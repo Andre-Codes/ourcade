@@ -222,16 +222,36 @@ const RELICS = [
   { id: "ironheart", name: "Iron Heart", e: "❤️‍🔥", desc: "+25 Max HP the moment you equip it." },
   { id: "scholar", name: "Scholar's Eye", e: "📖", desc: "+35% XP from every kill — level up far faster." },
   { id: "executioner", name: "Executioner", e: "⚔️", desc: "Enemies below 25% HP die in one blow, ignoring defense." },
-  { id: "thorns", name: "Thornmail", e: "🌹", desc: "Reflect damage: enemies lose effective HP equal to your Defense." },
+  { id: "thorns", name: "Thornmail", e: "🌹", desc: "Reflect damage: enemies lose effective HP up to your Defense (capped per foe)." },
+  { id: "sapper", name: "Sapper's Pick", e: "⛏️", desc: "Your blows ignore half of every enemy's Defense." },
+  { id: "aegis", name: "Aegis Plate", e: "🛡️", desc: "+6 Defense the moment you equip it." },
+  { id: "frostbite", name: "Frostbite Charm", e: "❄️", desc: "Chill the enemy — block one extra blow in every fight." },
+  { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "+1 Attack for every 120 gold you carry." },
+  { id: "revenant", name: "Revenant's Vow", e: "🕯️", desc: "Slaying a boss heals you all the way to full." },
+  { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+20% gold and +20% XP from every kill." },
 ];
 const relicById = (id) => RELICS.find((r) => r.id === id);
 const hasRelic = (p, id) => p.relics && p.relics.includes(id);
+
+// ---------- consumables: found on the floor, used from the right-hand slots ----------
+// `targeted` items arm on tap, then apply to the next valid cell you tap.
+const ITEM_SLOTS = 3;
+const CONSUMABLES = [
+  { id: "draught", name: "Healing Draught", e: "🧪", targeted: false, desc: "Restore 45 HP instantly." },
+  { id: "elixir", name: "Greater Elixir", e: "💖", targeted: false, desc: "Heal to full and gain +10 Max HP." },
+  { id: "phase", name: "Phase Step", e: "🌀", targeted: true, desc: "Leap over an adjacent monster to the empty tile beyond — no fight." },
+  { id: "firebomb", name: "Firebomb", e: "🔥", targeted: true, desc: "Hurl at an adjacent monster — instantly slays anything but a boss." },
+  { id: "ward", name: "Frost Ward", e: "❄️", targeted: false, desc: "Your next fight costs no HP." },
+  { id: "tome", name: "Tome of Insight", e: "📜", targeted: false, desc: "Gain a level instantly." },
+];
+const itemById = (id) => CONSUMABLES.find((c) => c.id === id);
 
 // effective attack including stat-style relic effects
 function effAtk(p) {
   let atk = p.atk;
   if (hasRelic(p, "glasscannon")) atk += 5;
   if (hasRelic(p, "berserker")) atk += Math.floor(Math.max(0, p.maxHp - p.hp) / 12);
+  if (hasRelic(p, "hoarder")) atk += Math.floor((p.gold || 0) / 120);
   return atk;
 }
 
@@ -240,23 +260,31 @@ function effAtk(p) {
 function combat(p, m) {
   const atk = effAtk(p);
   let effHp = m.hp;
-  if (hasRelic(p, "thorns")) effHp = Math.max(1, effHp - p.def); // reflected chip damage
-  const dToM = atk - m.def;
+  // Thornmail chips away effective HP, but never more than a fraction of the
+  // target's pool — so it can't trivialize tanky bosses at high Defense.
+  if (hasRelic(p, "thorns")) {
+    const chip = Math.min(p.def, Math.floor(m.hp * 0.4));
+    effHp = Math.max(1, m.hp - chip);
+  }
+  // Sapper's Pick: your blows ignore half of every enemy's Defense.
+  const enemyDef = hasRelic(p, "sapper") ? Math.floor(m.def / 2) : m.def;
+  const dToM = atk - enemyDef;
   if (dToM <= 0) return { unwinnable: true, cost: Infinity, heal: 0 };
 
   let rounds = Math.ceil(effHp / dToM);
   // Executioner: the killing blow lands as soon as the enemy would drop below
-  // 25%, shaving the final swings — model it as needing one fewer round when
-  // the last full hit would leave it under the threshold.
+  // 25% of its (effective) pool, shaving the final swings — model it as needing
+  // one fewer round when the last full hit would leave it under the threshold.
   if (hasRelic(p, "executioner") && rounds > 1) {
     const hpAfter = effHp - dToM * (rounds - 1);
-    if (hpAfter <= m.hp * 0.25) rounds -= 1;
+    if (hpAfter <= effHp * 0.25) rounds -= 1;
   }
 
   let perBlow = Math.max(0, m.atk - p.def);
   if (hasRelic(p, "glasscannon")) perBlow += 1;
   let blowsTaken = rounds - 1;
   if (hasRelic(p, "stoneskin") && blowsTaken > 0) blowsTaken -= 1; // first hit blocked
+  if (hasRelic(p, "frostbite") && blowsTaken > 0) blowsTaken -= 1; // an extra blow chilled away
 
   const cost = Math.max(0, blowsTaken * perBlow);
   // Vampiric Edge heals per blow you land (capped so it can't exceed the fight cost absurdly)
@@ -513,6 +541,12 @@ function generate(floor) {
     place(t.x, t.y, { t: "heal", big, amt: big ? 38 + floor * 5 : 18 + floor * 2 });
   }
 
+  // consumable drop — potions & skills, the only source of usable items
+  if (RNG.next() < 0.5) {
+    const t = takeOpen();
+    if (t) place(t.x, t.y, { t: "item", id: choice(CONSUMABLES).id });
+  }
+
   if (RNG.next() < 0.7) {
     const t = takeOpen();
     if (t) place(t.x, t.y, { t: "gold", amt: 8 + floor * 3 + ri(0, 5) });
@@ -575,6 +609,9 @@ function newGame(opts = {}) {
     relics: perks.startRelic ? [perks.startRelic] : [],
     pendingRelic: null,
     relicChoiceOpen: false,
+    items: [],
+    armedItem: null,
+    ward: false,
     lifetimeSlain: meta ? meta.lifetimeSlain : 0,
     bossesBeaten: meta ? meta.bossesBeaten : 0,
     log: ["You descend into the crypt. The torches gutter behind you."],
@@ -637,12 +674,14 @@ function sfx(g, name) {
 function gainGold(g, amt) {
   let a = amt;
   if (hasRelic(g, "gambler")) a = Math.round(a * 1.6);
+  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
   g.gold += a;
   return a;
 }
 function gainXp(g, amt) {
   let a = amt;
   if (hasRelic(g, "scholar")) a = Math.round(a * 1.35);
+  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
   g.xp += a;
   return a;
 }
@@ -660,6 +699,7 @@ function grantRelic(g) {
   const relic = choice(pool);
   // immediate stat relics apply on pickup
   if (relic.id === "ironheart") { g.maxHp += 25; g.hp += 25; }
+  if (relic.id === "aegis") { g.def += 6; }
   if (owned.length < RELIC_SLOTS) {
     g.relics = [...owned, relic.id];
     g.pendingRelic = null;
@@ -668,6 +708,122 @@ function grantRelic(g) {
     g.pendingRelic = relic.id;
   }
   return relic;
+}
+
+// spend banked XP into as many level-ups as it covers. Mutates g.
+function applyLevelUps(g) {
+  while (g.xp >= xpNeeded(g.level)) {
+    g.xp -= xpNeeded(g.level);
+    g.level += 1;
+    g.maxHp += 9;
+    g.hp = clamp(g.hp + 9, 0, g.maxHp);
+    g.atk += 1;
+    g.def += 1;
+    setFx(g, `★ LEVEL ${g.level}`, "#ffd24d");
+    sfx(g, "levelup");
+    pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK, +1 DEF (HP also restored +9).`);
+  }
+}
+
+// grant the rewards for slaying `cell`. Does NOT move the player or clear the
+// tile — callers handle the board. Used by melee combat and the Firebomb item.
+function awardKill(g, cell) {
+  gainGold(g, cell.gold);
+  gainXp(g, cell.xp);
+  g.slain += 1;
+  g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
+  if (cell.boss) {
+    g.maxHp += 18;
+    g.atk += 2;
+    g.def += 1;
+    g.hp = clamp(g.hp + 30, 0, g.maxHp);
+    g.bossesBeaten = (g.bossesBeaten || 0) + 1;
+    pushLog(g, "The boss's essence floods you: +18 Max HP, +2 ATK, +1 DEF, +30 HP.");
+    if (hasRelic(g, "revenant")) {
+      g.hp = g.maxHp;
+      setFx(g, "🕯 FULL HP", "#ffd27a");
+      pushLog(g, "Revenant's Vow restores you to full.");
+    }
+  }
+  applyLevelUps(g);
+}
+
+// instant (non-targeted) consumables. Mutates g.
+function applyInstantItem(g, id) {
+  switch (id) {
+    case "draught": {
+      const got = applyHeal(g, 45);
+      setFx(g, `+${got} HP`, "#ff5f6d");
+      sfx(g, "heal");
+      pushLog(g, `You quaff a Healing Draught (+${got} HP).`);
+      break;
+    }
+    case "elixir": {
+      g.maxHp += 10;
+      g.hp = g.maxHp;
+      setFx(g, "FULL HP +10", "#ff9bb0");
+      sfx(g, "heal");
+      pushLog(g, "The Greater Elixir floods you — full health and +10 Max HP.");
+      break;
+    }
+    case "ward": {
+      g.ward = true;
+      setFx(g, "❄ FROST WARD", "#7ec8ff");
+      sfx(g, "gear");
+      pushLog(g, "Frost Ward shimmers — your next fight will cost no HP.");
+      break;
+    }
+    case "tome": {
+      g.xp += xpNeeded(g.level);
+      setFx(g, "📜 INSIGHT", "#ffd24d");
+      sfx(g, "levelup");
+      pushLog(g, "You absorb the Tome of Insight.");
+      applyLevelUps(g);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+// targeted consumables. Mutates g (grid already copied by the caller).
+// Returns true if the item was spent, false if it should stay in the pack.
+function applyTargetedItem(g, id, tx, ty) {
+  const p = g.player;
+  const dx = tx - p.x, dy = ty - p.y;
+  const adjacent = Math.abs(dx) + Math.abs(dy) === 1;
+  const target = g.grid[ty] && g.grid[ty][tx];
+  if (!adjacent || !target || target.t !== "monster") {
+    g.toast = "Aim at an adjacent monster.";
+    return false;
+  }
+  if (id === "phase") {
+    const lx = tx + dx, ly = ty + dy;
+    const land = g.grid[ly] && g.grid[ly][lx];
+    if (!land || !isWalkthrough(land)) {
+      g.toast = "No room to leap beyond.";
+      return false;
+    }
+    g.player = { x: lx, y: ly };
+    g.confirm = null;
+    setFx(g, "🌀 PHASE", "#b98bff");
+    sfx(g, "step");
+    pushLog(g, `You phase past the ${target.kind} in a blur.`);
+    return true;
+  }
+  if (id === "firebomb") {
+    if (target.boss) {
+      g.toast = "The blast barely scratches the boss.";
+      return false;
+    }
+    awardKill(g, target);
+    g.grid[ty][tx] = { t: "floor" };
+    setFx(g, "🔥 BOOM", "#ff7a2e");
+    sfx(g, "hit");
+    pushLog(g, `Your Firebomb engulfs the ${target.kind}!`);
+    return true;
+  }
+  return false;
 }
 
 function score(g) {
@@ -713,6 +869,7 @@ function reducer(state, action) {
       g.relics[action.index] = incoming;
       // immediate-effect relic applies when actually equipped
       if (incoming === "ironheart") { g.maxHp += 25; g.hp += 25; }
+      if (incoming === "aegis") { g.def += 6; }
       g.pendingRelic = null;
       g.relicChoiceOpen = false;
       pushLog(g, `You swap out ${relicById(dropped)?.name} for ${relicById(incoming)?.name}.`);
@@ -725,6 +882,43 @@ function reducer(state, action) {
       pushLog(g, `You leave the ${relicById(state.pendingRelic)?.name} behind.`);
       g.pendingRelic = null;
       g.relicChoiceOpen = false;
+      return g;
+    }
+
+    case "USE_ITEM": {
+      if (state.screen !== "playing" || state.altarOpen || state.relicChoiceOpen) return state;
+      const idx = action.index;
+      const id = state.items[idx];
+      if (!id) return state;
+      const def = itemById(id);
+      // tapping the already-armed item cancels its targeting
+      if (state.armedItem && state.armedItem.index === idx) {
+        return { ...state, armedItem: null, toast: null };
+      }
+      if (def.targeted) {
+        return { ...state, armedItem: { id, index: idx }, toast: `${def.e} ${def.name} — tap a target.` };
+      }
+      // instant item: apply now and remove from the pack
+      const g = { ...state, items: state.items.slice(), armedItem: null, toast: null };
+      applyInstantItem(g, id);
+      g.items.splice(idx, 1);
+      if (g.hp <= 0) { g.screen = "dead"; g.deathLine = deathFlavor(g.floor, null); }
+      return g;
+    }
+    case "APPLY_ITEM": {
+      if (state.screen !== "playing") return state;
+      const { index, tx, ty } = action;
+      const id = state.items[index];
+      if (!id) return state;
+      const g = {
+        ...state,
+        grid: state.grid.map((r) => r.slice()),
+        items: state.items.slice(),
+        armedItem: null,
+        toast: null,
+      };
+      const spent = applyTargetedItem(g, id, tx, ty);
+      if (spent) g.items.splice(index, 1);
       return g;
     }
 
@@ -917,37 +1111,35 @@ function reducer(state, action) {
           moveIn();
           break;
         }
+        case "item": {
+          if ((g.items || []).length >= ITEM_SLOTS) {
+            g.toast = "Your pack is full — use something first.";
+            return g;
+          }
+          const it = itemById(cell.id);
+          g.items = [...(g.items || []), cell.id];
+          setFx(g, `${it.e} ${it.name}`, "#9bf0ab");
+          sfx(g, "gear");
+          pushLog(g, `You pocket a ${it.name}: ${it.desc}`);
+          clearTile();
+          moveIn();
+          break;
+        }
         case "monster": {
           const res = combat(g, cell);
           if (res.unwinnable) {
             g.toast = "Your blows glance off — far too tough.";
             return g;
           }
+          // Frost Ward turns the next fight free, then is spent.
+          if (g.ward) {
+            res.cost = 0;
+            g.ward = false;
+            setFx(g, "❄ WARDED", "#7ec8ff");
+          }
           // shared reward/level-up logic for any successful kill
           const finishKill = () => {
-            gainGold(g, cell.gold);
-            gainXp(g, cell.xp);
-            g.slain += 1;
-            g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
-            if (cell.boss) {
-              g.maxHp += 18;
-              g.atk += 2;
-              g.def += 1;
-              g.hp = clamp(g.hp + 30, 0, g.maxHp);
-              g.bossesBeaten = (g.bossesBeaten || 0) + 1;
-              pushLog(g, "The boss's essence floods you: +18 Max HP, +2 ATK, +1 DEF, +30 HP.");
-            }
-            while (g.xp >= xpNeeded(g.level)) {
-              g.xp -= xpNeeded(g.level);
-              g.level += 1;
-              g.maxHp += 9;
-              g.hp = clamp(g.hp + 9, 0, g.maxHp);
-              g.atk += 1;
-              g.def += 1;
-              setFx(g, `★ LEVEL ${g.level}`, "#ffd24d");
-              sfx(g, "levelup");
-              pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK, +1 DEF (HP also restored +9).`);
-            }
+            awardKill(g, cell);
             clearTile();
             moveIn();
           };
@@ -1228,6 +1420,12 @@ export default function CryptCrawler() {
   const onCellTap = (x, y) => {
     if (game.screen !== "playing" || game.altarOpen || game.relicChoiceOpen) return;
     setStatInfo(null);
+    // an armed consumable redirects the next tap into its target
+    if (game.armedItem) {
+      stopWalk();
+      dispatch({ type: "APPLY_ITEM", index: game.armedItem.index, tx: x, ty: y });
+      return;
+    }
     const p = game.player;
     if (x === p.x && y === p.y) return;
     stopWalk();
@@ -1283,6 +1481,7 @@ export default function CryptCrawler() {
             hpFlash={hpFlash}
             onCellTap={onCellTap}
             move={move}
+            onUseItem={(i) => { stopWalk(); dispatch({ type: "USE_ITEM", index: i }); }}
             onMenu={() => { stopWalk(); setPaused(true); }}
             onHelp={() => setShowHelp(true)}
             onBuy={(opt) => dispatch({ type: "BUY", opt })}
@@ -1393,7 +1592,7 @@ function StartScreen({ best, hasSave, meta, onNew, onDaily, onContinue, onHelp }
 }
 
 // ---------------- Play ----------------
-function PlayScreen({ game, hpFlash, onCellTap, move, onMenu, onHelp, onBuy, onCloseAltar, onStatInfo, muted, onToggleMute }) {
+function PlayScreen({ game, hpFlash, onCellTap, move, onUseItem, onMenu, onHelp, onBuy, onCloseAltar, onStatInfo, muted, onToggleMute }) {
   const hpPct = clamp((game.hp / game.maxHp) * 100, 0, 100);
   return (
     <div className="cck-play">
@@ -1426,9 +1625,10 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onMenu, onHelp, onBuy, onC
           <button className="cck-chip cck-chip-lvl" onClick={() => onStatInfo("level")}>★ {game.level}</button>
           {game.charm && <span className="cck-chip cck-chip-charm">🔥</span>}
         </div>
-        {game.relics && game.relics.length > 0 && (
+        {/* inventory: relics on the left, usable consumables on the right */}
+        <div className="cck-inventory">
           <div className="cck-relics">
-            {game.relics.map((id) => {
+            {(game.relics || []).map((id) => {
               const r = relicById(id);
               return (
                 <button key={id} className="cck-relic" onClick={() => onStatInfo("relic:" + id)} title={r.name}>
@@ -1436,11 +1636,30 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onMenu, onHelp, onBuy, onC
                 </button>
               );
             })}
-            {Array.from({ length: Math.max(0, RELIC_SLOTS - game.relics.length) }).map((_, i) => (
-              <span key={"empty" + i} className="cck-relic empty">·</span>
+            {Array.from({ length: Math.max(0, RELIC_SLOTS - (game.relics || []).length) }).map((_, i) => (
+              <span key={"er" + i} className="cck-relic empty">·</span>
             ))}
           </div>
-        )}
+          <div className="cck-items">
+            {(game.items || []).map((id, i) => {
+              const it = itemById(id);
+              const armed = game.armedItem && game.armedItem.index === i;
+              return (
+                <button
+                  key={id + i}
+                  className={`cck-relic cck-item${armed ? " armed" : ""}`}
+                  onClick={() => onUseItem(i)}
+                  title={`${it.name} — ${it.desc}`}
+                >
+                  {it.e}
+                </button>
+              );
+            })}
+            {Array.from({ length: Math.max(0, ITEM_SLOTS - (game.items || []).length) }).map((_, i) => (
+              <span key={"ei" + i} className="cck-relic empty">·</span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* grid */}
@@ -1469,15 +1688,6 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onMenu, onHelp, onBuy, onC
 
       {/* target readout (auto-shows adjacent foes) or latest log line */}
       <TargetBar game={game} onAttack={move} />
-
-      {/* dpad */}
-      <div className="cck-dpad">
-        <button className="cck-d up" onClick={() => move(0, -1)}>▲</button>
-        <button className="cck-d left" onClick={() => move(-1, 0)}>◀</button>
-        <div className="cck-d-center">@</div>
-        <button className="cck-d right" onClick={() => move(1, 0)}>▶</button>
-        <button className="cck-d down" onClick={() => move(0, 1)}>▼</button>
-      </div>
 
       {game.toast && <div className="cck-toast">{game.toast}</div>}
 
@@ -1528,6 +1738,9 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
         break;
       case "relic":
         inner = <span className="cck-emoji cck-reliccell">{cell.locked ? "🔐" : "✦"}</span>;
+        break;
+      case "item":
+        inner = <span className="cck-emoji cck-itemcell">{(itemById(cell.id) || {}).e || "✦"}</span>;
         break;
       case "monster": {
         const res = combat(player, cell);
@@ -1585,8 +1798,9 @@ function TargetBar({ game, onAttack }) {
       {foes.map((f, i) => {
         const cell = f.cell;
         const res = combat(game, cell);
-        const dmgOut = Math.max(1, game.atk - cell.def);
-        const blows = Math.ceil(cell.hp / dmgOut);
+        // blows the hero actually needs, accounting for relics (effAtk, Sapper,
+        // Thornmail, Executioner). `rounds` is the real count from combat().
+        const blows = res.unwinnable ? null : res.rounds;
         const fatal = res.cost >= game.hp;
         const charm = fatal && game.charm;
         const ratio = res.cost / game.hp;
@@ -1600,7 +1814,7 @@ function TargetBar({ game, onAttack }) {
             <span className="cck-tg-emoji">{cell.e}</span>
             <span className="cck-tg-info">
               <b>{cell.kind}{cell.boss ? " · BOSS" : ""}</b>
-              <small>HP {cell.hp} · ⚔ {cell.atk} · 🛡 {cell.def} · {blows} {blows === 1 ? "blow" : "blows"}</small>
+              <small>HP {cell.hp} · ⚔ {cell.atk} · 🛡 {cell.def}{blows != null ? ` · ${blows} ${blows === 1 ? "blow" : "blows"}` : ""}</small>
             </span>
             <span className="cck-tg-cost">
               <b>{res.unwinnable ? "∞" : `−${res.cost}`}</b>
@@ -1777,8 +1991,8 @@ function HelpModal({ onClose }) {
       <div className="cck-modal cck-helpmodal" onClick={(e) => e.stopPropagation()}>
         <div className="cck-modal-h">How to Play</div>
         <ul className="cck-help">
-          <li><b>Move:</b> tap any reachable tile to walk there, or use the D-pad / arrow keys / WASD.</li>
-          <li><b>Fight:</b> step or tap into a monster to attack — combat is 100% predictable, so the <span className="cck-hl">number</span> on it is the <b>exact HP</b> the fight will cost. Stand next to any monster and its full breakdown appears above the D-pad automatically. A fight that would kill you asks for a confirming second tap.</li>
+          <li><b>Move:</b> tap any reachable tile to walk there (arrow keys / WASD also work on desktop).</li>
+          <li><b>Fight:</b> tap into a monster to attack — combat is 100% predictable, so the <span className="cck-hl">number</span> on it is the <b>exact HP</b> the fight will cost. Stand next to any monster and its full breakdown appears automatically. A fight that would kill you asks for a confirming second tap.</li>
           <li><span className="cck-dot safe" /> cheap · <span className="cck-dot warn" /> risky · <span className="cck-dot danger" /> costly · <span className="cck-dot fatal" /> would kill you.</li>
         </ul>
         <div className="cck-help-sec">The math</div>
@@ -1791,7 +2005,8 @@ function HelpModal({ onClose }) {
           <li><b>Max HP</b> rises from <b>leveling up</b> (+9), <b>beating a boss</b> (+18), <b>chests</b>, and the altar's <b>Bandolier</b>.</li>
           <li><b>Level up</b> by earning XP from kills — each level adds Max HP, Attack &amp; Defense.</li>
           <li>🗝️ keys open 🔒 locked chests (the best loot). 🔮 <b>altars</b> sell upgrades that unlock as you go deeper — and there's always one on the floor right <b>before a boss</b>.</li>
-          <li><b>✦ Relics</b> are powerful passives found in reliquaries and deep altars — they change how you play (lifesteal, free first hits, executions…). You hold up to <b>three</b>; tap a relic to read it.</li>
+          <li><b>✦ Relics</b> are powerful passives found in reliquaries and deep altars — they change how you play (lifesteal, free first hits, executions…). You hold up to <b>three</b> on the <b>left</b>; tap a relic to read it.</li>
+          <li><b>🧪 Potions &amp; skills</b> are consumables found on the floor, held in <b>three slots on the right</b>. <b>Tap one to use it</b> — potions act at once, while targeted skills (like <b>🌀 Phase Step</b> to leap over a monster, or <b>🔥 Firebomb</b>) then ask you to <b>tap a target</b>. Tap the slot again to cancel.</li>
           <li><b>Tip:</b> tap your ❤/⚔/🛡/★ stats any time for a reminder of what they do.</li>
         </ul>
         <div className="cck-help-sec">Coming back</div>
@@ -1817,7 +2032,7 @@ function StyleBlock() {
   --line:#382c54; --torch:#ff8a3d; --torch2:#ffd27a; --blood:#e0455a;
   --bone:#ece3cf; --gold:#ffcc4d; --poison:#74e08a; --magic:#a98bff;
   --text:#cfc1e4; --muted:#857aa3;
-  position:relative; width:100%; min-height:100%;
+  position:relative; width:100%; min-height:100%; min-height:100dvh;
   background:radial-gradient(120% 90% at 50% -10%, #1a1230 0%, var(--bg1) 38%, var(--bg0) 100%);
   color:var(--text); font-family:'EB Garamond','Palatino Linotype',Georgia,serif;
   display:flex; justify-content:center; overflow-x:hidden;
@@ -1831,7 +2046,8 @@ function StyleBlock() {
     radial-gradient(60% 50% at 50% 120%, rgba(120,40,160,.18), transparent 70%);
   mix-blend-mode:screen;
 }
-.cck-frame{ position:relative; z-index:1; width:100%; max-width:480px; padding:14px 14px 26px; }
+.cck-frame{ position:relative; z-index:1; width:100%; max-width:480px; padding:14px 14px 26px;
+  min-height:100dvh; display:flex; flex-direction:column; }
 
 .cck-btn{
   font-family:'Cinzel',Georgia,serif; font-weight:700; letter-spacing:.04em;
@@ -1898,21 +2114,29 @@ button.cck-chip:active{ transform:translateY(1px); }
   box-shadow:0 0 10px rgba(255,138,61,.5); animation:flick 1.6s ease-in-out infinite alternate; }
 .cck-hpbar{ cursor:pointer; padding:0; width:100%; display:block; }
 
+/* ---- play layout: fill exactly one viewport, no page scroll ---- */
+.cck-play{ display:flex; flex-direction:column; flex:1; min-height:0; }
+
 /* ---- grid ---- */
-.cck-gridwrap{ position:relative; }
+.cck-gridwrap{ position:relative; flex:1 1 auto; min-height:0;
+  display:flex; align-items:center; justify-content:center; margin:6px 0; }
 .cck-grid{
   display:grid; grid-template-columns:repeat(${COLS},1fr); gap:3px;
+  /* width capped so grid height (= width·ROWS/COLS) plus the ~280px of HUD
+     chrome always fits within the viewport — letterboxes on short screens */
+  width:100%; margin-inline:auto;
+  max-width:min(100%, max(150px, calc((100dvh - 280px) * ${COLS} / ${ROWS})));
   background:linear-gradient(180deg,#0d0a16,#0a0712); padding:6px; border-radius:14px;
   border:1px solid var(--line); box-shadow:inset 0 0 30px rgba(0,0,0,.7), 0 6px 20px rgba(0,0,0,.5);
 }
-.cck-cell, .cck-target, .cck-chip, .cck-hpbar, .cck-d{
+.cck-cell, .cck-target, .cck-chip, .cck-hpbar, .cck-relic{
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .cck-cell{
   aspect-ratio:1; border-radius:6px; border:none; cursor:pointer; padding:0;
   display:flex; align-items:center; justify-content:center; position:relative;
-  font-size:clamp(15px,5.4vw,24px); line-height:1;
+  font-size:clamp(13px, min(5.4vw, 4.6vh), 24px); line-height:1;
   animation:cellIn .4s ease backwards;
 }
 @keyframes cellIn{ from{ opacity:0; transform:scale(.4);} to{ opacity:1; transform:scale(1);} }
@@ -1935,13 +2159,13 @@ button.cck-chip:active{ transform:translateY(1px); }
 .cck-cell.confirm{ box-shadow:0 0 0 2px var(--blood), 0 0 14px rgba(224,69,90,.8); animation:none; }
 
 .cck-hero{ font-family:'Cinzel',serif; font-weight:900; color:var(--torch2);
-  text-shadow:0 0 10px var(--torch), 0 0 4px #fff; font-size:clamp(17px,6vw,26px);
+  text-shadow:0 0 10px var(--torch), 0 0 4px #fff; font-size:clamp(15px, min(6vw, 5vh), 26px);
   animation:heroBob 1.6s ease-in-out infinite; }
 @keyframes heroBob{ 50%{ transform:translateY(-2px);} }
 .cck-down{ color:var(--magic); text-shadow:0 0 12px var(--magic); font-weight:900; }
 .cck-emoji{ filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
 .cck-altar{ animation:heroBob 2s ease-in-out infinite; filter:drop-shadow(0 0 8px var(--magic)); }
-.cck-boss{ font-size:clamp(18px,6.6vw,28px); filter:drop-shadow(0 0 8px var(--blood)); animation:heroBob 1.4s ease-in-out infinite; }
+.cck-boss{ font-size:clamp(16px, min(6.6vw, 5.4vh), 28px); filter:drop-shadow(0 0 8px var(--blood)); animation:heroBob 1.4s ease-in-out infinite; }
 
 .cck-badge{ position:absolute; bottom:-2px; right:-2px; min-width:16px; padding:0 3px; height:15px;
   display:flex; align-items:center; justify-content:center; border-radius:5px;
@@ -1962,18 +2186,6 @@ button.cck-chip:active{ transform:translateY(1px); }
 .cck-log{ margin:12px 2px 14px; min-height:38px; font-style:italic; font-size:15px; color:var(--muted);
   border-left:2px solid var(--line); padding-left:10px; line-height:1.3; }
 
-/* ---- dpad ---- */
-.cck-dpad{ display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(3,52px);
-  gap:6px; justify-content:center; align-content:center; }
-.cck-d{ border:1px solid var(--line); border-radius:12px; font-size:20px; color:var(--bone);
-  background:linear-gradient(180deg,var(--stone2),var(--stone)); cursor:pointer;
-  box-shadow:0 3px 0 #0b0815, inset 0 1px 0 rgba(255,255,255,.05); }
-.cck-d:active{ transform:translateY(2px); box-shadow:0 1px 0 #0b0815; }
-.cck-d.up{ grid-area:1/2; } .cck-d.left{ grid-area:2/1; }
-.cck-d.right{ grid-area:2/3; } .cck-d.down{ grid-area:3/2; }
-.cck-d-center{ grid-area:2/2; display:flex; align-items:center; justify-content:center;
-  font-family:'Cinzel',serif; font-weight:900; font-size:22px; color:var(--torch2);
-  text-shadow:0 0 8px var(--torch); }
 
 /* ---- toast ---- */
 .cck-toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
@@ -2040,8 +2252,15 @@ button.cck-chip:active{ transform:translateY(1px); }
 .cck-dailytag{ font-family:'Cinzel',serif; font-size:11px; font-weight:900; letter-spacing:.14em;
   color:#0c1320; background:linear-gradient(180deg,#7ec8ff,#3a7bd5); padding:3px 8px; border-radius:6px; margin-left:6px; }
 
-/* ---- relic chips in HUD ---- */
-.cck-relics{ display:flex; gap:6px; margin-top:7px; align-items:center; }
+/* ---- inventory: relics (left) + consumables (right) ---- */
+.cck-inventory{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:7px; }
+.cck-relics{ display:flex; gap:6px; align-items:center; }
+.cck-items{ display:flex; gap:6px; align-items:center; }
+.cck-item{ border-color:#2f6a4a; background:linear-gradient(180deg,#16302a,#0e1f1c);
+  box-shadow:0 0 8px rgba(116,224,138,.3); }
+.cck-item.armed{ border-color:var(--torch2); box-shadow:0 0 12px rgba(255,210,122,.85);
+  animation:flick 1s ease-in-out infinite alternate; }
+.cck-itemcell{ color:#9bf0ab; text-shadow:0 0 8px rgba(116,224,138,.9); animation:flick 1.4s ease-in-out infinite alternate; }
 .cck-relic{ width:34px; height:34px; border-radius:9px; font-size:18px; line-height:1;
   display:flex; align-items:center; justify-content:center; cursor:pointer;
   border:1px solid #5a3aa0; background:linear-gradient(180deg,#241a3c,#171028);
