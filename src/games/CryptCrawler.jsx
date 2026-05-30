@@ -236,13 +236,14 @@ const hasRelic = (p, id) => p.relics && p.relics.includes(id);
 // ---------- consumables: found on the floor, used from the right-hand slots ----------
 // `targeted` items arm on tap, then apply to the next valid cell you tap.
 const ITEM_SLOTS = 3;
+// `min` is the earliest floor each may drop on — basics early, power deep.
 const CONSUMABLES = [
-  { id: "draught", name: "Healing Draught", e: "🧪", targeted: false, desc: "Restore 45 HP instantly." },
-  { id: "elixir", name: "Greater Elixir", e: "💖", targeted: false, desc: "Heal to full and gain +10 Max HP." },
-  { id: "phase", name: "Phase Step", e: "🌀", targeted: true, desc: "Leap over an adjacent monster to the empty tile beyond — no fight." },
-  { id: "firebomb", name: "Firebomb", e: "🔥", targeted: true, desc: "Hurl at an adjacent monster — instantly slays anything but a boss." },
-  { id: "ward", name: "Frost Ward", e: "❄️", targeted: false, desc: "Your next fight costs no HP." },
-  { id: "tome", name: "Tome of Insight", e: "📜", targeted: false, desc: "Gain a level instantly." },
+  { id: "draught", name: "Healing Draught", e: "🧪", targeted: false, min: 1, desc: "Restore 45 HP instantly." },
+  { id: "ward", name: "Frost Ward", e: "❄️", targeted: false, min: 3, desc: "Your next fight costs no HP." },
+  { id: "phase", name: "Phase Step", e: "🌀", targeted: true, min: 3, desc: "Leap over an adjacent monster to the empty tile beyond — no fight." },
+  { id: "elixir", name: "Greater Elixir", e: "💖", targeted: false, min: 5, desc: "Heal to full and gain +10 Max HP." },
+  { id: "firebomb", name: "Firebomb", e: "🔥", targeted: true, min: 5, desc: "Hurl at an adjacent monster — instantly slays anything but a boss." },
+  { id: "tome", name: "Tome of Insight", e: "📜", targeted: false, min: 7, desc: "Gain a level instantly." },
 ];
 const itemById = (id) => CONSUMABLES.find((c) => c.id === id);
 
@@ -294,20 +295,41 @@ function combat(p, m) {
 
 // ---------- floor generation ----------
 function scaleMonster(base, floor) {
-  const hp = Math.round(base.hp * (1 + (floor - 1) * 0.20));
-  const atk = Math.round(base.atk * (1 + (floor - 1) * 0.16));
+  const hp = Math.round(base.hp * (1 + (floor - 1) * 0.22));
+  const atk = Math.round(base.atk * (1 + (floor - 1) * 0.18));
+  // Defense grows with depth (+1 every 4 floors). This is the key anti-OP lever:
+  // without it the player's Attack quickly dwarfs flat monster armor and every
+  // kill becomes a free one-blow clean kill. Scaling it keeps fights multi-round.
+  const def = base.def + Math.floor(floor / 4);
   // Reward scales with total threat, not just HP. Attack is weighted heavily
   // because high-attack mobs cost the most HP to kill and should pay the most.
-  const threat = hp + atk * 2.4 + base.def * 6;
+  const threat = hp + atk * 2.4 + def * 6;
   return {
     t: "monster",
     kind: base.kind,
     e: base.e,
     hp,
     atk,
-    def: base.def,
+    def,
     gold: Math.max(2, Math.round(threat * 0.14)),
     xp: Math.max(2, Math.round(threat * 0.22)),
+  };
+}
+
+// Occasionally upgrade an ordinary monster to an "elite": a tougher, glowing
+// variant that pays out double. Adds difficulty spikes and variance with
+// proportionate reward — never bosses, never on the gentle opening floors.
+function maybeElite(mon, floor) {
+  if (mon.boss || floor < 3) return mon;
+  if (RNG.next() >= clamp(0.05 + floor * 0.01, 0, 0.22)) return mon;
+  return {
+    ...mon,
+    elite: true,
+    hp: Math.round(mon.hp * 1.6),
+    atk: Math.round(mon.atk * 1.4),
+    def: mon.def + 1,
+    gold: Math.round(mon.gold * 2),
+    xp: Math.round(mon.xp * 2),
   };
 }
 
@@ -503,9 +525,10 @@ function generate(floor) {
       if (kt) place(kt.x, kt.y, { t: "key" });
     }
   }
-  // relic chest — a special chest that grants an equippable relic. More common
-  // deeper; never on floor 1 so the player learns the basics first.
-  if (floor >= 2 && RNG.next() < (floor >= 6 ? 0.4 : 0.28)) {
+  // relic chest — a special chest that grants an equippable relic. Gated to
+  // floor 3+ with a low, slowly-ramping chance so relics stay prizes and you
+  // don't fill all three slots by mid-game.
+  if (floor >= 3 && RNG.next() < 0.16 + Math.min(floor, 15) * 0.012) {
     const ch = takeDeadEnd();
     if (ch) place(ch.x, ch.y, { t: "relic", locked: floor >= 6 && RNG.next() < 0.5 });
   }
@@ -530,21 +553,27 @@ function generate(floor) {
   for (let i = 0; i < monsterCount; i++) {
     const t = takeOpen();
     if (!t) break;
-    place(t.x, t.y, scaleMonster(choice(pool), floor));
+    place(t.x, t.y, maybeElite(scaleMonster(choice(pool), floor), floor));
   }
 
-  const heals = 1 + (floor % 4 === 0 ? 1 : 0) + (isBoss ? 1 : 0);
+  // Healing thins out as you descend: floors 1-3 are forgiving; deeper floors
+  // keep HP a real resource as fights start costing more. The %4 bonus and the
+  // "big draught" roll only apply in the shallows.
+  const heals = (floor <= 3 ? 2 : 1) + (isBoss ? 1 : 0) + (floor < 10 && floor % 4 === 0 ? 1 : 0);
   for (let i = 0; i < heals; i++) {
     const t = takeOpen();
     if (!t) break;
-    const big = RNG.next() < 0.18;
+    const big = floor < 10 && RNG.next() < 0.18;
     place(t.x, t.y, { t: "heal", big, amt: big ? 38 + floor * 5 : 18 + floor * 2 });
   }
 
-  // consumable drop — potions & skills, the only source of usable items
-  if (RNG.next() < 0.5) {
+  // consumable drop — potions & skills, the only source of usable items. Gated
+  // to floor 2+ and rarer than before; the pool is filtered by each item's `min`
+  // floor so basics come early and powerful skills only appear deeper.
+  const itemPool = CONSUMABLES.filter((c) => floor >= (c.min || 1));
+  if (floor >= 2 && itemPool.length && RNG.next() < 0.32) {
     const t = takeOpen();
-    if (t) place(t.x, t.y, { t: "item", id: choice(CONSUMABLES).id });
+    if (t) place(t.x, t.y, { t: "item", id: choice(itemPool).id });
   }
 
   if (RNG.next() < 0.7) {
@@ -561,6 +590,46 @@ function generate(floor) {
   }
 
   return { grid, start: { ...start } };
+}
+
+// ---------- reinforcements: monsters that wander in while you dawdle ----------
+// Ticked once per real step. The deeper you are the faster they arrive, capped
+// per floor so it never becomes unwinnable. Beeline the stairs and you outrun
+// them; explore/farm and the crypt fills in behind you — the time-pressure that
+// rewards quick decisions. Mutates g (grid already copied by the MOVE handler).
+function maybeSpawnReinforcement(g) {
+  const floor = g.floor;
+  g.floorSteps = (g.floorSteps || 0) + 1;
+  const interval = clamp(13 - Math.floor(floor / 2), 6, 13);
+  if (g.floorSteps % interval !== 0) return;
+  const maxReinf = 3 + Math.floor(floor / 4);
+  if ((g.reinforcements || 0) >= maxReinf) return;
+
+  // candidate floor tiles at least 3 away from the hero (no instant ambush)
+  const p = g.player;
+  const spots = [];
+  for (let y = 1; y < ROWS - 1; y++) {
+    for (let x = 1; x < COLS - 1; x++) {
+      if (g.grid[y][x].t !== "floor") continue;
+      if (Math.abs(x - p.x) + Math.abs(y - p.y) <= 2) continue;
+      spots.push({ x, y });
+    }
+  }
+  if (!spots.length) return;
+
+  // keep the Daily identical for everyone: seed the picks from depth + step
+  const seeded = g.seed != null;
+  if (seeded) RNG.use(seededRng((g.seed + floor * 2654435761 + g.floorSteps * 40503) >>> 0));
+  const spot = choice(spots);
+  const pool = MONSTERS.filter((m) => m.min <= floor);
+  const mon = maybeElite(scaleMonster(choice(pool), floor), floor);
+  if (seeded) RNG.reset();
+
+  g.grid[spot.y][spot.x] = mon;
+  g.reinforcements = (g.reinforcements || 0) + 1;
+  sfx(g, "warn");
+  pushLog(g, `🦴 ${mon.kind} crawls out of the dark!`);
+  g.toast = "Something stirs in the crypt…";
 }
 
 // ---------- chest rewards ----------
@@ -612,6 +681,9 @@ function newGame(opts = {}) {
     items: [],
     armedItem: null,
     ward: false,
+    floorSteps: 0,
+    reinforcements: 0,
+    upgradesBought: 0,
     lifetimeSlain: meta ? meta.lifetimeSlain : 0,
     bossesBeaten: meta ? meta.bossesBeaten : 0,
     log: ["You descend into the crypt. The torches gutter behind you."],
@@ -718,10 +790,13 @@ function applyLevelUps(g) {
     g.maxHp += 9;
     g.hp = clamp(g.hp + 9, 0, g.maxHp);
     g.atk += 1;
-    g.def += 1;
+    // DEF every 2 levels — DEF is what makes fights cost zero, so its inflation
+    // is slowed (it still flows from chests, shields, the altar and relics).
+    const defUp = g.level % 2 === 0 ? 1 : 0;
+    g.def += defUp;
     setFx(g, `★ LEVEL ${g.level}`, "#ffd24d");
     sfx(g, "levelup");
-    pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK, +1 DEF (HP also restored +9).`);
+    pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK${defUp ? ", +1 DEF" : ""} (HP also restored +9).`);
   }
 }
 
@@ -834,12 +909,15 @@ function score(g) {
 // reasons to save gold as you descend. `min` is the floor it appears on.
 function shopItems(g) {
   const f = g.floor;
+  // permanent stat upgrades get pricier with every one you've already bought this
+  // run, so you can't simply grind gold into early dominance.
+  const up = 1 + 0.35 * (g.upgradesBought || 0);
   const all = [
     { opt: "heal", min: 1, icon: "❤", title: "Mend Wounds", desc: `Restore ${28 + f * 4} HP`, price: 22 + f * 5 },
-    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: "+2 Attack, forever", price: 40 + f * 10 },
-    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: "+2 Defense, forever", price: 40 + f * 10 },
+    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: "+2 Attack, forever", price: Math.round((40 + f * 10) * up) },
+    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: "+2 Defense, forever", price: Math.round((40 + f * 10) * up) },
     { opt: "key", min: 3, icon: "🗝️", title: "Iron Key", desc: "Opens one locked chest", price: 35 + f * 6 },
-    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: "+15 Max HP (and heal 15)", price: 55 + f * 10 },
+    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: "+15 Max HP (and heal 15)", price: Math.round((55 + f * 10) * up) },
     { opt: "greater", min: 5, icon: "💖", title: "Greater Draught", desc: "Heal all the way to full", price: 50 + f * 9 },
     { opt: "charm", min: 8, icon: "🔥", title: "Phoenix Charm", desc: "Survive one killing blow at ½ HP", price: 120 + f * 18, soldOut: g.charm },
     { opt: "relic", min: 4, icon: "✦", title: "Mystic Relic", desc: "Attune to a random new relic", price: 90 + f * 12, soldOut: (g.relics || []).length >= RELICS.length },
@@ -936,12 +1014,13 @@ function reducer(state, action) {
           setFx(g, `+${amt} HP`, "#ff5f6d");
           break;
         }
-        case "atk": g.atk += 2; setFx(g, "+2 ATK", "#ffd27a"); break;
-        case "def": g.def += 2; setFx(g, "+2 DEF", "#7ec8ff"); break;
+        case "atk": g.atk += 2; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, "+2 ATK", "#ffd27a"); break;
+        case "def": g.def += 2; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, "+2 DEF", "#7ec8ff"); break;
         case "key": g.keys += 1; setFx(g, "🗝️ +1", "#ffd24d"); break;
         case "band":
           g.maxHp += 15;
           g.hp = clamp(g.hp + 15, 0, g.maxHp);
+          g.upgradesBought = (g.upgradesBought || 0) + 1;
           setFx(g, "+15 MAX HP", "#ff9bb0");
           break;
         case "greater": g.hp = g.maxHp; setFx(g, "FULL HP", "#ff5f6d"); break;
@@ -998,6 +1077,8 @@ function reducer(state, action) {
           g.grid = next.grid;
           g.player = next.start;
           g.floor += 1;
+          g.floorSteps = 0;
+          g.reinforcements = 0;
           g.hp = clamp(g.hp + Math.round(g.maxHp * 0.03), 0, g.maxHp);
           g.confirm = null;
           sfx(g, g.floor % 5 === 0 ? "boss" : "stairs");
@@ -1194,6 +1275,8 @@ function reducer(state, action) {
       }
 
       if (!resolvedConfirm) g.confirm = null;
+      // a real step was taken on this floor — the crypt may send reinforcements
+      maybeSpawnReinforcement(g);
       if (g.hp <= 0) {
         g.screen = "dead";
         g.deathLine = deathFlavor(g.floor, null);
@@ -1779,9 +1862,10 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
           else if (ratio < 0.45) bcls += " warn";
           else bcls += " danger";
         }
-        inner = <span className={`cck-emoji ${cell.boss ? "cck-boss" : ""}`}>{cell.e}</span>;
+        inner = <span className={`cck-emoji ${cell.boss ? "cck-boss" : ""} ${cell.elite ? "cck-eliteglow" : ""}`}>{cell.e}</span>;
         badge = <span className={bcls}>{label}</span>;
         if (cell.boss) cls += " bosscell";
+        else if (cell.elite) cls += " elitecell";
         break;
       }
       default:
@@ -1837,7 +1921,7 @@ function TargetBar({ game, onAttack }) {
           <button key={i} className={`cck-target ${tone}`} onClick={() => onAttack(f.dx, f.dy)}>
             <span className="cck-tg-emoji">{cell.e}</span>
             <span className="cck-tg-info">
-              <b>{cell.kind}{cell.boss ? " · BOSS" : ""}</b>
+              <b>{cell.kind}{cell.boss ? " · BOSS" : cell.elite ? " · ELITE" : ""}</b>
               <small>HP {cell.hp} · ⚔ {cell.atk} · 🛡 {cell.def}{blows != null ? ` · ${blows} ${blows === 1 ? "blow" : "blows"}` : ""}</small>
             </span>
             <span className="cck-tg-cost">
@@ -2180,6 +2264,9 @@ button.cck-chip:active{ transform:translateY(1px); }
   box-shadow:inset 0 0 14px rgba(169,139,255,.5); animation:cellIn .4s backwards, downGlow 1.8s ease-in-out infinite; }
 @keyframes downGlow{ 50%{ box-shadow:inset 0 0 22px rgba(169,139,255,.85);} }
 .cck-cell.bosscell{ background:radial-gradient(circle, rgba(224,69,90,.28), #181226 72%); }
+.cck-cell.elitecell{ background:radial-gradient(circle, rgba(255,204,77,.22), #181226 72%);
+  box-shadow:inset 0 0 0 1px rgba(255,204,77,.55), 0 0 10px rgba(255,204,77,.35); }
+.cck-eliteglow{ filter:drop-shadow(0 0 6px var(--gold)); }
 .cck-cell.confirm{ box-shadow:0 0 0 2px var(--blood), 0 0 14px rgba(224,69,90,.8); animation:none; }
 
 .cck-hero{ font-family:'Cinzel',serif; font-weight:900; color:var(--torch2);
