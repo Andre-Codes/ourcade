@@ -1,6 +1,6 @@
 # 🕹️ Ourcade
 
-A little arcade of homemade minigames, built with **React + Vite** and deployed to **GitHub Pages**.
+A little arcade of homemade minigames, built with **React + Vite** and deployed to **GitHub Pages**
 
 ## Games
 
