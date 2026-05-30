@@ -852,7 +852,7 @@ function reducer(state, action) {
     case "NEW_GAME":
       return newGame(action.opts || {});
     case "CONTINUE":
-      return { ...action.state, screen: "playing", toast: null, confirm: null, altarOpen: false };
+      return { ...action.state, screen: "playing", toast: null, confirm: null, altarOpen: false, armedItem: null };
     case "GO_START":
       return { ...state, screen: "start" };
     case "DISMISS_TOAST":
@@ -1224,6 +1224,23 @@ const BEST_KEY = "crypt:best:v1";
 const MUTE_KEY = "crypt:muted:v1";
 const META_KEY = "crypt:meta:v1";
 
+// ---- persistence ----
+// Synchronous localStorage wrapper. Synchronous matters: the latest state lands
+// on disk the instant an action resolves, so it survives a tab close, refresh,
+// or the OS killing a backgrounded mobile tab — no async write left in flight.
+// Every call is guarded so private-mode / disabled-storage never crashes the game.
+const store = {
+  get(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return null; }
+  },
+  set(key, value) {
+    try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; }
+  },
+  remove(key) {
+    try { window.localStorage.removeItem(key); } catch (e) {}
+  },
+};
+
 // today's date as YYYY-MM-DD (local) and a stable integer seed from it
 function todayStr() {
   const d = new Date();
@@ -1252,84 +1269,91 @@ export default function CryptCrawler() {
   const prevHp = useRef(null);
   const lastSfx = useRef(0);
 
-  // load best + save on mount
+  // load best + meta + saved run on mount
   useEffect(() => {
-    (async () => {
+    const b = store.get(BEST_KEY);
+    if (b) setBest(parseInt(b, 10) || 0);
+
+    const m = store.get(MUTE_KEY);
+    if (m === "1") { setMuted(true); Sound.setMuted(true); }
+
+    const mt = store.get(META_KEY);
+    if (mt) {
+      try { const parsed = JSON.parse(mt); if (parsed) setMeta((prev) => ({ ...prev, ...parsed })); } catch (e) {}
+    }
+
+    const s = store.get(SAVE_KEY);
+    if (s) {
       try {
-        const b = await window.storage.get(BEST_KEY);
-        if (b && b.value) setBest(parseInt(b.value, 10) || 0);
-      } catch (e) {}
-      try {
-        const m = await window.storage.get(MUTE_KEY);
-        if (m && m.value === "1") { setMuted(true); Sound.setMuted(true); }
-      } catch (e) {}
-      try {
-        const mt = await window.storage.get(META_KEY);
-        if (mt && mt.value) {
-          const parsed = JSON.parse(mt.value);
-          if (parsed) setMeta((prev) => ({ ...prev, ...parsed }));
+        const parsed = JSON.parse(s);
+        if (parsed && parsed.screen === "playing") {
+          setSavedRun(parsed);
+          setHasSave(true);
         }
       } catch (e) {}
-      try {
-        const s = await window.storage.get(SAVE_KEY);
-        if (s && s.value) {
-          const parsed = JSON.parse(s.value);
-          if (parsed && parsed.screen === "playing") {
-            setSavedRun(parsed);
-            setHasSave(true);
-          }
-        }
-      } catch (e) {}
-    })();
+    }
   }, []);
 
-  // persist run / best
+  // persist run / best — runs on EVERY state change (the reducer returns a new
+  // `game` object per action), so picking up an item, buying at an altar, taking
+  // a hit, or swapping a relic is all saved immediately, not just on movement.
   useEffect(() => {
-    (async () => {
-      if (game.screen === "playing") {
-        try {
-          await window.storage.set(SAVE_KEY, JSON.stringify(game));
-        } catch (e) {}
-        setSavedRun(game);
-        setHasSave(true);
-      } else if (game.screen === "dead") {
-        try {
-          await window.storage.delete(SAVE_KEY);
-        } catch (e) {}
-        setHasSave(false);
-        setSavedRun(null);
-        const sc = score(game);
-        if (sc > best) {
-          setBest(sc);
-          try { await window.storage.set(BEST_KEY, String(sc)); } catch (e) {}
-        }
-        // fold this run into permanent meta progression
-        setMeta((prev) => {
-          const next = {
-            ...prev,
-            lifetimeSlain: (game.lifetimeSlain != null ? game.lifetimeSlain : prev.lifetimeSlain),
-            bossesBeaten: (game.bossesBeaten != null ? game.bossesBeaten : prev.bossesBeaten),
-            deepest: Math.max(prev.deepest || 0, game.floor),
-          };
-          if (game.daily) {
-            const today = todayStr();
-            const isNewDay = prev.dailyDate !== today;
-            next.dailyDate = today;
-            next.dailyBest = isNewDay ? sc : Math.max(prev.dailyBest || 0, sc);
-            // streak: increment if last completed daily was yesterday, else reset to 1
-            if (prev.lastDaily !== today) {
-              const y = new Date(); y.setDate(y.getDate() - 1);
-              const yStr = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, "0")}-${String(y.getDate()).padStart(2, "0")}`;
-              next.streak = prev.lastDaily === yStr ? (prev.streak || 0) + 1 : 1;
-              next.lastDaily = today;
-            }
-          }
-          (async () => { try { await window.storage.set(META_KEY, JSON.stringify(next)); } catch (e) {} })();
-          return next;
-        });
+    if (game.screen === "playing") {
+      store.set(SAVE_KEY, JSON.stringify(game));
+      setSavedRun(game);
+      setHasSave(true);
+    } else if (game.screen === "dead") {
+      store.remove(SAVE_KEY);
+      setHasSave(false);
+      setSavedRun(null);
+      const sc = score(game);
+      if (sc > best) {
+        setBest(sc);
+        store.set(BEST_KEY, String(sc));
       }
-    })();
-  }, [game.screen, game.player, game.floor]);
+      // fold this run into permanent meta progression
+      setMeta((prev) => {
+        const next = {
+          ...prev,
+          lifetimeSlain: (game.lifetimeSlain != null ? game.lifetimeSlain : prev.lifetimeSlain),
+          bossesBeaten: (game.bossesBeaten != null ? game.bossesBeaten : prev.bossesBeaten),
+          deepest: Math.max(prev.deepest || 0, game.floor),
+        };
+        if (game.daily) {
+          const today = todayStr();
+          const isNewDay = prev.dailyDate !== today;
+          next.dailyDate = today;
+          next.dailyBest = isNewDay ? sc : Math.max(prev.dailyBest || 0, sc);
+          // streak: increment if last completed daily was yesterday, else reset to 1
+          if (prev.lastDaily !== today) {
+            const y = new Date(); y.setDate(y.getDate() - 1);
+            const yStr = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, "0")}-${String(y.getDate()).padStart(2, "0")}`;
+            next.streak = prev.lastDaily === yStr ? (prev.streak || 0) + 1 : 1;
+            next.lastDaily = today;
+          }
+        }
+        store.set(META_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+  }, [game]);
+
+  // belt-and-suspenders for mobile: phones rarely fire a clean unload, so flush
+  // the current run when the tab is hidden or being frozen/closed. Uses the
+  // shared gameRef (declared below) which always points at the latest state.
+  useEffect(() => {
+    const flush = () => {
+      const g = gameRef.current;
+      if (g && g.screen === "playing") store.set(SAVE_KEY, JSON.stringify(g));
+    };
+    const onVisibility = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   // hp flash on damage
   useEffect(() => {
@@ -1355,7 +1379,7 @@ export default function CryptCrawler() {
     setMuted((m) => {
       const next = !m;
       Sound.setMuted(next);
-      (async () => { try { await window.storage.set(MUTE_KEY, next ? "1" : "0"); } catch (e) {} })();
+      store.set(MUTE_KEY, next ? "1" : "0");
       if (!next) Sound.play("key"); // little confirmation blip when unmuting
       return next;
     });
