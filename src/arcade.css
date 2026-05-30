@@ -1,0 +1,187 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   OURCADE SHELL STYLES
+   All classes are `arcade-` prefixed so they never collide with the global
+   CSS that individual games inject when they mount. Each game lives on its
+   own route, so only one game's styles are ever active at a time.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --arcade-bg: #07080f;
+  --arcade-surface: #0e101a;
+  --arcade-border: #1c2035;
+  --arcade-text: #eef0ff;
+  --arcade-muted: #6b708f;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+}
+
+/* ---- Home ---- */
+.arcade-home {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(232,255,71,.05), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 85% 90%, rgba(255,77,114,.04), transparent 65%),
+    var(--arcade-bg);
+  color: var(--arcade-text);
+  font-family: 'Share Tech Mono', monospace;
+  padding: 48px 20px 64px;
+  box-sizing: border-box;
+}
+
+.arcade-header { text-align: center; margin-bottom: 44px; }
+.arcade-logo {
+  font-family: 'Black Ops One', cursive;
+  font-size: clamp(2.6rem, 9vw, 5rem);
+  letter-spacing: 0.14em;
+  margin: 0;
+  background: linear-gradient(90deg, #e8ff47, #3fffd0, #b44dff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 28px rgba(63,255,208,.25));
+}
+.arcade-tagline {
+  color: var(--arcade-muted);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  margin-top: 10px;
+}
+
+.arcade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.arcade-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px 56px;
+  background: var(--arcade-surface);
+  border: 1px solid var(--arcade-border);
+  border-radius: 18px;
+  text-decoration: none;
+  color: var(--arcade-text);
+  overflow: hidden;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.arcade-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  box-shadow: 0 14px 40px rgba(0,0,0,.5), 0 0 28px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.arcade-card-glow {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: .12;
+  filter: blur(40px);
+  pointer-events: none;
+}
+.arcade-card-emoji { font-size: 2.2rem; }
+.arcade-card-title {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: var(--accent);
+}
+.arcade-card-blurb {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #b8bcd8;
+  margin: 0;
+}
+.arcade-card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.arcade-tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arcade-muted);
+  border: 1px solid var(--arcade-border);
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+.arcade-card-play {
+  position: absolute;
+  bottom: 18px; left: 20px;
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  opacity: .85;
+}
+
+.arcade-footer {
+  text-align: center;
+  color: var(--arcade-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  margin-top: 52px;
+  text-transform: uppercase;
+}
+
+/* ---- Game stage ---- */
+.arcade-stage { position: relative; min-height: 100vh; }
+
+.arcade-back {
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 2147483000; /* above any in-game overlay */
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(10, 12, 22, 0.72);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 7px 14px;
+  backdrop-filter: blur(6px);
+  transition: background .15s ease, border-color .15s ease;
+}
+.arcade-back:hover {
+  background: rgba(20, 24, 40, 0.92);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.arcade-iframe {
+  border: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.arcade-react-game { min-height: 100vh; }
+
+/* ---- misc ---- */
+.arcade-loading,
+.arcade-notfound {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--arcade-bg);
+  color: var(--arcade-text);
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.1em;
+}
+.arcade-back-link {
+  color: #e8ff47;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
