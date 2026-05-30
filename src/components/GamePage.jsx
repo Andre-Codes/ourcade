@@ -16,9 +16,12 @@ export default function GamePage() {
 
   return (
     <div className="arcade-stage">
-      <Link to="/" className="arcade-back" title="Back to arcade" aria-label="Back to arcade">
-        ← Arcade
-      </Link>
+      <div className="arcade-cabinet-chrome">
+        <Link to="/" className="arcade-back" title="Back to arcade" aria-label="Back to arcade">
+          ‹ BACK TO ARCADE
+        </Link>
+        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
+      </div>
 
       {game.type === "iframe" ? (
         <iframe

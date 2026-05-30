@@ -1,11 +1,12 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   OURCADE SHELL STYLES
+   OURCADE SHELL STYLES — "dark neon arcade portal, est. 2003"
    All classes are `arcade-` prefixed so they never collide with the global
    CSS that individual games inject when they mount. Each game lives on its
-   own route, so only one game's styles are ever active at a time.
+   own route, so only one game's styles are ever active at a time. No bare
+   element selectors beyond html/body/#root — nothing here can reach a game.
    ───────────────────────────────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
 
 :root {
   --arcade-bg: #07080f;
@@ -13,6 +14,14 @@
   --arcade-border: #1c2035;
   --arcade-text: #eef0ff;
   --arcade-muted: #6b708f;
+  --neon-lime: #e8ff47;
+  --neon-aqua: #3fffd0;
+  --neon-violet: #b44dff;
+  --neon-pink: #ff4d72;
+  --neon-gold: #ffd23f;
+  /* reusable 2003 "outset" bevel */
+  --bevel: inset 2px 2px 0 rgba(255,255,255,.14), inset -2px -2px 0 rgba(0,0,0,.6);
+  --bevel-in: inset -2px -2px 0 rgba(255,255,255,.08), inset 2px 2px 0 rgba(0,0,0,.7);
 }
 
 html, body, #root {
@@ -20,43 +29,107 @@ html, body, #root {
   min-height: 100%;
 }
 
-/* ---- Home ---- */
+/* ====================================================================== */
+/*  HOME                                                                   */
+/* ====================================================================== */
 .arcade-home {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(232,255,71,.05), transparent 70%),
-    radial-gradient(ellipse 50% 50% at 85% 90%, rgba(255,77,114,.04), transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
+    radial-gradient(ellipse 60% 40% at 15% 8%, rgba(232,255,71,.07), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 85% 92%, rgba(255,77,114,.06), transparent 65%),
     var(--arcade-bg);
   color: var(--arcade-text);
   font-family: 'Share Tech Mono', monospace;
-  padding: 48px 20px 64px;
+  padding: 18px 16px 56px;
   box-sizing: border-box;
 }
 
-.arcade-header { text-align: center; margin-bottom: 44px; }
+/* ---- top nav ---- */
+.arcade-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 980px;
+  margin: 0 auto 26px;
+  padding: 8px;
+  background: linear-gradient(180deg, #15182a, #0c0e18);
+  border: 2px solid #2a2f4a;
+  border-radius: 7px;
+  box-shadow: var(--bevel);
+}
+.arcade-tab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: #cfd3f5;
+  text-decoration: none;
+  padding: 9px 12px;
+  border: 2px solid #2a2f4a;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #1c2138, #11142a);
+  box-shadow: var(--bevel);
+  transition: color .12s ease, background .12s ease, transform .08s ease;
+}
+.arcade-tab:hover { color: #0a0a12; background: linear-gradient(180deg, #fff, var(--neon-aqua)); }
+.arcade-tab:active { transform: translateY(1px); }
+.arcade-tab.is-active { color: #0a0a12; background: linear-gradient(180deg, var(--neon-lime), #9fd400); }
+.arcade-tab-hot { color: var(--neon-pink); }
+.arcade-nav-spark { color: var(--neon-aqua); font-size: 0.8rem; text-shadow: 0 0 8px var(--neon-aqua); }
+
+/* ---- header / logo ---- */
+.arcade-header { text-align: center; margin: 6px auto 40px; }
 .arcade-logo {
   font-family: 'Black Ops One', cursive;
-  font-size: clamp(2.6rem, 9vw, 5rem);
-  letter-spacing: 0.14em;
+  font-size: clamp(2.8rem, 11vw, 5.5rem);
+  letter-spacing: 0.12em;
   margin: 0;
-  background: linear-gradient(90deg, #e8ff47, #3fffd0, #b44dff);
+  line-height: 1;
+  background: linear-gradient(180deg, #fffbe6 0%, var(--neon-lime) 38%, var(--neon-aqua) 72%, var(--neon-violet) 108%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 28px rgba(63,255,208,.25));
-}
-.arcade-tagline {
-  color: var(--arcade-muted);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  font-size: 0.72rem;
-  margin-top: 10px;
+  text-shadow:
+    0 2px 0 #1a0030,
+    0 4px 0 rgba(0,0,0,.45),
+    0 0 32px rgba(63,255,208,.45);
 }
 
+/* ---- slogan marquee ---- */
+.arcade-marquee {
+  overflow: hidden;
+  max-width: 720px;
+  margin: 16px auto 0;
+  border: 2px solid #2a2f4a;
+  border-radius: 5px;
+  background: #04050b;
+  box-shadow: var(--bevel-in);
+}
+.arcade-marquee-track { display: inline-flex; white-space: nowrap; will-change: transform; }
+.arcade-marquee-item {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--neon-aqua);
+  padding: 9px 0;
+}
+.arcade-marquee-item b { color: var(--neon-lime); }
+
+.arcade-tagline {
+  color: var(--arcade-muted);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.66rem;
+  margin-top: 14px;
+}
+
+/* ---- game cabinet grid ---- */
 .arcade-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 18px;
+  gap: 20px;
   max-width: 980px;
   margin: 0 auto;
 }
@@ -66,19 +139,20 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 22px 20px 56px;
-  background: var(--arcade-surface);
-  border: 1px solid var(--arcade-border);
-  border-radius: 18px;
+  padding: 16px 16px 58px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a;
+  border-radius: 12px;
   text-decoration: none;
   color: var(--arcade-text);
   overflow: hidden;
-  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  box-shadow: var(--bevel);
+  transition: transform .14s ease, border-color .2s ease, box-shadow .2s ease;
 }
 .arcade-card:hover {
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-  box-shadow: 0 14px 40px rgba(0,0,0,.5), 0 0 28px color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent);
+  box-shadow: var(--bevel), 0 14px 40px rgba(0,0,0,.55), 0 0 26px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .arcade-card-glow {
   position: absolute;
@@ -86,27 +160,44 @@ html, body, #root {
   width: 120px; height: 120px;
   border-radius: 50%;
   background: var(--accent);
-  opacity: .12;
+  opacity: .14;
   filter: blur(40px);
   pointer-events: none;
 }
-.arcade-card-emoji { font-size: 2.2rem; }
+
+/* cabinet "screen" */
+.arcade-screen {
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #04050b;
+  border-radius: 7px;
+  background: radial-gradient(circle at 50% 32%, #12233f 0%, #0a1326 38%, #04050b 78%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 0 22px rgba(0,0,0,.85);
+}
+.arcade-card-emoji {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 60%, transparent));
+}
+
 .arcade-card-title {
   font-family: 'Black Ops One', cursive;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-  margin: 0;
+  font-size: 1.04rem;
+  letter-spacing: 0.03em;
+  margin: 2px 0 0;
   color: var(--accent);
 }
-.arcade-card-blurb {
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: #b8bcd8;
-  margin: 0;
-}
+
+.arcade-card-meta { display: flex; align-items: center; gap: 9px; }
+.arcade-stars { color: var(--neon-gold); font-size: 0.92rem; letter-spacing: 1px; text-shadow: 0 0 6px rgba(255,210,63,.4); }
+.arcade-stars-empty { color: #3a3f5c; text-shadow: none; }
+.arcade-plays { font-size: 0.6rem; color: var(--arcade-muted); letter-spacing: 0.04em; }
+
+.arcade-card-blurb { font-size: 0.8rem; line-height: 1.55; color: #b8bcd8; margin: 0; }
 .arcade-card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .arcade-tag {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--arcade-muted);
@@ -114,56 +205,129 @@ html, body, #root {
   border-radius: 6px;
   padding: 2px 7px;
 }
+
 .arcade-card-play {
   position: absolute;
-  bottom: 18px; left: 20px;
-  font-family: 'Black Ops One', cursive;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  opacity: .85;
+  bottom: 14px; left: 16px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  color: #0a0a12;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 75%, white), var(--accent));
+  padding: 9px 12px;
+  border-radius: 5px;
+  box-shadow: var(--bevel);
 }
+.arcade-card:hover .arcade-card-play { filter: brightness(1.1); }
 
+/* ---- NEW!/HOT! starburst ---- */
+.arcade-burst {
+  position: absolute;
+  top: 8px; right: 8px;
+  z-index: 3;
+  width: 56px; height: 56px;
+  display: grid;
+  place-items: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: #1a0a00;
+  transform: rotate(-12deg);
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.arcade-burst.is-new { background: var(--neon-lime); }
+.arcade-burst.is-hot { background: var(--neon-pink); color: #fff; }
+
+/* ====================================================================== */
+/*  FOOTER                                                                 */
+/* ====================================================================== */
 .arcade-footer {
+  max-width: 760px;
+  margin: 50px auto 0;
+  padding: 22px 16px 8px;
+  border-top: 2px solid #2a2f4a;
   text-align: center;
-  color: var(--arcade-muted);
-  font-size: 0.66rem;
-  letter-spacing: 0.18em;
-  margin-top: 52px;
-  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-
-/* ---- Game stage ---- */
-.arcade-stage { position: relative; min-height: 100vh; }
-
-.arcade-back {
-  position: fixed;
-  top: 12px; left: 12px;
-  z-index: 2147483000; /* above any in-game overlay */
+.arcade-counter { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.arcade-counter-label { font-family: 'Press Start 2P', monospace; font-size: 0.54rem; color: var(--arcade-muted); }
+.arcade-odometer { display: inline-flex; gap: 3px; }
+.arcade-digit {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.74rem;
-  letter-spacing: 0.1em;
+  font-size: 1.05rem;
+  min-width: 15px;
+  text-align: center;
+  padding: 3px 5px;
+  color: var(--neon-aqua);
+  background: #04050b;
+  border: 1px solid #2a2f4a;
+  border-radius: 3px;
+  box-shadow: var(--bevel-in);
+  text-shadow: 0 0 8px rgba(63,255,208,.6);
+}
+.arcade-bestview { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: var(--neon-pink); margin: 4px 0; }
+.arcade-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.arcade-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.46rem;
+  letter-spacing: 0.02em;
+  color: #cfd3f5;
+  background: linear-gradient(180deg, #1c2138, #0c0e18);
+  border: 1px solid #2a2f4a;
+  border-radius: 3px;
+  box-shadow: var(--bevel);
+  padding: 6px 8px;
+}
+.arcade-copy { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: #8a8fb5; margin: 4px 0 0; }
+.arcade-smallprint { font-size: 0.62rem; letter-spacing: 0.14em; color: #45496a; margin: 0; text-transform: uppercase; }
+
+/* ====================================================================== */
+/*  GAME STAGE  (cabinet chrome — fixed corner overlay, game stays full)   */
+/* ====================================================================== */
+.arcade-stage { position: relative; min-height: 100vh; background: var(--arcade-bg); }
+
+.arcade-cabinet-chrome {
+  position: fixed;
+  top: 10px; left: 10px;
+  z-index: 2147483000; /* above any in-game overlay */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.arcade-back {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  color: #fff;
-  background: rgba(10, 12, 22, 0.72);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 999px;
-  padding: 7px 14px;
-  backdrop-filter: blur(6px);
-  transition: background .15s ease, border-color .15s ease;
+  color: #0a0a12;
+  background: linear-gradient(180deg, var(--neon-lime), #9fd400);
+  border: 2px solid #04050b;
+  border-radius: 5px;
+  padding: 9px 11px;
+  box-shadow: var(--bevel), 0 4px 14px rgba(0,0,0,.5);
+  transition: filter .12s ease, transform .08s ease;
 }
-.arcade-back:hover {
-  background: rgba(20, 24, 40, 0.92);
-  border-color: rgba(255,255,255,0.4);
+.arcade-back:hover { filter: brightness(1.12); }
+.arcade-back:active { transform: translateY(1px); }
+.arcade-cabinet-badge {
+  font-family: 'Black Ops One', cursive;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--neon-aqua);
+  background: rgba(7,8,15,.66);
+  border: 1px solid #2a2f4a;
+  border-radius: 5px;
+  padding: 6px 9px;
+  text-shadow: 0 0 8px rgba(63,255,208,.6);
+  backdrop-filter: blur(4px);
+}
+/* on phones, drop the badge so chrome never crowds a game's own HUD */
+@media (max-width: 560px) {
+  .arcade-cabinet-badge { display: none; }
 }
 
-.arcade-iframe {
-  border: 0;
-  width: 100vw;
-  height: 100vh;
-  display: block;
-}
-
+.arcade-iframe { border: 0; width: 100vw; height: 100vh; display: block; }
 .arcade-react-game { min-height: 100vh; }
 
 /* ---- misc ---- */
@@ -181,7 +345,27 @@ html, body, #root {
   letter-spacing: 0.1em;
 }
 .arcade-back-link {
-  color: #e8ff47;
+  color: var(--neon-lime);
   text-decoration: none;
   border-bottom: 1px solid currentColor;
+}
+
+/* ====================================================================== */
+/*  MOTION  (respect reduce-motion: no scroll/blink/pulse)                 */
+/* ====================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .arcade-marquee-track { animation: arcade-marquee 20s linear infinite; }
+  .arcade-bestview { animation: arcade-blink 1.2s steps(1, end) infinite; }
+  .arcade-tab-hot { animation: arcade-blink 1.2s steps(1, end) infinite; }
+  .arcade-burst { animation: arcade-pulse 1s ease-in-out infinite; }
+}
+@keyframes arcade-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes arcade-blink {
+  50% { opacity: 0.25; }
+}
+@keyframes arcade-pulse {
+  50% { transform: rotate(-12deg) scale(1.09); }
 }
