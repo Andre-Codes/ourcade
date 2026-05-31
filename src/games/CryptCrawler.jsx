@@ -52,11 +52,14 @@ const key = (x, y) => `${x},${y}`;
 // instead of flat subtraction. That keeps a fight's HP cost a roughly constant
 // fraction of your max HP at every depth — so a well-built, well-played hero
 // can always survive, while a careless one falls behind and dies.
-const HP_RATE = 0.13;   // monster HP linear growth per floor
-const ATK_RATE = 0.11;  // monster ATK linear growth per floor
-const DEF_K = 55;       // hero defense mitigation constant (higher = DEF worth less)
+const HP_RATE = 0.20;   // monster HP linear growth per floor
+const ATK_RATE = 0.13;  // monster ATK linear growth per floor
+const DEF_K = 75;       // hero defense mitigation constant (higher = DEF worth less)
 const ARMOR_K = 40;     // enemy armor mitigation constant (keeps fights to a few rounds)
-const MIT_CAP = 0.8;    // no mitigation ever exceeds this — nothing is fully immune
+const MIT_CAP = 0.65;   // no mitigation ever exceeds this — nothing is fully immune
+// Vampiric Edge recovers this fraction of the HP a fight actually cost — capped
+// at the cost itself so it's strong sustain but can never net-gain you HP.
+const VAMP_RATE = 0.5;
 // x points of defense convert to a damage-reduction fraction with diminishing
 // returns: 0 at def 0, approaching (but never reaching) MIT_CAP as def climbs.
 const mitig = (x, K) => Math.min(MIT_CAP, x / (x + K));
@@ -243,14 +246,14 @@ const BOSSES = [
 // engine and reducer read. Players hold up to RELIC_SLOTS at once.
 const RELIC_SLOTS = 3;
 const RELICS = [
-  { id: "vampedge", name: "Vampiric Edge", e: "🩸", desc: "Heal a slice of your Max HP for every blow you land in a fight." },
+  { id: "vampedge", name: "Vampiric Edge", e: "🩸", desc: "Recover part of the HP each fight costs you — strong sustain in long battles." },
   { id: "stoneskin", name: "Stoneskin", e: "🪨", desc: "The first enemy blow in every fight is fully blocked." },
   { id: "gambler", name: "Gambler's Coin", e: "🪙", desc: "+60% gold from all sources, but healing is 30% weaker." },
   { id: "berserker", name: "Berserker's Brand", e: "🔥", desc: "Up to +50% Attack — the lower your health, the harder you hit." },
   { id: "warden", name: "Warden's Key", e: "🗝️", desc: "Open locked chests without spending a key." },
   { id: "glasscannon", name: "Glass Cannon", e: "💎", desc: "+18% Attack, but you take +8% damage from every enemy blow." },
   { id: "ironheart", name: "Iron Heart", e: "❤️‍🔥", desc: "+25% Max HP the moment you equip it." },
-  { id: "scholar", name: "Scholar's Eye", e: "📖", desc: "+35% XP from every kill — level up far faster." },
+  { id: "scholar", name: "Scholar's Eye", e: "📖", desc: "+25% XP from every kill — level up far faster." },
   { id: "executioner", name: "Executioner", e: "⚔️", desc: "Enemies below 25% HP die in one blow, ignoring defense." },
   { id: "thorns", name: "Thornmail", e: "🌹", desc: "Reflect damage: stronger Defense chips more off each foe's effective HP." },
   { id: "sapper", name: "Sapper's Pick", e: "⛏️", desc: "Your blows ignore half of every enemy's Defense." },
@@ -258,7 +261,7 @@ const RELICS = [
   { id: "frostbite", name: "Frostbite Charm", e: "❄️", desc: "Chill the enemy — block one extra blow in every fight." },
   { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "Up to +35% Attack while you carry a deep purse of gold." },
   { id: "revenant", name: "Revenant's Vow", e: "🕯️", desc: "Slaying a boss heals you all the way to full." },
-  { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+20% gold and +20% XP from every kill." },
+  { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+15% gold and +15% XP from every kill." },
   // --- cursed relics: a strong upside chained to a real drawback ---
   { id: "glasscrown", name: "Glass Crown", e: "👑", cursed: true, desc: "☠ CURSED — +45% Attack, but you collect 40% less gold." },
   { id: "bloodpact", name: "Bloodpact", e: "🫀", cursed: true, desc: "☠ CURSED — kills give +60% gold, but each kill costs 4% of your Max HP." },
@@ -330,7 +333,7 @@ function combat(p, m) {
   // damage and by the target's own pool — so it stays relevant at depth without
   // ever trivializing a tanky foe (it's a fraction of their HP, self-capping).
   if (hasRelic(p, "thorns")) {
-    const chip = Math.floor(m.hp * mitig(p.def, DEF_K) * 0.5);
+    const chip = Math.floor(m.hp * mitig(p.def, DEF_K) * 0.25);
     effHp = Math.max(1, m.hp - chip);
   }
   // Your blows are reduced by the enemy's armor as a percentage (diminishing
@@ -359,9 +362,10 @@ function combat(p, m) {
   if (hasRelic(p, "frostbite") && blowsTaken > 0) blowsTaken -= 1; // an extra blow chilled away
 
   const cost = Math.max(0, Math.round(blowsTaken * perBlow));
-  // Vampiric Edge heals a slice of your max HP per blow you land, so it scales
-  // with the hero instead of being a flat trickle that fades at depth.
-  const heal = hasRelic(p, "vampedge") ? Math.round(rounds * p.maxHp * 0.02) : 0;
+  // Vampiric Edge recovers a portion of the HP this fight cost you — never more
+  // than the fight took, so it's strong sustain but can't create infinite HP
+  // (a free, 0-cost kill heals nothing).
+  const heal = hasRelic(p, "vampedge") ? Math.round(cost * VAMP_RATE) : 0;
   return { unwinnable: false, cost, heal, rounds };
 }
 
@@ -374,7 +378,7 @@ function scaleMonster(base, floor) {
   const atk = Math.round(base.atk * (1 + ATK_RATE * (floor - 1)));
   // Armor grows slowly and stays small: it feeds percentage mitigation now
   // (ARMOR_K), so it only needs to nudge fights from 3 → 5 rounds at depth.
-  const def = base.def + Math.floor(floor / 8);
+  const def = base.def + Math.floor(floor / 6);
   // Reward scales with total threat, not just HP. Attack is weighted heavily
   // because high-attack mobs cost the most HP to kill and should pay the most.
   const threat = hp + atk * 2.4 + def * 6;
@@ -853,15 +857,15 @@ function sfx(g, name) {
 function gainGold(g, amt) {
   let a = amt;
   if (hasRelic(g, "gambler")) a = Math.round(a * 1.6);
-  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
+  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.15);
   if (hasRelic(g, "glasscrown")) a = Math.round(a * 0.6); // Glass Crown curse: −40% gold
   g.gold += a;
   return a;
 }
 function gainXp(g, amt) {
   let a = amt;
-  if (hasRelic(g, "scholar")) a = Math.round(a * 1.35);
-  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
+  if (hasRelic(g, "scholar")) a = Math.round(a * 1.25);
+  if (hasRelic(g, "keeneye")) a = Math.round(a * 1.15);
   if (hasRelic(g, "reckless")) a = Math.round(a * 0.6); // Reckless Might curse: −40% XP
   g.xp += a;
   return a;
@@ -960,7 +964,7 @@ function awardKill(g, cell) {
     // not the same +2 ATK it gave on floor 5.
     const f = cell.floor || g.floor || 1;
     const hpUp = Math.round(20 + f * 2);
-    const atkUp = Math.round(2 + f / 8);
+    const atkUp = Math.round(1 + f / 14);
     const defUp = Math.round(1 + f / 12);
     g.maxHp += hpUp;
     g.atk += atkUp;
