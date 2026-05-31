@@ -45,6 +45,34 @@ function shuffle(arr) {
 }
 const key = (x, y) => `${x},${y}`;
 
+// ---------- endless-scaling tunables ----------
+// The crypt is meant to be played forever. The trick that makes that possible
+// without numbers exploding: monsters and the hero both grow *gently and
+// linearly*, and defense is percentage damage-reduction (diminishing returns)
+// instead of flat subtraction. That keeps a fight's HP cost a roughly constant
+// fraction of your max HP at every depth — so a well-built, well-played hero
+// can always survive, while a careless one falls behind and dies.
+const HP_RATE = 0.13;   // monster HP linear growth per floor
+const ATK_RATE = 0.11;  // monster ATK linear growth per floor
+const DEF_K = 55;       // hero defense mitigation constant (higher = DEF worth less)
+const ARMOR_K = 40;     // enemy armor mitigation constant (keeps fights to a few rounds)
+const MIT_CAP = 0.8;    // no mitigation ever exceeds this — nothing is fully immune
+// x points of defense convert to a damage-reduction fraction with diminishing
+// returns: 0 at def 0, approaching (but never reaching) MIT_CAP as def climbs.
+const mitig = (x, K) => Math.min(MIT_CAP, x / (x + K));
+
+// Compact number formatting so the rare very-deep run stays readable
+// (1.2K, 3.4M, …). Plain integers below 10,000 so normal play looks normal.
+function fmt(n) {
+  const v = Math.round(n);
+  if (!isFinite(v)) return "∞";
+  const a = Math.abs(v);
+  if (a < 10000) return String(v);
+  if (a < 1e6) return (v / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+  if (a < 1e9) return (v / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+  return (v / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+}
+
 // ---------- audio: tiny Web Audio synth (no asset files needed) ----------
 const Sound = (() => {
   let ctx = null;
@@ -214,20 +242,20 @@ const BOSSES = [
 // engine and reducer read. Players hold up to RELIC_SLOTS at once.
 const RELIC_SLOTS = 3;
 const RELICS = [
-  { id: "vampedge", name: "Vampiric Edge", e: "🩸", desc: "Heal 2 HP for every blow you land in a fight." },
+  { id: "vampedge", name: "Vampiric Edge", e: "🩸", desc: "Heal a slice of your Max HP for every blow you land in a fight." },
   { id: "stoneskin", name: "Stoneskin", e: "🪨", desc: "The first enemy blow in every fight is fully blocked." },
   { id: "gambler", name: "Gambler's Coin", e: "🪙", desc: "+60% gold from all sources, but healing is 30% weaker." },
-  { id: "berserker", name: "Berserker's Brand", e: "🔥", desc: "+1 Attack for every 12 Max HP you are currently missing." },
+  { id: "berserker", name: "Berserker's Brand", e: "🔥", desc: "Up to +50% Attack — the lower your health, the harder you hit." },
   { id: "warden", name: "Warden's Key", e: "🗝️", desc: "Open locked chests without spending a key." },
-  { id: "glasscannon", name: "Glass Cannon", e: "💎", desc: "+5 Attack, but you take +1 damage per enemy blow." },
-  { id: "ironheart", name: "Iron Heart", e: "❤️‍🔥", desc: "+25 Max HP the moment you equip it." },
+  { id: "glasscannon", name: "Glass Cannon", e: "💎", desc: "+18% Attack, but you take +8% damage from every enemy blow." },
+  { id: "ironheart", name: "Iron Heart", e: "❤️‍🔥", desc: "+25% Max HP the moment you equip it." },
   { id: "scholar", name: "Scholar's Eye", e: "📖", desc: "+35% XP from every kill — level up far faster." },
   { id: "executioner", name: "Executioner", e: "⚔️", desc: "Enemies below 25% HP die in one blow, ignoring defense." },
-  { id: "thorns", name: "Thornmail", e: "🌹", desc: "Reflect damage: enemies lose effective HP up to your Defense (capped per foe)." },
+  { id: "thorns", name: "Thornmail", e: "🌹", desc: "Reflect damage: stronger Defense chips more off each foe's effective HP." },
   { id: "sapper", name: "Sapper's Pick", e: "⛏️", desc: "Your blows ignore half of every enemy's Defense." },
-  { id: "aegis", name: "Aegis Plate", e: "🛡️", desc: "+6 Defense the moment you equip it." },
+  { id: "aegis", name: "Aegis Plate", e: "🛡️", desc: "+40% Defense (and a little more) the moment you equip it." },
   { id: "frostbite", name: "Frostbite Charm", e: "❄️", desc: "Chill the enemy — block one extra blow in every fight." },
-  { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "+1 Attack for every 120 gold you carry." },
+  { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "Up to +35% Attack while you carry a deep purse of gold." },
   { id: "revenant", name: "Revenant's Vow", e: "🕯️", desc: "Slaying a boss heals you all the way to full." },
   { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+20% gold and +20% XP from every kill." },
 ];
@@ -248,30 +276,37 @@ const CONSUMABLES = [
 ];
 const itemById = (id) => CONSUMABLES.find((c) => c.id === id);
 
-// effective attack including stat-style relic effects
-function effAtk(p) {
-  let atk = p.atk;
-  if (hasRelic(p, "glasscannon")) atk += 5;
-  if (hasRelic(p, "berserker")) atk += Math.floor(Math.max(0, p.maxHp - p.hp) / 12);
-  if (hasRelic(p, "hoarder")) atk += Math.floor((p.gold || 0) / 120);
-  return atk;
+// effective attack including stat-style relic effects. These are now
+// *multiplicative* so they scale with the hero's growing ATK instead of being
+// a flat bonus that becomes meaningless at depth. `floor` is used to benchmark
+// "how much gold is a lot" for the Hoarder relic.
+function effAtk(p, floor = p.floor || 1) {
+  let mult = 1;
+  if (hasRelic(p, "glasscannon")) mult += 0.18; // +18% attack
+  if (hasRelic(p, "berserker")) mult += Math.min(0.5, 0.5 * Math.max(0, p.maxHp - p.hp) / Math.max(1, p.maxHp)); // up to +50% as you drop low
+  if (hasRelic(p, "hoarder")) mult += Math.min(0.35, 0.35 * (p.gold || 0) / (150 * (1 + 0.12 * floor))); // up to +35% from a deep purse
+  return p.atk * mult;
 }
 
 // ---------- combat (player strikes first; fully deterministic) ----------
 // Relic-aware. Returns the exact HP cost plus any heal-back the fight grants.
 function combat(p, m) {
-  const atk = effAtk(p);
+  const atk = effAtk(p, m.floor || p.floor || 1);
   let effHp = m.hp;
-  // Thornmail chips away effective HP, but never more than a fraction of the
-  // target's pool — so it can't trivialize tanky bosses at high Defense.
+  // Thornmail chips away effective HP, scaled by how much your Defense reduces
+  // damage and by the target's own pool — so it stays relevant at depth without
+  // ever trivializing a tanky foe (it's a fraction of their HP, self-capping).
   if (hasRelic(p, "thorns")) {
-    const chip = Math.min(p.def, Math.floor(m.hp * 0.4));
+    const chip = Math.floor(m.hp * mitig(p.def, DEF_K) * 0.5);
     effHp = Math.max(1, m.hp - chip);
   }
-  // Sapper's Pick: your blows ignore half of every enemy's Defense.
-  const enemyDef = hasRelic(p, "sapper") ? Math.floor(m.def / 2) : m.def;
-  const dToM = atk - enemyDef;
-  if (dToM <= 0) return { unwinnable: true, cost: Infinity, heal: 0 };
+  // Your blows are reduced by the enemy's armor as a percentage (diminishing
+  // returns), not flat subtraction — so a growing ATK always lands meaningful
+  // damage and fights stay a few rounds instead of becoming one-shots.
+  // Sapper's Pick halves the enemy's effective armor.
+  const rawDef = hasRelic(p, "sapper") ? m.def * 0.5 : m.def;
+  const dToM = atk * (1 - mitig(rawDef, ARMOR_K));
+  if (dToM <= 0.0001) return { unwinnable: true, cost: Infinity, heal: 0 };
 
   let rounds = Math.ceil(effHp / dToM);
   // Executioner: the killing blow lands as soon as the enemy would drop below
@@ -282,31 +317,37 @@ function combat(p, m) {
     if (hpAfter <= effHp * 0.25) rounds -= 1;
   }
 
-  let perBlow = Math.max(0, m.atk - p.def);
-  if (hasRelic(p, "glasscannon")) perBlow += 1;
+  // Damage taken per blow is the enemy's ATK reduced by your Defense as a
+  // percentage. Defense never becomes worthless and never makes you immune.
+  let perBlow = m.atk * (1 - mitig(p.def, DEF_K));
+  if (hasRelic(p, "glasscannon")) perBlow *= 1.08; // +8% damage taken
   let blowsTaken = rounds - 1;
   if (hasRelic(p, "stoneskin") && blowsTaken > 0) blowsTaken -= 1; // first hit blocked
   if (hasRelic(p, "frostbite") && blowsTaken > 0) blowsTaken -= 1; // an extra blow chilled away
 
-  const cost = Math.max(0, blowsTaken * perBlow);
-  // Vampiric Edge heals per blow you land (capped so it can't exceed the fight cost absurdly)
-  const heal = hasRelic(p, "vampedge") ? rounds * 2 : 0;
+  const cost = Math.max(0, Math.round(blowsTaken * perBlow));
+  // Vampiric Edge heals a slice of your max HP per blow you land, so it scales
+  // with the hero instead of being a flat trickle that fades at depth.
+  const heal = hasRelic(p, "vampedge") ? Math.round(rounds * p.maxHp * 0.02) : 0;
   return { unwinnable: false, cost, heal, rounds };
 }
 
 // ---------- floor generation ----------
 function scaleMonster(base, floor) {
-  const hp = Math.round(base.hp * (1 + (floor - 1) * 0.22));
-  const atk = Math.round(base.atk * (1 + (floor - 1) * 0.18));
-  // Defense grows with depth (+1 every 4 floors). This is the key anti-OP lever:
-  // without it the player's Attack quickly dwarfs flat monster armor and every
-  // kill becomes a free one-blow clean kill. Scaling it keeps fights multi-round.
-  const def = base.def + Math.floor(floor / 4);
+  // Gentle *linear* growth on both HP and ATK. The hero grows at a matching
+  // pace (see applyLevelUps), so a fight's cost stays a roughly constant share
+  // of max HP at every depth — endless without the numbers running away.
+  const hp = Math.round(base.hp * (1 + HP_RATE * (floor - 1)));
+  const atk = Math.round(base.atk * (1 + ATK_RATE * (floor - 1)));
+  // Armor grows slowly and stays small: it feeds percentage mitigation now
+  // (ARMOR_K), so it only needs to nudge fights from 3 → 5 rounds at depth.
+  const def = base.def + Math.floor(floor / 8);
   // Reward scales with total threat, not just HP. Attack is weighted heavily
   // because high-attack mobs cost the most HP to kill and should pay the most.
   const threat = hp + atk * 2.4 + def * 6;
   return {
     t: "monster",
+    floor, // combat reads this for floor-aware relics (Hoarder)
     kind: base.kind,
     e: base.e,
     hp,
@@ -336,14 +377,16 @@ function maybeElite(mon, floor) {
 
 function makeBoss(floor) {
   const cycle = Math.floor((floor / 5 - 1)) % BOSSES.length;
-  const tier = Math.floor((floor / 5 - 1) / BOSSES.length); // extra scaling on repeats
   const b = BOSSES[cycle];
-  const mult = 1 + tier * 0.6 + (floor - 5) * 0.05;
-  const hp = Math.round(b.hp * mult);
-  const atk = Math.round(b.atk * (1 + tier * 0.4 + (floor - 5) * 0.03));
+  // Bosses ride the same gentle linear curve as everything else — their hefty
+  // base stats already make them a wall, so no extra repeat-tier multiplier is
+  // needed (that double-counted growth and produced the old impossible spikes).
+  const hp = Math.round(b.hp * (1 + HP_RATE * (floor - 1)));
+  const atk = Math.round(b.atk * (1 + ATK_RATE * (floor - 1)));
   return {
     t: "monster",
     boss: true,
+    floor,
     kind: b.kind,
     e: b.e,
     hp,
@@ -550,7 +593,10 @@ function generate(floor) {
 
   // ---- monsters & consumables on remaining open tiles ----
   const pool = MONSTERS.filter((m) => m.min <= floor);
-  const monsterCount = clamp(4 + Math.floor(floor * 0.7), 4, Math.floor(open.length * 0.55));
+  // Density rises with depth but stays capped so a floor is always *traversable*
+  // by picking your fights — you can never be forced to fight your way through a
+  // wall of bodies, but you also can't clear every monster on the HP you have.
+  const monsterCount = clamp(4 + Math.floor(floor * 0.5), 4, Math.floor(open.length * 0.5));
   for (let i = 0; i < monsterCount; i++) {
     const t = takeOpen();
     if (!t) break;
@@ -565,7 +611,9 @@ function generate(floor) {
     const t = takeOpen();
     if (!t) break;
     const big = floor < 10 && RNG.next() < 0.18;
-    place(t.x, t.y, { t: "heal", big, amt: big ? 38 + floor * 5 : 18 + floor * 2 });
+    // Heals are a fraction of your max HP, resolved on pickup — so a draught is
+    // always meaningful no matter how large your HP pool has grown.
+    place(t.x, t.y, { t: "heal", big, pct: big ? 0.45 : 0.22 });
   }
 
   // consumable drop — potions & skills, the only source of usable items. Gated
@@ -583,11 +631,11 @@ function generate(floor) {
   }
   if (RNG.next() < 0.22) {
     const t = takeOpen();
-    if (t) place(t.x, t.y, { t: "sword", amt: 1 + Math.floor(floor / 5) });
+    if (t) place(t.x, t.y, { t: "sword", amt: 2 + Math.floor(floor / 4) });
   }
   if (RNG.next() < 0.18) {
     const t = takeOpen();
-    if (t) place(t.x, t.y, { t: "shield", amt: 1 + Math.floor(floor / 8) });
+    if (t) place(t.x, t.y, { t: "shield", amt: 1 + Math.floor(floor / 6) });
   }
 
   return { grid, start: { ...start } };
@@ -603,7 +651,7 @@ function maybeSpawnReinforcement(g) {
   g.floorSteps = (g.floorSteps || 0) + 1;
   const interval = clamp(13 - Math.floor(floor / 2), 6, 13);
   if (g.floorSteps % interval !== 0) return;
-  const maxReinf = 3 + Math.floor(floor / 4);
+  const maxReinf = Math.min(3 + Math.floor(floor / 6), 8);
   if ((g.reinforcements || 0) >= maxReinf) return;
 
   // candidate floor tiles at least 3 away from the hero (no instant ambush)
@@ -635,17 +683,23 @@ function maybeSpawnReinforcement(g) {
 
 // ---------- chest rewards ----------
 function rollReward(floor, locked) {
+  // Stat rewards scale with depth so a deep chest is worth opening — a flat
+  // +4 ATK would be noise once your ATK is in the hundreds.
+  const lAtk = Math.round(4 + floor / 4);
+  const lDef = Math.round(3 + floor / 5);
+  const uAtk = Math.round(2 + floor / 6);
+  const uDef = Math.max(1, Math.round(floor / 8));
   const opts = locked
     ? [
-        { maxHp: 28 + floor * 3, heal: true, label: "+Max HP & full heal" },
-        { atk: 4, label: "+4 Attack" },
-        { def: 3, label: "+3 Defense" },
+        { maxHp: Math.round(40 + floor * 4), heal: true, label: "+Max HP & full heal" },
+        { atk: lAtk, label: `+${lAtk} Attack` },
+        { def: lDef, label: `+${lDef} Defense` },
         { gold: 40 + floor * 10, label: "treasure" },
       ]
     : [
-        { maxHp: 10, label: "+10 Max HP" },
-        { atk: 2, label: "+2 Attack" },
-        { def: 1, label: "+1 Defense" },
+        { maxHp: Math.round(12 + floor * 1.5), label: "+Max HP" },
+        { atk: uAtk, label: `+${uAtk} Attack` },
+        { def: uDef, label: `+${uDef} Defense` },
         { gold: 15 + floor * 4, label: "coins" },
       ];
   return choice(opts);
@@ -726,7 +780,10 @@ function metaPerks(meta) {
 }
 
 function xpNeeded(level) {
-  return Math.round(60 * Math.pow(level, 1.35));
+  // Near-linear so the hero's level keeps pace with the floor (~level ≈ floor).
+  // The old level^1.35 curve out-ran the linear XP income at depth, leaving the
+  // hero badly under-levelled exactly when monsters were toughest.
+  return Math.round(45 + 22 * level);
 }
 
 function pushLog(g, text) {
@@ -764,20 +821,27 @@ function applyHeal(g, amt) {
   g.hp = clamp(g.hp + a, 0, g.maxHp);
   return a;
 }
+// immediate stat relics apply the moment they're actually equipped — as a
+// percentage of your current stat so they stay impactful at any depth. Applied
+// in exactly one place per relic (direct equip here, or on swap-in) so the
+// bonus is never double-counted and is never gained for a relic you declined.
+function applyEquipBonus(g, id) {
+  if (id === "ironheart") { const b = Math.round(g.maxHp * 0.25); g.maxHp += b; g.hp += b; }
+  if (id === "aegis") { g.def = Math.round(g.def * 1.4) + 4; }
+}
+
 // grant a random relic the player doesn't already hold; returns the relic or null
 function grantRelic(g) {
   const owned = g.relics || [];
   const pool = RELICS.filter((r) => !owned.includes(r.id));
   if (!pool.length) return null;
   const relic = choice(pool);
-  // immediate stat relics apply on pickup
-  if (relic.id === "ironheart") { g.maxHp += 25; g.hp += 25; }
-  if (relic.id === "aegis") { g.def += 6; }
   if (owned.length < RELIC_SLOTS) {
+    applyEquipBonus(g, relic.id); // equipped right now
     g.relics = [...owned, relic.id];
     g.pendingRelic = null;
   } else {
-    // slots full → stash it for the player to choose what to swap
+    // slots full → stash it; the bonus applies only if/when it's swapped in
     g.pendingRelic = relic.id;
   }
   return relic;
@@ -788,16 +852,17 @@ function applyLevelUps(g) {
   while (g.xp >= xpNeeded(g.level)) {
     g.xp -= xpNeeded(g.level);
     g.level += 1;
-    g.maxHp += 9;
-    g.hp = clamp(g.hp + 9, 0, g.maxHp);
+    // Each level keeps pace with the linear monster curve: a solid Max HP bump
+    // (so damage stays a constant share of your bar) plus ATK and DEF. DEF gives
+    // diminishing-returns mitigation now, so +1 every level is safe — it can't
+    // make fights free the way flat subtraction once did.
+    g.maxHp += 12;
+    g.hp = clamp(g.hp + Math.round(g.maxHp * 0.06), 0, g.maxHp);
     g.atk += 1;
-    // DEF every 2 levels — DEF is what makes fights cost zero, so its inflation
-    // is slowed (it still flows from chests, shields, the altar and relics).
-    const defUp = g.level % 2 === 0 ? 1 : 0;
-    g.def += defUp;
+    g.def += 1;
     setFx(g, `★ LEVEL ${g.level}`, "#ffd24d");
     sfx(g, "levelup");
-    pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK${defUp ? ", +1 DEF" : ""} (HP also restored +9).`);
+    pushLog(g, `★ LEVEL ${g.level}! +12 Max HP, +1 ATK, +1 DEF (and some HP back).`);
   }
 }
 
@@ -809,12 +874,18 @@ function awardKill(g, cell) {
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
   if (cell.boss) {
-    g.maxHp += 18;
-    g.atk += 2;
-    g.def += 1;
-    g.hp = clamp(g.hp + 30, 0, g.maxHp);
+    // Boss rewards scale with depth so a floor-50 boss is a real power spike,
+    // not the same +2 ATK it gave on floor 5.
+    const f = cell.floor || g.floor || 1;
+    const hpUp = Math.round(20 + f * 2);
+    const atkUp = Math.round(2 + f / 8);
+    const defUp = Math.round(1 + f / 12);
+    g.maxHp += hpUp;
+    g.atk += atkUp;
+    g.def += defUp;
+    g.hp = clamp(g.hp + Math.round(g.maxHp * 0.25), 0, g.maxHp);
     g.bossesBeaten = (g.bossesBeaten || 0) + 1;
-    pushLog(g, "The boss's essence floods you: +18 Max HP, +2 ATK, +1 DEF, +30 HP.");
+    pushLog(g, `The boss's essence floods you: +${hpUp} Max HP, +${atkUp} ATK, +${defUp} DEF, and a surge of health.`);
     if (hasRelic(g, "revenant")) {
       g.hp = g.maxHp;
       setFx(g, "🕯 FULL HP", "#ffd27a");
@@ -828,18 +899,19 @@ function awardKill(g, cell) {
 function applyInstantItem(g, id) {
   switch (id) {
     case "draught": {
-      const got = applyHeal(g, 45);
-      setFx(g, `+${got} HP`, "#ff5f6d");
+      const got = applyHeal(g, Math.round(g.maxHp * 0.35));
+      setFx(g, `+${fmt(got)} HP`, "#ff5f6d");
       sfx(g, "heal");
-      pushLog(g, `You quaff a Healing Draught (+${got} HP).`);
+      pushLog(g, `You quaff a Healing Draught (+${fmt(got)} HP).`);
       break;
     }
     case "elixir": {
-      g.maxHp += 10;
+      const bonus = Math.round(g.maxHp * 0.06);
+      g.maxHp += bonus;
       g.hp = g.maxHp;
-      setFx(g, "FULL HP +10", "#ff9bb0");
+      setFx(g, `FULL HP +${fmt(bonus)}`, "#ff9bb0");
       sfx(g, "heal");
-      pushLog(g, "The Greater Elixir floods you — full health and +10 Max HP.");
+      pushLog(g, `The Greater Elixir floods you — full health and +${fmt(bonus)} Max HP.`);
       break;
     }
     case "ward": {
@@ -910,15 +982,24 @@ function score(g) {
 // reasons to save gold as you descend. `min` is the floor it appears on.
 function shopItems(g) {
   const f = g.floor;
-  // permanent stat upgrades get pricier with every one you've already bought this
-  // run, so you can't simply grind gold into early dominance.
-  const up = 1 + 0.35 * (g.upgradesBought || 0);
+  // Permanent stat upgrades get a little pricier with each one bought this run,
+  // but the ramp is gentle and capped so deep-run upgrades never lock out — the
+  // *effect* scales with depth too, so each buy stays meaningful forever.
+  const up = Math.min(2.5, 1 + 0.15 * (g.upgradesBought || 0));
+  const statPrice = Math.round((30 + f * 8) * up);
+  // Upgrade effects scale with floor so a deep "+Attack" is a real boost, not
+  // the same +2 it was on floor 1. `amount` is the single source of truth that
+  // BUY reads when applying the purchase.
+  const atkUp = Math.round(2 + f / 6);
+  const defUp = Math.round(2 + f / 8);
+  const bandUp = Math.round(15 + f * 2);
+  const mendUp = "≈" + fmt(Math.round((g.maxHp || 80) * 0.4));
   const all = [
-    { opt: "heal", min: 1, icon: "❤", title: "Mend Wounds", desc: `Restore ${28 + f * 4} HP`, price: 22 + f * 5 },
-    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: "+2 Attack, forever", price: Math.round((40 + f * 10) * up) },
-    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: "+2 Defense, forever", price: Math.round((40 + f * 10) * up) },
+    { opt: "heal", min: 1, icon: "❤", title: "Mend Wounds", desc: `Restore ${mendUp} HP`, price: 22 + f * 5 },
+    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: `+${atkUp} Attack, forever`, price: statPrice, amount: atkUp },
+    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: `+${defUp} Defense, forever`, price: statPrice, amount: defUp },
     { opt: "key", min: 3, icon: "🗝️", title: "Iron Key", desc: "Opens one locked chest", price: 35 + f * 6 },
-    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: "+15 Max HP (and heal 15)", price: Math.round((55 + f * 10) * up) },
+    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: `+${bandUp} Max HP (and heal ${bandUp})`, price: statPrice, amount: bandUp },
     { opt: "greater", min: 5, icon: "💖", title: "Greater Draught", desc: "Heal all the way to full", price: 50 + f * 9 },
     { opt: "charm", min: 8, icon: "🔥", title: "Phoenix Charm", desc: "Survive one killing blow at ½ HP", price: 120 + f * 18, soldOut: g.charm },
     { opt: "relic", min: 4, icon: "✦", title: "Mystic Relic", desc: "Attune to a random new relic", price: 90 + f * 12, soldOut: (g.relics || []).length >= RELICS.length },
@@ -946,9 +1027,7 @@ function reducer(state, action) {
       const incoming = state.pendingRelic;
       const dropped = g.relics[action.index];
       g.relics[action.index] = incoming;
-      // immediate-effect relic applies when actually equipped
-      if (incoming === "ironheart") { g.maxHp += 25; g.hp += 25; }
-      if (incoming === "aegis") { g.def += 6; }
+      applyEquipBonus(g, incoming); // immediate-effect relic applies when actually equipped
       g.pendingRelic = null;
       g.relicChoiceOpen = false;
       pushLog(g, `You swap out ${relicById(dropped)?.name} for ${relicById(incoming)?.name}.`);
@@ -1011,18 +1090,18 @@ function reducer(state, action) {
       g.gold -= it.price;
       switch (action.opt) {
         case "heal": {
-          const amt = applyHeal(g, 28 + g.floor * 4);
-          setFx(g, `+${amt} HP`, "#ff5f6d");
+          const amt = applyHeal(g, Math.round(g.maxHp * 0.4));
+          setFx(g, `+${fmt(amt)} HP`, "#ff5f6d");
           break;
         }
-        case "atk": g.atk += 2; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, "+2 ATK", "#ffd27a"); break;
-        case "def": g.def += 2; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, "+2 DEF", "#7ec8ff"); break;
+        case "atk": g.atk += it.amount; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, `+${it.amount} ATK`, "#ffd27a"); break;
+        case "def": g.def += it.amount; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, `+${it.amount} DEF`, "#7ec8ff"); break;
         case "key": g.keys += 1; setFx(g, "🗝️ +1", "#ffd24d"); break;
         case "band":
-          g.maxHp += 15;
-          g.hp = clamp(g.hp + 15, 0, g.maxHp);
+          g.maxHp += it.amount;
+          g.hp = clamp(g.hp + it.amount, 0, g.maxHp);
           g.upgradesBought = (g.upgradesBought || 0) + 1;
-          setFx(g, "+15 MAX HP", "#ff9bb0");
+          setFx(g, `+${fmt(it.amount)} MAX HP`, "#ff9bb0");
           break;
         case "greater": g.hp = g.maxHp; setFx(g, "FULL HP", "#ff5f6d"); break;
         case "charm": g.charm = true; setFx(g, "🔥 CHARM", "#ffd27a"); break;
@@ -1092,19 +1171,22 @@ function reducer(state, action) {
           return g;
         }
         case "heal": {
-          const got = applyHeal(g, cell.amt);
-          setFx(g, `+${got} HP`, "#ff5f6d");
+          // pct of max HP (resolved here so it scales with your grown pool);
+          // fall back to a legacy flat `amt` for any pre-update saved tile.
+          const amount = cell.pct != null ? Math.round(g.maxHp * cell.pct) : (cell.amt || 0);
+          const got = applyHeal(g, amount);
+          setFx(g, `+${fmt(got)} HP`, "#ff5f6d");
           sfx(g, "heal");
-          pushLog(g, `You drink a ${cell.big ? "greater " : ""}draught (+${got} HP).`);
+          pushLog(g, `You drink a ${cell.big ? "greater " : ""}draught (+${fmt(got)} HP).`);
           clearTile();
           moveIn();
           break;
         }
         case "gold": {
           const got = gainGold(g, cell.amt);
-          setFx(g, `+${got} gold`, "#ffd24d");
+          setFx(g, `+${fmt(got)} gold`, "#ffd24d");
           sfx(g, "coin");
-          pushLog(g, `You pocket ${got} gold.`);
+          pushLog(g, `You pocket ${fmt(got)} gold.`);
           clearTile();
           moveIn();
           break;
@@ -1152,11 +1234,11 @@ function reducer(state, action) {
           if (cell.locked && !freeOpen) g.keys -= 1;
           const r = rollReward(g.floor, cell.locked);
           let msg = [];
-          if (r.maxHp) { g.maxHp += r.maxHp; g.hp += r.maxHp; msg.push(`+${r.maxHp} Max HP`); }
+          if (r.maxHp) { g.maxHp += r.maxHp; g.hp += r.maxHp; msg.push(`+${fmt(r.maxHp)} Max HP`); }
           if (r.heal) { g.hp = g.maxHp; msg.push("full heal"); }
-          if (r.atk) { g.atk += r.atk; msg.push(`+${r.atk} ATK`); }
-          if (r.def) { g.def += r.def; msg.push(`+${r.def} DEF`); }
-          if (r.gold) { const got = gainGold(g, r.gold); msg.push(`+${got} gold`); }
+          if (r.atk) { g.atk += r.atk; msg.push(`+${fmt(r.atk)} ATK`); }
+          if (r.def) { g.def += r.def; msg.push(`+${fmt(r.def)} DEF`); }
+          if (r.gold) { const got = gainGold(g, r.gold); msg.push(`+${fmt(got)} gold`); }
           if (cell.locked && freeOpen) msg.push("(Warden's Key)");
           setFx(g, cell.locked ? "✦ LOOT ✦" : "loot", "#9b7bff");
           sfx(g, "chest");
@@ -1250,7 +1332,7 @@ function reducer(state, action) {
               return g;
             }
             g.confirm = { x: nx, y: ny };
-            g.toast = `☠ ${cell.kind} would cost ${res.cost} HP — fatal! Tap again to risk it.`;
+            g.toast = `☠ ${cell.kind} would cost ${fmt(res.cost)} HP — fatal! Tap again to risk it.`;
             sfx(g, "warn");
             return g;
           }
@@ -1258,15 +1340,15 @@ function reducer(state, action) {
           g.hp -= res.cost;
           if (res.heal > 0) g.hp = clamp(g.hp + res.heal, 0, g.maxHp);
           const costLabel = res.cost > 0
-            ? (res.heal > 0 ? `-${res.cost} +${res.heal}` : `-${res.cost} HP`)
-            : (res.heal > 0 ? `+${res.heal} HP` : "clean kill");
+            ? (res.heal > 0 ? `-${fmt(res.cost)} +${fmt(res.heal)}` : `-${fmt(res.cost)} HP`)
+            : (res.heal > 0 ? `+${fmt(res.heal)} HP` : "clean kill");
           setFx(g, costLabel, res.cost > res.heal ? "#ff5f6d" : "#74e08a");
           sfx(g, cell.boss ? "bosswin" : "hit");
           pushLog(
             g,
             cell.boss
-              ? `⚔ You vanquish the ${cell.kind}! (−${res.cost} HP, +${cell.gold} gold)`
-              : `You slay the ${cell.kind} (−${res.cost} HP).`
+              ? `⚔ You vanquish the ${cell.kind}! (−${fmt(res.cost)} HP, +${fmt(cell.gold)} gold)`
+              : `You slay the ${cell.kind} (−${fmt(res.cost)} HP).`
           );
           finishKill();
           break;
@@ -1732,12 +1814,12 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onUseItem, onMenu, onHelp,
       <div className="cck-stats">
         <button className={`cck-hpbar ${hpFlash ? "flash" : ""}`} onClick={() => onStatInfo("hp")}>
           <div className="cck-hpfill" style={{ width: `${hpPct}%` }} />
-          <span className="cck-hptext">❤ {game.hp} / {game.maxHp} &nbsp;ⓘ</span>
+          <span className="cck-hptext">❤ {fmt(game.hp)} / {fmt(game.maxHp)} &nbsp;ⓘ</span>
         </button>
         <div className="cck-chips">
-          <button className="cck-chip" onClick={() => onStatInfo("atk")}>⚔ {effAtk(game)}{effAtk(game) !== game.atk ? "*" : ""}</button>
-          <button className="cck-chip" onClick={() => onStatInfo("def")}>🛡 {game.def}</button>
-          <span className="cck-chip cck-chip-static">💰 {game.gold}</span>
+          <button className="cck-chip" onClick={() => onStatInfo("atk")}>⚔ {fmt(effAtk(game))}{Math.round(effAtk(game)) !== game.atk ? "*" : ""}</button>
+          <button className="cck-chip" onClick={() => onStatInfo("def")}>🛡 {fmt(game.def)}</button>
+          <span className="cck-chip cck-chip-static">💰 {fmt(game.gold)}</span>
           <span className="cck-chip cck-chip-static">🗝️ {game.keys}</span>
           <button className="cck-chip cck-chip-lvl" onClick={() => onStatInfo("level")}>★ {game.level}</button>
           {game.charm && <span className="cck-chip cck-chip-charm">🔥</span>}
@@ -1872,7 +1954,7 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
         let label;
         if (res.unwinnable) { bcls += " unwin"; label = "∞"; }
         else {
-          label = res.cost;
+          label = fmt(res.cost);
           const ratio = res.cost / player.hp;
           if (res.cost >= player.hp) bcls += " fatal";
           else if (ratio < 0.18) bcls += " safe";
@@ -1947,10 +2029,10 @@ function TargetBar({ game, onAttack }) {
             <span className="cck-tg-emoji">{cell.e}</span>
             <span className="cck-tg-info">
               <b>{cell.kind}{cell.boss ? " · BOSS" : cell.elite ? " · ELITE" : ""}</b>
-              <small>HP {cell.hp} · ⚔ {cell.atk} · 🛡 {cell.def}{blows != null ? ` · ${blows} ${blows === 1 ? "blow" : "blows"}` : ""}</small>
+              <small>HP {fmt(cell.hp)} · ⚔ {fmt(cell.atk)} · 🛡 {fmt(cell.def)}{blows != null ? ` · ${blows} ${blows === 1 ? "blow" : "blows"}` : ""}</small>
             </span>
             <span className="cck-tg-cost">
-              <b>{res.unwinnable ? "∞" : `−${res.cost}`}</b>
+              <b>{res.unwinnable ? "∞" : `−${fmt(res.cost)}`}</b>
               <em>{charm ? "🔥 survive" : fatal ? "☠ fatal" : "HP"}</em>
             </span>
           </button>
@@ -1965,23 +2047,26 @@ function TargetBar({ game, onAttack }) {
 const STAT_TEXT = {
   hp: (g) => ({
     title: "❤ Health",
-    body: `You have ${g.hp} of ${g.maxHp} max. Every fight subtracts HP — at 0 you die, so HP is the real currency of the crypt.`,
-    grow: `Max HP grows when you LEVEL UP (+9), defeat a BOSS (+18), open chests, or buy a Bandolier at the altar. Refill with ❤️ potions, altar healing, or a Greater Draught.`,
+    body: `You have ${fmt(g.hp)} of ${fmt(g.maxHp)} max. Every fight subtracts HP — at 0 you die, so HP is the real currency of the crypt.`,
+    grow: `Max HP grows when you LEVEL UP (+12), defeat a BOSS, open chests, or buy a Bandolier at the altar. Refill with ❤️ potions, altar healing, or a Greater Draught — healing scales with your Max HP, so it never goes stale.`,
   }),
   atk: (g) => ({
     title: "⚔ Attack",
-    body: `Attack is ${g.atk}. Each blow you land deals your Attack minus the enemy's Defense. Higher Attack means fewer blows to kill — and fewer blows means you take less damage back.`,
-    grow: `Raise it with 🗡️ swords on the floor, "Whet the Blade" at the altar, chest rewards, and leveling up.`,
+    body: `Attack is ${fmt(Math.round(effAtk(g)))}. Higher Attack means fewer blows to kill — and fewer blows means you take less damage back. Keeping Attack growing is what stops deep monsters from taking forever to kill.`,
+    grow: `Raise it with 🗡️ swords on the floor, "Whet the Blade" at the altar, chest rewards, and leveling up. Upgrades scale with depth, so they stay meaningful.`,
   }),
-  def: (g) => ({
-    title: "🛡 Defense",
-    body: `Defense is ${g.def}. Each enemy blow deals its Attack minus your Defense (never less than 0). Higher Defense makes every single fight cost less HP.`,
-    grow: `Raise it with 🛡️ armor on the floor, "Temper Armor" at the altar, chest rewards, and leveling up.`,
-  }),
+  def: (g) => {
+    const pct = Math.round(mitig(g.def, DEF_K) * 100);
+    return {
+      title: "🛡 Defense",
+      body: `Defense is ${fmt(g.def)}, reducing every enemy blow by ${pct}%. Defense is percentage damage-reduction with diminishing returns — it always helps and never becomes useless, but you're never fully immune.`,
+      grow: `Raise it with 🛡️ armor on the floor, "Temper Armor" at the altar, chest rewards, and leveling up.`,
+    };
+  },
   level: (g) => ({
     title: "★ Level",
-    body: `You're level ${g.level}. Slaying monsters earns XP; fill the bar and you level up. Tougher enemies grant more XP.`,
-    grow: `Each level grants +9 Max HP, +1 Attack, and +1 Defense, and tops your health back up by 9.`,
+    body: `You're level ${g.level}. Slaying monsters earns XP; fill the bar and you level up. Tougher enemies grant more XP — and your level keeps pace with the floor.`,
+    grow: `Each level grants +12 Max HP, +1 Attack, and +1 Defense, and tops some of your health back up.`,
   }),
 };
 
@@ -2063,7 +2148,7 @@ function AltarModal({ game, onBuy, onClose }) {
     <div className="cck-modal-bg" onClick={onClose}>
       <div className="cck-modal" onClick={(e) => e.stopPropagation()}>
         <div className="cck-modal-h">🔮 Forgotten Altar</div>
-        <p className="cck-modal-sub">You have <b>💰 {game.gold}</b> gold.</p>
+        <p className="cck-modal-sub">You have <b>💰 {fmt(game.gold)}</b> gold.</p>
         <div className="cck-shoplist">
           {items.map((it) => {
             const afford = game.gold >= it.price && !it.soldOut;
@@ -2078,7 +2163,7 @@ function AltarModal({ game, onBuy, onClose }) {
                   <b>{it.title}</b>
                   <small>{it.soldOut ? "Already carried" : it.desc}</small>
                 </span>
-                <span className="cck-shop-price">{it.soldOut ? "✓" : `💰 ${it.price}`}</span>
+                <span className="cck-shop-price">{it.soldOut ? "✓" : `💰 ${fmt(it.price)}`}</span>
               </button>
             );
           })}
@@ -2103,13 +2188,13 @@ function DeathScreen({ game, score, best, onAgain, onMenu }) {
       <p className="cck-death-line">{game.deathLine}</p>
       <div className="cck-scoregrid">
         <div><span>Depth</span><b>Floor {game.floor}</b></div>
-        <div><span>Slain</span><b>{game.slain}</b></div>
-        <div><span>Gold</span><b>{game.gold}</b></div>
+        <div><span>Slain</span><b>{fmt(game.slain)}</b></div>
+        <div><span>Gold</span><b>{fmt(game.gold)}</b></div>
         <div><span>Level</span><b>{game.level}</b></div>
       </div>
       <div className="cck-finalscore">
         <span>SCORE</span>
-        <b>{score}</b>
+        <b>{fmt(score)}</b>
         {isRecord && <em>★ New Record</em>}
       </div>
       <div className="cck-startbtns">
