@@ -2,6 +2,9 @@
 
 A little arcade of homemade minigames, built with **React + Vite** and deployed to **GitHub Pages**
 
+The home page has two shelves, decided by each entry's `category`: **🕹️ Games**
+and **🧰 Tools & Toys**.
+
 ## Games
 
 | Game | Type | Description |
@@ -9,7 +12,15 @@ A little arcade of homemade minigames, built with **React + Vite** and deployed 
 | 🏰 Crypt of the Hollow King | React | Deterministic magic-tower puzzle-crawler |
 | ⚡ Reflex Arcade | React | Four reaction minigames in one |
 | 🧠 Mind Flood | HTML | Six cognitive trainers |
+
+## Tools & Toys
+
+| Tool | Type | Description |
+|------|------|-------------|
 | ♠️ Poker Night Tracker | React | Buy-in tracking + settlement math |
+| 🎡 Wheel of Names | React | Spin a wheel of names to pick one at random |
+| 🎲 Dice & Coin | React | Roll d4–d20 with modifiers, or flip a coin |
+| 🎱 Magic 8-Ball | React | Ask a yes/no question, shake for an answer |
 
 ## Run locally
 
@@ -39,8 +50,10 @@ Everything routes through [`src/data/games.js`](src/data/games.js) — that's th
 only file you edit to add, remove, or reorder games.
 
 - **React game:** drop a `.jsx` into `src/games/` (it must `export default` a
-  component), then add an entry with `type: "react"` and
+  component), then add an entry with `type: "react"`, `category: "game"`, and
   `component: lazy(() => import("../games/YourGame.jsx"))`.
+- **Tool / toy:** same as a React game, but drop the `.jsx` into `src/tools/`
+  and set `category: "tool"` so it lands on the Tools & Toys shelf.
 - **Standalone HTML game:** drop the file into `public/games/`, then add an
   entry with `type: "iframe"` and `src: "games/your-file.html"`.
 
@@ -56,7 +69,8 @@ src/
   arcade.css            · shell styles (all `arcade-` prefixed)
   data/games.js         · ← the game registry
   components/
-    Home.jsx            · the cabinet grid
+    Home.jsx            · the cabinet grid (Games + Tools shelves)
     GamePage.jsx        · renders a React game or an iframe
   games/                · React game components
+  tools/                · React tool/toy components
 ```

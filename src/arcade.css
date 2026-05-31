@@ -125,6 +125,20 @@ html, body, #root {
   margin-top: 14px;
 }
 
+/* ---- shelf section headings ---- */
+.arcade-section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  color: var(--neon-aqua);
+  max-width: 980px;
+  margin: 8px auto 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #1c2035;
+  text-shadow: 0 0 12px rgba(63,255,208,.35);
+}
+main > section + section { margin-top: 44px; }
+
 /* ---- game cabinet grid ---- */
 .arcade-grid {
   display: grid;

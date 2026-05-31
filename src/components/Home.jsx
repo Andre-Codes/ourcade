@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { GAMES } from "../data/games.js";
+import { getByCategory } from "../data/games.js";
 
 const VISIT_KEY = "ourcade:visits";
 
@@ -30,17 +30,61 @@ function Stars({ rating = 0 }) {
   );
 }
 
+function GameCard({ game, cta = "PLAY ▶" }) {
+  return (
+    <Link
+      to={`/play/${game.id}`}
+      className="arcade-card"
+      style={{ "--accent": game.accent }}
+    >
+      <div className="arcade-card-glow" />
+      {game.badge && (
+        <span className={`arcade-burst ${game.badge === "HOT" ? "is-hot" : "is-new"}`}>
+          {game.badge}!
+        </span>
+      )}
+
+      {/* cabinet "screen" */}
+      <div className="arcade-screen">
+        <span className="arcade-card-emoji">{game.emoji}</span>
+      </div>
+
+      <h2 className="arcade-card-title">{game.title}</h2>
+
+      <div className="arcade-card-meta">
+        <Stars rating={game.rating} />
+        <span className="arcade-plays">
+          played {Number(game.plays || 0).toLocaleString("en-US")}×
+        </span>
+      </div>
+
+      <p className="arcade-card-blurb">{game.blurb}</p>
+
+      <div className="arcade-card-tags">
+        {game.tags.map((t) => (
+          <span key={t} className="arcade-tag">{t}</span>
+        ))}
+      </div>
+
+      <span className="arcade-card-play">{cta}</span>
+    </Link>
+  );
+}
+
 export default function Home() {
   const visitors = useVisitorCount();
   const odometer = String(visitors).padStart(8, "0").split("");
+  const games = getByCategory("game");
+  const tools = getByCategory("tool");
 
   return (
     <div className="arcade-home" id="top">
       {/* ---- retro top nav ---- */}
       <nav className="arcade-nav">
         <a href="#top" className="arcade-tab is-active">HOME</a>
-        <a href="#arcade-grid" className="arcade-tab">GAMES</a>
-        <a href="#arcade-grid" className="arcade-tab arcade-tab-hot">NEW!</a>
+        <a href="#arcade-games" className="arcade-tab">GAMES</a>
+        <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
+        <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
         <a href="#arcade-foot" className="arcade-tab">F.A.Q.</a>
         <span className="arcade-nav-spark">✦</span>
       </nav>
@@ -61,46 +105,24 @@ export default function Home() {
         <p className="arcade-tagline">~ insert coin · press start · enter the cabinet ~</p>
       </header>
 
-      <main className="arcade-grid" id="arcade-grid">
-        {GAMES.map((game) => (
-          <Link
-            key={game.id}
-            to={`/play/${game.id}`}
-            className="arcade-card"
-            style={{ "--accent": game.accent }}
-          >
-            <div className="arcade-card-glow" />
-            {game.badge && (
-              <span className={`arcade-burst ${game.badge === "HOT" ? "is-hot" : "is-new"}`}>
-                {game.badge}!
-              </span>
-            )}
+      <main>
+        <section id="arcade-games">
+          <h2 className="arcade-section-title">🕹️ GAMES</h2>
+          <div className="arcade-grid">
+            {games.map((game) => (
+              <GameCard key={game.id} game={game} cta="PLAY ▶" />
+            ))}
+          </div>
+        </section>
 
-            {/* cabinet "screen" */}
-            <div className="arcade-screen">
-              <span className="arcade-card-emoji">{game.emoji}</span>
-            </div>
-
-            <h2 className="arcade-card-title">{game.title}</h2>
-
-            <div className="arcade-card-meta">
-              <Stars rating={game.rating} />
-              <span className="arcade-plays">
-                played {Number(game.plays || 0).toLocaleString("en-US")}×
-              </span>
-            </div>
-
-            <p className="arcade-card-blurb">{game.blurb}</p>
-
-            <div className="arcade-card-tags">
-              {game.tags.map((t) => (
-                <span key={t} className="arcade-tag">{t}</span>
-              ))}
-            </div>
-
-            <span className="arcade-card-play">PLAY ▶</span>
-          </Link>
-        ))}
+        <section id="arcade-tools">
+          <h2 className="arcade-section-title">🧰 TOOLS &amp; TOYS</h2>
+          <div className="arcade-grid">
+            {tools.map((game) => (
+              <GameCard key={game.id} game={game} cta="OPEN ▶" />
+            ))}
+          </div>
+        </section>
       </main>
 
       <footer className="arcade-footer" id="arcade-foot">
