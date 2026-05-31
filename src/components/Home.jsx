@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { getByCategory } from "../data/games.js";
+import { GAMES } from "../data/games.js";
 
 const VISIT_KEY = "ourcade:visits";
 
@@ -74,8 +74,33 @@ function GameCard({ game, cta = "PLAY ▶" }) {
 export default function Home() {
   const visitors = useVisitorCount();
   const odometer = String(visitors).padStart(8, "0").split("");
-  const games = getByCategory("game");
-  const tools = getByCategory("tool");
+
+  // ---- search + tag filtering (scales as the library grows) ----
+  const [query, setQuery] = useState("");
+  const [activeTags, setActiveTags] = useState([]);
+
+  // the union of every tag in the registry, for the filter chips
+  const allTags = useMemo(() => {
+    const s = new Set();
+    GAMES.forEach((g) => (g.tags || []).forEach((t) => s.add(t)));
+    return [...s].sort();
+  }, []);
+
+  const toggleTag = (t) =>
+    setActiveTags((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]));
+  const clearFilters = () => { setQuery(""); setActiveTags([]); };
+
+  const matches = (g) => {
+    const q = query.trim().toLowerCase();
+    const textOk = !q || g.title.toLowerCase().includes(q) || (g.blurb || "").toLowerCase().includes(q);
+    const tagsOk = activeTags.every((t) => (g.tags || []).includes(t));
+    return textOk && tagsOk;
+  };
+
+  const visible = GAMES.filter(matches);
+  const games = visible.filter((g) => g.category === "game");
+  const tools = visible.filter((g) => g.category === "tool");
+  const filtering = query.trim() !== "" || activeTags.length > 0;
 
   return (
     <div className="arcade-home" id="top">
@@ -105,23 +130,59 @@ export default function Home() {
         <p className="arcade-tagline">~ insert coin · press start · enter the cabinet ~</p>
       </header>
 
+      <div className="arcade-search" id="arcade-search">
+        <input
+          className="arcade-search-input"
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="search the cabinets…"
+          aria-label="Search games and tools"
+        />
+        <div className="arcade-chips">
+          {allTags.map((t) => (
+            <button
+              key={t}
+              type="button"
+              className={`arcade-chip${activeTags.includes(t) ? " is-active" : ""}`}
+              onClick={() => toggleTag(t)}
+            >
+              {t}
+            </button>
+          ))}
+          {filtering && (
+            <button type="button" className="arcade-chip arcade-chip-clear" onClick={clearFilters}>
+              clear ✕
+            </button>
+          )}
+        </div>
+      </div>
+
       <main>
         <section id="arcade-games">
           <h2 className="arcade-section-title">🕹️ GAMES</h2>
-          <div className="arcade-grid">
-            {games.map((game) => (
-              <GameCard key={game.id} game={game} cta="PLAY ▶" />
-            ))}
-          </div>
+          {games.length ? (
+            <div className="arcade-grid">
+              {games.map((game) => (
+                <GameCard key={game.id} game={game} cta="PLAY ▶" />
+              ))}
+            </div>
+          ) : (
+            <p className="arcade-empty">No cabinets match — try another tag.</p>
+          )}
         </section>
 
         <section id="arcade-tools">
           <h2 className="arcade-section-title">🧰 TOOLS &amp; TOYS</h2>
-          <div className="arcade-grid">
-            {tools.map((game) => (
-              <GameCard key={game.id} game={game} cta="OPEN ▶" />
-            ))}
-          </div>
+          {tools.length ? (
+            <div className="arcade-grid">
+              {tools.map((game) => (
+                <GameCard key={game.id} game={game} cta="OPEN ▶" />
+              ))}
+            </div>
+          ) : (
+            <p className="arcade-empty">No tools match — try another tag.</p>
+          )}
         </section>
       </main>
 
@@ -145,7 +206,7 @@ export default function Home() {
         </div>
 
         <p className="arcade-copy">© 2003 OURCADE — all worlds reserved.</p>
-        <p className="arcade-smallprint">Built with React + Vite · Deployed on GitHub Pages</p>
+        <p className="arcade-smallprint">Hand-coded with caffeine · Optimized for 56k · No cookies, just quarters</p>
       </footer>
     </div>
   );

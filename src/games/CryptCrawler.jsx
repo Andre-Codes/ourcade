@@ -137,6 +137,7 @@ const Sound = (() => {
     stairs:  (c) => { beep(c, { type: "sine", f0: 392, f1: 262, t: 0.22, vol: 0.12 }); },
     boss:    (c) => { beep(c, { type: "sawtooth", f0: 110, f1: 70, t: 0.6, vol: 0.16 }); beep(c, { type: "sawtooth", f0: 146, f1: 90, t: 0.6, vol: 0.12, delay: 0.02 }); },
     levelup: (c) => { [523, 659, 784, 1047, 1319].forEach((f, i) => beep(c, { type: "triangle", f0: f, t: 0.14, vol: 0.16, delay: i * 0.08 })); },
+    streak:  (c) => { [659, 880, 1175].forEach((f, i) => beep(c, { type: "triangle", f0: f, t: 0.1, vol: 0.15, delay: i * 0.05 })); },
     bosswin: (c) => { [392, 523, 659, 784, 1047].forEach((f, i) => beep(c, { type: "square", f0: f, t: 0.16, vol: 0.15, delay: i * 0.1 })); },
     revive:  (c) => { beep(c, { type: "sine", f0: 196, f1: 880, t: 0.5, vol: 0.18 }); },
     death:   (c) => { beep(c, { type: "sawtooth", f0: 392, f1: 70, t: 0.9, vol: 0.18 }); noise(c, { t: 0.5, vol: 0.08, hp: 300, delay: 0.1 }); },
@@ -258,6 +259,10 @@ const RELICS = [
   { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "Up to +35% Attack while you carry a deep purse of gold." },
   { id: "revenant", name: "Revenant's Vow", e: "🕯️", desc: "Slaying a boss heals you all the way to full." },
   { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+20% gold and +20% XP from every kill." },
+  // --- cursed relics: a strong upside chained to a real drawback ---
+  { id: "glasscrown", name: "Glass Crown", e: "👑", cursed: true, desc: "☠ CURSED — +45% Attack, but you collect 40% less gold." },
+  { id: "bloodpact", name: "Bloodpact", e: "🫀", cursed: true, desc: "☠ CURSED — kills give +60% gold, but each kill costs 4% of your Max HP." },
+  { id: "reckless", name: "Reckless Might", e: "💢", cursed: true, desc: "☠ CURSED — +30% Attack, but you gain 40% less XP." },
 ];
 const relicById = (id) => RELICS.find((r) => r.id === id);
 const hasRelic = (p, id) => p.relics && p.relics.includes(id);
@@ -276,6 +281,32 @@ const CONSUMABLES = [
 ];
 const itemById = (id) => CONSUMABLES.find((c) => c.id === id);
 
+// ---------- floor modifiers: an optional per-floor twist on risk vs. reward ----------
+// Decided in generate() from the active RNG (so the Daily Dungeon stays shared).
+// Boss & pre-boss/altar floors stay "clean". Effects are read at generation
+// seams (monster stats, gold, drops) and in the reinforcement cadence.
+const FLOOR_MODIFIERS = [
+  { id: "bloodmoon", name: "Bloodmoon", e: "🌑", desc: "Monsters hit harder and have more HP — but spill double gold.", monsterHp: 1.25, monsterAtk: 1.15, goldMult: 2 },
+  { id: "famine", name: "Famine", e: "🥀", desc: "No healing drops on this floor. Spend your HP wisely.", noHeal: true },
+  { id: "haste", name: "Haste", e: "💨", desc: "Reinforcements pour in fast. Reach the stairs quickly.", hasteMult: 1.8 },
+  { id: "gilded", name: "Gilded Halls", e: "💰", desc: "Treasure everywhere — extra gold piles strewn about.", goldMult: 1.5, extraGold: 2 },
+  { id: "swarm", name: "Swarm", e: "🐀", desc: "The crypt is crowded, but every kill grants bonus XP.", extraMonsters: 2, xpMult: 1.3 },
+];
+const modById = (id) => FLOOR_MODIFIERS.find((m) => m.id === id) || null;
+// the modifier chosen for the most recently generated floor — read by callers of
+// generate() to store it on game state (generate() can't see `g`).
+let _lastModifier = null;
+// mutate a freshly-made monster for the active floor modifier
+function applyFloorMod(m, modId) {
+  const mod = modById(modId);
+  if (!mod) return m;
+  if (mod.monsterHp) { m.hp = Math.round(m.hp * mod.monsterHp); m.maxHp = m.hp; }
+  if (mod.monsterAtk) m.atk = Math.round(m.atk * mod.monsterAtk);
+  if (mod.goldMult) m.gold = Math.round((m.gold || 0) * mod.goldMult);
+  if (mod.xpMult) m.xp = Math.round((m.xp || 0) * mod.xpMult);
+  return m;
+}
+
 // effective attack including stat-style relic effects. These are now
 // *multiplicative* so they scale with the hero's growing ATK instead of being
 // a flat bonus that becomes meaningless at depth. `floor` is used to benchmark
@@ -285,6 +316,8 @@ function effAtk(p, floor = p.floor || 1) {
   if (hasRelic(p, "glasscannon")) mult += 0.18; // +18% attack
   if (hasRelic(p, "berserker")) mult += Math.min(0.5, 0.5 * Math.max(0, p.maxHp - p.hp) / Math.max(1, p.maxHp)); // up to +50% as you drop low
   if (hasRelic(p, "hoarder")) mult += Math.min(0.35, 0.35 * (p.gold || 0) / (150 * (1 + 0.12 * floor))); // up to +35% from a deep purse
+  if (hasRelic(p, "glasscrown")) mult += 0.45; // cursed: big attack, gold penalty (in gainGold)
+  if (hasRelic(p, "reckless")) mult += 0.30;   // cursed: attack up, XP penalty (in gainXp)
   return p.atk * mult;
 }
 
@@ -561,6 +594,11 @@ function generate(floor) {
   // ---- blockers first, on dead ends ----
   const preBoss = floor % 5 === 4; // floors 4,9,14… — the last stop before a boss
 
+  // floor modifier: an optional twist on normal floors (boss & pre-boss stay clean)
+  const modifier = (!isBoss && !preBoss && floor >= 2 && RNG.next() < 0.5) ? choice(FLOOR_MODIFIERS).id : null;
+  const mod = modById(modifier);
+  _lastModifier = modifier;
+
   // locked chest (best loot) + its key, placed together or not at all
   if (RNG.next() < 0.6) {
     const ch = takeDeadEnd();
@@ -596,17 +634,17 @@ function generate(floor) {
   // Density rises with depth but stays capped so a floor is always *traversable*
   // by picking your fights — you can never be forced to fight your way through a
   // wall of bodies, but you also can't clear every monster on the HP you have.
-  const monsterCount = clamp(4 + Math.floor(floor * 0.5), 4, Math.floor(open.length * 0.5));
+  const monsterCount = clamp(4 + Math.floor(floor * 0.5) + (mod?.extraMonsters || 0), 4, Math.floor(open.length * 0.5));
   for (let i = 0; i < monsterCount; i++) {
     const t = takeOpen();
     if (!t) break;
-    place(t.x, t.y, maybeElite(scaleMonster(choice(pool), floor), floor));
+    place(t.x, t.y, applyFloorMod(maybeElite(scaleMonster(choice(pool), floor), floor), modifier));
   }
 
   // Healing thins out as you descend: floors 1-3 are forgiving; deeper floors
   // keep HP a real resource as fights start costing more. The %4 bonus and the
   // "big draught" roll only apply in the shallows.
-  const heals = (floor <= 3 ? 2 : 1) + (isBoss ? 1 : 0) + (floor < 10 && floor % 4 === 0 ? 1 : 0);
+  const heals = mod?.noHeal ? 0 : ((floor <= 3 ? 2 : 1) + (isBoss ? 1 : 0) + (floor < 10 && floor % 4 === 0 ? 1 : 0));
   for (let i = 0; i < heals; i++) {
     const t = takeOpen();
     if (!t) break;
@@ -619,7 +657,7 @@ function generate(floor) {
   // consumable drop — potions & skills, the only source of usable items. Gated
   // to floor 2+ and rarer than before; the pool is filtered by each item's `min`
   // floor so basics come early and powerful skills only appear deeper.
-  const itemPool = CONSUMABLES.filter((c) => floor >= (c.min || 1));
+  const itemPool = CONSUMABLES.filter((c) => floor >= (c.min || 1) && !(mod?.noHeal && (c.id === "draught" || c.id === "elixir")));
   if (floor >= 2 && itemPool.length && RNG.next() < 0.32) {
     const t = takeOpen();
     if (t) place(t.x, t.y, { t: "item", id: choice(itemPool).id });
@@ -627,7 +665,12 @@ function generate(floor) {
 
   if (RNG.next() < 0.7) {
     const t = takeOpen();
-    if (t) place(t.x, t.y, { t: "gold", amt: 8 + floor * 3 + ri(0, 5) });
+    if (t) place(t.x, t.y, { t: "gold", amt: Math.round((8 + floor * 3 + ri(0, 5)) * (mod?.goldMult || 1)) });
+  }
+  // Gilded Halls scatters a few extra gold piles
+  for (let i = 0; i < (mod?.extraGold || 0); i++) {
+    const t = takeOpen();
+    if (t) place(t.x, t.y, { t: "gold", amt: Math.round((8 + floor * 3 + ri(0, 5)) * (mod?.goldMult || 1)) });
   }
   if (RNG.next() < 0.22) {
     const t = takeOpen();
@@ -638,7 +681,7 @@ function generate(floor) {
     if (t) place(t.x, t.y, { t: "shield", amt: 1 + Math.floor(floor / 6) });
   }
 
-  return { grid, start: { ...start } };
+  return { grid, start: { ...start }, modifier };
 }
 
 // ---------- reinforcements: monsters that wander in while you dawdle ----------
@@ -649,9 +692,11 @@ function generate(floor) {
 function maybeSpawnReinforcement(g) {
   const floor = g.floor;
   g.floorSteps = (g.floorSteps || 0) + 1;
-  const interval = clamp(13 - Math.floor(floor / 2), 6, 13);
+  const mod = modById(g.modifier);
+  let interval = clamp(13 - Math.floor(floor / 2), 6, 13);
+  let maxReinf = Math.min(3 + Math.floor(floor / 6), 8);
+  if (mod?.hasteMult) { interval = Math.max(3, Math.round(interval / mod.hasteMult)); maxReinf = Math.min(12, maxReinf + 2); }
   if (g.floorSteps % interval !== 0) return;
-  const maxReinf = Math.min(3 + Math.floor(floor / 6), 8);
   if ((g.reinforcements || 0) >= maxReinf) return;
 
   // candidate floor tiles at least 3 away from the hero (no instant ambush)
@@ -671,7 +716,7 @@ function maybeSpawnReinforcement(g) {
   if (seeded) RNG.use(seededRng((g.seed + floor * 2654435761 + g.floorSteps * 40503) >>> 0));
   const spot = choice(spots);
   const pool = MONSTERS.filter((m) => m.min <= floor);
-  const mon = maybeElite(scaleMonster(choice(pool), floor), floor);
+  const mon = applyFloorMod(maybeElite(scaleMonster(choice(pool), floor), floor), g.modifier);
   if (seeded) RNG.reset();
 
   g.grid[spot.y][spot.x] = mon;
@@ -720,6 +765,7 @@ function newGame(opts = {}) {
     grid,
     player: start,
     floor: 1,
+    modifier: null,
     hp: 80 + perks.bonusHp,
     maxHp: 80 + perks.bonusHp,
     atk: 10 + perks.bonusAtk,
@@ -730,6 +776,9 @@ function newGame(opts = {}) {
     keys: 0,
     charm: false,
     slain: 0,
+    killStreak: 0,
+    lastKillAt: 0,
+    bestStreak: 0,
     relics: perks.startRelic ? [perks.startRelic] : [],
     pendingRelic: null,
     relicChoiceOpen: false,
@@ -805,6 +854,7 @@ function gainGold(g, amt) {
   let a = amt;
   if (hasRelic(g, "gambler")) a = Math.round(a * 1.6);
   if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
+  if (hasRelic(g, "glasscrown")) a = Math.round(a * 0.6); // Glass Crown curse: −40% gold
   g.gold += a;
   return a;
 }
@@ -812,6 +862,7 @@ function gainXp(g, amt) {
   let a = amt;
   if (hasRelic(g, "scholar")) a = Math.round(a * 1.35);
   if (hasRelic(g, "keeneye")) a = Math.round(a * 1.2);
+  if (hasRelic(g, "reckless")) a = Math.round(a * 0.6); // Reckless Might curse: −40% XP
   g.xp += a;
   return a;
 }
@@ -866,13 +917,44 @@ function applyLevelUps(g) {
   }
 }
 
+// Kill-streak tiers — chaining kills within KILL_WINDOW ms escalates the
+// reward multiplier and pops a halo announcement. Index = streak - 1; streaks
+// beyond the table stay at the top tier.
+const KILL_WINDOW = 1200;
+const STREAK_TIERS = [
+  { mult: 1, label: null, color: null },               // 1st kill — no fanfare
+  { mult: 1.25, label: "DOUBLE KILL!", color: "#ffd24d" },
+  { mult: 1.5, label: "TRIPLE KILL!", color: "#ff9f1c" },
+  { mult: 1.75, label: "MULTI KILL!", color: "#ff6b35" },
+  { mult: 2, label: "RAMPAGE!", color: "#ff3d6e" },
+];
+const streakTier = (streak) => STREAK_TIERS[Math.min(streak, STREAK_TIERS.length) - 1];
+
 // grant the rewards for slaying `cell`. Does NOT move the player or clear the
 // tile — callers handle the board. Used by melee combat and the Firebomb item.
 function awardKill(g, cell) {
-  gainGold(g, cell.gold);
-  gainXp(g, cell.xp);
+  // kill-streak: count consecutive kills landed within the time window, then
+  // scale gold/XP by the resulting tier multiplier.
+  const now = Date.now();
+  g.killStreak = (now - (g.lastKillAt || 0) <= KILL_WINDOW) ? (g.killStreak || 0) + 1 : 1;
+  g.lastKillAt = now;
+  const tier = streakTier(g.killStreak);
+  const mult = tier.mult;
+
+  gainGold(g, Math.round(cell.gold * mult));
+  gainXp(g, Math.round(cell.xp * mult));
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
+  if (hasRelic(g, "bloodpact")) {
+    gainGold(g, Math.round(cell.gold * mult * 0.6)); // +60% gold from the kill
+    g.hp = Math.max(1, g.hp - Math.round(g.maxHp * 0.04)); // pay 4% Max HP (never lethal)
+  }
+  if (g.killStreak >= 2 && tier.label) {
+    g.bestStreak = Math.max(g.bestStreak || 0, g.killStreak);
+    setFx(g, `${tier.label} ×${g.killStreak}`, tier.color);
+    sfx(g, "streak");
+    pushLog(g, `${tier.label} (×${g.killStreak}) — rewards boosted ${Math.round((mult - 1) * 100)}%!`);
+  }
   if (cell.boss) {
     // Boss rewards scale with depth so a floor-50 boss is a real power spike,
     // not the same +2 ATK it gave on floor 5.
@@ -1168,6 +1250,12 @@ function reducer(state, action) {
               ? `Floor ${g.floor} — a great malice stirs ahead…`
               : `You descend to floor ${g.floor}.`
           );
+          g.modifier = _lastModifier || null;
+          if (g.modifier) {
+            const fm = modById(g.modifier);
+            pushLog(g, `${fm.e} ${fm.name} — ${fm.desc}`);
+            setFx(g, `${fm.e} ${fm.name}`, "#c9a3ff");
+          }
           return g;
         }
         case "heal": {

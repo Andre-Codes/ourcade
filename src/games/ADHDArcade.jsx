@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 
-const GLOBAL_CSS = `
+export const GLOBAL_CSS =`
   @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { margin:0; background:#08080f; overflow:hidden; touch-action:none; }
@@ -292,7 +292,7 @@ function surgeNodeColor(score) {
 // ═══════════════════════════════════════════════════════════════════
 const SURGE_GRACE_MS = 400;   // anti-instakill: count at most one miss per window
 
-function TapSurge({onExit}) {
+export function TapSurge({onExit}) {
   const [nodes,setNodes]         = useState([]);
   const [score,setScore]         = useState(0);
   const [misses,setMisses]       = useState(0);
@@ -548,7 +548,7 @@ const PANIC_COLORS=[
 const NUM_LANES=4, TILE_W=68, TILE_H=68;
 const GRACE_MS=1500; // ms after color change where old-color tiles at bottom are forgiven
 
-function ColorPanic({onExit}) {
+export function ColorPanic({onExit}) {
   const [tiles,setTiles]       = useState([]);
   const [target,setTarget]     = useState(PANIC_COLORS[0]);
   const [score,setScore]       = useState(0);
@@ -810,7 +810,7 @@ const PT_HIT_ZONE_H = 72; // height of the hit zone bar
 const PT_PERFECT    = 18;
 const PT_GOOD       = 40;
 
-function PianoTiles({onExit}) {
+export function PianoTiles({onExit}) {
   const [tiles, setTiles]         = useState([]);   // {id, lane, startY, speed, born}
   const [score, setScore]         = useState(0);
   const [misses, setMisses]       = useState(0);
@@ -1099,7 +1099,7 @@ function PianoTiles({onExit}) {
 //  - Smaller dots get MORE time (lifeMultiplier increases with level)
 //  - baseLife shrinks as score rises → pressure increases over time
 // ═══════════════════════════════════════════════════════════════════
-function Splitter({onExit}) {
+export function Splitter({onExit}) {
   const [dots,setDots]         = useState([]);
   const [score,setScore]       = useState(0);
   const [lives,setLives]       = useState(3);
@@ -1263,63 +1263,8 @@ function SplitterDot({dot,onTap}) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-//  ARCADE MENU
-// ═══════════════════════════════════════════════════════════════════
-const GAMES=[
-  {id:"tapsurge",   label:"TAP SURGE",    color:T.surge,    emoji:"⚡", desc:"Tap dots before they vanish · 3 misses and it's over",              component:TapSurge},
-  {id:"colorpanic", label:"COLOR PANIC",  color:T.panic,    emoji:"🎨", desc:"Tap only the target color · grace period on color switch",           component:ColorPanic},
-  {id:"pianotiles", label:"PIANO TILES",  color:PT_COLOR,   emoji:"🎹", desc:"Tap the lane when a tile hits the line · Perfect > Good > Miss",     component:PianoTiles},
-  {id:"splitter",   label:"SPLITTER",     color:T.splitter, emoji:"💥", desc:"Tap dots before they split · gets faster as you score",              component:Splitter},
-];
-
-export default function ADHDArcade() {
-  const [activeGame,setActiveGame]=useState(null);
-  const hs=loadHS();
-
-  // Show the arcade "back" button only on the hub of cards, not inside a mini-game.
-  useArcadeBackButton(activeGame === null);
-
-  useEffect(()=>{
-    const s=document.createElement("style");
-    s.textContent=GLOBAL_CSS;
-    document.head.appendChild(s);
-    return()=>document.head.removeChild(s);
-  },[]);
-
-  const G=activeGame?GAMES.find(g=>g.id===activeGame):null;
-
-  return (
-    <div style={{width:"100vw",height:"100svh",background:T.bg,overflow:"hidden",position:"relative"}}>
-      <div style={{position:"fixed",inset:0,pointerEvents:"none",opacity:0.025,backgroundImage:"linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)",backgroundSize:"28px 28px"}}/>
-      {G
-        ?<div style={{width:"100%",height:"100%"}}><G.component onExit={()=>setActiveGame(null)}/></div>
-        :(
-          <div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",overflowY:"auto",padding:"18px 14px 40px"}}>
-            <div style={{textAlign:"center",marginBottom:22,marginTop:6}}>
-              <div style={{fontFamily:"'Black Ops One'",fontSize:34,letterSpacing:5,background:"linear-gradient(135deg,#ff2d78,#ff9500,#ffd60a)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",filter:"drop-shadow(0 0 16px #ff2d7866)",lineHeight:1,marginBottom:5}}>ADHD ARCADE</div>
-              <div style={{color:"#ffffff28",fontFamily:"'Share Tech Mono'",fontSize:9,letterSpacing:5}}>TAP · REACT · SCORE · REPEAT</div>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,width:"100%",maxWidth:430}}>
-              {GAMES.map((game,i)=>{
-                const best=hs[game.id]||0;
-                return (
-                  <div key={game.id} onPointerDown={()=>{getCtx();setActiveGame(game.id);}}
-                    style={{background:`linear-gradient(135deg,${game.color}0d,${game.color}04)`,border:`1px solid ${game.color}2e`,borderRadius:12,padding:"16px 12px",cursor:"pointer",animation:`slideUp 0.4s ease ${i*0.07}s both`,position:"relative",overflow:"hidden"}}>
-                    <div style={{position:"absolute",top:-14,right:-14,width:50,height:50,borderRadius:"50%",background:game.color,opacity:0.07,filter:"blur(16px)"}}/>
-                    <div style={{fontSize:26,marginBottom:7}}>{game.emoji}</div>
-                    <div style={{fontFamily:"'Black Ops One'",fontSize:12,color:game.color,letterSpacing:1,textShadow:`0 0 8px ${game.color}66`,marginBottom:4}}>{game.label}</div>
-                    <div style={{fontFamily:"'Share Tech Mono'",fontSize:8,color:"#ffffff35",letterSpacing:0.3,lineHeight:1.6,marginBottom:8}}>{game.desc}</div>
-                    {best>0&&<div style={{fontFamily:"'Share Tech Mono'",fontSize:9,color:game.color,opacity:0.6}}>BEST: {best}</div>}
-                    <div style={{position:"absolute",bottom:10,right:10,fontFamily:"'Black Ops One'",fontSize:16,color:game.color,opacity:0.16}}>▶</div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{marginTop:22,color:"#ffffff12",fontFamily:"'Share Tech Mono'",fontSize:8,letterSpacing:3,textAlign:"center",lineHeight:2}}>SCORES SAVED LOCALLY · TURN SOUND ON</div>
-          </div>
-        )
-      }
-    </div>
-  );
-}
+// NOTE: The four minigames above are now exported individually and registered
+// as standalone cabinets in src/data/games.js (each wrapped by its own file:
+// TapSurge.jsx, ColorPanic.jsx, PianoTiles.jsx, Splitter.jsx). The old combined
+// "ADHD Arcade" hub component was retired when the games were decoupled; this
+// file now serves purely as the shared kit + the four game components.

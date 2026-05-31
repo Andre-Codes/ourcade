@@ -344,6 +344,61 @@ main > section + section { margin-top: 44px; }
 .arcade-iframe { border: 0; width: 100vw; height: 100vh; display: block; }
 .arcade-react-game { min-height: 100vh; }
 
+/* ---- search + tag filter (home discovery) ---- */
+.arcade-search {
+  max-width: 1100px;
+  margin: 0 auto 18px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.arcade-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  background: #120c1f;
+  border: 2px solid #3a2a5a;
+  border-radius: 8px;
+  color: #ffe9b0;
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 1px;
+  outline: none;
+}
+.arcade-search-input::placeholder { color: #8a7aa8; }
+.arcade-search-input:focus { border-color: #ff8a3d; box-shadow: 0 0 10px #ff8a3d55; }
+.arcade-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.arcade-chip {
+  padding: 5px 12px;
+  background: #1a1330;
+  border: 1px solid #3a2a5a;
+  border-radius: 999px;
+  color: #cbb8f0;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.arcade-chip:hover { border-color: #ff8a3d; color: #ffe9b0; }
+.arcade-chip.is-active {
+  background: #ff8a3d;
+  border-color: #ff8a3d;
+  color: #1a0e02;
+  box-shadow: 0 0 10px #ff8a3d66;
+}
+.arcade-chip-clear { background: transparent; border-color: #5a3a3a; color: #ff9b9b; }
+.arcade-empty {
+  text-align: center;
+  color: #9a8ab8;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 24px 0 8px;
+}
+
 /* ---- misc ---- */
 .arcade-loading,
 .arcade-notfound {
