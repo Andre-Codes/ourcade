@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 
 const GLOBAL_CSS = `
@@ -14,6 +14,9 @@ const GLOBAL_CSS = `
   @keyframes pop      { 0%{transform:scale(0.3)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
   @keyframes glow     { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.5)} }
   @keyframes graceFlash { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes surgeRing  { from{stroke-dashoffset:0} to{stroke-dashoffset:var(--circ)} }
+  @keyframes surgeDanger{ 0%,100%{box-shadow:inset 0 0 0 0 rgba(255,45,78,0)} 50%{box-shadow:inset 0 0 70px 6px rgba(255,45,78,0.38)} }
+  @keyframes surgeDeath { 0%{transform:translate(0,0)} 15%{transform:translate(-9px,5px)} 30%{transform:translate(8px,-6px)} 45%{transform:translate(-7px,-4px)} 60%{transform:translate(6px,6px)} 75%{transform:translate(-4px,3px)} 100%{transform:translate(0,0)} }
 `;
 
 const T = {
@@ -120,6 +123,7 @@ const SFX = {
   },
   surgeWrongTap: () => thwack({ freq:140, gain:0.1, dur:0.1 }),
   surgeMiss:     () => thwack({ freq:110, gain:0.13, dur:0.14 }),
+  surgeDanger:   () => { pop({ freq:880, gain:0.12, dur:0.09, sweep:1 }); setTimeout(()=>pop({ freq:660, gain:0.11, dur:0.12, sweep:1 }), 100); },
 
   // Color Panic
   panicHit: (combo=0) => {
@@ -286,6 +290,8 @@ function surgeNodeColor(score) {
 //  - Color: green (slow) → yellow → red (fast)
 //  - Smaller play area, slower speed curve
 // ═══════════════════════════════════════════════════════════════════
+const SURGE_GRACE_MS = 400;   // anti-instakill: count at most one miss per window
+
 function TapSurge({onExit}) {
   const [nodes,setNodes]         = useState([]);
   const [score,setScore]         = useState(0);
@@ -298,6 +304,7 @@ function TapSurge({onExit}) {
   const [flashWrong,setFlashWrong] = useState(false);
   const [speedPct,setSpeedPct]   = useState(0);
   const [dotColor,setDotColor]   = useState(surgeNodeColor(0));
+  const [dying,setDying]         = useState(false);
 
   const areaRef     = useRef(null);
   const nodesRef    = useRef([]);
@@ -306,6 +313,7 @@ function TapSurge({onExit}) {
   const missRef     = useRef(0);
   const gameOverRef = useRef(false);
   const spawnTimer  = useRef(null);
+  const lastMissRef = useRef(0);     // anti-instakill: gate misses to 1 per window
 
   nodesRef.current = nodes;
   comboRef.current = combo;
@@ -326,16 +334,30 @@ function TapSurge({onExit}) {
   // Pure ref-based miss counter — zero stale closure risk
   const recordMiss=useCallback(()=>{
     if(gameOverRef.current) return;
+    // Anti-instakill grace: at top speed several dots can expire in the same
+    // instant. Count at most one miss per GRACE_MS so a full-life run can't end
+    // in a single frame — the dot is still cleared by the expiry handler.
+    const now=Date.now();
+    if(now-lastMissRef.current<SURGE_GRACE_MS) return;
+    lastMissRef.current=now;
     missRef.current+=1;
     setMisses(missRef.current);
-    SFX.loseLife();
     setFlashWrong(true);
     setTimeout(()=>setFlashWrong(false),420);
     if(missRef.current>=3){
+      // Fatal miss — freeze the field, play a short death beat, then reveal the
+      // game-over screen so the end feels earned rather than instant.
       gameOverRef.current=true;
       clearTimeout(spawnTimer.current);
+      SFX.loseLife();
       setRunning(false);
-      setGameOver(true);
+      setDying(true);
+      setTimeout(()=>setGameOver(true),520);
+    }else if(missRef.current>=2){
+      // One life left — warn the player.
+      SFX.surgeDanger();
+    }else{
+      SFX.loseLife();
     }
   },[]); // intentionally no deps — touches refs only
 
@@ -409,14 +431,14 @@ function TapSurge({onExit}) {
     const py=(touch.clientY||e.clientY)-rect.top;
     const hitAny=nodesRef.current.some(nd=>{
       const dx=px-nd.x,dy=py-nd.y;
-      return Math.sqrt(dx*dx+dy*dy)<36;
+      // forgiving backstop: a near-miss just outside the dot costs nothing
+      return Math.sqrt(dx*dx+dy*dy)<40;
     });
     if(hitAny) return;
     SFX.surgeWrongTap();
-    // Base penalty 5, scales up with score: +1 per 50 score, capped at 50
-    const scaledPenalty=Math.min(50, 5+Math.floor(scoreRef.current/50));
-    const comboPenalty=comboRef.current*2;
-    const penalty=scaledPenalty+comboPenalty;
+    // Base penalty 5, scales up with score: +1 per 50 score, capped at 50.
+    // Losing the combo (below) is already a steep hit, so no extra combo tax.
+    const penalty=Math.min(50, 5+Math.floor(scoreRef.current/50));
     scoreRef.current=Math.max(0,scoreRef.current-penalty);
     setScore(scoreRef.current);
     setCombo(0);
@@ -427,21 +449,24 @@ function TapSurge({onExit}) {
 
   const restart=()=>{
     clearTimeout(spawnTimer.current);
-    gameOverRef.current=false; missRef.current=0; scoreRef.current=0;
+    gameOverRef.current=false; missRef.current=0; scoreRef.current=0; lastMissRef.current=0;
     setNodes([]);setScore(0);setMisses(0);setCombo(0);
     setSpeedPct(0);setDotColor(surgeNodeColor(0));
-    setGameOver(false);setCountdown(3);setRunning(false);
+    setGameOver(false);setCountdown(3);setRunning(false);setDying(false);
   };
 
   if(gameOver) return <GameOver score={score} color={dotColor} game="tapsurge" onRestart={restart} onExit={onExit}/>;
 
   const hudColor=dotColor;
+  const danger=misses>=2;   // one life left
   return (
     <div
       style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",
-        animation:flashWrong?"wrongFlash 0.35s ease":"none"}}
+        animation:dying?"surgeDeath 0.5s ease":flashWrong?"wrongFlash 0.35s ease":"none"}}
       onPointerDown={handleAreaTap}
     >
+      {/* last-life danger vignette */}
+      {danger&&<div style={{position:"absolute",inset:0,zIndex:90,pointerEvents:"none",animation:"surgeDanger 0.9s ease-in-out infinite"}}/>}
       <div style={{position:"absolute",top:0,left:0,right:0,height:62,display:"flex",alignItems:"center",padding:"0 10px",gap:8,background:`linear-gradient(${T.surface}f0,transparent)`,zIndex:100,borderBottom:"1px solid #ffffff08"}}>
         <button onPointerDown={onExit} style={{background:"#ffffff08",border:"1px solid #ffffff12",color:"#ffffff55",padding:"5px 10px",borderRadius:4,fontFamily:"'Share Tech Mono'",fontSize:12,cursor:"pointer",flexShrink:0}}>←</button>
         <span style={{fontFamily:"'Black Ops One'",fontSize:13,color:hudColor,textShadow:`0 0 8px ${hudColor}`,flexShrink:0,transition:"color 1.5s"}}>TAP SURGE</span>
@@ -450,15 +475,17 @@ function TapSurge({onExit}) {
         {combo>=3&&<span style={{color:T.gold,fontFamily:"'Black Ops One'",fontSize:12,textShadow:`0 0 8px ${T.gold}`,animation:"pulse 0.5s infinite"}}>×{combo}</span>}
         <span style={{color:"#ffffff28",fontFamily:"'Share Tech Mono'",fontSize:9}}>BEST <span style={{color:hudColor}}>{loadHS()["tapsurge"]||0}</span></span>
         <span style={{fontFamily:"'Black Ops One'",fontSize:22,color:hudColor,textShadow:`0 0 10px ${hudColor}`,minWidth:44,textAlign:"right",transition:"color 1.5s"}}>{score}</span>
-        <div style={{display:"flex",gap:3,flexShrink:0}}>
-          {[0,1,2].map(i=>(
+        <div style={{display:"flex",gap:3,flexShrink:0,animation:danger?"pulse 0.6s infinite":"none"}}>
+          {[0,1,2].map(i=>{
+            const lit=i<(3-misses);
+            return (
             <div key={i} style={{
               width:9,height:9,borderRadius:"50%",
-              background:i<(3-misses)?hudColor:"#ff2d5540",
-              boxShadow:i<(3-misses)?`0 0 6px ${hudColor}`:"0 0 4px #ff2d5555",
+              background:lit?(danger?T.red:hudColor):"#ff2d5540",
+              boxShadow:lit?`0 0 6px ${danger?T.red:hudColor}`:"0 0 4px #ff2d5555",
               transition:"all 0.3s",
             }}/>
-          ))}
+          );})}
         </div>
       </div>
       <div ref={areaRef} style={{position:"absolute",inset:0,top:62}}>
@@ -474,26 +501,18 @@ function TapSurge({onExit}) {
   );
 }
 
-function TapSurgeNode({node,onTap}) {
-  const [progress,setProgress] = useState(1);
-  const progressRef = useRef(1);
-  useEffect(()=>{
-    const start=Date.now();
-    const id=setInterval(()=>{
-      const p=1-(Date.now()-start)/node.lifeMs;
-      progressRef.current=Math.max(0,p);
-      setProgress(Math.max(0,p));
-    },40);
-    return()=>clearInterval(id);
-  },[node.lifeMs]);
-
+// Memoized: the depleting ring is a pure CSS animation (compositor-driven, no
+// per-frame React state), so a node never needs to re-render after it mounts.
+// Tap timing is read from elapsed life at tap time instead of a ticking ref.
+const TapSurgeNode = memo(function TapSurgeNode({node,onTap}) {
   const size=64, r=27;
   const circ=Math.PI*2*r;
   const nodeCol=node.color||"#30d158";
+  const tapProgress=()=>Math.max(0,1-(Date.now()-node.born)/node.lifeMs);
 
   return (
     <div
-      onPointerDown={e=>{e.stopPropagation();onTap(node,progressRef.current,e);}}
+      onPointerDown={e=>{e.stopPropagation();onTap(node,tapProgress(),e);}}
       style={{position:"absolute",left:node.x-size/2,top:node.y-size/2,width:size,height:size,cursor:"pointer",animation:"popIn 0.2s cubic-bezier(0.34,1.56,0.64,1)"}}
     >
       <svg width={size} height={size} style={{position:"absolute",inset:0,overflow:"visible"}}>
@@ -501,8 +520,9 @@ function TapSurgeNode({node,onTap}) {
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#ffffff08" strokeWidth={4}/>
         <circle cx={size/2} cy={size/2} r={r} fill="none"
           stroke={nodeCol} strokeWidth={3.5}
-          strokeDasharray={circ} strokeDashoffset={circ*(1-progress)}
-          strokeLinecap="round" transform={`rotate(-90 ${size/2} ${size/2})`}
+          strokeDasharray={circ} strokeLinecap="round"
+          transform={`rotate(-90 ${size/2} ${size/2})`}
+          style={{["--circ"]:circ, strokeDashoffset:0, animation:`surgeRing ${node.lifeMs}ms linear forwards`}}
         />
         <circle cx={size/2} cy={size/2} r={r-7}
           fill={`${nodeCol}1a`} stroke={`${nodeCol}44`} strokeWidth={1.5}
@@ -510,7 +530,7 @@ function TapSurgeNode({node,onTap}) {
       </svg>
     </div>
   );
-}
+});
 
 // ═══════════════════════════════════════════════════════════════════
 //  GAME 2: COLOR PANIC

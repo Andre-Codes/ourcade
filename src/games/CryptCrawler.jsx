@@ -1578,7 +1578,19 @@ export default function CryptCrawler() {
   const stepWalk = useCallback(() => {
     const w = walkRef.current;
     const g = gameRef.current;
-    if (g.screen !== "playing" || w.i >= w.steps.length) { stopWalk(); return; }
+    if (g.screen !== "playing") { stopWalk(); return; }
+    if (w.i >= w.steps.length) {
+      // Walk finished. A safe blocker queued for auto-interact fires now that
+      // the hero is adjacent (single deliberate move, never via stepWalk).
+      if (w.interact) {
+        const dx = w.interact.x - g.player.x, dy = w.interact.y - g.player.y;
+        stopWalk();
+        if (Math.abs(dx) + Math.abs(dy) === 1) move(dx, dy);
+        return;
+      }
+      stopWalk();
+      return;
+    }
     const prevTile = w.i === 0 ? g.player : w.steps[w.i - 1];
     const next = w.steps[w.i];
     // The path was planned at tap time; a reinforcement may have since spawned
@@ -1591,7 +1603,8 @@ export default function CryptCrawler() {
     const dy = next.y - prevTile.y;
     w.i += 1;
     move(dx, dy);
-    if (w.i < w.steps.length) {
+    if (w.i < w.steps.length || w.interact) {
+      // keep ticking — the extra tick after the last step runs the interaction
       w.timer = setTimeout(stepWalk, 110);
     } else {
       stopWalk();
@@ -1616,41 +1629,57 @@ export default function CryptCrawler() {
     return () => window.removeEventListener("keydown", onKey);
   }, [game.screen, game.relicChoiceOpen, game.altarOpen, move]);
 
-  const onCellTap = (x, y) => {
-    if (game.screen !== "playing" || game.altarOpen || game.relicChoiceOpen) return;
+  // Stable across renders (reads live state from gameRef) so the memoized grid
+  // Cells don't re-render just because their tap handler changed identity.
+  const onCellTap = useCallback((x, y) => {
+    const g = gameRef.current;
+    if (g.screen !== "playing" || g.altarOpen || g.relicChoiceOpen) return;
     setStatInfo(null);
     // an armed consumable redirects the next tap into its target
-    if (game.armedItem) {
+    if (g.armedItem) {
       stopWalk();
-      dispatch({ type: "APPLY_ITEM", index: game.armedItem.index, tx: x, ty: y });
+      dispatch({ type: "APPLY_ITEM", index: g.armedItem.index, tx: x, ty: y });
       return;
     }
-    const p = game.player;
+    const p = g.player;
     if (x === p.x && y === p.y) return;
     stopWalk();
-    const result = findPath(game.grid, p, { x, y });
+    const result = findPath(g.grid, p, { x, y });
     if (!result || result.steps.length === 0) {
       // fall back to a single adjacent step if tapped neighbor
       const dx = x - p.x, dy = y - p.y;
       if (Math.abs(dx) + Math.abs(dy) === 1) move(dx, dy);
       return;
     }
-    // If destination is a blocker (monster/chest/stairs), walk up to it but
-    // pause on the tile BEFORE so the interaction is a deliberate second tap —
-    // unless it's directly adjacent already.
-    let steps = result.steps;
-    if (result.destIsBlocker && steps.length > 1) {
-      steps = steps.slice(0, -1);
-    }
-    if (steps.length === 0) {
-      // adjacent blocker: interact immediately
-      const dx = x - p.x, dy = y - p.y;
-      move(dx, dy);
+    // If the destination is a blocker the final step IS the interaction tile —
+    // it must never be walked onto via stepWalk (which refuses non-walkthrough
+    // tiles). Strip it and interact with a direct move(), the same path the
+    // keyboard and TargetBar use.
+    if (result.destIsBlocker) {
+      const walkSteps = result.steps.slice(0, -1); // tiles up to (not incl) blocker
+      if (walkSteps.length === 0) {
+        // already adjacent: interact now (attack / open / grab / descend)
+        const dx = x - p.x, dy = y - p.y;
+        move(dx, dy);
+        return;
+      }
+      // Hybrid approach behaviour: monsters require a deliberate second tap
+      // (walk adjacent and STOP), while safe blockers auto-interact on arrival.
+      const destCell = g.grid[y] && g.grid[y][x];
+      const isMonster = destCell && destCell.t === "monster";
+      walkRef.current = {
+        steps: walkSteps,
+        i: 0,
+        timer: null,
+        interact: isMonster ? null : { x, y },
+      };
+      stepWalk();
       return;
     }
-    walkRef.current = { steps, i: 0, timer: null };
+    // walkthrough destination — walk all the way onto it
+    walkRef.current = { steps: result.steps, i: 0, timer: null };
     stepWalk();
-  };
+  }, [move, stepWalk, stopWalk, dispatch]);
 
   // stop walking if the run ends
   useEffect(() => {
@@ -1793,6 +1822,9 @@ function StartScreen({ best, hasSave, meta, onNew, onDaily, onContinue, onHelp }
 // ---------------- Play ----------------
 function PlayScreen({ game, hpFlash, onCellTap, move, onUseItem, onMenu, onHelp, onBuy, onCloseAltar, onStatInfo, muted, onToggleMute }) {
   const hpPct = clamp((game.hp / game.maxHp) * 100, 0, 100);
+  // Every player-side input combat() reads. While this is unchanged, a memoized
+  // Cell can skip re-rendering its monster threat badge even as `game` churns.
+  const threatSig = `${game.atk}|${game.def}|${game.hp}|${game.maxHp}|${game.gold}|${game.floor}|${(game.relics || []).join(",")}`;
   return (
     <div className="cck-play">
       <div className="cck-topbar">
@@ -1868,11 +1900,14 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onUseItem, onMenu, onHelp,
             row.map((cell, x) => (
               <Cell
                 key={`${x}-${y}`}
+                x={x}
+                y={y}
                 cell={cell}
                 isPlayer={game.player.x === x && game.player.y === y}
                 player={game}
+                threatSig={threatSig}
                 confirm={game.confirm && game.confirm.x === x && game.confirm.y === y}
-                onTap={() => onCellTap(x, y)}
+                onTap={onCellTap}
                 delay={(x + y) * 18}
               />
             ))
@@ -1897,7 +1932,7 @@ function PlayScreen({ game, hpFlash, onCellTap, move, onUseItem, onMenu, onHelp,
   );
 }
 
-function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
+const Cell = React.memo(function Cell({ x, y, cell, isPlayer, player, threatSig, confirm, onTap, delay }) {
   let inner = null;
   let cls = "cck-cell";
   let badge = null;
@@ -1977,7 +2012,7 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
   return (
     <button
       className={cls}
-      onClick={onTap}
+      onClick={() => onTap(x, y)}
       style={{ animationDelay: `${delay}ms` }}
       aria-label={cell.t}
     >
@@ -1985,7 +2020,19 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
       {badge}
     </button>
   );
-}
+}, (a, b) => (
+  // Skip re-render unless something this cell actually draws has changed.
+  // `player`/`game` churns every action, but the only player state a cell's
+  // monster badge depends on is captured by `threatSig` — so we compare that
+  // instead of the object reference. `cell` keeps its identity across renders
+  // when unchanged (grid rows are sliced, cell objects are replaced on edit).
+  a.cell === b.cell &&
+  a.isPlayer === b.isPlayer &&
+  a.confirm === b.confirm &&
+  a.threatSig === b.threatSig &&
+  a.onTap === b.onTap &&
+  a.x === b.x && a.y === b.y && a.delay === b.delay
+));
 
 // Auto target readout: a fixed-height panel so the grid never shifts. The most
 // recent log lines stay visible at the top (so simultaneous events are all
