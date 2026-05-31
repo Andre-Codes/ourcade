@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useArcadeBackButton } from "../arcadeChrome.js";
 
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
@@ -1255,6 +1256,9 @@ const GAMES=[
 export default function ADHDArcade() {
   const [activeGame,setActiveGame]=useState(null);
   const hs=loadHS();
+
+  // Show the arcade "back" button only on the hub of cards, not inside a mini-game.
+  useArcadeBackButton(activeGame === null);
 
   useEffect(()=>{
     const s=document.createElement("style");

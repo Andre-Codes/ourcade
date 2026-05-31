@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect, useRef, useState, useCallback } from "react";
+import { useArcadeBackButton } from "../arcadeChrome.js";
 
 /* ============================================================
    CRYPT OF THE HOLLOW KING
@@ -1352,6 +1353,9 @@ export default function CryptCrawler() {
   const prevHp = useRef(null);
   const lastSfx = useRef(0);
 
+  // The arcade "back" button only belongs on the title screen, never over the HUD.
+  useArcadeBackButton(game.screen === "start");
+
   // load best + meta + saved run on mount
   useEffect(() => {
     const b = store.get(BEST_KEY);
@@ -1495,6 +1499,12 @@ export default function CryptCrawler() {
     if (g.screen !== "playing" || w.i >= w.steps.length) { stopWalk(); return; }
     const prevTile = w.i === 0 ? g.player : w.steps[w.i - 1];
     const next = w.steps[w.i];
+    // The path was planned at tap time; a reinforcement may have since spawned
+    // onto a tile ahead of us. Every queued step is a walkthrough tile by
+    // construction, so if the live tile is no longer walkable, halt here instead
+    // of marching in and auto-attacking whatever appeared.
+    const liveCell = g.grid[next.y] && g.grid[next.y][next.x];
+    if (!liveCell || !isWalkthrough(liveCell)) { stopWalk(); return; }
     const dx = next.x - prevTile.x;
     const dy = next.y - prevTile.y;
     w.i += 1;
@@ -1814,7 +1824,14 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
   else cls += " floor";
 
   if (isPlayer) {
-    inner = <span className="cck-hero">@</span>;
+    // crisp inline SVG knight — renders identically on mobile and desktop,
+    // tinted by `color` (currentColor) so the torch glow CSS still applies
+    inner = (
+      <svg className="cck-hero" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="7" r="3.4" />
+        <path d="M5.5 21c0-5.3 2.7-8.2 6.5-8.2s6.5 2.9 6.5 8.2z" />
+      </svg>
+    );
     cls += " hero";
   } else {
     switch (cell.t) {
@@ -1888,8 +1905,10 @@ function Cell({ cell, isPlayer, player, confirm, onTap, delay }) {
   );
 }
 
-// Auto target readout: whenever the hero stands next to monsters, show each
-// one's full breakdown and let a single tap attack it. No popover, no long-press.
+// Auto target readout: a fixed-height panel so the grid never shifts. The most
+// recent log lines stay visible at the top (so simultaneous events are all
+// shown); whenever the hero stands next to monsters, each one's full breakdown
+// appears below in a scrollable list — a single tap attacks it.
 function TargetBar({ game, onAttack }) {
   const p = game.player;
   const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
@@ -1898,11 +1917,17 @@ function TargetBar({ game, onAttack }) {
     const c = game.grid[p.y + dy] && game.grid[p.y + dy][p.x + dx];
     if (c && c.t === "monster") foes.push({ cell: c, dx, dy });
   }
-  if (!foes.length) {
-    return <div className="cck-log">{game.log[0]}</div>;
-  }
+  // newest first; older lines are dimmed in CSS
+  const recent = (game.log || []).slice(0, 3);
   return (
-    <div className="cck-targets">
+    <div className="cck-readout">
+      <div className={`cck-log${foes.length ? " compact" : ""}`}>
+        {recent.map((line, i) => (
+          <div key={i} className={`cck-logline${i === 0 ? " latest" : ""}`}>{line}</div>
+        ))}
+      </div>
+      {foes.length > 0 && (
+      <div className="cck-targets">
       {foes.map((f, i) => {
         const cell = f.cell;
         const res = combat(game, cell);
@@ -1931,6 +1956,8 @@ function TargetBar({ game, onAttack }) {
           </button>
         );
       })}
+      </div>
+      )}
     </div>
   );
 }
@@ -2230,10 +2257,11 @@ button.cck-chip:active{ transform:translateY(1px); }
   display:flex; align-items:center; justify-content:center; margin:6px 0; }
 .cck-grid{
   display:grid; grid-template-columns:repeat(${COLS},1fr); gap:3px;
-  /* width capped so grid height (= width·ROWS/COLS) plus the ~280px of HUD
-     chrome always fits within the viewport — letterboxes on short screens */
+  /* width capped so grid height (= width·ROWS/COLS) plus the ~366px of HUD
+     chrome (incl. the fixed 132px readout panel) always fits within the
+     viewport — letterboxes on short screens */
   width:100%; margin-inline:auto;
-  max-width:min(100%, max(150px, calc((100dvh - 280px) * ${COLS} / ${ROWS})));
+  max-width:min(100%, max(150px, calc((100dvh - 366px) * ${COLS} / ${ROWS})));
   background:linear-gradient(180deg,#0d0a16,#0a0712); padding:6px; border-radius:14px;
   border:1px solid var(--line); box-shadow:inset 0 0 30px rgba(0,0,0,.7), 0 6px 20px rgba(0,0,0,.5);
 }
@@ -2269,9 +2297,11 @@ button.cck-chip:active{ transform:translateY(1px); }
 .cck-eliteglow{ filter:drop-shadow(0 0 6px var(--gold)); }
 .cck-cell.confirm{ box-shadow:0 0 0 2px var(--blood), 0 0 14px rgba(224,69,90,.8); animation:none; }
 
-.cck-hero{ font-family:'Cinzel',serif; font-weight:900; color:var(--torch2);
-  text-shadow:0 0 10px var(--torch), 0 0 4px #fff; font-size:clamp(15px, min(6vw, 5vh), 26px);
+.cck-hero{ display:block; color:var(--torch2);
+  width:clamp(17px, min(6.6vw, 5.6vh), 30px); height:clamp(17px, min(6.6vw, 5.6vh), 30px);
+  filter:drop-shadow(0 0 6px var(--torch)) drop-shadow(0 0 2px rgba(255,255,255,.65));
   animation:heroBob 1.6s ease-in-out infinite; }
+.cck-hero path, .cck-hero circle{ fill:currentColor; }
 @keyframes heroBob{ 50%{ transform:translateY(-2px);} }
 .cck-down{ color:var(--magic); text-shadow:0 0 12px var(--magic); font-weight:900; }
 .cck-emoji{ filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
@@ -2293,9 +2323,19 @@ button.cck-chip:active{ transform:translateY(1px); }
   text-shadow:0 2px 8px #000, 0 0 12px currentColor; animation:fxFloat 1.1s ease-out forwards; }
 @keyframes fxFloat{ 0%{ opacity:0; transform:translate(-50%,8px) scale(.7);} 25%{ opacity:1;} 100%{ opacity:0; transform:translate(-50%,-30px) scale(1.05);} }
 
+/* ---- readout: fixed-height panel (log + adjacent-foe targets) so the grid
+   above it never reflows as cards appear/disappear ---- */
+.cck-readout{ flex:0 0 auto; height:132px; margin:8px 2px 10px;
+  display:flex; flex-direction:column; gap:6px; overflow:hidden; }
+
 /* ---- log ---- */
-.cck-log{ margin:12px 2px 14px; min-height:38px; font-style:italic; font-size:15px; color:var(--muted);
-  border-left:2px solid var(--line); padding-left:10px; line-height:1.3; }
+.cck-log{ flex:0 0 auto; display:flex; flex-direction:column; gap:3px;
+  border-left:2px solid var(--line); padding-left:10px; }
+.cck-logline{ font-style:italic; font-size:15px; line-height:1.3; color:var(--muted); opacity:.5; }
+.cck-logline.latest{ opacity:1; }
+/* when foes are adjacent, the targets need the room — keep only the newest line */
+.cck-log.compact .cck-logline{ display:none; }
+.cck-log.compact .cck-logline.latest{ display:block; }
 
 
 /* ---- toast ---- */
@@ -2417,14 +2457,17 @@ button.cck-chip:active{ transform:translateY(1px); }
   background:linear-gradient(180deg,#ff6b7d,#c41f3a);
   box-shadow:0 3px 0 #5c0f1d, 0 0 20px rgba(224,69,90,.45); }
 
-/* ---- target readout (adjacent foes) ---- */
-.cck-targets{ margin:10px 2px 12px; display:flex; flex-direction:column; gap:7px; min-height:38px; }
-.cck-target{ display:flex; align-items:center; gap:10px; width:100%; text-align:left;
-  padding:8px 11px; border-radius:11px; cursor:pointer;
+/* ---- target readout (adjacent foes) — scrolls within the fixed panel ---- */
+.cck-targets{ flex:1 1 auto; min-height:0; overflow-y:auto;
+  display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+.cck-targets::-webkit-scrollbar{ width:5px; }
+.cck-targets::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+.cck-target{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; flex:0 0 auto;
+  padding:6px 11px; border-radius:11px; cursor:pointer;
   border:1px solid var(--line); background:linear-gradient(180deg,var(--stone2),var(--stone));
   color:var(--bone); transition:transform .06s ease, box-shadow .12s ease; }
 .cck-target:active{ transform:translateY(1px) scale(.995); }
-.cck-tg-emoji{ font-size:26px; line-height:1; filter:drop-shadow(0 0 5px rgba(0,0,0,.5)); }
+.cck-tg-emoji{ font-size:24px; line-height:1; filter:drop-shadow(0 0 5px rgba(0,0,0,.5)); }
 .cck-tg-info{ flex:1; display:flex; flex-direction:column; gap:1px; min-width:0; }
 .cck-tg-info b{ font-family:'Cinzel',serif; font-size:15px; }
 .cck-tg-info small{ color:var(--muted); font-size:11.5px; letter-spacing:.02em; }

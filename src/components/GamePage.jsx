@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getGame } from "../data/games.js";
+import { ArcadeChromeContext } from "../arcadeChrome.js";
 
 export default function GamePage() {
   const { id } = useParams();
   const game = getGame(id);
+  // React games toggle this via useArcadeBackButton; iframe games leave it true.
+  const [backVisible, setBackVisible] = useState(true);
 
   if (!game) {
     return (
@@ -16,12 +20,14 @@ export default function GamePage() {
 
   return (
     <div className="arcade-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" title="Back to arcade" aria-label="Back to arcade">
-          ‹ BACK TO ARCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      {backVisible && (
+        <div className="arcade-cabinet-chrome">
+          <Link to="/" className="arcade-back" title="Back to arcade" aria-label="Back to arcade">
+            ‹ BACK TO ARCADE
+          </Link>
+          <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
+        </div>
+      )}
 
       {game.type === "iframe" ? (
         <iframe
@@ -32,9 +38,11 @@ export default function GamePage() {
           allow="autoplay; fullscreen; gamepad"
         />
       ) : (
-        <div className="arcade-react-game">
-          <game.component />
-        </div>
+        <ArcadeChromeContext.Provider value={setBackVisible}>
+          <div className="arcade-react-game">
+            <game.component />
+          </div>
+        </ArcadeChromeContext.Provider>
       )}
     </div>
   );
