@@ -46,20 +46,36 @@ function shuffle(arr) {
 const key = (x, y) => `${x},${y}`;
 
 // ---------- endless-scaling tunables ----------
-// The crypt is meant to be played forever. The trick that makes that possible
-// without numbers exploding: monsters and the hero both grow *gently and
-// linearly*, and defense is percentage damage-reduction (diminishing returns)
-// instead of flat subtraction. That keeps a fight's HP cost a roughly constant
-// fraction of your max HP at every depth — so a well-built, well-played hero
-// can always survive, while a careless one falls behind and dies.
-const HP_RATE = 0.15;   // monster HP linear growth per floor (gentle bump over the
-                        // original 0.13 — barely changes early floors, but by depth
-                        // it keeps monsters ahead of the hero's ATK so fights don't
-                        // collapse into free one-shots)
-const ATK_RATE = 0.11;  // monster ATK linear growth per floor
+// The crypt is meant to be played forever. The trick that makes that possible:
+// monsters grow *quadratically* — matched to the hero's own compounding power
+// (levels + floor-scaled chest/boss/shop rewards), which is itself quadratic.
+// Matching the curves keeps a fight's HP cost a roughly constant share of your
+// max HP at EVERY depth, so a well-built, well-played hero survives and pushes
+// deep while a careless one falls behind and dies. Defense is percentage
+// damage-reduction (diminishing returns), never flat subtraction.
+//
+// Monster HP/ATK at floor f = base * (1 + A*(f-1) + B*(f-1)^2). The linear term
+// carries the early floors; the small quadratic term keeps deep monsters apace
+// with the hero instead of decaying into free one-shots. Re-tune with the
+// throwaway run-sim if play feels off (raise the B's if depth gets too easy).
+const HP_A = 0.16, HP_B = 0.003;    // monster HP growth (linear + quadratic)
+const ATK_A = 0.13, ATK_B = 0.005;  // monster ATK growth — quadratic a touch steeper
+                                    // than HP, since the hero's HP bar outgrows raw
+                                    // ATK so damage-taken needs the extra push
+const BOSS_ATK_RATE = 0.10;         // bosses grow ATK *linearly* and gently — they're
+                                    // HP walls you chip with items, not one-shotters
+const monGrow = (a, b, floor) => 1 + a * (floor - 1) + b * (floor - 1) * (floor - 1);
+// Weak monster types have their effective base lifted toward the toughest type's
+// as you descend (ramping in, so the opening floors stay gentle) — no monster is
+// ever free fodder, even a deep "Rat". Lift = clamp(BASE + RAMP*(f-1), BASE, CAP).
+const MIN_FRAC_BASE = 0.28, MIN_FRAC_RAMP = 0.012, MIN_FRAC_CAP = 0.72;
+// Wandering reinforcements pay only this fraction of normal gold/XP — they're a
+// threat to outrun, not a farm you can spawn-and-kill for points (see awardKill).
+const REINF_REWARD = 0.25;
 const DEF_K = 58;       // hero defense mitigation constant (higher = DEF worth less)
 const ARMOR_K = 40;     // enemy armor mitigation constant (keeps fights to a few rounds)
-const MIT_CAP = 0.78;   // no mitigation ever exceeds this — nothing is fully immune
+const MIT_CAP = 0.70;   // no mitigation ever exceeds this — nothing is fully immune,
+                        // and stacking DEF can't trivialize incoming damage
 // Vampiric Edge recovers this fraction of the HP a fight actually cost — capped
 // at the cost itself so it's strong sustain but can never net-gain you HP.
 const VAMP_RATE = 0.5;
@@ -381,12 +397,22 @@ function combat(p, m) {
 }
 
 // ---------- floor generation ----------
+// the toughest base stats in the bestiary — weak types are lifted toward these
+// at depth (see scaleMonster) so nothing ever becomes free fodder.
+const STRONGEST_HP = Math.max(...MONSTERS.map((m) => m.hp));
+const STRONGEST_ATK = Math.max(...MONSTERS.map((m) => m.atk));
+
 function scaleMonster(base, floor) {
-  // Gentle *linear* growth on both HP and ATK. The hero grows at a matching
-  // pace (see applyLevelUps), so a fight's cost stays a roughly constant share
-  // of max HP at every depth — endless without the numbers running away.
-  const hp = Math.round(base.hp * (1 + HP_RATE * (floor - 1)));
-  const atk = Math.round(base.atk * (1 + ATK_RATE * (floor - 1)));
+  // Quadratic growth on HP and ATK, matched to the hero's compounding power so a
+  // fight's cost stays a roughly constant share of max HP at every depth (see the
+  // tunables block). The weakest types also get their effective base lifted toward
+  // the toughest type's — ramping in with depth — so a deep "Rat" is still a real
+  // fight, never a 0-HP one-shot, while early floors stay gentle.
+  const lift = clamp(MIN_FRAC_BASE + MIN_FRAC_RAMP * (floor - 1), MIN_FRAC_BASE, MIN_FRAC_CAP);
+  const baseHp = Math.max(base.hp, STRONGEST_HP * lift);
+  const baseAtk = Math.max(base.atk, STRONGEST_ATK * lift);
+  const hp = Math.round(baseHp * monGrow(HP_A, HP_B, floor));
+  const atk = Math.round(baseAtk * monGrow(ATK_A, ATK_B, floor));
   // Armor grows slowly and stays small: it feeds percentage mitigation now
   // (ARMOR_K), so it only needs to nudge fights from 3 → 5 rounds at depth.
   const def = base.def + Math.floor(floor / 8);
@@ -426,11 +452,11 @@ function maybeElite(mon, floor) {
 function makeBoss(floor) {
   const cycle = Math.floor((floor / 5 - 1)) % BOSSES.length;
   const b = BOSSES[cycle];
-  // Bosses ride the same gentle linear curve as everything else — their hefty
-  // base stats already make them a wall, so no extra repeat-tier multiplier is
-  // needed (that double-counted growth and produced the old impossible spikes).
-  const hp = Math.round(b.hp * (1 + HP_RATE * (floor - 1)));
-  const atk = Math.round(b.atk * (1 + ATK_RATE * (floor - 1)));
+  // Bosses ride the same quadratic HP curve as everything else — their hefty base
+  // stats already make them a wall — but their ATK grows on a gentler *linear*
+  // rate: a boss is an HP wall you chip down with items/heals, not a one-shotter.
+  const hp = Math.round(b.hp * monGrow(HP_A, HP_B, floor));
+  const atk = Math.round(b.atk * (1 + BOSS_ATK_RATE * (floor - 1)));
   return {
     t: "monster",
     boss: true,
@@ -730,8 +756,13 @@ function maybeSpawnReinforcement(g) {
   const seeded = g.seed != null;
   if (seeded) RNG.use(seededRng((g.seed + floor * 2654435761 + g.floorSteps * 40503) >>> 0));
   const spot = choice(spots);
+  // reinforcements draw from the TOUGHER half of the eligible bestiary (and can
+  // still roll elite), so a wandering monster is a real threat — not the free
+  // weak-mob farm that pacing your steps used to conjure.
   const pool = MONSTERS.filter((m) => m.min <= floor);
-  const mon = applyFloorMod(maybeElite(scaleMonster(choice(pool), floor), floor), g.modifier);
+  const strongPool = pool.slice(Math.floor(pool.length / 2));
+  const mon = applyFloorMod(maybeElite(scaleMonster(choice(strongPool), floor), floor), g.modifier);
+  mon.reinf = true; // awardKill pays only REINF_REWARD gold/XP for these
   if (seeded) RNG.reset();
 
   g.grid[spot.y][spot.x] = mon;
@@ -847,11 +878,13 @@ function metaPerks(meta) {
 }
 
 function xpNeeded(level) {
-  // Near-linear so the hero's level keeps pace with the floor (~level ≈ floor)
-  // without out-running it. Eased from 22→19 per level to offset the kill-streak
-  // XP bonus that was removed when combos became cosmetic (see awardKill): that
-  // bonus was the pacing nudge that kept the hero levelled for the early bosses.
-  return Math.round(45 + 19 * level);
+  // Super-linear (quadratic) so the hero's level tracks the floor (~level ≈ floor)
+  // instead of out-running it. The old near-linear curve let XP income — which
+  // climbs with depth — push level to ~1.5× floor, over-powering the hero. The
+  // quadratic term makes each level cost more as you climb, so descending (not
+  // grinding a shallow floor) is what advances you. Calibration, not a cap:
+  // two heroes at the same floor can differ wildly in build, HP, and gold.
+  return Math.round(45 + 12 * level + 2.6 * level * level);
 }
 
 function pushLog(g, text) {
@@ -922,17 +955,17 @@ function applyLevelUps(g) {
   while (g.xp >= xpNeeded(g.level)) {
     g.xp -= xpNeeded(g.level);
     g.level += 1;
-    // Each level keeps pace with the linear monster curve: a solid Max HP bump
-    // (so damage stays a constant share of your bar) plus ATK and DEF. DEF gives
-    // diminishing-returns mitigation now, so +1 every level is safe — it can't
-    // make fights free the way flat subtraction once did.
-    g.maxHp += 12;
+    // Each level keeps pace with the monster curve: a Max HP bump (trimmed to +9
+    // so the bar doesn't outrun the monsters' ATK and trivialize damage taken)
+    // plus ATK and DEF. DEF gives diminishing-returns mitigation now, so +1 every
+    // level is safe — it can't make fights free the way flat subtraction once did.
+    g.maxHp += 9;
     g.hp = clamp(g.hp + Math.round(g.maxHp * 0.06), 0, g.maxHp);
     g.atk += 1;
     g.def += 1;
     setFx(g, `★ LEVEL ${g.level}`, "#ffd24d");
     sfx(g, "levelup");
-    pushLog(g, `★ LEVEL ${g.level}! +12 Max HP, +1 ATK, +1 DEF (and some HP back).`);
+    pushLog(g, `★ LEVEL ${g.level}! +9 Max HP, +1 ATK, +1 DEF (and some HP back).`);
   }
 }
 
@@ -964,12 +997,16 @@ function awardKill(g, cell) {
   g.lastKillAt = now;
   const tier = streakTier(g.killStreak);
 
-  gainGold(g, cell.gold);
-  gainXp(g, cell.xp);
+  // reinforcements (monsters that wandered in) are a threat to outrun, not loot:
+  // they pay a fraction of the reward so pacing your steps to spawn-and-farm them
+  // can't be used to rack up gold/XP/score.
+  const rewardMult = cell.reinf ? REINF_REWARD : 1;
+  gainGold(g, Math.round(cell.gold * rewardMult));
+  gainXp(g, Math.round(cell.xp * rewardMult));
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
   if (hasRelic(g, "bloodpact")) {
-    gainGold(g, Math.round(cell.gold * 0.6)); // +60% gold from the kill
+    gainGold(g, Math.round(cell.gold * rewardMult * 0.6)); // +60% gold from the kill
     g.hp = Math.max(1, g.hp - Math.round(g.maxHp * 0.04)); // pay 4% Max HP (never lethal)
   }
   if (g.killStreak >= 2 && tier.label) {
@@ -982,7 +1019,7 @@ function awardKill(g, cell) {
     // Boss rewards scale with depth so a floor-50 boss is a real power spike,
     // not the same +2 ATK it gave on floor 5.
     const f = cell.floor || g.floor || 1;
-    const hpUp = Math.round(20 + f * 2);
+    const hpUp = Math.round(14 + f);
     const atkUp = Math.round(1 + f / 14);
     const defUp = Math.round(1 + f / 12);
     g.maxHp += hpUp;
@@ -2206,7 +2243,7 @@ const STAT_TEXT = {
   hp: (g) => ({
     title: "❤ Health",
     body: `You have ${fmt(g.hp)} of ${fmt(g.maxHp)} max. Every fight subtracts HP — at 0 you die, so HP is the real currency of the crypt.`,
-    grow: `Max HP grows when you LEVEL UP (+12), defeat a BOSS, open chests, or buy a Bandolier at the altar. Refill with ❤️ potions, altar healing, or a Greater Draught — healing scales with your Max HP, so it never goes stale.`,
+    grow: `Max HP grows when you LEVEL UP (+9), defeat a BOSS, open chests, or buy a Bandolier at the altar. Refill with ❤️ potions, altar healing, or a Greater Draught — healing scales with your Max HP, so it never goes stale.`,
   }),
   atk: (g) => ({
     title: "⚔ Attack",
@@ -2224,7 +2261,7 @@ const STAT_TEXT = {
   level: (g) => ({
     title: "★ Level",
     body: `You're level ${g.level}. Slaying monsters earns XP; fill the bar and you level up. Tougher enemies grant more XP — and your level keeps pace with the floor.`,
-    grow: `Each level grants +12 Max HP, +1 Attack, and +1 Defense, and tops some of your health back up.`,
+    grow: `Each level grants +9 Max HP, +1 Attack, and +1 Defense, and tops some of your health back up.`,
   }),
 };
 
