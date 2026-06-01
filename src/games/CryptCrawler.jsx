@@ -833,10 +833,11 @@ function metaPerks(meta) {
 }
 
 function xpNeeded(level) {
-  // Near-linear so the hero's level keeps pace with the floor (~level ≈ floor).
-  // The old level^1.35 curve out-ran the linear XP income at depth, leaving the
-  // hero badly under-levelled exactly when monsters were toughest.
-  return Math.round(45 + 22 * level);
+  // Near-linear so the hero's level keeps pace with the floor without out-running
+  // it. Steeper than before (was 22/level) because combos no longer grant XP and
+  // monsters got tankier — both pushed leveling ahead of the floor. Still linear,
+  // so it can't re-create the old level^1.35 problem of under-levelling at depth.
+  return Math.round(45 + 30 * level);
 }
 
 function pushLog(g, text) {
@@ -937,8 +938,11 @@ const streakTier = (streak) => STREAK_TIERS[Math.min(streak, STREAK_TIERS.length
 // grant the rewards for slaying `cell`. Does NOT move the player or clear the
 // tile — callers handle the board. Used by melee combat and the Firebomb item.
 function awardKill(g, cell) {
-  // kill-streak: count consecutive kills landed within the time window, then
-  // scale gold/XP by the resulting tier multiplier.
+  // kill-streak: count consecutive kills landed within the time window. The
+  // tier multiplier boosts GOLD (and score) only — chaining kills fast is a
+  // tapping skill, not the HP-puzzle, so letting it multiply XP warped the
+  // level curve (you out-levelled the floor). XP stays at its flat per-kill
+  // value so leveling tracks roughly level ≈ floor.
   const now = Date.now();
   g.killStreak = (now - (g.lastKillAt || 0) <= KILL_WINDOW) ? (g.killStreak || 0) + 1 : 1;
   g.lastKillAt = now;
@@ -946,7 +950,7 @@ function awardKill(g, cell) {
   const mult = tier.mult;
 
   gainGold(g, Math.round(cell.gold * mult));
-  gainXp(g, Math.round(cell.xp * mult));
+  gainXp(g, cell.xp);
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
   if (hasRelic(g, "bloodpact")) {
@@ -957,7 +961,7 @@ function awardKill(g, cell) {
     g.bestStreak = Math.max(g.bestStreak || 0, g.killStreak);
     setFx(g, `${tier.label} ×${g.killStreak}`, tier.color);
     sfx(g, "streak");
-    pushLog(g, `${tier.label} (×${g.killStreak}) — rewards boosted ${Math.round((mult - 1) * 100)}%!`);
+    pushLog(g, `${tier.label} (×${g.killStreak}) — gold boosted ${Math.round((mult - 1) * 100)}%!`);
   }
   if (cell.boss) {
     // Boss rewards scale with depth so a floor-50 boss is a real power spike,
