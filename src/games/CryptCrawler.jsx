@@ -63,6 +63,14 @@ const MIT_CAP = 0.78;   // no mitigation ever exceeds this — nothing is fully 
 // Vampiric Edge recovers this fraction of the HP a fight actually cost — capped
 // at the cost itself so it's strong sustain but can never net-gain you HP.
 const VAMP_RATE = 0.5;
+// Permanent altar stat upgrades (ATK/DEF/Max-HP) escalate per-stat:
+// price = base * UPGRADE_GROWTH^(times you've bought THAT stat), uncapped. A
+// fresh upgrade is always cheap (deep runs never lock out), but stacking one
+// stat climbs steeply — the gold sink that stops a fat purse from buying
+// unbounded power and one-shotting the whole crypt. The single most important
+// balance knob: nudge ↑ toward 1.3 if the late game still goes OP, ↓ toward 1.2
+// if upgrades feel stingy.
+const UPGRADE_GROWTH = 1.25;
 // x points of defense convert to a damage-reduction fraction with diminishing
 // returns: 0 at def 0, approaching (but never reaching) MIT_CAP as def climbs.
 const mitig = (x, K) => Math.min(MIT_CAP, x / (x + K));
@@ -794,7 +802,10 @@ function newGame(opts = {}) {
     ward: false,
     floorSteps: 0,
     reinforcements: 0,
-    upgradesBought: 0,
+    // per-stat altar purchase counts — drive the escalating upgrade prices
+    atkBought: 0,
+    defBought: 0,
+    hpBought: 0,
     lifetimeSlain: meta ? meta.lifetimeSlain : 0,
     bossesBeaten: meta ? meta.bossesBeaten : 0,
     log: ["You descend into the crypt. The torches gutter behind you."],
@@ -837,10 +848,10 @@ function metaPerks(meta) {
 
 function xpNeeded(level) {
   // Near-linear so the hero's level keeps pace with the floor (~level ≈ floor)
-  // without out-running it. Back at the original 22/level: leveling is now reined
-  // in by capping combo XP (see awardKill) rather than by a steeper curve, which
-  // had left the hero badly under-levelled for early bosses.
-  return Math.round(45 + 22 * level);
+  // without out-running it. Eased from 22→19 per level to offset the kill-streak
+  // XP bonus that was removed when combos became cosmetic (see awardKill): that
+  // bonus was the pacing nudge that kept the hero levelled for the early bosses.
+  return Math.round(45 + 19 * level);
 }
 
 function pushLog(g, text) {
@@ -925,48 +936,47 @@ function applyLevelUps(g) {
   }
 }
 
-// Kill-streak tiers — chaining kills within KILL_WINDOW ms escalates the
-// reward multiplier and pops a halo announcement. Index = streak - 1; streaks
-// beyond the table stay at the top tier.
+// Kill-streak tiers — chaining kills within KILL_WINDOW ms pops a celebratory
+// halo announcement. Index = streak - 1; streaks beyond the table stay at the
+// top tier. Purely cosmetic: a combo is a flourish, NOT an economic bonus.
+// Multiplying gold/XP by the streak let a strong hero farm clustered mobs into
+// a runaway gold-and-level lead that trivialized depth (see awardKill).
 const KILL_WINDOW = 1200;
 const STREAK_TIERS = [
-  { mult: 1, label: null, color: null },               // 1st kill — no fanfare
-  { mult: 1.25, label: "DOUBLE KILL!", color: "#ffd24d" },
-  { mult: 1.5, label: "TRIPLE KILL!", color: "#ff9f1c" },
-  { mult: 1.75, label: "MULTI KILL!", color: "#ff6b35" },
-  { mult: 2, label: "RAMPAGE!", color: "#ff3d6e" },
+  { label: null, color: null },               // 1st kill — no fanfare
+  { label: "DOUBLE KILL!", color: "#ffd24d" },
+  { label: "TRIPLE KILL!", color: "#ff9f1c" },
+  { label: "MULTI KILL!", color: "#ff6b35" },
+  { label: "RAMPAGE!", color: "#ff3d6e" },
 ];
 const streakTier = (streak) => STREAK_TIERS[Math.min(streak, STREAK_TIERS.length) - 1];
 
 // grant the rewards for slaying `cell`. Does NOT move the player or clear the
 // tile — callers handle the board. Used by melee combat and the Firebomb item.
 function awardKill(g, cell) {
-  // kill-streak: count consecutive kills landed within the time window. GOLD gets
-  // the full tier multiplier (chaining is a tapping skill, rewarded in score), but
-  // XP gets only a softened, capped slice of it: at full RAMPAGE the gold bonus is
-  // +100% while the XP bonus is just +30%. Full combo XP let you out-level the
-  // floor; zero combo XP left you under-levelled for early bosses — this is the
-  // middle ground so leveling tracks roughly level ≈ floor.
+  // kill-streak: count consecutive kills landed within the time window. This is
+  // purely cosmetic now — it drives the halo announcement and sound, nothing
+  // more. Gold and XP are awarded FLAT: multiplying them by the streak let a
+  // strong hero farm clustered mobs into a runaway gold/level lead that made
+  // depth trivial. Leveling stays paced via xpNeeded() instead.
   const now = Date.now();
   g.killStreak = (now - (g.lastKillAt || 0) <= KILL_WINDOW) ? (g.killStreak || 0) + 1 : 1;
   g.lastKillAt = now;
   const tier = streakTier(g.killStreak);
-  const mult = tier.mult;
-  const xpMult = 1 + (mult - 1) * 0.3; // 30% of the gold streak bonus, applied to XP
 
-  gainGold(g, Math.round(cell.gold * mult));
-  gainXp(g, Math.round(cell.xp * xpMult));
+  gainGold(g, cell.gold);
+  gainXp(g, cell.xp);
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
   if (hasRelic(g, "bloodpact")) {
-    gainGold(g, Math.round(cell.gold * mult * 0.6)); // +60% gold from the kill
+    gainGold(g, Math.round(cell.gold * 0.6)); // +60% gold from the kill
     g.hp = Math.max(1, g.hp - Math.round(g.maxHp * 0.04)); // pay 4% Max HP (never lethal)
   }
   if (g.killStreak >= 2 && tier.label) {
     g.bestStreak = Math.max(g.bestStreak || 0, g.killStreak);
     setFx(g, `${tier.label} ×${g.killStreak}`, tier.color);
     sfx(g, "streak");
-    pushLog(g, `${tier.label} (×${g.killStreak}) — +${Math.round((mult - 1) * 100)}% gold, +${Math.round((xpMult - 1) * 100)}% XP!`);
+    pushLog(g, `${tier.label} (×${g.killStreak} kill streak!)`);
   }
   if (cell.boss) {
     // Boss rewards scale with depth so a floor-50 boss is a real power spike,
@@ -1077,24 +1087,24 @@ function score(g) {
 // reasons to save gold as you descend. `min` is the floor it appears on.
 function shopItems(g) {
   const f = g.floor;
-  // Permanent stat upgrades get a little pricier with each one bought this run,
-  // but the ramp is gentle and capped so deep-run upgrades never lock out — the
-  // *effect* scales with depth too, so each buy stays meaningful forever.
-  const up = Math.min(2.5, 1 + 0.15 * (g.upgradesBought || 0));
-  const statPrice = Math.round((30 + f * 8) * up);
-  // Upgrade effects scale with floor so a deep "+Attack" is a real boost, not
-  // the same +2 it was on floor 1. `amount` is the single source of truth that
-  // BUY reads when applying the purchase.
+  // Permanent stat upgrades escalate PER STAT: each repeat of the same upgrade
+  // costs UPGRADE_GROWTH× more than the last (uncapped). A fresh upgrade stays
+  // cheap at any depth, so deep runs never lock out — but stacking one stat
+  // climbs fast, so a fat purse can't be poured into unbounded ATK/DEF/HP. The
+  // *effect* also scales with floor, so each buy stays meaningful forever.
+  const base = 30 + f * 8;
+  const priceFor = (bought) => Math.round(base * UPGRADE_GROWTH ** (bought || 0));
+  // `amount` is the single source of truth that BUY reads when applying the buy.
   const atkUp = Math.round(2 + f / 6);
   const defUp = Math.round(2 + f / 8);
   const bandUp = Math.round(15 + f * 2);
   const mendUp = "≈" + fmt(Math.round((g.maxHp || 80) * 0.4));
   const all = [
     { opt: "heal", min: 1, icon: "❤", title: "Mend Wounds", desc: `Restore ${mendUp} HP`, price: 22 + f * 5 },
-    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: `+${atkUp} Attack, forever`, price: statPrice, amount: atkUp },
-    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: `+${defUp} Defense, forever`, price: statPrice, amount: defUp },
+    { opt: "atk", min: 1, icon: "⚔", title: "Whet the Blade", desc: `+${atkUp} Attack, forever`, price: priceFor(g.atkBought), amount: atkUp },
+    { opt: "def", min: 1, icon: "🛡", title: "Temper Armor", desc: `+${defUp} Defense, forever`, price: priceFor(g.defBought), amount: defUp },
     { opt: "key", min: 3, icon: "🗝️", title: "Iron Key", desc: "Opens one locked chest", price: 35 + f * 6 },
-    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: `+${bandUp} Max HP (and heal ${bandUp})`, price: statPrice, amount: bandUp },
+    { opt: "band", min: 5, icon: "➕", title: "Bandolier", desc: `+${bandUp} Max HP (and heal ${bandUp})`, price: priceFor(g.hpBought), amount: bandUp },
     { opt: "greater", min: 5, icon: "💖", title: "Greater Draught", desc: "Heal all the way to full", price: 50 + f * 9 },
     { opt: "charm", min: 8, icon: "🔥", title: "Phoenix Charm", desc: "Survive one killing blow at ½ HP", price: 120 + f * 18, soldOut: g.charm },
     { opt: "relic", min: 4, icon: "✦", title: "Mystic Relic", desc: "Attune to a random new relic", price: 90 + f * 12, soldOut: (g.relics || []).length >= RELICS.length },
@@ -1189,13 +1199,13 @@ function reducer(state, action) {
           setFx(g, `+${fmt(amt)} HP`, "#ff5f6d");
           break;
         }
-        case "atk": g.atk += it.amount; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, `+${it.amount} ATK`, "#ffd27a"); break;
-        case "def": g.def += it.amount; g.upgradesBought = (g.upgradesBought || 0) + 1; setFx(g, `+${it.amount} DEF`, "#7ec8ff"); break;
+        case "atk": g.atk += it.amount; g.atkBought = (g.atkBought || 0) + 1; setFx(g, `+${it.amount} ATK`, "#ffd27a"); break;
+        case "def": g.def += it.amount; g.defBought = (g.defBought || 0) + 1; setFx(g, `+${it.amount} DEF`, "#7ec8ff"); break;
         case "key": g.keys += 1; setFx(g, "🗝️ +1", "#ffd24d"); break;
         case "band":
           g.maxHp += it.amount;
           g.hp = clamp(g.hp + it.amount, 0, g.maxHp);
-          g.upgradesBought = (g.upgradesBought || 0) + 1;
+          g.hpBought = (g.hpBought || 0) + 1;
           setFx(g, `+${fmt(it.amount)} MAX HP`, "#ff9bb0");
           break;
         case "greater": g.hp = g.maxHp; setFx(g, "FULL HP", "#ff5f6d"); break;
