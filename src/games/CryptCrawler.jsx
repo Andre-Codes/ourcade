@@ -52,11 +52,14 @@ const key = (x, y) => `${x},${y}`;
 // instead of flat subtraction. That keeps a fight's HP cost a roughly constant
 // fraction of your max HP at every depth — so a well-built, well-played hero
 // can always survive, while a careless one falls behind and dies.
-const HP_RATE = 0.20;   // monster HP linear growth per floor
-const ATK_RATE = 0.13;  // monster ATK linear growth per floor
-const DEF_K = 75;       // hero defense mitigation constant (higher = DEF worth less)
+const HP_RATE = 0.15;   // monster HP linear growth per floor (gentle bump over the
+                        // original 0.13 — barely changes early floors, but by depth
+                        // it keeps monsters ahead of the hero's ATK so fights don't
+                        // collapse into free one-shots)
+const ATK_RATE = 0.11;  // monster ATK linear growth per floor
+const DEF_K = 58;       // hero defense mitigation constant (higher = DEF worth less)
 const ARMOR_K = 40;     // enemy armor mitigation constant (keeps fights to a few rounds)
-const MIT_CAP = 0.65;   // no mitigation ever exceeds this — nothing is fully immune
+const MIT_CAP = 0.78;   // no mitigation ever exceeds this — nothing is fully immune
 // Vampiric Edge recovers this fraction of the HP a fight actually cost — capped
 // at the cost itself so it's strong sustain but can never net-gain you HP.
 const VAMP_RATE = 0.5;
@@ -378,7 +381,7 @@ function scaleMonster(base, floor) {
   const atk = Math.round(base.atk * (1 + ATK_RATE * (floor - 1)));
   // Armor grows slowly and stays small: it feeds percentage mitigation now
   // (ARMOR_K), so it only needs to nudge fights from 3 → 5 rounds at depth.
-  const def = base.def + Math.floor(floor / 6);
+  const def = base.def + Math.floor(floor / 8);
   // Reward scales with total threat, not just HP. Attack is weighted heavily
   // because high-attack mobs cost the most HP to kill and should pay the most.
   const threat = hp + atk * 2.4 + def * 6;
@@ -833,11 +836,11 @@ function metaPerks(meta) {
 }
 
 function xpNeeded(level) {
-  // Near-linear so the hero's level keeps pace with the floor without out-running
-  // it. Steeper than before (was 22/level) because combos no longer grant XP and
-  // monsters got tankier — both pushed leveling ahead of the floor. Still linear,
-  // so it can't re-create the old level^1.35 problem of under-levelling at depth.
-  return Math.round(45 + 30 * level);
+  // Near-linear so the hero's level keeps pace with the floor (~level ≈ floor)
+  // without out-running it. Back at the original 22/level: leveling is now reined
+  // in by capping combo XP (see awardKill) rather than by a steeper curve, which
+  // had left the hero badly under-levelled for early bosses.
+  return Math.round(45 + 22 * level);
 }
 
 function pushLog(g, text) {
@@ -938,19 +941,21 @@ const streakTier = (streak) => STREAK_TIERS[Math.min(streak, STREAK_TIERS.length
 // grant the rewards for slaying `cell`. Does NOT move the player or clear the
 // tile — callers handle the board. Used by melee combat and the Firebomb item.
 function awardKill(g, cell) {
-  // kill-streak: count consecutive kills landed within the time window. The
-  // tier multiplier boosts GOLD (and score) only — chaining kills fast is a
-  // tapping skill, not the HP-puzzle, so letting it multiply XP warped the
-  // level curve (you out-levelled the floor). XP stays at its flat per-kill
-  // value so leveling tracks roughly level ≈ floor.
+  // kill-streak: count consecutive kills landed within the time window. GOLD gets
+  // the full tier multiplier (chaining is a tapping skill, rewarded in score), but
+  // XP gets only a softened, capped slice of it: at full RAMPAGE the gold bonus is
+  // +100% while the XP bonus is just +30%. Full combo XP let you out-level the
+  // floor; zero combo XP left you under-levelled for early bosses — this is the
+  // middle ground so leveling tracks roughly level ≈ floor.
   const now = Date.now();
   g.killStreak = (now - (g.lastKillAt || 0) <= KILL_WINDOW) ? (g.killStreak || 0) + 1 : 1;
   g.lastKillAt = now;
   const tier = streakTier(g.killStreak);
   const mult = tier.mult;
+  const xpMult = 1 + (mult - 1) * 0.3; // 30% of the gold streak bonus, applied to XP
 
   gainGold(g, Math.round(cell.gold * mult));
-  gainXp(g, cell.xp);
+  gainXp(g, Math.round(cell.xp * xpMult));
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
   if (hasRelic(g, "bloodpact")) {
@@ -961,7 +966,7 @@ function awardKill(g, cell) {
     g.bestStreak = Math.max(g.bestStreak || 0, g.killStreak);
     setFx(g, `${tier.label} ×${g.killStreak}`, tier.color);
     sfx(g, "streak");
-    pushLog(g, `${tier.label} (×${g.killStreak}) — gold boosted ${Math.round((mult - 1) * 100)}%!`);
+    pushLog(g, `${tier.label} (×${g.killStreak}) — +${Math.round((mult - 1) * 100)}% gold, +${Math.round((xpMult - 1) * 100)}% XP!`);
   }
   if (cell.boss) {
     // Boss rewards scale with depth so a floor-50 boss is a real power spike,
