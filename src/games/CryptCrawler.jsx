@@ -62,7 +62,7 @@ const HP_A = 0.16, HP_B = 0.003;    // monster HP growth (linear + quadratic)
 const ATK_A = 0.13, ATK_B = 0.005;  // monster ATK growth — quadratic a touch steeper
                                     // than HP, since the hero's HP bar outgrows raw
                                     // ATK so damage-taken needs the extra push
-const BOSS_ATK_RATE = 0.10;         // bosses grow ATK *linearly* and gently — they're
+const BOSS_ATK_RATE = 0.08;         // bosses grow ATK *linearly* and gently — they're
                                     // HP walls you chip with items, not one-shotters
 const monGrow = (a, b, floor) => 1 + a * (floor - 1) + b * (floor - 1) * (floor - 1);
 // Weak monster types have their effective base lifted toward the toughest type's
