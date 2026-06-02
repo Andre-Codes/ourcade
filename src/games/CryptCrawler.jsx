@@ -72,6 +72,34 @@ const MIN_FRAC_BASE = 0.28, MIN_FRAC_RAMP = 0.012, MIN_FRAC_CAP = 0.72;
 // Wandering reinforcements pay only this fraction of normal gold/XP — they're a
 // threat to outrun, not a farm you can spawn-and-kill for points (see awardKill).
 const REINF_REWARD = 0.25;
+// ---- power-relative catch-up (the anti-fizzle) ----
+// Floor sets the baseline difficulty, but a hero who out-gears the floor — lots of
+// ATK or a deep HP bar from focused shopping, drops, and relics — would otherwise
+// leave floor-scaled monsters behind and one-shot / out-tank them (the "fizzles
+// around floor 20" problem). So every monster's HP/ATK is nudged toward the hero's
+// ACTUAL power, but only PARTIALLY (CATCHUP < 1): a strong build still clearly
+// outpaces the curve (kills faster, takes less) and feels rewarded, yet the world
+// never decays into free kills. A hero at/below the floor baseline gets no nudge
+// (boost = 1) — never punished for being under-geared. Keyed off real STATS, not
+// XP-level, because leveling already tracks the floor; the fizzle is gear-driven.
+const CATCHUP = 0.6;
+// Expected stats for a balanced hero at a floor — where catch-up == 1. Calibrated
+// against the run-sim and deliberately a touch generous, so only a genuinely
+// ahead-of-the-curve hero triggers the nudge.
+const baselineAtk = (floor) => 10 + 4 * floor + 0.04 * floor * floor;
+const baselineHp = (floor) => 80 + 16 * floor + 0.4 * floor * floor;
+// {hp, atk} multipliers applied to a monster's floor-scaled stats. Monster HP
+// tracks the hero's effective ATK (so it can't be one-shot); monster ATK tracks
+// the hero's Max HP (so a blow stays a real share of the bar and bosses aren't
+// out-tanked). effAtk() folds in ATK relics; null hero (floor 1) → no boost.
+function powerBoosts(g, floor) {
+  if (!g) return { hp: 1, atk: 1 };
+  const eatk = effAtk(g, floor);
+  return {
+    hp: 1 + CATCHUP * Math.max(0, eatk / baselineAtk(floor) - 1),
+    atk: 1 + CATCHUP * Math.max(0, (g.maxHp || 0) / baselineHp(floor) - 1),
+  };
+}
 const DEF_K = 58;       // hero defense mitigation constant (higher = DEF worth less)
 const ARMOR_K = 40;     // enemy armor mitigation constant (keeps fights to a few rounds)
 const MIT_CAP = 0.70;   // no mitigation ever exceeds this — nothing is fully immune,
@@ -402,17 +430,19 @@ function combat(p, m) {
 const STRONGEST_HP = Math.max(...MONSTERS.map((m) => m.hp));
 const STRONGEST_ATK = Math.max(...MONSTERS.map((m) => m.atk));
 
-function scaleMonster(base, floor) {
+function scaleMonster(base, floor, boosts = { hp: 1, atk: 1 }) {
   // Quadratic growth on HP and ATK, matched to the hero's compounding power so a
   // fight's cost stays a roughly constant share of max HP at every depth (see the
   // tunables block). The weakest types also get their effective base lifted toward
   // the toughest type's — ramping in with depth — so a deep "Rat" is still a real
-  // fight, never a 0-HP one-shot, while early floors stay gentle.
+  // fight, never a 0-HP one-shot, while early floors stay gentle. Finally the
+  // power-relative `boosts` nudge stats toward the hero's actual strength so a
+  // geared hero can't one-shot/out-tank the floor (see powerBoosts).
   const lift = clamp(MIN_FRAC_BASE + MIN_FRAC_RAMP * (floor - 1), MIN_FRAC_BASE, MIN_FRAC_CAP);
   const baseHp = Math.max(base.hp, STRONGEST_HP * lift);
   const baseAtk = Math.max(base.atk, STRONGEST_ATK * lift);
-  const hp = Math.round(baseHp * monGrow(HP_A, HP_B, floor));
-  const atk = Math.round(baseAtk * monGrow(ATK_A, ATK_B, floor));
+  const hp = Math.round(baseHp * monGrow(HP_A, HP_B, floor) * boosts.hp);
+  const atk = Math.round(baseAtk * monGrow(ATK_A, ATK_B, floor) * boosts.atk);
   // Armor grows slowly and stays small: it feeds percentage mitigation now
   // (ARMOR_K), so it only needs to nudge fights from 3 → 5 rounds at depth.
   const def = base.def + Math.floor(floor / 8);
@@ -449,14 +479,15 @@ function maybeElite(mon, floor) {
   };
 }
 
-function makeBoss(floor) {
+function makeBoss(floor, boosts = { hp: 1, atk: 1 }) {
   const cycle = Math.floor((floor / 5 - 1)) % BOSSES.length;
   const b = BOSSES[cycle];
   // Bosses ride the same quadratic HP curve as everything else — their hefty base
   // stats already make them a wall — but their ATK grows on a gentler *linear*
   // rate: a boss is an HP wall you chip down with items/heals, not a one-shotter.
-  const hp = Math.round(b.hp * monGrow(HP_A, HP_B, floor));
-  const atk = Math.round(b.atk * (1 + BOSS_ATK_RATE * (floor - 1)));
+  // The power-relative `boosts` keep them threatening for an over-geared hero too.
+  const hp = Math.round(b.hp * monGrow(HP_A, HP_B, floor) * boosts.hp);
+  const atk = Math.round(b.atk * (1 + BOSS_ATK_RATE * (floor - 1)) * boosts.atk);
   return {
     t: "monster",
     boss: true,
@@ -532,7 +563,7 @@ function reachableSet(grid, start) {
   return seen;
 }
 
-function generate(floor) {
+function generate(floor, boosts = { hp: 1, atk: 1 }) {
   const isBoss = floor % 5 === 0;
   const grid = emptyGrid();
 
@@ -557,7 +588,7 @@ function generate(floor) {
     grid[downY][downX] = { t: "down" };
     grid[downY][downX - 1] = { t: "wall" };
     grid[downY][downX + 1] = { t: "wall" };
-    grid[bossTile.y][bossTile.x] = makeBoss(floor);
+    grid[bossTile.y][bossTile.x] = makeBoss(floor, boosts);
     carve(grid, start.x, start.y, bossTile.x, bossTile.y);
   } else {
     downX = ri(2, COLS - 3);
@@ -679,7 +710,7 @@ function generate(floor) {
   for (let i = 0; i < monsterCount; i++) {
     const t = takeOpen();
     if (!t) break;
-    place(t.x, t.y, applyFloorMod(maybeElite(scaleMonster(choice(pool), floor), floor), modifier));
+    place(t.x, t.y, applyFloorMod(maybeElite(scaleMonster(choice(pool), floor, boosts), floor), modifier));
   }
 
   // Healing thins out as you descend: floors 1-3 are forgiving; deeper floors
@@ -761,7 +792,7 @@ function maybeSpawnReinforcement(g) {
   // weak-mob farm that pacing your steps used to conjure.
   const pool = MONSTERS.filter((m) => m.min <= floor);
   const strongPool = pool.slice(Math.floor(pool.length / 2));
-  const mon = applyFloorMod(maybeElite(scaleMonster(choice(strongPool), floor), floor), g.modifier);
+  const mon = applyFloorMod(maybeElite(scaleMonster(choice(strongPool), floor, powerBoosts(g, floor)), floor), g.modifier);
   mon.reinf = true; // awardKill pays only REINF_REWARD gold/XP for these
   if (seeded) RNG.reset();
 
@@ -1294,7 +1325,7 @@ function reducer(state, action) {
         }
         case "down": {
           if (g.seed != null) RNG.use(seededRng((g.seed + (g.floor + 1) * 2654435761) >>> 0));
-          const next = generate(g.floor + 1);
+          const next = generate(g.floor + 1, powerBoosts(g, g.floor + 1));
           if (g.seed != null) RNG.reset();
           g.grid = next.grid;
           g.player = next.start;
