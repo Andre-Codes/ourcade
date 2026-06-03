@@ -72,6 +72,14 @@ const MIN_FRAC_BASE = 0.28, MIN_FRAC_RAMP = 0.012, MIN_FRAC_CAP = 0.72;
 // Wandering reinforcements pay only this fraction of normal gold/XP — they're a
 // threat to outrun, not a farm you can spawn-and-kill for points (see awardKill).
 const REINF_REWARD = 0.25;
+// Reinforcements escalate beyond their base floor-scaling: a steady depth ramp
+// plus a per-wave bump so the longer you linger on a floor (and the deeper you
+// are) the nastier each newcomer is. They also roll elite more often.
+const REINF_DEPTH = 0.015; // +1.5% reinforcement stats per floor of depth
+const REINF_WAVE = 0.08;   // +8% per reinforcement already spawned this floor
+const REINF_ELITE = 0.1;   // extra elite chance for reinforcements
+// How far a Blink Scroll can teleport you (Manhattan distance).
+const BLINK_RANGE = 3;
 // ---- power-relative catch-up (the anti-fizzle) ----
 // Floor sets the baseline difficulty, but a hero who out-gears the floor — lots of
 // ATK or a deep HP bar from focused shopping, drops, and relics — would otherwise
@@ -317,10 +325,16 @@ const RELICS = [
   { id: "hoarder", name: "Hoarder's Ring", e: "💍", desc: "Up to +35% Attack while you carry a deep purse of gold." },
   { id: "revenant", name: "Revenant's Vow", e: "🕯️", desc: "Slaying a boss heals you all the way to full." },
   { id: "keeneye", name: "Keen Eye", e: "🦅", desc: "+15% gold and +15% XP from every kill." },
+  { id: "pathfinder", name: "Pathfinder's Compass", e: "🧭", desc: "Reinforcements are far slower to find you — they wander in much less often." },
+  { id: "verdant", name: "Verdant Charm", e: "🌿", desc: "Regenerate a sliver of HP with every step you take." },
+  { id: "bloodhound", name: "Bloodhound's Fang", e: "🐺", desc: "+12% Attack, and every kill heals you a little." },
+  { id: "warlord", name: "Warlord's Banner", e: "🚩", desc: "Up to +30% Attack that climbs with your active kill streak." },
   // --- cursed relics: a strong upside chained to a real drawback ---
   { id: "glasscrown", name: "Glass Crown", e: "👑", cursed: true, desc: "☠ CURSED — +45% Attack, but you collect 40% less gold." },
   { id: "bloodpact", name: "Bloodpact", e: "🫀", cursed: true, desc: "☠ CURSED — kills give +60% gold, but each kill costs 4% of your Max HP." },
   { id: "reckless", name: "Reckless Might", e: "💢", cursed: true, desc: "☠ CURSED — +30% Attack, but you gain 40% less XP." },
+  { id: "soulbrand", name: "Soulbrand", e: "😈", cursed: true, desc: "☠ CURSED — +55% Attack, but reinforcements pour in twice as fast." },
+  { id: "hourglass", name: "Cracked Hourglass", e: "⏳", cursed: true, desc: "☠ CURSED — +30% gold & XP, but every step ages you, draining a sliver of HP." },
 ];
 const relicById = (id) => RELICS.find((r) => r.id === id);
 const hasRelic = (p, id) => p.relics && p.relics.includes(id);
@@ -332,9 +346,14 @@ const ITEM_SLOTS = 3;
 const CONSUMABLES = [
   { id: "draught", name: "Healing Draught", e: "🧪", targeted: false, min: 1, desc: "Restore 45 HP instantly." },
   { id: "ward", name: "Frost Ward", e: "❄️", targeted: false, min: 3, desc: "Your next fight costs no HP." },
-  { id: "phase", name: "Phase Step", e: "🌀", targeted: true, min: 3, desc: "Leap over an adjacent monster to the empty tile beyond — no fight." },
+  { id: "phase", name: "Blink Scroll", e: "🌀", targeted: true, min: 3, desc: "Teleport to any empty floor tile within a few steps — slip past danger." },
   { id: "elixir", name: "Greater Elixir", e: "💖", targeted: false, min: 5, desc: "Heal to full and gain +10 Max HP." },
   { id: "firebomb", name: "Firebomb", e: "🔥", targeted: true, min: 5, desc: "Hurl at an adjacent monster — instantly slays anything but a boss." },
+  { id: "smoke", name: "Smoke Bomb", e: "💨", targeted: false, min: 4, desc: "Scatter every wandering reinforcement and lull the crypt for a while." },
+  { id: "whetstone", name: "Whetstone", e: "🪓", targeted: false, min: 4, desc: "Hone your blade for a permanent Attack boost (scales with depth)." },
+  { id: "bulwark", name: "Bulwark Charm", e: "🛡️", targeted: false, min: 5, desc: "Harden your guard for a permanent Defense boost (scales with depth)." },
+  { id: "thunder", name: "Thunderclap Scroll", e: "⚡", targeted: true, min: 6, desc: "Chain lightning slays an adjacent monster and the one directly beyond it (not bosses)." },
+  { id: "siphon", name: "Soul Siphon", e: "🩸", targeted: true, min: 7, desc: "Drain an adjacent non-boss monster — slay it and heal to full." },
   { id: "tome", name: "Tome of Insight", e: "📜", targeted: false, min: 7, desc: "Gain a level instantly." },
 ];
 const itemById = (id) => CONSUMABLES.find((c) => c.id === id);
@@ -374,8 +393,11 @@ function effAtk(p, floor = p.floor || 1) {
   if (hasRelic(p, "glasscannon")) mult += 0.18; // +18% attack
   if (hasRelic(p, "berserker")) mult += Math.min(0.5, 0.5 * Math.max(0, p.maxHp - p.hp) / Math.max(1, p.maxHp)); // up to +50% as you drop low
   if (hasRelic(p, "hoarder")) mult += Math.min(0.35, 0.35 * (p.gold || 0) / (150 * (1 + 0.12 * floor))); // up to +35% from a deep purse
+  if (hasRelic(p, "bloodhound")) mult += 0.12; // +12% attack (also heals on kill in awardKill)
+  if (hasRelic(p, "warlord")) mult += Math.min(0.30, 0.05 * Math.max(0, (p.killStreak || 1) - 1)); // up to +30% as your streak climbs
   if (hasRelic(p, "glasscrown")) mult += 0.45; // cursed: big attack, gold penalty (in gainGold)
   if (hasRelic(p, "reckless")) mult += 0.30;   // cursed: attack up, XP penalty (in gainXp)
+  if (hasRelic(p, "soulbrand")) mult += 0.55;  // cursed: big attack, faster reinforcements (in maybeSpawnReinforcement)
   return p.atk * mult;
 }
 
@@ -465,9 +487,10 @@ function scaleMonster(base, floor, boosts = { hp: 1, atk: 1 }) {
 // Occasionally upgrade an ordinary monster to an "elite": a tougher, glowing
 // variant that pays out double. Adds difficulty spikes and variance with
 // proportionate reward — never bosses, never on the gentle opening floors.
-function maybeElite(mon, floor) {
+function maybeElite(mon, floor, bonus = 0) {
   if (mon.boss || floor < 3) return mon;
-  if (RNG.next() >= clamp(0.05 + floor * 0.01, 0, 0.22)) return mon;
+  const chance = clamp(0.05 + floor * 0.01 + bonus, 0, bonus ? 0.4 : 0.22);
+  if (RNG.next() >= chance) return mon;
   return {
     ...mon,
     elite: true,
@@ -765,9 +788,12 @@ function maybeSpawnReinforcement(g) {
   const floor = g.floor;
   g.floorSteps = (g.floorSteps || 0) + 1;
   const mod = modById(g.modifier);
+  if (g.reinfHold > 0) { g.reinfHold -= 1; return; } // a Smoke Bomb keeps the crypt quiet
   let interval = clamp(13 - Math.floor(floor / 2), 6, 13);
   let maxReinf = Math.min(3 + Math.floor(floor / 6), 8);
   if (mod?.hasteMult) { interval = Math.max(3, Math.round(interval / mod.hasteMult)); maxReinf = Math.min(12, maxReinf + 2); }
+  if (hasRelic(g, "pathfinder")) interval = Math.round(interval * 1.6); // wanderers are slow to find you
+  if (hasRelic(g, "soulbrand")) interval = Math.max(3, Math.round(interval / 2)); // cursed: they pour in fast
   if (g.floorSteps % interval !== 0) return;
   if ((g.reinforcements || 0) >= maxReinf) return;
 
@@ -792,7 +818,13 @@ function maybeSpawnReinforcement(g) {
   // weak-mob farm that pacing your steps used to conjure.
   const pool = MONSTERS.filter((m) => m.min <= floor);
   const strongPool = pool.slice(Math.floor(pool.length / 2));
-  const mon = applyFloorMod(maybeElite(scaleMonster(choice(strongPool), floor, powerBoosts(g, floor)), floor), g.modifier);
+  // escalate beyond base scaling: steady depth ramp + a per-wave bump, so the 6th
+  // wanderer on a deep floor is a genuine spike, plus a higher elite chance.
+  const wave = g.reinforcements || 0; // how many already crawled out this floor
+  const ramp = 1 + REINF_DEPTH * (floor - 1) + REINF_WAVE * wave;
+  const pb = powerBoosts(g, floor);
+  const boosts = { hp: pb.hp * ramp, atk: pb.atk * ramp };
+  const mon = applyFloorMod(maybeElite(scaleMonster(choice(strongPool), floor, boosts), floor, REINF_ELITE), g.modifier);
   mon.reinf = true; // awardKill pays only REINF_REWARD gold/XP for these
   if (seeded) RNG.reset();
 
@@ -864,6 +896,7 @@ function newGame(opts = {}) {
     ward: false,
     floorSteps: 0,
     reinforcements: 0,
+    reinfHold: 0,
     // per-stat altar purchase counts — drive the escalating upgrade prices
     atkBought: 0,
     defBought: 0,
@@ -885,11 +918,11 @@ function newGame(opts = {}) {
 // permanent unlocks driven by lifetime stats (the meta-progression bar)
 const META_TIERS = [
   { need: 0,    bonusHp: 0,  bonusAtk: 0, bonusDef: 0, label: "Wanderer" },
-  { need: 50,   bonusHp: 5,  bonusAtk: 0, bonusDef: 0, label: "Delver" },
-  { need: 150,  bonusHp: 10, bonusAtk: 1, bonusDef: 0, label: "Crypt-Breaker" },
-  { need: 350,  bonusHp: 15, bonusAtk: 1, bonusDef: 1, label: "Tomb Warden" },
-  { need: 700,  bonusHp: 20, bonusAtk: 2, bonusDef: 1, label: "Deathless" },
-  { need: 1300, bonusHp: 30, bonusAtk: 2, bonusDef: 2, label: "Hollow Slayer" },
+  { need: 125,  bonusHp: 5,  bonusAtk: 0, bonusDef: 0, label: "Delver" },
+  { need: 375,  bonusHp: 10, bonusAtk: 1, bonusDef: 0, label: "Crypt-Breaker" },
+  { need: 875,  bonusHp: 15, bonusAtk: 1, bonusDef: 1, label: "Tomb Warden" },
+  { need: 1750, bonusHp: 20, bonusAtk: 2, bonusDef: 1, label: "Deathless" },
+  { need: 3250, bonusHp: 30, bonusAtk: 2, bonusDef: 2, label: "Hollow Slayer" },
 ];
 function metaTier(meta) {
   const kills = meta ? meta.lifetimeSlain : 0;
@@ -937,6 +970,7 @@ function gainGold(g, amt) {
   let a = amt;
   if (hasRelic(g, "gambler")) a = Math.round(a * 1.6);
   if (hasRelic(g, "keeneye")) a = Math.round(a * 1.15);
+  if (hasRelic(g, "hourglass")) a = Math.round(a * 1.3); // Cracked Hourglass: +30% gold (HP drain in MOVE)
   if (hasRelic(g, "glasscrown")) a = Math.round(a * 0.6); // Glass Crown curse: −40% gold
   g.gold += a;
   return a;
@@ -945,6 +979,7 @@ function gainXp(g, amt) {
   let a = amt;
   if (hasRelic(g, "scholar")) a = Math.round(a * 1.25);
   if (hasRelic(g, "keeneye")) a = Math.round(a * 1.15);
+  if (hasRelic(g, "hourglass")) a = Math.round(a * 1.3); // Cracked Hourglass: +30% XP (HP drain in MOVE)
   if (hasRelic(g, "reckless")) a = Math.round(a * 0.6); // Reckless Might curse: −40% XP
   g.xp += a;
   return a;
@@ -1036,6 +1071,7 @@ function awardKill(g, cell) {
   gainXp(g, Math.round(cell.xp * rewardMult));
   g.slain += 1;
   g.lifetimeSlain = (g.lifetimeSlain || 0) + 1;
+  if (hasRelic(g, "bloodhound")) applyHeal(g, Math.round(g.maxHp * 0.03)); // the fang drinks deep on every kill
   if (hasRelic(g, "bloodpact")) {
     gainGold(g, Math.round(cell.gold * rewardMult * 0.6)); // +60% gold from the kill
     g.hp = Math.max(1, g.hp - Math.round(g.maxHp * 0.04)); // pay 4% Max HP (never lethal)
@@ -1102,6 +1138,34 @@ function applyInstantItem(g, id) {
       applyLevelUps(g);
       break;
     }
+    case "smoke": {
+      for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+        const c = g.grid[y][x];
+        if (c && c.t === "monster" && c.reinf) g.grid[y][x] = { t: "floor" };
+      }
+      g.reinforcements = 0;
+      g.reinfHold = (g.reinfHold || 0) + 12; // steps the crypt stays quiet
+      setFx(g, "💨 VANISH", "#9fb4c8");
+      sfx(g, "step");
+      pushLog(g, "A smoke bomb bursts — the wanderers lose your trail.");
+      break;
+    }
+    case "whetstone": {
+      const up = Math.round(2 + g.floor / 4);
+      g.atk += up;
+      setFx(g, `+${up} ATK`, "#ff9b6b");
+      sfx(g, "gear");
+      pushLog(g, `You hone your blade (+${up} Attack).`);
+      break;
+    }
+    case "bulwark": {
+      const up = Math.round(1 + g.floor / 6);
+      g.def += up;
+      setFx(g, `+${up} DEF`, "#7ec8ff");
+      sfx(g, "gear");
+      pushLog(g, `The charm hardens your guard (+${up} Defense).`);
+      break;
+    }
     default:
       break;
   }
@@ -1112,24 +1176,51 @@ function applyInstantItem(g, id) {
 function applyTargetedItem(g, id, tx, ty) {
   const p = g.player;
   const dx = tx - p.x, dy = ty - p.y;
+  // Blink Scroll targets an empty floor tile (not a monster), so it resolves
+  // before the adjacent-monster guard below.
+  if (id === "phase") {
+    const dist = Math.abs(dx) + Math.abs(dy);
+    const dest = g.grid[ty] && g.grid[ty][tx];
+    if (dist === 0 || dist > BLINK_RANGE || !dest || !isWalkthrough(dest)) {
+      g.toast = "Tap an empty floor tile within a few steps.";
+      return false;
+    }
+    g.player = { x: tx, y: ty };
+    g.confirm = null;
+    setFx(g, "🌀 BLINK", "#b98bff");
+    sfx(g, "step");
+    pushLog(g, "You blink across the crypt in a swirl of dust.");
+    return true;
+  }
   const adjacent = Math.abs(dx) + Math.abs(dy) === 1;
   const target = g.grid[ty] && g.grid[ty][tx];
   if (!adjacent || !target || target.t !== "monster") {
     g.toast = "Aim at an adjacent monster.";
     return false;
   }
-  if (id === "phase") {
-    const lx = tx + dx, ly = ty + dy;
-    const land = g.grid[ly] && g.grid[ly][lx];
-    if (!land || !isWalkthrough(land)) {
-      g.toast = "No room to leap beyond.";
-      return false;
+  if (id === "thunder") {
+    if (target.boss) { g.toast = "The bolt fizzles against the boss."; return false; }
+    awardKill(g, target);
+    g.grid[ty][tx] = { t: "floor" };
+    const bx = tx + dx, by = ty + dy; // tile directly beyond, same direction
+    const beyond = g.grid[by] && g.grid[by][bx];
+    if (beyond && beyond.t === "monster" && !beyond.boss) {
+      awardKill(g, beyond);
+      g.grid[by][bx] = { t: "floor" };
     }
-    g.player = { x: lx, y: ly };
-    g.confirm = null;
-    setFx(g, "🌀 PHASE", "#b98bff");
-    sfx(g, "step");
-    pushLog(g, `You phase past the ${target.kind} in a blur.`);
+    setFx(g, "⚡ THUNDER", "#ffe066");
+    sfx(g, "hit");
+    pushLog(g, "Chain lightning arcs through the crypt!");
+    return true;
+  }
+  if (id === "siphon") {
+    if (target.boss) { g.toast = "Its soul is too vast to drain."; return false; }
+    awardKill(g, target);
+    g.grid[ty][tx] = { t: "floor" };
+    g.hp = g.maxHp;
+    setFx(g, "🩸 SIPHON", "#ff4d6d");
+    sfx(g, "heal");
+    pushLog(g, `You drain the ${target.kind} and surge to full health.`);
     return true;
   }
   if (id === "firebomb") {
@@ -1229,8 +1320,9 @@ function reducer(state, action) {
       if (def.targeted) {
         return { ...state, armedItem: { id, index: idx }, toast: `${def.e} ${def.name} — tap a target.` };
       }
-      // instant item: apply now and remove from the pack
-      const g = { ...state, items: state.items.slice(), armedItem: null, toast: null };
+      // instant item: apply now and remove from the pack. Clone the grid too —
+      // some instant items (Smoke Bomb) clear monsters off the board.
+      const g = { ...state, grid: state.grid.map((r) => r.slice()), items: state.items.slice(), armedItem: null, toast: null };
       applyInstantItem(g, id);
       g.items.splice(idx, 1);
       if (g.hp <= 0) { g.screen = "dead"; g.deathLine = deathFlavor(g.floor, null); }
@@ -1539,6 +1631,9 @@ function reducer(state, action) {
       if (!resolvedConfirm) g.confirm = null;
       // a real step was taken on this floor — the crypt may send reinforcements
       maybeSpawnReinforcement(g);
+      // per-step relic effects: Verdant Charm regen, Cracked Hourglass drain
+      if (hasRelic(g, "verdant")) applyHeal(g, Math.max(1, Math.round(g.maxHp * 0.005)));
+      if (hasRelic(g, "hourglass")) g.hp = Math.max(1, g.hp - Math.max(1, Math.round(g.maxHp * 0.004)));
       if (g.hp <= 0) {
         g.screen = "dead";
         g.deathLine = deathFlavor(g.floor, null);
@@ -2452,7 +2547,7 @@ function HelpModal({ onClose }) {
           <li><b>Level up</b> by earning XP from kills — each level adds Max HP, Attack &amp; Defense.</li>
           <li>🗝️ keys open 🔒 locked chests (the best loot). 🔮 <b>altars</b> sell upgrades that unlock as you go deeper — and there's always one on the floor right <b>before a boss</b>.</li>
           <li><b>✦ Relics</b> are powerful passives found in reliquaries and deep altars — they change how you play (lifesteal, free first hits, executions…). You hold up to <b>three</b> on the <b>left</b>; tap a relic to read it.</li>
-          <li><b>🧪 Potions &amp; skills</b> are consumables found on the floor, held in <b>three slots on the right</b>. <b>Tap one to use it</b> — potions act at once, while targeted skills (like <b>🌀 Phase Step</b> to leap over a monster, or <b>🔥 Firebomb</b>) then ask you to <b>tap a target</b>. Tap the slot again to cancel.</li>
+          <li><b>🧪 Potions &amp; skills</b> are consumables found on the floor, held in <b>three slots on the right</b>. <b>Tap one to use it</b> — potions act at once, while targeted skills (like <b>🌀 Blink Scroll</b> to teleport a few tiles, or <b>🔥 Firebomb</b>) then ask you to <b>tap a target</b>. Tap the slot again to cancel.</li>
           <li><b>Tip:</b> tap your ❤/⚔/🛡/★ stats any time for a reminder of what they do.</li>
         </ul>
         <div className="cck-help-sec">Coming back</div>
