@@ -942,13 +942,15 @@ function metaPerks(meta) {
 }
 
 function xpNeeded(level) {
-  // Super-linear (quadratic) so the hero's level tracks the floor (~level ≈ floor)
-  // instead of out-running it. The old near-linear curve let XP income — which
-  // climbs with depth — push level to ~1.5× floor, over-powering the hero. The
-  // quadratic term makes each level cost more as you climb, so descending (not
-  // grinding a shallow floor) is what advances you. Calibration, not a cap:
+  // Super-linear (quadratic) so the hero's level tracks the floor and runs just a
+  // touch ahead of it — not out-running it the way the old near-linear curve did
+  // (XP income climbs with depth and used to push level to ~1.5× floor, over-
+  // powering the hero). The quadratic term makes each level cost more as you climb,
+  // so descending (not grinding a shallow floor) is what advances you, while the
+  // gentle coefficient keeps a well-played hero modestly ahead of the curve so
+  // bosses stay survivable and deep runs are reachable. Calibration, not a cap:
   // two heroes at the same floor can differ wildly in build, HP, and gold.
-  return Math.round(45 + 12 * level + 2.6 * level * level);
+  return Math.round(45 + 12 * level + 1.9 * level * level);
 }
 
 function pushLog(g, text) {
@@ -1659,10 +1661,10 @@ function deathFlavor(floor, monster) {
 // ============================================================
 //  COMPONENT
 // ============================================================
-const SAVE_KEY = "crypt:save:v2";
+const SAVE_KEY = "crypt:save:v3";
 const BEST_KEY = "crypt:best:v1";
 const MUTE_KEY = "crypt:muted:v1";
-const META_KEY = "crypt:meta:v2";
+const META_KEY = "crypt:meta:v3";
 
 // ---- persistence ----
 // Synchronous localStorage wrapper. Synchronous matters: the latest state lands
