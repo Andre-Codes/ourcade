@@ -1659,10 +1659,10 @@ function deathFlavor(floor, monster) {
 // ============================================================
 //  COMPONENT
 // ============================================================
-const SAVE_KEY = "crypt:save:v1";
+const SAVE_KEY = "crypt:save:v2";
 const BEST_KEY = "crypt:best:v1";
 const MUTE_KEY = "crypt:muted:v1";
-const META_KEY = "crypt:meta:v1";
+const META_KEY = "crypt:meta:v2";
 
 // ---- persistence ----
 // Synchronous localStorage wrapper. Synchronous matters: the latest state lands
