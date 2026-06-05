@@ -25,6 +25,20 @@ import { lazy } from "react";
 
 export const GAMES = [
   {
+    id: "descent",
+    title: "The Descent",
+    blurb: "A fragile-hero puzzle-roguelike. No healing — survive by shoving threats into the dark. Every floor is verified beatable hitless.",
+    emoji: "🕯️",
+    accent: "#e3bb5e",
+    tags: ["puzzle", "roguelike"],
+    badge: "NEW",
+    rating: 5,
+    plays: 0,
+    category: "game",
+    type: "react",
+    component: lazy(() => import("../games/Descent.jsx")),
+  },
+  {
     id: "crypt-crawler",
     title: "Crypt of the Hollow King",
     blurb: "A deterministic magic-tower puzzle-crawler. Plan every step — no luck, just route-finding and HP math.",
