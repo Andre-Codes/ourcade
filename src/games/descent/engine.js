@@ -88,7 +88,7 @@ export const VESSEL_BY_ID = Object.fromEntries(VESSELS.map((v) => [v.id, v]));
 export const BOSS_EVERY = 5;
 // ember economy — kept in one place for easy tuning. Hunting (kills/purges)
 // is the dominant source; depth/clean are a modest baseline.
-export const EM = { depth: 1, clean: 2, purge: 4, kill: 1, boss: 8, mod: 2 };
+export const EM = { depth: 1, clean: 1, purge: 2, kill: 1, boss: 5, mod: 1 };
 
 // Floor modifiers — named conditions that re-skin the puzzle. All solver-safe:
 // dark/hunting are pure presentation/pursuit; volatile/cramped only change
@@ -238,7 +238,23 @@ export function bomberIntent(b, player) {
 export function warlordIntent(b, player, pits, enemies, wallSet) {
   const ci = chargerIntent(b, player, pits, enemies, wallSet);
   const si = strikerIntent(b, player, pits, enemies, wallSet);
-  const tile = ci.kind === "idle" ? null : ci.tile;
+  let tile = ci.kind === "idle" ? null : ci.tile;
+  // The Warlord refuses to stall: when both direct steps are blocked, it routes
+  // around the obstacle — taking any open neighbour that gets it strictly closer.
+  // Deterministic (DIRS order, no RNG) so the solver models the same approach.
+  if (!tile) {
+    const cur = manhattan(b, player);
+    let best = null, bestD = cur;
+    for (const [dx, dy] of DIRS) {
+      const nx = b.x + dx, ny = b.y + dy;
+      if (!inBounds(nx, ny) || (nx === player.x && ny === player.y)) continue;
+      if (pits.has(key(nx, ny)) || wallSet.has(key(nx, ny))) continue;
+      if (enemies.some((e) => e.id !== b.id && e.x === nx && e.y === ny)) continue;
+      const d = manhattan({ x: nx, y: ny }, player);
+      if (d < bestD) { bestD = d; best = { x: nx, y: ny }; }
+    }
+    if (best) tile = best;
+  }
   const beam = si.kind === "beam" ? si.tiles : null;
   if (!tile && !beam) return { kind: "idle" };
   return { kind: "warlord", tile, beam };
@@ -566,7 +582,7 @@ export function generateFloor(depth) {
 
   const bossAdds = Math.max(1, Math.min(Math.floor(depth / 5), 3));
   let nEnemies = isBoss ? 1 + bossAdds : Math.min(1 + Math.floor((depth - 1) / 2), depth >= 14 ? 6 : 5);
-  if (event === "vault") nEnemies = Math.random() < 0.5 ? 0 : 1; // a breather
+  if (event === "vault") nEnemies = Math.max(1, Math.min(1 + Math.floor((depth - 1) / 2), 5)); // a guarded hoard — the cache always sits on an enemy floor
   else if (event === "gauntlet") nEnemies = Math.min(nEnemies + 1, 6);
   else if (modifier === "volatile") nEnemies = Math.min(nEnemies + 1, 6);
   const nPits = modifier === "cramped"

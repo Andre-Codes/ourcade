@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 // Self-contained party tool. Injects its own theme (only one tool mounts per
 // route; the arcade shell CSS is all `arcade-` prefixed, so a global reset here
 // is safe). Names persist to localStorage. Single screen → the shell's
-// "‹ BACK TO ARCADE" button stays visible, so no useArcadeBackButton needed.
+// "‹ BACK TO OURCADE" button stays visible, so no useArcadeBackButton needed.
 
 const STORAGE_KEY = "ourcade:wheel:names";
 const DEFAULT_NAMES = ["Alex", "Sam", "Jordan", "Taylor", "Casey", "Riley"];

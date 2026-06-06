@@ -22,8 +22,8 @@ export default function GamePage() {
     <div className="arcade-stage">
       {backVisible && (
         <div className="arcade-cabinet-chrome">
-          <Link to="/" className="arcade-back" title="Back to arcade" aria-label="Back to arcade">
-            ‹ BACK TO ARCADE
+          <Link to="/" className="arcade-back" title="Back to Ourcade" aria-label="Back to Ourcade">
+            ‹ BACK TO OURCADE
           </Link>
           <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
         </div>

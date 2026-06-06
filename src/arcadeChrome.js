@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect } from "react";
 
 // Lets a mounted React game tell the arcade shell (GamePage) whether the
-// "‹ BACK TO ARCADE" chrome should be visible. The value is a setter function
+// "‹ BACK TO OURCADE" chrome should be visible. The value is a setter function
 // (or null when there's no provider, e.g. a game rendered standalone in tests).
 export const ArcadeChromeContext = createContext(null);
 

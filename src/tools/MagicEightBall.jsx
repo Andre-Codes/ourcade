@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 
 // ── Magic 8-Ball ─────────────────────────────────────────────────────────────
 // Self-contained novelty tool. Injects its own theme. Single screen → the
-// shell's "‹ BACK TO ARCADE" stays visible (no useArcadeBackButton needed).
+// shell's "‹ BACK TO OURCADE" stays visible (no useArcadeBackButton needed).
 
 const ANSWERS = [
   // affirmative

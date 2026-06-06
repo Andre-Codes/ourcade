@@ -8,6 +8,7 @@ import {
   SATCHEL_MAX, PREMIUM_COST, INSPECT,
   withIntents, resolve, generateFloor, farEdgeSpawn, rollVerbDraft,
 } from "./descent/engine";
+import { useArcadeBackButton } from "../arcadeChrome.js";
 
 
 /* ---------- token glyphs ---------- */
@@ -17,7 +18,7 @@ function SigilDefs() {
     <svg className="sigilDefs" width="0" height="0" aria-hidden="true">
       <defs>
         <radialGradient id="gPlayer" cx="50%" cy="38%" r="70%">
-          <stop offset="0%" stopColor="#fff6d8" /><stop offset="55%" stopColor="#e9c469" /><stop offset="100%" stopColor="#9a7322" />
+          <stop offset="0%" stopColor="#8a97c4" /><stop offset="55%" stopColor="#414d7e" /><stop offset="100%" stopColor="#1c2240" />
         </radialGradient>
         <radialGradient id="gLantern" cx="50%" cy="50%" r="60%">
           <stop offset="0%" stopColor="#fffdf2" /><stop offset="60%" stopColor="#ffe9a6" /><stop offset="100%" stopColor="#caa23f" />
@@ -233,6 +234,9 @@ export default function App() {
   const [staged, setStaged] = useState(null);
   const [armed, setArmed] = useState(null); // null | verb id
   const [phase, setPhase] = useState("intro"); // intro | play | resolving | reward | dead
+  // Show the arcade's "‹ BACK TO OURCADE" chrome only on the sanctum — never
+  // mid-run, where it would sit atop the board's own UI.
+  useArcadeBackButton(phase === "intro");
   const [flash, setFlash] = useState(0);
   const [toast, setToast] = useState(null);
   const [rewardOptions, setRewardOptions] = useState([]);
@@ -268,10 +272,11 @@ export default function App() {
   const [records, setRecords] = useState(REC0);
   const [achievements, setAchievements] = useState([]);
   const toastTimer = useRef(null);
-  const showToast = useCallback((msg, ms = 1100) => {
+  const showToast = useCallback((msg, ms = 1900) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), ms);
+    // hold long enough to read — never shorter than the rise animation
+    toastTimer.current = setTimeout(() => setToast(null), Math.max(ms, 1800));
   }, []);
   const lockRef = useRef(false);
   const commitRef = useRef(null);
@@ -313,7 +318,7 @@ export default function App() {
   const spawnFx = useCallback((kind, x, y, tiles, val) => {
     const id = ++fxId.current;
     setFx((arr) => [...arr, { id, kind, x, y, tiles, val }]);
-    setTimeout(() => setFx((arr) => arr.filter((f) => f.id !== id)), 820);
+    setTimeout(() => setFx((arr) => arr.filter((f) => f.id !== id)), 1500);
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -711,6 +716,7 @@ export default function App() {
       if (hpTaken > 0) newPoints = relicSet.has("iron") ? Math.min(stylePoints, STYLE.thresh[1]) : 0;
       else if (pkills > 0) newPoints = stylePoints + pkills + (bossSlain > 0 ? 2 : 0);
       else if (waited) newPoints = Math.max(0, stylePoints - 1);
+      const oldStep = styleRank(stylePoints);
       const newStep = styleRank(newPoints);
       const keScaled = Math.round(ke * STYLE.mult[newStep]);
       setStylePoints(newPoints);
@@ -734,6 +740,7 @@ export default function App() {
       else if (kills >= 2) { SFX.play("multikill"); showToast(kills >= 4 ? "MASSACRE!" : kills === 3 ? "TRIPLE KILL!" : "DOUBLE KILL!", 1100); }
       else if (fwUsed > 0) showToast("SOUL WARDED", 900);
       else if (wardUsed > 0) showToast("WARD SHATTERS", 900);
+      else if (waited && newStep < oldStep) showToast(newStep === 0 ? "STREAK ENDS" : "STREAK COOLING", 1300);
       if (fwUsed > 0) setFloorWard(false);
       if (wardUsed > 0) setWards((w) => w - wardUsed);
 
@@ -943,6 +950,10 @@ export default function App() {
 
   const orderedVerbs = ["push", "wall", "pull", "swap", "dash", "leap"].filter(ownsVerb).map((id) => verbs.find((v) => v.id === id));
 
+  // the consumable currently armed (blink) or staged (instant) — drives a tooltip
+  // so the player reads what it does before committing
+  const activeConsumable = armed === "blink" ? "blink" : (staged?.item ?? null);
+
   // progress (0..1) toward the next style rank — fills the partial segment
   const styleCur = STYLE.thresh[styleStep];
   const styleNext = STYLE.thresh[Math.min(styleStep + 1, STYLE.thresh.length - 1)];
@@ -1093,26 +1104,33 @@ export default function App() {
             ? "◈  A ward will absorb this hit"
             : staged
             ? "✓  Clean — no damage"
+            : styleStep > 0
+            ? "✦  Safe — but WAIT bleeds your streak"
             : "✓  Safe to wait")}
           {phase === "resolving" && "…"}
         </div>
 
         {satchel.length > 0 && (
-          <div className="satchel">
-            {Array.from(new Set(satchel)).map((id) => {
-              const count = satchel.filter((s) => s === id).length;
-              const passive = CONSUMABLES[id].mode === "passive";
-              const active = (id === "blink" && armed === "blink") || staged?.item === id;
-              return (
-                <button key={id} className={`cbtn ${active ? "armed" : ""} ${passive ? "passive" : ""}`}
-                  disabled={phase !== "play"} onClick={() => useConsumable(id)}
-                  title={`${CONSUMABLES[id].name} — ${CONSUMABLES[id].desc}`}>
-                  <span className="cicon"><ConsumableIcon id={id} /></span>
-                  <span className="clabel">{CONSUMABLES[id].name.split(" ")[0]}</span>
-                  {count > 1 && <span className="ccount">{count}</span>}
-                </button>
-              );
-            })}
+          <div className="satchelWrap">
+            {activeConsumable && CONSUMABLES[activeConsumable] && (
+              <div className="cTip"><b>{CONSUMABLES[activeConsumable].name}</b> — {CONSUMABLES[activeConsumable].desc}</div>
+            )}
+            <div className="satchel">
+              {Array.from(new Set(satchel)).map((id) => {
+                const count = satchel.filter((s) => s === id).length;
+                const passive = CONSUMABLES[id].mode === "passive";
+                const active = (id === "blink" && armed === "blink") || staged?.item === id;
+                return (
+                  <button key={id} className={`cbtn ${active ? "armed" : ""} ${passive ? "passive" : ""}`}
+                    disabled={phase !== "play"} onClick={() => useConsumable(id)}
+                    title={`${CONSUMABLES[id].name} — ${CONSUMABLES[id].desc}`}>
+                    <span className="cicon"><ConsumableIcon id={id} /></span>
+                    <span className="clabel">{CONSUMABLES[id].name.split(" ")[0]}</span>
+                    {count > 1 && <span className="ccount">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -1121,12 +1139,17 @@ export default function App() {
             const ready = verbReady[v.id] && v.cd === 0;
             return (
               <button key={v.id}
-                className={`vbtn ${armed === v.id ? "armed" : ""}`}
+                className={`vbtn ${armed === v.id ? "armed" : ""} ${v.cd > 0 ? "charging" : ""}`}
                 disabled={phase !== "play" || !ready}
                 onClick={() => armVerb(v.id)}>
                 <span className="vicon"><VerbIcon id={v.id} /></span>
                 <span className="vlabel">{VERB_INFO[v.id].label}</span>
-                {v.cd > 0 && <span className="cd">{v.cd}</span>}
+                {v.cd > 0 && (
+                  <>
+                    <span className="cdFill" style={{ height: `${Math.min(1, v.cd / Math.max(1, v.baseCd)) * 100}%` }} />
+                    <span className="cdNum">{v.cd}</span>
+                  </>
+                )}
               </button>
             );
           })}
@@ -1442,8 +1465,8 @@ const CSS = `
 .fuse.hot{background:var(--danger); color:#fff; box-shadow:0 0 14px rgba(255,70,54,.95); animation:primed .45s ease-in-out infinite;}
 .armor{position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); display:flex; gap:3px;}
 .plate{width:7px; height:7px; transform:rotate(45deg); background:var(--violet); border:1px solid #e8d6ff; box-shadow:0 0 6px rgba(176,125,255,.7);}
-.fxEmber{position:absolute; transform:translate(-50%,-50%); color:var(--gold); font-size:13px; font-weight:700; text-shadow:0 0 10px rgba(227,187,94,.8); white-space:nowrap; animation:emberfloat .8s ease-out forwards; pointer-events:none;}
-@keyframes emberfloat{0%{opacity:0; transform:translate(-50%,-30%) scale(.8)}25%{opacity:1}100%{opacity:0; transform:translate(-50%,-160%) scale(1.05)}}
+.fxEmber{position:absolute; transform:translate(-50%,-50%); color:var(--gold); font-size:13px; font-weight:700; text-shadow:0 0 10px rgba(227,187,94,.8); white-space:nowrap; animation:emberfloat 1.4s ease-out forwards; pointer-events:none;}
+@keyframes emberfloat{0%{opacity:0; transform:translate(-50%,-30%) scale(.8)}15%{opacity:1}65%{opacity:1; transform:translate(-50%,-110%) scale(1.05)}100%{opacity:0; transform:translate(-50%,-165%) scale(1.05)}}
 /* one-shot effects */
 .fxRing{position:absolute; transform:translate(-50%,-50%); width:14%; height:14%; border-radius:50%; border:3px solid var(--orange); box-shadow:0 0 24px rgba(255,157,60,.8); animation:ring .6s ease-out forwards;}
 @keyframes ring{0%{opacity:1; width:14%; height:14%}100%{opacity:0; width:140%; height:140%; border-width:1px}}
@@ -1464,8 +1487,8 @@ const CSS = `
 .ghostKill{color:var(--crimson); border:2px solid var(--crimson); background:rgba(255,88,72,.15); box-shadow:0 0 14px rgba(255,88,72,.5);}
 .ghostStun{color:var(--muted); border:2px dashed var(--muted); background:rgba(139,133,155,.12);}
 .ghostSwap{color:var(--teal); border:2px solid var(--teal); background:rgba(84,226,198,.14); box-shadow:0 0 14px rgba(84,226,198,.45);}
-.toast{position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-family:'Cinzel',serif; font-weight:700; letter-spacing:.18em; font-size:19px; color:var(--teal); text-shadow:0 0 18px rgba(84,226,198,.6); animation:rise .9s ease-out forwards; pointer-events:none; text-align:center;}
-@keyframes rise{0%{opacity:0; transform:translate(-50%,-30%)}25%{opacity:1}100%{opacity:0; transform:translate(-50%,-90%)}}
+.toast{position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-family:'Cinzel',serif; font-weight:700; letter-spacing:.18em; font-size:19px; color:var(--teal); text-shadow:0 0 18px rgba(84,226,198,.6); animation:rise 1.8s ease-out forwards; pointer-events:none; text-align:center;}
+@keyframes rise{0%{opacity:0; transform:translate(-50%,-30%)}12%{opacity:1}75%{opacity:1; transform:translate(-50%,-62%)}100%{opacity:0; transform:translate(-50%,-90%)}}
 
 .banner{min-height:32px; display:flex; align-items:center; justify-content:center; border-radius:9px; font-size:12.5px; letter-spacing:.05em; padding:7px 10px; border:1px solid var(--edge); background:#10101a;}
 .banner.good{color:var(--teal); border-color:rgba(84,226,198,.35);}
@@ -1473,6 +1496,8 @@ const CSS = `
 .banner.bad{color:var(--crimson); border-color:rgba(255,88,72,.45); background:rgba(255,70,54,.08); animation:hotpulse .8s ease-in-out infinite;}
 
 .satchel{display:flex; gap:6px; margin-bottom:7px;}
+.cTip{font-size:10.5px; line-height:1.4; color:#cfe6f5; background:linear-gradient(180deg,#13202b,#0e1820); border:1px solid rgba(143,209,255,.3); border-radius:8px; padding:5px 9px; margin-bottom:6px; text-align:center;}
+.cTip b{color:var(--teal); letter-spacing:.04em;}
 .cbtn{position:relative; flex:1 1 0; min-height:46px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border:1px solid rgba(143,209,255,.35); background:linear-gradient(180deg,#15202b,#101820); color:#cfe6f5; font-family:'IBM Plex Mono'; font-weight:600; letter-spacing:.06em; font-size:10px; border-radius:10px; cursor:pointer; transition:transform .08s, background .15s, border-color .15s;}
 .cbtn:active{transform:translateY(1px);}
 .cbtn:disabled{opacity:.4;}
@@ -1490,7 +1515,10 @@ const CSS = `
 .vbtn.armed{background:rgba(227,187,94,.18); border-color:var(--gold); color:var(--gold); box-shadow:0 0 12px rgba(227,187,94,.25), inset 0 0 10px rgba(227,187,94,.1);}
 .vicon{width:20px; height:20px; opacity:.92;}
 .vlabel{line-height:1;}
-.cd{position:absolute; top:4px; right:6px; font-size:11px; color:var(--crimson);}
+.cdFill{position:absolute; left:0; right:0; bottom:0; background:rgba(8,8,14,.74); border-radius:0 0 10px 10px; transition:height .22s ease; pointer-events:none;}
+.cdNum{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-weight:700; font-size:19px; color:var(--crimson); text-shadow:0 0 8px rgba(255,70,54,.55); pointer-events:none;}
+.vbtn.charging{opacity:1; border-color:rgba(255,70,54,.3);}
+.vbtn.charging .vicon,.vbtn.charging .vlabel{opacity:.38;}
 
 .actions{display:grid; grid-template-columns:.8fr 1.6fr; gap:8px;}
 .btn{border:1px solid var(--edge); background:#15151f; color:var(--ink); font-family:'IBM Plex Mono'; font-weight:600; letter-spacing:.1em; font-size:13px; min-height:54px; border-radius:11px; cursor:pointer; transition:transform .08s, background .15s;}

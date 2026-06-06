@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 // ── Dice & Coin Roller ───────────────────────────────────────────────────────
 // Self-contained party/TTRPG tool. Injects its own theme. Single screen → the
-// shell's "‹ BACK TO ARCADE" stays visible (no useArcadeBackButton needed).
+// shell's "‹ BACK TO OURCADE" stays visible (no useArcadeBackButton needed).
 
 const DICE = [4, 6, 8, 10, 12, 20];
 const MAX_COUNT = 12;
