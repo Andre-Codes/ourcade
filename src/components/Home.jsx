@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
+import DailyBand from "./DailyBand.jsx";
 
 const VISIT_KEY = "ourcade:visits";
 
@@ -107,6 +108,7 @@ export default function Home() {
       {/* ---- retro top nav ---- */}
       <nav className="arcade-nav">
         <a href="#top" className="arcade-tab is-active">HOME</a>
+        <a href="#arcade-today" className="arcade-tab arcade-tab-hot">TODAY!</a>
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
@@ -129,6 +131,8 @@ export default function Home() {
         </div>
         <p className="arcade-tagline">~ insert coin · press start · enter the cabinet ~</p>
       </header>
+
+      <DailyBand />
 
       <div className="arcade-search" id="arcade-search">
         <input

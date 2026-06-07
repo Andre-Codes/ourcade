@@ -1,0 +1,60 @@
+name: Generate daily content
+
+# Refreshes the AI-authored pools (polls / quizzes / tips / news) on a schedule.
+# Content is date-seeded and rotates daily, so one big batch lasts weeks — a
+# weekly refresh keeps it varied. Also runnable on demand.
+on:
+  schedule:
+    - cron: "17 9 * * 1" # Mondays, 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-content
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate content with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run generate
+
+      - name: Verify date-seeded rotation still holds
+        run: npm run check:daily
+
+      - name: Commit refreshed batch (only if changed)
+        id: commit
+        run: |
+          git config user.name "ourcade-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data/generated
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No content changes — nothing to commit."
+          else
+            git commit -m "chore: refresh daily content (AI-generated)"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Commits pushed with the default GITHUB_TOKEN do NOT trigger other
+      # workflows, so deploy.yml won't auto-run — kick it off explicitly.
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml

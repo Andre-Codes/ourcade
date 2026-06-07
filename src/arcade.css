@@ -438,3 +438,219 @@ main > section + section { margin-top: 44px; }
 @keyframes arcade-pulse {
   50% { transform: rotate(-12deg) scale(1.09); }
 }
+
+/* ====================================================================== */
+/*  TODAY AT OURCADE — daily-fresh band (game of the day, poll, quiz,      */
+/*  stumble, mascot, news). Reuses the shell tokens; arcade- prefixed.     */
+/* ====================================================================== */
+.arcade-daily { max-width: 980px; margin: 0 auto 40px; }
+.arcade-daily-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--neon-gold);
+  text-shadow: 0 0 14px rgba(255,210,63,.4);
+  margin: 8px 0 6px;
+}
+.arcade-daily-date {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arcade-muted);
+  margin: 0 0 20px;
+}
+
+.arcade-daily-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; }
+.arcade-daily-side { display: flex; flex-direction: column; gap: 16px; }
+.arcade-daily-row { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: stretch; margin-top: 18px; }
+
+/* ---- Game of the Day hero ---- */
+.arcade-hero {
+  position: relative;
+  display: block;
+  padding: 18px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--arcade-text);
+  overflow: hidden;
+  box-shadow: var(--bevel), 0 0 24px color-mix(in srgb, var(--accent) 20%, transparent);
+  transition: transform .14s ease, box-shadow .2s ease;
+}
+.arcade-hero:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--bevel), 0 16px 44px rgba(0,0,0,.55), 0 0 34px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.arcade-hero-glow {
+  position: absolute; top: -50px; left: -30px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: var(--accent); opacity: .16; filter: blur(46px); pointer-events: none;
+}
+.arcade-hero-kicker {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.54rem; letter-spacing: 0.05em;
+  color: #0a0a12;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, white), var(--accent));
+  padding: 7px 10px; border-radius: 5px; box-shadow: var(--bevel);
+}
+.arcade-hero-body { display: flex; gap: 16px; align-items: center; margin-top: 14px; }
+.arcade-hero-screen {
+  flex: 0 0 auto; width: 118px; height: 118px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #04050b; border-radius: 9px;
+  background: radial-gradient(circle at 50% 32%, #12233f 0%, #0a1326 38%, #04050b 78%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 0 24px rgba(0,0,0,.85);
+}
+.arcade-hero-emoji { font-size: 3.9rem; filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent) 60%, transparent)); }
+.arcade-hero-info { min-width: 0; }
+.arcade-hero-title { font-family: 'Black Ops One', cursive; font-size: 1.5rem; letter-spacing: 0.02em; margin: 0; color: var(--accent); }
+.arcade-hero-meta { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; }
+.arcade-hero-blurb { font-size: 0.86rem; line-height: 1.5; color: #b8bcd8; margin: 0 0 12px; }
+.arcade-hero-play {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem;
+  color: #0a0a12;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 75%, white), var(--accent));
+  padding: 10px 14px; border-radius: 6px; box-shadow: var(--bevel);
+}
+.arcade-hero:hover .arcade-hero-play { filter: brightness(1.1); }
+
+/* ---- shared widget box (poll + quiz teaser) ---- */
+.arcade-widget {
+  position: relative; display: block; padding: 14px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+  text-decoration: none; color: var(--arcade-text);
+}
+.arcade-widget-kicker {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.06em;
+  color: var(--neon-aqua); text-shadow: 0 0 8px rgba(63,255,208,.4);
+}
+
+/* ---- daily poll ---- */
+.arcade-poll-q { font-family: 'Black Ops One', cursive; font-size: 1rem; margin: 8px 0 12px; }
+.arcade-poll-options { display: flex; flex-direction: column; gap: 8px; }
+.arcade-poll-opt {
+  text-align: left; font-family: 'Share Tech Mono', monospace; font-size: 0.82rem;
+  color: #cbb8f0; background: #120c1f; border: 2px solid #3a2a5a; border-radius: 8px;
+  padding: 9px 12px; cursor: pointer; transition: all .14s;
+}
+.arcade-poll-opt:hover { border-color: var(--neon-violet); color: #ffe9b0; background: #1a1330; transform: translateX(2px); }
+.arcade-poll-results { display: flex; flex-direction: column; gap: 8px; }
+.arcade-poll-bar {
+  position: relative; overflow: hidden; border: 1px solid #2a2f4a; border-radius: 7px;
+  background: #04050b; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;
+}
+.arcade-poll-bar-fill {
+  position: absolute; inset: 0 auto 0 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--neon-violet) 55%, transparent), color-mix(in srgb, var(--neon-aqua) 30%, transparent));
+}
+.arcade-poll-bar.is-mine .arcade-poll-bar-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--neon-lime) 60%, transparent), color-mix(in srgb, var(--neon-gold) 35%, transparent));
+}
+.arcade-poll-bar-label, .arcade-poll-bar-pct { position: relative; z-index: 1; font-size: 0.78rem; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
+.arcade-poll-bar.is-mine .arcade-poll-bar-label::after { content: " ✓"; color: var(--neon-lime); }
+.arcade-poll-bar-pct { font-family: 'Press Start 2P', monospace; font-size: 0.54rem; }
+.arcade-poll-foot { font-size: 0.68rem; color: var(--arcade-muted); margin: 4px 0 0; letter-spacing: 0.04em; }
+
+/* ---- quiz teaser ---- */
+.arcade-quizteaser { transition: transform .14s ease, border-color .2s ease, box-shadow .2s ease; }
+.arcade-quizteaser:hover { transform: translateY(-3px); border-color: var(--neon-violet); box-shadow: var(--bevel), 0 0 22px rgba(180,77,255,.3); }
+.arcade-quizteaser-title { font-family: 'Black Ops One', cursive; font-size: 1.05rem; margin: 8px 0 6px; color: var(--neon-violet); }
+.arcade-quizteaser-cta, .arcade-quizteaser-prior { font-size: 0.8rem; color: #b8bcd8; margin: 0; line-height: 1.5; }
+.arcade-quizteaser-cta b, .arcade-quizteaser-prior b { color: var(--neon-aqua); }
+
+/* ---- stumble button ---- */
+.arcade-stumble {
+  font-family: 'Press Start 2P', monospace; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.03em;
+  color: #1a0a00; background: linear-gradient(180deg, #fff, var(--neon-gold));
+  border: 2px solid #04050b; border-radius: 10px; padding: 14px 16px; cursor: pointer;
+  box-shadow: var(--bevel), 0 6px 18px rgba(0,0,0,.4);
+  transition: filter .12s ease, transform .08s ease;
+}
+.arcade-stumble:hover { filter: brightness(1.08); }
+.arcade-stumble:active { transform: translateY(1px); }
+
+/* ---- mascot + streak ---- */
+.arcade-mascot {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-mascot-face { font-size: 2.4rem; filter: drop-shadow(0 0 10px rgba(63,255,208,.5)); }
+.arcade-mascot-bubble { min-width: 0; }
+.arcade-streak {
+  display: inline-block; font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+  color: #1a0a00; background: var(--neon-gold); border-radius: 4px; padding: 3px 6px; margin-bottom: 6px;
+}
+.arcade-mascot-tip { font-size: 0.82rem; line-height: 1.45; color: #cbb8f0; margin: 0; }
+
+/* ---- site news ---- */
+.arcade-news { margin-top: 18px; padding: 12px 14px; background: #04050b; border: 2px solid #2a2f4a; border-radius: 10px; box-shadow: var(--bevel-in); }
+.arcade-news-label { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: var(--neon-pink); letter-spacing: 0.04em; }
+.arcade-news-list { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.arcade-news-list li { font-size: 0.78rem; color: #b8bcd8; line-height: 1.4; }
+
+/* ====================================================================== */
+/*  QUIZ PAGE                                                              */
+/* ====================================================================== */
+.arcade-quiz-stage {
+  display: flex; align-items: center; justify-content: center; padding: 28px 16px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
+    var(--arcade-bg);
+  font-family: 'Share Tech Mono', monospace;
+}
+.arcade-quiz {
+  width: 100%; max-width: 540px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 16px;
+  box-shadow: var(--bevel), 0 16px 50px rgba(0,0,0,.5);
+  padding: 28px 24px; color: var(--arcade-text);
+}
+.arcade-quiz-title { font-family: 'Black Ops One', cursive; font-size: 1.5rem; margin: 10px 0 4px; color: var(--neon-violet); line-height: 1.1; }
+.arcade-quiz-progress { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: var(--arcade-muted); margin: 0 0 18px; }
+.arcade-quiz-q { font-size: 1.05rem; line-height: 1.4; margin: 0 0 16px; }
+.arcade-quiz-answers { display: flex; flex-direction: column; gap: 10px; }
+.arcade-quiz-answer {
+  text-align: left; font-family: 'Share Tech Mono', monospace; font-size: 0.92rem;
+  color: #cbb8f0; background: #120c1f; border: 2px solid #3a2a5a; border-radius: 9px;
+  padding: 13px 15px; cursor: pointer; transition: all .14s;
+}
+.arcade-quiz-answer:hover { border-color: var(--neon-violet); color: #ffe9b0; background: #1a1330; transform: translateX(3px); box-shadow: 0 0 14px rgba(180,77,255,.25); }
+.arcade-quiz-result { text-align: center; }
+.arcade-quiz-result-emoji { font-size: 4.5rem; filter: drop-shadow(0 0 16px rgba(63,255,208,.5)); margin: 6px 0; }
+.arcade-quiz-result-title { font-family: 'Black Ops One', cursive; font-size: 1.7rem; margin: 4px 0 10px; color: var(--neon-aqua); }
+.arcade-quiz-result-blurb { font-size: 0.95rem; line-height: 1.55; color: #b8bcd8; margin: 0 auto 22px; max-width: 42ch; }
+.arcade-quiz-result-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+.arcade-quiz-play {
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem; color: #0a0a12;
+  background: linear-gradient(180deg, var(--neon-lime), #9fd400);
+  border: 2px solid #04050b; border-radius: 7px; padding: 12px 16px; cursor: pointer;
+  box-shadow: var(--bevel); transition: filter .12s ease, transform .08s ease;
+}
+.arcade-quiz-play:hover { filter: brightness(1.1); }
+.arcade-quiz-play:active { transform: translateY(1px); }
+.arcade-quiz-retake {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: #cbb8f0;
+  background: transparent; border: 1px solid #3a2a5a; border-radius: 7px; padding: 11px 14px; cursor: pointer;
+}
+.arcade-quiz-retake:hover { border-color: var(--neon-violet); color: #ffe9b0; }
+.arcade-quiz-home { font-size: 0.8rem; color: var(--neon-lime); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+/* ---- daily band responsive ---- */
+@media (max-width: 760px) {
+  .arcade-daily-grid { grid-template-columns: 1fr; }
+  .arcade-daily-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .arcade-hero-body { flex-direction: column; align-items: flex-start; }
+  .arcade-hero-screen { width: 100%; height: 96px; }
+  .arcade-hero-emoji { font-size: 3.2rem; }
+  .arcade-hero-title { font-size: 1.25rem; }
+}
