@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import DailyBand from "./DailyBand.jsx";
+import byteBadger from "../assets/byte-badger.png";
+import arcadeBadger from "../assets/arcade-badger.png";
 
 const VISIT_KEY = "ourcade:visits";
 
@@ -117,6 +119,13 @@ export default function Home() {
       </nav>
 
       <header className="arcade-header">
+        <img
+          className="arcade-logo-mascot"
+          src={byteBadger}
+          alt="Byte Badger, the Ourcade mascot"
+          width="128"
+          height="128"
+        />
         <h1 className="arcade-logo" data-text="OURCADE">OURCADE</h1>
 
         {/* slogan marquee */}
@@ -164,7 +173,10 @@ export default function Home() {
 
       <main>
         <section id="arcade-games">
-          <h2 className="arcade-section-title">🕹️ GAMES</h2>
+          <h2 className="arcade-section-title">
+            <img className="arcade-heading-badger" src={arcadeBadger} alt="" aria-hidden="true" />
+            GAMES
+          </h2>
           {games.length ? (
             <div className="arcade-grid">
               {games.map((game) => (

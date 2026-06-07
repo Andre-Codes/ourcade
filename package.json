@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "generate": "node scripts/generate-content.js",
     "research": "node scripts/research-topics.js",
-    "check:daily": "node scripts/daily-check.js"
+    "check:daily": "node scripts/daily-check.js",
+    "assets:mascots": "node scripts/process-mascots.js"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.102.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "sharp": "^0.34.5",
     "vite": "^5.4.8"
   }
 }

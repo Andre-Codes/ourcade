@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # needed for `gh workflow run deploy.yml` (trigger Pages deploy)
 
 concurrency:
   group: generate-content

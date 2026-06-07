@@ -11,6 +11,7 @@ import {
   getQuizResult,
   recordVisit,
 } from "../lib/store.js";
+import byteBadger from "../assets/byte-badger.png";
 
 // tiny local copy of Home's star row (kept decoupled so Home stays untouched)
 function Stars({ rating = 0 }) {
@@ -151,7 +152,7 @@ function MascotTip({ dayKey: key, streak }) {
   const tip = getTodaysTip(key);
   return (
     <div className="arcade-mascot">
-      <span className="arcade-mascot-face" aria-hidden="true">👾</span>
+      <img className="arcade-mascot-face" src={byteBadger} alt="Byte Badger" aria-hidden="true" />
       <div className="arcade-mascot-bubble">
         {streak > 1 && (
           <span className="arcade-streak">🔥 {streak}-day streak!</span>

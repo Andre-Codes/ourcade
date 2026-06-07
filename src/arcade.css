@@ -82,6 +82,21 @@ html, body, #root {
 
 /* ---- header / logo ---- */
 .arcade-header { text-align: center; margin: 6px auto 40px; }
+.arcade-logo-mascot {
+  display: block;
+  width: clamp(84px, 15vw, 140px);
+  height: auto;
+  margin: 0 auto 4px;
+  filter: drop-shadow(0 0 14px rgba(63,255,208,.45));
+  animation: arcade-mascot-bob 3.2s ease-in-out infinite;
+}
+@keyframes arcade-mascot-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-logo-mascot { animation: none; }
+}
 .arcade-logo {
   font-family: 'Black Ops One', cursive;
   font-size: clamp(2.8rem, 11vw, 5.5rem);
@@ -136,6 +151,13 @@ html, body, #root {
   padding-bottom: 10px;
   border-bottom: 2px solid #1c2035;
   text-shadow: 0 0 12px rgba(63,255,208,.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.arcade-heading-badger {
+  width: 56px; height: auto; flex: 0 0 auto;
+  filter: drop-shadow(0 0 10px rgba(63,255,208,.4));
 }
 main > section + section { margin-top: 44px; }
 
@@ -581,7 +603,10 @@ main > section + section { margin-top: 44px; }
   background: linear-gradient(180deg, #14172a, var(--arcade-surface));
   border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
 }
-.arcade-mascot-face { font-size: 2.4rem; filter: drop-shadow(0 0 10px rgba(63,255,208,.5)); }
+.arcade-mascot-face {
+  width: 64px; height: auto; flex: 0 0 auto;
+  filter: drop-shadow(0 0 10px rgba(63,255,208,.5));
+}
 .arcade-mascot-bubble { min-width: 0; }
 .arcade-streak {
   display: inline-block; font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
