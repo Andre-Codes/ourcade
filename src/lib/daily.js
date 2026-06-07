@@ -100,6 +100,22 @@ export function rotateDaily(list, key, salt = 0) {
   return ordered[idx];
 }
 
+// Like rotateDaily but returns N distinct items for the day. Steps through the
+// SAME no-repeat order in non-overlapping windows of size n, so a visitor sees a
+// fresh set each day and the whole pool cycles before anything repeats.
+export function rotateDailyN(list, key, n, salt = 0) {
+  if (!list || list.length === 0) return [];
+  const count = Math.min(n, list.length);
+  const ordered = seededShuffle(list, (ROTATE_SEED ^ daySeed(String(salt))) >>> 0);
+  const day = dayNumberFromKey(key);
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const idx = (((day * count + i) % ordered.length) + ordered.length) % ordered.length;
+    out.push(ordered[idx]);
+  }
+  return out;
+}
+
 // Hash-based pick (MAY repeat day to day). Fine for low-stakes flavor like a
 // mascot tip where repeats don't matter.
 export function pickDaily(list, key, salt = 0) {

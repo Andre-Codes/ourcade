@@ -109,7 +109,7 @@ function systemBlocks() {
 async function generate(label, schema, userPrompt) {
   const stream = client.messages.stream({
     model: "claude-opus-4-8",
-    max_tokens: 32000,
+    max_tokens: 48000, // richer quizzes (6-7 blended questions) need more room
     thinking: { type: "adaptive" },
     output_config: {
       effort: "high",
@@ -286,10 +286,11 @@ function validateQuizzes(quizzes) {
         req(GAME_IDS.has(r.gameId), `quiz ${q.id} result ${r.id}: gameId "${r.gameId}" not in registry`);
       }
     });
-    req(Array.isArray(q.questions) && q.questions.length >= 1, `quiz ${q.id}: needs >=1 question`);
+    req(Array.isArray(q.questions) && q.questions.length >= 6, `quiz ${q.id}: needs >=6 questions, got ${(q.questions || []).length}`);
+    let blendedAnswers = 0; // answers that feed 2+ results — guards against a flat 1:1 map
     (q.questions || []).forEach((qq, k) => {
       req(!!qq.q, `quiz ${q.id} q[${k}]: missing text`);
-      req(Array.isArray(qq.answers) && qq.answers.length >= 2, `quiz ${q.id} q[${k}]: needs >=2 answers`);
+      req(Array.isArray(qq.answers) && qq.answers.length >= 3, `quiz ${q.id} q[${k}]: needs >=3 answers`);
       (qq.answers || []).forEach((a, ai) => {
         req(!!a.label, `quiz ${q.id} q[${k}] a[${ai}]: missing label`);
         const weights = Array.isArray(a.weights) ? a.weights : [];
@@ -299,8 +300,10 @@ function validateQuizzes(quizzes) {
         );
         // fold [{result,points}] -> {result: points} (the shape scoreQuiz expects)
         a.weights = Object.fromEntries(weights.map((w) => [w.result, w.points]));
+        if (Object.keys(a.weights).length >= 2) blendedAnswers += 1;
       });
     });
+    req(blendedAnswers >= 3, `quiz ${q.id}: only ${blendedAnswers} blended answers (need >=3 that feed 2+ results so results aren't 1:1 with answers)`);
   });
 }
 
@@ -335,7 +338,13 @@ async function main() {
   const quizzesData = await generate(
     "quizzes",
     quizzesSchema,
-    `Generate ${COUNT.quizzes} "Which X are you?"-style personality quizzes. Each quiz: a unique kebab-case id, a catchy title, a one-line intro, 4-6 results, and 4-5 questions. Each result: kebab-case id, title, a single emoji, a ~2-sentence blurb, and gameId set to the on-theme game id that best fits that result. Each question has 3-4 answers; each answer's weights is a list of {result, points} (points 1-2) pointing only at THIS quiz's own result ids. Make every result reachable. Vary themes (which game / arcade archetype / snack / internet era / etc.).${quizTopical}`
+    `Generate ${COUNT.quizzes} "Which X are you?"-style personality quizzes. Each quiz: a unique kebab-case id, a catchy title, a one-line intro, 4-6 results, and 6-7 questions. Each result: kebab-case id, title, a single emoji, a ~2-sentence blurb, and gameId set to the on-theme game id that best fits that result.
+
+Each question has 3-4 answers; each answer's weights is a list of {result, points} pointing only at THIS quiz's own result ids. The whole point is that the result should NOT be predictable from any single question. So:
+- BLEND most answers across 2-3 results (a primary plus one or two secondaries) instead of a clean one-answer-equals-one-result map. A pure 1:1 mapping makes the outcome obvious — avoid it.
+- VARY the points across 1-3 (a strong, defining answer is worth 3; a subtle lean is worth 1) rather than a flat value.
+- Make at least 2 of the questions OBLIQUE — indirect prompts like "pick a snack / a color / a song / a childhood toy / a weekend plan / a ringtone" where the player can't tell which result an answer feeds. The other questions can be more on-the-nose.
+Make every result reachable, and make sure two different answer paths could plausibly land on the same result. Vary themes (which game / arcade archetype / snack / internet era / etc.).${quizTopical}`
   );
   const flavorData = await generate(
     "flavor",

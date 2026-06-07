@@ -129,11 +129,11 @@ export default function Home() {
         <h1 className="arcade-logo" data-text="OURCADE">OURCADE</h1>
 
         {/* slogan marquee */}
-        <div className="arcade-marquee" aria-label="Our games, Our world, Ourcade">
+        <div className="arcade-marquee" aria-label="Our vibes, Our world, Ourcade">
           <div className="arcade-marquee-track">
             {Array.from({ length: 4 }).map((_, i) => (
               <span key={i} className="arcade-marquee-item">
-                ★ OUR GAMES&nbsp;·&nbsp;OUR WORLD&nbsp;·&nbsp;<b>OURCADE</b>&nbsp;
+                ★ OUR VIBES&nbsp;·&nbsp;OUR WORLD&nbsp;·&nbsp;<b>OURCADE</b>&nbsp;
               </span>
             ))}
           </div>

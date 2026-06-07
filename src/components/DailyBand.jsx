@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
 import { getTodaysPoll, simulatedTally } from "../data/polls.js";
-import { getTodaysQuiz } from "../data/quizzes.js";
+import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import {
   getPollVote,
@@ -110,26 +110,36 @@ function DailyPoll({ dayKey: key }) {
   );
 }
 
-// ── Today's quiz teaser ───────────────────────────────────────────────────
+// ── Today's quizzes teaser (a few to choose from) ─────────────────────────
 function QuizTeaser({ dayKey: key }) {
-  const quiz = getTodaysQuiz(key);
-  if (!quiz) return null;
-  const priorId = getQuizResult(quiz.id);
-  const prior = priorId ? quiz.results.find((r) => r.id === priorId) : null;
+  const quizzes = getTodaysQuizzes(key, 3);
+  if (!quizzes.length) return null;
   return (
-    <Link to={`/quiz/${quiz.id}`} className="arcade-widget arcade-quizteaser">
-      <span className="arcade-widget-kicker">🔮 TODAY&apos;S QUIZ</span>
-      <p className="arcade-quizteaser-title">{quiz.title}</p>
-      {prior ? (
-        <p className="arcade-quizteaser-prior">
-          you were: <b>{prior.emoji} {prior.title}</b> · retake →
-        </p>
-      ) : (
-        <p className="arcade-quizteaser-cta">
-          {quiz.intro} <b>take it →</b>
-        </p>
-      )}
-    </Link>
+    <div className="arcade-widget arcade-quizteaser">
+      <span className="arcade-widget-kicker">🔮 TODAY&apos;S QUIZZES</span>
+      <ul className="arcade-quizteaser-list">
+        {quizzes.map((quiz) => {
+          const priorId = getQuizResult(quiz.id);
+          const prior = priorId ? quiz.results.find((r) => r.id === priorId) : null;
+          return (
+            <li key={quiz.id}>
+              <Link to={`/quiz/${quiz.id}`} className="arcade-quizteaser-item">
+                <span className="arcade-quizteaser-title">{quiz.title}</span>
+                {prior ? (
+                  <span className="arcade-quizteaser-prior">
+                    you were: <b>{prior.emoji} {prior.title}</b> · retake →
+                  </span>
+                ) : (
+                  <span className="arcade-quizteaser-cta">
+                    {quiz.intro} <b>take it →</b>
+                  </span>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

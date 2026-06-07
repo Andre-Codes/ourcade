@@ -579,11 +579,16 @@ main > section + section { margin-top: 44px; }
 .arcade-poll-bar-pct { font-family: 'Press Start 2P', monospace; font-size: 0.54rem; }
 .arcade-poll-foot { font-size: 0.68rem; color: var(--arcade-muted); margin: 4px 0 0; letter-spacing: 0.04em; }
 
-/* ---- quiz teaser ---- */
-.arcade-quizteaser { transition: transform .14s ease, border-color .2s ease, box-shadow .2s ease; }
-.arcade-quizteaser:hover { transform: translateY(-3px); border-color: var(--neon-violet); box-shadow: var(--bevel), 0 0 22px rgba(180,77,255,.3); }
-.arcade-quizteaser-title { font-family: 'Black Ops One', cursive; font-size: 1.05rem; margin: 8px 0 6px; color: var(--neon-violet); }
-.arcade-quizteaser-cta, .arcade-quizteaser-prior { font-size: 0.8rem; color: #b8bcd8; margin: 0; line-height: 1.5; }
+/* ---- quiz teaser (a few quizzes to choose from) ---- */
+.arcade-quizteaser-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.arcade-quizteaser-item {
+  display: block; text-decoration: none; padding: 9px 11px;
+  background: #120c1f; border: 2px solid #3a2a5a; border-radius: 8px;
+  transition: transform .14s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.arcade-quizteaser-item:hover { transform: translateY(-3px); border-color: var(--neon-violet); box-shadow: 0 0 22px rgba(180,77,255,.3); }
+.arcade-quizteaser-title { display: block; font-family: 'Black Ops One', cursive; font-size: 1rem; margin: 0 0 4px; color: var(--neon-violet); }
+.arcade-quizteaser-cta, .arcade-quizteaser-prior { display: block; font-size: 0.8rem; color: #b8bcd8; margin: 0; line-height: 1.5; }
 .arcade-quizteaser-cta b, .arcade-quizteaser-prior b { color: var(--neon-aqua); }
 
 /* ---- stumble button ---- */
