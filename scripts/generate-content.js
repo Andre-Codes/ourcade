@@ -13,26 +13,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
+import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
 
-// How big a batch to ask for. One run = months of date-seeded daily rotation.
+// How big a batch to ask for. One run = a month-plus of date-seeded daily rotation.
 const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50 };
 
-// ---- tiny .env loader (no dependency) — only fills vars not already set ----
-function loadEnv() {
-  const envPath = path.join(ROOT, ".env");
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
-    if (!m) continue;
-    let val = m[2];
-    if (/^(".*"|'.*')$/.test(val)) val = val.slice(1, -1);
-    if (!(m[1] in process.env)) process.env[m[1]] = val;
-  }
-}
-loadEnv();
+loadEnv(ROOT);
 
 if (!process.env.ANTHROPIC_API_KEY) {
   console.error(
@@ -63,7 +52,7 @@ VOICE
 - Nostalgic-millennial, dry and a little chaotic, warm — never mean.
 - Faded LAN-party-flyer / "best viewed in 1024x768" energy. Self-aware about being a small weird site.
 - PG-13 at most. No slurs, no politics, nothing needing a content warning; keep every reference good-natured and non-defamatory.
-- Default to evergreen arcade / gaming / nostalgia. When TOPICAL HOOKS are provided, a portion of the content may riff on them — but ALWAYS through an early-2000s / nostalgic lens (e.g. "if X dropped in 2003…", rate it on a Y2K / Tamagotchi scale, dial-up-era framing). Avoid hard dates and hyper-ephemeral specifics so it still reads fine weeks later.
+- Mix three kinds of content: on-site-game themed, evergreen arcade/gaming/nostalgia, and TOPICAL. For topical items, NAME the actual current thing from the TOPICAL HOOKS (the real movie / song / game / meme by name) so it's unmistakably recognizable, THEN give it the early-2000s / arcade twist (e.g. "if <real thing> dropped in 2003…", rate it on a Y2K / Tamagotchi scale, dial-up framing). Do NOT dissolve the reference into something generic. No hard calendar dates; keep it good-natured and non-defamatory.
 
 THE ARCADE'S GAMES (use these EXACT ids wherever a gameId is required):
 ${GAME_CONTEXT}
@@ -76,32 +65,25 @@ const client = new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 // block so every structured call can riff on the same current hooks.
 let TOPICAL = "";
 
-// Pull current pop-culture / internet / gaming hooks via Claude's server-side
-// web search. Kept SEPARATE from the structured calls because web search
-// attaches citations, which structured outputs reject. Best-effort: if web
-// search is unavailable, we fall back to evergreen-only content.
+// Pull current hooks via a forced, live web search (see scripts/lib/research.js).
+// We VERIFY a search actually fired (web_search_requests) — otherwise the model
+// may have answered from stale training data, so we fall back to evergreen only.
+// Always writes provenance to src/data/generated/_research.md. Kept separate from
+// the structured calls because web-search citations conflict with structured output.
 async function researchTopics() {
   try {
-    const res = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 4000,
-      tools: [{ type: "web_search_20260209", name: "web_search" }],
-      messages: [
-        {
-          role: "user",
-          content:
-            "Search the web for what's currently buzzing in mainstream pop culture, the internet, music, movies/TV, and video games. Return ONLY a plain bulleted list of 12-18 short hooks we could riff on for a nostalgic arcade site — each just a few words (a trend, meme, release, or viral moment). No commentary.",
-        },
-      ],
-    });
-    const text = res.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n")
-      .trim();
-    const n = text.split("\n").filter((l) => l.trim()).length;
-    console.log(n ? `  research: gathered ~${n} topical hooks` : "  research: no hooks returned");
-    return text;
+    const r = await runResearch(client);
+    fs.writeFileSync(path.join(OUT_DIR, "_research.md"), buildProofMarkdown(r));
+    if (r.toolError) {
+      console.warn(`  research: web search error "${r.toolError}" — evergreen only. (Enable Web Search in the Claude Console.)`);
+      return "";
+    }
+    if (r.requestCount < 1) {
+      console.warn("  research: model did NOT actually search (0 requests) — evergreen only.");
+      return "";
+    }
+    console.log(`  research: ${r.requestCount} live search(es), ${r.results.length} sources → src/data/generated/_research.md`);
+    return r.hooks;
   } catch (e) {
     console.warn(`  research: web search unavailable (${e.message}); evergreen content only.`);
     return "";
@@ -336,13 +318,13 @@ async function main() {
   TOPICAL = await researchTopics();
 
   const pollTopical = TOPICAL
-    ? " Make roughly a third of them riff on the TOPICAL HOOKS (current pop culture / internet / games) through the nostalgic lens; keep the rest evergreen and on-site-game themed."
+    ? " About 40% of them MUST be topical: build the question around a NAMED hook from the TOPICAL HOOKS (the real movie/song/game/meme, by name) with the nostalgic twist. Keep the rest evergreen and on-site-game themed."
     : "";
   const quizTopical = TOPICAL
-    ? ' Make 3-4 of the quizzes topical — built around the TOPICAL HOOKS but filtered through early-2000s nostalgia (e.g. "Which <current thing> are you, dial-up edition?") — and keep the rest evergreen or game-archetype. Topical quizzes still set each result\'s gameId to the best-fitting on-site game.'
+    ? ' Make 5-6 of the quizzes topical — each built around NAMED hooks from the TOPICAL HOOKS (e.g. "Which <real 2026 thing> are you, dial-up edition?"), naming real current things in the title and results — and keep the rest evergreen or game-archetype. Topical quizzes still set each result\'s gameId to the best-fitting on-site game.'
     : "";
   const newsTopical = TOPICAL
-    ? " A handful of the news blurbs may wink at the TOPICAL HOOKS, still in 2003-webmaster voice."
+    ? ' Several news blurbs should NAME real current things from the TOPICAL HOOKS, reported in 2003-webmaster voice (e.g. "NEW: <real thing> arrives — we gave it 4 quarters").'
     : "";
 
   const pollsData = await generate(

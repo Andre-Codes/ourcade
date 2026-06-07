@@ -2,44 +2,37 @@
 // Quizzes. Shape: { id, title, intro, questions:[{q,answers:[{label,weights}]}], results:[{id,title,emoji,blurb,gameId}] }
 export default [
   {
-    "id": "which-arcade-game-are-you",
-    "title": "Which OURCADE Game Are You?",
-    "intro": "Five buttons, one soul. Find out which game lives in your chest.",
+    "id": "gta6-vibe-dialup",
+    "title": "Which GTA 6 Vibe Are You? (Dial-Up Edition)",
+    "intro": "The most-hyped game on Earth, buffered through a 56k modem just for you.",
     "results": [
       {
-        "id": "descent",
-        "title": "The Descent",
-        "emoji": "🕳️",
-        "blurb": "You don't win by fighting, you win by surviving one more floor. Fragile, clever, and quietly relentless.",
-        "gameId": "descent"
-      },
-      {
-        "id": "crypt",
-        "title": "Crypt of the Hollow King",
-        "emoji": "🗝️",
-        "blurb": "You plan ten steps ahead and double-check the math. Luck is for people who didn't read the room.",
+        "id": "heist-planner",
+        "title": "The Heist Planner",
+        "emoji": "🎯",
+        "blurb": "You map every score on graph paper before anyone touches a getaway car. No luck involved — just a perfect, deterministic route.",
         "gameId": "crypt-crawler"
       },
       {
-        "id": "tap",
-        "title": "Tap Surge",
-        "emoji": "⚡",
-        "blurb": "Pure reflex, zero patience, all gas. You get faster the more pressure you're under.",
+        "id": "chaos-agent",
+        "title": "The Chaos Agent",
+        "emoji": "🚗",
+        "blurb": "Plan? You floor it and find out. Reflexes over reading the mission briefing, always.",
         "gameId": "tap-surge"
       },
       {
-        "id": "color",
-        "title": "Color Panic",
-        "emoji": "🌈",
-        "blurb": "You thrive in colorful chaos and constantly shifting rules. Keeping up IS the fun.",
-        "gameId": "color-panic"
+        "id": "open-world-wanderer",
+        "title": "The Open-World Wanderer",
+        "emoji": "🗺️",
+        "blurb": "The main mission can wait — there's a vista to find and a pier to drive off of. You're here to vibe, not to grind.",
+        "gameId": "descent"
       },
       {
-        "id": "split",
-        "title": "Splitter",
-        "emoji": "🫧",
-        "blurb": "You handle one problem and three more appear, and you love it. The longer you last, the wilder it gets.",
-        "gameId": "splitter"
+        "id": "cash-counter",
+        "title": "The Cash Counter",
+        "emoji": "💰",
+        "blurb": "You're not in it for the carnage; you're in it for the payout split. Somebody's gotta settle up who owes whom.",
+        "gameId": "poker-tracker"
       }
     ],
     "questions": [
@@ -47,59 +40,824 @@ export default [
         "q": "Your ideal Friday night?",
         "answers": [
           {
-            "label": "A careful plan executed perfectly",
+            "label": "Mapping the perfect score on graph paper",
             "weights": {
-              "crypt": 2,
-              "descent": 1
+              "heist-planner": 2
             }
           },
           {
-            "label": "Pure adrenaline, no thoughts",
+            "label": "Donuts in a stolen convertible",
             "weights": {
-              "tap": 2,
-              "split": 1
+              "chaos-agent": 2
             }
           },
           {
-            "label": "Loud, bright, total sensory overload",
+            "label": "Driving nowhere just to watch the sunset",
             "weights": {
-              "color": 2
+              "open-world-wanderer": 2
             }
           },
           {
-            "label": "Barely escaping certain doom",
+            "label": "Counting the night's winnings",
             "weights": {
-              "descent": 2
+              "cash-counter": 2
             }
           }
         ]
       },
       {
-        "q": "Pick a problem-solving style.",
+        "q": "The cops show up. You...",
         "answers": [
           {
-            "label": "Shove it into the dark and walk away",
+            "label": "Already planned the exit three steps ago",
             "weights": {
-              "descent": 2
+              "heist-planner": 2
             }
           },
           {
-            "label": "Whiteboard, spreadsheet, route map",
+            "label": "Slam the gas and pray",
             "weights": {
-              "crypt": 2
+              "chaos-agent": 2
             }
           },
           {
-            "label": "React faster than the problem can grow",
+            "label": "Vanish into the hills",
             "weights": {
-              "split": 2,
-              "tap": 1
+              "open-world-wanderer": 2
             }
           },
           {
-            "label": "Sort it by color, somehow",
+            "label": "Quietly bribe your way out",
             "weights": {
-              "color": 2
+              "cash-counter": 1,
+              "heist-planner": 1
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a ringtone",
+        "answers": [
+          {
+            "label": "Tense spy-movie theme",
+            "weights": {
+              "heist-planner": 2
+            }
+          },
+          {
+            "label": "Roaring engine revs",
+            "weights": {
+              "chaos-agent": 2
+            }
+          },
+          {
+            "label": "Mellow radio static",
+            "weights": {
+              "open-world-wanderer": 2
+            }
+          },
+          {
+            "label": "A satisfying cha-ching",
+            "weights": {
+              "cash-counter": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your role in the crew?",
+        "answers": [
+          {
+            "label": "The brains",
+            "weights": {
+              "heist-planner": 2
+            }
+          },
+          {
+            "label": "The wheelman",
+            "weights": {
+              "chaos-agent": 2
+            }
+          },
+          {
+            "label": "The scout",
+            "weights": {
+              "open-world-wanderer": 2
+            }
+          },
+          {
+            "label": "The treasurer",
+            "weights": {
+              "cash-counter": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "resident-evil-requiem-survivor",
+    "title": "Which Resident Evil Requiem Survivor Are You?",
+    "intro": "The survival-horror revival is here — which pixel-grained doomed protagonist are you?",
+    "results": [
+      {
+        "id": "survival-hoarder",
+        "title": "The Survival Hoarder",
+        "emoji": "🧪",
+        "blurb": "You never have enough herbs and you NEVER waste a bullet. Inventory management is your true final boss.",
+        "gameId": "descent"
+      },
+      {
+        "id": "jumpscare-screamer",
+        "title": "The Jumpscare Screamer",
+        "emoji": "😱",
+        "blurb": "Every closet is a threat and every threat makes you yelp. Pure reaction, zero chill.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "lore-detective",
+        "title": "The Lore Detective",
+        "emoji": "📜",
+        "blurb": "You read every dusty file and plan your path through the mansion like a chess match. Knowledge is the real survival tool.",
+        "gameId": "crypt-crawler"
+      },
+      {
+        "id": "speedrun-escapist",
+        "title": "The Speedrun Escapist",
+        "emoji": "🏃",
+        "blurb": "Story? Lore? No thanks — you're sprinting for the exit before the monster multiplies. Outrun everything.",
+        "gameId": "splitter"
+      }
+    ],
+    "questions": [
+      {
+        "q": "You find a save room. You...",
+        "answers": [
+          {
+            "label": "Reorganize your entire inventory",
+            "weights": {
+              "survival-hoarder": 2
+            }
+          },
+          {
+            "label": "Catch your breath, heart pounding",
+            "weights": {
+              "jumpscare-screamer": 2
+            }
+          },
+          {
+            "label": "Read the typewriter note for clues",
+            "weights": {
+              "lore-detective": 2
+            }
+          },
+          {
+            "label": "Don't stop — keep moving",
+            "weights": {
+              "speedrun-escapist": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "A door creaks open behind you.",
+        "answers": [
+          {
+            "label": "Check ammo first",
+            "weights": {
+              "survival-hoarder": 2
+            }
+          },
+          {
+            "label": "SCREAM",
+            "weights": {
+              "jumpscare-screamer": 2
+            }
+          },
+          {
+            "label": "Note the room layout",
+            "weights": {
+              "lore-detective": 2
+            }
+          },
+          {
+            "label": "Already gone",
+            "weights": {
+              "speedrun-escapist": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your survival strategy?",
+        "answers": [
+          {
+            "label": "Conserve everything",
+            "weights": {
+              "survival-hoarder": 2
+            }
+          },
+          {
+            "label": "Panic productively",
+            "weights": {
+              "jumpscare-screamer": 1,
+              "speedrun-escapist": 1
+            }
+          },
+          {
+            "label": "Out-think the horror",
+            "weights": {
+              "lore-detective": 2
+            }
+          },
+          {
+            "label": "Out-run the horror",
+            "weights": {
+              "speedrun-escapist": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a weapon",
+        "answers": [
+          {
+            "label": "A single, precious bullet",
+            "weights": {
+              "survival-hoarder": 2
+            }
+          },
+          {
+            "label": "Whatever's nearest, swung wildly",
+            "weights": {
+              "jumpscare-screamer": 2
+            }
+          },
+          {
+            "label": "A puzzle key you decoded",
+            "weights": {
+              "lore-detective": 2
+            }
+          },
+          {
+            "label": "Your sneakers",
+            "weights": {
+              "speedrun-escapist": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "chart-topper-2026",
+    "title": "Which 2026 Chart-Topper Are You?",
+    "intro": "Taylor, BTS, Ella Langley, or Sabrina — which record-smasher matches your energy, mixtape edition?",
+    "results": [
+      {
+        "id": "taylor-record-breaker",
+        "title": "Taylor Swift, Record-Breaker",
+        "emoji": "🎤",
+        "blurb": "You don't chase milestones — you set them, then quietly lap the field again. Fifteen number ones and still building bridges.",
+        "gameId": "piano-tiles"
+      },
+      {
+        "id": "bts-comeback-king",
+        "title": "BTS, Comeback King",
+        "emoji": "💜",
+        "blurb": "You go quiet, then return and break a decade-old sales record in a single week. The reunion energy is unmatched.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "ella-langley-breakout",
+        "title": "Ella Langley, Breakout Star",
+        "emoji": "🤠",
+        "blurb": "Seven weeks at the top and a No. 1 debut — you came out of nowhere and refused to leave. Boots planted, charts conquered.",
+        "gameId": "wheel-of-names"
+      },
+      {
+        "id": "sabrina-carpenter-pop",
+        "title": "Sabrina Carpenter, Pop Sweetheart",
+        "emoji": "🍬",
+        "blurb": "Playful, glossy, and impossible to skip — you anchor the year's hits with a wink. Pure earworm engineering.",
+        "gameId": "color-panic"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Your comeback strategy?",
+        "answers": [
+          {
+            "label": "Drop a flawless body of work, no notes",
+            "weights": {
+              "taylor-record-breaker": 2
+            }
+          },
+          {
+            "label": "Disappear, then return to deafening screams",
+            "weights": {
+              "bts-comeback-king": 2
+            }
+          },
+          {
+            "label": "Grind until they can't ignore me",
+            "weights": {
+              "ella-langley-breakout": 2
+            }
+          },
+          {
+            "label": "Keep it fun and just out-charm everyone",
+            "weights": {
+              "sabrina-carpenter-pop": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a stage outfit",
+        "answers": [
+          {
+            "label": "Era-defining and meticulously planned",
+            "weights": {
+              "taylor-record-breaker": 2
+            }
+          },
+          {
+            "label": "Coordinated to the millisecond with seven others",
+            "weights": {
+              "bts-comeback-king": 2
+            }
+          },
+          {
+            "label": "Boots, denim, attitude",
+            "weights": {
+              "ella-langley-breakout": 2
+            }
+          },
+          {
+            "label": "Sparkly and unapologetically cute",
+            "weights": {
+              "sabrina-carpenter-pop": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your fans are...",
+        "answers": [
+          {
+            "label": "Decoding every lyric for hidden clues",
+            "weights": {
+              "taylor-record-breaker": 2
+            }
+          },
+          {
+            "label": "Buying half a million copies overnight",
+            "weights": {
+              "bts-comeback-king": 2
+            }
+          },
+          {
+            "label": "Hollering every word at the bar",
+            "weights": {
+              "ella-langley-breakout": 2
+            }
+          },
+          {
+            "label": "Replaying the hook for the 40th time",
+            "weights": {
+              "sabrina-carpenter-pop": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do you handle a record?",
+        "answers": [
+          {
+            "label": "Break it, then break my own",
+            "weights": {
+              "taylor-record-breaker": 2
+            }
+          },
+          {
+            "label": "Shatter a decade-old one in one week",
+            "weights": {
+              "bts-comeback-king": 2
+            }
+          },
+          {
+            "label": "Set the biggest week of the year",
+            "weights": {
+              "ella-langley-breakout": 2
+            }
+          },
+          {
+            "label": "Land another hit, no big deal",
+            "weights": {
+              "sabrina-carpenter-pop": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blockbuster-2026",
+    "title": "Which 2026 Blockbuster Are You?",
+    "intro": "Avatar, Dune, He-Man, or Miranda Priestly — pick your popcorn destiny, VHS-rewound edition.",
+    "results": [
+      {
+        "id": "avatar-fire-and-ash",
+        "title": "Avatar: Fire and Ash",
+        "emoji": "🔥",
+        "blurb": "You're a billion-dollar spectacle that descends into a glowing, dangerous world and dares you to survive it. Big, bold, and best in the dark.",
+        "gameId": "descent"
+      },
+      {
+        "id": "dune-part-three",
+        "title": "Dune: Part Three",
+        "emoji": "🏜️",
+        "blurb": "Every move is calculated, every step prophesied — you plan the whole campaign before lifting a finger. No luck, just destiny math.",
+        "gameId": "crypt-crawler"
+      },
+      {
+        "id": "masters-of-the-universe",
+        "title": "Masters of the Universe",
+        "emoji": "⚔️",
+        "blurb": "Pure '80s toy-aisle adrenaline with He-Man swinging and Skeletor scheming. You're loud, fast, and packed with Easter eggs.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "devil-wears-prada-2",
+        "title": "The Devil Wears Prada 2",
+        "emoji": "👠",
+        "blurb": "Mid-2000s glamour returns with Meryl and Anne picking who's in and who's out. You spin the wheel of fashion fate with a single raised eyebrow.",
+        "gameId": "wheel-of-names"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Your ideal movie night?",
+        "answers": [
+          {
+            "label": "Eye-melting visuals on the biggest screen",
+            "weights": {
+              "avatar-fire-and-ash": 2
+            }
+          },
+          {
+            "label": "A slow, brainy epic I'll rewatch with notes",
+            "weights": {
+              "dune-part-three": 2
+            }
+          },
+          {
+            "label": "Loud, fun nostalgia with my old toys nearby",
+            "weights": {
+              "masters-of-the-universe": 2
+            }
+          },
+          {
+            "label": "Sharp, glossy comedy with killer outfits",
+            "weights": {
+              "devil-wears-prada-2": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a vibe",
+        "answers": [
+          {
+            "label": "Dangerous and dazzling",
+            "weights": {
+              "avatar-fire-and-ash": 2
+            }
+          },
+          {
+            "label": "Prophetic and patient",
+            "weights": {
+              "dune-part-three": 2
+            }
+          },
+          {
+            "label": "Saturday-morning cartoon chaos",
+            "weights": {
+              "masters-of-the-universe": 2
+            }
+          },
+          {
+            "label": "Effortlessly chic and a little ruthless",
+            "weights": {
+              "devil-wears-prada-2": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do you win?",
+        "answers": [
+          {
+            "label": "Overwhelming spectacle",
+            "weights": {
+              "avatar-fire-and-ash": 2
+            }
+          },
+          {
+            "label": "Out-planning everyone",
+            "weights": {
+              "dune-part-three": 2
+            }
+          },
+          {
+            "label": "Hitting first and hardest",
+            "weights": {
+              "masters-of-the-universe": 2
+            }
+          },
+          {
+            "label": "A single devastating look",
+            "weights": {
+              "devil-wears-prada-2": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your sequel energy?",
+        "answers": [
+          {
+            "label": "Bigger and brighter than ever",
+            "weights": {
+              "avatar-fire-and-ash": 2
+            }
+          },
+          {
+            "label": "The story finally pays off",
+            "weights": {
+              "dune-part-three": 1,
+              "avatar-fire-and-ash": 1
+            }
+          },
+          {
+            "label": "Reboot loaded with fan service",
+            "weights": {
+              "masters-of-the-universe": 2
+            }
+          },
+          {
+            "label": "That's all, darling",
+            "weights": {
+              "devil-wears-prada-2": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "viral-meme-2026",
+    "title": "Which Viral Meme Are You?",
+    "intro": "Chill Guy, the Homer donut bit, or pure TikTok brainrot — which 2026 meme lives in your soul?",
+    "results": [
+      {
+        "id": "chill-guy",
+        "title": "Chill Guy",
+        "emoji": "😎",
+        "blurb": "You just shrug and vibe through chaos like a movement, not a meme. Nothing fazes you — ask and the universe will answer eventually.",
+        "gameId": "magic-8-ball"
+      },
+      {
+        "id": "homer-donut",
+        "title": "Homer Dropped His Donut",
+        "emoji": "🍩",
+        "blurb": "You're the perfect cartoon snack-grab, fumbled at the worst moment. Reflexes betray you, but you'd do it again.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "brainrot-overload",
+        "title": "Peak TikTok Brainrot",
+        "emoji": "🧠",
+        "blurb": "Your brain is six tabs of absurdist trends fighting for control. Somehow that's a workout in itself.",
+        "gameId": "mind-flood"
+      },
+      {
+        "id": "bendy-arbys-chaos",
+        "title": "Bendy & Arby's Chaos",
+        "emoji": "🐰",
+        "blurb": "You're the niche meme that splits into ten weirder memes the moment anyone looks away. Endless, unstoppable, slightly cursed.",
+        "gameId": "splitter"
+      }
+    ],
+    "questions": [
+      {
+        "q": "How do you react to bad news?",
+        "answers": [
+          {
+            "label": "Shrug, stay chill",
+            "weights": {
+              "chill-guy": 2
+            }
+          },
+          {
+            "label": "Drop my donut in slow motion",
+            "weights": {
+              "homer-donut": 2
+            }
+          },
+          {
+            "label": "Spiral into seven unrelated thoughts",
+            "weights": {
+              "brainrot-overload": 2
+            }
+          },
+          {
+            "label": "Spawn three new problems",
+            "weights": {
+              "bendy-arbys-chaos": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your group chat energy?",
+        "answers": [
+          {
+            "label": "The calm one",
+            "weights": {
+              "chill-guy": 2
+            }
+          },
+          {
+            "label": "The clumsy comic relief",
+            "weights": {
+              "homer-donut": 2
+            }
+          },
+          {
+            "label": "The one posting nonstop nonsense",
+            "weights": {
+              "brainrot-overload": 2
+            }
+          },
+          {
+            "label": "The one who derails everything",
+            "weights": {
+              "bendy-arbys-chaos": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a personality trait",
+        "answers": [
+          {
+            "label": "Unbothered",
+            "weights": {
+              "chill-guy": 2
+            }
+          },
+          {
+            "label": "Lovable klutz",
+            "weights": {
+              "homer-donut": 2
+            }
+          },
+          {
+            "label": "Overstimulated",
+            "weights": {
+              "brainrot-overload": 2
+            }
+          },
+          {
+            "label": "Chaotic and multiplying",
+            "weights": {
+              "bendy-arbys-chaos": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How long will you stay relevant?",
+        "answers": [
+          {
+            "label": "Forever, it's a movement",
+            "weights": {
+              "chill-guy": 2
+            }
+          },
+          {
+            "label": "One perfectly timed clip",
+            "weights": {
+              "homer-donut": 2
+            }
+          },
+          {
+            "label": "Until the next trend, in 4 minutes",
+            "weights": {
+              "brainrot-overload": 2
+            }
+          },
+          {
+            "label": "I keep coming back, weirder",
+            "weights": {
+              "bendy-arbys-chaos": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cozy-comeback-2026",
+    "title": "Which Nostalgic Comeback Are You?",
+    "intro": "Pokémon's cozy turn, Prada's return, The Bear's farewell, or the Targaryen civil war — which revival are you?",
+    "results": [
+      {
+        "id": "pokemon-pokopia",
+        "title": "Pokémon Pokopia",
+        "emoji": "🌿",
+        "blurb": "You're the cozy 30-year anniversary glow-up, all building and chilling. Pure comfort with a nostalgic heartbeat.",
+        "gameId": "wheel-of-names"
+      },
+      {
+        "id": "prada-glam-return",
+        "title": "The Devil Wears Prada 2",
+        "emoji": "👠",
+        "blurb": "You strut back in with mid-2000s glamour and a withering glance. Some legends never go out of style.",
+        "gameId": "color-panic"
+      },
+      {
+        "id": "the-bear-finale",
+        "title": "The Bear's Farewell",
+        "emoji": "🐻",
+        "blurb": "You're high-pressure, high-stakes, and going out with a tearful bang. Every second counts and the kitchen is on fire.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "house-of-the-dragon",
+        "title": "House of the Dragon",
+        "emoji": "🐉",
+        "blurb": "You're deep in the scheming endgame, planning every alliance and betrayal. No move is wasted in the dance of dragons.",
+        "gameId": "crypt-crawler"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Your comeback mood?",
+        "answers": [
+          {
+            "label": "Soft, warm, and nostalgic",
+            "weights": {
+              "pokemon-pokopia": 2
+            }
+          },
+          {
+            "label": "Glamorous and a little savage",
+            "weights": {
+              "prada-glam-return": 2
+            }
+          },
+          {
+            "label": "Intense and bittersweet",
+            "weights": {
+              "the-bear-finale": 2
+            }
+          },
+          {
+            "label": "Scheming and epic",
+            "weights": {
+              "house-of-the-dragon": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a setting",
+        "answers": [
+          {
+            "label": "A cozy little island home",
+            "weights": {
+              "pokemon-pokopia": 2
+            }
+          },
+          {
+            "label": "A glossy fashion office",
+            "weights": {
+              "prada-glam-return": 2
+            }
+          },
+          {
+            "label": "A chaotic restaurant kitchen",
+            "weights": {
+              "the-bear-finale": 2
+            }
+          },
+          {
+            "label": "A war council of dragons",
+            "weights": {
+              "house-of-the-dragon": 2
             }
           }
         ]
@@ -108,58 +866,219 @@ export default [
         "q": "How do you handle pressure?",
         "answers": [
           {
-            "label": "I speed up and lock in",
+            "label": "Build something calming instead",
             "weights": {
-              "tap": 2
+              "pokemon-pokopia": 2
             }
           },
           {
-            "label": "I slow down and calculate",
+            "label": "Raise an eyebrow and delegate",
             "weights": {
-              "crypt": 2
+              "prada-glam-return": 2
             }
           },
           {
-            "label": "I juggle five things at once",
+            "label": "Yes, Chef — full speed ahead",
             "weights": {
-              "color": 1,
-              "split": 2
+              "the-bear-finale": 2
             }
           },
           {
-            "label": "I just need to not die",
+            "label": "Plot three moves ahead",
+            "weights": {
+              "house-of-the-dragon": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your farewell would be...",
+        "answers": [
+          {
+            "label": "A peaceful new beginning",
+            "weights": {
+              "pokemon-pokopia": 2
+            }
+          },
+          {
+            "label": "A perfectly timed exit line",
+            "weights": {
+              "prada-glam-return": 2
+            }
+          },
+          {
+            "label": "Emotional and unforgettable",
+            "weights": {
+              "the-bear-finale": 2
+            }
+          },
+          {
+            "label": "A penultimate cliffhanger",
+            "weights": {
+              "house-of-the-dragon": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "which-ourcade-game",
+    "title": "Which OURCADE Game Are You?",
+    "intro": "Five games, one you. Best viewed in 1024x768.",
+    "results": [
+      {
+        "id": "descent",
+        "title": "The Descent",
+        "emoji": "🕳️",
+        "blurb": "Fragile, clever, and allergic to healing — you survive by shoving problems into the dark. Every floor is beatable if you're brave enough.",
+        "gameId": "descent"
+      },
+      {
+        "id": "crypt-crawler",
+        "title": "Crypt of the Hollow King",
+        "emoji": "🗝️",
+        "blurb": "You don't gamble; you calculate. Route-finding and HP math are your love languages.",
+        "gameId": "crypt-crawler"
+      },
+      {
+        "id": "tap-surge",
+        "title": "Tap Surge",
+        "emoji": "⚡",
+        "blurb": "All reflex, all the time — you tap before your brain catches up. The faster it gets, the more alive you feel.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "color-panic",
+        "title": "Color Panic",
+        "emoji": "🌈",
+        "blurb": "You thrive when the rules keep changing mid-task. Focus is your superpower when tiles rain down.",
+        "gameId": "color-panic"
+      },
+      {
+        "id": "mind-flood",
+        "title": "Mind Flood",
+        "emoji": "🧠",
+        "blurb": "You're six brain trainers in a trench coat, always testing your own limits. Memory, math, and reflexes — bring it all on.",
+        "gameId": "mind-flood"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Pick a mood",
+        "answers": [
+          {
+            "label": "Careful and a little doomed",
             "weights": {
               "descent": 2
             }
+          },
+          {
+            "label": "Cold and calculated",
+            "weights": {
+              "crypt-crawler": 2
+            }
+          },
+          {
+            "label": "Fast-twitch and frantic",
+            "weights": {
+              "tap-surge": 2,
+              "color-panic": 1
+            }
+          },
+          {
+            "label": "Curious and brainy",
+            "weights": {
+              "mind-flood": 2
+            }
           }
         ]
       },
       {
-        "q": "Choose a victory feeling.",
+        "q": "What do you love most?",
         "answers": [
           {
-            "label": "A flawless, hitless run",
+            "label": "Planning the perfect route",
             "weights": {
-              "descent": 2,
-              "crypt": 1
+              "crypt-crawler": 2,
+              "descent": 1
             }
           },
           {
-            "label": "A new high score by a single point",
+            "label": "Pure reflex tests",
             "weights": {
-              "tap": 2
+              "tap-surge": 2
             }
           },
           {
-            "label": "Surviving way past where I should've",
+            "label": "Keeping up with shifting targets",
             "weights": {
-              "split": 2
+              "color-panic": 2
             }
           },
           {
-            "label": "Nailing the pattern when it changed",
+            "label": "Stretching my brain",
             "weights": {
-              "color": 2
+              "mind-flood": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your win condition?",
+        "answers": [
+          {
+            "label": "Survive against all odds",
+            "weights": {
+              "descent": 2
+            }
+          },
+          {
+            "label": "Solve it flawlessly",
+            "weights": {
+              "crypt-crawler": 2
+            }
+          },
+          {
+            "label": "Outlast the speed-up",
+            "weights": {
+              "tap-surge": 2
+            }
+          },
+          {
+            "label": "Stay focused while it changes",
+            "weights": {
+              "color-panic": 2,
+              "mind-flood": 1
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a challenge",
+        "answers": [
+          {
+            "label": "Risk and survival",
+            "weights": {
+              "descent": 2
+            }
+          },
+          {
+            "label": "A logic puzzle",
+            "weights": {
+              "crypt-crawler": 2
+            }
+          },
+          {
+            "label": "Reaction endurance",
+            "weights": {
+              "tap-surge": 2
+            }
+          },
+          {
+            "label": "Total cognition",
+            "weights": {
+              "mind-flood": 2
             }
           }
         ]
@@ -167,317 +1086,152 @@ export default [
     ]
   },
   {
-    "id": "which-computer-lab-snack-are-you",
-    "title": "Which Computer-Lab Snack Are You?",
-    "intro": "It's lunch, the bell rang, and your backpack is full of crinkly chaos. Which snack are you really?",
+    "id": "arcade-snack",
+    "title": "Which Lunchroom Arcade Snack Are You?",
+    "intro": "The fuel of every after-school gaming binge — which classic snack are you, really?",
     "results": [
+      {
+        "id": "pizza-bagel",
+        "title": "The Pizza Bagel",
+        "emoji": "🍕",
+        "blurb": "Reliable, hot, and ready in a snap of energy — you're pure comfort fuel. Best enjoyed mid-button-mash.",
+        "gameId": "tap-surge"
+      },
       {
         "id": "gushers",
         "title": "Gushers",
-        "emoji": "🟥",
-        "blurb": "Bright, loud, and faintly mysterious about what's inside. You're the colorful surprise nobody saw coming.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "dunkaroos",
-        "title": "Dunkaroos",
-        "emoji": "🍪",
-        "blurb": "Sweet, fast, and over before you wanted it to be. You bring instant joy and a sugar crash.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "hot-cheetos",
-        "title": "Flamin' Hot Cheetos",
-        "emoji": "🔥",
-        "blurb": "Intense, messy, and impossible to ignore. You leave a mark on everything you touch.",
+        "emoji": "🫐",
+        "blurb": "You explode at the slightest pressure and split into pure chaos. Sticky, intense, unforgettable.",
         "gameId": "splitter"
       },
       {
-        "id": "capri-sun",
-        "title": "Capri Sun",
-        "emoji": "🧃",
-        "blurb": "You look simple but require real focus to crack. Once people figure you out, they're loyal forever.",
-        "gameId": "mind-flood"
-      },
-      {
-        "id": "fruit-by-the-foot",
-        "title": "Fruit by the Foot",
-        "emoji": "📏",
-        "blurb": "Long, rhythmic, weirdly hypnotic to unroll. You're a whole little ceremony.",
-        "gameId": "piano-tiles"
-      }
-    ],
-    "questions": [
-      {
-        "q": "What's your energy at recess?",
-        "answers": [
-          {
-            "label": "Bouncing off the walls",
-            "weights": {
-              "dunkaroos": 2,
-              "hot-cheetos": 1
-            }
-          },
-          {
-            "label": "Loud and unpredictable",
-            "weights": {
-              "gushers": 2
-            }
-          },
-          {
-            "label": "Calm, focused, in my zone",
-            "weights": {
-              "capri-sun": 2,
-              "fruit-by-the-foot": 1
-            }
-          },
-          {
-            "label": "Slow and theatrical about everything",
-            "weights": {
-              "fruit-by-the-foot": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick a flavor of personality.",
-        "answers": [
-          {
-            "label": "Sugary and instant",
-            "weights": {
-              "dunkaroos": 2
-            }
-          },
-          {
-            "label": "Spicy and a little chaotic",
-            "weights": {
-              "hot-cheetos": 2
-            }
-          },
-          {
-            "label": "Fruity and confusing",
-            "weights": {
-              "gushers": 2
-            }
-          },
-          {
-            "label": "Refreshing once you get me open",
-            "weights": {
-              "capri-sun": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "What do friends say about you?",
-        "answers": [
-          {
-            "label": "Leaves a mess everywhere",
-            "weights": {
-              "hot-cheetos": 2
-            }
-          },
-          {
-            "label": "Gone too soon",
-            "weights": {
-              "dunkaroos": 2
-            }
-          },
-          {
-            "label": "Worth the effort",
-            "weights": {
-              "capri-sun": 2
-            }
-          },
-          {
-            "label": "Honestly kind of a whole experience",
-            "weights": {
-              "fruit-by-the-foot": 1,
-              "gushers": 1
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your snack-table strategy?",
-        "answers": [
-          {
-            "label": "Trade for the brightest thing",
-            "weights": {
-              "gushers": 2
-            }
-          },
-          {
-            "label": "Hoard the spicy stuff",
-            "weights": {
-              "hot-cheetos": 2
-            }
-          },
-          {
-            "label": "Make it last all period",
-            "weights": {
-              "fruit-by-the-foot": 2
-            }
-          },
-          {
-            "label": "Quietly enjoy mine and dip",
-            "weights": {
-              "capri-sun": 1,
-              "dunkaroos": 1
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-dial-up-sound-are-you",
-    "title": "Which Dial-Up Sound Are You?",
-    "intro": "56k of pure personality. Hold still while we connect to your true self (this may take 4 minutes).",
-    "results": [
-      {
-        "id": "screech",
-        "title": "The Screech",
-        "emoji": "📞",
-        "blurb": "You announce yourself at maximum volume whether anyone's ready or not. Chaotic, urgent, impossible to sleep through.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "handshake",
-        "title": "The Handshake",
-        "emoji": "🤝",
-        "blurb": "Methodical and a little nerdy, you negotiate every detail before committing. Everyone trusts you to make the connection work.",
-        "gameId": "mind-flood"
-      },
-      {
-        "id": "static",
-        "title": "The Static",
-        "emoji": "📺",
-        "blurb": "You're a wall of beautiful noise that somehow makes sense. People can't always read you, but they can't look away.",
+        "id": "pixy-stix",
+        "title": "Pixy Stix",
+        "emoji": "🌈",
+        "blurb": "You're a rainbow of pure sugar that demands lightning focus. Blink and you'll miss the right color.",
         "gameId": "color-panic"
       },
       {
-        "id": "mail",
-        "title": "You've Got Mail",
-        "emoji": "📬",
-        "blurb": "You're the cheerful payoff after all that suffering. People light up the second you show up.",
-        "gameId": "wheel-of-names"
+        "id": "capri-sun",
+        "title": "Capri-Sun",
+        "emoji": "🧃",
+        "blurb": "Calm, refreshing, and a little mysterious to stab open. You answer life's questions one squeeze at a time.",
+        "gameId": "magic-8-ball"
       }
     ],
     "questions": [
       {
-        "q": "How do you enter a room?",
+        "q": "Your energy level?",
         "answers": [
           {
-            "label": "Loudly and immediately",
+            "label": "Steady and dependable",
             "weights": {
-              "screech": 2
+              "pizza-bagel": 2
             }
           },
           {
-            "label": "With a polite, careful intro",
+            "label": "Explosive and messy",
             "weights": {
-              "handshake": 2
+              "gushers": 2
             }
           },
           {
-            "label": "As a vibe nobody can decode",
+            "label": "Maximum sugar rush",
             "weights": {
-              "static": 2
+              "pixy-stix": 2
             }
           },
           {
-            "label": "Like good news arriving",
+            "label": "Cool and laid-back",
             "weights": {
-              "mail": 2
+              "capri-sun": 2
             }
           }
         ]
       },
       {
-        "q": "Your friends are waiting on you. You're…",
+        "q": "How do friends describe you?",
         "answers": [
           {
-            "label": "Already done, somehow",
+            "label": "Comforting",
             "weights": {
-              "screech": 2
+              "pizza-bagel": 2
             }
           },
           {
-            "label": "Triple-checking everything first",
+            "label": "A little unhinged",
             "weights": {
-              "handshake": 2
+              "gushers": 2
             }
           },
           {
-            "label": "Buffering forever",
+            "label": "Colorful and loud",
             "weights": {
-              "static": 2
+              "pixy-stix": 2
             }
           },
           {
-            "label": "Worth the wait every time",
+            "label": "Mysterious and chill",
             "weights": {
-              "mail": 2
+              "capri-sun": 2
             }
           }
         ]
       },
       {
-        "q": "Pick a mood.",
+        "q": "Pick a recess activity",
         "answers": [
           {
-            "label": "Pure urgency",
+            "label": "Rapid-fire arcade tapping",
             "weights": {
-              "screech": 2
+              "pizza-bagel": 2
             }
           },
           {
-            "label": "Quiet competence",
+            "label": "Causing harmless chaos",
             "weights": {
-              "handshake": 1,
-              "mail": 1
+              "gushers": 2
             }
           },
           {
-            "label": "Glorious confusion",
+            "label": "Sorting candy by color",
             "weights": {
-              "static": 2
+              "pixy-stix": 2
             }
           },
           {
-            "label": "Surprise delight",
+            "label": "Asking the 8-ball about your crush",
             "weights": {
-              "mail": 2
+              "capri-sun": 2
             }
           }
         ]
       },
       {
-        "q": "What's your love language?",
+        "q": "Your downside?",
         "answers": [
           {
-            "label": "Being heard from three rooms away",
+            "label": "You burn out fast when overheated",
             "weights": {
-              "screech": 2
+              "pizza-bagel": 2
             }
           },
           {
-            "label": "Negotiating a fair deal",
+            "label": "You go everywhere at once",
             "weights": {
-              "handshake": 2
+              "gushers": 2
             }
           },
           {
-            "label": "Existing as ambient noise nearby",
+            "label": "Pure chaos energy, no nutrients",
             "weights": {
-              "static": 2
+              "pixy-stix": 2
             }
           },
           {
-            "label": "Showing up with good vibes",
+            "label": "Hard to open up",
             "weights": {
-              "mail": 2
+              "capri-sun": 2
             }
           }
         ]
@@ -485,102 +1239,524 @@ export default [
     ]
   },
   {
-    "id": "which-brain-trainer-are-you",
-    "title": "Which Mind Flood Trainer Are You?",
-    "intro": "Six brain games walk into a bar. Which one is you?",
+    "id": "internet-era",
+    "title": "Which Internet Era Are You?",
+    "intro": "From dial-up screeches to six-second loops — which slice of the old web is your soul?",
     "results": [
       {
-        "id": "corsi",
-        "title": "Corsi (Memory)",
-        "emoji": "🔵",
-        "blurb": "You remember everything, in order, forever. Great party trick, terrible for grudges.",
-        "gameId": "mind-flood"
+        "id": "dialup-90s",
+        "title": "The Dial-Up '90s",
+        "emoji": "📟",
+        "blurb": "You're patient, mysterious, and worth the wait — even if it takes three minutes to load. The 8-ball of the web age.",
+        "gameId": "magic-8-ball"
       },
       {
-        "id": "stroop",
-        "title": "Stroop Clash",
-        "emoji": "🌀",
-        "blurb": "You stay calm when the world contradicts itself. Mixed signals are basically your cardio.",
-        "gameId": "mind-flood"
+        "id": "flash-game-2000s",
+        "title": "The Flash-Game 2000s",
+        "emoji": "💾",
+        "blurb": "You're a scrappy little masterpiece that someone made for fun and ruined a school year over. Endlessly replayable, gloriously janky.",
+        "gameId": "descent"
       },
       {
-        "id": "math-rush",
-        "title": "Math Rush",
-        "emoji": "➗",
-        "blurb": "You do the math before anyone else opens their calculator. Speed and certainty, no notes.",
-        "gameId": "mind-flood"
+        "id": "myspace-2007",
+        "title": "The MySpace '07",
+        "emoji": "🎸",
+        "blurb": "Top 8 drama and a custom song that autoplays — you're all personality and curation. Spin the wheel to pick your bestie.",
+        "gameId": "wheel-of-names"
       },
       {
-        "id": "n-back",
-        "title": "N-Back",
-        "emoji": "🧠",
-        "blurb": "You hold a dozen things in your head and rotate them like a juggler. Most people get dizzy watching.",
-        "gameId": "mind-flood"
-      },
-      {
-        "id": "go-no-go",
-        "title": "Go / No-Go",
-        "emoji": "🚦",
-        "blurb": "You know exactly when to act and when to freeze. Impulse control is your superpower.",
-        "gameId": "mind-flood"
+        "id": "vine-2013",
+        "title": "The Vine 2013",
+        "emoji": "📱",
+        "blurb": "Six seconds, infinite loops, pure chaos energy that splinters into a hundred remixes. Quotable forever.",
+        "gameId": "splitter"
       }
     ],
     "questions": [
       {
-        "q": "Pick your strongest skill.",
+        "q": "Your loading speed?",
         "answers": [
           {
-            "label": "Remembering sequences",
+            "label": "Glacial but worth it",
             "weights": {
-              "corsi": 2
+              "dialup-90s": 2
             }
           },
           {
-            "label": "Ignoring distractions",
+            "label": "Instant once the plugin loads",
             "weights": {
-              "stroop": 2
+              "flash-game-2000s": 2
             }
           },
           {
-            "label": "Fast mental math",
+            "label": "As long as the song buffers",
             "weights": {
-              "math-rush": 2
+              "myspace-2007": 2
             }
           },
           {
-            "label": "Holding many things at once",
+            "label": "Six seconds, looping forever",
             "weights": {
-              "n-back": 2
+              "vine-2013": 2
             }
           }
         ]
       },
       {
-        "q": "Your group project role?",
+        "q": "Pick a vibe",
         "answers": [
           {
-            "label": "The one who remembers every detail",
+            "label": "Patient and cryptic",
             "weights": {
-              "corsi": 2
+              "dialup-90s": 2
             }
           },
           {
-            "label": "The one who stays calm in chaos",
+            "label": "Scrappy and addictive",
             "weights": {
-              "stroop": 1,
-              "go-no-go": 1
+              "flash-game-2000s": 2
             }
           },
           {
-            "label": "The one crunching the numbers",
+            "label": "Curated and dramatic",
             "weights": {
-              "math-rush": 2
+              "myspace-2007": 2
             }
           },
           {
-            "label": "The one tracking all the moving parts",
+            "label": "Chaotic and quotable",
             "weights": {
-              "n-back": 2
+              "vine-2013": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do people remember you?",
+        "answers": [
+          {
+            "label": "\"It took FOREVER\"",
+            "weights": {
+              "dialup-90s": 2
+            }
+          },
+          {
+            "label": "\"I played that during class\"",
+            "weights": {
+              "flash-game-2000s": 2
+            }
+          },
+          {
+            "label": "\"You were my Top 8\"",
+            "weights": {
+              "myspace-2007": 2
+            }
+          },
+          {
+            "label": "\"I still quote you\"",
+            "weights": {
+              "vine-2013": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your signature sound?",
+        "answers": [
+          {
+            "label": "A screeching modem handshake",
+            "weights": {
+              "dialup-90s": 2
+            }
+          },
+          {
+            "label": "A satisfying retry chime",
+            "weights": {
+              "flash-game-2000s": 2
+            }
+          },
+          {
+            "label": "An autoplaying emo anthem",
+            "weights": {
+              "myspace-2007": 2
+            }
+          },
+          {
+            "label": "A six-second meme loop",
+            "weights": {
+              "vine-2013": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reaction-game-player",
+    "title": "Which Reaction-Game Player Are You?",
+    "intro": "When the dots fall and the clock speeds up, what kind of tapper emerges?",
+    "results": [
+      {
+        "id": "tap-surge-tapper",
+        "title": "The Surge Tapper",
+        "emoji": "⚡",
+        "blurb": "You live for raw speed — tap the dots before they vanish and never blink. Three misses? Not in your house.",
+        "gameId": "tap-surge"
+      },
+      {
+        "id": "color-panic-sorter",
+        "title": "The Color Sorter",
+        "emoji": "🌈",
+        "blurb": "You thrive when the target keeps shifting and tiles rain down. Adaptability is your whole personality.",
+        "gameId": "color-panic"
+      },
+      {
+        "id": "piano-tiles-rhythmist",
+        "title": "The Rhythmist",
+        "emoji": "🎹",
+        "blurb": "You feel the beat in your bones and hit every lane Perfect, never Good. Timing is everything.",
+        "gameId": "piano-tiles"
+      },
+      {
+        "id": "splitter-popper",
+        "title": "The Popper",
+        "emoji": "💥",
+        "blurb": "You pop the dots before they multiply, holding back the flood by sheer will. The longer you last, the more frantic it gets.",
+        "gameId": "splitter"
+      }
+    ],
+    "questions": [
+      {
+        "q": "What's your edge?",
+        "answers": [
+          {
+            "label": "Pure speed",
+            "weights": {
+              "tap-surge-tapper": 2
+            }
+          },
+          {
+            "label": "Adapting to changes",
+            "weights": {
+              "color-panic-sorter": 2
+            }
+          },
+          {
+            "label": "Perfect timing",
+            "weights": {
+              "piano-tiles-rhythmist": 2
+            }
+          },
+          {
+            "label": "Crowd control",
+            "weights": {
+              "splitter-popper": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your worst enemy?",
+        "answers": [
+          {
+            "label": "Dots that vanish too fast",
+            "weights": {
+              "tap-surge-tapper": 2
+            }
+          },
+          {
+            "label": "A target that won't sit still",
+            "weights": {
+              "color-panic-sorter": 2
+            }
+          },
+          {
+            "label": "Being a hair off the beat",
+            "weights": {
+              "piano-tiles-rhythmist": 2
+            }
+          },
+          {
+            "label": "Things that multiply",
+            "weights": {
+              "splitter-popper": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a focus",
+        "answers": [
+          {
+            "label": "Don't miss three",
+            "weights": {
+              "tap-surge-tapper": 2
+            }
+          },
+          {
+            "label": "Only hit the right color",
+            "weights": {
+              "color-panic-sorter": 2
+            }
+          },
+          {
+            "label": "Hit the line exactly",
+            "weights": {
+              "piano-tiles-rhythmist": 2
+            }
+          },
+          {
+            "label": "Pop before they split",
+            "weights": {
+              "splitter-popper": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do you feel when it speeds up?",
+        "answers": [
+          {
+            "label": "Alive and locked in",
+            "weights": {
+              "tap-surge-tapper": 2
+            }
+          },
+          {
+            "label": "Sharper than ever",
+            "weights": {
+              "color-panic-sorter": 2
+            }
+          },
+          {
+            "label": "In the groove",
+            "weights": {
+              "piano-tiles-rhythmist": 2
+            }
+          },
+          {
+            "label": "Barely holding the line",
+            "weights": {
+              "splitter-popper": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dungeon-crawler-type",
+    "title": "Which Dungeon Crawler Are You?",
+    "intro": "Down in the dark, two OURCADE crawlers await — which descent-into-doom is your style?",
+    "results": [
+      {
+        "id": "darkness-shover",
+        "title": "The Darkness Shover",
+        "emoji": "🕳️",
+        "blurb": "No healing, no problem — you survive by shoving every threat into the void. Fragile in body, ruthless in tactics.",
+        "gameId": "descent"
+      },
+      {
+        "id": "route-planner",
+        "title": "The Route Planner",
+        "emoji": "🗺️",
+        "blurb": "You map the entire tower before taking a single step. Luck is for people who didn't read ahead.",
+        "gameId": "crypt-crawler"
+      },
+      {
+        "id": "hp-mathematician",
+        "title": "The HP Mathematician",
+        "emoji": "➗",
+        "blurb": "You count every point of damage three turns out. The dungeon is just a spreadsheet with monsters.",
+        "gameId": "crypt-crawler"
+      },
+      {
+        "id": "hitless-daredevil",
+        "title": "The Hitless Daredevil",
+        "emoji": "😤",
+        "blurb": "Every floor is beatable without a scratch, and you intend to prove it. Pure nerve over the dark.",
+        "gameId": "descent"
+      }
+    ],
+    "questions": [
+      {
+        "q": "A monster blocks your path.",
+        "answers": [
+          {
+            "label": "Shove it into the abyss",
+            "weights": {
+              "darkness-shover": 2
+            }
+          },
+          {
+            "label": "Reroute around it",
+            "weights": {
+              "route-planner": 2
+            }
+          },
+          {
+            "label": "Calculate the damage trade",
+            "weights": {
+              "hp-mathematician": 2
+            }
+          },
+          {
+            "label": "Walk past untouched",
+            "weights": {
+              "hitless-daredevil": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do you approach a new floor?",
+        "answers": [
+          {
+            "label": "Look for things to push",
+            "weights": {
+              "darkness-shover": 2
+            }
+          },
+          {
+            "label": "Plan the whole route first",
+            "weights": {
+              "route-planner": 2
+            }
+          },
+          {
+            "label": "Do the HP math",
+            "weights": {
+              "hp-mathematician": 2
+            }
+          },
+          {
+            "label": "Aim for a perfect run",
+            "weights": {
+              "hitless-daredevil": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your relationship with luck?",
+        "answers": [
+          {
+            "label": "I make my own with shoves",
+            "weights": {
+              "darkness-shover": 2
+            }
+          },
+          {
+            "label": "There is no luck, only routes",
+            "weights": {
+              "route-planner": 2
+            }
+          },
+          {
+            "label": "Numbers don't lie",
+            "weights": {
+              "hp-mathematician": 2
+            }
+          },
+          {
+            "label": "I refuse to even get hit",
+            "weights": {
+              "hitless-daredevil": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a victory pose",
+        "answers": [
+          {
+            "label": "Standing over a dark pit",
+            "weights": {
+              "darkness-shover": 2
+            }
+          },
+          {
+            "label": "Holding a flawless map",
+            "weights": {
+              "route-planner": 2
+            }
+          },
+          {
+            "label": "Showing my exact HP total",
+            "weights": {
+              "hp-mathematician": 2
+            }
+          },
+          {
+            "label": "Untouched, not a scratch",
+            "weights": {
+              "hitless-daredevil": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "party-tool-type",
+    "title": "Which Party Tool Are You?",
+    "intro": "Game night's secret MVPs — which OURCADE helper matches your friend-group role?",
+    "results": [
+      {
+        "id": "name-spinner",
+        "title": "The Wheel of Names",
+        "emoji": "🎡",
+        "blurb": "You're the fair-and-final decider when nobody can agree. Drop in the names, spin, and the debate is over.",
+        "gameId": "wheel-of-names"
+      },
+      {
+        "id": "dice-flipper",
+        "title": "Dice & Coin",
+        "emoji": "🎲",
+        "blurb": "You're chaos with a conscience — let the dice decide and the coin break the tie. Sums, breakdowns, history and all.",
+        "gameId": "dice-roller"
+      },
+      {
+        "id": "fate-asker",
+        "title": "The Magic 8-Ball",
+        "emoji": "🎱",
+        "blurb": "You answer every yes/no crisis with cosmic confidence. Twenty replies, infinite drama.",
+        "gameId": "magic-8-ball"
+      },
+      {
+        "id": "money-settler",
+        "title": "The Poker Night Tracker",
+        "emoji": "💵",
+        "blurb": "You're the responsible one tallying buy-ins so nobody fights over the cash. Exact who-pays-whom, every time.",
+        "gameId": "poker-tracker"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Your role on game night?",
+        "answers": [
+          {
+            "label": "The fair tiebreaker",
+            "weights": {
+              "name-spinner": 2
+            }
+          },
+          {
+            "label": "The chaos goblin",
+            "weights": {
+              "dice-flipper": 2
+            }
+          },
+          {
+            "label": "The drama oracle",
+            "weights": {
+              "fate-asker": 2
+            }
+          },
+          {
+            "label": "The responsible treasurer",
+            "weights": {
+              "money-settler": 2
             }
           }
         ]
@@ -589,1622 +1765,391 @@ export default [
         "q": "How do you make decisions?",
         "answers": [
           {
-            "label": "Patiently, only when it's right",
+            "label": "Spin and accept fate",
             "weights": {
-              "go-no-go": 2
+              "name-spinner": 2
             }
           },
           {
-            "label": "Instantly, with the numbers",
+            "label": "Roll for it",
+            "weights": {
+              "dice-flipper": 2
+            }
+          },
+          {
+            "label": "Ask the universe yes or no",
+            "weights": {
+              "fate-asker": 2
+            }
+          },
+          {
+            "label": "Crunch the numbers",
+            "weights": {
+              "money-settler": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a vibe",
+        "answers": [
+          {
+            "label": "Impartial and final",
+            "weights": {
+              "name-spinner": 2
+            }
+          },
+          {
+            "label": "Random and fun",
+            "weights": {
+              "dice-flipper": 2
+            }
+          },
+          {
+            "label": "Mystical and cheeky",
+            "weights": {
+              "fate-asker": 2
+            }
+          },
+          {
+            "label": "Organized and trustworthy",
+            "weights": {
+              "money-settler": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "The group is arguing. You...",
+        "answers": [
+          {
+            "label": "Spin to settle it",
+            "weights": {
+              "name-spinner": 2
+            }
+          },
+          {
+            "label": "Roll a d20 on it",
+            "weights": {
+              "dice-flipper": 2
+            }
+          },
+          {
+            "label": "Shake for an answer",
+            "weights": {
+              "fate-asker": 2
+            }
+          },
+          {
+            "label": "Pull up the ledger",
+            "weights": {
+              "money-settler": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "y2k-gadget",
+    "title": "Which Y2K Gadget Are You?",
+    "intro": "Pocket tech from the chunky-plastic golden age — which beloved device are you?",
+    "results": [
+      {
+        "id": "tamagotchi",
+        "title": "The Tamagotchi",
+        "emoji": "🥚",
+        "blurb": "You need constant attention and reward it with pure joy. Neglect you for a day and there's chaos — but you keep your owner's brain sharp.",
+        "gameId": "mind-flood"
+      },
+      {
+        "id": "ipod-classic",
+        "title": "The iPod Classic",
+        "emoji": "🎵",
+        "blurb": "You're sleek, rhythmic, and hold a thousand songs in your soul. Scroll wheel forever, tap to the beat.",
+        "gameId": "piano-tiles"
+      },
+      {
+        "id": "gameboy",
+        "title": "The Game Boy",
+        "emoji": "🎮",
+        "blurb": "Rugged, pixelated, and built to survive a dungeon crawl on four AAs. You're the original pocket adventure.",
+        "gameId": "descent"
+      },
+      {
+        "id": "razr-flip",
+        "title": "The RAZR Flip Phone",
+        "emoji": "📱",
+        "blurb": "You snap shut with dramatic flair and answer questions with one cool flip. Style first, function flexible.",
+        "gameId": "magic-8-ball"
+      }
+    ],
+    "questions": [
+      {
+        "q": "Your main personality trait?",
+        "answers": [
+          {
+            "label": "High-maintenance but adorable",
+            "weights": {
+              "tamagotchi": 2
+            }
+          },
+          {
+            "label": "Sleek and musical",
+            "weights": {
+              "ipod-classic": 2
+            }
+          },
+          {
+            "label": "Tough and pixelated",
+            "weights": {
+              "gameboy": 2
+            }
+          },
+          {
+            "label": "Dramatic and stylish",
+            "weights": {
+              "razr-flip": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "How do friends use you?",
+        "answers": [
+          {
+            "label": "They check on me constantly",
+            "weights": {
+              "tamagotchi": 2
+            }
+          },
+          {
+            "label": "For the perfect playlist",
+            "weights": {
+              "ipod-classic": 2
+            }
+          },
+          {
+            "label": "For long boredom-killing sessions",
+            "weights": {
+              "gameboy": 2
+            }
+          },
+          {
+            "label": "To look cool flipping me open",
+            "weights": {
+              "razr-flip": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Pick a hobby",
+        "answers": [
+          {
+            "label": "Keeping my brain busy",
+            "weights": {
+              "tamagotchi": 2
+            }
+          },
+          {
+            "label": "Tapping to a rhythm",
+            "weights": {
+              "ipod-classic": 2
+            }
+          },
+          {
+            "label": "Pixel adventures",
+            "weights": {
+              "gameboy": 2
+            }
+          },
+          {
+            "label": "Snappy yes/no answers",
+            "weights": {
+              "razr-flip": 2
+            }
+          }
+        ]
+      },
+      {
+        "q": "Your battery life?",
+        "answers": [
+          {
+            "label": "Drains if ignored",
+            "weights": {
+              "tamagotchi": 2
+            }
+          },
+          {
+            "label": "Lasts the whole road trip",
+            "weights": {
+              "ipod-classic": 2
+            }
+          },
+          {
+            "label": "Eternal on AAs",
+            "weights": {
+              "gameboy": 2
+            }
+          },
+          {
+            "label": "Dies fast but looks great doing it",
+            "weights": {
+              "razr-flip": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "brain-trainer-type",
+    "title": "Which Mind Flood Trainer Are You?",
+    "intro": "Six cognitive workouts, one brain — which Mind Flood mode is secretly YOU?",
+    "results": [
+      {
+        "id": "corsi-memory",
+        "title": "Corsi Block Memory",
+        "emoji": "🧩",
+        "blurb": "You remember the exact order of everything, down to the tile. Spatial memory is your flex.",
+        "gameId": "mind-flood"
+      },
+      {
+        "id": "stroop-clash",
+        "title": "Stroop Clash",
+        "emoji": "🎨",
+        "blurb": "You thrive when the word fights the color and you have to choose right. Cognitive conflict? Bring it.",
+        "gameId": "mind-flood"
+      },
+      {
+        "id": "math-rush",
+        "title": "Math Rush",
+        "emoji": "➗",
+        "blurb": "You do mental arithmetic faster than the calculator loads. Numbers fly and you never flinch.",
+        "gameId": "mind-flood"
+      },
+      {
+        "id": "go-no-go",
+        "title": "Go/No-Go",
+        "emoji": "🚦",
+        "blurb": "You know exactly when to act and when to freeze. Impulse control is your superpower.",
+        "gameId": "mind-flood"
+      }
+    ],
+    "questions": [
+      {
+        "q": "What's your mental strength?",
+        "answers": [
+          {
+            "label": "Remembering sequences",
+            "weights": {
+              "corsi-memory": 2
+            }
+          },
+          {
+            "label": "Resisting the obvious wrong answer",
+            "weights": {
+              "stroop-clash": 2
+            }
+          },
+          {
+            "label": "Lightning arithmetic",
             "weights": {
               "math-rush": 2
             }
           },
           {
-            "label": "Even when signals conflict",
-            "weights": {
-              "stroop": 2
-            }
-          },
-          {
-            "label": "After replaying what came before",
-            "weights": {
-              "corsi": 1,
-              "n-back": 1
-            }
-          }
-        ]
-      },
-      {
-        "q": "What trips other people up but not you?",
-        "answers": [
-          {
-            "label": "Long lists to memorize",
-            "weights": {
-              "corsi": 2
-            }
-          },
-          {
-            "label": "Contradictory instructions",
-            "weights": {
-              "stroop": 2
-            }
-          },
-          {
-            "label": "Knowing when to NOT react",
+            "label": "Knowing when NOT to act",
             "weights": {
               "go-no-go": 2
             }
-          },
-          {
-            "label": "Keeping count while everything changes",
-            "weights": {
-              "n-back": 2
-            }
           }
         ]
-      }
-    ]
-  },
-  {
-    "id": "which-party-tool-are-you",
-    "title": "Which OURCADE Party Tool Are You?",
-    "intro": "You're not a game, you're the friend who runs game night. Which tool are you?",
-    "results": [
-      {
-        "id": "wheel",
-        "title": "Wheel of Names",
-        "emoji": "🎡",
-        "blurb": "You make decisions feel fair and fun, even when they're random. Everyone wants you to pick who goes first.",
-        "gameId": "wheel-of-names"
       },
       {
-        "id": "dice",
-        "title": "Dice & Coin",
-        "emoji": "🎲",
-        "blurb": "You're up for anything and you let chance lead. Roll with you and the night gets interesting.",
-        "gameId": "dice-roller"
-      },
-      {
-        "id": "eightball",
-        "title": "Magic 8-Ball",
-        "emoji": "🎱",
-        "blurb": "You answer everything with confident vagueness. Reply hazy, try again later.",
-        "gameId": "magic-8-ball"
-      },
-      {
-        "id": "poker",
-        "title": "Poker Night Tracker",
-        "emoji": "💰",
-        "blurb": "You keep the books so nobody fights about who owes who. Responsible to a fault, and secretly the MVP.",
-        "gameId": "poker-tracker"
-      }
-    ],
-    "questions": [
-      {
-        "q": "Your role at the hangout?",
+        "q": "Pick a challenge",
         "answers": [
           {
-            "label": "Settling who goes first",
+            "label": "Repeat a growing pattern",
             "weights": {
-              "wheel": 2
+              "corsi-memory": 2
             }
           },
           {
-            "label": "Suggesting we leave it to chance",
+            "label": "Name the color, not the word",
             "weights": {
-              "dice": 2
+              "stroop-clash": 2
             }
           },
           {
-            "label": "Dispensing cryptic advice",
+            "label": "Solve sums against the clock",
             "weights": {
-              "eightball": 2
+              "math-rush": 2
             }
           },
           {
-            "label": "Keeping track of everything",
+            "label": "Hold back at the wrong signal",
             "weights": {
-              "poker": 2
+              "go-no-go": 2
             }
           }
         ]
       },
       {
-        "q": "Someone asks your opinion.",
+        "q": "Your weakness?",
         "answers": [
           {
-            "label": "\"Let's just pick fairly\"",
+            "label": "Long sequences trip me up",
             "weights": {
-              "wheel": 2
+              "corsi-memory": 2
             }
           },
           {
-            "label": "\"Flip for it\"",
+            "label": "Conflicting info confuses me",
             "weights": {
-              "dice": 2
+              "stroop-clash": 2
             }
           },
           {
-            "label": "\"Outlook not so good\"",
+            "label": "Slow math under pressure",
             "weights": {
-              "eightball": 2
+              "math-rush": 2
             }
           },
           {
-            "label": "\"Hold on, let me check the numbers\"",
+            "label": "I act too fast sometimes",
             "weights": {
-              "poker": 2
+              "go-no-go": 2
             }
           }
         ]
       },
       {
-        "q": "Pick a personality trait.",
+        "q": "How do friends describe your brain?",
         "answers": [
           {
-            "label": "Fair and festive",
+            "label": "A photographic memory",
             "weights": {
-              "wheel": 2
+              "corsi-memory": 2
             }
           },
           {
-            "label": "Spontaneous",
+            "label": "Cool under conflicting info",
             "weights": {
-              "dice": 2
+              "stroop-clash": 2
             }
           },
           {
-            "label": "Mysterious",
+            "label": "A human calculator",
             "weights": {
-              "eightball": 1,
-              "dice": 1
+              "math-rush": 2
             }
           },
           {
-            "label": "Organized",
+            "label": "Disciplined and patient",
             "weights": {
-              "poker": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you end the night?",
-        "answers": [
-          {
-            "label": "One last spin to decide cleanup",
-            "weights": {
-              "wheel": 2
-            }
-          },
-          {
-            "label": "Best of three rolls, loser drives",
-            "weights": {
-              "dice": 2
-            }
-          },
-          {
-            "label": "\"Ask again tomorrow\"",
-            "weights": {
-              "eightball": 2
-            }
-          },
-          {
-            "label": "Making sure everyone's squared up",
-            "weights": {
-              "poker": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-y2k-gadget-are-you",
-    "title": "Which Y2K Gadget Are You?",
-    "intro": "Plastic, beeping, and probably translucent. Which turn-of-the-millennium device matches your soul?",
-    "results": [
-      {
-        "id": "tamagotchi",
-        "title": "Tamagotchi",
-        "emoji": "🥚",
-        "blurb": "You're high-maintenance and impossible to ignore, but people adore keeping you alive. One missed check-in and it's chaos.",
-        "gameId": "descent"
-      },
-      {
-        "id": "gameboy",
-        "title": "Game Boy",
-        "emoji": "🎮",
-        "blurb": "Reliable, patient, and tougher than you look. You'll outlast everyone and still work after a drop.",
-        "gameId": "crypt-crawler"
-      },
-      {
-        "id": "ipod-mini",
-        "title": "iPod Mini",
-        "emoji": "🎵",
-        "blurb": "Sleek, rhythmic, and quietly cooler than everything around you. You set the tempo for the whole room.",
-        "gameId": "piano-tiles"
-      },
-      {
-        "id": "razr",
-        "title": "Motorola RAZR",
-        "emoji": "📱",
-        "blurb": "Fast, flashy, and satisfying to snap shut on a conversation. Style and reflexes in equal measure.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "furby",
-        "title": "Furby",
-        "emoji": "👹",
-        "blurb": "Lovably unhinged and a little too talkative. People can't tell if you're a friend or a warning.",
-        "gameId": "splitter"
-      }
-    ],
-    "questions": [
-      {
-        "q": "How needy are you, honestly?",
-        "answers": [
-          {
-            "label": "Extremely, please attend to me",
-            "weights": {
-              "tamagotchi": 2
-            }
-          },
-          {
-            "label": "Low-key, I'll be fine",
-            "weights": {
-              "gameboy": 2
-            }
-          },
-          {
-            "label": "I just want good vibes around me",
-            "weights": {
-              "ipod-mini": 2
-            }
-          },
-          {
-            "label": "I won't stop talking either way",
-            "weights": {
-              "furby": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick an aesthetic.",
-        "answers": [
-          {
-            "label": "Translucent and chunky",
-            "weights": {
-              "gameboy": 1,
-              "tamagotchi": 1
-            }
-          },
-          {
-            "label": "Sleek and minimal",
-            "weights": {
-              "ipod-mini": 2
-            }
-          },
-          {
-            "label": "Flip-phone flashy",
-            "weights": {
-              "razr": 2
-            }
-          },
-          {
-            "label": "Furry and slightly cursed",
-            "weights": {
-              "furby": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your friends describe you as…",
-        "answers": [
-          {
-            "label": "A whole responsibility",
-            "weights": {
-              "tamagotchi": 2
-            }
-          },
-          {
-            "label": "Indestructible",
-            "weights": {
-              "gameboy": 2
-            }
-          },
-          {
-            "label": "The one with taste",
-            "weights": {
-              "ipod-mini": 2
-            }
-          },
-          {
-            "label": "Stylish but chaotic",
-            "weights": {
-              "razr": 1,
-              "furby": 1
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you end a conversation?",
-        "answers": [
-          {
-            "label": "By beeping until they help me",
-            "weights": {
-              "tamagotchi": 2
-            }
-          },
-          {
-            "label": "I never do, I just keep going",
-            "weights": {
-              "gameboy": 1,
-              "furby": 1
-            }
-          },
-          {
-            "label": "With a perfect dramatic snap",
-            "weights": {
-              "razr": 2
-            }
-          },
-          {
-            "label": "By cueing the right song and leaving",
-            "weights": {
-              "ipod-mini": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-reaction-gamer-are-you",
-    "title": "What Kind of Reaction Gamer Are You?",
-    "intro": "Twitchy thumbs, racing heart. Find your true tap-tap-tap calling.",
-    "results": [
-      {
-        "id": "tapper",
-        "title": "The Surger",
-        "emoji": "⚡",
-        "blurb": "You live for speed and rising stakes. Three misses and you're out, but you rarely miss.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "colorist",
-        "title": "The Color Hunter",
-        "emoji": "🌈",
-        "blurb": "You filter chaos in real time and only hit the right target. Changing rules don't scare you, they excite you.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "rhythmist",
-        "title": "The Rhythm Keeper",
-        "emoji": "🎹",
-        "blurb": "You feel the beat in your bones and tap perfectly on the line. Timing is everything, and yours is flawless.",
-        "gameId": "piano-tiles"
-      },
-      {
-        "id": "popper",
-        "title": "The Splitter",
-        "emoji": "🫧",
-        "blurb": "You pop problems before they multiply. The faster it gets, the calmer you become.",
-        "gameId": "splitter"
-      }
-    ],
-    "questions": [
-      {
-        "q": "What's your favorite kind of pressure?",
-        "answers": [
-          {
-            "label": "It just keeps getting faster",
-            "weights": {
-              "tapper": 2
-            }
-          },
-          {
-            "label": "The rules keep changing",
-            "weights": {
-              "colorist": 2
-            }
-          },
-          {
-            "label": "Stay perfectly on beat",
-            "weights": {
-              "rhythmist": 2
-            }
-          },
-          {
-            "label": "More targets every second",
-            "weights": {
-              "popper": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick a failure you fear most.",
-        "answers": [
-          {
-            "label": "Missing three in a row",
-            "weights": {
-              "tapper": 2
-            }
-          },
-          {
-            "label": "Tapping the wrong color",
-            "weights": {
-              "colorist": 2
-            }
-          },
-          {
-            "label": "Being off by a fraction of a second",
-            "weights": {
-              "rhythmist": 2
-            }
-          },
-          {
-            "label": "Letting them split out of control",
-            "weights": {
-              "popper": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you warm up?",
-        "answers": [
-          {
-            "label": "Pure speed drills",
-            "weights": {
-              "tapper": 2
-            }
-          },
-          {
-            "label": "Sorting things by color",
-            "weights": {
-              "colorist": 2
-            }
-          },
-          {
-            "label": "Tapping along to a song",
-            "weights": {
-              "rhythmist": 2
-            }
-          },
-          {
-            "label": "Popping bubble wrap",
-            "weights": {
-              "popper": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Choose a vibe word.",
-        "answers": [
-          {
-            "label": "Relentless",
-            "weights": {
-              "tapper": 2
-            }
-          },
-          {
-            "label": "Sharp",
-            "weights": {
-              "colorist": 1,
-              "popper": 1
-            }
-          },
-          {
-            "label": "Smooth",
-            "weights": {
-              "rhythmist": 2
-            }
-          },
-          {
-            "label": "Unbothered",
-            "weights": {
-              "popper": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-roguelike-hero-are-you",
-    "title": "Which Roguelike Hero Are You?",
-    "intro": "The dungeon is dark and full of math. What kind of adventurer survives in you?",
-    "results": [
-      {
-        "id": "shover",
-        "title": "The Shover",
-        "emoji": "🕳️",
-        "blurb": "You don't fight fair, you fight smart, shoving danger into the void. No healing, no fear, just vibes and gravity.",
-        "gameId": "descent"
-      },
-      {
-        "id": "planner",
-        "title": "The Planner",
-        "emoji": "🗝️",
-        "blurb": "You solve the whole floor in your head before stepping foot on it. Every move accounted for, every HP point spent on purpose.",
-        "gameId": "crypt-crawler"
-      },
-      {
-        "id": "mathlete",
-        "title": "The Mathlete",
-        "emoji": "➗",
-        "blurb": "You treat combat like a spreadsheet and you always balance the books. Numbers are your true weapon.",
-        "gameId": "mind-flood"
-      },
-      {
-        "id": "gambler",
-        "title": "The Gambler",
-        "emoji": "🎲",
-        "blurb": "You trust the dice and the dice usually like you back. High risk, high glory, occasional disaster.",
-        "gameId": "dice-roller"
-      }
-    ],
-    "questions": [
-      {
-        "q": "You enter a new room. First instinct?",
-        "answers": [
-          {
-            "label": "Find the edge to shove things off",
-            "weights": {
-              "shover": 2
-            }
-          },
-          {
-            "label": "Map every tile before moving",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Calculate the damage trade",
-            "weights": {
-              "mathlete": 2
-            }
-          },
-          {
-            "label": "Charge in and see what happens",
-            "weights": {
-              "gambler": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you feel about luck?",
-        "answers": [
-          {
-            "label": "I'd rather not rely on it",
-            "weights": {
-              "planner": 2,
-              "mathlete": 1
-            }
-          },
-          {
-            "label": "It's a tool like any other",
-            "weights": {
-              "shover": 2
-            }
-          },
-          {
-            "label": "Luck is my best friend",
-            "weights": {
-              "gambler": 2
-            }
-          },
-          {
-            "label": "Luck is just probability I haven't done yet",
-            "weights": {
-              "mathlete": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your inventory is…",
-        "answers": [
-          {
-            "label": "Minimal, just enough to survive",
-            "weights": {
-              "shover": 2
-            }
-          },
-          {
-            "label": "Perfectly organized",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Labeled with damage values",
-            "weights": {
-              "mathlete": 2
-            }
-          },
-          {
-            "label": "A chaotic grab-bag of risks",
-            "weights": {
-              "gambler": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you handle a boss?",
-        "answers": [
-          {
-            "label": "Lure it near a pit",
-            "weights": {
-              "shover": 2
-            }
-          },
-          {
-            "label": "Pre-plan every single turn",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Out-math its health bar",
-            "weights": {
-              "mathlete": 2
-            }
-          },
-          {
-            "label": "Pray to the dice gods",
-            "weights": {
-              "gambler": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-jet2-holiday-vibe-are-you",
-    "title": "Which 'Nothing Beats a Holiday' Vibe Are You?",
-    "intro": "That upbeat jingle is playing in your head right now, dial-up edition. Which getaway energy are you?",
-    "results": [
-      {
-        "id": "overpacker",
-        "title": "The Overpacker",
-        "emoji": "🧳",
-        "blurb": "You bring three outfits per day and a backup charger for your backup charger. Prepared for any timeline, even the ones that won't happen.",
-        "gameId": "wheel-of-names"
-      },
-      {
-        "id": "sunbed-sprinter",
-        "title": "The Sunbed Sprinter",
-        "emoji": "☀️",
-        "blurb": "You're up at dawn to claim the best lounger before anyone blinks. Pure reflex, zero chill, all towel.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "buffet-champ",
-        "title": "The Buffet Champion",
-        "emoji": "🍤",
-        "blurb": "You treat the all-inclusive spread like a boss you fully intend to clear. The longer you last, the more plates appear.",
-        "gameId": "splitter"
-      },
-      {
-        "id": "gate-zen",
-        "title": "The Delayed-Gate Zen Master",
-        "emoji": "😌",
-        "blurb": "Flight pushed back four hours? You're unbothered, snacks deployed, fate accepted. Outlook: surprisingly good.",
-        "gameId": "magic-8-ball"
-      }
-    ],
-    "questions": [
-      {
-        "q": "How do you pack for the trip?",
-        "answers": [
-          {
-            "label": "Everything, just in case",
-            "weights": {
-              "overpacker": 2
-            }
-          },
-          {
-            "label": "One bag, ready to sprint",
-            "weights": {
-              "sunbed-sprinter": 2
-            }
-          },
-          {
-            "label": "Stretchy waistband only",
-            "weights": {
-              "buffet-champ": 2
-            }
-          },
-          {
-            "label": "Whatever's nearby, it's fine",
-            "weights": {
-              "gate-zen": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "First morning of vacation, you're…",
-        "answers": [
-          {
-            "label": "Triple-checking the itinerary",
-            "weights": {
-              "overpacker": 2
-            }
-          },
-          {
-            "label": "At the pool before sunrise",
-            "weights": {
-              "sunbed-sprinter": 2
-            }
-          },
-          {
-            "label": "First in line at breakfast",
-            "weights": {
-              "buffet-champ": 2
-            }
-          },
-          {
-            "label": "Sleeping in, no plans",
-            "weights": {
-              "gate-zen": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "A flight delay hits. Your reaction?",
-        "answers": [
-          {
-            "label": "Good thing I packed extra everything",
-            "weights": {
-              "overpacker": 2
-            }
-          },
-          {
-            "label": "Stress-pacing the terminal",
-            "weights": {
-              "sunbed-sprinter": 1,
-              "buffet-champ": 1
-            }
-          },
-          {
-            "label": "Time to find airport snacks",
-            "weights": {
-              "buffet-champ": 2
-            }
-          },
-          {
-            "label": "More relaxation, honestly",
-            "weights": {
-              "gate-zen": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your holiday motto?",
-        "answers": [
-          {
-            "label": "Be prepared",
-            "weights": {
-              "overpacker": 2
-            }
-          },
-          {
-            "label": "Early bird gets the lounger",
-            "weights": {
-              "sunbed-sprinter": 2
-            }
-          },
-          {
-            "label": "Go back for seconds",
-            "weights": {
-              "buffet-champ": 2
-            }
-          },
-          {
-            "label": "It is what it is",
-            "weights": {
-              "gate-zen": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-space-tourist-are-you",
-    "title": "Which 11-Minute Space Tourist Are You?",
-    "intro": "If a quick celebrity space flight launched in the dial-up era, what kind of astronaut would you be?",
-    "results": [
-      {
-        "id": "selfie",
-        "title": "The Selfie Astronaut",
-        "emoji": "🤳",
-        "blurb": "You spent the whole flight getting the perfect zero-g photo. Reflexes of a champion, science of a tourist.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "screamer",
-        "title": "The Zero-G Screamer",
-        "emoji": "😱",
-        "blurb": "Pure colorful panic from liftoff to landing. You felt everything at maximum volume and loved every second.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "planner",
-        "title": "The Mission Planner",
-        "emoji": "🧮",
-        "blurb": "You read every manual and memorized the flight path. Eleven minutes, fully optimized, no surprises.",
-        "gameId": "crypt-crawler"
-      },
-      {
-        "id": "souvenir",
-        "title": "The Souvenir Collector",
-        "emoji": "🛍️",
-        "blurb": "You came back with a keychain, a mug, and a randomly chosen mission patch. The gift shop was the real launch.",
-        "gameId": "wheel-of-names"
-      }
-    ],
-    "questions": [
-      {
-        "q": "What's your goal for the flight?",
-        "answers": [
-          {
-            "label": "The perfect floating photo",
-            "weights": {
-              "selfie": 2
-            }
-          },
-          {
-            "label": "Feeling absolutely everything",
-            "weights": {
-              "screamer": 2
-            }
-          },
-          {
-            "label": "Executing the plan flawlessly",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Bringing back proof I went",
-            "weights": {
-              "souvenir": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Liftoff! You're…",
-        "answers": [
-          {
-            "label": "Holding the camera steady",
-            "weights": {
-              "selfie": 2
-            }
-          },
-          {
-            "label": "Screaming with joy",
-            "weights": {
-              "screamer": 2
-            }
-          },
-          {
-            "label": "Calmly noting the timing",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Wondering if the gift shop's open",
-            "weights": {
-              "souvenir": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How did you prepare?",
-        "answers": [
-          {
-            "label": "Practiced my angles",
-            "weights": {
-              "selfie": 2
-            }
-          },
-          {
-            "label": "Didn't, just vibed",
-            "weights": {
-              "screamer": 2
-            }
-          },
-          {
-            "label": "Read every document twice",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Made a packing list of merch",
-            "weights": {
-              "souvenir": 1,
-              "selfie": 1
-            }
-          }
-        ]
-      },
-      {
-        "q": "Back on Earth, your first move?",
-        "answers": [
-          {
-            "label": "Post everything immediately",
-            "weights": {
-              "selfie": 2
-            }
-          },
-          {
-            "label": "Still shaking, still grinning",
-            "weights": {
-              "screamer": 2
-            }
-          },
-          {
-            "label": "Debrief and review the data",
-            "weights": {
-              "planner": 2
-            }
-          },
-          {
-            "label": "Spin the rack for one more keychain",
-            "weights": {
-              "souvenir": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-nintendo-revival-are-you",
-    "title": "Which Game Revival Are You? (CRT Edition)",
-    "intro": "Old franchises keep coming back, like a sequel rented from the corner video store. Which comeback are you?",
-    "results": [
-      {
-        "id": "tennis",
-        "title": "The Sports Revival",
-        "emoji": "🎾",
-        "blurb": "Pure pick-up-and-play speed, the kind you'd button-mash with siblings for hours. Fast, friendly, endlessly replayable.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "platformer",
-        "title": "The Colorful Platformer",
-        "emoji": "🍄",
-        "blurb": "Bright, joyful chaos full of surprises around every corner. You make even the wildest level feel welcoming.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "horror",
-        "title": "The Survival-Horror Comeback",
-        "emoji": "🧟",
-        "blurb": "Tense, atmospheric, and all about surviving with what little you've got. No healing, just nerve.",
-        "gameId": "descent"
-      },
-      {
-        "id": "action",
-        "title": "The Methodical Action Sequel",
-        "emoji": "⚔️",
-        "blurb": "Deliberate, demanding, and deeply rewarding once you master the patterns. You reward patience and punish button-mashers.",
-        "gameId": "crypt-crawler"
-      }
-    ],
-    "questions": [
-      {
-        "q": "Pick your ideal gameplay loop.",
-        "answers": [
-          {
-            "label": "Quick rounds, instant fun",
-            "weights": {
-              "tennis": 2
-            }
-          },
-          {
-            "label": "Exploring bright, playful worlds",
-            "weights": {
-              "platformer": 2
-            }
-          },
-          {
-            "label": "Surviving on scarce resources",
-            "weights": {
-              "horror": 2
-            }
-          },
-          {
-            "label": "Mastering tough, precise combat",
-            "weights": {
-              "action": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "What hooks you about a sequel?",
-        "answers": [
-          {
-            "label": "It's the same chaotic multiplayer joy",
-            "weights": {
-              "tennis": 2
-            }
-          },
-          {
-            "label": "New levels packed with surprises",
-            "weights": {
-              "platformer": 2
-            }
-          },
-          {
-            "label": "It's even scarier than before",
-            "weights": {
-              "horror": 2
-            }
-          },
-          {
-            "label": "Deeper, harder systems to learn",
-            "weights": {
-              "action": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your vibe in one word?",
-        "answers": [
-          {
-            "label": "Energetic",
-            "weights": {
-              "tennis": 2
-            }
-          },
-          {
-            "label": "Joyful",
-            "weights": {
-              "platformer": 2
-            }
-          },
-          {
-            "label": "Tense",
-            "weights": {
-              "horror": 1,
-              "action": 1
-            }
-          },
-          {
-            "label": "Focused",
-            "weights": {
-              "action": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How do you handle a tough boss?",
-        "answers": [
-          {
-            "label": "Spam buttons and laugh",
-            "weights": {
-              "tennis": 2
-            }
-          },
-          {
-            "label": "Find the clever colorful trick",
-            "weights": {
-              "platformer": 2
-            }
-          },
-          {
-            "label": "Conserve everything and outlast it",
-            "weights": {
-              "horror": 2
-            }
-          },
-          {
-            "label": "Learn its pattern, strike clean",
-            "weights": {
-              "action": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-viral-meme-are-you-2003",
-    "title": "Which Viral Meme Are You? (2003 Edition)",
-    "intro": "Every viral moment, reimagined as a forwarded email with 14 'FW: FW:' in the subject line. Which one are you?",
-    "results": [
-      {
-        "id": "dancing-guy",
-        "title": "The Dancing Guy",
-        "emoji": "🕺",
-        "blurb": "You found the beat and committed completely, and now everyone's looping you. Pure rhythm, zero self-consciousness.",
-        "gameId": "piano-tiles"
-      },
-      {
-        "id": "confused-penguin",
-        "title": "The Confused Penguin",
-        "emoji": "🐧",
-        "blurb": "Adorable, a little baffled, multiplying across every feed before anyone can explain why. You're chaos in a cute shell.",
-        "gameId": "splitter"
-      },
-      {
-        "id": "everywhere-face",
-        "title": "The 'He's Literally Everywhere' Face",
-        "emoji": "😐",
-        "blurb": "You show up in every thread, every comment, every reaction. People can't escape you and they've stopped trying.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "shoot-your-shot",
-        "title": "The Shoot-Your-Shot Note",
-        "emoji": "💌",
-        "blurb": "You went for it boldly and let fate decide the rest. Brave, earnest, and answered by a magic 8-ball's worth of replies.",
-        "gameId": "magic-8-ball"
-      }
-    ],
-    "questions": [
-      {
-        "q": "How do you go viral?",
-        "answers": [
-          {
-            "label": "By dancing like nobody's watching",
-            "weights": {
-              "dancing-guy": 2
-            }
-          },
-          {
-            "label": "By being inexplicably cute",
-            "weights": {
-              "confused-penguin": 2
-            }
-          },
-          {
-            "label": "By being literally everywhere",
-            "weights": {
-              "everywhere-face": 2
-            }
-          },
-          {
-            "label": "By being bravely, publicly earnest",
-            "weights": {
-              "shoot-your-shot": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Your energy in a group chat?",
-        "answers": [
-          {
-            "label": "The one always posting clips",
-            "weights": {
-              "dancing-guy": 1,
-              "everywhere-face": 1
-            }
-          },
-          {
-            "label": "Confused but lovable",
-            "weights": {
-              "confused-penguin": 2
-            }
-          },
-          {
-            "label": "Replying to literally everything",
-            "weights": {
-              "everywhere-face": 2
-            }
-          },
-          {
-            "label": "Sliding into the DMs with confidence",
-            "weights": {
-              "shoot-your-shot": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick a meme superpower.",
-        "answers": [
-          {
-            "label": "Perfect comedic timing",
-            "weights": {
-              "dancing-guy": 2
-            }
-          },
-          {
-            "label": "Infinite shareability",
-            "weights": {
-              "confused-penguin": 2
-            }
-          },
-          {
-            "label": "Total inescapability",
-            "weights": {
-              "everywhere-face": 2
-            }
-          },
-          {
-            "label": "Fearless boldness",
-            "weights": {
-              "shoot-your-shot": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "What happens after you blow up?",
-        "answers": [
-          {
-            "label": "Endless remixes set to music",
-            "weights": {
-              "dancing-guy": 2
-            }
-          },
-          {
-            "label": "Spawning a hundred variations",
-            "weights": {
-              "confused-penguin": 2
-            }
-          },
-          {
-            "label": "Appearing in unrelated threads forever",
-            "weights": {
-              "everywhere-face": 2
-            }
-          },
-          {
-            "label": "People waiting to see if it worked",
-            "weights": {
-              "shoot-your-shot": 2
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-computer-lab-kid-are-you",
-    "title": "Which Computer Lab Kid Were You?",
-    "intro": "The hum of CRT monitors, the click of beige keyboards, the forbidden games URL. Who were you, really?",
-    "results": [
-      {
-        "id": "flash-addict",
-        "title": "The Flash-Game Smuggler",
-        "emoji": "🎮",
-        "blurb": "You knew every unblocked site and minimized faster than the teacher could turn around. Reflexes honed by pure rebellion.",
-        "gameId": "tap-surge"
-      },
-      {
-        "id": "typing-champ",
-        "title": "The Typing-Tutor Champ",
-        "emoji": "⌨️",
-        "blurb": "You hit 80 words a minute while everyone else hunted and pecked. Rhythm, precision, and a smug little grin.",
-        "gameId": "piano-tiles"
-      },
-      {
-        "id": "paint-artist",
-        "title": "The MS Paint Artist",
-        "emoji": "🎨",
-        "blurb": "You made masterpieces with the spray-can tool and a thousand colors. Chaos, creativity, and zero undo regrets.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "encarta-explorer",
-        "title": "The Encarta Explorer",
-        "emoji": "📚",
-        "blurb": "You actually read the CD-ROM encyclopedia for fun. A brain sponge with a thirst for trivia.",
-        "gameId": "mind-flood"
-      },
-      {
-        "id": "minesweeper-pro",
-        "title": "The Minesweeper Strategist",
-        "emoji": "💣",
-        "blurb": "You cleared the expert board through pure deduction, never luck. Calm, logical, and quietly intense.",
-        "gameId": "crypt-crawler"
-      }
-    ],
-    "questions": [
-      {
-        "q": "The teacher steps out. You immediately…",
-        "answers": [
-          {
-            "label": "Open the secret games site",
-            "weights": {
-              "flash-addict": 2
-            }
-          },
-          {
-            "label": "Keep practicing typing drills",
-            "weights": {
-              "typing-champ": 2
-            }
-          },
-          {
-            "label": "Draw something in Paint",
-            "weights": {
-              "paint-artist": 2
-            }
-          },
-          {
-            "label": "Keep reading the encyclopedia",
-            "weights": {
-              "encarta-explorer": 1,
-              "minesweeper-pro": 1
-            }
-          }
-        ]
-      },
-      {
-        "q": "What were you best at?",
-        "answers": [
-          {
-            "label": "Hiding what was on my screen",
-            "weights": {
-              "flash-addict": 2
-            }
-          },
-          {
-            "label": "Fast, perfect typing",
-            "weights": {
-              "typing-champ": 2
-            }
-          },
-          {
-            "label": "Making digital art",
-            "weights": {
-              "paint-artist": 2
-            }
-          },
-          {
-            "label": "Logic puzzles",
-            "weights": {
-              "minesweeper-pro": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick a lab activity.",
-        "answers": [
-          {
-            "label": "Reflex-based sneaky games",
-            "weights": {
-              "flash-addict": 2
-            }
-          },
-          {
-            "label": "Beating my typing high score",
-            "weights": {
-              "typing-champ": 2
-            }
-          },
-          {
-            "label": "Filling the screen with color",
-            "weights": {
-              "paint-artist": 2
-            }
-          },
-          {
-            "label": "Looking up random facts",
-            "weights": {
-              "encarta-explorer": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "How would classmates describe you?",
-        "answers": [
-          {
-            "label": "Sneaky and quick",
-            "weights": {
-              "flash-addict": 2
-            }
-          },
-          {
-            "label": "Show-off fast fingers",
-            "weights": {
-              "typing-champ": 2
-            }
-          },
-          {
-            "label": "The creative one",
-            "weights": {
-              "paint-artist": 2
-            }
-          },
-          {
-            "label": "The smart one who knows stuff",
-            "weights": {
-              "encarta-explorer": 1,
-              "minesweeper-pro": 1
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "which-old-internet-forum-poster-are-you",
-    "title": "Which Old-School Forum Poster Are You?",
-    "intro": "phpBB, animated signatures, and 'first!' as a personality. Which post count is your spirit?",
-    "results": [
-      {
-        "id": "lurker",
-        "title": "The Lurker",
-        "emoji": "👀",
-        "blurb": "You've read every thread and posted in none. Quiet, observant, and surprisingly hard to take down.",
-        "gameId": "descent"
-      },
-      {
-        "id": "mod",
-        "title": "The Moderator",
-        "emoji": "🛡️",
-        "blurb": "You keep the peace, settle disputes, and track who started what. Responsible, fair, and secretly running everything.",
-        "gameId": "poker-tracker"
-      },
-      {
-        "id": "sig-artist",
-        "title": "The Signature Artist",
-        "emoji": "🖼️",
-        "blurb": "Your forum signature is a 600-pixel-tall animated work of art. Flashy, colorful, impossible to scroll past.",
-        "gameId": "color-panic"
-      },
-      {
-        "id": "necro-poster",
-        "title": "The Necro-Poster",
-        "emoji": "⚰️",
-        "blurb": "You reply to threads from four years ago like no time has passed. Patient, deliberate, and weirdly methodical.",
-        "gameId": "crypt-crawler"
-      },
-      {
-        "id": "emoji-spammer",
-        "title": "The Emoji Spammer",
-        "emoji": "😂",
-        "blurb": "Your posts are 80% smileys and somehow still beloved. You multiply reactions faster than anyone can read them.",
-        "gameId": "splitter"
-      }
-    ],
-    "questions": [
-      {
-        "q": "How often do you post?",
-        "answers": [
-          {
-            "label": "Almost never, I just watch",
-            "weights": {
-              "lurker": 2
-            }
-          },
-          {
-            "label": "Only to keep order",
-            "weights": {
-              "mod": 2
-            }
-          },
-          {
-            "label": "Every chance I get, with flair",
-            "weights": {
-              "sig-artist": 1,
-              "emoji-spammer": 1
-            }
-          },
-          {
-            "label": "On ancient threads, randomly",
-            "weights": {
-              "necro-poster": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "What's in your signature?",
-        "answers": [
-          {
-            "label": "Nothing, I'm invisible",
-            "weights": {
-              "lurker": 2
-            }
-          },
-          {
-            "label": "The forum rules, helpfully",
-            "weights": {
-              "mod": 2
-            }
-          },
-          {
-            "label": "A glorious animated banner",
-            "weights": {
-              "sig-artist": 2
-            }
-          },
-          {
-            "label": "A row of fifty smileys",
-            "weights": {
-              "emoji-spammer": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Someone starts drama. You…",
-        "answers": [
-          {
-            "label": "Watch silently and screenshot",
-            "weights": {
-              "lurker": 2
-            }
-          },
-          {
-            "label": "Lock the thread immediately",
-            "weights": {
-              "mod": 2
-            }
-          },
-          {
-            "label": "Post a dramatic reaction gif",
-            "weights": {
-              "emoji-spammer": 1,
-              "sig-artist": 1
-            }
-          },
-          {
-            "label": "Bump an old thread about it",
-            "weights": {
-              "necro-poster": 2
-            }
-          }
-        ]
-      },
-      {
-        "q": "Pick a posting philosophy.",
-        "answers": [
-          {
-            "label": "Observe everything, reveal nothing",
-            "weights": {
-              "lurker": 2
-            }
-          },
-          {
-            "label": "Order above all",
-            "weights": {
-              "mod": 2
-            }
-          },
-          {
-            "label": "Make every post a spectacle",
-            "weights": {
-              "sig-artist": 2
-            }
-          },
-          {
-            "label": "No thread is ever truly dead",
-            "weights": {
-              "necro-poster": 2
+              "go-no-go": 2
             }
           }
         ]

@@ -1,11 +1,11 @@
 name: Generate daily content
 
 # Refreshes the AI-authored pools (polls / quizzes / tips / news) on a schedule.
-# Content is date-seeded and rotates daily, so one big batch lasts weeks — a
-# weekly refresh keeps it varied. Also runnable on demand.
+# Content is date-seeded and rotates daily; topical items name real current
+# things, so a monthly refresh keeps them at most ~a month old. Also on demand.
 on:
   schedule:
-    - cron: "17 9 * * 1" # Mondays, 09:17 UTC
+    - cron: "0 9 1 * *" # 1st of each month, 09:00 UTC
   workflow_dispatch:
 
 permissions:
