@@ -11,6 +11,7 @@ import {
   getQuizResult,
   recordVisit,
 } from "../lib/store.js";
+import FlashTheater from "./FlashTheater.jsx";
 import byteBadger from "../assets/byte-badger.png";
 
 // tiny local copy of Home's star row (kept decoupled so Home stays untouched)
@@ -216,6 +217,8 @@ export default function DailyBand() {
         <StumbleButton />
         <MascotTip dayKey={key} streak={streak} />
       </div>
+
+      <FlashTheater dayKey={key} compact browseTo="/flash" />
 
       <SiteNews dayKey={key} />
     </section>

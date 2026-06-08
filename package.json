@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "generate": "node scripts/generate-content.js",
+    "fetch:flash": "node scripts/fetch-flash.js",
     "research": "node scripts/research-topics.js",
     "check:daily": "node scripts/daily-check.js",
     "assets:mascots": "node scripts/process-mascots.js"

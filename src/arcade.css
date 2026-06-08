@@ -625,6 +625,52 @@ main > section + section { margin-top: 44px; }
 .arcade-news-list { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
 .arcade-news-list li { font-size: 0.78rem; color: #b8bcd8; line-height: 1.4; }
 
+/* ---- Flash Theater (archive.org embeds) ---- */
+.arcade-flash {
+  margin-top: 18px; padding: 14px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-flash-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.arcade-flash-browse {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--neon-lime);
+  text-decoration: none; border-bottom: 1px solid currentColor; white-space: nowrap;
+}
+.arcade-flash-browse:hover { filter: brightness(1.12); }
+.arcade-flash-screen {
+  position: relative; margin-top: 12px;
+  width: 100%; aspect-ratio: 560 / 384; /* archive.org embed proportions (incl. its toolbar) */
+  border: 2px solid #04050b; border-radius: 9px; overflow: hidden;
+  background: radial-gradient(circle at 50% 32%, #12233f 0%, #0a1326 38%, #04050b 78%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 0 24px rgba(0,0,0,.85);
+}
+.arcade-flash-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.arcade-flash-meta { margin: 10px 2px 0; font-size: 0.82rem; line-height: 1.45; color: #cbb8f0; }
+.arcade-flash-title { font-family: 'Black Ops One', cursive; font-size: 1rem; color: var(--neon-aqua); }
+.arcade-flash-by, .arcade-flash-year { color: var(--arcade-muted); }
+.arcade-flash-stumble { display: block; width: 100%; margin-top: 12px; }
+/* compact (daily band): cap the screen so it doesn't dominate the page */
+.arcade-flash.is-compact .arcade-flash-screen { max-width: 560px; margin-left: auto; margin-right: auto; }
+
+/* dedicated /flash page: center under the fixed back-chrome */
+.arcade-flash-page { max-width: 760px; margin: 0 auto; padding: 64px 16px 40px; }
+
+/* ---- Flash Channel (lean-back auto-advance) ---- */
+.arcade-channel-loading {
+  max-width: 760px; margin: 0 auto; padding: 120px 16px; text-align: center;
+  font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--neon-aqua);
+}
+.arcade-channel-live {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.06em;
+  color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,77,166,.5); white-space: nowrap;
+}
+.arcade-channel-controls { display: flex; gap: 12px; margin-top: 12px; }
+.arcade-channel-controls .arcade-stumble { flex: 1; text-align: center; }
+.arcade-channel-note {
+  margin: 10px 2px 0; font-size: 0.72rem; line-height: 1.4; color: var(--arcade-muted);
+  letter-spacing: 0.02em;
+}
+
 /* ====================================================================== */
 /*  QUIZ PAGE                                                              */
 /* ====================================================================== */
