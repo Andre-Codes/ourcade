@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { embedUrl, randomAnimation } from "../data/animations.js";
+import ShareButton from "./ShareButton.jsx";
 
 // Lean-back "channel": roams the WHOLE pool, auto-advancing on a timer. We can't
 // know when a SWF actually ends (archive.org is a cross-origin iframe, no end
@@ -42,7 +43,10 @@ export default function FlashChannel() {
         <span className="arcade-channel-live">{playing ? "● LIVE" : "❚❚ PAUSED"}</span>
       </div>
 
-      <div className="arcade-flash-screen">
+      <div
+        className="arcade-flash-screen"
+        style={anim.aspect ? { "--flash-aspect": anim.aspect } : undefined}
+      >
         <iframe
           key={anim.id}
           className="arcade-flash-frame"
@@ -69,6 +73,11 @@ export default function FlashChannel() {
         <button type="button" className="arcade-stumble" onClick={next}>
           ⏭ NEXT
         </button>
+        <ShareButton
+          label="Share"
+          title="Ourcade — Flash Channel"
+          text={`Watching "${anim.title}"${anim.creator ? ` by ${anim.creator}` : ""} on the Ourcade Flash Channel`}
+        />
       </div>
 
       <p className="arcade-channel-note">

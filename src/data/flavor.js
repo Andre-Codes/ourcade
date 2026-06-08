@@ -3,6 +3,7 @@
 
 import { pickDaily, pickDailyN } from "../lib/daily.js";
 import generated from "./generated/flavor.js";
+import { MANUAL_NEWS, MANUAL_TIPS } from "./manual.js";
 
 const FALLBACK = {
   tips: [
@@ -27,16 +28,21 @@ const EIGHTBALL_TIPS = [
   "The Magic 8-Ball saves its best wisdom for the stubborn.",
 ];
 
+// Manual entries (from manual.js) and the hand-kept EIGHTBALL_TIPS persist across
+// regeneration; the generated batch (or fallback) fills out the rest of the pool.
 const tips = [
+  ...MANUAL_TIPS,
   ...(generated && Array.isArray(generated.tips) && generated.tips.length
     ? generated.tips
     : FALLBACK.tips),
   ...EIGHTBALL_TIPS,
 ];
-const news =
-  generated && Array.isArray(generated.news) && generated.news.length
+const news = [
+  ...MANUAL_NEWS,
+  ...(generated && Array.isArray(generated.news) && generated.news.length
     ? generated.news
-    : FALLBACK.news;
+    : FALLBACK.news),
+];
 
 export function getTodaysTip(key) {
   return pickDaily(tips, key, 303);

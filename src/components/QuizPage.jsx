@@ -4,6 +4,7 @@ import { getQuiz, getTodaysQuiz, scoreQuiz } from "../data/quizzes.js";
 import { getGame } from "../data/games.js";
 import { setQuizResult } from "../lib/store.js";
 import { todayKey } from "../lib/daily.js";
+import ShareButton from "./ShareButton.jsx";
 
 export default function QuizPage() {
   const { id } = useParams();
@@ -93,6 +94,11 @@ export default function QuizPage() {
               <button type="button" className="arcade-quiz-retake" onClick={retake}>
                 ↻ retake
               </button>
+              <ShareButton
+                label="Share result"
+                title={`Ourcade Quiz — ${quiz.title}`}
+                text={`${result.emoji} I got "${result.title}" on the Ourcade quiz "${quiz.title}"! What do you get?`}
+              />
               <Link to="/" className="arcade-quiz-home">
                 ← back to arcade
               </Link>

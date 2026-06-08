@@ -4,6 +4,7 @@
 
 import { rotateDaily, daySeed } from "../lib/daily.js";
 import generated from "./generated/polls.js";
+import { MANUAL_POLLS } from "./manual.js";
 
 // Minimal safety net — the real variety lives in generated/polls.js.
 const FALLBACK = [
@@ -18,8 +19,12 @@ const FALLBACK = [
   },
 ];
 
-export const POLLS =
-  Array.isArray(generated) && generated.length ? generated : FALLBACK;
+// Manual entries (hand-edited, persist across regeneration) lead the pool, then
+// the generated batch — or the fallback if generation is missing/empty.
+export const POLLS = [
+  ...MANUAL_POLLS,
+  ...(Array.isArray(generated) && generated.length ? generated : FALLBACK),
+];
 
 const SALT = 101; // keeps poll rotation independent of games & quizzes
 

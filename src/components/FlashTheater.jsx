@@ -6,6 +6,7 @@ import {
   getTodaysAnimation,
   randomAnimation,
 } from "../data/animations.js";
+import ShareButton from "./ShareButton.jsx";
 
 // Shared by the daily band (compact) and the /flash page (full). Renders today's
 // featured animation as an archive.org embed; STUMBLE swaps in a random one from
@@ -37,7 +38,10 @@ export default function FlashTheater({ dayKey, compact = false, browseTo }) {
         )}
       </div>
 
-      <div className="arcade-flash-screen">
+      <div
+        className="arcade-flash-screen"
+        style={anim.aspect ? { "--flash-aspect": anim.aspect } : undefined}
+      >
         <iframe
           key={anim.id}
           className="arcade-flash-frame"
@@ -54,14 +58,21 @@ export default function FlashTheater({ dayKey, compact = false, browseTo }) {
         {anim.year && <span className="arcade-flash-year"> ({anim.year})</span>}
       </p>
 
-      <button
-        type="button"
-        className="arcade-stumble arcade-flash-stumble"
-        onClick={stumble}
-        disabled={busy}
-      >
-        {busy ? "🎲 loading…" : "🎲 STUMBLE — another animation"}
-      </button>
+      <div className="arcade-flash-actions">
+        <button
+          type="button"
+          className="arcade-stumble arcade-flash-stumble"
+          onClick={stumble}
+          disabled={busy}
+        >
+          {busy ? "🎲 loading…" : "🎲 STUMBLE — another animation"}
+        </button>
+        <ShareButton
+          label="Share"
+          title="Ourcade — Flash Theater"
+          text={`"${anim.title}"${anim.creator ? ` by ${anim.creator}` : ""} on Ourcade Flash Theater`}
+        />
+      </div>
     </div>
   );
 }

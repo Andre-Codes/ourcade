@@ -707,6 +707,16 @@ main > section + section { margin-top: 44px; }
 .arcade-stumble:hover { filter: brightness(1.08); }
 .arcade-stumble:active { transform: translateY(1px); }
 
+/* ---- share button (secondary action; aqua, calmer than stumble's gold) ---- */
+.arcade-share {
+  font-family: 'Press Start 2P', monospace; font-size: 0.58rem; line-height: 1.5; letter-spacing: 0.03em;
+  color: var(--neon-aqua); background: #0e101a;
+  border: 2px solid #1c3a36; border-radius: 10px; padding: 12px 14px; cursor: pointer;
+  transition: filter .12s ease, transform .08s ease, border-color .12s ease;
+}
+.arcade-share:hover { border-color: var(--neon-aqua); filter: brightness(1.08); }
+.arcade-share:active { transform: translateY(1px); }
+
 /* ---- mascot + streak ---- */
 .arcade-mascot {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px;
@@ -744,7 +754,10 @@ main > section + section { margin-top: 44px; }
 .arcade-flash-browse:hover { filter: brightness(1.12); }
 .arcade-flash-screen {
   position: relative; margin-top: 12px;
-  width: 100%; aspect-ratio: 560 / 384; /* archive.org embed proportions (incl. its toolbar) */
+  /* archive.org's player renders a 4:3 stage + a ~40px toolbar. A taller box than
+     the old 560/384 keeps 4:3 shorts (the bulk of the pool) from cropping. Shorts
+     with other shapes set a per-item `aspect` override (see animations.js). */
+  width: 100%; aspect-ratio: var(--flash-aspect, 640 / 525);
   border: 2px solid #04050b; border-radius: 9px; overflow: hidden;
   background: radial-gradient(circle at 50% 32%, #12233f 0%, #0a1326 38%, #04050b 78%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 0 24px rgba(0,0,0,.85);
@@ -754,6 +767,10 @@ main > section + section { margin-top: 44px; }
 .arcade-flash-title { font-family: 'Black Ops One', cursive; font-size: 1rem; color: var(--neon-aqua); }
 .arcade-flash-by, .arcade-flash-year { color: var(--arcade-muted); }
 .arcade-flash-stumble { display: block; width: 100%; margin-top: 12px; }
+.arcade-flash-actions { display: flex; gap: 10px; margin-top: 12px; align-items: stretch; }
+.arcade-flash-actions .arcade-flash-stumble { flex: 1; margin-top: 0; }
+.arcade-flash-actions .arcade-share { white-space: nowrap; }
+.arcade-poll-share { margin-top: 12px; width: 100%; }
 /* compact (daily band): cap the screen so it doesn't dominate the page */
 .arcade-flash.is-compact .arcade-flash-screen { max-width: 560px; margin-left: auto; margin-right: auto; }
 

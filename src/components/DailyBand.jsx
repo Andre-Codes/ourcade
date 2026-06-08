@@ -12,6 +12,7 @@ import {
   recordVisit,
 } from "../lib/store.js";
 import FlashTheater from "./FlashTheater.jsx";
+import ShareButton from "./ShareButton.jsx";
 import byteBadger from "../assets/byte-badger.png";
 
 // tiny local copy of Home's star row (kept decoupled so Home stays untouched)
@@ -105,6 +106,12 @@ function DailyPoll({ dayKey: key }) {
             </div>
           ))}
           <p className="arcade-poll-foot">thanks! a new poll drops tomorrow ✦</p>
+          <ShareButton
+            className="arcade-poll-share"
+            label="Share this poll"
+            title="Ourcade — Today's Poll"
+            text={`Today's Ourcade poll: ${poll.question}`}
+          />
         </div>
       )}
     </div>

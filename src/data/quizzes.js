@@ -3,6 +3,7 @@
 
 import { rotateDaily, rotateDailyN } from "../lib/daily.js";
 import generated from "./generated/quizzes.js";
+import { MANUAL_QUIZZES } from "./manual.js";
 
 const FALLBACK = [
   {
@@ -67,8 +68,12 @@ const FALLBACK = [
   },
 ];
 
-export const QUIZZES =
-  Array.isArray(generated) && generated.length ? generated : FALLBACK;
+// Manual entries (hand-edited, persist across regeneration) lead the pool, then
+// the generated batch — or the fallback if generation is missing/empty.
+export const QUIZZES = [
+  ...MANUAL_QUIZZES,
+  ...(Array.isArray(generated) && generated.length ? generated : FALLBACK),
+];
 
 const SALT = 202; // independent rotation from games & polls
 

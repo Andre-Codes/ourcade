@@ -8,6 +8,10 @@
 import { rotateDaily } from "../lib/daily.js";
 import featured from "./generated/flash-featured.js";
 
+// Each animation: { id, title, creator, year, featured? }. Optional `aspect`
+// (a CSS aspect-ratio string like "4 / 3", "1 / 1", "16 / 9") overrides the
+// default flash-screen shape for shorts that would otherwise crop — see
+// FlashTheater/FlashChannel and .arcade-flash-screen in arcade.css.
 // Tiny safety net so the daily pick works even if the generated module is empty.
 const FALLBACK = [
   { id: "endoftheworld_flash", title: "The End of the World", creator: "Jason Windsor", year: "2003", featured: true },
