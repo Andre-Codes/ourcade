@@ -50,6 +50,28 @@ export function setQuizResult(quizId, resultId) {
   write(`quiz:${quizId}`, resultId);
 }
 
+// ---- magic 8-ball: discovered legendary answers (the easter-egg collection) ----
+export function getDiscoveredLegendaries() {
+  return readJSON("eightball:legends", []);
+}
+// Idempotent: re-discovering a known legendary returns isNew:false and leaves
+// the original discovery date untouched.
+export function recordLegendary(id) {
+  const found = getDiscoveredLegendaries();
+  if (found.some((f) => f.id === id)) return { found, isNew: false };
+  const next = [...found, { id, at: new Date().toISOString() }];
+  write("eightball:legends", JSON.stringify(next));
+  return { found: next, isNew: true };
+}
+
+// ---- magic 8-ball: per-device sound mute (default: not muted) ----
+export function getEightBallMuted() {
+  return read("eightball:muted") === "1";
+}
+export function setEightBallMuted(on) {
+  write("eightball:muted", on ? "1" : "0");
+}
+
 // ---- visit streak: consecutive calendar days seen ----
 // Idempotent within a day (safe under React StrictMode's double-mount): the
 // first call for a new day advances the streak, repeat calls return it as-is.

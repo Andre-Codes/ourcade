@@ -15,10 +15,24 @@ const FALLBACK = {
   ],
 };
 
-const tips =
-  generated && Array.isArray(generated.tips) && generated.tips.length
+// Hand-kept, never regenerated. Quiet hints that the Magic 8-Ball is hiding
+// more than its classic answers — vague on purpose, so only someone who keeps
+// shaking (and pays attention) pieces together that something rarer is in there.
+const EIGHTBALL_TIPS = [
+  "Most folks shake the Magic 8-Ball a few times and wander off. Most folks miss things.",
+  "The Magic 8-Ball repeats itself less than you'd expect. Keep count, if you're the type.",
+  "Some 8-Ball answers feel rarer than the others. That's not your imagination.",
+  "Ask the Magic 8-Ball one more time than feels reasonable. Then a few hundred more.",
+  "Every so often the 8-Ball's window glows a little wrong. Did you catch it, or did you blink?",
+  "The Magic 8-Ball saves its best wisdom for the stubborn.",
+];
+
+const tips = [
+  ...(generated && Array.isArray(generated.tips) && generated.tips.length
     ? generated.tips
-    : FALLBACK.tips;
+    : FALLBACK.tips),
+  ...EIGHTBALL_TIPS,
+];
 const news =
   generated && Array.isArray(generated.news) && generated.news.length
     ? generated.news

@@ -1,8 +1,10 @@
-// Processes the raw Byte Badger mascot PNGs into optimized, web-ready assets.
+// Processes the raw art (mascots + Magic 8-Ball legendary tokens) into
+// optimized, web-ready assets.
 //
-// The source files (repo root) are large (1254x1254, ~MB) with transparent
-// padding. This trims that padding, resizes, and compresses into web-ready
-// copies, plus generates favicon / apple-touch / og:image variants.
+// The source files live in assets-src/ and are large (~1024-1536px, multi-MB)
+// with transparent padding. This trims that padding, resizes, and compresses
+// into web-ready copies under src/assets/, plus generates the favicon /
+// apple-touch / og:image variants under public/.
 //
 // Run with: npm run assets:mascots
 
@@ -10,10 +12,12 @@ import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SRC_BYTE = join(root, "byte_badger.png");
-const SRC_ARCADE = join(root, "arcade_badger.png");
+const SRC = join(root, "assets-src");
+const SRC_BYTE = join(SRC, "byte_badger.png");
+const SRC_ARCADE = join(SRC, "arcade_badger.png");
 const ASSETS = join(root, "src", "assets");
 const PUBLIC = join(root, "public");
 
@@ -69,9 +73,44 @@ async function main() {
     .png({ compressionLevel: 9, quality: 90 })
     .toFile(join(PUBLIC, "og-byte-badger.png"));
 
-  console.log("Mascot assets generated:");
+  // 6. Magic 8-Ball legendary tokens (transparent). The floppy + locked tile
+  // are centered objects → trim their padding; the rays backdrop fills the
+  // frame and fades out at the edges → resize without trimming so the burst
+  // stays symmetric.
+  await trimmed(join(SRC, "golden-floppy.png"))
+    .resize({ width: 384, withoutEnlargement: true })
+    .png({ compressionLevel: 9, quality: 90 })
+    .toFile(join(ASSETS, "golden-floppy.png"));
+
+  await trimmed(join(SRC, "legend-locked.png"))
+    .resize({ width: 384, withoutEnlargement: true })
+    .png({ compressionLevel: 9, quality: 90 })
+    .toFile(join(ASSETS, "legend-locked.png"));
+
+  await sharp(join(SRC, "legend-rays.png"))
+    .resize({ width: 720, withoutEnlargement: true })
+    .png({ compressionLevel: 9, quality: 88 })
+    .toFile(join(ASSETS, "legend-rays.png"));
+
+  // Mythic relic token (iridescent disc) — optional until the source art lands.
+  // Drop assets-src/mythic-disc.png and re-run to replace the placeholder.
+  let mythicDone = false;
+  if (existsSync(join(SRC, "mythic-disc.png"))) {
+    await trimmed(join(SRC, "mythic-disc.png"))
+      .resize({ width: 384, withoutEnlargement: true })
+      .png({ compressionLevel: 9, quality: 90 })
+      .toFile(join(ASSETS, "mythic-disc.png"));
+    mythicDone = true;
+  }
+
+  console.log("Assets generated:");
   console.log("  src/assets/byte-badger.png");
   console.log("  src/assets/arcade-badger.png");
+  console.log("  src/assets/golden-floppy.png");
+  console.log("  src/assets/legend-locked.png");
+  console.log("  src/assets/legend-rays.png");
+  if (mythicDone) console.log("  src/assets/mythic-disc.png");
+  else console.log("  (skipped mythic-disc.png — no assets-src/mythic-disc.png yet)");
   console.log("  public/favicon-32.png");
   console.log("  public/apple-touch-icon.png");
   console.log("  public/og-byte-badger.png");
