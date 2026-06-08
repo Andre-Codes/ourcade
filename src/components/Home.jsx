@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import DailyBand from "./DailyBand.jsx";
+import Walkman from "./Walkman.jsx";
 import byteBadger from "../assets/byte-badger.png";
 import arcadeBadger from "../assets/arcade-badger.png";
 
@@ -78,6 +79,9 @@ export default function Home() {
   const visitors = useVisitorCount();
   const odometer = String(visitors).padStart(8, "0").split("");
 
+  // ---- easter egg: click Badger's discman to spin up the walkman ----
+  const [walkmanOn, setWalkmanOn] = useState(false);
+
   // ---- search + tag filtering (scales as the library grows) ----
   const [query, setQuery] = useState("");
   const [activeTags, setActiveTags] = useState([]);
@@ -119,13 +123,23 @@ export default function Home() {
       </nav>
 
       <header className="arcade-header">
-        <img
-          className="arcade-logo-mascot"
-          src={byteBadger}
-          alt="Byte Badger, the Ourcade mascot"
-          width="128"
-          height="128"
-        />
+        <div className="arcade-mascot-wrap">
+          <img
+            className="arcade-logo-mascot"
+            src={byteBadger}
+            alt="Byte Badger, the Ourcade mascot"
+            width="128"
+            height="128"
+          />
+          {/* secret: the discman in Badger's hand spins up the walkman */}
+          <button
+            type="button"
+            className="arcade-walkman-hotspot"
+            onClick={() => setWalkmanOn(true)}
+            aria-label="Play Badger's walkman"
+            title="▶ play"
+          />
+        </div>
         <h1 className="arcade-logo" data-text="OURCADE">OURCADE</h1>
 
         {/* slogan marquee */}
@@ -224,6 +238,8 @@ export default function Home() {
         <p className="arcade-copy">© 2003 OURCADE — all worlds reserved.</p>
         <p className="arcade-smallprint">Hand-coded with caffeine · Optimized for 56k · No cookies, just quarters</p>
       </footer>
+
+      <Walkman on={walkmanOn} onStop={() => setWalkmanOn(false)} />
     </div>
   );
 }

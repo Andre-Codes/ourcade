@@ -82,20 +82,125 @@ html, body, #root {
 
 /* ---- header / logo ---- */
 .arcade-header { text-align: center; margin: 6px auto 40px; }
+/* The mascot + its hidden discman hotspot bob together as one unit, so the
+   click target stays glued to the discman in Badger's hand. */
+.arcade-mascot-wrap {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto 4px;
+  animation: arcade-mascot-bob 3.2s ease-in-out infinite;
+}
 .arcade-logo-mascot {
   display: block;
   width: clamp(84px, 15vw, 140px);
   height: auto;
-  margin: 0 auto 4px;
   filter: drop-shadow(0 0 14px rgba(63,255,208,.45));
-  animation: arcade-mascot-bob 3.2s ease-in-out infinite;
 }
 @keyframes arcade-mascot-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .arcade-logo-mascot { animation: none; }
+  .arcade-mascot-wrap { animation: none; }
+}
+
+/* ---- easter egg: Badger's walkman ---- */
+/* Invisible click target over the discman in the header mascot's hand — kept
+   secret (no resting style), but a pointer cursor + keyboard focus ring make it
+   discoverable. Percentages resolve against the mascot image box. */
+.arcade-walkman-hotspot {
+  position: absolute;
+  right: 3%;
+  bottom: 9%;
+  width: 32%;
+  height: 26%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.arcade-walkman-hotspot:focus-visible {
+  outline: 2px dashed var(--neon-aqua);
+  outline-offset: 2px;
+}
+
+/* Offscreen, audio-only YouTube player. NOT display:none — some browsers pause
+   playback for fully hidden media; 1×1 + opacity:0 keeps the audio alive. */
+.arcade-walkman-host {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* "Now playing" chip — pinned bottom-right while the mix runs. */
+.arcade-walkman-chip {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(86vw, 420px);
+  padding: 9px 12px;
+  border: 2px solid var(--neon-violet);
+  border-radius: 8px;
+  background: #04050b;
+  box-shadow: 0 0 16px rgba(124,77,255,.45), var(--bevel-in);
+}
+.arcade-walkman-now {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.5;
+  color: var(--neon-aqua);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.arcade-walkman-btn {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+  border: 1px solid #2a2f4a;
+  border-radius: 5px;
+  background: #111430;
+  color: #cbb8f0;
+  font-size: 0.82rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.arcade-walkman-btn:hover { color: var(--neon-lime); border-color: var(--neon-lime); }
+.arcade-walkman-btn:focus-visible { outline: 2px solid var(--neon-aqua); outline-offset: 1px; }
+
+/* Little dancing equalizer so the chip reads as "music is on". */
+.arcade-walkman-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 16px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+.arcade-walkman-eq i {
+  flex: 1 1 auto;
+  background: var(--neon-lime);
+  border-radius: 1px;
+  animation: arcade-walkman-eq 0.9s ease-in-out infinite;
+}
+.arcade-walkman-eq i:nth-child(2) { animation-delay: 0.25s; }
+.arcade-walkman-eq i:nth-child(3) { animation-delay: 0.5s; }
+@keyframes arcade-walkman-eq {
+  0%, 100% { height: 25%; }
+  50% { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-walkman-eq i { animation: none; height: 60%; }
 }
 .arcade-logo {
   font-family: 'Black Ops One', cursive;
