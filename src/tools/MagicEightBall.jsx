@@ -26,7 +26,7 @@ const RARITY = {
   rare: { label: "RARE", color: "#3fa9ff", weight: 0.15 },
   epic: { label: "EPIC", color: "#b44dff", weight: 0.04 },
   legendary: { label: "LEGENDARY", color: "#ffd23f", weight: 0.003 }, // ~1 in 333
-  mythic: { label: "MYTHIC", color: "#ff6ad5", weight: 0.5 }, // ~1 in 2000 — iridescent relic
+  mythic: { label: "MYTHIC", color: "#ff6ad5", weight: 0.0005 }, // ~1 in 2000 — iridescent relic
 };
 
 const ANSWERS = [
