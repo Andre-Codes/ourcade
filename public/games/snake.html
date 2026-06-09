@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>snake</title>
+<style>
+  :root{
+    --body:#43536f;
+    --body-hi:#5a6c8e;
+    --body-lo:#2c3850;
+    --silver:#d2d6dd;
+    --silver-hi:#eef1f4;
+    --silver-lo:#aab0bb;
+    --key-green:#2f7a3a;
+    --key-green-lt:#5a9b5f;
+    --call-green:#1fa28d;
+    --lcd-frame:#222d49;
+    --lcd-bg:#a8c83a;
+    --ink:#1a2608;
+    --desk:#0e0f12;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:radial-gradient(120% 120% at 50% 0%, #20222a 0%, var(--desk) 70%);
+    font-family:"Lucida Console","DejaVu Sans Mono",Menlo,Consolas,monospace;
+    color:#9aa0a8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100dvh;
+    padding:16px;
+    overflow:hidden;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+
+  .phone{
+    width:min(360px, 96vw);
+    background:linear-gradient(180deg, var(--body-hi), var(--body) 18%, var(--body) 82%, var(--body-lo));
+    border-radius:34px 34px 30px 30px;
+    padding:16px 18px 20px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 -2px 6px rgba(0,0,0,.4) inset,
+      0 22px 50px rgba(0,0,0,.55),
+      0 4px 10px rgba(0,0,0,.4);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .top{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:7px;
+    padding-top:2px;
+  }
+  .earpiece{
+    width:42px;height:6px;border-radius:6px;
+    background:var(--body-lo);
+    box-shadow:0 1px 0 rgba(255,255,255,.05);
+  }
+  .brand{
+    font-size:10px;letter-spacing:3px;color:#cfd3da;font-weight:700;
+  }
+
+  .bezel{
+    background:linear-gradient(180deg,#1c2740,#26324d);
+    border-radius:10px;
+    padding:12px;
+    box-shadow:0 2px 5px rgba(0,0,0,.45) inset, 0 1px 0 rgba(255,255,255,.08);
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    image-rendering:pixelated;
+    border-radius:3px;
+    background:var(--lcd-bg);
+    box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 0 22px rgba(150,190,40,.25);
+  }
+
+  .controls{display:flex;flex-direction:column;gap:10px;align-items:center;}
+
+  /* function-key cluster (3310-style: center select, 'i' soft key + curved up/down rocker) */
+  .funcs{position:relative;width:100%;height:132px;}
+  .funcs::before{
+    content:"";position:absolute;left:5%;right:5%;top:0;bottom:6px;
+    background:linear-gradient(180deg,#cdd1d8,#b9bec8 70%,#a4aab4);
+    border-radius:42% 42% 36% 36% / 34% 34% 66% 66%;
+    box-shadow:inset 0 1px 0 #fff, inset 0 -2px 4px rgba(0,0,0,.15), 0 3px 7px rgba(0,0,0,.35);
+  }
+  /* top-center select / OK key */
+  .callkey{
+    position:absolute;top:2px;left:50%;transform:translateX(-50%);
+    width:50%;height:38px;border:none;cursor:pointer;z-index:3;
+    background:linear-gradient(180deg,var(--silver-hi),var(--silver) 55%,var(--silver-lo));
+    border-radius:48% 48% 46% 46% / 82% 82% 40% 40%;
+    box-shadow:0 3px 0 #8d939d, 0 4px 7px rgba(0,0,0,.4), inset 0 1px 0 #fff;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;
+  }
+  .callkey .dash{
+    width:34px;height:7px;border-radius:7px;background:var(--call-green);
+    box-shadow:0 0 5px rgba(31,162,141,.55), inset 0 1px 1px rgba(255,255,255,.4);
+  }
+  /* bottom-left 'i' soft key, curving up under the select key */
+  .ikey{
+    position:absolute;left:6%;bottom:8px;width:40%;height:78px;border:none;cursor:pointer;z-index:2;
+    background:linear-gradient(180deg,var(--silver-hi),var(--silver) 60%,var(--silver-lo));
+    box-shadow:0 2px 0 #9398a2, 0 3px 5px rgba(0,0,0,.35), inset 0 1px 0 #fff;
+    border-radius:30px 64px 26px 26px / 34px 96px 26px 26px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;color:var(--key-green);
+  }
+  .ikey .iglyph{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:19px;}
+  /* bottom-right curved up/down rocker (single housing, two press zones) */
+  .nav{
+    position:absolute;right:6%;bottom:8px;width:40%;height:78px;overflow:hidden;z-index:2;
+    background:linear-gradient(180deg,var(--silver-hi),var(--silver) 60%,var(--silver-lo));
+    box-shadow:0 2px 0 #9398a2, 0 3px 5px rgba(0,0,0,.35), inset 0 1px 0 #fff;
+    border-radius:64px 30px 26px 26px / 96px 34px 26px 26px;
+  }
+  .nav button{
+    position:absolute;left:0;width:100%;height:50%;border:none;background:transparent;cursor:pointer;
+    display:flex;justify-content:center;
+  }
+  .nav .up{top:0;align-items:flex-end;padding-bottom:5px;}
+  .nav .dn{bottom:0;align-items:flex-start;padding-top:5px;}
+  .nav button.pressed{background:rgba(0,0,0,.08);}
+  .chev{width:0;height:0;}
+  .cu{border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:12px solid var(--key-green);}
+  .cd{border-left:9px solid transparent;border-right:9px solid transparent;border-top:12px solid var(--key-green);}
+
+  .pad{
+    width:100%;display:grid;grid-template-columns:repeat(3,1fr);
+    gap:8px 10px;margin-top:2px;
+  }
+  .num{
+    padding:6px 4px 8px;border-radius:50%/42%;
+    background:linear-gradient(180deg,var(--silver-hi),var(--silver) 58%,var(--silver-lo));
+    border:none;cursor:pointer;
+    box-shadow:0 2px 0 #9398a2, 0 3px 4px rgba(0,0,0,.32), inset 0 1px 0 #fff;
+    display:flex;flex-direction:column;align-items:center;line-height:1;
+  }
+  .num b{font-size:16px;font-weight:700;color:var(--key-green);}
+  .num small{font-size:7px;letter-spacing:1px;color:var(--key-green-lt);height:8px;margin-top:2px;}
+
+  .pressed{transform:translateY(2px)!important;box-shadow:0 0 0 #9398a2, 0 1px 2px rgba(0,0,0,.4)!important;filter:brightness(.97);}
+  .callkey.pressed{transform:translateX(-50%) translateY(2px)!important;}
+
+  .hint{font-size:9px;color:#9aa3b5;letter-spacing:1px;text-align:center;margin-top:0;}
+  @media (max-height:760px){
+    .pad{display:none;}
+  }
+  /* offscreen, audio-only YouTube host. NOT display:none — some browsers pause
+     fully-hidden media; 1x1 + opacity:0 keeps the audio alive (same as the site Walkman). */
+  #ythost{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="top">
+      <div class="earpiece"></div>
+      <div class="brand">N O P I A</div>
+    </div>
+
+    <div class="bezel">
+      <canvas id="lcd" width="400" height="360"></canvas>
+    </div>
+
+    <div class="controls">
+      <div class="funcs">
+        <button class="callkey" id="callKey" aria-label="Select / Call"><span class="dash"></span></button>
+        <button class="ikey" id="iKey" aria-label="Menu"><span class="iglyph">i</span></button>
+        <div class="nav">
+          <button class="up" id="upKey" aria-label="Up"><i class="chev cu"></i></button>
+          <button class="dn" id="dnKey" aria-label="Down"><i class="chev cd"></i></button>
+        </div>
+      </div>
+
+      <div class="pad" id="pad">
+        <button class="num" data-key="1"><b>1</b><small>&nbsp;</small></button>
+        <button class="num" data-key="2"><b>2</b><small>ABC</small></button>
+        <button class="num" data-key="3"><b>3</b><small>DEF</small></button>
+        <button class="num" data-key="4"><b>4</b><small>GHI</small></button>
+        <button class="num" data-key="5"><b>5</b><small>JKL</small></button>
+        <button class="num" data-key="6"><b>6</b><small>MNO</small></button>
+        <button class="num" data-key="7"><b>7</b><small>PQRS</small></button>
+        <button class="num" data-key="8"><b>8</b><small>TUV</small></button>
+        <button class="num" data-key="9"><b>9</b><small>WXYZ</small></button>
+        <button class="num" data-key="star"><b>*</b><small>&nbsp;</small></button>
+        <button class="num" data-key="0"><b>0</b><small>&nbsp;</small></button>
+        <button class="num" data-key="hash"><b>#</b><small>&nbsp;</small></button>
+      </div>
+      <div class="hint">swipe / 2 4 6 8 to steer &middot; 5 selects &middot; i = menu &middot; dial 8675309</div>
+    </div>
+  </div>
+
+  <!-- hidden audio-only YouTube player (the "real call" song) -->
+  <div id="ythost"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- tuning levers ---------- */
+  const GW = 20, GH = 15;          // play grid size (cells)
+  const START_LEN = 4;             // starting snake length
+  const STEP_START = 200;          // ms per step at start
+  const STEP_MIN = 95;             // fastest step
+  const STEP_DROP = 5;             // ms shaved off per food eaten
+  const BLINK_MS = 380;            // food / prompt blink period
+
+  /* ---------- 5x7 dot-matrix font ---------- */
+  const F = {
+    '0':["01110","10001","10011","10101","11001","10001","01110"],
+    '1':["00100","01100","00100","00100","00100","00100","01110"],
+    '2':["01110","10001","00001","00110","01000","10000","11111"],
+    '3':["11110","00001","00001","01110","00001","00001","11110"],
+    '4':["00010","00110","01010","10010","11111","00010","00010"],
+    '5':["11111","10000","10000","11110","00001","10001","01110"],
+    '6':["01110","10001","10000","11110","10001","10001","01110"],
+    '7':["11111","00001","00010","00100","01000","01000","01000"],
+    '8':["01110","10001","10001","01110","10001","10001","01110"],
+    '9':["01110","10001","10001","01111","00001","10001","01110"],
+    'A':["01110","10001","10001","11111","10001","10001","10001"],
+    'B':["11110","10001","10001","11110","10001","10001","11110"],
+    'C':["01110","10001","10000","10000","10000","10001","01110"],
+    'D':["11100","10010","10001","10001","10001","10010","11100"],
+    'E':["11111","10000","10000","11110","10000","10000","11111"],
+    'F':["11111","10000","10000","11110","10000","10000","10000"],
+    'G':["01110","10001","10000","10111","10001","10001","01110"],
+    'H':["10001","10001","10001","11111","10001","10001","10001"],
+    'I':["01110","00100","00100","00100","00100","00100","01110"],
+    'J':["00111","00010","00010","00010","10010","10010","01100"],
+    'K':["10001","10010","10100","11000","10100","10010","10001"],
+    'L':["10000","10000","10000","10000","10000","10000","11111"],
+    'M':["10001","11011","10101","10101","10001","10001","10001"],
+    'N':["10001","10001","11001","10101","10011","10001","10001"],
+    'O':["01110","10001","10001","10001","10001","10001","01110"],
+    'P':["11110","10001","10001","11110","10000","10000","10000"],
+    'Q':["01110","10001","10001","10001","10101","10010","01101"],
+    'R':["11110","10001","10001","11110","10100","10010","10001"],
+    'S':["01110","10001","10000","01110","00001","10001","01110"],
+    'T':["11111","00100","00100","00100","00100","00100","00100"],
+    'U':["10001","10001","10001","10001","10001","10001","01110"],
+    'V':["10001","10001","10001","10001","10001","01010","00100"],
+    'W':["10001","10001","10001","10101","10101","11011","10001"],
+    'X':["10001","10001","01010","00100","01010","10001","10001"],
+    'Y':["10001","10001","01010","00100","00100","00100","00100"],
+    'Z':["11111","00001","00010","00100","01000","10000","11111"],
+    ' ':["00000","00000","00000","00000","00000","00000","00000"],
+    ':':["00000","00100","00000","00000","00000","00100","00000"],
+    '!':["00100","00100","00100","00100","00100","00000","00100"],
+    '.':["00000","00000","00000","00000","00000","00100","00100"],
+    '-':["00000","00000","00000","11111","00000","00000","00000"],
+    '>':["10000","01000","00100","00010","00100","01000","10000"],
+    '?':["01110","10001","00001","00110","00100","00000","00100"],
+    '*':["00000","00100","10101","01110","10101","00100","00000"],
+    '#':["01010","01010","11111","01010","11111","01010","01010"]
+  };
+
+  /* ---------- canvas / layout ---------- */
+  const canvas = document.getElementById('lcd');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let DPR = 1, cell = 16, statusH = 18, pad = 6, fs = 2;
+  let lcdW = 0, lcdH = 0;
+
+  function layout(){
+    const cssW = canvas.clientWidth || 320;
+    cell = Math.max(8, Math.floor(cssW / GW));
+    fs = Math.max(2, Math.floor(cell / 7));
+    statusH = 9 * fs + 6;
+    pad = Math.max(4, Math.round(cell * 0.35));
+    lcdW = GW * cell + pad * 2;
+    lcdH = statusH + GH * cell + pad * 2;
+    DPR = Math.min(3, window.devicePixelRatio || 1);
+    canvas.width = Math.round(lcdW * DPR);
+    canvas.height = Math.round(lcdH * DPR);
+    canvas.style.height = (lcdH * (canvas.clientWidth / lcdW)) + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+  }
+
+  /* draw a string of dot-matrix glyphs; returns width in px */
+  function textW(str, s){ return str.length * 6 * s - s; }
+  function drawText(str, x, y, s, color){
+    ctx.fillStyle = color;
+    str = (str+"").toUpperCase();
+    for(let i=0;i<str.length;i++){
+      const g = F[str[i]] || F['?'];
+      const gx = x + i * 6 * s;
+      for(let r=0;r<7;r++){
+        const row = g[r];
+        for(let c=0;c<5;c++){
+          if(row[c]==='1') ctx.fillRect(gx + c*s, y + r*s, s, s);
+        }
+      }
+    }
+  }
+  function drawTextCentered(str, y, s, color){
+    drawText(str, Math.round((lcdW - textW(str,s))/2), y, s, color);
+  }
+
+  /* ---------- audio ---------- */
+  let actx = null, soundOn = true;
+  function beep(freq, dur, vol){
+    if(!soundOn) return;
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state === 'suspended') actx.resume();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'square'; o.frequency.value = freq;
+      g.gain.value = 0.0001;
+      o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime;
+      g.gain.exponentialRampToValueAtTime(vol||0.05, t+0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+(dur||0.07));
+      o.start(t); o.stop(t+(dur||0.07)+0.02);
+    }catch(e){}
+  }
+  const sEat   = ()=>beep(880, 0.05, 0.05);
+  const sTurn  = ()=>beep(440, 0.02, 0.02);
+  const sOver  = ()=>{ beep(200,0.18,0.06); setTimeout(()=>beep(150,0.26,0.06),140); };
+  const sClick = ()=>beep(660, 0.025, 0.03);
+
+  /* ---------- classic ringtone (Gran Vals, the tune of that era) ---------- */
+  let ringNodes = [], ringtonePlaying = false, ringTimer = null;
+  function stopRingtone(){
+    ringNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
+    ringNodes = []; ringtonePlaying = false;
+    if(ringTimer){ clearTimeout(ringTimer); ringTimer = null; }
+  }
+  function playRingtone(){
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended') actx.resume();
+    }catch(e){ return; }
+    stopRingtone();
+    const N={A5:880,B5:987.77,Cs5:554.37,Cs6:1108.73,D5:587.33,D6:1174.66,E5:659.25,E6:1318.51,Fs5:739.99,Gs5:830.61};
+    const PITCH=1.18, u=0.11; // a little higher, a little faster
+    const seq=[['E6',1],['D6',1],['Fs5',2],['Gs5',2],['Cs6',1],['B5',1],['D5',2],['E5',2],['B5',1],['A5',1],['Cs5',2],['E5',2],['A5',4]];
+    let t = actx.currentTime + 0.05;
+    seq.forEach(p=>{
+      const dur = p[1]*u;
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type='square'; o.frequency.value = N[p[0]]*PITCH;
+      g.gain.value = 0.0001;
+      o.connect(g); g.connect(actx.destination);
+      g.gain.exponentialRampToValueAtTime(0.06, t+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+dur*0.92);
+      o.start(t); o.stop(t+dur);
+      ringNodes.push(o);
+      t += dur;
+    });
+    ringtonePlaying = true;
+    const ms = (t - actx.currentTime)*1000;
+    ringTimer = setTimeout(()=>{ ringtonePlaying=false; ringNodes=[]; }, ms+60);
+  }
+  function triggerEgg(){
+    state = EGG; eggT = 0; setSoftLabels();
+    playRingtone();
+  }
+
+  /* ---------- hidden YouTube (the "real call" plays a song, audio only) ----------
+     Same trick the site's Walkman uses: a 1x1, opacity:0, NOT display:none player —
+     fully-hidden media gets paused by some browsers, so we keep it technically visible.
+     Autoplay is allowed because a key/tap gesture always precedes playback. */
+  const JENNY_NUMBER  = '8675309';
+  const JENNY_VIDEO_ID = 'Nm1pQpdb27Q'; // Tommy Tutone — 867-5309/Jenny (swap if it dies)
+  let ytPlayer = null, ytReady = false, ytWanted = false;
+  function loadYT(){
+    if(window.YT && window.YT.Player){ makeYT(); return; }
+    if(document.getElementById('yt-iframe-api')) return; // already loading
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = ()=>{ if(typeof prev==='function') prev(); makeYT(); };
+    const tag = document.createElement('script');
+    tag.id = 'yt-iframe-api'; tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  }
+  function makeYT(){
+    if(ytPlayer) return;
+    ytPlayer = new YT.Player('ythost', {
+      width:'1', height:'1', videoId: JENNY_VIDEO_ID,
+      playerVars:{ autoplay:0, controls:0, disablekb:1, playsinline:1, rel:0 },
+      events:{
+        onReady:()=>{ ytReady = true; if(ytWanted) playJenny(); },
+        onStateChange:(e)=>{ if(e.data===YT.PlayerState.ENDED && state===CALLING) hangUp(); },
+        onError:()=>{ /* dead video id — fail quietly, the UI still "connects" */ }
+      }
+    });
+  }
+  // warm the player up on the first user gesture so the later dial can start audio
+  let ytInit = false;
+  function ensureYT(){ if(ytInit) return; ytInit = true; loadYT(); }
+  function playJenny(){
+    ytWanted = true; loadYT();
+    if(!ytReady || !ytPlayer) return;
+    try{ ytPlayer.seekTo(0); ytPlayer.playVideo(); }catch(e){}
+  }
+  function stopJenny(){
+    ytWanted = false;
+    try{ ytPlayer && ytPlayer.stopVideo && ytPlayer.stopVideo(); }catch(e){}
+  }
+
+  /* ---------- persistent hi-score (localStorage, ourcade: namespace) ---------- */
+  let hi = 0;
+  function loadHi(){
+    try{ hi = parseInt(localStorage.getItem('ourcade:snake:hi'))||0; }catch(e){}
+  }
+  function saveHi(){ try{ localStorage.setItem('ourcade:snake:hi', String(hi)); }catch(e){} }
+
+  /* ---------- game state ---------- */
+  const TITLE='title', PLAY='play', PAUSE='pause', OVER='over',
+        MENU='menu', OPTIONS='options', WAP='wap', DIAL='dial',
+        CALLING='calling', IMEI='imei', EGG='egg';
+  const OLEN = 5; // options list length
+  let state = TITLE;
+  let snake, dir, buf, food, score, stepMs, acc, last, growing, deathBlink;
+  let menuIdx = 0, optIdx = 0, eggT = 0;
+  let dialBuf = '', wapScroll = 0, callT = 0, imeiT = 0;
+  let wrap = false; // false = walls kill (classic), true = wrap-around
+
+  // 3310-style main menu — icon + label (icons drawn in drawIcon)
+  const MENU_ITEMS = [
+    { label:"SNAKE",    icon:"snake" },
+    { label:"INTERNET", icon:"globe" },
+    { label:"DIALER",   icon:"phone" },
+    { label:"OPTIONS",  icon:"gear"  },
+  ];
+  const IMEI_STR = "35-680200-401650-7"; // cosmetic IMEI shown for *#06#
+  // tiny retro render of theourcade.com (Snake is featured); mirrors the real shelves
+  const WAP_GAMES = ["DESCENT","CRYPT OF THE HOLLOW KING","TAP SURGE",
+                     "COLOR PANIC","PIANO TILES","MIND FLOOD"];
+
+  function reset(){
+    snake = [];
+    const cx = Math.floor(GW/2), cy = Math.floor(GH/2);
+    for(let i=0;i<START_LEN;i++) snake.push({x:cx-i, y:cy});
+    dir = {x:1,y:0}; buf = [];
+    score = 0; stepMs = STEP_START; acc = 0; growing = 0; deathBlink = 0;
+    placeFood();
+  }
+  function placeFood(){
+    const occ = new Set(snake.map(s=>s.x+","+s.y));
+    let p, tries=0;
+    do{ p={x:(Math.random()*GW)|0, y:(Math.random()*GH)|0}; tries++; }
+    while(occ.has(p.x+","+p.y) && tries<500);
+    food = p;
+  }
+
+  function queueDir(nx,ny){
+    if(state!==PLAY) return;
+    const cur = buf.length ? buf[buf.length-1] : dir;
+    if(cur.x===-nx && cur.y===-ny) return;      // no reverse
+    if(cur.x===nx && cur.y===ny) return;        // no dupe
+    if(buf.length<2){ buf.push({x:nx,y:ny}); sTurn(); }
+  }
+
+  function step(){
+    if(buf.length){ dir = buf.shift(); }
+    let hx = snake[0].x + dir.x;
+    let hy = snake[0].y + dir.y;
+
+    if(wrap){
+      hx = (hx + GW) % GW; hy = (hy + GH) % GH;
+    } else if(hx<0||hy<0||hx>=GW||hy>=GH){
+      return die();
+    }
+
+    const willGrow = (hx===food.x && hy===food.y);
+    const limit = willGrow ? snake.length : snake.length-1;
+    for(let i=0;i<limit;i++){
+      if(snake[i].x===hx && snake[i].y===hy) return die();
+    }
+
+    snake.unshift({x:hx,y:hy});
+    if(willGrow){
+      score += 1;
+      stepMs = Math.max(STEP_MIN, stepMs - STEP_DROP);
+      placeFood();
+      sEat();
+    } else {
+      snake.pop();
+    }
+  }
+
+  function die(){
+    sOver();
+    deathBlink = 0;
+    state = OVER;
+    if(score > hi){ hi = score; saveHi(); }
+    setSoftLabels();
+  }
+
+  function startGame(){ stopRingtone(); reset(); state = PLAY; setSoftLabels(); }
+
+  /* ---------- rendering ---------- */
+  function px(cx){ return pad + cx*cell; }
+  function py(cy){ return statusH + pad + cy*cell; }
+
+  function drawCellBlock(cx,cy){
+    const m = Math.max(1, Math.round(cell*0.12));
+    ctx.fillStyle = ink;
+    ctx.fillRect(px(cx)+m, py(cy)+m, cell-m*2, cell-m*2);
+  }
+
+  let ink = '#1a2608', bg = '#a8c83a', ghost = 'rgba(26,38,8,0.10)';
+
+  function clearLCD(){
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,lcdW,lcdH);
+  }
+
+  function drawGhostGrid(){
+    ctx.fillStyle = ghost;
+    const m = Math.max(1, Math.round(cell*0.12));
+    for(let y=0;y<GH;y++) for(let x=0;x<GW;x++){
+      ctx.fillRect(px(x)+m, py(y)+m, cell-m*2, cell-m*2);
+    }
+  }
+
+  function drawStatus(){
+    ctx.fillStyle = ink;
+    // battery (far right)
+    const bw = 9*fs, bh = 5*fs, bxr = lcdW - pad - bw - fs, byr = pad + fs;
+    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.6);
+    ctx.strokeRect(bxr+0.5, byr+0.5, bw, bh);
+    ctx.fillRect(bxr+bw+1, byr+fs, fs, bh-2*fs);
+    ctx.fillRect(bxr+fs, byr+fs, (bw-2*fs)*0.8, bh-2*fs);
+    // signal bars (just left of battery)
+    const sigR = bxr - 3*fs;
+    for(let i=0;i<4;i++){
+      const h = (i+1)*fs + fs;
+      ctx.fillRect(sigR - (3-i)*(fs*2), pad+fs + (5*fs - h), fs+1, h);
+    }
+    // left: score while playing, else operator name
+    if(state===PLAY||state===PAUSE){
+      drawText((""+score).padStart(4,'0'), pad, pad, fs, ink);
+    } else {
+      drawText("NOPIA", pad, pad, fs, ink);
+    }
+    // divider line
+    ctx.fillRect(pad, statusH-2, lcdW-pad*2, 1);
+  }
+
+  function drawField(){
+    drawGhostGrid();
+    // food blinks
+    const blink = (Math.floor(performance.now()/BLINK_MS))%2===0;
+    if(blink || state!==PLAY){
+      // food drawn as a small ring-ish block to differ from body
+      const m = Math.max(1, Math.round(cell*0.12));
+      ctx.fillStyle = ink;
+      ctx.fillRect(px(food.x)+m, py(food.y)+m, cell-m*2, cell-m*2);
+      ctx.fillStyle = bg;
+      const im = Math.max(1, Math.round(cell*0.30));
+      ctx.fillRect(px(food.x)+im, py(food.y)+im, cell-im*2, cell-im*2);
+    }
+    // snake
+    const hidden = (state===OVER) && (Math.floor(deathBlink/220)%2===1);
+    if(!hidden){
+      for(let i=0;i<snake.length;i++) drawCellBlock(snake[i].x, snake[i].y);
+      // head eye dot
+      const h = snake[0];
+      ctx.fillStyle = bg;
+      const e = Math.max(1, Math.round(cell*0.16));
+      ctx.fillRect(px(h.x)+Math.round(cell*0.5)-e, py(h.y)+Math.round(cell*0.34)-e, e, e);
+    }
+  }
+
+  function overlayBox(lines, big){
+    // dim playfield slightly
+    ctx.fillStyle = 'rgba(168,200,58,0.6)';
+    ctx.fillRect(0, statusH, lcdW, lcdH-statusH);
+    let totalH = 0;
+    lines.forEach(l=>{ totalH += (l.s*8) + 4; });
+    let y = statusH + (lcdH - statusH - totalH)/2;
+    lines.forEach(l=>{
+      const blink = l.blink ? (Math.floor(performance.now()/BLINK_MS))%2===0 : true;
+      if(blink) drawTextCentered(l.t, Math.round(y), l.s, ink);
+      y += l.s*8 + 4;
+    });
+  }
+
+  /* ----- main menu: 3310-style 2x2 icon grid ----- */
+  function drawIcon(kind, cx, cy, r){
+    ctx.fillStyle = ink; ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.7);
+    if(kind==='snake'){
+      const u = r*0.62;
+      [[-1,0],[0,0],[0,-1],[1,-1]].forEach(([dx,dy])=>
+        ctx.fillRect(cx+dx*u-u*0.42, cy+dy*u-u*0.42, u*0.84, u*0.84));
+      ctx.fillRect(cx+1.7*u, cy+0.6*u, u*0.5, u*0.5); // food pip
+    } else if(kind==='globe'){
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx,cy,r*0.48,r,0,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-r,cy); ctx.lineTo(cx+r,cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-r*0.86,cy-r*0.5); ctx.lineTo(cx+r*0.86,cy-r*0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-r*0.86,cy+r*0.5); ctx.lineTo(cx+r*0.86,cy+r*0.5); ctx.stroke();
+    } else if(kind==='phone'){
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(-0.55); const u=r;
+      ctx.fillRect(-0.22*u,-0.85*u,0.44*u,1.7*u);    // handset bar
+      ctx.fillRect(-0.6*u,-1.0*u,1.2*u,0.45*u);      // ear piece
+      ctx.fillRect(-0.6*u, 0.55*u,1.2*u,0.45*u);     // mouth piece
+      ctx.restore();
+    } else if(kind==='gear'){
+      const teeth=8;
+      for(let i=0;i<teeth;i++){ ctx.save(); ctx.translate(cx,cy); ctx.rotate(i/teeth*Math.PI*2);
+        ctx.fillRect(-0.18*r,-1.18*r,0.36*r,0.5*r); ctx.restore(); }
+      ctx.beginPath(); ctx.arc(cx,cy,r*0.82,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(cx,cy,r*0.34,0,Math.PI*2); ctx.fill();
+    }
+  }
+  function drawIconMenu(){
+    drawTextCentered("MENU", statusH + pad, fs, ink);
+    const top = statusH + pad + 12*fs;
+    const areaH = lcdH - top - pad;
+    const colW = lcdW/2, rowH = areaH/2;
+    for(let i=0;i<MENU_ITEMS.length;i++){
+      const col=i%2, row=(i/2)|0;
+      const cx0 = col*colW, cy0 = top + row*rowH;
+      const cx = cx0 + colW/2, icy = cy0 + rowH*0.40;
+      const r = Math.min(colW, rowH)*0.22;
+      if(i===menuIdx){ // selection box
+        ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.8);
+        ctx.strokeRect(cx0+6, cy0+3, colW-12, rowH-8);
+      }
+      drawIcon(MENU_ITEMS[i].icon, cx, icy, r);
+      const lbl = MENU_ITEMS[i].label;
+      drawText(lbl, Math.round(cx - textW(lbl,fs)/2), Math.round(cy0 + rowH*0.74), fs, ink);
+    }
+  }
+
+  /* ----- options list (the old menu) ----- */
+  function drawOptions(){
+    drawTextCentered("OPTIONS", statusH + pad, fs, ink);
+    const items = [
+      "SOUND  " + (soundOn?"ON":"OFF"),
+      "MODE   " + (wrap?"WRAP":"WALLS"),
+      "RINGTONE",
+      "RESET HI",
+      "BACK"
+    ];
+    const s = fs;
+    let y = statusH + pad + 12*fs;
+    const lineH = 9*s;
+    for(let i=0;i<items.length;i++){
+      const x = Math.round((lcdW - textW(items[i],s))/2);
+      if(i===optIdx) drawText(">", x - 8*s, y, s, ink);
+      drawText(items[i], x, y, s, ink);
+      y += lineH;
+    }
+    if(ringtonePlaying) drawTextCentered("PLAYING...", lcdH - pad - 7*s, s, ink);
+  }
+
+  /* ----- in-phone WAP browser: a low-fi render of theourcade.com ----- */
+  let wapMax = 0;
+  function drawWAP(){
+    // inverted URL bar
+    const barH = 9*fs;
+    ctx.fillStyle = ink; ctx.fillRect(0, statusH, lcdW, barH);
+    drawText("THEOURCADE.COM", pad, statusH + Math.round((barH-7*fs)/2), fs, bg);
+    const top = statusH + barH + 3, bottom = lcdH - pad;
+    const lines = [
+      {t:"OURCADE", s:fs+1},
+      {t:"OUR VIBES OUR WORLD", s:fs},
+      {t:"", s:fs},
+      {t:"GAME OF THE DAY", s:fs},
+      {t:"> SNAKE", s:fs+1},
+      {t:"RATING 5 OF 5", s:fs},
+      {t:"THE ONE THAT CAME ON", s:fs},
+      {t:"EVERY PHONE. EAT.", s:fs},
+      {t:"GROW. DONT BITE", s:fs},
+      {t:"YOURSELF.", s:fs},
+      {t:"", s:fs},
+      {t:"MORE GAMES", s:fs},
+      ...WAP_GAMES.map(g=>({t:"- "+g, s:fs})),
+      {t:"", s:fs},
+      {t:"C 2003 OURCADE", s:fs},
+      {t:"PRESS START STAY", s:fs},
+    ];
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, top, lcdW, bottom-top); ctx.clip();
+    let y = top - wapScroll;
+    lines.forEach(l=>{ if(l.t) drawText(l.t, pad, Math.round(y), l.s, ink); y += l.s*8 + 2; });
+    ctx.restore();
+    wapMax = Math.max(0, (y + wapScroll) - bottom);
+    // scrollbar hint
+    if(wapMax>0){
+      const trackH = bottom - top, kh = Math.max(6, trackH*(trackH/(trackH+wapMax)));
+      const ky = top + (trackH-kh) * (wapScroll/wapMax);
+      ctx.fillStyle = ink; ctx.fillRect(lcdW-3, ky, 2, kh);
+    }
+  }
+
+  /* ----- dialer ----- */
+  function drawDial(){
+    drawTextCentered("DIALER", statusH + pad, fs, ink);
+    const s = fs+2;
+    const maxChars = Math.max(1, Math.floor((lcdW - pad*2) / (6*s)));
+    const disp = dialBuf.length>maxChars ? dialBuf.slice(dialBuf.length-maxChars) : dialBuf;
+    const midY = statusH + Math.round((lcdH-statusH)/2) - 4*s;
+    if(disp){
+      drawTextCentered(disp, midY, s, ink);
+    } else {
+      const blink=(Math.floor(performance.now()/BLINK_MS))%2===0;
+      if(blink) drawTextCentered("ENTER NUMBER", midY+2*fs, fs, ink);
+    }
+    drawTextCentered("CALL DIALS . I CLEARS", lcdH - pad - 7*fs, fs, ink);
+  }
+
+  /* ----- calling screen (also used for failed calls) ----- */
+  let callFail = false;
+  function drawCalling(){
+    const baseY = statusH + Math.round((lcdH-statusH)*0.30);
+    if(callFail){
+      drawTextCentered("NO SIGNAL", baseY, fs+1, ink);
+      drawTextCentered("BUSY", baseY + 13*fs, fs, ink);
+      return;
+    }
+    drawTextCentered("CALLING", baseY, fs+1, ink);
+    drawTextCentered("867-5309", baseY + 13*fs, fs, ink);
+    const dots = ".".repeat(1 + (Math.floor(callT/350)%3));
+    drawTextCentered(dots, baseY + 26*fs, fs+1, ink);
+    drawTextCentered("I = HANG UP", lcdH - pad - 7*fs, fs, ink);
+  }
+
+  /* ----- IMEI screen (shown for *#06#, then the connecting-people egg) ----- */
+  function drawIMEI(){
+    const baseY = statusH + Math.round((lcdH-statusH)*0.34);
+    drawTextCentered("IMEI", baseY, fs+1, ink);
+    drawTextCentered(IMEI_STR, baseY + 13*fs, fs, ink);
+  }
+
+  /* ----- "connecting people": two hands reaching, index fingers nearly touching ----- */
+  function drawHand(ymid, gap, u, sign){
+    const tipX = lcdW/2 - sign*(gap/2);
+    ctx.save();
+    ctx.translate(tipX, ymid); ctx.scale(sign, 1);
+    ctx.fillStyle = ink;
+    ctx.fillRect(-40*u, -3*u, 34*u, 6*u);     // forearm (runs off-screen)
+    ctx.fillRect(-12*u, -6*u, 8*u, 12*u);     // fist
+    ctx.fillRect(-9*u,  -9.5*u, 2.6*u, 4*u);  // thumb
+    ctx.fillRect(-6*u, -1.7*u, 6*u, 3.4*u);   // index finger
+    ctx.fillRect(-0.6*u, -1.3*u, 1.4*u, 2.6*u); // fingertip
+    ctx.restore();
+  }
+  function drawEgg(){
+    clearLCD();
+    const ymid = statusH + (lcdH - statusH)/2 + 6;
+    const prog = Math.min(1, eggT/1100);
+    const ease = 1 - Math.pow(1-prog,3);
+    const gap = 3 + (1-ease)*(lcdW*0.5);
+    const u = Math.max(2, Math.round(cell*0.16));
+    drawHand(ymid, gap, u, +1); // left hand, pointing right
+    drawHand(ymid, gap, u, -1); // right hand, pointing left
+    if(prog>0.93){ // spark of contact
+      const e = Math.max(2, Math.round(cell*0.22));
+      ctx.fillStyle = ink; ctx.fillRect(Math.round(lcdW/2-e/2), Math.round(ymid-e/2), e, e);
+    }
+    if(prog>0.5) drawTextCentered("NOPIA", statusH + Math.round(pad*1.4), fs+1, ink);
+    if(prog>0.95){
+      const blink = (Math.floor(performance.now()/BLINK_MS))%2===0;
+      if(blink){
+        drawTextCentered("CONNECTING", lcdH - pad - 17*fs, fs, ink);
+        drawTextCentered("PEOPLE", lcdH - pad - 8*fs, fs, ink);
+      }
+    }
+  }
+
+  function render(){
+    if(state===EGG){ drawEgg(); return; }
+    clearLCD();
+    drawStatus();
+    if(state===TITLE){
+      drawField();
+      overlayBox([
+        {t:"SNAKE", s:fs+2},
+        {t:"HI "+hi, s:fs},
+        {t:"TAP TO PLAY", s:fs, blink:true},
+        {t:"i FOR MENU", s:fs}
+      ]);
+    } else if(state===PLAY){
+      drawField();
+    } else if(state===PAUSE){
+      drawField();
+      overlayBox([{t:"PAUSED", s:fs+1}, {t:"TAP TO RESUME", s:fs, blink:true}]);
+    } else if(state===OVER){
+      drawField();
+      overlayBox([
+        {t:"GAME OVER", s:fs+1},
+        {t:"SCORE "+score, s:fs},
+        {t:"HI "+hi, s:fs},
+        {t:"TAP TO RETRY", s:fs, blink:true}
+      ]);
+    } else if(state===MENU){
+      drawIconMenu();
+    } else if(state===OPTIONS){
+      drawOptions();
+    } else if(state===WAP){
+      drawWAP();
+    } else if(state===DIAL){
+      drawDial();
+    } else if(state===CALLING){
+      drawCalling();
+    } else if(state===IMEI){
+      drawIMEI();
+    }
+  }
+
+  /* ---------- main loop ---------- */
+  function frame(ts){
+    if(!last) last = ts;
+    const dt = ts - last; last = ts;
+    if(state===PLAY){
+      acc += dt;
+      while(acc >= stepMs){ acc -= stepMs; step(); if(state!==PLAY) break; }
+    } else if(state===OVER){
+      deathBlink += dt;
+    } else if(state===CALLING){
+      callT += dt;
+      if(callFail && callT > 1400){ callFail=false; state=DIAL; }
+    } else if(state===IMEI){
+      imeiT += dt;
+      if(imeiT > 1600){ triggerEgg(); }   // IMEI flashes, then the connecting-people egg
+    } else if(state===EGG){
+      eggT += dt;
+      if(eggT > 9000){ state=TITLE; stopRingtone(); setSoftLabels(); }
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- input ---------- */
+  function setSoftLabels(){ /* labels are physical on the Nopia */ }
+  function setDir(d){
+    if(d==='up') queueDir(0,-1);
+    else if(d==='down') queueDir(0,1);
+    else if(d==='left') queueDir(-1,0);
+    else if(d==='right') queueDir(1,0);
+  }
+
+  // --- screen / menu navigation helpers ---
+  const isScrollState = ()=> state===MENU || state===OPTIONS || state===WAP;
+  function openMainMenu(){ menuIdx=0; state=MENU; }
+  function openDialer(){ dialBuf=''; state=DIAL; }
+  function selectMenu(){
+    const it = MENU_ITEMS[menuIdx];
+    if(it.icon==='snake') startGame();
+    else if(it.icon==='globe'){ state=WAP; wapScroll=0; }
+    else if(it.icon==='phone') openDialer();
+    else if(it.icon==='gear'){ optIdx=0; state=OPTIONS; }
+  }
+  function selectOption(){
+    if(optIdx===0) soundOn=!soundOn;
+    else if(optIdx===1) wrap=!wrap;
+    else if(optIdx===2) playRingtone();
+    else if(optIdx===3){ hi=0; saveHi(); }
+    else if(optIdx===4) state=MENU;
+  }
+  function endEgg(){ state=TITLE; stopRingtone(); }
+  function hangUp(){ stopJenny(); callFail=false; state=TITLE; }
+
+  // --- dialer ---
+  function dialInput(ch){
+    if(dialBuf.length<16){ dialBuf += ch; beep(620,0.04,0.04); }
+    if(dialBuf.endsWith('*#06#')){ dialBuf=''; state=IMEI; imeiT=0; } // live IMEI code
+  }
+  function dialCall(){
+    if(dialBuf==='*#06#'){ dialBuf=''; state=IMEI; imeiT=0; return; }
+    if(dialBuf===JENNY_NUMBER){ dialBuf=''; callFail=false; state=CALLING; callT=0; playJenny(); return; }
+    sOver(); callFail=true; state=CALLING; callT=0; // unknown number → busy
+  }
+
+  // center / OK / tap (fromCall=true when it's the green send key)
+  function act(fromCall){
+    sClick();
+    switch(state){
+      case TITLE: case OVER: fromCall ? openDialer() : startGame(); break;
+      case PLAY:  state=PAUSE; break;
+      case PAUSE: state=PLAY; last=0; break;
+      case MENU:    selectMenu(); break;
+      case OPTIONS: selectOption(); break;
+      case WAP:     state=MENU; break;
+      case DIAL:    dialCall(); break;
+      case CALLING: hangUp(); break;
+      case IMEI:    triggerEgg(); break;
+      case EGG:     endEgg(); break;
+    }
+  }
+  const primary = ()=> act(false);
+  const callPressed = ()=> act(true);
+
+  // 'i' soft key: menu / back / clear
+  function iKey(){
+    sClick();
+    switch(state){
+      case TITLE: case OVER: openMainMenu(); break;
+      case PLAY:  state=PAUSE; break;
+      case PAUSE: state=PLAY; last=0; break;
+      case MENU:  state=TITLE; break;
+      case OPTIONS: case WAP: state=MENU; break;
+      case DIAL: if(dialBuf) dialBuf=dialBuf.slice(0,-1); else state=MENU; break;
+      case CALLING: hangUp(); break;
+      case IMEI: state=TITLE; break;
+      case EGG: endEgg(); break;
+    }
+  }
+
+  function doScroll(dir){
+    if(state===MENU){ menuIdx=(menuIdx + (dir==='up'?MENU_ITEMS.length-1:1))%MENU_ITEMS.length; sClick(); }
+    else if(state===OPTIONS){ optIdx=(optIdx + (dir==='up'?OLEN-1:1))%OLEN; sClick(); }
+    else if(state===WAP){ wapScroll = Math.max(0, Math.min(wapMax, wapScroll + (dir==='up'?-12:12))); sClick(); }
+    else if(state===CALLING || state===IMEI || state===EGG){ /* ignore */ }
+    else setDir(dir);
+  }
+
+  // numeric/symbol key (shared by keypad + keyboard)
+  function pressDigit(ch){
+    if(state===DIAL){ dialInput(ch); return; }
+    if(state===MENU){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectMenu(); else sClick(); return; }
+    if(state===OPTIONS){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectOption(); else sClick(); return; }
+    if(state===WAP){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else sClick(); return; }
+    if(state===CALLING || state===IMEI || state===EGG){ sClick(); return; }
+    if(state===TITLE || state===OVER){ openDialer(); dialInput(ch); return; } // standby: type to dial
+    // gameplay
+    if(ch==='2') setDir('up');
+    else if(ch==='8') setDir('down');
+    else if(ch==='4') setDir('left');
+    else if(ch==='6') setDir('right');
+    else if(ch==='5') primary();
+    else sClick();
+  }
+
+  // keyboard
+  window.addEventListener('keydown', e=>{
+    ensureYT();
+    const k = e.key.toLowerCase();
+    if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+    if(/^[0-9*#]$/.test(e.key)){ pressDigit(e.key); return; }
+    if(k==='arrowup'||k==='w') doScroll('up');
+    else if(k==='arrowdown'||k==='s') doScroll('down');
+    else if(k==='arrowleft'||k==='a') setDir('left');
+    else if(k==='arrowright'||k==='d') setDir('right');
+    else if(k==='enter'||k===' ') primary();
+    else if(k==='escape'||k==='backspace') iKey();
+    else if(k==='c') callPressed();
+    else if(k==='p'){ if(state===PLAY)state=PAUSE; else if(state===PAUSE){state=PLAY;last=0;} }
+    else if(k==='m'){ soundOn=!soundOn; sClick(); }
+  });
+
+  // on-screen buttons with press feedback
+  function bindPress(el, fn){
+    const down = (e)=>{ e.preventDefault(); ensureYT(); el.classList.add('pressed'); fn(); };
+    const up = ()=> el.classList.remove('pressed');
+    el.addEventListener('touchstart', down, {passive:false});
+    el.addEventListener('touchend', up);
+    el.addEventListener('touchcancel', up);
+    el.addEventListener('mousedown', down);
+    el.addEventListener('mouseup', up);
+    el.addEventListener('mouseleave', up);
+  }
+  bindPress(document.getElementById('upKey'), ()=>doScroll('up'));
+  bindPress(document.getElementById('dnKey'), ()=>doScroll('down'));
+  bindPress(document.getElementById('iKey'), iKey);
+  bindPress(document.getElementById('callKey'), callPressed);
+
+  document.querySelectorAll('.num').forEach(b=>{
+    const key=b.dataset.key;
+    const ch = key==='star'?'*':(key==='hash'?'#':key);
+    bindPress(b, ()=>pressDigit(ch));
+  });
+
+  // swipe + tap on the screen
+  let tStart=null;
+  canvas.addEventListener('touchstart', e=>{
+    ensureYT();
+    const t=e.touches[0]; tStart={x:t.clientX,y:t.clientY,t:performance.now()};
+  }, {passive:true});
+  canvas.addEventListener('touchend', e=>{
+    if(!tStart) return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-tStart.x, dy=t.clientY-tStart.y;
+    const adx=Math.abs(dx), ady=Math.abs(dy);
+    if(adx<14 && ady<14){ primary(); tStart=null; return; } // tap
+    if(adx>ady) setDir(dx>0?'right':'left');
+    else setDir(dy>0?'down':'up');
+    tStart=null;
+  }, {passive:true});
+  canvas.addEventListener('click', ()=>{ ensureYT(); if(!('ontouchstart' in window)) primary(); });
+
+  window.addEventListener('resize', layout);
+
+  /* ---------- boot ---------- */
+  function boot(){
+    layout();
+    loadHi();
+    reset();
+    state = TITLE;
+    setSoftLabels();
+    if(!reduceMotion){
+      // quick screen-on sweep
+      let p=0;
+      const sweep=()=>{
+        clearLCD();
+        ctx.fillStyle='#0c0d09';
+        ctx.fillRect(0, p, lcdW, lcdH-p);
+        p+=Math.max(8, lcdH/14);
+        if(p<lcdH) requestAnimationFrame(sweep);
+        else requestAnimationFrame(frame);
+      };
+      sweep();
+    } else {
+      requestAnimationFrame(frame);
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
