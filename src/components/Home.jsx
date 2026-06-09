@@ -144,7 +144,7 @@ export default function Home() {
         <h1 className="arcade-logo" data-text="OURCADE">OURCADE</h1>
 
         {/* slogan marquee */}
-        <div className="arcade-marquee" aria-label="Our vibes, Our world, Ourcade">
+        <div className="arcade-marquee" aria-label="Our vibes, Our world, Ourcade — press start, stay a while">
           <div className="arcade-marquee-track">
             {Array.from({ length: 4 }).map((_, i) => (
               <span key={i} className="arcade-marquee-item">
@@ -153,7 +153,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <p className="arcade-tagline">~ insert coin · press start · enter the cabinet ~</p>
+        <p className="arcade-tagline">~ press start, stay a while ~</p>
       </header>
 
       <DailyBand />

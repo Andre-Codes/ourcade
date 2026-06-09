@@ -716,6 +716,27 @@ main > section + section { margin-top: 44px; }
 .arcade-poll-bar-pct { font-family: 'Press Start 2P', monospace; font-size: 0.54rem; }
 .arcade-poll-foot { font-size: 0.68rem; color: var(--arcade-muted); margin: 4px 0 0; letter-spacing: 0.04em; }
 
+/* ---- random game fact ---- */
+.arcade-fact-text {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.86rem; line-height: 1.5;
+  color: #d6e6ff; margin: 9px 0 0;
+}
+
+/* ---- next-game roadmap vote (standing fixture — pinned, not daily) ---- */
+.arcade-nextgame {
+  position: relative; margin-top: 18px; padding: 16px 18px;
+  background: linear-gradient(180deg, #17122a, var(--arcade-surface));
+  border: 2px solid color-mix(in srgb, var(--neon-gold) 45%, #2a2f4a);
+  border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-nextgame .arcade-poll-q { margin-top: 10px; }
+.arcade-nextgame-options {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+@media (max-width: 640px) {
+  .arcade-nextgame-options { grid-template-columns: 1fr; }
+}
+
 /* ---- quiz teaser (a few quizzes to choose from) ---- */
 .arcade-quizteaser-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .arcade-quizteaser-item {

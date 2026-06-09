@@ -100,6 +100,19 @@ export function rotateDaily(list, key, salt = 0) {
   return ordered[idx];
 }
 
+// Like rotateDaily, but only advances to the next item every `periodDays` days,
+// so a single pick lingers for a few days before changing. Still cycles the whole
+// pool with no repeats (each item shows for one full period before the next).
+// periodDays = 1 is identical to rotateDaily.
+export function rotateEvery(list, key, periodDays = 1, salt = 0) {
+  if (!list || list.length === 0) return undefined;
+  const p = Math.max(1, Math.floor(periodDays));
+  const ordered = seededShuffle(list, (ROTATE_SEED ^ daySeed(String(salt))) >>> 0);
+  const step = Math.floor(dayNumberFromKey(key) / p);
+  const idx = ((step % ordered.length) + ordered.length) % ordered.length;
+  return ordered[idx];
+}
+
 // Like rotateDaily but returns N distinct items for the day. Steps through the
 // SAME no-repeat order in non-overlapping windows of size n, so a visitor sees a
 // fresh set each day and the whole pool cycles before anything repeats.

@@ -5,6 +5,8 @@ import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
 import { getTodaysPoll, simulatedTally } from "../data/polls.js";
 import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
+import { getTodaysFact } from "../data/facts.js";
+import { NEXT_GAME_VOTE, nextGameTally } from "../data/nextGame.js";
 import {
   getPollVote,
   setPollVote,
@@ -151,6 +153,77 @@ function QuizTeaser({ dayKey: key }) {
   );
 }
 
+// ── Random game fact ──────────────────────────────────────────────────────
+function GameFact({ dayKey: key }) {
+  const fact = getTodaysFact(key);
+  if (!fact) return null;
+  return (
+    <div className="arcade-widget arcade-fact">
+      <span className="arcade-widget-kicker">💡 GAME FACT</span>
+      <p className="arcade-fact-text">{fact}</p>
+    </div>
+  );
+}
+
+// ── Next-game roadmap vote (standing fixture, not part of the daily rotation) ─
+function NextGameVote() {
+  const vote = NEXT_GAME_VOTE; // pinned — same question every day
+  const key = useMemo(() => todayKey(), []);
+  const [picked, setPicked] = useState(() => getPollVote(vote.id));
+
+  const choose = (optId) => {
+    if (picked) return; // one vote per device
+    setPollVote(vote.id, optId);
+    setPicked(optId);
+  };
+
+  const results = picked ? nextGameTally(picked, key) : null;
+
+  return (
+    <div className="arcade-nextgame">
+      <span className="arcade-widget-kicker">🕹️ HELP US PICK THE NEXT CABINET</span>
+      <p className="arcade-poll-q">{vote.question}</p>
+      {!picked ? (
+        <div className="arcade-poll-options arcade-nextgame-options">
+          {vote.options.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              className="arcade-poll-opt"
+              onClick={() => choose(o.id)}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="arcade-poll-results">
+          {results.map((r) => (
+            <div
+              key={r.id}
+              className={`arcade-poll-bar${r.id === picked ? " is-mine" : ""}`}
+            >
+              <div
+                className="arcade-poll-bar-fill"
+                style={{ width: `${r.pct}%` }}
+              />
+              <span className="arcade-poll-bar-label">{r.label}</span>
+              <span className="arcade-poll-bar-pct">{r.pct}%</span>
+            </div>
+          ))}
+          <p className="arcade-poll-foot">your vote sticks — we build what wins ✦</p>
+          <ShareButton
+            className="arcade-poll-share"
+            label="Share this vote"
+            title="Ourcade — Vote for the next cabinet"
+            text={`Help pick Ourcade's next game: ${vote.question}`}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Stumble (random game) ─────────────────────────────────────────────────
 function StumbleButton() {
   const navigate = useNavigate();
@@ -217,6 +290,7 @@ export default function DailyBand() {
         <div className="arcade-daily-side">
           <DailyPoll dayKey={key} />
           <QuizTeaser dayKey={key} />
+          <GameFact dayKey={key} />
         </div>
       </div>
 
@@ -224,6 +298,8 @@ export default function DailyBand() {
         <StumbleButton />
         <MascotTip dayKey={key} streak={streak} />
       </div>
+
+      <NextGameVote />
 
       <FlashTheater dayKey={key} compact browseTo="/flash" />
 

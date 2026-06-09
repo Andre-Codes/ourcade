@@ -10,6 +10,7 @@ import { dayKey, rotateDaily } from "../src/lib/daily.js";
 import { POLLS, getTodaysPoll } from "../src/data/polls.js";
 import { QUIZZES, getTodaysQuiz } from "../src/data/quizzes.js";
 import { getTodaysTip } from "../src/data/flavor.js";
+import { FACTS, getTodaysFact } from "../src/data/facts.js";
 
 const DAYS = 14;
 
@@ -46,7 +47,8 @@ for (const key of keys) {
       `${(poll?.question || "—").slice(0, 29).padEnd(29)} | ${quiz?.title || "—"}`
   );
 }
-console.log(`\nsample mascot tip (day 1): ${getTodaysTip(keys[0])}\n`);
+console.log(`\nsample mascot tip (day 1): ${getTodaysTip(keys[0])}`);
+console.log(`sample game fact (day 1): ${getTodaysFact(keys[0])}\n`);
 
 // ---- assertions ----
 let failures = 0;
@@ -59,6 +61,7 @@ function check(name, ok, detail = "") {
 const k0 = keys[0];
 check("poll deterministic", getTodaysPoll(k0).id === getTodaysPoll(k0).id);
 check("quiz deterministic", getTodaysQuiz(k0).id === getTodaysQuiz(k0).id);
+check("fact deterministic", getTodaysFact(k0) === getTodaysFact(k0));
 
 // No repeats across one full rotation cycle (length == pool size).
 function noRepeats(label, idFor, poolLen) {
@@ -69,6 +72,19 @@ function noRepeats(label, idFor, poolLen) {
 noRepeats("poll", (k) => getTodaysPoll(k).id, POLLS.length);
 noRepeats("quiz", (k) => getTodaysQuiz(k).id, QUIZZES.length);
 if (GAME_LIST) noRepeats("game-of-the-day", (k) => rotateDaily(GAME_LIST, k, 0).id, GAME_LIST.length);
+
+// Facts rotate every 3 days (a pick lingers), so sample one day per 3-day period
+// and confirm the whole pool cycles with no repeats over a full run.
+const FACT_PERIOD = 3;
+const factBase = new Date();
+const factSample = Array.from({ length: FACTS.length }, (_, i) =>
+  dayKey(new Date(factBase.getFullYear(), factBase.getMonth(), factBase.getDate() + i * FACT_PERIOD))
+).map(getTodaysFact);
+check(
+  `fact no repeats over ${FACTS.length}-period (${FACTS.length * FACT_PERIOD}-day) cycle`,
+  new Set(factSample).size === FACTS.length,
+  `${new Set(factSample).size}/${FACTS.length} unique`
+);
 
 console.log(`\n${failures === 0 ? "✓ all checks passed" : "✗ " + failures + " check(s) failed"}\n`);
 process.exit(failures === 0 ? 0 : 1);
