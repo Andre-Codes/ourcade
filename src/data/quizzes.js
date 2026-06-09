@@ -76,6 +76,7 @@ export const QUIZZES = [
 ];
 
 const SALT = 202; // independent rotation from games & polls
+const SALT_TOPICAL = 717; // own order for the guaranteed trend pick
 
 export function getQuiz(id) {
   return QUIZZES.find((q) => q.id === id);
@@ -86,9 +87,18 @@ export function getTodaysQuiz(key) {
 }
 
 // A handful of quizzes a visitor can take today (default 3), drawn from the same
-// no-repeat rotation so the set is fresh each day.
+// no-repeat rotation so the set is fresh each day. If the day's set happens to be
+// all-evergreen, we swap the last slot for today's trend-linked quiz so there's
+// always at least one "ripped from the headlines" pick (when any exist). Graceful
+// no-op on older data that predates the `topical` flag.
 export function getTodaysQuizzes(key, n = 3) {
-  return rotateDailyN(QUIZZES, key, n, SALT);
+  const set = rotateDailyN(QUIZZES, key, n, SALT);
+  if (set.some((q) => q.topical)) return set;
+  const topicalPool = QUIZZES.filter((q) => q.topical);
+  if (!topicalPool.length) return set;
+  const pick = rotateDaily(topicalPool, key, SALT_TOPICAL);
+  if (!pick || set.some((q) => q.id === pick.id)) return set;
+  return [...set.slice(0, Math.max(0, set.length - 1)), pick];
 }
 
 // Tally each chosen answer's weights into result buckets; highest total wins.

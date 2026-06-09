@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getGame } from "../data/games.js";
 import { ArcadeChromeContext } from "../arcadeChrome.js";
+import NedryGag from "./NedryGag.jsx";
 
 export default function GamePage() {
   const { id } = useParams();
@@ -12,7 +13,7 @@ export default function GamePage() {
   if (!game) {
     return (
       <div className="arcade-notfound">
-        <p>That game doesn’t exist.</p>
+        <NedryGag message="That game doesn’t exist." />
         <Link to="/" className="arcade-back-link">← Back to Ourcade</Link>
       </div>
     );

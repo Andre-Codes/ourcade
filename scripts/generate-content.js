@@ -181,6 +181,7 @@ const quizzesSchema = {
           id: { type: "string" },
           title: { type: "string" },
           intro: { type: "string" },
+          topical: { type: "boolean" }, // true = built around a current TOPICAL HOOK
           results: {
             type: "array",
             items: {
@@ -231,7 +232,7 @@ const quizzesSchema = {
             },
           },
         },
-        required: ["id", "title", "intro", "results", "questions"],
+        required: ["id", "title", "intro", "topical", "results", "questions"],
       },
     },
   },
@@ -278,6 +279,7 @@ function validateQuizzes(quizzes) {
     req(q.id && !seen.has(q.id), `quiz[${i}]: missing or duplicate id`);
     seen.add(q.id);
     req(!!q.title, `quiz ${q.id}: missing title`);
+    req(typeof q.topical === "boolean", `quiz ${q.id}: "topical" must be a boolean`);
     req(Array.isArray(q.results) && q.results.length >= 2, `quiz ${q.id}: needs >=2 results`);
     const resultIds = new Set((q.results || []).map((r) => r.id));
     (q.results || []).forEach((r) => {
@@ -305,6 +307,12 @@ function validateQuizzes(quizzes) {
     });
     req(blendedAnswers >= 3, `quiz ${q.id}: only ${blendedAnswers} blended answers (need >=3 that feed 2+ results so results aren't 1:1 with answers)`);
   });
+  // When live research produced hooks, insist the batch actually carries enough
+  // trend-linked quizzes so the homepage can always surface a fresh one.
+  if (TOPICAL) {
+    const topicalCount = quizzes.filter((q) => q.topical === true).length;
+    req(topicalCount >= 4, `quizzes: only ${topicalCount} topical (need >=4 built around current hooks)`);
+  }
 }
 
 function writeModule(file, value, note) {
@@ -324,8 +332,8 @@ async function main() {
     ? " About 40% of them MUST be topical: build the question around a NAMED hook from the TOPICAL HOOKS (the real movie/song/game/meme, by name) with the nostalgic twist. Keep the rest evergreen and on-site-game themed."
     : "";
   const quizTopical = TOPICAL
-    ? ' Make 5-6 of the quizzes topical — each built around NAMED hooks from the TOPICAL HOOKS (e.g. "Which <real 2026 thing> are you, dial-up edition?"), naming real current things in the title and results — and keep the rest evergreen or game-archetype. Topical quizzes still set each result\'s gameId to the best-fitting on-site game.'
-    : "";
+    ? ' Make 5-6 of the quizzes topical — each built around NAMED hooks from the TOPICAL HOOKS (e.g. "Which <real 2026 thing> are you, dial-up edition?"), naming real current things in the title and results — and keep the rest evergreen or game-archetype. Topical quizzes still set each result\'s gameId to the best-fitting on-site game. Set "topical": true on every quiz built around a current hook and "topical": false on the evergreen/game-archetype ones.'
+    : ' Set "topical": false on every quiz (no current hooks are available this run).';
   const newsTopical = TOPICAL
     ? ' Several news blurbs should NAME real current things from the TOPICAL HOOKS, reported in 2003-webmaster voice (e.g. "NEW: <real thing> arrives — we gave it 4 quarters").'
     : "";
@@ -374,7 +382,7 @@ Make every result reachable, and make sure two different answer paths could plau
   writeModule(
     "quizzes.js",
     quizzes,
-    "Quizzes. Shape: { id, title, intro, questions:[{q,answers:[{label,weights}]}], results:[{id,title,emoji,blurb,gameId}] }"
+    "Quizzes. Shape: { id, title, intro, topical, questions:[{q,answers:[{label,weights}]}], results:[{id,title,emoji,blurb,gameId}] }"
   );
   writeModule("flavor.js", { tips, news }, "Mascot tips + site news. Shape: { tips:[], news:[] }");
   console.log("\n✓ done");

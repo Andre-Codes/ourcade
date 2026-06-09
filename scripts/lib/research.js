@@ -22,7 +22,7 @@ export function loadEnv(root) {
   }
 }
 
-const RESEARCH_PROMPT = `You MUST use the web_search tool — your training data is stale, so do NOT answer from memory. Run several searches for what is genuinely popular and being talked about RIGHT NOW (it is 2026): new/upcoming movies & TV, music (albums, songs, artists), video games, viral internet memes and moments, and notable pop-culture news. Prefer things from the last few weeks or months.
+const RESEARCH_PROMPT = `You MUST use the web_search tool — your training data is stale, so do NOT answer from memory. Run several searches for what is genuinely popular and being talked about RIGHT NOW: new/upcoming movies & TV, music (albums, songs, artists), video games, viral internet memes and moments, and notable pop-culture news. Prefer things from the last few weeks or months.
 
 Then return ONLY a plain bulleted list of ~15 hooks we can riff on for a nostalgic arcade site. Each bullet MUST name the actual thing and add a short gloss, like:
 - <Real Title / Name> — <one line on why it's buzzing>

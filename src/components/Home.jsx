@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import DailyBand from "./DailyBand.jsx";
 import Walkman from "./Walkman.jsx";
+import NedryGag from "./NedryGag.jsx";
 import byteBadger from "../assets/byte-badger.png";
 import arcadeBadger from "../assets/arcade-badger.png";
 
@@ -198,7 +199,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <p className="arcade-empty">No cabinets match — try another tag.</p>
+            <NedryGag message="No cabinets match — try another tag." />
           )}
         </section>
 
@@ -211,7 +212,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <p className="arcade-empty">No tools match — try another tag.</p>
+            <NedryGag message="No tools match — try another tag." />
           )}
         </section>
       </main>

@@ -5,6 +5,7 @@ import { getGame } from "../data/games.js";
 import { setQuizResult } from "../lib/store.js";
 import { todayKey } from "../lib/daily.js";
 import ShareButton from "./ShareButton.jsx";
+import NedryGag from "./NedryGag.jsx";
 
 export default function QuizPage() {
   const { id } = useParams();
@@ -18,7 +19,7 @@ export default function QuizPage() {
   if (!quiz) {
     return (
       <div className="arcade-notfound">
-        <p>That quiz wandered off.</p>
+        <NedryGag message="That quiz wandered off." />
         <Link to="/" className="arcade-back-link">← Back to Ourcade</Link>
       </div>
     );

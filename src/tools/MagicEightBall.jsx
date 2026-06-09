@@ -6,6 +6,8 @@ import {
   setEightBallMuted,
 } from "../lib/store.js";
 import { playRare, playEpic, playLegendary, playMythic } from "../lib/blips.js";
+import { renderEightBallCard } from "../lib/eightBallCard.js";
+import { shareImage } from "../lib/share.js";
 import goldenFloppy from "../assets/golden-floppy.png";
 import mythicDisc from "../assets/mythic-disc.png";
 import legendLocked from "../assets/legend-locked.png";
@@ -234,6 +236,28 @@ function answerColor(a) {
   return a.tone ? TONE[a.tone] : "#9fb4ff";
 }
 
+// Hidden gag: certain "magic word" phrases summon Dennis Nedry's finger-wag
+// ("ah ah ah, you didn't say the magic word!") instead of an answer.
+const MAGIC_WORDS = [
+  "magic word",
+  "say the magic word",
+  "the magic word",
+  "abracadabra",
+  "open sesame",
+  "please",
+  "pretty please",
+  "say please",
+];
+function isMagicWord(text) {
+  const t = String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!t) return false;
+  return MAGIC_WORDS.some((w) => t === w || t.includes(w));
+}
+
 const CONFETTI_COLORS = ["#ffd23f", "#3fffd0", "#b44dff", "#3fa9ff", "#ff6a8a", "#ffffff"];
 // Mythic rains a fuller iridescent rainbow to read as a tier above gold.
 const MYTHIC_CONFETTI = ["#ff5e7e", "#ff9e42", "#ffe14d", "#5dff9b", "#3fd0ff", "#7a6bff", "#ff6ad5"];
@@ -364,6 +388,30 @@ const style = `
     display: inline-flex; align-items: center; gap: 8px;
   }
   .eb-pill:hover { border-color: #ffd23f; }
+  .eb-pill:disabled { opacity: .6; cursor: default; }
+  .eb-share {
+    margin-top: 16px; color: #3fffd0; border-color: #16463c;
+  }
+  .eb-share:hover { border-color: #3fffd0; }
+
+  /* ── secret "magic word" gag overlay ────────────────────────────────────── */
+  .eb-nedry {
+    position: fixed; inset: 0; z-index: 60; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; text-align: center; padding: 24px;
+    background: radial-gradient(ellipse at 50% 45%, rgba(8,20,40,.9), rgba(3,3,8,.97) 70%);
+    animation: eb-fade .3s ease;
+  }
+  .eb-nedry-gif {
+    width: clamp(200px, 56vw, 340px); height: auto; border-radius: 10px;
+    box-shadow: 0 0 36px rgba(63,169,255,.45);
+    animation: eb-floppy-in .6s cubic-bezier(.2,1.4,.4,1);
+  }
+  .eb-nedry-quote {
+    max-width: 26ch; font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.7rem, 3.2vw, 1rem); line-height: 1.8; letter-spacing: 0.06em;
+    color: #ffd23f; text-shadow: 0 0 16px rgba(255,210,63,.6);
+  }
   .eb-mute {
     font-family: 'Share Tech Mono', monospace; font-size: 1rem;
     padding: 8px 10px; border-radius: 8px; cursor: pointer; line-height: 1;
@@ -550,11 +598,22 @@ export default function MagicEightBall() {
   const [hallOpen, setHallOpen] = useState(false);
   const [discovered, setDiscovered] = useState(() => getDiscoveredLegendaries());
   const [muted, setMuted] = useState(() => getEightBallMuted());
+  const [nedry, setNedry] = useState(false);
+  const [shareStatus, setShareStatus] = useState(null); // "shared" | "saved" | "failed" | "working" | null
   const timer = useRef(null);
   const celeTimer = useRef(null);
+  const nedryTimer = useRef(null);
+  const shareTimer = useRef(null);
 
   const ask = () => {
     if (shaking) return;
+    // Secret "magic word" gag: skip the answer entirely and wag a finger.
+    if (isMagicWord(question)) {
+      setNedry(true);
+      clearTimeout(nedryTimer.current);
+      nedryTimer.current = setTimeout(() => setNedry(false), 4600);
+      return;
+    }
     setShaking(true);
     setAnswer(null);
     const a = pickAnswer();
@@ -595,7 +654,28 @@ export default function MagicEightBall() {
   useEffect(() => () => {
     clearTimeout(timer.current);
     clearTimeout(celeTimer.current);
+    clearTimeout(nedryTimer.current);
+    clearTimeout(shareTimer.current);
   }, []);
+
+  const shareAnswer = async () => {
+    if (!answer || shareStatus === "working") return;
+    setShareStatus("working");
+    try {
+      const blob = await renderEightBallCard({ question, answer });
+      const result = await shareImage({
+        blob,
+        filename: "ourcade-8ball.png",
+        title: "Ourcade — Magic 8-Ball",
+        text: question ? `I asked the Magic 8-Ball: “${question}”` : "The Magic 8-Ball says…",
+      });
+      setShareStatus(result === "cancelled" ? null : result);
+    } catch {
+      setShareStatus("failed");
+    }
+    clearTimeout(shareTimer.current);
+    shareTimer.current = setTimeout(() => setShareStatus(null), 2200);
+  };
 
   const foundIds = new Set(discovered.map((d) => d.id));
   const foundCount = COLLECTIBLES.filter((l) => foundIds.has(l.id)).length;
@@ -663,10 +743,28 @@ export default function MagicEightBall() {
 
         <div className="eb-hint">— tap the ball to ask again —</div>
 
-        <div className="eb-controls">
-          <button className="eb-pill" onClick={() => setHallOpen(true)}>
-            🏆 HALL OF LEGENDS ▸ {foundCount}/{COLLECTIBLES.length}
+        {answer && !shaking && (
+          <button className="eb-pill eb-share" onClick={shareAnswer} disabled={shareStatus === "working"}>
+            {shareStatus === "shared"
+              ? "✓ Shared!"
+              : shareStatus === "saved"
+                ? "✓ Saved!"
+                : shareStatus === "failed"
+                  ? "Couldn’t share"
+                  : shareStatus === "working"
+                    ? "…rendering"
+                    : "📸 Share this answer"}
           </button>
+        )}
+
+        <div className="eb-controls">
+          {/* The Hall stays hidden until the first legendary/mythic find — its
+              existence is part of the surprise. */}
+          {discovered.length > 0 && (
+            <button className="eb-pill" onClick={() => setHallOpen(true)}>
+              🏆 HALL OF LEGENDS ▸ {foundCount}/{COLLECTIBLES.length}
+            </button>
+          )}
           <button
             className="eb-mute"
             onClick={toggleMute}
@@ -677,6 +775,15 @@ export default function MagicEightBall() {
           </button>
         </div>
       </div>
+
+      {/* ── secret "magic word" gag (Dennis Nedry) ──────────────────────── */}
+      {nedry && (
+        <div className="eb-nedry" onClick={() => setNedry(false)}>
+          <img className="eb-nedry-gif" src="/nedry-wag.gif" alt="A finger wags: ah ah ah!" />
+          <div className="eb-nedry-quote">Ah ah ah — you didn’t say the magic word!</div>
+          <div className="eb-cele-dismiss">— click anywhere to dismiss —</div>
+        </div>
+      )}
 
       {/* ── legendary / mythic celebration ──────────────────────────────── */}
       {celebrate && (() => {

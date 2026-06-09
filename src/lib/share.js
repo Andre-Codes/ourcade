@@ -27,3 +27,45 @@ export async function share({ title, text, url } = {}) {
   }
   return "failed";
 }
+
+/* Share an image Blob. On phones (and browsers that support file sharing) this
+   opens the OS share sheet with the image attached; everywhere else it saves the
+   PNG to the user's downloads and best-effort copies the link. Returns a status
+   string so callers can show feedback. */
+export async function shareImage({ blob, filename = "ourcade.png", title, text, url } = {}) {
+  if (!blob) return "failed";
+  const link = url || (typeof window !== "undefined" ? window.location.href : "");
+
+  if (typeof navigator !== "undefined" && navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: blob.type || "image/png" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title, text });
+        return "shared";
+      }
+    } catch (err) {
+      if (err && err.name === "AbortError") return "cancelled";
+      // otherwise fall through to download
+    }
+  }
+
+  // Desktop fallback: save the file + copy the link.
+  try {
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+    try {
+      if (navigator.clipboard && link) await navigator.clipboard.writeText(link);
+    } catch {
+      /* link copy is best-effort */
+    }
+    return "saved";
+  } catch {
+    return "failed";
+  }
+}
