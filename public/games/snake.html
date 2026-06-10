@@ -210,13 +210,83 @@
 (function(){
   "use strict";
 
+  /* ====================================================================
+     NOPIA — a tiny Nokia-3310-style "OS": a screen/app stack, a soft-key
+     label bar, a per-user persistent store, and apps (Menu, Games/Snake,
+     Services browser, Composer, Messages, Names, Profiles, Settings, Clock).
+     New apps = one object implementing { render, navi, back, up, down, key }.
+     ==================================================================== */
+
   /* ---------- tuning levers ---------- */
-  const GW = 20, GH = 15;          // play grid size (cells)
+  const GW = 20, GH = 15;          // phone play grid (cells)
+  const WEB_GW = 12, WEB_GH = 8;   // embedded browser grid (cells)
   const START_LEN = 4;             // starting snake length
-  const STEP_START = 200;          // ms per step at start
-  const STEP_MIN = 95;             // fastest step
-  const STEP_DROP = 5;             // ms shaved off per food eaten
-  const BLINK_MS = 380;            // food / prompt blink period
+  const STEP_MIN = 95;             // fastest step (ms)
+  const STEP_DROP = 5;             // ms shaved per food
+  const BLINK_MS = 380;            // blink period
+
+  /* ---------- persistent per-user store ----------
+     One JSON blob, namespaced by uid() so a future accounts/Firebase layer can
+     sync per user. Messages go through Transport (the only seam a future
+     FirebaseTransport must replace to deliver a text to another user's phone). */
+  function uid(){ try{ return localStorage.getItem('ourcade:nokia:uid') || 'guest'; }catch(e){ return 'guest'; } }
+  function dbKey(){ return 'ourcade:nokia:' + uid(); }
+  const DEFAULTS = {
+    settings:{ soundOn:true, profile:'GENERAL', keypadTones:true, maze:false, level:3, greeting:'OURCADE', clock24:true },
+    snake:{ hi:0, webPlayed:false, webBest:0 },
+    contacts:[ {name:'JENNY', addr:'8675309'}, {name:'OURCADE', addr:'6287'} ],
+    messages:[],
+    composer:[]
+  };
+  let DB = loadDB();
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function deepDefaults(d, def){
+    if(d===null || typeof d!=='object') return clone(def);
+    if(Array.isArray(def)) return Array.isArray(d) ? d : clone(def);
+    const out = {};
+    for(const k in def){
+      if(def[k] && typeof def[k]==='object' && !Array.isArray(def[k])) out[k] = deepDefaults(d[k], def[k]);
+      else out[k] = (d[k]!==undefined) ? d[k] : clone(def[k]);
+    }
+    return out;
+  }
+  function loadDB(){
+    let d = null;
+    try{ d = JSON.parse(localStorage.getItem(dbKey()) || 'null'); }catch(e){ d = null; }
+    d = deepDefaults(d, DEFAULTS);
+    // one-time migration of the old flat snake keys
+    try{
+      const lh = parseInt(localStorage.getItem('ourcade:snake:hi'));
+      if(!isNaN(lh) && lh > d.snake.hi) d.snake.hi = lh;
+      if(localStorage.getItem('ourcade:snake:webPlayed') === '1') d.snake.webPlayed = true;
+      const wb = parseInt(localStorage.getItem('ourcade:snake:webBest'));
+      if(!isNaN(wb) && wb > d.snake.webBest) d.snake.webBest = wb;
+    }catch(e){}
+    return d;
+  }
+  function saveDB(){ try{ localStorage.setItem(dbKey(), JSON.stringify(DB)); }catch(e){} }
+  function factoryReset(){ DB = clone(DEFAULTS); saveDB(); }
+
+  // Messages transport seam — today files locally; future: FirebaseTransport delivers to recipient.
+  const Transport = {
+    send(to, body){
+      const m = { id:Date.now()+'-'+Math.floor(Math.random()*1e4), from:uid(), to, body, ts:Date.now(), folder:'sent', read:true };
+      DB.messages.push(m); saveDB();
+      autoReply(to);                 // demo only; remove once real delivery exists
+      /* TODO FirebaseTransport.send: write {from,to,body,ts} to recipient's inbox */
+      return m;
+    },
+    poll(){ /* TODO FirebaseTransport.poll: pull new inbox messages into DB.messages */ }
+  };
+  function autoReply(to){
+    const replies = ['OK','LOL','ON MY WAY','CALL ME','NICE','HAHA','SEE U SOON','K'];
+    setTimeout(()=>{
+      DB.messages.push({ id:Date.now()+'-r'+Math.floor(Math.random()*1e4), from:to, to:uid(),
+        body:replies[(Math.random()*replies.length)|0], ts:Date.now(), folder:'inbox', read:false });
+      saveDB();
+    }, 1600);
+  }
+  function contactName(addr){ const c = DB.contacts.find(c=>c.addr===addr); return c ? c.name : addr; }
 
   /* ---------- 5x7 dot-matrix font ---------- */
   const F = {
@@ -260,9 +330,13 @@
     ':':["00000","00100","00000","00000","00000","00100","00000"],
     '!':["00100","00100","00100","00100","00100","00000","00100"],
     '.':["00000","00000","00000","00000","00000","00100","00100"],
-    '-':["00000","00000","00000","11111","00000","00000","00000"],
-    '>':["10000","01000","00100","00010","00100","01000","10000"],
+    ',':["00000","00000","00000","00000","00100","00100","01000"],
     '?':["01110","10001","00001","00110","00100","00000","00100"],
+    '-':["00000","00000","00000","11111","00000","00000","00000"],
+    '/':["00001","00010","00010","00100","01000","01000","10000"],
+    '(':["00010","00100","01000","01000","01000","00100","00010"],
+    ')':["01000","00100","00010","00010","00010","00100","01000"],
+    '>':["10000","01000","00100","00010","00100","01000","10000"],
     '*':["00000","00100","10101","01110","10101","00100","00000"],
     '#':["01010","01010","11111","01010","11111","01010","01010"]
   };
@@ -273,7 +347,7 @@
   const reduceMotion = window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let DPR = 1, cell = 16, statusH = 18, pad = 6, fs = 2;
+  let DPR = 1, cell = 16, statusH = 18, softH = 22, pad = 6, fs = 2;
   let lcdW = 0, lcdH = 0;
 
   function layout(){
@@ -281,6 +355,7 @@
     cell = Math.max(8, Math.floor(cssW / GW));
     fs = Math.max(2, Math.floor(cell / 7));
     statusH = 9 * fs + 6;
+    softH = 9 * fs + 4;
     pad = Math.max(4, Math.round(cell * 0.35));
     lcdW = GW * cell + pad * 2;
     lcdH = statusH + GH * cell + pad * 2;
@@ -290,23 +365,18 @@
     canvas.style.height = (lcdH * (canvas.clientWidth / lcdW)) + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.imageSmoothingEnabled = false;
-    applyVenue(); // keep the active play-field geometry sized to the (possibly resized) LCD
+    applyVenue();
   }
 
-  /* ---------- play-field "venue" geometry ----------
-     The same engine renders two surfaces: the full phone LCD ('phone') and a small
-     framed canvas inside the WAP browser ('web'). These vars are the ACTIVE geometry;
-     px/py/step/placeFood/reset/drawField read them instead of GW/GH/cell directly. */
-  const WEB_GW = 12, WEB_GH = 8;        // smaller grid for the embedded browser game
+  /* ---------- play-field "venue" geometry (phone LCD vs embedded browser box) ---------- */
   let venue = 'phone';
   let gw = GW, gh = GH, fcell = 16, ox = 6, oy = 24;
   function applyVenue(){
     if(venue === 'web'){
       gw = WEB_GW; gh = WEB_GH;
-      const barH = 9*fs;                 // browser url bar
-      const headH = 9*fs;                // score/hi header
+      const barH = 9*fs, headH = 9*fs;
       const boxTop = statusH + barH + headH + 3;
-      const boxBottom = lcdH - pad - 8*fs; // leave a little footer room
+      const boxBottom = lcdH - pad - 8*fs;
       const availW = lcdW - 2*(pad+3);
       const availH = boxBottom - boxTop;
       fcell = Math.max(6, Math.min(Math.floor(availW/gw), Math.floor(availH/gh)));
@@ -318,8 +388,8 @@
     }
   }
 
-  /* draw a string of dot-matrix glyphs; returns width in px */
-  function textW(str, s){ return str.length * 6 * s - s; }
+  /* ---------- text ---------- */
+  function textW(str, s){ return ((str+"").length) * 6 * s - s; }
   function drawText(str, x, y, s, color){
     ctx.fillStyle = color;
     str = (str+"").toUpperCase();
@@ -328,20 +398,33 @@
       const gx = x + i * 6 * s;
       for(let r=0;r<7;r++){
         const row = g[r];
-        for(let c=0;c<5;c++){
-          if(row[c]==='1') ctx.fillRect(gx + c*s, y + r*s, s, s);
-        }
+        for(let c=0;c<5;c++){ if(row[c]==='1') ctx.fillRect(gx + c*s, y + r*s, s, s); }
       }
     }
   }
-  function drawTextCentered(str, y, s, color){
-    drawText(str, Math.round((lcdW - textW(str,s))/2), y, s, color);
+  function drawTextCentered(str, y, s, color){ drawText(str, Math.round((lcdW - textW(str,s))/2), y, s, color); }
+  function blinkOn(){ return (Math.floor(performance.now()/BLINK_MS))%2===0; }
+  let ink = '#1a2608', bg = '#a8c83a', ghost = 'rgba(26,38,8,0.10)';
+  function clearLCD(){ ctx.fillStyle = bg; ctx.fillRect(0,0,lcdW,lcdH); }
+
+  // char-wrapped text starting at (pad, top); returns the next caret {x,y}
+  function drawWrapped(str, top, s, bottom){
+    str = (str+"").toUpperCase();
+    const max = Math.max(1, Math.floor((lcdW - 2*pad) / (6*s)));
+    for(let i=0;i<str.length;i++){
+      const col = i % max, row = (i/max)|0, y = top + row*8*s;
+      if(y > bottom) break;
+      drawText(str[i], pad + col*6*s, y, s, ink);
+    }
+    const idx = str.length, col = idx % max, row = (idx/max)|0;
+    return { x: pad + col*6*s, y: top + row*8*s };
   }
 
   /* ---------- audio ---------- */
-  let actx = null, soundOn = true;
+  let actx = null;
+  function audible(){ return DB.settings.soundOn && DB.settings.profile !== 'SILENT'; }
   function beep(freq, dur, vol){
-    if(!soundOn) return;
+    if(!audible()) return;
     try{
       if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
       if(actx.state === 'suspended') actx.resume();
@@ -355,12 +438,45 @@
       o.start(t); o.stop(t+(dur||0.07)+0.02);
     }catch(e){}
   }
-  const sEat   = ()=>beep(880, 0.05, 0.05);
-  const sTurn  = ()=>beep(440, 0.02, 0.02);
-  const sOver  = ()=>{ beep(200,0.18,0.06); setTimeout(()=>beep(150,0.26,0.06),140); };
-  const sClick = ()=>beep(660, 0.025, 0.03);
+  const sEat  = ()=>beep(880, 0.05, 0.05);
+  const sTurn = ()=>beep(440, 0.02, 0.02);
+  const sOver = ()=>{ beep(200,0.18,0.06); setTimeout(()=>beep(150,0.26,0.06),140); };
+  const sClick= ()=>beep(660, 0.025, 0.03);
+  function click(){ if(DB.settings.keypadTones) sClick(); }   // keypad tone (gated)
 
-  /* ---------- classic ringtone (Gran Vals, the tune of that era) ---------- */
+  // two-tone DTMF for the dialer
+  const DTMF = {'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],
+    '6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477]};
+  function dtmf(ch){
+    if(!DB.settings.keypadTones || !audible()) return;
+    const p = DTMF[ch]; if(!p) return;
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended') actx.resume();
+      const t = actx.currentTime;
+      p.forEach(f=>{ const o=actx.createOscillator(), g=actx.createGain(); o.type='sine'; o.frequency.value=f;
+        g.gain.value=0.0001; o.connect(g); g.connect(actx.destination);
+        g.gain.exponentialRampToValueAtTime(0.05, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.13);
+        o.start(t); o.stop(t+0.15); });
+    }catch(e){}
+  }
+
+  // composer notes (~2 octaves) — keys 1..0 map to a scale so tunes work
+  const NOTE_FREQ = {C:261.63,D:293.66,E:329.63,F:349.23,G:392.00,A:440.00,B:493.88,C2:523.25,D2:587.33,E2:659.25};
+  const NOTE_KEYS = {'1':'C','2':'D','3':'E','4':'F','5':'G','6':'A','7':'B','8':'C2','9':'D2','0':'E2'};
+  function playNote(n, dur){ beep(NOTE_FREQ[n]||440, dur||0.18, 0.06); }
+  function playSeq(seq){
+    if(!seq || !seq.length) return;
+    let i = 0; const tempo = 230;
+    (function nx(){ if(i>=seq.length) return; playNote(seq[i], 0.2); i++; setTimeout(nx, tempo); })();
+  }
+  const PRESETS = [
+    { name:'MARY LAMB', seq:['E','D','C','D','E','E','E','D','D','D','E','G','G','E','D','C','D','E','E','E','E','D','D','E','D','C'] },
+    { name:'TWINKLE',   seq:['C','C','G','G','A','A','G','F','F','E','E','D','D','C'] }
+  ];
+
+  /* ---------- classic ringtone (Gran Vals) ---------- */
   let ringNodes = [], ringtonePlaying = false, ringTimer = null;
   function stopRingtone(){
     ringNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
@@ -368,13 +484,11 @@
     if(ringTimer){ clearTimeout(ringTimer); ringTimer = null; }
   }
   function playRingtone(){
-    try{
-      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
-      if(actx.state==='suspended') actx.resume();
-    }catch(e){ return; }
+    if(!audible()) return;
+    try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){ return; }
     stopRingtone();
     const N={A5:880,B5:987.77,Cs5:554.37,Cs6:1108.73,D5:587.33,D6:1174.66,E5:659.25,E6:1318.51,Fs5:739.99,Gs5:830.61};
-    const PITCH=1.18, u=0.11; // a little higher, a little faster
+    const PITCH=1.18, u=0.11;
     const seq=[['E6',1],['D6',1],['Fs5',2],['Gs5',2],['Cs6',1],['B5',1],['D5',2],['E5',2],['B5',1],['A5',1],['Cs5',2],['E5',2],['A5',4]];
     let t = actx.currentTime + 0.05;
     seq.forEach(p=>{
@@ -393,23 +507,14 @@
     const ms = (t - actx.currentTime)*1000;
     ringTimer = setTimeout(()=>{ ringtonePlaying=false; ringNodes=[]; }, ms+60);
   }
-  function triggerEgg(){
-    state = EGG; eggT = 0; setSoftLabels();
-    playRingtone();
-  }
 
-  /* ---------- hidden YouTube (the "real call" plays a song, audio only) ----------
-     Same trick the site's Walkman uses: a 1x1, opacity:0, NOT display:none player —
-     fully-hidden media gets paused by some browsers, so we keep it technically visible.
-     Autoplay is allowed because a key/tap gesture always precedes playback. */
+  /* ---------- hidden YouTube (the "real call" plays a song, audio only) ---------- */
   const JENNY_NUMBER = '8675309';
-  // Verified-embeddable uploads of 867-5309/Jenny (official first, fan upload fallback).
-  // If one is region-locked / pulled, onError advances to the next.
   const JENNY_IDS = ['6WTdTwcmxyo', '5tJ_w8HG1Tg'];
   let ytPlayer = null, ytReady = false, ytWanted = false, ytIdx = 0;
   function loadYT(){
     if(window.YT && window.YT.Player){ makeYT(); return; }
-    if(document.getElementById('yt-iframe-api')) return; // already loading
+    if(document.getElementById('yt-iframe-api')) return;
     const prev = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = ()=>{ if(typeof prev==='function') prev(); makeYT(); };
     const tag = document.createElement('script');
@@ -423,74 +528,31 @@
       playerVars:{ controls:0, disablekb:1, playsinline:1, rel:0, origin:location.origin },
       events:{
         onReady:()=>{ ytReady = true; if(ytWanted) playJenny(); },
-        onStateChange:(e)=>{ if(e.data===YT.PlayerState.ENDED && state===CALLING) hangUp(); },
-        onError:()=>{ // dead / region-locked id — try the next candidate
-          ytIdx++;
-          if(ytWanted && ytIdx < JENNY_IDS.length){ try{ ytPlayer.loadVideoById(JENNY_IDS[ytIdx]); }catch(e){} }
-        }
+        onStateChange:(e)=>{ if(e.data===YT.PlayerState.ENDED){ const s=cur(); if(s && s.id==='calling' && s.hang) s.hang(); } },
+        onError:()=>{ ytIdx++; if(ytWanted && ytIdx < JENNY_IDS.length){ try{ ytPlayer.loadVideoById(JENNY_IDS[ytIdx]); }catch(e){} } }
       }
     });
   }
-  // create the player early (on boot / first gesture) so it's ready before the dial gesture
   let ytInit = false;
   function ensureYT(){ if(ytInit) return; ytInit = true; loadYT(); }
   function playJenny(){
     ytWanted = true; ytIdx = 0; ensureYT();
-    if(!ytReady || !ytPlayer){ return; } // onReady will call us again
+    if(!ytReady || !ytPlayer) return;
     try{ ytPlayer.loadVideoById(JENNY_IDS[0]); ytPlayer.playVideo(); }catch(e){}
   }
-  function stopJenny(){
-    ytWanted = false;
-    try{ ytPlayer && ytPlayer.stopVideo && ytPlayer.stopVideo(); }catch(e){}
-  }
+  function stopJenny(){ ytWanted = false; try{ ytPlayer && ytPlayer.stopVideo && ytPlayer.stopVideo(); }catch(e){} }
 
-  /* ---------- persistent hi-score + browser-version award (localStorage, ourcade: ns) ----------
-     hi is shared by both venues. webPlayed/webBest track the embedded browser game so a future
-     profiles/leaderboard/Firebase layer can read clearly-named keys. */
-  let hi = 0, webPlayed = false, webBest = 0;
-  function loadHi(){
-    try{
-      hi = parseInt(localStorage.getItem('ourcade:snake:hi'))||0;
-      webPlayed = localStorage.getItem('ourcade:snake:webPlayed') === '1';
-      webBest = parseInt(localStorage.getItem('ourcade:snake:webBest'))||0;
-    }catch(e){}
-  }
-  function saveHi(){ try{ localStorage.setItem('ourcade:snake:hi', String(hi)); }catch(e){} }
-  function saveWeb(){ try{
-    localStorage.setItem('ourcade:snake:webPlayed', webPlayed?'1':'0');
-    localStorage.setItem('ourcade:snake:webBest', String(webBest));
-  }catch(e){} }
-  function resetHi(){ hi=0; webPlayed=false; webBest=0; saveHi(); saveWeb(); }
-
-  /* ---------- game state ---------- */
-  const TITLE='title', PLAY='play', PAUSE='pause', OVER='over',
-        MENU='menu', OPTIONS='options', WAP='wap', DIAL='dial',
-        CALLING='calling', IMEI='imei', EGG='egg';
-  const OLEN = 5; // options list length
-  let state = TITLE;
-  let snake, dir, buf, food, score, stepMs, acc, last, growing, deathBlink;
-  let menuIdx = 0, optIdx = 0, eggT = 0;
-  let dialBuf = '', wapScroll = 0, callT = 0, imeiT = 0;
-  let wrap = false; // false = walls kill (classic), true = wrap-around
-
-  // 3310-style main menu — icon + label (icons drawn in drawIcon)
-  const MENU_ITEMS = [
-    { label:"SNAKE",    icon:"snake" },
-    { label:"INTERNET", icon:"globe" },
-    { label:"DIALER",   icon:"phone" },
-    { label:"OPTIONS",  icon:"gear"  },
-  ];
-  const IMEI_STR = "35-680200-401650-7"; // cosmetic IMEI shown for *#06#
-  // tiny retro render of theourcade.com (Snake is featured); mirrors the real shelves
-  const WAP_GAMES = ["DESCENT","CRYPT OF THE HOLLOW KING","TAP SURGE",
-                     "COLOR PANIC","PIANO TILES","MIND FLOOD"];
-
+  /* ====================================================================
+     SNAKE ENGINE (shared by phone + embedded-browser venues)
+     ==================================================================== */
+  let snake, dir, buf, food, score, stepMs, acc, last, deathBlink;
+  function levelMs(){ return Math.max(STEP_MIN, 260 - (DB.settings.level||3)*20); }
   function reset(){
     snake = [];
     const cx = Math.floor(gw/2), cy = Math.floor(gh/2);
     for(let i=0;i<START_LEN;i++) snake.push({x:cx-i, y:cy});
     dir = {x:1,y:0}; buf = [];
-    score = 0; stepMs = STEP_START; acc = 0; growing = 0; deathBlink = 0;
+    score = 0; stepMs = levelMs(); acc = 0; deathBlink = 0;
     placeFood();
   }
   function placeFood(){
@@ -500,547 +562,595 @@
     while(occ.has(p.x+","+p.y) && tries<500);
     food = p;
   }
-
+  function setDir(d){
+    if(d==='up') queueDir(0,-1); else if(d==='down') queueDir(0,1);
+    else if(d==='left') queueDir(-1,0); else if(d==='right') queueDir(1,0);
+  }
   function queueDir(nx,ny){
-    if(state!==PLAY) return;
-    const cur = buf.length ? buf[buf.length-1] : dir;
-    if(cur.x===-nx && cur.y===-ny) return;      // no reverse
-    if(cur.x===nx && cur.y===ny) return;        // no dupe
+    if(cur() !== SnakeApp || SnakeApp.paused || SnakeApp.over) return;
+    const c = buf.length ? buf[buf.length-1] : dir;
+    if(c.x===-nx && c.y===-ny) return;
+    if(c.x===nx && c.y===ny) return;
     if(buf.length<2){ buf.push({x:nx,y:ny}); sTurn(); }
   }
-
   function step(){
     if(buf.length){ dir = buf.shift(); }
-    let hx = snake[0].x + dir.x;
-    let hy = snake[0].y + dir.y;
-
-    if(wrap){
-      hx = (hx + gw) % gw; hy = (hy + gh) % gh;
-    } else if(hx<0||hy<0||hx>=gw||hy>=gh){
-      return die();
-    }
-
+    let hx = snake[0].x + dir.x, hy = snake[0].y + dir.y;
+    if(DB.settings.maze){ hx=(hx+gw)%gw; hy=(hy+gh)%gh; }
+    else if(hx<0||hy<0||hx>=gw||hy>=gh){ return die(); }
     const willGrow = (hx===food.x && hy===food.y);
     const limit = willGrow ? snake.length : snake.length-1;
-    for(let i=0;i<limit;i++){
-      if(snake[i].x===hx && snake[i].y===hy) return die();
-    }
-
+    for(let i=0;i<limit;i++){ if(snake[i].x===hx && snake[i].y===hy) return die(); }
     snake.unshift({x:hx,y:hy});
-    if(willGrow){
-      score += 1;
-      stepMs = Math.max(STEP_MIN, stepMs - STEP_DROP);
-      placeFood();
-      sEat();
-    } else {
-      snake.pop();
-    }
+    if(willGrow){ score+=1; stepMs=Math.max(STEP_MIN, stepMs-STEP_DROP); placeFood(); sEat(); }
+    else snake.pop();
   }
-
   function die(){
-    sOver();
-    deathBlink = 0;
-    state = OVER;
-    if(score > hi){ hi = score; saveHi(); }
-    if(venue==='web' && score > webBest){ webBest = score; saveWeb(); }
-    setSoftLabels();
+    sOver(); deathBlink = 0; SnakeApp.over = true;
+    if(score > DB.snake.hi){ DB.snake.hi = score; saveDB(); }
+    if(SnakeApp.venue==='web' && score > DB.snake.webBest){ DB.snake.webBest = score; saveDB(); }
   }
 
-  // launch Snake on a given surface: 'phone' (full LCD) or 'web' (framed, in the browser)
-  function playVenue(v){
-    stopRingtone();
-    venue = v; applyVenue();
-    reset();
-    state = PLAY; last = 0; acc = 0;
-    if(v === 'web' && !webPlayed){ webPlayed = true; saveWeb(); } // unlock the NET SNAKE award
-    setSoftLabels();
-  }
-  function startGame(){ playVenue('phone'); }
-  function exitWeb(){ venue='phone'; applyVenue(); state = WAP; } // leave web game → back to site
-
-  /* ---------- rendering ---------- */
+  /* ---------- field rendering ---------- */
   function px(cx){ return ox + cx*fcell; }
   function py(cy){ return oy + cy*fcell; }
-
   function drawCellBlock(cx,cy){
     const m = Math.max(1, Math.round(fcell*0.12));
-    ctx.fillStyle = ink;
-    ctx.fillRect(px(cx)+m, py(cy)+m, fcell-m*2, fcell-m*2);
+    ctx.fillStyle = ink; ctx.fillRect(px(cx)+m, py(cy)+m, fcell-m*2, fcell-m*2);
   }
-
-  let ink = '#1a2608', bg = '#a8c83a', ghost = 'rgba(26,38,8,0.10)';
-
-  function clearLCD(){
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,lcdW,lcdH);
-  }
-
   function drawGhostGrid(){
     ctx.fillStyle = ghost;
     const m = Math.max(1, Math.round(fcell*0.12));
-    for(let y=0;y<gh;y++) for(let x=0;x<gw;x++){
-      ctx.fillRect(px(x)+m, py(y)+m, fcell-m*2, fcell-m*2);
-    }
+    for(let y=0;y<gh;y++) for(let x=0;x<gw;x++) ctx.fillRect(px(x)+m, py(y)+m, fcell-m*2, fcell-m*2);
   }
-
-  function drawStatus(){
-    ctx.fillStyle = ink;
-    // battery (far right)
-    const bw = 9*fs, bh = 5*fs, bxr = lcdW - pad - bw - fs, byr = pad + fs;
-    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.6);
-    ctx.strokeRect(bxr+0.5, byr+0.5, bw, bh);
-    ctx.fillRect(bxr+bw+1, byr+fs, fs, bh-2*fs);
-    ctx.fillRect(bxr+fs, byr+fs, (bw-2*fs)*0.8, bh-2*fs);
-    // signal bars (just left of battery)
-    const sigR = bxr - 3*fs;
-    for(let i=0;i<4;i++){
-      const h = (i+1)*fs + fs;
-      ctx.fillRect(sigR - (3-i)*(fs*2), pad+fs + (5*fs - h), fs+1, h);
-    }
-    // left: score while playing the phone game, else operator name (web shows score in-page)
-    if((state===PLAY||state===PAUSE) && venue==='phone'){
-      drawText((""+score).padStart(4,'0'), pad, pad, fs, ink);
-    } else {
-      drawText("NOPIA", pad, pad, fs, ink);
-    }
-    // divider line
-    ctx.fillRect(pad, statusH-2, lcdW-pad*2, 1);
-  }
-
   function drawField(){
     drawGhostGrid();
-    // food blinks
-    const blink = (Math.floor(performance.now()/BLINK_MS))%2===0;
-    if(blink || state!==PLAY){
-      // food drawn as a small ring-ish block to differ from body
+    const playing = !SnakeApp.paused && !SnakeApp.over;
+    if(blinkOn() || !playing){
       const m = Math.max(1, Math.round(fcell*0.12));
-      ctx.fillStyle = ink;
-      ctx.fillRect(px(food.x)+m, py(food.y)+m, fcell-m*2, fcell-m*2);
-      ctx.fillStyle = bg;
-      const im = Math.max(1, Math.round(fcell*0.30));
+      ctx.fillStyle = ink; ctx.fillRect(px(food.x)+m, py(food.y)+m, fcell-m*2, fcell-m*2);
+      ctx.fillStyle = bg; const im = Math.max(1, Math.round(fcell*0.30));
       ctx.fillRect(px(food.x)+im, py(food.y)+im, fcell-im*2, fcell-im*2);
     }
-    // snake
-    const hidden = (state===OVER) && (Math.floor(deathBlink/220)%2===1);
+    const hidden = SnakeApp.over && (Math.floor(deathBlink/220)%2===1);
     if(!hidden){
       for(let i=0;i<snake.length;i++) drawCellBlock(snake[i].x, snake[i].y);
-      // head eye dot
-      const h = snake[0];
-      ctx.fillStyle = bg;
+      const h = snake[0]; ctx.fillStyle = bg;
       const e = Math.max(1, Math.round(fcell*0.16));
       ctx.fillRect(px(h.x)+Math.round(fcell*0.5)-e, py(h.y)+Math.round(fcell*0.34)-e, e, e);
     }
   }
-
-  // centered text overlay within [top,bottom]; dims that band first
   function overlayRegion(lines, top, bottom){
-    ctx.fillStyle = 'rgba(168,200,58,0.6)';
-    ctx.fillRect(0, top, lcdW, bottom-top);
-    let totalH = 0;
-    lines.forEach(l=>{ totalH += (l.s*8) + 4; });
+    ctx.fillStyle = 'rgba(168,200,58,0.6)'; ctx.fillRect(0, top, lcdW, bottom-top);
+    let totalH = 0; lines.forEach(l=>{ totalH += (l.s*8)+4; });
     let y = top + (bottom - top - totalH)/2;
-    lines.forEach(l=>{
-      const blink = l.blink ? (Math.floor(performance.now()/BLINK_MS))%2===0 : true;
-      if(blink) drawTextCentered(l.t, Math.round(y), l.s, ink);
-      y += l.s*8 + 4;
-    });
+    lines.forEach(l=>{ const vis = l.blink ? blinkOn() : true; if(vis) drawTextCentered(l.t, Math.round(y), l.s, ink); y += l.s*8 + 4; });
   }
   function overlayBox(lines){ overlayRegion(lines, statusH, lcdH); }
 
-  /* ----- main menu: 3310-style 2x2 icon grid ----- */
+  /* ---------- canvas icons (used for the award badge) ---------- */
   function drawIcon(kind, cx, cy, r){
     ctx.fillStyle = ink; ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.7);
-    if(kind==='snake'){
-      const u = r*0.62;
-      [[-1,0],[0,0],[0,-1],[1,-1]].forEach(([dx,dy])=>
-        ctx.fillRect(cx+dx*u-u*0.42, cy+dy*u-u*0.42, u*0.84, u*0.84));
-      ctx.fillRect(cx+1.7*u, cy+0.6*u, u*0.5, u*0.5); // food pip
-    } else if(kind==='globe'){
+    if(kind==='globe'){
       ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
       ctx.beginPath(); ctx.ellipse(cx,cy,r*0.48,r,0,0,Math.PI*2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cx-r,cy); ctx.lineTo(cx+r,cy); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cx-r*0.86,cy-r*0.5); ctx.lineTo(cx+r*0.86,cy-r*0.5); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cx-r*0.86,cy+r*0.5); ctx.lineTo(cx+r*0.86,cy+r*0.5); ctx.stroke();
-    } else if(kind==='phone'){
-      ctx.save(); ctx.translate(cx,cy); ctx.rotate(-0.55); const u=r;
-      ctx.fillRect(-0.22*u,-0.85*u,0.44*u,1.7*u);    // handset bar
-      ctx.fillRect(-0.6*u,-1.0*u,1.2*u,0.45*u);      // ear piece
-      ctx.fillRect(-0.6*u, 0.55*u,1.2*u,0.45*u);     // mouth piece
-      ctx.restore();
-    } else if(kind==='gear'){
-      const teeth=8;
-      for(let i=0;i<teeth;i++){ ctx.save(); ctx.translate(cx,cy); ctx.rotate(i/teeth*Math.PI*2);
-        ctx.fillRect(-0.18*r,-1.18*r,0.36*r,0.5*r); ctx.restore(); }
-      ctx.beginPath(); ctx.arc(cx,cy,r*0.82,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(cx,cy,r*0.34,0,Math.PI*2); ctx.fill();
     }
   }
-  function drawIconMenu(){
-    drawTextCentered("MENU", statusH + pad, fs, ink);
-    const top = statusH + pad + 12*fs;
-    const areaH = lcdH - top - pad;
-    const colW = lcdW/2, rowH = areaH/2;
-    for(let i=0;i<MENU_ITEMS.length;i++){
-      const col=i%2, row=(i/2)|0;
-      const cx0 = col*colW, cy0 = top + row*rowH;
-      const cx = cx0 + colW/2, icy = cy0 + rowH*0.40;
-      const r = Math.min(colW, rowH)*0.22;
-      if(i===menuIdx){ // selection box
-        ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.8);
-        ctx.strokeRect(cx0+6, cy0+3, colW-12, rowH-8);
-      }
-      drawIcon(MENU_ITEMS[i].icon, cx, icy, r);
-      const lbl = MENU_ITEMS[i].label;
-      drawText(lbl, Math.round(cx - textW(lbl,fs)/2), Math.round(cy0 + rowH*0.74), fs, ink);
-    }
-  }
-
-  /* ----- options list (the old menu) ----- */
-  function drawOptions(){
-    drawTextCentered("OPTIONS", statusH + pad, fs, ink);
-    const items = [
-      "SOUND  " + (soundOn?"ON":"OFF"),
-      "MODE   " + (wrap?"WRAP":"WALLS"),
-      "RINGTONE",
-      "RESET HI",
-      "BACK"
-    ];
-    const s = fs;
-    let y = statusH + pad + 12*fs;
-    const lineH = 9*s;
-    for(let i=0;i<items.length;i++){
-      const x = Math.round((lcdW - textW(items[i],s))/2);
-      if(i===optIdx) drawText(">", x - 8*s, y, s, ink);
-      drawText(items[i], x, y, s, ink);
-      y += lineH;
-    }
-    if(ringtonePlaying) drawTextCentered("PLAYING...", lcdH - pad - 7*s, s, ink);
-  }
-
-  /* ----- in-phone WAP browser: a low-fi render of theourcade.com ----- */
-  let wapMax = 0;
-  function drawWAP(){
-    // inverted URL bar
-    const barH = 9*fs;
-    ctx.fillStyle = ink; ctx.fillRect(0, statusH, lcdW, barH);
-    drawText("THEOURCADE.COM", pad, statusH + Math.round((barH-7*fs)/2), fs, bg);
-    const top = statusH + barH + 3, bottom = lcdH - pad;
-    const lines = [
-      {t:"OURCADE", s:fs+1},
-      {t:"OUR VIBES OUR WORLD", s:fs},
-      {t:"", s:fs},
-      {t:"GAME OF THE DAY", s:fs},
-      {t:"> SNAKE", s:fs+1},
-      {t:"RATING 5 OF 5", s:fs},
-      {t:"PRESS CENTER TO PLAY", s:fs, blink:true},
-      ...(webPlayed ? [{t:"WEB BEST "+webBest, s:fs}] : []),
-      {t:"", s:fs},
-      {t:"THE ONE THAT CAME ON", s:fs},
-      {t:"EVERY PHONE. EAT.", s:fs},
-      {t:"GROW. DONT BITE", s:fs},
-      {t:"YOURSELF.", s:fs},
-      {t:"", s:fs},
-      {t:"MORE GAMES", s:fs},
-      ...WAP_GAMES.map(g=>({t:"- "+g, s:fs})),
-      {t:"", s:fs},
-      {t:"C 2003 OURCADE", s:fs},
-      {t:"PRESS START STAY", s:fs},
-    ];
-    const blinkOn = (Math.floor(performance.now()/BLINK_MS))%2===0;
-    ctx.save();
-    ctx.beginPath(); ctx.rect(0, top, lcdW, bottom-top); ctx.clip();
-    let y = top - wapScroll;
-    lines.forEach(l=>{ if(l.t && (!l.blink || blinkOn)) drawText(l.t, pad, Math.round(y), l.s, ink); y += l.s*8 + 2; });
-    ctx.restore();
-    wapMax = Math.max(0, (y + wapScroll) - bottom);
-    // scrollbar hint
-    if(wapMax>0){
-      const trackH = bottom - top, kh = Math.max(6, trackH*(trackH/(trackH+wapMax)));
-      const ky = top + (trackH-kh) * (wapScroll/wapMax);
-      ctx.fillStyle = ink; ctx.fillRect(lcdW-3, ky, 2, kh);
-    }
-  }
-
-  /* ----- dialer ----- */
-  function drawDial(){
-    drawTextCentered("DIALER", statusH + pad, fs, ink);
-    const s = fs+2;
-    const maxChars = Math.max(1, Math.floor((lcdW - pad*2) / (6*s)));
-    const disp = dialBuf.length>maxChars ? dialBuf.slice(dialBuf.length-maxChars) : dialBuf;
-    const midY = statusH + Math.round((lcdH-statusH)/2) - 4*s;
-    if(disp){
-      drawTextCentered(disp, midY, s, ink);
-    } else {
-      const blink=(Math.floor(performance.now()/BLINK_MS))%2===0;
-      if(blink) drawTextCentered("ENTER NUMBER", midY+2*fs, fs, ink);
-    }
-    drawTextCentered("CALL DIALS . I CLEARS", lcdH - pad - 7*fs, fs, ink);
-  }
-
-  /* ----- calling screen (also used for failed calls) ----- */
-  let callFail = false;
-  function drawCalling(){
-    const baseY = statusH + Math.round((lcdH-statusH)*0.30);
-    if(callFail){
-      drawTextCentered("NO SIGNAL", baseY, fs+1, ink);
-      drawTextCentered("BUSY", baseY + 13*fs, fs, ink);
-      return;
-    }
-    drawTextCentered("CALLING", baseY, fs+1, ink);
-    drawTextCentered("867-5309", baseY + 13*fs, fs, ink);
-    const dots = ".".repeat(1 + (Math.floor(callT/350)%3));
-    drawTextCentered(dots, baseY + 26*fs, fs+1, ink);
-    drawTextCentered("I = HANG UP", lcdH - pad - 7*fs, fs, ink);
-  }
-
-  /* ----- IMEI screen (shown for *#06#, then the connecting-people egg) ----- */
-  function drawIMEI(){
-    const baseY = statusH + Math.round((lcdH-statusH)*0.34);
-    drawTextCentered("IMEI", baseY, fs+1, ink);
-    drawTextCentered(IMEI_STR, baseY + 13*fs, fs, ink);
-  }
-
-  /* ----- "connecting people": two hands reaching, index fingers nearly touching ----- */
-  function drawHand(ymid, gap, u, sign){
-    const tipX = lcdW/2 - sign*(gap/2);
-    ctx.save();
-    ctx.translate(tipX, ymid); ctx.scale(sign, 1);
-    ctx.fillStyle = ink;
-    ctx.fillRect(-40*u, -3*u, 34*u, 6*u);     // forearm (runs off-screen)
-    ctx.fillRect(-12*u, -6*u, 8*u, 12*u);     // fist
-    ctx.fillRect(-9*u,  -9.5*u, 2.6*u, 4*u);  // thumb
-    ctx.fillRect(-6*u, -1.7*u, 6*u, 3.4*u);   // index finger
-    ctx.fillRect(-0.6*u, -1.3*u, 1.4*u, 2.6*u); // fingertip
-    ctx.restore();
-  }
-  function drawEgg(){
-    clearLCD();
-    const ymid = statusH + (lcdH - statusH)/2 + 6;
-    const prog = Math.min(1, eggT/1100);
-    const ease = 1 - Math.pow(1-prog,3);
-    const gap = 3 + (1-ease)*(lcdW*0.5);
-    const u = Math.max(2, Math.round(cell*0.16));
-    drawHand(ymid, gap, u, +1); // left hand, pointing right
-    drawHand(ymid, gap, u, -1); // right hand, pointing left
-    if(prog>0.93){ // spark of contact
-      const e = Math.max(2, Math.round(cell*0.22));
-      ctx.fillStyle = ink; ctx.fillRect(Math.round(lcdW/2-e/2), Math.round(ymid-e/2), e, e);
-    }
-    if(prog>0.5) drawTextCentered("NOPIA", statusH + Math.round(pad*1.4), fs+1, ink);
-    if(prog>0.95){
-      const blink = (Math.floor(performance.now()/BLINK_MS))%2===0;
-      if(blink){
-        drawTextCentered("CONNECTING", lcdH - pad - 17*fs, fs, ink);
-        drawTextCentered("PEOPLE", lcdH - pad - 8*fs, fs, ink);
-      }
-    }
-  }
-
-  /* ----- the embedded browser game: Snake running "on theourcade.com" ----- */
-  function webFieldBox(){ return { x:ox-3, y:oy-3, w:gw*fcell+6, h:gh*fcell+6 }; }
-  function drawWebGame(){
-    // browser url bar
-    const barH = 9*fs;
-    ctx.fillStyle = ink; ctx.fillRect(0, statusH, lcdW, barH);
-    drawText("THEOURCADE.COM/SNAKE", pad, statusH + Math.round((barH-7*fs)/2), fs, bg);
-    // score / hi header (inside the page)
-    const hy = statusH + barH + 2;
-    drawText("SCORE "+score, pad, hy, fs, ink);
-    const hiStr = "HI "+hi; drawText(hiStr, lcdW - pad - textW(hiStr,fs), hy, fs, ink);
-    // the embedded canvas frame + field
-    const b = webFieldBox();
-    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.6);
-    ctx.strokeRect(b.x+0.5, b.y+0.5, b.w, b.h);
-    drawField();
-    if(state===PAUSE) overlayRegion([{t:"PAUSED", s:fs+1}, {t:"CENTER RESUMES", s:fs, blink:true}], b.y, b.y+b.h);
-    else if(state===OVER) overlayRegion([
-      {t:"GAME OVER", s:fs}, {t:"SCORE "+score, s:fs},
-      {t:"CENTER RETRY", s:fs, blink:true}, {t:"PHONE EXITS", s:fs}
-    ], b.y, b.y+b.h);
-  }
-
-  // "NET SNAKE" achievement chip — shown once the player has played the in-browser game
   function drawAwardBadge(){
-    const label = "NET SNAKE";
-    const r = 3*fs, tw = textW(label, fs);
-    const totalW = r*2 + 5 + tw;
-    const cx = Math.round((lcdW - totalW)/2) + r;
-    const cy = lcdH - pad - 4*fs;
+    const label = "NET SNAKE", r = 3*fs, tw = textW(label, fs);
+    const totalW = r*2 + 5 + tw, cx = Math.round((lcdW - totalW)/2) + r, cy = lcdH - softH - 4*fs;
     drawIcon('globe', cx, cy, r);
     drawText(label, cx + r + 5, Math.round(cy - 3.5*fs), fs, ink);
   }
 
-  function render(){
-    if(state===EGG){ drawEgg(); return; }
-    if((state===PLAY||state===PAUSE||state===OVER) && venue==='web'){
-      clearLCD(); drawStatus(); drawWebGame(); return;
-    }
+  /* ---------- connecting-people egg ---------- */
+  function drawHand(ymid, gap, u, sign){
+    const tipX = lcdW/2 - sign*(gap/2);
+    ctx.save(); ctx.translate(tipX, ymid); ctx.scale(sign, 1); ctx.fillStyle = ink;
+    ctx.fillRect(-40*u, -3*u, 34*u, 6*u);
+    ctx.fillRect(-12*u, -6*u, 8*u, 12*u);
+    ctx.fillRect(-9*u, -9.5*u, 2.6*u, 4*u);
+    ctx.fillRect(-6*u, -1.7*u, 6*u, 3.4*u);
+    ctx.fillRect(-0.6*u, -1.3*u, 1.4*u, 2.6*u);
+    ctx.restore();
+  }
+  function drawEgg(t){
     clearLCD();
-    drawStatus();
-    if(state===TITLE){
+    const ymid = statusH + (lcdH - statusH)/2 + 6;
+    const prog = Math.min(1, t/1100), ease = 1 - Math.pow(1-prog,3);
+    const gap = 3 + (1-ease)*(lcdW*0.5), u = Math.max(2, Math.round(cell*0.16));
+    drawHand(ymid, gap, u, +1); drawHand(ymid, gap, u, -1);
+    if(prog>0.93){ const e=Math.max(2,Math.round(cell*0.22)); ctx.fillStyle=ink; ctx.fillRect(Math.round(lcdW/2-e/2), Math.round(ymid-e/2), e, e); }
+    if(prog>0.5) drawTextCentered("NOPIA", statusH + Math.round(pad*1.4), fs+1, ink);
+    if(prog>0.95 && blinkOn()){ drawTextCentered("CONNECTING", lcdH - pad - 17*fs, fs, ink); drawTextCentered("PEOPLE", lcdH - pad - 8*fs, fs, ink); }
+  }
+
+  /* ====================================================================
+     OS SHELL — screen stack, status bar, soft-key bar, toast, input
+     ==================================================================== */
+  let screenStack = [];
+  function cur(){ return screenStack[screenStack.length-1]; }
+  function pushScreen(s){ if(s.enter) s.enter(); screenStack.push(s); }
+  function popScreen(){ const s = screenStack.pop(); if(s && s.exit) s.exit(); if(!screenStack.length) pushScreen(Standby); }
+  function goScreen(s){ const old = screenStack.pop(); if(old && old.exit) old.exit(); pushScreen(s); }
+  function popToStandby(){ const s = cur(); if(s && s.exit) s.exit(); screenStack = []; pushScreen(Standby); }
+
+  let toast = null, toastT = 0;
+  function showToast(msg){ toast = msg; toastT = 1000; }
+
+  function softLabelOf(s){ const v = s ? s.soft : null; return typeof v==='function' ? v() : v; }
+
+  function drawStatusBar(leftText){
+    ctx.fillStyle = ink;
+    const bw=9*fs, bh=5*fs, bxr=lcdW-pad-bw-fs, byr=pad+fs;
+    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.6);
+    ctx.strokeRect(bxr+0.5, byr+0.5, bw, bh);
+    ctx.fillRect(bxr+bw+1, byr+fs, fs, bh-2*fs);
+    ctx.fillRect(bxr+fs, byr+fs, (bw-2*fs)*0.8, bh-2*fs);
+    const sigR = bxr - 3*fs;
+    for(let i=0;i<4;i++){ const h=(i+1)*fs+fs; ctx.fillRect(sigR-(3-i)*(fs*2), pad+fs+(5*fs-h), fs+1, h); }
+    let left = leftText;
+    if(left==null){ const s=cur(); left = (s && s.statusLeft!=null) ? (typeof s.statusLeft==='function'?s.statusLeft():s.statusLeft) : 'OURCADE'; }
+    drawText(left, pad, pad, fs, ink);
+    ctx.fillRect(pad, statusH-2, lcdW-pad*2, 1);
+  }
+  function drawSoftBar(label){
+    if(!label) return;
+    const y = lcdH - softH;
+    ctx.fillStyle = ink; ctx.fillRect(pad, y, lcdW-2*pad, 1);
+    drawTextCentered(label, y+4, fs, ink);
+  }
+  function drawToast(msg){
+    const w=textW(msg,fs)+8, x=Math.round((lcdW-w)/2), y=lcdH - softH - 11*fs;
+    ctx.fillStyle=bg; ctx.fillRect(x-1,y-1,w+2,9*fs+4);
+    ctx.fillStyle=ink; ctx.fillRect(x,y,w,9*fs+2);
+    drawText(msg, x+4, y+2, fs, bg);
+  }
+
+  /* content region helpers (chrome screens leave room for status + soft bars) */
+  function contentTop(){ return statusH + 2; }
+  function contentBottom(){ return lcdH - softH - 2; }
+
+  function drawListBody(title, labels, idx, numbered){
+    let top = contentTop();
+    if(title){ drawTextCentered(title, top, fs, ink); top += 10*fs; }
+    const bottom = contentBottom(), lineH = 9*fs;
+    const rows = Math.max(1, Math.floor((bottom-top)/lineH));
+    let start = 0;
+    if(labels.length>rows) start = Math.min(Math.max(0, idx-(rows>>1)), labels.length-rows);
+    for(let r=0;r<rows && start+r<labels.length;r++){
+      const i = start+r, y = top + r*lineH;
+      const text = (numbered?((i+1)+' '):'') + labels[i];
+      if(i===idx){ ctx.fillStyle=ink; ctx.fillRect(pad-1, y-1, lcdW-2*(pad-1), lineH-1); drawText(text, pad+2, y, fs, bg); }
+      else drawText(text, pad+2, y, fs, ink);
+    }
+    if(start>0) drawTextCentered('-', top-7*fs+1, fs, ink);
+  }
+
+  // generic scrolling list app
+  function ListScreen(opts){
+    return {
+      id: opts.id, idx: 0,
+      statusLeft: (opts.statusLeft!=null ? opts.statusLeft : 'OURCADE'),
+      get soft(){ return opts.soft || 'Select'; },
+      enter(){ this.idx = 0; },
+      items(){ return opts.items(); },
+      up(){ const n=this.items().length; if(n){ this.idx=(this.idx+n-1)%n; click(); } },
+      down(){ const n=this.items().length; if(n){ this.idx=(this.idx+1)%n; click(); } },
+      navi(){ const it=this.items()[this.idx]; if(it && it.run) it.run(); },
+      key(ch){
+        const items=this.items();
+        if(opts.numbered){
+          // numbered menus use number-key shortcuts (authentic); scroll keys still scroll
+          const n=parseInt(ch); if(n>=1 && n<=items.length){ this.idx=n-1; this.navi(); } else click();
+        } else {
+          // unnumbered lists: 2/8 scroll, 5 selects as a keypad convenience
+          if(ch==='2') this.up(); else if(ch==='8') this.down(); else if(ch==='5') this.navi(); else click();
+        }
+      },
+      back(){ popScreen(); },
+      render(){ drawListBody(opts.title, this.items().map(i=>i.label), this.idx, !!opts.numbered); }
+    };
+  }
+
+  /* ---------- input plumbing (delegates to the current screen) ---------- */
+  function naviPress(){ const s=cur(); if(s.navi){ click(); s.navi(); } }
+  function phonePress(){ const s=cur(); click(); if(s.back) s.back(); else popScreen(); }
+  function doScroll(dir){ const s=cur(); if(dir==='up'){ if(s.up) s.up(); } else { if(s.down) s.down(); } }
+  function pressDigit(ch){ const s=cur(); if(s.key) s.key(ch); else click(); }
+  function screenTap(){ const s=cur(); if(s.tap){ click(); s.tap(); } else if(s.navi){ click(); s.navi(); } }
+
+  /* ====================================================================
+     APPS
+     ==================================================================== */
+
+  /* ----- Standby ----- */
+  function clockStr(){
+    const d = new Date(); let h = d.getHours(); const m = String(d.getMinutes()).padStart(2,'0');
+    if(DB.settings.clock24) return String(h).padStart(2,'0')+':'+m;
+    const ap = h<12?'AM':'PM'; h = h%12 || 12; return h+':'+m+' '+ap;
+  }
+  const Standby = {
+    id:'standby', statusLeft:'OURCADE',
+    get soft(){ return 'Menu'; },
+    render(){
+      const midY = statusH + Math.round((lcdH-statusH-softH)*0.30);
+      drawTextCentered(clockStr(), midY, fs+2, ink);
+      drawTextCentered(DB.settings.greeting||'OURCADE', midY + 16*fs, fs, ink);
+      const unread = DB.messages.filter(m=>m.folder==='inbox' && !m.read).length;
+      if(unread) drawTextCentered(unread+' MESSAGE'+(unread>1?'S':''), contentBottom()-9*fs, fs, ink);
+      if(DB.snake.webPlayed) drawAwardBadge();
+    },
+    navi(){ pushScreen(MainMenu); },
+    back(){ /* nothing on standby */ },
+    tap(){ pushScreen(MainMenu); },
+    key(ch){ pushScreen(Dialer); Dialer.input(ch); }
+  };
+
+  /* ----- Main menu ----- */
+  const MainMenu = ListScreen({ id:'menu', title:'MENU', numbered:true, items:()=>[
+    {label:'MESSAGES', run:()=>pushScreen(MessagesMenu)},
+    {label:'NAMES',    run:()=>pushScreen(NamesScreen)},
+    {label:'GAMES',    run:()=>pushScreen(GamesMenu)},
+    {label:'COMPOSER', run:()=>pushScreen(ComposerApp)},
+    {label:'PROFILES', run:()=>pushScreen(ProfilesScreen)},
+    {label:'SETTINGS', run:()=>pushScreen(SettingsScreen)},
+    {label:'CLOCK',    run:()=>pushScreen(ClockApp)},
+    {label:'SERVICES', run:()=>pushScreen(Browser)}
+  ]});
+
+  /* ----- Dialer / Calling / IMEI ----- */
+  const Dialer = {
+    id:'dialer', statusLeft:'OURCADE', buf:'',
+    get soft(){ return 'Call'; },
+    enter(){ this.buf=''; },
+    input(ch){
+      if(this.buf.length<20){ this.buf += ch; dtmf(ch); }
+      if(this.buf.endsWith('*#06#')){ this.buf=''; goScreen(IMEIScreen); }
+    },
+    key(ch){ this.input(ch); },
+    navi(){ this.call(); },
+    back(){ if(this.buf) this.buf=this.buf.slice(0,-1); else popScreen(); },
+    call(){
+      if(this.buf===JENNY_NUMBER){ const num=this.buf; this.buf=''; pushScreen(makeCalling('867-5309', false)); playJenny(); return; }
+      if(!this.buf) return;
+      const num=this.buf; this.buf=''; pushScreen(makeCalling(num, true));
+    },
+    render(){
+      const s=fs+2;
+      const maxC=Math.max(1, Math.floor((lcdW-2*pad)/(6*s)));
+      const disp = this.buf.length>maxC ? this.buf.slice(this.buf.length-maxC) : this.buf;
+      const midY = statusH + Math.round((lcdH-statusH-softH)/2) - 3*s;
+      if(disp) drawTextCentered(disp, midY, s, ink);
+      else if(blinkOn()) drawTextCentered('ENTER NUMBER', midY+2*fs, fs, ink);
+    }
+  };
+  function makeCalling(num, fail){
+    return {
+      id:'calling', statusBar:true, t:0, fail:!!fail,
+      get soft(){ return this.fail ? '' : 'End'; },
+      enter(){ this.t=0; if(this.fail) sOver(); },
+      tick(dt){ this.t+=dt; if(this.fail && this.t>1400) popScreen(); },
+      navi(){ this.hang(); }, back(){ this.hang(); },
+      hang(){ stopJenny(); popScreen(); },
+      render(){
+        const baseY = statusH + Math.round((lcdH-statusH)*0.30);
+        if(this.fail){ drawTextCentered('NO SIGNAL', baseY, fs+1, ink); drawTextCentered('BUSY', baseY+13*fs, fs, ink); return; }
+        drawTextCentered('CALLING', baseY, fs+1, ink);
+        drawTextCentered(num, baseY+13*fs, fs, ink);
+        drawTextCentered('.'.repeat(1+(Math.floor(this.t/350)%3)), baseY+26*fs, fs+1, ink);
+      }
+    };
+  }
+  const IMEIScreen = {
+    id:'imei', t:0, get soft(){ return ''; },
+    enter(){ this.t=0; },
+    tick(dt){ this.t+=dt; if(this.t>1600) goScreen(EggScreen); },
+    navi(){ goScreen(EggScreen); }, back(){ popScreen(); },
+    render(){ const y=statusH+Math.round((lcdH-statusH)*0.34); drawTextCentered('IMEI', y, fs+1, ink); drawTextCentered('35-680200-401650-7', y+13*fs, fs, ink); }
+  };
+  const EggScreen = {
+    id:'egg', statusBar:false, t:0,
+    enter(){ this.t=0; playRingtone(); },
+    exit(){ stopRingtone(); },
+    tick(dt){ this.t+=dt; if(this.t>9000) popToStandby(); },
+    navi(){ popToStandby(); }, back(){ popToStandby(); }, tap(){ popToStandby(); },
+    render(){ drawEgg(this.t); }
+  };
+
+  /* ----- Games / Snake ----- */
+  const GamesMenu = ListScreen({ id:'games', title:'GAMES', numbered:true, items:()=>[
+    {label:'SNAKE', run:()=>pushScreen(SnakeMenu)}
+  ]});
+  const SnakeMenu = ListScreen({ id:'snakemenu', title:'SNAKE', numbered:false, items:()=>[
+    {label:'NEW GAME', run:()=>{ SnakeApp.start('phone'); pushScreen(SnakeApp); }},
+    {label:'LEVEL '+DB.settings.level, run:()=>{ DB.settings.level=(DB.settings.level%9)+1; saveDB(); }},
+    {label:'MAZE '+(DB.settings.maze?'ON':'OFF'), run:()=>{ DB.settings.maze=!DB.settings.maze; saveDB(); }},
+    {label:'TOP SCORE '+DB.snake.hi, run:()=>showToast('HI '+DB.snake.hi)}
+  ]});
+  const SnakeApp = {
+    id:'snake', statusBar:false, venue:'phone', paused:false, over:false,
+    get soft(){ return ''; },
+    start(v){
+      this.venue=v; venue=v; applyVenue(); reset();
+      this.paused=false; this.over=false; last=0; acc=0;
+      if(v==='web' && !DB.snake.webPlayed){ DB.snake.webPlayed=true; saveDB(); }
+    },
+    tick(dt){
+      if(this.over){ deathBlink+=dt; return; }
+      if(this.paused) return;
+      acc+=dt; let guard=0;
+      while(acc>=stepMs){ acc-=stepMs; step(); if(this.over) break; if(++guard>12) break; }
+    },
+    up(){ setDir('up'); }, down(){ setDir('down'); },
+    key(ch){ if(ch==='2')setDir('up'); else if(ch==='8')setDir('down'); else if(ch==='4')setDir('left'); else if(ch==='6')setDir('right'); else if(ch==='5')this.navi(); },
+    navi(){ if(this.over) this.start(this.venue); else this.paused=!this.paused; },
+    back(){ if(this.venue==='web'){ venue='phone'; applyVenue(); popScreen(); } else popScreen(); },
+    tap(){ this.navi(); },
+    render(){
+      if(this.venue==='web'){ this.renderWeb(); return; }
+      drawStatusBar(String(score).padStart(4,'0'));
       drawField();
-      overlayBox([
-        {t:"SNAKE", s:fs+2},
-        {t:"HI "+hi, s:fs},
-        {t:"TAP TO PLAY", s:fs, blink:true},
-        {t:"i FOR MENU", s:fs}
-      ]);
-      if(webPlayed) drawAwardBadge();
-    } else if(state===PLAY){
+      if(this.paused) overlayBox([{t:'PAUSED',s:fs+1},{t:'CENTER RESUMES',s:fs,blink:true}]);
+      else if(this.over) overlayBox([{t:'GAME OVER',s:fs+1},{t:'SCORE '+score,s:fs},{t:'HI '+DB.snake.hi,s:fs},{t:'CENTER RETRY',s:fs,blink:true}]);
+    },
+    renderWeb(){
+      drawStatusBar('OURCADE');
+      const barH=9*fs; ctx.fillStyle=ink; ctx.fillRect(0,statusH,lcdW,barH);
+      drawText('THEOURCADE.COM/SNAKE', pad, statusH+Math.round((barH-7*fs)/2), fs, bg);
+      const hy=statusH+barH+2; drawText('SCORE '+score, pad, hy, fs, ink);
+      const hs='HI '+DB.snake.hi; drawText(hs, lcdW-pad-textW(hs,fs), hy, fs, ink);
+      ctx.strokeStyle=ink; ctx.lineWidth=Math.max(1,fs*0.6); ctx.strokeRect(ox-3+0.5, oy-3+0.5, gw*fcell+6, gh*fcell+6);
       drawField();
-    } else if(state===PAUSE){
-      drawField();
-      overlayBox([{t:"PAUSED", s:fs+1}, {t:"TAP TO RESUME", s:fs, blink:true}]);
-    } else if(state===OVER){
-      drawField();
-      overlayBox([
-        {t:"GAME OVER", s:fs+1},
-        {t:"SCORE "+score, s:fs},
-        {t:"HI "+hi, s:fs},
-        {t:"TAP TO RETRY", s:fs, blink:true}
-      ]);
-    } else if(state===MENU){
-      drawIconMenu();
-    } else if(state===OPTIONS){
-      drawOptions();
-    } else if(state===WAP){
-      drawWAP();
-    } else if(state===DIAL){
-      drawDial();
-    } else if(state===CALLING){
-      drawCalling();
-    } else if(state===IMEI){
-      drawIMEI();
+      const bt=oy-3, bb=oy-3+gh*fcell+6;
+      if(this.paused) overlayRegion([{t:'PAUSED',s:fs+1},{t:'CENTER RESUMES',s:fs,blink:true}], bt, bb);
+      else if(this.over) overlayRegion([{t:'GAME OVER',s:fs},{t:'SCORE '+score,s:fs},{t:'CENTER RETRY',s:fs,blink:true},{t:'END EXITS',s:fs}], bt, bb);
+    }
+  };
+
+  /* ----- Services (browser): Snake embedded in a webpage + a tiny web ring ----- */
+  const PAGES = {
+    home:{ url:'OURCADE.COM', blocks:[
+      {type:'text',t:'OURCADE ARCADE',s:1},
+      {type:'text',t:'EST. 2003',s:0},
+      {type:'space'},
+      {type:'text',t:'PLAY THE CLASSIC:',s:0},
+      {type:'applet'},
+      {type:'space'},
+      {type:'link',label:'GAMES',go:'games'},
+      {type:'link',label:'GUESTBOOK',go:'guest'},
+      {type:'link',label:'ABOUT',go:'about'},
+      {type:'space'},
+      {type:'text',t:'VISITORS 0013370',s:0},
+      {type:'text',t:'(C) 2003 OURCADE',s:0}
+    ]},
+    games:{ url:'OURCADE.COM/GAMES', blocks:[
+      {type:'text',t:'GAMES',s:1},
+      {type:'text',t:'- SNAKE',s:0},
+      {type:'text',t:'- DESCENT',s:0},
+      {type:'text',t:'- CRYPT KING',s:0},
+      {type:'text',t:'- TAP SURGE',s:0},
+      {type:'text',t:'- MIND FLOOD',s:0},
+      {type:'space'},
+      {type:'applet'},
+      {type:'space'},
+      {type:'link',label:'HOME',go:'home'}
+    ]},
+    guest:{ url:'OURCADE.COM/GBOOK', blocks:[
+      {type:'text',t:'GUESTBOOK',s:1},
+      {type:'text',t:'XX SN4KE XX:',s:0},
+      {type:'text',t:'BEST SITE EVER!',s:0},
+      {type:'text',t:'NOKIA4LIFE:',s:0},
+      {type:'text',t:'867-5309 CALL ME',s:0},
+      {type:'space'},
+      {type:'link',label:'SIGN',go:'guest'},
+      {type:'link',label:'HOME',go:'home'}
+    ]},
+    about:{ url:'OURCADE.COM/ABOUT', blocks:[
+      {type:'text',t:'ABOUT',s:1},
+      {type:'text',t:'HAND CODED WITH',s:0},
+      {type:'text',t:'CAFFEINE. MADE FOR',s:0},
+      {type:'text',t:'56K MODEMS. NO',s:0},
+      {type:'text',t:'COOKIES JUST',s:0},
+      {type:'text',t:'QUARTERS.',s:0},
+      {type:'space'},
+      {type:'link',label:'HOME',go:'home'}
+    ]}
+  };
+  function blockH(b){ return b.type==='space' ? 5*fs : b.type==='applet' ? 14*fs : b.type==='link' ? (8*fs+2) : ((b.s?fs+1:fs)*8+2); }
+  const Browser = {
+    id:'services', statusLeft:'OURCADE', page:'home', focus:0, scroll:0, loadT:0,
+    get soft(){ return this.loadT>0 ? '' : 'Open'; },
+    enter(){ this.page='home'; this.focus=0; this.scroll=0; this.loadT=500; },
+    tick(dt){ if(this.loadT>0) this.loadT-=dt; },
+    def(){ return PAGES[this.page]; },
+    focusables(){ const f=[]; this.def().blocks.forEach((b,i)=>{ if(b.type==='link'||b.type==='applet') f.push(i); }); return f; },
+    up(){ const f=this.focusables(); if(f.length){ this.focus=(this.focus+f.length-1)%f.length; click(); } },
+    down(){ const f=this.focusables(); if(f.length){ this.focus=(this.focus+1)%f.length; click(); } },
+    navi(){
+      if(this.loadT>0) return;
+      const f=this.focusables(), b=this.def().blocks[f[this.focus]]; if(!b) return;
+      if(b.type==='applet'){ SnakeApp.start('web'); pushScreen(SnakeApp); }
+      else if(b.type==='link'){ this.go(b.go); }
+    },
+    go(id){ if(PAGES[id]){ this.page=id; this.focus=0; this.scroll=0; this.loadT=400; click(); } },
+    back(){ if(this.page!=='home') this.go('home'); else popScreen(); },
+    key(ch){ if(ch==='2')this.up(); else if(ch==='8')this.down(); else if(ch==='5')this.navi(); else click(); },
+    render(){
+      const p=this.def(), barH=9*fs;
+      ctx.fillStyle=ink; ctx.fillRect(0,statusH,lcdW,barH);
+      drawText(p.url, pad, statusH+Math.round((barH-7*fs)/2), fs, bg);
+      const top=statusH+barH+3, bottom=contentBottom();
+      if(this.loadT>0){ drawTextCentered('LOADING...', top+12*fs, fs, ink); return; }
+      const f=this.focusables(), focusIdx=f[this.focus];
+      const pos=[]; let yy=0;
+      p.blocks.forEach(b=>{ pos.push({y:yy,h:blockH(b)}); yy+=blockH(b); });
+      if(focusIdx!=null){ const fy=pos[focusIdx].y, fh=pos[focusIdx].h;
+        if(fy-this.scroll<0) this.scroll=fy; else if(fy+fh-this.scroll>(bottom-top)) this.scroll=fy+fh-(bottom-top); }
+      this.scroll=Math.max(0, Math.min(this.scroll, Math.max(0, yy-(bottom-top))));
+      ctx.save(); ctx.beginPath(); ctx.rect(0,top,lcdW,bottom-top); ctx.clip();
+      p.blocks.forEach((b,i)=>{ const y=top+pos[i].y-this.scroll; if(y>bottom||y+pos[i].h<top) return; drawBlock(b, y, i===focusIdx); });
+      ctx.restore();
+    }
+  };
+  function drawBlock(b, y, focused){
+    if(b.type==='text'){ const s=b.s?fs+1:fs; drawText(b.t, pad, y, s, ink); }
+    else if(b.type==='link'){
+      const label='> '+b.label;
+      if(focused){ ctx.fillStyle=ink; ctx.fillRect(pad-1,y-1,lcdW-2*(pad-1),8*fs+1); drawText(label,pad+2,y,fs,bg); }
+      else drawText(label,pad+2,y,fs,ink);
+    } else if(b.type==='applet'){
+      const h=14*fs, x=pad+2, w=lcdW-2*pad-4;
+      ctx.strokeStyle=ink; ctx.lineWidth=Math.max(1, fs*(focused?1.2:0.6)); ctx.strokeRect(x+0.5,y+0.5,w,h-4);
+      drawTextCentered('SNAKE.APP', y+3*fs, fs, ink);
+      if(!(focused && !blinkOn())) drawTextCentered('> PLAY', y+8*fs, fs, ink);
     }
   }
 
-  /* ---------- main loop ---------- */
+  /* ----- Composer ----- */
+  const ComposerApp = {
+    id:'composer', statusLeft:'OURCADE', seq:[], presetIdx:0,
+    get soft(){ return 'Play'; },
+    enter(){ this.seq = (DB.composer && DB.composer.length) ? DB.composer.slice() : []; },
+    key(ch){
+      if(NOTE_KEYS[ch]){ const n=NOTE_KEYS[ch]; playNote(n,0.18); this.seq.push(n); if(this.seq.length>96) this.seq.shift(); DB.composer=this.seq.slice(); saveDB(); }
+      else if(ch==='*'){ this.seq=[]; DB.composer=[]; saveDB(); showToast('CLEARED'); }
+      else if(ch==='#'){ const p=PRESETS[this.presetIdx%PRESETS.length]; this.presetIdx++; this.seq=p.seq.slice(); DB.composer=this.seq.slice(); saveDB(); showToast(p.name); }
+      else click();
+    },
+    navi(){ playSeq(this.seq); },
+    back(){ if(this.seq.length){ this.seq.pop(); DB.composer=this.seq.slice(); saveDB(); } else popScreen(); },
+    render(){
+      drawTextCentered('COMPOSER', contentTop(), fs, ink);
+      const tail = this.seq.slice(-48).join(' ');
+      drawWrapped(tail, contentTop()+11*fs, fs, contentBottom()-9*fs);
+      drawTextCentered('1-0 NOTES  * CLR  # TUNE', contentBottom()-7*fs, fs, ink);
+    }
+  };
+
+  /* ----- Messages + Names ----- */
+  const MTAP = {'1':'.,?!1','2':'abc2','3':'def3','4':'ghi4','5':'jkl5','6':'mno6','7':'pqrs7','8':'tuv8','9':'wxyz9','0':' 0'};
+  const Editor = {
+    id:'editor', statusLeft:'OURCADE', text:'', caseMode:1, pk:null, pidx:0, pt:0, preTo:null,
+    get soft(){ return 'Send'; },
+    tick(){ if(this.pk && performance.now()-this.pt>850) this.pk=null; },
+    applyCase(c, replacing){
+      if(!/[a-z]/i.test(c)) return c;
+      if(this.caseMode===2) return c.toUpperCase();
+      if(this.caseMode===0) return c.toLowerCase();
+      const prev = replacing ? this.text.slice(0,-1) : this.text;
+      const lastCh = prev.slice(-1);
+      return (prev.length===0 || lastCh===' ') ? c.toUpperCase() : c.toLowerCase();
+    },
+    key(ch){
+      const now = performance.now(); click();
+      if(MTAP[ch]){
+        const set = MTAP[ch];
+        if(this.pk===ch && (now-this.pt)<850){ this.pidx=(this.pidx+1)%set.length; this.text=this.text.slice(0,-1)+this.applyCase(set[this.pidx], true); }
+        else { this.pk=ch; this.pidx=0; this.text += this.applyCase(set[0], false); }
+        this.pt = now;
+      } else if(ch==='#'){ this.caseMode=(this.caseMode+1)%3; this.pk=null; }
+      else if(ch==='*'){ this.pk=null; this.text += '?'; }
+    },
+    navi(){
+      if(!this.text.trim()){ showToast('EMPTY'); return; }
+      if(this.preTo){ Transport.send(this.preTo, this.text); showToast('MESSAGE SENT'); popScreen(); }
+      else openRecipientPicker(this.text);
+    },
+    back(){ if(this.text){ this.text=this.text.slice(0,-1); this.pk=null; } else popScreen(); },
+    render(){
+      drawTextCentered('WRITE MSG', contentTop(), fs, ink);
+      const p = drawWrapped(this.text, contentTop()+11*fs, fs, contentBottom()-9*fs);
+      if(blinkOn()){ ctx.fillStyle=ink; ctx.fillRect(p.x, p.y, 5*fs, 7*fs); }
+      const modes=['abc','Abc','ABC'];
+      drawText(modes[this.caseMode], pad, contentBottom()-7*fs, fs, ink);
+      const cc=''+this.text.length; drawText(cc, lcdW-pad-textW(cc,fs), contentBottom()-7*fs, fs, ink);
+    }
+  };
+  function openEditor(preTo){ Editor.text=''; Editor.caseMode=1; Editor.pk=null; Editor.preTo=preTo||null; pushScreen(Editor); }
+  function openRecipientPicker(body){
+    pushScreen(ListScreen({ id:'pickto', title:'SEND TO', numbered:false, items:()=>{
+      if(!DB.contacts.length) return [{label:'(NO NAMES)', run:()=>{}}];
+      return DB.contacts.map(c=>({ label:c.name, run:()=>{ Transport.send(c.addr, body); showToast('MESSAGE SENT'); popScreen(); popScreen(); } }));
+    }}));
+  }
+  const MessagesMenu = ListScreen({ id:'messages', title:'MESSAGES', numbered:true, items:()=>{
+    const unread = DB.messages.filter(m=>m.folder==='inbox'&&!m.read).length;
+    return [
+      {label:'INBOX'+(unread?(' ('+unread+')'):''), run:()=>pushScreen(makeFolder('inbox','INBOX'))},
+      {label:'WRITE MESSAGE', run:()=>openEditor(null)},
+      {label:'SENT', run:()=>pushScreen(makeFolder('sent','SENT'))}
+    ];
+  }});
+  function makeFolder(folder, title){
+    return ListScreen({ id:'folder', title, numbered:false, items:()=>{
+      const msgs = DB.messages.filter(m=>m.folder===folder).slice().reverse();
+      if(!msgs.length) return [{label:'(EMPTY)', run:()=>{}}];
+      return msgs.map(m=>({ label:(folder==='inbox'?contactName(m.from):contactName(m.to))+': '+m.body.slice(0,12),
+        run:()=>{ if(!m.read){ m.read=true; saveDB(); } pushScreen(makeMsgView(m, folder)); } }));
+    }});
+  }
+  function makeMsgView(m, folder){
+    return {
+      id:'msgview', statusLeft:'OURCADE',
+      get soft(){ return 'Reply'; },
+      navi(){ openEditor(folder==='inbox'?m.from:m.to); },
+      back(){ popScreen(); },
+      render(){
+        const who = (folder==='inbox'?'FROM ':'TO ') + (folder==='inbox'?contactName(m.from):contactName(m.to));
+        drawText(who, pad, contentTop(), fs, ink);
+        drawWrapped(m.body, contentTop()+11*fs, fs, contentBottom());
+      }
+    };
+  }
+  const NamesScreen = ListScreen({ id:'names', title:'NAMES', numbered:false, soft:'Write', items:()=>{
+    if(!DB.contacts.length) return [{label:'(NO NAMES)', run:()=>{}}];
+    return DB.contacts.map(c=>({ label:c.name+' '+c.addr, run:()=>openEditor(c.addr) }));
+  }});
+
+  /* ----- Profiles / Settings / Clock ----- */
+  const ProfilesScreen = ListScreen({ id:'profiles', title:'PROFILES', numbered:false, items:()=>
+    ['GENERAL','SILENT','MEETING','OUTDOOR'].map(p=>({ label:(DB.settings.profile===p?'* ':'  ')+p, run:()=>{ DB.settings.profile=p; saveDB(); showToast(p); } }))
+  });
+  const SettingsScreen = ListScreen({ id:'settings', title:'SETTINGS', numbered:false, items:()=>[
+    {label:'SOUND '+(DB.settings.soundOn?'ON':'OFF'), run:()=>{ DB.settings.soundOn=!DB.settings.soundOn; saveDB(); }},
+    {label:'KEYPAD TONES '+(DB.settings.keypadTones?'ON':'OFF'), run:()=>{ DB.settings.keypadTones=!DB.settings.keypadTones; saveDB(); }},
+    {label:'RINGTONE', run:()=>playRingtone()},
+    {label:'MAZE '+(DB.settings.maze?'ON':'OFF'), run:()=>{ DB.settings.maze=!DB.settings.maze; saveDB(); }},
+    {label:'CLOCK '+(DB.settings.clock24?'24H':'12H'), run:()=>{ DB.settings.clock24=!DB.settings.clock24; saveDB(); }},
+    {label:'RESTORE FACTORY', run:()=>{ factoryReset(); showToast('DONE'); }}
+  ]});
+  const ClockApp = {
+    id:'clock', statusLeft:'OURCADE',
+    get soft(){ return ''; },
+    back(){ popScreen(); },
+    render(){
+      const y = statusH + Math.round((lcdH-statusH-softH)*0.32);
+      drawTextCentered(clockStr(), y, fs+3, ink);
+      const d = new Date(), ds = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      drawTextCentered(ds+' '+(d.getMonth()+1)+'/'+d.getDate(), y+22*fs, fs, ink);
+    }
+  };
+
+  /* ====================================================================
+     MAIN LOOP + INPUT WIRING
+     ==================================================================== */
   function frame(ts){
     if(!last) last = ts;
     const dt = ts - last; last = ts;
-    if(state===PLAY){
-      acc += dt;
-      while(acc >= stepMs){ acc -= stepMs; step(); if(state!==PLAY) break; }
-    } else if(state===OVER){
-      deathBlink += dt;
-    } else if(state===CALLING){
-      callT += dt;
-      if(callFail && callT > 1400){ callFail=false; state=DIAL; }
-    } else if(state===IMEI){
-      imeiT += dt;
-      if(imeiT > 1600){ triggerEgg(); }   // IMEI flashes, then the connecting-people egg
-    } else if(state===EGG){
-      eggT += dt;
-      if(eggT > 9000){ state=TITLE; stopRingtone(); setSoftLabels(); }
-    }
-    render();
+    if(toastT>0){ toastT-=dt; if(toastT<=0) toast=null; }
+    const s = cur();
+    if(s.tick) s.tick(dt);
+    clearLCD();
+    const showChrome = (s.statusBar !== false);
+    if(showChrome) drawStatusBar();
+    if(s.render) s.render(dt);
+    if(showChrome){ const lbl = softLabelOf(s); if(lbl) drawSoftBar(lbl); }
+    if(toast) drawToast(toast);
     requestAnimationFrame(frame);
-  }
-
-  /* ---------- input ---------- */
-  function setSoftLabels(){ /* labels are physical on the Nopia */ }
-  function setDir(d){
-    if(d==='up') queueDir(0,-1);
-    else if(d==='down') queueDir(0,1);
-    else if(d==='left') queueDir(-1,0);
-    else if(d==='right') queueDir(1,0);
-  }
-
-  // --- screen / menu navigation helpers ---
-  const isScrollState = ()=> state===MENU || state===OPTIONS || state===WAP;
-  function openMainMenu(){ menuIdx=0; state=MENU; }
-  function openDialer(){ dialBuf=''; state=DIAL; }
-  function selectMenu(){
-    const it = MENU_ITEMS[menuIdx];
-    if(it.icon==='snake') startGame();
-    else if(it.icon==='globe'){ state=WAP; wapScroll=0; }
-    else if(it.icon==='phone') openDialer();
-    else if(it.icon==='gear'){ optIdx=0; state=OPTIONS; }
-  }
-  function selectOption(){
-    if(optIdx===0) soundOn=!soundOn;
-    else if(optIdx===1) wrap=!wrap;
-    else if(optIdx===2) playRingtone();
-    else if(optIdx===3){ resetHi(); }
-    else if(optIdx===4) state=MENU;
-  }
-  function endEgg(){ state=TITLE; stopRingtone(); }
-  function hangUp(){ stopJenny(); callFail=false; state=TITLE; }
-
-  // --- dialer ---
-  function dialInput(ch){
-    if(dialBuf.length<16){ dialBuf += ch; beep(620,0.04,0.04); }
-    if(dialBuf.endsWith('*#06#')){ dialBuf=''; state=IMEI; imeiT=0; } // live IMEI code
-  }
-  function dialCall(){
-    if(dialBuf==='*#06#'){ dialBuf=''; state=IMEI; imeiT=0; return; }
-    if(dialBuf===JENNY_NUMBER){ dialBuf=''; callFail=false; state=CALLING; callT=0; playJenny(); return; }
-    sOver(); callFail=true; state=CALLING; callT=0; // unknown number → busy
-  }
-
-  // center NAVI key — "performs the function above it; dials & answers": menu / select / dial
-  function naviPress(){
-    sClick();
-    switch(state){
-      case TITLE: openMainMenu(); break;     // standby shows "Menu" above the Navi key
-      case OVER:  playVenue(venue); break;   // retry on the same surface
-      case PLAY:  state=PAUSE; break;
-      case PAUSE: state=PLAY; last=0; break;
-      case MENU:    selectMenu(); break;
-      case OPTIONS: selectOption(); break;
-      case WAP:     playVenue('web'); break;  // "click" the featured Snake → play in-browser
-      case DIAL:    dialCall(); break;        // places the call
-      case CALLING: hangUp(); break;
-      case IMEI:    triggerEgg(); break;
-      case EGG:     endEgg(); break;
-    }
-  }
-  // left PHONE/END key (handset glyph) — open dialer / hang up / exit to previous menu
-  function phonePress(){
-    sClick();
-    switch(state){
-      case TITLE: openDialer(); break;        // "the phone button" opens the dialer
-      case OVER:  venue==='web' ? exitWeb() : openMainMenu(); break;
-      case PLAY:  venue==='web' ? exitWeb() : (state=PAUSE); break;   // web: quit to site
-      case PAUSE: venue==='web' ? exitWeb() : (state=PLAY, last=0); break;
-      case MENU:  state=TITLE; break;
-      case OPTIONS: case WAP: state=MENU; break;
-      case DIAL: if(dialBuf) dialBuf=dialBuf.slice(0,-1); else state=TITLE; break;
-      case CALLING: hangUp(); break;
-      case IMEI: state=TITLE; break;
-      case EGG: endEgg(); break;
-    }
-  }
-  // screen tap: quick-play from standby / retry on game-over, otherwise behaves like Navi
-  function screenTap(){
-    if(state===TITLE){ sClick(); startGame(); return; }
-    if(state===OVER){ sClick(); playVenue(venue); return; }
-    naviPress();
-  }
-
-  function doScroll(dir){
-    if(state===MENU){ menuIdx=(menuIdx + (dir==='up'?MENU_ITEMS.length-1:1))%MENU_ITEMS.length; sClick(); }
-    else if(state===OPTIONS){ optIdx=(optIdx + (dir==='up'?OLEN-1:1))%OLEN; sClick(); }
-    else if(state===WAP){ wapScroll = Math.max(0, Math.min(wapMax, wapScroll + (dir==='up'?-12:12))); sClick(); }
-    else if(state===CALLING || state===IMEI || state===EGG){ /* ignore */ }
-    else setDir(dir);
-  }
-
-  // numeric/symbol key (shared by keypad + keyboard)
-  function pressDigit(ch){
-    if(state===DIAL){ dialInput(ch); return; }
-    if(state===MENU){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectMenu(); else sClick(); return; }
-    if(state===OPTIONS){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectOption(); else sClick(); return; }
-    if(state===WAP){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')playVenue('web'); else sClick(); return; }
-    if(state===CALLING || state===IMEI || state===EGG){ sClick(); return; }
-    if(state===TITLE || (state===OVER && venue==='phone')){ openDialer(); dialInput(ch); return; } // standby: type to dial
-    // gameplay
-    if(ch==='2') setDir('up');
-    else if(ch==='8') setDir('down');
-    else if(ch==='4') setDir('left');
-    else if(ch==='6') setDir('right');
-    else if(ch==='5') naviPress();
-    else sClick();
   }
 
   // keyboard
@@ -1053,14 +1163,13 @@
     else if(k==='arrowdown'||k==='s') doScroll('down');
     else if(k==='arrowleft'||k==='a') setDir('left');
     else if(k==='arrowright'||k==='d') setDir('right');
-    else if(k==='enter'||k===' ') naviPress();       // Navi / select / dial
-    else if(k==='escape'||k==='backspace') phonePress(); // Phone/End / back
-    else if(k==='p'){ if(state===PLAY)state=PAUSE; else if(state===PAUSE){state=PLAY;last=0;} }
-    else if(k==='m'){ soundOn=!soundOn; sClick(); }
+    else if(k==='enter'||k===' ') naviPress();
+    else if(k==='escape'||k==='backspace') phonePress();
   });
 
-  // on-screen buttons with press feedback
+  // on-screen buttons
   function bindPress(el, fn){
+    if(!el) return;
     const down = (e)=>{ e.preventDefault(); ensureYT(); el.classList.add('pressed'); fn(); };
     const up = ()=> el.classList.remove('pressed');
     el.addEventListener('touchstart', down, {passive:false});
@@ -1074,27 +1183,20 @@
   bindPress(document.getElementById('dnKey'), ()=>doScroll('down'));
   bindPress(document.getElementById('phoneKey'), phonePress);
   bindPress(document.getElementById('callKey'), naviPress);
-
   document.querySelectorAll('.num').forEach(b=>{
-    const key=b.dataset.key;
-    const ch = key==='star'?'*':(key==='hash'?'#':key);
+    const k = b.dataset.key, ch = k==='star'?'*':(k==='hash'?'#':k);
     bindPress(b, ()=>pressDigit(ch));
   });
 
   // swipe + tap on the screen
   let tStart=null;
-  canvas.addEventListener('touchstart', e=>{
-    ensureYT();
-    const t=e.touches[0]; tStart={x:t.clientX,y:t.clientY,t:performance.now()};
-  }, {passive:true});
+  canvas.addEventListener('touchstart', e=>{ ensureYT(); const t=e.touches[0]; tStart={x:t.clientX,y:t.clientY}; }, {passive:true});
   canvas.addEventListener('touchend', e=>{
     if(!tStart) return;
-    const t=e.changedTouches[0];
-    const dx=t.clientX-tStart.x, dy=t.clientY-tStart.y;
+    const t=e.changedTouches[0], dx=t.clientX-tStart.x, dy=t.clientY-tStart.y;
     const adx=Math.abs(dx), ady=Math.abs(dy);
-    if(adx<14 && ady<14){ screenTap(); tStart=null; return; } // tap
-    if(adx>ady) setDir(dx>0?'right':'left');
-    else setDir(dy>0?'down':'up');
+    if(adx<14 && ady<14){ screenTap(); tStart=null; return; }
+    if(adx>ady) setDir(dx>0?'right':'left'); else setDir(dy>0?'down':'up');
     tStart=null;
   }, {passive:true});
   canvas.addEventListener('click', ()=>{ ensureYT(); if(!('ontouchstart' in window)) screenTap(); });
@@ -1104,26 +1206,9 @@
   /* ---------- boot ---------- */
   function boot(){
     layout();
-    loadHi();
-    reset();
-    state = TITLE;
-    setSoftLabels();
-    ensureYT(); // build the hidden player now so dialing 8675309 can start audio instantly
-    if(!reduceMotion){
-      // quick screen-on sweep
-      let p=0;
-      const sweep=()=>{
-        clearLCD();
-        ctx.fillStyle='#0c0d09';
-        ctx.fillRect(0, p, lcdW, lcdH-p);
-        p+=Math.max(8, lcdH/14);
-        if(p<lcdH) requestAnimationFrame(sweep);
-        else requestAnimationFrame(frame);
-      };
-      sweep();
-    } else {
-      requestAnimationFrame(frame);
-    }
+    pushScreen(Standby);
+    ensureYT();
+    requestAnimationFrame(frame);
   }
   boot();
 })();
