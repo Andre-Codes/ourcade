@@ -290,6 +290,32 @@
     canvas.style.height = (lcdH * (canvas.clientWidth / lcdW)) + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.imageSmoothingEnabled = false;
+    applyVenue(); // keep the active play-field geometry sized to the (possibly resized) LCD
+  }
+
+  /* ---------- play-field "venue" geometry ----------
+     The same engine renders two surfaces: the full phone LCD ('phone') and a small
+     framed canvas inside the WAP browser ('web'). These vars are the ACTIVE geometry;
+     px/py/step/placeFood/reset/drawField read them instead of GW/GH/cell directly. */
+  const WEB_GW = 12, WEB_GH = 8;        // smaller grid for the embedded browser game
+  let venue = 'phone';
+  let gw = GW, gh = GH, fcell = 16, ox = 6, oy = 24;
+  function applyVenue(){
+    if(venue === 'web'){
+      gw = WEB_GW; gh = WEB_GH;
+      const barH = 9*fs;                 // browser url bar
+      const headH = 9*fs;                // score/hi header
+      const boxTop = statusH + barH + headH + 3;
+      const boxBottom = lcdH - pad - 8*fs; // leave a little footer room
+      const availW = lcdW - 2*(pad+3);
+      const availH = boxBottom - boxTop;
+      fcell = Math.max(6, Math.min(Math.floor(availW/gw), Math.floor(availH/gh)));
+      const fieldW = gw*fcell, fieldH = gh*fcell;
+      ox = Math.round((lcdW - fieldW)/2);
+      oy = boxTop + Math.max(0, Math.round((availH - fieldH)/2));
+    } else {
+      gw = GW; gh = GH; fcell = cell; ox = pad; oy = statusH + pad;
+    }
   }
 
   /* draw a string of dot-matrix glyphs; returns width in px */
@@ -418,12 +444,23 @@
     try{ ytPlayer && ytPlayer.stopVideo && ytPlayer.stopVideo(); }catch(e){}
   }
 
-  /* ---------- persistent hi-score (localStorage, ourcade: namespace) ---------- */
-  let hi = 0;
+  /* ---------- persistent hi-score + browser-version award (localStorage, ourcade: ns) ----------
+     hi is shared by both venues. webPlayed/webBest track the embedded browser game so a future
+     profiles/leaderboard/Firebase layer can read clearly-named keys. */
+  let hi = 0, webPlayed = false, webBest = 0;
   function loadHi(){
-    try{ hi = parseInt(localStorage.getItem('ourcade:snake:hi'))||0; }catch(e){}
+    try{
+      hi = parseInt(localStorage.getItem('ourcade:snake:hi'))||0;
+      webPlayed = localStorage.getItem('ourcade:snake:webPlayed') === '1';
+      webBest = parseInt(localStorage.getItem('ourcade:snake:webBest'))||0;
+    }catch(e){}
   }
   function saveHi(){ try{ localStorage.setItem('ourcade:snake:hi', String(hi)); }catch(e){} }
+  function saveWeb(){ try{
+    localStorage.setItem('ourcade:snake:webPlayed', webPlayed?'1':'0');
+    localStorage.setItem('ourcade:snake:webBest', String(webBest));
+  }catch(e){} }
+  function resetHi(){ hi=0; webPlayed=false; webBest=0; saveHi(); saveWeb(); }
 
   /* ---------- game state ---------- */
   const TITLE='title', PLAY='play', PAUSE='pause', OVER='over',
@@ -450,7 +487,7 @@
 
   function reset(){
     snake = [];
-    const cx = Math.floor(GW/2), cy = Math.floor(GH/2);
+    const cx = Math.floor(gw/2), cy = Math.floor(gh/2);
     for(let i=0;i<START_LEN;i++) snake.push({x:cx-i, y:cy});
     dir = {x:1,y:0}; buf = [];
     score = 0; stepMs = STEP_START; acc = 0; growing = 0; deathBlink = 0;
@@ -459,7 +496,7 @@
   function placeFood(){
     const occ = new Set(snake.map(s=>s.x+","+s.y));
     let p, tries=0;
-    do{ p={x:(Math.random()*GW)|0, y:(Math.random()*GH)|0}; tries++; }
+    do{ p={x:(Math.random()*gw)|0, y:(Math.random()*gh)|0}; tries++; }
     while(occ.has(p.x+","+p.y) && tries<500);
     food = p;
   }
@@ -478,8 +515,8 @@
     let hy = snake[0].y + dir.y;
 
     if(wrap){
-      hx = (hx + GW) % GW; hy = (hy + GH) % GH;
-    } else if(hx<0||hy<0||hx>=GW||hy>=GH){
+      hx = (hx + gw) % gw; hy = (hy + gh) % gh;
+    } else if(hx<0||hy<0||hx>=gw||hy>=gh){
       return die();
     }
 
@@ -505,19 +542,30 @@
     deathBlink = 0;
     state = OVER;
     if(score > hi){ hi = score; saveHi(); }
+    if(venue==='web' && score > webBest){ webBest = score; saveWeb(); }
     setSoftLabels();
   }
 
-  function startGame(){ stopRingtone(); reset(); state = PLAY; setSoftLabels(); }
+  // launch Snake on a given surface: 'phone' (full LCD) or 'web' (framed, in the browser)
+  function playVenue(v){
+    stopRingtone();
+    venue = v; applyVenue();
+    reset();
+    state = PLAY; last = 0; acc = 0;
+    if(v === 'web' && !webPlayed){ webPlayed = true; saveWeb(); } // unlock the NET SNAKE award
+    setSoftLabels();
+  }
+  function startGame(){ playVenue('phone'); }
+  function exitWeb(){ venue='phone'; applyVenue(); state = WAP; } // leave web game → back to site
 
   /* ---------- rendering ---------- */
-  function px(cx){ return pad + cx*cell; }
-  function py(cy){ return statusH + pad + cy*cell; }
+  function px(cx){ return ox + cx*fcell; }
+  function py(cy){ return oy + cy*fcell; }
 
   function drawCellBlock(cx,cy){
-    const m = Math.max(1, Math.round(cell*0.12));
+    const m = Math.max(1, Math.round(fcell*0.12));
     ctx.fillStyle = ink;
-    ctx.fillRect(px(cx)+m, py(cy)+m, cell-m*2, cell-m*2);
+    ctx.fillRect(px(cx)+m, py(cy)+m, fcell-m*2, fcell-m*2);
   }
 
   let ink = '#1a2608', bg = '#a8c83a', ghost = 'rgba(26,38,8,0.10)';
@@ -529,9 +577,9 @@
 
   function drawGhostGrid(){
     ctx.fillStyle = ghost;
-    const m = Math.max(1, Math.round(cell*0.12));
-    for(let y=0;y<GH;y++) for(let x=0;x<GW;x++){
-      ctx.fillRect(px(x)+m, py(y)+m, cell-m*2, cell-m*2);
+    const m = Math.max(1, Math.round(fcell*0.12));
+    for(let y=0;y<gh;y++) for(let x=0;x<gw;x++){
+      ctx.fillRect(px(x)+m, py(y)+m, fcell-m*2, fcell-m*2);
     }
   }
 
@@ -549,8 +597,8 @@
       const h = (i+1)*fs + fs;
       ctx.fillRect(sigR - (3-i)*(fs*2), pad+fs + (5*fs - h), fs+1, h);
     }
-    // left: score while playing, else operator name
-    if(state===PLAY||state===PAUSE){
+    // left: score while playing the phone game, else operator name (web shows score in-page)
+    if((state===PLAY||state===PAUSE) && venue==='phone'){
       drawText((""+score).padStart(4,'0'), pad, pad, fs, ink);
     } else {
       drawText("NOPIA", pad, pad, fs, ink);
@@ -565,12 +613,12 @@
     const blink = (Math.floor(performance.now()/BLINK_MS))%2===0;
     if(blink || state!==PLAY){
       // food drawn as a small ring-ish block to differ from body
-      const m = Math.max(1, Math.round(cell*0.12));
+      const m = Math.max(1, Math.round(fcell*0.12));
       ctx.fillStyle = ink;
-      ctx.fillRect(px(food.x)+m, py(food.y)+m, cell-m*2, cell-m*2);
+      ctx.fillRect(px(food.x)+m, py(food.y)+m, fcell-m*2, fcell-m*2);
       ctx.fillStyle = bg;
-      const im = Math.max(1, Math.round(cell*0.30));
-      ctx.fillRect(px(food.x)+im, py(food.y)+im, cell-im*2, cell-im*2);
+      const im = Math.max(1, Math.round(fcell*0.30));
+      ctx.fillRect(px(food.x)+im, py(food.y)+im, fcell-im*2, fcell-im*2);
     }
     // snake
     const hidden = (state===OVER) && (Math.floor(deathBlink/220)%2===1);
@@ -579,24 +627,25 @@
       // head eye dot
       const h = snake[0];
       ctx.fillStyle = bg;
-      const e = Math.max(1, Math.round(cell*0.16));
-      ctx.fillRect(px(h.x)+Math.round(cell*0.5)-e, py(h.y)+Math.round(cell*0.34)-e, e, e);
+      const e = Math.max(1, Math.round(fcell*0.16));
+      ctx.fillRect(px(h.x)+Math.round(fcell*0.5)-e, py(h.y)+Math.round(fcell*0.34)-e, e, e);
     }
   }
 
-  function overlayBox(lines, big){
-    // dim playfield slightly
+  // centered text overlay within [top,bottom]; dims that band first
+  function overlayRegion(lines, top, bottom){
     ctx.fillStyle = 'rgba(168,200,58,0.6)';
-    ctx.fillRect(0, statusH, lcdW, lcdH-statusH);
+    ctx.fillRect(0, top, lcdW, bottom-top);
     let totalH = 0;
     lines.forEach(l=>{ totalH += (l.s*8) + 4; });
-    let y = statusH + (lcdH - statusH - totalH)/2;
+    let y = top + (bottom - top - totalH)/2;
     lines.forEach(l=>{
       const blink = l.blink ? (Math.floor(performance.now()/BLINK_MS))%2===0 : true;
       if(blink) drawTextCentered(l.t, Math.round(y), l.s, ink);
       y += l.s*8 + 4;
     });
   }
+  function overlayBox(lines){ overlayRegion(lines, statusH, lcdH); }
 
   /* ----- main menu: 3310-style 2x2 icon grid ----- */
   function drawIcon(kind, cx, cy, r){
@@ -683,6 +732,9 @@
       {t:"GAME OF THE DAY", s:fs},
       {t:"> SNAKE", s:fs+1},
       {t:"RATING 5 OF 5", s:fs},
+      {t:"PRESS CENTER TO PLAY", s:fs, blink:true},
+      ...(webPlayed ? [{t:"WEB BEST "+webBest, s:fs}] : []),
+      {t:"", s:fs},
       {t:"THE ONE THAT CAME ON", s:fs},
       {t:"EVERY PHONE. EAT.", s:fs},
       {t:"GROW. DONT BITE", s:fs},
@@ -694,10 +746,11 @@
       {t:"C 2003 OURCADE", s:fs},
       {t:"PRESS START STAY", s:fs},
     ];
+    const blinkOn = (Math.floor(performance.now()/BLINK_MS))%2===0;
     ctx.save();
     ctx.beginPath(); ctx.rect(0, top, lcdW, bottom-top); ctx.clip();
     let y = top - wapScroll;
-    lines.forEach(l=>{ if(l.t) drawText(l.t, pad, Math.round(y), l.s, ink); y += l.s*8 + 2; });
+    lines.forEach(l=>{ if(l.t && (!l.blink || blinkOn)) drawText(l.t, pad, Math.round(y), l.s, ink); y += l.s*8 + 2; });
     ctx.restore();
     wapMax = Math.max(0, (y + wapScroll) - bottom);
     // scrollbar hint
@@ -783,8 +836,45 @@
     }
   }
 
+  /* ----- the embedded browser game: Snake running "on theourcade.com" ----- */
+  function webFieldBox(){ return { x:ox-3, y:oy-3, w:gw*fcell+6, h:gh*fcell+6 }; }
+  function drawWebGame(){
+    // browser url bar
+    const barH = 9*fs;
+    ctx.fillStyle = ink; ctx.fillRect(0, statusH, lcdW, barH);
+    drawText("THEOURCADE.COM/SNAKE", pad, statusH + Math.round((barH-7*fs)/2), fs, bg);
+    // score / hi header (inside the page)
+    const hy = statusH + barH + 2;
+    drawText("SCORE "+score, pad, hy, fs, ink);
+    const hiStr = "HI "+hi; drawText(hiStr, lcdW - pad - textW(hiStr,fs), hy, fs, ink);
+    // the embedded canvas frame + field
+    const b = webFieldBox();
+    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1, fs*0.6);
+    ctx.strokeRect(b.x+0.5, b.y+0.5, b.w, b.h);
+    drawField();
+    if(state===PAUSE) overlayRegion([{t:"PAUSED", s:fs+1}, {t:"CENTER RESUMES", s:fs, blink:true}], b.y, b.y+b.h);
+    else if(state===OVER) overlayRegion([
+      {t:"GAME OVER", s:fs}, {t:"SCORE "+score, s:fs},
+      {t:"CENTER RETRY", s:fs, blink:true}, {t:"PHONE EXITS", s:fs}
+    ], b.y, b.y+b.h);
+  }
+
+  // "NET SNAKE" achievement chip — shown once the player has played the in-browser game
+  function drawAwardBadge(){
+    const label = "NET SNAKE";
+    const r = 3*fs, tw = textW(label, fs);
+    const totalW = r*2 + 5 + tw;
+    const cx = Math.round((lcdW - totalW)/2) + r;
+    const cy = lcdH - pad - 4*fs;
+    drawIcon('globe', cx, cy, r);
+    drawText(label, cx + r + 5, Math.round(cy - 3.5*fs), fs, ink);
+  }
+
   function render(){
     if(state===EGG){ drawEgg(); return; }
+    if((state===PLAY||state===PAUSE||state===OVER) && venue==='web'){
+      clearLCD(); drawStatus(); drawWebGame(); return;
+    }
     clearLCD();
     drawStatus();
     if(state===TITLE){
@@ -795,6 +885,7 @@
         {t:"TAP TO PLAY", s:fs, blink:true},
         {t:"i FOR MENU", s:fs}
       ]);
+      if(webPlayed) drawAwardBadge();
     } else if(state===PLAY){
       drawField();
     } else if(state===PAUSE){
@@ -870,7 +961,7 @@
     if(optIdx===0) soundOn=!soundOn;
     else if(optIdx===1) wrap=!wrap;
     else if(optIdx===2) playRingtone();
-    else if(optIdx===3){ hi=0; saveHi(); }
+    else if(optIdx===3){ resetHi(); }
     else if(optIdx===4) state=MENU;
   }
   function endEgg(){ state=TITLE; stopRingtone(); }
@@ -892,12 +983,12 @@
     sClick();
     switch(state){
       case TITLE: openMainMenu(); break;     // standby shows "Menu" above the Navi key
-      case OVER:  startGame(); break;        // retry
+      case OVER:  playVenue(venue); break;   // retry on the same surface
       case PLAY:  state=PAUSE; break;
       case PAUSE: state=PLAY; last=0; break;
       case MENU:    selectMenu(); break;
       case OPTIONS: selectOption(); break;
-      case WAP:     state=MENU; break;
+      case WAP:     playVenue('web'); break;  // "click" the featured Snake → play in-browser
       case DIAL:    dialCall(); break;        // places the call
       case CALLING: hangUp(); break;
       case IMEI:    triggerEgg(); break;
@@ -909,9 +1000,9 @@
     sClick();
     switch(state){
       case TITLE: openDialer(); break;        // "the phone button" opens the dialer
-      case OVER:  openMainMenu(); break;
-      case PLAY:  state=PAUSE; break;
-      case PAUSE: state=PLAY; last=0; break;
+      case OVER:  venue==='web' ? exitWeb() : openMainMenu(); break;
+      case PLAY:  venue==='web' ? exitWeb() : (state=PAUSE); break;   // web: quit to site
+      case PAUSE: venue==='web' ? exitWeb() : (state=PLAY, last=0); break;
       case MENU:  state=TITLE; break;
       case OPTIONS: case WAP: state=MENU; break;
       case DIAL: if(dialBuf) dialBuf=dialBuf.slice(0,-1); else state=TITLE; break;
@@ -920,9 +1011,10 @@
       case EGG: endEgg(); break;
     }
   }
-  // screen tap: quick-play from standby/game-over, otherwise behaves like the Navi key
+  // screen tap: quick-play from standby / retry on game-over, otherwise behaves like Navi
   function screenTap(){
-    if(state===TITLE || state===OVER){ sClick(); startGame(); return; }
+    if(state===TITLE){ sClick(); startGame(); return; }
+    if(state===OVER){ sClick(); playVenue(venue); return; }
     naviPress();
   }
 
@@ -939,9 +1031,9 @@
     if(state===DIAL){ dialInput(ch); return; }
     if(state===MENU){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectMenu(); else sClick(); return; }
     if(state===OPTIONS){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')selectOption(); else sClick(); return; }
-    if(state===WAP){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else sClick(); return; }
+    if(state===WAP){ if(ch==='2')doScroll('up'); else if(ch==='8')doScroll('down'); else if(ch==='5')playVenue('web'); else sClick(); return; }
     if(state===CALLING || state===IMEI || state===EGG){ sClick(); return; }
-    if(state===TITLE || state===OVER){ openDialer(); dialInput(ch); return; } // standby: type to dial
+    if(state===TITLE || (state===OVER && venue==='phone')){ openDialer(); dialInput(ch); return; } // standby: type to dial
     // gameplay
     if(ch==='2') setDir('up');
     else if(ch==='8') setDir('down');
