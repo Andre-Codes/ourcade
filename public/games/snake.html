@@ -88,7 +88,7 @@
 
   .controls{display:flex;flex-direction:column;gap:10px;align-items:center;}
 
-  /* function-key cluster (3310-style: center select, 'i' soft key + curved up/down rocker) */
+  /* function-key cluster (3310-style: center Navi, left Phone/End key, curved up/down rocker) */
   .funcs{position:relative;width:100%;height:132px;}
   .funcs::before{
     content:"";position:absolute;left:5%;right:5%;top:0;bottom:6px;
@@ -109,32 +109,32 @@
     width:34px;height:7px;border-radius:7px;background:var(--call-green);
     box-shadow:0 0 5px rgba(31,162,141,.55), inset 0 1px 1px rgba(255,255,255,.4);
   }
-  /* bottom-left 'i' soft key, curving up under the select key */
-  .ikey{
-    position:absolute;left:6%;bottom:8px;width:40%;height:78px;border:none;cursor:pointer;z-index:2;
+  /* bottom-left PHONE/END key (handset), curving up under the Navi key */
+  .phonekey{
+    position:absolute;left:7%;bottom:8px;width:34%;height:58px;border:none;cursor:pointer;z-index:2;
     background:linear-gradient(180deg,var(--silver-hi),var(--silver) 60%,var(--silver-lo));
     box-shadow:0 2px 0 #9398a2, 0 3px 5px rgba(0,0,0,.35), inset 0 1px 0 #fff;
-    border-radius:30px 64px 26px 26px / 34px 96px 26px 26px;
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;color:var(--key-green);
+    border-radius:24px 52px 22px 22px / 28px 72px 22px 22px;
+    display:flex;align-items:center;justify-content:center;color:var(--key-green);
   }
-  .ikey .iglyph{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:19px;}
+  .phonekey .hglyph{width:20px;height:20px;fill:currentColor;transform:rotate(8deg);}
   /* bottom-right curved up/down rocker (single housing, two press zones) */
   .nav{
-    position:absolute;right:6%;bottom:8px;width:40%;height:78px;overflow:hidden;z-index:2;
+    position:absolute;right:7%;bottom:8px;width:34%;height:58px;overflow:hidden;z-index:2;
     background:linear-gradient(180deg,var(--silver-hi),var(--silver) 60%,var(--silver-lo));
     box-shadow:0 2px 0 #9398a2, 0 3px 5px rgba(0,0,0,.35), inset 0 1px 0 #fff;
-    border-radius:64px 30px 26px 26px / 96px 34px 26px 26px;
+    border-radius:52px 24px 22px 22px / 72px 28px 22px 22px;
   }
   .nav button{
     position:absolute;left:0;width:100%;height:50%;border:none;background:transparent;cursor:pointer;
     display:flex;justify-content:center;
   }
-  .nav .up{top:0;align-items:flex-end;padding-bottom:5px;}
-  .nav .dn{bottom:0;align-items:flex-start;padding-top:5px;}
+  .nav .up{top:0;align-items:flex-end;padding-bottom:4px;}
+  .nav .dn{bottom:0;align-items:flex-start;padding-top:4px;}
   .nav button.pressed{background:rgba(0,0,0,.08);}
   .chev{width:0;height:0;}
-  .cu{border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:12px solid var(--key-green);}
-  .cd{border-left:9px solid transparent;border-right:9px solid transparent;border-top:12px solid var(--key-green);}
+  .cu{border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:10px solid var(--key-green);}
+  .cd{border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid var(--key-green);}
 
   .pad{
     width:100%;display:grid;grid-template-columns:repeat(3,1fr);
@@ -175,8 +175,10 @@
 
     <div class="controls">
       <div class="funcs">
-        <button class="callkey" id="callKey" aria-label="Select / Call"><span class="dash"></span></button>
-        <button class="ikey" id="iKey" aria-label="Menu"><span class="iglyph">i</span></button>
+        <button class="callkey" id="callKey" aria-label="Navi / Menu / Call"><span class="dash"></span></button>
+        <button class="phonekey" id="phoneKey" aria-label="Phone / End">
+          <svg class="hglyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.6c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.4 2.2z"/></svg>
+        </button>
         <div class="nav">
           <button class="up" id="upKey" aria-label="Up"><i class="chev cu"></i></button>
           <button class="dn" id="dnKey" aria-label="Down"><i class="chev cd"></i></button>
@@ -197,7 +199,7 @@
         <button class="num" data-key="0"><b>0</b><small>&nbsp;</small></button>
         <button class="num" data-key="hash"><b>#</b><small>&nbsp;</small></button>
       </div>
-      <div class="hint">swipe / 2 4 6 8 to steer &middot; 5 selects &middot; i = menu &middot; dial 8675309</div>
+      <div class="hint">swipe or arrow keys to steer &middot; menu for more</div>
     </div>
   </div>
 
@@ -374,9 +376,11 @@
      Same trick the site's Walkman uses: a 1x1, opacity:0, NOT display:none player —
      fully-hidden media gets paused by some browsers, so we keep it technically visible.
      Autoplay is allowed because a key/tap gesture always precedes playback. */
-  const JENNY_NUMBER  = '8675309';
-  const JENNY_VIDEO_ID = 'Nm1pQpdb27Q'; // Tommy Tutone — 867-5309/Jenny (swap if it dies)
-  let ytPlayer = null, ytReady = false, ytWanted = false;
+  const JENNY_NUMBER = '8675309';
+  // Verified-embeddable uploads of 867-5309/Jenny (official first, fan upload fallback).
+  // If one is region-locked / pulled, onError advances to the next.
+  const JENNY_IDS = ['6WTdTwcmxyo', '5tJ_w8HG1Tg'];
+  let ytPlayer = null, ytReady = false, ytWanted = false, ytIdx = 0;
   function loadYT(){
     if(window.YT && window.YT.Player){ makeYT(); return; }
     if(document.getElementById('yt-iframe-api')) return; // already loading
@@ -389,22 +393,25 @@
   function makeYT(){
     if(ytPlayer) return;
     ytPlayer = new YT.Player('ythost', {
-      width:'1', height:'1', videoId: JENNY_VIDEO_ID,
-      playerVars:{ autoplay:0, controls:0, disablekb:1, playsinline:1, rel:0 },
+      width:'1', height:'1',
+      playerVars:{ controls:0, disablekb:1, playsinline:1, rel:0, origin:location.origin },
       events:{
         onReady:()=>{ ytReady = true; if(ytWanted) playJenny(); },
         onStateChange:(e)=>{ if(e.data===YT.PlayerState.ENDED && state===CALLING) hangUp(); },
-        onError:()=>{ /* dead video id — fail quietly, the UI still "connects" */ }
+        onError:()=>{ // dead / region-locked id — try the next candidate
+          ytIdx++;
+          if(ytWanted && ytIdx < JENNY_IDS.length){ try{ ytPlayer.loadVideoById(JENNY_IDS[ytIdx]); }catch(e){} }
+        }
       }
     });
   }
-  // warm the player up on the first user gesture so the later dial can start audio
+  // create the player early (on boot / first gesture) so it's ready before the dial gesture
   let ytInit = false;
   function ensureYT(){ if(ytInit) return; ytInit = true; loadYT(); }
   function playJenny(){
-    ytWanted = true; loadYT();
-    if(!ytReady || !ytPlayer) return;
-    try{ ytPlayer.seekTo(0); ytPlayer.playVideo(); }catch(e){}
+    ytWanted = true; ytIdx = 0; ensureYT();
+    if(!ytReady || !ytPlayer){ return; } // onReady will call us again
+    try{ ytPlayer.loadVideoById(JENNY_IDS[0]); ytPlayer.playVideo(); }catch(e){}
   }
   function stopJenny(){
     ytWanted = false;
@@ -880,39 +887,43 @@
     sOver(); callFail=true; state=CALLING; callT=0; // unknown number → busy
   }
 
-  // center / OK / tap (fromCall=true when it's the green send key)
-  function act(fromCall){
+  // center NAVI key — "performs the function above it; dials & answers": menu / select / dial
+  function naviPress(){
     sClick();
     switch(state){
-      case TITLE: case OVER: fromCall ? openDialer() : startGame(); break;
+      case TITLE: openMainMenu(); break;     // standby shows "Menu" above the Navi key
+      case OVER:  startGame(); break;        // retry
       case PLAY:  state=PAUSE; break;
       case PAUSE: state=PLAY; last=0; break;
       case MENU:    selectMenu(); break;
       case OPTIONS: selectOption(); break;
       case WAP:     state=MENU; break;
-      case DIAL:    dialCall(); break;
+      case DIAL:    dialCall(); break;        // places the call
       case CALLING: hangUp(); break;
       case IMEI:    triggerEgg(); break;
       case EGG:     endEgg(); break;
     }
   }
-  const primary = ()=> act(false);
-  const callPressed = ()=> act(true);
-
-  // 'i' soft key: menu / back / clear
-  function iKey(){
+  // left PHONE/END key (handset glyph) — open dialer / hang up / exit to previous menu
+  function phonePress(){
     sClick();
     switch(state){
-      case TITLE: case OVER: openMainMenu(); break;
+      case TITLE: openDialer(); break;        // "the phone button" opens the dialer
+      case OVER:  openMainMenu(); break;
       case PLAY:  state=PAUSE; break;
       case PAUSE: state=PLAY; last=0; break;
       case MENU:  state=TITLE; break;
       case OPTIONS: case WAP: state=MENU; break;
-      case DIAL: if(dialBuf) dialBuf=dialBuf.slice(0,-1); else state=MENU; break;
+      case DIAL: if(dialBuf) dialBuf=dialBuf.slice(0,-1); else state=TITLE; break;
       case CALLING: hangUp(); break;
       case IMEI: state=TITLE; break;
       case EGG: endEgg(); break;
     }
+  }
+  // screen tap: quick-play from standby/game-over, otherwise behaves like the Navi key
+  function screenTap(){
+    if(state===TITLE || state===OVER){ sClick(); startGame(); return; }
+    naviPress();
   }
 
   function doScroll(dir){
@@ -936,7 +947,7 @@
     else if(ch==='8') setDir('down');
     else if(ch==='4') setDir('left');
     else if(ch==='6') setDir('right');
-    else if(ch==='5') primary();
+    else if(ch==='5') naviPress();
     else sClick();
   }
 
@@ -950,9 +961,8 @@
     else if(k==='arrowdown'||k==='s') doScroll('down');
     else if(k==='arrowleft'||k==='a') setDir('left');
     else if(k==='arrowright'||k==='d') setDir('right');
-    else if(k==='enter'||k===' ') primary();
-    else if(k==='escape'||k==='backspace') iKey();
-    else if(k==='c') callPressed();
+    else if(k==='enter'||k===' ') naviPress();       // Navi / select / dial
+    else if(k==='escape'||k==='backspace') phonePress(); // Phone/End / back
     else if(k==='p'){ if(state===PLAY)state=PAUSE; else if(state===PAUSE){state=PLAY;last=0;} }
     else if(k==='m'){ soundOn=!soundOn; sClick(); }
   });
@@ -970,8 +980,8 @@
   }
   bindPress(document.getElementById('upKey'), ()=>doScroll('up'));
   bindPress(document.getElementById('dnKey'), ()=>doScroll('down'));
-  bindPress(document.getElementById('iKey'), iKey);
-  bindPress(document.getElementById('callKey'), callPressed);
+  bindPress(document.getElementById('phoneKey'), phonePress);
+  bindPress(document.getElementById('callKey'), naviPress);
 
   document.querySelectorAll('.num').forEach(b=>{
     const key=b.dataset.key;
@@ -990,12 +1000,12 @@
     const t=e.changedTouches[0];
     const dx=t.clientX-tStart.x, dy=t.clientY-tStart.y;
     const adx=Math.abs(dx), ady=Math.abs(dy);
-    if(adx<14 && ady<14){ primary(); tStart=null; return; } // tap
+    if(adx<14 && ady<14){ screenTap(); tStart=null; return; } // tap
     if(adx>ady) setDir(dx>0?'right':'left');
     else setDir(dy>0?'down':'up');
     tStart=null;
   }, {passive:true});
-  canvas.addEventListener('click', ()=>{ ensureYT(); if(!('ontouchstart' in window)) primary(); });
+  canvas.addEventListener('click', ()=>{ ensureYT(); if(!('ontouchstart' in window)) screenTap(); });
 
   window.addEventListener('resize', layout);
 
@@ -1006,6 +1016,7 @@
     reset();
     state = TITLE;
     setSoftLabels();
+    ensureYT(); // build the hidden player now so dialing 8675309 can start audio instantly
     if(!reduceMotion){
       // quick screen-on sweep
       let p=0;
