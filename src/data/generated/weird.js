@@ -2,73 +2,75 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-fogcam",
-    "title": "The world's oldest webcam still pointing at the same foggy street corner",
-    "blurb": "FogCam has been quietly filming a San Francisco State walkway since 1994, refusing to do anything more exciting. Sometimes there's fog. Sometimes there's just the promise of fog.",
-    "url": "https://www.fogcam.org",
-    "foundNote": "streaming since 1994"
+    "id": "gw-single-serving-sites",
+    "title": "A directory of websites that do exactly one (1) thing",
+    "blurb": "A lovingly kept index of one-purpose sites — faxable balls, photos of chickens taken BY chickens, a catalog of literary farts. The 2003 web's whole personality, archived.",
+    "url": "https://singleservingsites.cool",
+    "foundNote": "this is the good kind of useless"
   },
   {
-    "id": "gw-fishcam",
-    "title": "A fish tank in San Mateo that's been live since the Clinton administration",
-    "blurb": "The Amazing Fish Cam went online in 1994 and just kept aiming at the fish. Lou Montulli (the cookie guy) maintains it. The fish have no idea they're internet history.",
-    "url": "https://www.fishcam.com",
-    "foundNote": "second-oldest cam online"
+    "id": "gw-nicest-place",
+    "title": "A nonstop stream of strangers offering you a hug",
+    "blurb": "Real people, real videos, arms open, built specifically as an antidote to the rest of the internet being The Rest Of The Internet. Soft launch your feelings.",
+    "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that buries you in podcasts, screensavers, and pure noise",
-    "blurb": "Neal Agarwal made a game that lovingly impersonates your worst doomscroll. Click once and suddenly there are three things talking and a DVD logo bouncing toward the corner.",
-    "url": "https://neal.fun/stimulation-clicker/"
-  },
-  {
-    "id": "gw-infinite-craft",
-    "title": "Combine elements until you accidentally invent Shrek Jesus",
-    "blurb": "Drag water onto fire, keep going, and somehow end up with Ohio and existential dread. Whole forums exist just to document the cursed combos people have found.",
-    "url": "https://neal.fun/infinite-craft/",
-    "foundNote": "there is no final element"
-  },
-  {
-    "id": "gw-save-the-sounds",
-    "title": "A museum of dying tech sounds: dial-up, Windows startups, cassette clicks",
-    "blurb": "Press a button and hear the modem handshake that ruined every phone call in 1999. It's a graveyard for noises your brain still has fully memorized.",
-    "url": "https://savethesounds.info"
-  },
-  {
-    "id": "gw-quiet-place",
-    "title": "A gentle little site that just asks you to breathe for a minute",
-    "blurb": "The Quiet Place Project walks you, line by line, away from the tab-screaming internet. It's the digital equivalent of someone turning the LAN party lights down low.",
-    "url": "https://thequietplaceproject.com"
-  },
-  {
-    "id": "gw-click-click-click",
-    "title": "A website that narrates your every mouse move like it's studying you",
-    "blurb": "It watches your clicks, scrolls, and window resizes, then comments on each one in real time. Mildly unsettling, weirdly polite — like a hall monitor for your cursor.",
-    "url": "https://clickclickclick.click"
+    "id": "gw-sito-synergy",
+    "title": "Artists have been nesting pixel grids inside pixel grids since 1997",
+    "blurb": "A global collaborative art project where 3x3 image tiles get drawn into each other forever, like a Russian doll made of MS Paint. Older than most of our high scores.",
+    "url": "https://www.sito.org/synergy/",
+    "foundNote": "HyGrid running since 1995"
   },
   {
     "id": "gw-koalas-to-the-max",
-    "title": "Click a single fuzzy dot until it slowly becomes a koala",
-    "blurb": "It splits, and splits, and splits, and eventually a koala appears out of the chaos. Pointless, soothing, exactly the kind of thing the computer lab was built for.",
+    "title": "Split one giant dot into smaller dots until a koala appears",
+    "blurb": "Hover and the dot quarters itself, again and again, in the most satisfying chain reaction on the web. Splitter players will feel a deep, ancestral calm.",
     "url": "https://koalastothemax.com"
   },
   {
+    "id": "gw-is-it-christmas",
+    "title": "A website that says NO for 364 days a year",
+    "blurb": "Asks one question, answers it honestly, flips to YES exactly once. The most reliable narrator on the entire internet.",
+    "url": "https://isitchristmas.com",
+    "foundNote": "a tiny annual tradition"
+  },
+  {
+    "id": "gw-this-person",
+    "title": "A new fake human face every time you refresh",
+    "blurb": "An AI hallucinates a totally real-looking person who has never existed and never will. Refresh and they're gone forever, like a Geocities guestbook signer.",
+    "url": "https://thispersondoesnotexist.com"
+  },
+  {
     "id": "gw-pug-in-a-rug",
-    "title": "It is, as advertised, a pug in a rug",
-    "blurb": "Click the rug. The pug emerges. Click again, it tucks back in. We have peer-reviewed this and confirm it is a good pug.",
+    "title": "A site that confirms whether there is, in fact, a pug in a rug",
+    "blurb": "There is. It's a pug. It's in a rug. Some questions don't need a search engine, just a yes.",
     "url": "https://puginarug.com"
   },
   {
     "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by listening to a man scream 'COW' louder",
-    "blurb": "Move your mouse and a very committed narrator gets more excited the closer you get. It is loud, it is dumb, and it absolutely belongs on a school computer.",
-    "url": "https://findtheinvisiblecow.com"
+    "title": "Find an invisible cow by screaming the word 'cow'",
+    "blurb": "Your mouse gets warmer, a voice yells louder, and you locate a cow you cannot see. Best played in a quiet library for maximum chaos.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "sound on, dignity off"
   },
   {
-    "id": "gw-nyan-cat",
-    "title": "The Pop-Tart cat flying forever to the song that lived in your head rent-free",
-    "blurb": "Nyan Cat still loops on its own dedicated site, leaving a rainbow trail across the infinite. The play counter has seen things. So has the cat.",
-    "url": "https://nyan.cat",
-    "foundNote": "meme certified 2011"
+    "id": "gw-mapcrunch",
+    "title": "Teleport to a random street anywhere on Earth",
+    "blurb": "One button drops you somewhere on the planet's roadside view — a Mongolian highway, a Brazilian cul-de-sac. The screensaver your school computer wished it had.",
+    "url": "https://www.mapcrunch.com"
+  },
+  {
+    "id": "gw-rainymood",
+    "title": "A perfect rainstorm that never ends and never floods anything",
+    "blurb": "Pure looping rain and thunder, running since the days when we left it open in a background tab to 'study.' Still the comfiest white noise on the web.",
+    "url": "https://rainymood.com",
+    "foundNote": "a study-session classic"
+  },
+  {
+    "id": "gw-floor796",
+    "title": "An ever-expanding animated scene of life on the 796th floor",
+    "blurb": "One enormous hand-drawn pixel world that just keeps growing, packed with hidden gags and tiny dramas. A Where's-Waldo poster that updates itself.",
+    "url": "https://floor796.com",
+    "foundNote": "still being drawn, frame by frame"
   }
 ];
