@@ -2,75 +2,70 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-single-serving-sites",
-    "title": "A directory of websites that do exactly one (1) thing",
-    "blurb": "A lovingly kept index of one-purpose sites — faxable balls, photos of chickens taken BY chickens, a catalog of literary farts. The 2003 web's whole personality, archived.",
-    "url": "https://singleservingsites.cool",
-    "foundNote": "this is the good kind of useless"
+    "id": "gw-size-of-space",
+    "title": "Scroll from a person to the literal edge of the observable universe",
+    "blurb": "Neal.fun zooms you out past the Sun, past black holes, past the Milky Way until your brain politely files for an extension. The cosmic horror is free and runs in your browser.",
+    "url": "https://neal.fun/size-of-space/"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "A nonstop stream of strangers offering you a hug",
-    "blurb": "Real people, real videos, arms open, built specifically as an antidote to the rest of the internet being The Rest Of The Internet. Soft launch your feelings.",
-    "url": "https://thenicestplace.net"
-  },
-  {
-    "id": "gw-sito-synergy",
-    "title": "Artists have been nesting pixel grids inside pixel grids since 1997",
-    "blurb": "A global collaborative art project where 3x3 image tiles get drawn into each other forever, like a Russian doll made of MS Paint. Older than most of our high scores.",
-    "url": "https://www.sito.org/synergy/",
-    "foundNote": "HyGrid running since 1995"
+    "id": "gw-this-is-sand",
+    "title": "Pour digital sand into hypnotic colored dunes",
+    "blurb": "Tap, hold, change colors, repeat — it's a Zen garden for people who grew up rotating Tetris blocks. Weirdly the most relaxing thing on the internet that isn't a screensaver.",
+    "url": "https://thisissand.com"
   },
   {
     "id": "gw-koalas-to-the-max",
-    "title": "Split one giant dot into smaller dots until a koala appears",
-    "blurb": "Hover and the dot quarters itself, again and again, in the most satisfying chain reaction on the web. Splitter players will feel a deep, ancestral calm.",
+    "title": "Click dots until they split into a hidden picture",
+    "blurb": "Each tap quarters the circles, dividing forever toward a surprise image. It's Splitter's chill cousin — no game over, just satisfying recursion.",
     "url": "https://koalastothemax.com"
   },
   {
+    "id": "gw-scream-into-void",
+    "title": "Type a scream, watch it dissolve into nothing",
+    "blurb": "A tiny cathartic release valve for the modern soul. No login, no algorithm, no one reads it — just you and the void, the way the early web intended.",
+    "url": "https://screamintothevoid.com"
+  },
+  {
     "id": "gw-is-it-christmas",
-    "title": "A website that says NO for 364 days a year",
-    "blurb": "Asks one question, answers it honestly, flips to YES exactly once. The most reliable narrator on the entire internet.",
+    "title": "A website that bravely answers one question all year",
+    "blurb": "It says NO. Every single day. Except one, when it flips to YES and you can feel the dial-up-era commitment to a single dumb bit.",
     "url": "https://isitchristmas.com",
-    "foundNote": "a tiny annual tradition"
+    "foundNote": "the purest single-serving site"
   },
   {
-    "id": "gw-this-person",
-    "title": "A new fake human face every time you refresh",
-    "blurb": "An AI hallucinates a totally real-looking person who has never existed and never will. Refresh and they're gone forever, like a Geocities guestbook signer.",
-    "url": "https://thispersondoesnotexist.com"
+    "id": "gw-hacker-typer",
+    "title": "Mash any key and become a movie hacker instantly",
+    "blurb": "Fake green code pours across a black screen like you're 'in the mainframe.' Pair with a hoodie and you're basically the antagonist of a 2003 cyber-thriller.",
+    "url": "https://hackertyper.com"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "title": "A site that confirms whether there is, in fact, a pug in a rug",
-    "blurb": "There is. It's a pug. It's in a rug. Some questions don't need a search engine, just a yes.",
-    "url": "https://puginarug.com"
+    "id": "gw-omfg-dogs",
+    "title": "Dogs walking on a loop, forever, with a banger soundtrack",
+    "blurb": "Pure 2008 Flash-era energy preserved in amber: spinning pixel pups marching to a chiptune jam. There is no point and that is the point.",
+    "url": "https://www.omfgdogs.com/"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by screaming the word 'cow'",
-    "blurb": "Your mouse gets warmer, a voice yells louder, and you locate a cow you cannot see. Best played in a quiet library for maximum chaos.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "sound on, dignity off"
+    "id": "gw-find-the-invisible-cow",
+    "title": "Find an invisible cow using only a screaming voice",
+    "blurb": "Your speakers yell COW! louder as you get warmer until you finally click empty space and a cow appears. Best played alone, never in a quiet office.",
+    "url": "https://findtheinvisiblecow.com/"
   },
   {
-    "id": "gw-mapcrunch",
-    "title": "Teleport to a random street anywhere on Earth",
-    "blurb": "One button drops you somewhere on the planet's roadside view — a Mongolian highway, a Brazilian cul-de-sac. The screensaver your school computer wished it had.",
-    "url": "https://www.mapcrunch.com"
+    "id": "gw-procatinator",
+    "title": "Random cat GIFs perfectly synced to random songs",
+    "blurb": "Hit next and the universe occasionally aligns into something transcendent. It's the slot machine of vintage cat content, and the house always pays out cute.",
+    "url": "https://procatinator.com/"
   },
   {
-    "id": "gw-rainymood",
-    "title": "A perfect rainstorm that never ends and never floods anything",
-    "blurb": "Pure looping rain and thunder, running since the days when we left it open in a background tab to 'study.' Still the comfiest white noise on the web.",
-    "url": "https://rainymood.com",
-    "foundNote": "a study-session classic"
+    "id": "gw-falling-falling",
+    "title": "Fall through endless color forever while a low drone hums",
+    "blurb": "You're just plummeting through soft gradients into infinity. It's either deeply calming or mildly cursed depending on the day you're having.",
+    "url": "https://www.fallingfalling.com/"
   },
   {
-    "id": "gw-floor796",
-    "title": "An ever-expanding animated scene of life on the 796th floor",
-    "blurb": "One enormous hand-drawn pixel world that just keeps growing, packed with hidden gags and tiny dramas. A Where's-Waldo poster that updates itself.",
-    "url": "https://floor796.com",
-    "foundNote": "still being drawn, frame by frame"
+    "id": "gw-drawing-garden",
+    "title": "Move your mouse and grow a field of flowers",
+    "blurb": "No buttons, no menu, no tutorial — just drag and watch a garden bloom under your cursor. The whole vibe is a soft exhale after a long internet.",
+    "url": "https://drawing.garden/"
   }
 ];
