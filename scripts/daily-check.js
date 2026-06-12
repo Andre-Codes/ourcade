@@ -14,6 +14,7 @@ import { FACTS, getTodaysFact, PERIOD_DAYS as FACT_PERIOD } from "../src/data/fa
 import { CURIOSITIES, getTodaysCuriosity } from "../src/data/curiosities.js";
 import { WEIRD, getCurrentWeirdThing, BLOCKS_PER_DAY } from "../src/data/weird.js";
 import { staticArtifacts } from "../src/data/stumble.js";
+import { urlKey } from "./lib/validate-urls.js";
 
 const DAYS = 14;
 
@@ -138,6 +139,14 @@ check(
     ["nostalgic", "current", "timeless"].every((e) => counts[e] > 0),
     Object.entries(counts).map(([e, n]) => `${e}:${n}`).join(" ")
   );
+
+  // No cross-pool overlap: a site on the daily Weird card shouldn't also be in
+  // the dice (urlKey = host-level identity except on multi-page hosts).
+  const stumbleKeys = new Map(pool.map((a) => [urlKey(a.url), a.id]));
+  const overlaps = WEIRD.filter((w) => stumbleKeys.has(urlKey(w.url))).map(
+    (w) => `${w.id}↔${stumbleKeys.get(urlKey(w.url))}`
+  );
+  check("weird/stumble pools don't overlap", overlaps.length === 0, overlaps.join(", ") || "disjoint");
 }
 
 console.log(`\n${failures === 0 ? "✓ all checks passed" : "✗ " + failures + " check(s) failed"}\n`);

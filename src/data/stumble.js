@@ -18,17 +18,22 @@
 
 import { loadPool } from "./animations.js";
 import generated from "./generated/stumble.js";
-import { MANUAL_ARTIFACTS } from "./manual.js";
+import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual.js";
 import {
   getStumbleSeen,
   recordStumbleSeen,
   clearStumbleSeen,
+  getDeepCutsUnlocked,
 } from "../lib/store.js";
 
 const STATIC = [
   ...MANUAL_ARTIFACTS,
   ...(Array.isArray(generated) && generated.length ? generated : []),
 ];
+
+// Konami-locked extras — stranger picks that only join the draw once the code
+// has been entered (see Home.jsx). Flagged so the page can show the 🩻 chip.
+const DEEP_CUTS = MANUAL_DEEP_CUTS.map((a) => ({ ...a, deepCut: true }));
 
 // flash pool entry → artifact (same shape as MANUAL_ARTIFACTS entries)
 function flashToArtifact(a) {
@@ -57,12 +62,15 @@ function loadFlashArtifacts() {
 }
 
 // The invisible 40/40/20: nostalgic splits between flash and everything else.
+// Deep cuts (when unlocked) get their own small bucket on top — the overall
+// mix barely shifts, but the dice now occasionally roll strange.
 function buildBuckets(flashArtifacts) {
   return [
     { weight: 0.2, items: flashArtifacts },
     { weight: 0.2, items: STATIC.filter((a) => a.era === "nostalgic") },
     { weight: 0.4, items: STATIC.filter((a) => a.era === "current") },
     { weight: 0.2, items: STATIC.filter((a) => a.era === "timeless") },
+    ...(getDeepCutsUnlocked() ? [{ weight: 0.12, items: DEEP_CUTS }] : []),
   ].filter((b) => b.items.length > 0);
 }
 
@@ -99,10 +107,12 @@ export async function drawArtifact(excludeId) {
   return pick || null;
 }
 
-// Resolve a shared deep link (#/stumble?a=<id>) back to its artifact.
+// Resolve a shared deep link (#/stumble?a=<id>) back to its artifact. Deep
+// cuts resolve regardless of unlock — a shared 1am find should open for the
+// friend it was sent to.
 export async function findArtifact(id) {
   if (!id) return null;
-  const hit = STATIC.find((a) => a.id === id);
+  const hit = STATIC.find((a) => a.id === id) || DEEP_CUTS.find((a) => a.id === id);
   if (hit) return hit;
   if (id.startsWith("flash:")) {
     const raw = id.slice("flash:".length);
@@ -113,8 +123,8 @@ export async function findArtifact(id) {
   return null;
 }
 
-// For scripts/daily-check.js: audit the static pool without touching the lazy
-// flash chunk (the flash bucket is validated by fetch-flash.js itself).
+// For scripts/daily-check.js: audit the static pools (deep cuts included)
+// without touching the lazy flash chunk (fetch-flash.js validates that one).
 export function staticArtifacts() {
-  return STATIC;
+  return [...STATIC, ...DEEP_CUTS];
 }

@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { drawArtifact, findArtifact } from "../data/stumble.js";
+import { renderStumbleCard } from "../lib/stumbleCard.js";
+import { shareImage } from "../lib/share.js";
 import ShareButton from "./ShareButton.jsx";
 
 /* /stumble — the discovery portal. One artifact at a time, a giant STUMBLE
@@ -35,6 +37,46 @@ function shareUrlFor(artifact) {
   return `${window.location.href.split("#")[0]}#/stumble?a=${encodeURIComponent(artifact.id)}`;
 }
 
+// Renders the artifact as a 1080×1080 PNG and hands it to the OS share sheet
+// (or downloads it on desktop) — the 8-Ball card pattern.
+function CardButton({ artifact }) {
+  const [status, setStatus] = useState(null); // "busy" | "saved" | "shared" | "failed" | null
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const onClick = async () => {
+    setStatus("busy");
+    let result = "failed";
+    try {
+      const blob = await renderStumbleCard(artifact);
+      result = await shareImage({
+        blob,
+        filename: `stumble-${artifact.id.replace(/[^a-z0-9-]+/gi, "-")}.png`,
+        title: "Ourcade — Stumble",
+        text: `I stumbled upon "${artifact.title}" on Ourcade`,
+      });
+    } catch {
+      result = "failed";
+    }
+    setStatus(result === "cancelled" ? null : result);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setStatus(null), 1800);
+  };
+
+  const label =
+    status === "busy" ? "🖼 rendering…"
+    : status === "saved" ? "✓ Card saved!"
+    : status === "shared" ? "✓ Shared!"
+    : status === "failed" ? "Card failed"
+    : "🖼 Card";
+
+  return (
+    <button type="button" className="arcade-share" onClick={onClick} disabled={status === "busy"}>
+      {label}
+    </button>
+  );
+}
+
 function ArtifactCard({ artifact }) {
   const kindChip = KIND_LABEL[artifact.kind];
   const host = hostnameOf(artifact.url);
@@ -43,6 +85,7 @@ function ArtifactCard({ artifact }) {
   return (
     <div className="arcade-stumble-card">
       {kindChip && <span className="arcade-stumble-kind">{kindChip}</span>}
+      {artifact.deepCut && <span className="arcade-stumble-deepcut">🩻 DEEP CUT</span>}
       <h2 className="arcade-stumble-title">
         {artifact.title}
         {artifact.year && <span className="arcade-stumble-year"> ({artifact.year})</span>}
@@ -148,12 +191,15 @@ export default function StumblePage() {
             {busy ? "🎲 rolling…" : "🎲 STUMBLE AGAIN"}
           </button>
           {artifact && (
-            <ShareButton
-              label="Share this find"
-              title="Ourcade — Stumble"
-              text={`I stumbled upon "${artifact.title}" on Ourcade`}
-              url={shareUrlFor(artifact)}
-            />
+            <>
+              <ShareButton
+                label="Share this find"
+                title="Ourcade — Stumble"
+                text={`I stumbled upon "${artifact.title}" on Ourcade`}
+                url={shareUrlFor(artifact)}
+              />
+              <CardButton artifact={artifact} />
+            </>
           )}
         </div>
 

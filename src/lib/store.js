@@ -72,6 +72,17 @@ export function setEightBallMuted(on) {
   write("eightball:muted", on ? "1" : "0");
 }
 
+// ---- konami deep cuts: secret stumble pool unlock (persists, like legendaries) ----
+export function getDeepCutsUnlocked() {
+  return read("stumble:deepcuts") === "1";
+}
+// Idempotent; returns whether THIS call did the unlocking (for the toast).
+export function recordDeepCutsUnlocked() {
+  const isNew = !getDeepCutsUnlocked();
+  write("stumble:deepcuts", "1");
+  return { isNew };
+}
+
 // ---- stumble: ids already seen THIS SESSION (sessionStorage, not local) ----
 // Session-scoped on purpose: within one sitting you never see a repeat, but a
 // fresh visit starts with the whole pool again. Same try/catch contract as the

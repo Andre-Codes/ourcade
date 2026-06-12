@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
+import { recordDeepCutsUnlocked } from "../lib/store.js";
 import DailyBand from "./DailyBand.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
@@ -82,6 +83,32 @@ export default function Home() {
 
   // ---- easter egg: click Badger's discman to spin up the walkman ----
   const [walkmanOn, setWalkmanOn] = useState(false);
+
+  // ---- easter egg: the Konami code unlocks the DEEP CUTS stumble pool ----
+  const [deepCutsToast, setDeepCutsToast] = useState(false);
+  useEffect(() => {
+    const SEQ = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
+    let i = 0;
+    let timer = null;
+    const onKey = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return; // don't eat the search box
+      const k = String(e.key).toLowerCase();
+      i = k === SEQ[i] ? i + 1 : k === SEQ[0] ? 1 : 0;
+      if (i === SEQ.length) {
+        i = 0;
+        recordDeepCutsUnlocked();
+        setDeepCutsToast(true);
+        clearTimeout(timer);
+        timer = setTimeout(() => setDeepCutsToast(false), 5200);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // ---- search + tag filtering (scales as the library grows) ----
   const [query, setQuery] = useState("");
@@ -248,6 +275,13 @@ export default function Home() {
       </footer>
 
       <Walkman on={walkmanOn} onStop={() => setWalkmanOn(false)} />
+
+      {deepCutsToast && (
+        <div className="arcade-deepcuts-toast" role="status">
+          🩻 DEEP CUTS UNLOCKED — the dice now roll stranger.{" "}
+          <Link to="/stumble">roll them →</Link>
+        </div>
+      )}
     </div>
   );
 }

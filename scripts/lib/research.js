@@ -32,12 +32,14 @@ No preamble, no closing remarks — just the bullets.`;
 // Runs the live search. Basic web_search_20250305 (no code-execution dependency,
 // maximally compatible). Best-effort: returns whatever it gathered plus the
 // proof fields; callers decide how to react to requestCount === 0 / toolError.
-export async function runResearch(client) {
+// `prompt` defaults to the pop-culture hooks prompt; other callers (the weird
+// thing / stumble harvesters) pass their own.
+export async function runResearch(client, prompt = RESEARCH_PROMPT) {
   const res = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 4000,
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }],
-    messages: [{ role: "user", content: RESEARCH_PROMPT }],
+    messages: [{ role: "user", content: prompt }],
   });
 
   const queries = [];

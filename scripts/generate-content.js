@@ -6,7 +6,11 @@
    under src/data/generated/. NEVER runs in the browser — this
    is a dev/CI tool and @anthropic-ai/sdk stays a devDependency.
 
-   Run:  npm run generate     (needs ANTHROPIC_API_KEY)
+   Run:  npm run generate              (needs ANTHROPIC_API_KEY)
+         npm run generate:weird        (--only=weird — the 2x/day cron's
+                                        cheap mode: refresh ONLY the
+                                        "Today's Weird Thing" pool)
+         node scripts/generate-content.js --only=curiosities
    ============================================================ */
 
 import fs from "node:fs";
@@ -14,12 +18,16 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
+import { checkUrls, urlKey } from "./lib/validate-urls.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
 
+// --only=weird / --only=curiosities runs just that pool (and skips the rest).
+const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").split("=")[1] || null;
+
 // How big a batch to ask for. One run = a month-plus of date-seeded daily rotation.
-const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60 };
+const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30 };
 
 // Facts are hand-curated (see MANUAL_FACTS in src/data/manual.js); the home runs
 // on those only. Set true to also (re)generate the supplemental generated/facts.js.
@@ -262,6 +270,51 @@ const factsSchema = {
   required: ["facts"],
 };
 
+const weirdSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    weird: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          blurb: { type: "string" },
+          url: { type: "string" },
+          foundNote: { type: "string" }, // optional flavor; "" if none
+        },
+        required: ["id", "title", "blurb", "url", "foundNote"],
+      },
+    },
+  },
+  required: ["weird"],
+};
+
+const curiositiesSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    curiosities: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          blurb: { type: "string" },
+          url: { type: "string" }, // the "go deeper →" source — REQUIRED so every card self-verifies
+        },
+        required: ["id", "title", "blurb", "url"],
+      },
+    },
+  },
+  required: ["curiosities"],
+};
+
 // ---- validation gate: collect every problem, write nothing if any exist ----
 const errors = [];
 const req = (cond, msg) => {
@@ -340,6 +393,152 @@ function validateFacts(facts) {
   });
 }
 
+// ---- weird things + curiosities (URL-bearing pools, liveness-gated) ----
+
+// Manual pools, for dedupe (don't regenerate what's already hand-curated).
+// Weird things also dedupe against the stumble pools — the same site showing
+// up on the daily card AND in the dice undercuts both.
+let MANUAL_WEIRD = [];
+let MANUAL_CURIOSITIES = [];
+let FEATURED_URLS = [];
+try {
+  const manual = await import("../src/data/manual.js");
+  MANUAL_WEIRD = manual.MANUAL_WEIRD || [];
+  MANUAL_CURIOSITIES = manual.MANUAL_CURIOSITIES || [];
+  const generatedStumble = (await import("../src/data/generated/stumble.js")).default || [];
+  FEATURED_URLS = [
+    ...MANUAL_WEIRD,
+    ...(manual.MANUAL_ARTIFACTS || []),
+    ...(manual.MANUAL_DEEP_CUTS || []),
+    ...generatedStumble,
+  ]
+    .map((a) => a.url)
+    .filter(Boolean);
+} catch (e) {
+  console.warn(`warning: couldn't import manual.js (${e.message}); dedupe skipped.`);
+}
+
+// Liveness-check every item's url; returns the survivors and logs the dead.
+// This is the gate that lets the cron run unattended: a bad batch shrinks or
+// (below the floor) aborts the write, and the previous pool keeps serving.
+async function dropDeadUrls(label, items) {
+  const results = await checkUrls(items.map((it) => it.url));
+  const alive = [];
+  for (const it of items) {
+    const r = results.get(it.url);
+    if (r?.alive) alive.push(it);
+    else console.warn(`  ${label}: DROP ${it.id} — ${r?.reason || "no result"} (${it.url})`);
+  }
+  console.log(`  ${label}: ${alive.length}/${items.length} urls alive`);
+  return alive;
+}
+
+const WEIRD_RESEARCH_PROMPT = `You MUST use the web_search tool — your training data is stale, so do NOT answer from memory. Run several searches for genuinely weird, delightful corners of the CURRENT internet: strange new websites, quirky single-purpose sites, odd ongoing projects, unusual creator/hobbyist projects, bizarre-but-wholesome things people are sharing right now (tech forums, "weird website" roundups, show-and-tell threads). Long-running living projects count too. NOT news, NOT products, NOT politics.
+
+Then return ONLY a plain bulleted list of ~15 finds. Each bullet MUST include the real name, a one-line gloss, and the URL, like:
+- <Name> — <what it is and why it's delightful> — <https://...>
+
+No preamble, no closing remarks — just the bullets.`;
+
+async function generateWeird() {
+  console.log("Refreshing the Today's Weird Thing pool…");
+  let hooks = "";
+  try {
+    const r = await runResearch(client, WEIRD_RESEARCH_PROMPT);
+    fs.writeFileSync(path.join(OUT_DIR, "_weird.md"), buildProofMarkdown(r));
+    if (r.toolError || r.requestCount < 1) {
+      console.warn("  research: no live search — generating from stable knowledge only.");
+    } else {
+      console.log(`  research: ${r.requestCount} live search(es), ${r.results.length} sources → src/data/generated/_weird.md`);
+      hooks = r.hooks;
+    }
+  } catch (e) {
+    console.warn(`  research: unavailable (${e.message}); stable knowledge only.`);
+  }
+
+  const hookBlock = hooks
+    ? `\n\nFRESH FINDS from a live web search just now — prefer these (verbatim URLs) for most of the batch:\n${hooks}`
+    : "";
+  const data = await generate(
+    "weird",
+    weirdSchema,
+    `Generate ${COUNT.weird} entries for the homepage's "🔍 TODAY'S WEIRD THING" card — proof the site is alive and aware of the current internet. Each entry: a kebab-case id starting with "gw-", a title (a hooky one-liner like "A live map of broken McDonald's ice cream machines"), a 1-2 sentence blurb in the site's dry/warm voice, the REAL working url, and foundNote (a tiny aside like "online since 1995" — or "" if none).
+
+THESE ARE PRESENTED AS REAL — do NOT invent sites. Use only the FRESH FINDS below and things you are certain exist at the exact URL given. Mostly current/living internet; wholesome-weird, never mean. No duplicates, and do NOT reuse these already-featured urls: ${FEATURED_URLS.join(", ")}${hookBlock}`
+  );
+
+  let items = (data.weird || []).map((w) => ({
+    id: String(w.id || "").trim(),
+    title: String(w.title || "").trim(),
+    blurb: String(w.blurb || "").trim(),
+    url: String(w.url || "").trim(),
+    ...(String(w.foundNote || "").trim() ? { foundNote: String(w.foundNote).trim() } : {}),
+  }));
+
+  // structural validation
+  const seenIds = new Set(MANUAL_WEIRD.map((w) => w.id));
+  const seenUrls = new Set(FEATURED_URLS.map(urlKey));
+  items = items.filter((w, i) => {
+    if (!w.id || !w.title || !w.blurb || !w.url) return req(false, `weird[${i}]: missing fields`), false;
+    if (seenIds.has(w.id) || seenUrls.has(urlKey(w.url))) return false; // silent dedupe
+    seenIds.add(w.id);
+    seenUrls.add(urlKey(w.url));
+    return true;
+  });
+
+  items = await dropDeadUrls("weird", items);
+  req(items.length >= 8, `weird: only ${items.length} alive items (need >=8) — keeping the previous pool`);
+
+  if (errors.length) {
+    console.error(`\n✗ validation failed (${errors.length}) — writing nothing:`);
+    for (const e of errors) console.error(`  - ${e}`);
+    process.exitCode = 1;
+    return;
+  }
+  writeModule("weird.js", items, 'Today\'s Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.');
+  console.log("\n✓ done");
+}
+
+async function generateCuriosities() {
+  console.log("Generating the Timeless Curiosity pool…");
+  const data = await generate(
+    "curiosities",
+    curiositiesSchema,
+    `Generate ${COUNT.curiosities} entries for the homepage's "🌌 TIMELESS CURIOSITY" card — things fascinating regardless of decade: math oddities, history, nature, engineering, physics, language. Each entry: a kebab-case id starting with "gc-", a short title, a 1-2 sentence blurb that lands the wonder (dry, warm, no exclamation-mark hype), and url — the "go deeper" source, which MUST be the canonical English Wikipedia article (or an equally durable page) for that exact topic.
+
+ACCURACY IS THE WHOLE POINT — these are presented as true. Use ONLY widely documented topics you are certain of; when in doubt, leave it out. No duplicates, and do NOT reuse these already-featured topics/urls: ${MANUAL_CURIOSITIES.map((c) => c.url).filter(Boolean).join(", ")}`
+  );
+
+  let items = (data.curiosities || []).map((c) => ({
+    id: String(c.id || "").trim(),
+    title: String(c.title || "").trim(),
+    blurb: String(c.blurb || "").trim(),
+    url: String(c.url || "").trim(),
+  }));
+
+  const seenIds = new Set(MANUAL_CURIOSITIES.map((c) => c.id));
+  const seenUrls = new Set(MANUAL_CURIOSITIES.map((c) => urlKey(c.url)));
+  items = items.filter((c, i) => {
+    if (!c.id || !c.title || !c.blurb || !c.url) return req(false, `curiosity[${i}]: missing fields`), false;
+    if (seenIds.has(c.id) || seenUrls.has(urlKey(c.url))) return false;
+    seenIds.add(c.id);
+    seenUrls.add(urlKey(c.url));
+    return true;
+  });
+
+  items = await dropDeadUrls("curiosities", items);
+  req(items.length >= 20, `curiosities: only ${items.length} alive items (need >=20) — keeping the previous pool`);
+
+  if (errors.length) {
+    console.error(`\n✗ validation failed (${errors.length}) — writing nothing:`);
+    for (const e of errors) console.error(`  - ${e}`);
+    process.exitCode = 1;
+    return;
+  }
+  writeModule("curiosities.js", items, "Timeless Curiosity pool. Shape: { id, title, blurb, url } — urls liveness-checked at generation time.");
+  console.log("\n✓ done");
+}
+
 function writeModule(file, value, note) {
   const banner =
     `// AUTO-GENERATED by scripts/generate-content.js — do not edit by hand.\n` +
@@ -350,6 +549,16 @@ function writeModule(file, value, note) {
 }
 
 async function main() {
+  // Cheap targeted modes (the refresh-weird cron uses --only=weird so it never
+  // touches — or pays for — the big monthly polls/quizzes/flavor batch).
+  if (ONLY === "weird") return generateWeird();
+  if (ONLY === "curiosities") return generateCuriosities();
+  if (ONLY) {
+    console.error(`Unknown --only=${ONLY} (expected "weird" or "curiosities").`);
+    process.exitCode = 1;
+    return;
+  }
+
   console.log("Generating OURCADE daily content with Claude…");
   TOPICAL = await researchTopics();
 
