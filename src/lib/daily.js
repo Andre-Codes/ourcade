@@ -42,6 +42,34 @@ export function todayKey() {
   return getDayOverride() || dayKey(new Date());
 }
 
+// A "?hour=0-23" override (paired with ?day=) lets us eyeball any intraday
+// block without waiting for the clock. Same dev/QA-only contract as ?day=.
+export function getHourOverride() {
+  if (typeof window === "undefined" || !window.location) return null;
+  try {
+    const { search, hash } = window.location;
+    const hashQ = hash && hash.includes("?") ? hash.slice(hash.indexOf("?")) : "";
+    for (const qs of [search, hashQ]) {
+      if (!qs) continue;
+      const v = new URLSearchParams(qs).get("hour");
+      if (v && /^\d{1,2}$/.test(v) && Number(v) <= 23) return Number(v);
+    }
+  } catch {
+    /* ignore malformed URLs */
+  }
+  return null;
+}
+
+// Which block of the local day we're in (e.g. blocksPerDay=3 → 0 for
+// 00:00-07:59, 1 for 08:00-15:59, 2 for 16:00-23:59). Honors ?hour= so QA can
+// preview any block. Local hours on purpose — blocks roll with the player's
+// own day, same philosophy as dayKey.
+export function blockOfDay(blocksPerDay, date = new Date()) {
+  const b = Math.max(1, Math.floor(blocksPerDay));
+  const hour = getHourOverride() ?? date.getHours();
+  return Math.min(b - 1, Math.floor((hour / 24) * b));
+}
+
 // Whole-day counter derived from the key itself (so it stays consistent with
 // dayKey regardless of the runner's timezone). Increments by 1 each calendar
 // day — this is what drives the no-repeat rotation.
@@ -109,6 +137,22 @@ export function rotateEvery(list, key, periodDays = 1, salt = 0) {
   const p = Math.max(1, Math.floor(periodDays));
   const ordered = seededShuffle(list, (ROTATE_SEED ^ daySeed(String(salt))) >>> 0);
   const step = Math.floor(dayNumberFromKey(key) / p);
+  const idx = ((step % ordered.length) + ordered.length) % ordered.length;
+  return ordered[idx];
+}
+
+// Like rotateDaily, but advances multiple times per day — the "every few
+// hours" feel. Steps through the same no-repeat order; with blocksPerDay=3 a
+// pick lasts ~8 hours and every device in the same block sees the same item.
+// `block` overrides the wall-clock block — used by scripts/daily-check.js to
+// simulate every block of every day headlessly.
+export function rotateIntraday(list, key, blocksPerDay = 3, salt = 0, block) {
+  if (!list || list.length === 0) return undefined;
+  const b = Math.max(1, Math.floor(blocksPerDay));
+  const blk =
+    block == null ? blockOfDay(b) : Math.min(b - 1, Math.max(0, Math.floor(block)));
+  const ordered = seededShuffle(list, (ROTATE_SEED ^ daySeed(String(salt))) >>> 0);
+  const step = dayNumberFromKey(key) * b + blk;
   const idx = ((step % ordered.length) + ordered.length) % ordered.length;
   return ordered[idx];
 }

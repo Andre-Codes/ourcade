@@ -3,8 +3,9 @@
    GENERATE_FACTS in scripts/generate-content.js): real-world facts can't be
    web-grounded during structured output, so we'd rather run a known-true set.
 
-   The pick changes every 3 days (not daily), so a fact lingers a little. Pure JS
-   — importable by the home UI and by scripts/daily-check.js.
+   The pick changes daily — the fact card is the homepage's nostalgia anchor,
+   and the hand-verified pool is deep enough to run months without a repeat.
+   Pure JS — importable by the home UI and by scripts/daily-check.js.
 
    To re-enable the AI supplement: flip GENERATE_FACTS, run `npm run generate`,
    then restore the `generated/facts.js` import + spread below.
@@ -27,9 +28,9 @@ const FALLBACK = [
 export const FACTS = MANUAL_FACTS.length ? MANUAL_FACTS : FALLBACK;
 
 const SALT = 202; // keeps fact rotation independent of polls(101)/tips(303)/news(404)
-const PERIOD_DAYS = 3; // a fresh fact every 3 days
+export const PERIOD_DAYS = 1; // a fresh fact daily — 100+ hand-checked facts ≈ 3+ months no-repeat
 
-// Cycles the whole pool with no repeats, advancing once every 3 days.
+// Cycles the whole pool with no repeats, advancing once per period.
 export function getTodaysFact(key) {
   return rotateEvery(FACTS, key, PERIOD_DAYS, SALT);
 }

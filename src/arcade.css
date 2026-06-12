@@ -623,7 +623,7 @@ main > section + section { margin-top: 44px; }
 
 .arcade-daily-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; }
 .arcade-daily-side { display: flex; flex-direction: column; gap: 16px; }
-.arcade-daily-row { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: stretch; margin-top: 18px; }
+.arcade-daily-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: stretch; margin-top: 18px; }
 
 /* ---- Game of the Day hero ---- */
 .arcade-hero {
@@ -894,10 +894,118 @@ main > section + section { margin-top: 44px; }
 .arcade-quiz-retake:hover { border-color: var(--neon-violet); color: #ffe9b0; }
 .arcade-quiz-home { font-size: 0.8rem; color: var(--neon-lime); text-decoration: none; border-bottom: 1px solid currentColor; }
 
+/* ====================================================================== */
+/*  TODAY'S ARCADE — curiosity · weird thing · stumble portal             */
+/* ====================================================================== */
+.arcade-daily-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; align-items: stretch; }
+
+/* timeless curiosity — violet, the "rabbit hole that's 500 years old" card */
+.arcade-curiosity .arcade-widget-kicker { color: var(--neon-violet); text-shadow: 0 0 8px rgba(180,77,255,.4); }
+.arcade-curiosity-title {
+  font-family: 'Black Ops One', cursive; font-size: 1rem; color: #e3d2ff; margin: 8px 0 6px;
+}
+.arcade-curiosity-text {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; line-height: 1.5;
+  color: #d6e6ff; margin: 0 0 10px;
+}
+
+/* today's weird thing — pink, the "this site is alive" card */
+.arcade-weird .arcade-widget-kicker { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,77,114,.4); }
+.arcade-weird-title {
+  font-family: 'Black Ops One', cursive; font-size: 1rem; color: #ffd9e2; margin: 8px 0 6px;
+}
+.arcade-weird-text {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; line-height: 1.5;
+  color: #d6e6ff; margin: 0 0 10px;
+}
+.arcade-weird-foot { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: space-between; }
+.arcade-weird-note { font-size: 0.62rem; letter-spacing: 0.08em; color: var(--arcade-muted); text-transform: uppercase; }
+
+/* shared "go deeper →" outbound link */
+.arcade-deeper {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--neon-lime);
+  text-decoration: none; border-bottom: 1px solid currentColor; white-space: nowrap;
+}
+.arcade-deeper:hover { color: #fff; }
+
+/* stumble portal — the homepage door to /stumble; biggest button on the page */
+.arcade-stumble-portal {
+  display: flex; align-items: center; gap: 16px; margin-top: 18px; padding: 16px 18px;
+  color: #1a0a00; background: linear-gradient(180deg, #fff, var(--neon-gold));
+  border: 2px solid #04050b; border-radius: 12px; text-decoration: none;
+  box-shadow: var(--bevel), 0 6px 18px rgba(0,0,0,.4);
+  transition: filter .12s ease, transform .08s ease;
+}
+.arcade-stumble-portal:hover { filter: brightness(1.07); }
+.arcade-stumble-portal:active { transform: translateY(1px); }
+.arcade-stumble-portal-dice { font-size: 2rem; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)); }
+.arcade-stumble-portal-body { display: flex; flex-direction: column; gap: 5px; }
+.arcade-stumble-portal-title {
+  font-family: 'Press Start 2P', monospace; font-size: 0.74rem; letter-spacing: 0.04em;
+}
+.arcade-stumble-portal-sub {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; line-height: 1.4; color: #4a3200;
+}
+
+/* THE FLOOR — finite by design */
+.arcade-floor-note {
+  margin: -4px 0 14px; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+  letter-spacing: 0.06em; color: var(--arcade-muted);
+}
+.arcade-badge-link { text-decoration: none; cursor: pointer; }
+.arcade-badge-link:hover { color: var(--neon-gold); border-color: var(--neon-gold); }
+
+/* ====================================================================== */
+/*  STUMBLE PAGE (/stumble)                                                */
+/* ====================================================================== */
+.arcade-stumble-page { max-width: 760px; margin: 0 auto; padding: 64px 16px 40px; }
+.arcade-stumble-card {
+  margin-top: 12px; padding: 18px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-stumble-loading {
+  text-align: center; padding: 60px 18px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--neon-gold);
+}
+.arcade-stumble-kind {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.06em;
+  color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4);
+}
+.arcade-stumble-title { font-family: 'Black Ops One', cursive; font-size: 1.35rem; color: var(--arcade-text); margin: 10px 0 0; }
+.arcade-stumble-year { color: var(--arcade-muted); font-size: 1rem; }
+.arcade-stumble-screen { margin-top: 14px; }
+.arcade-stumble-image {
+  display: block; width: 100%; margin-top: 14px; border: 2px solid #04050b; border-radius: 9px;
+}
+.arcade-stumble-blurb {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; line-height: 1.55;
+  color: #d6e6ff; margin: 12px 0 0;
+}
+.arcade-stumble-credit { font-size: 0.78rem; color: var(--arcade-muted); margin: 6px 0 0; }
+.arcade-stumble-open {
+  display: inline-block; margin-top: 14px; padding: 12px 16px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem; letter-spacing: 0.03em;
+  color: #0a0a12; background: linear-gradient(180deg, var(--neon-lime), #9fd400);
+  border: 2px solid #04050b; border-radius: 8px; text-decoration: none;
+  box-shadow: var(--bevel); transition: filter .12s ease, transform .08s ease;
+}
+.arcade-stumble-open:hover { filter: brightness(1.1); }
+.arcade-stumble-open:active { transform: translateY(1px); }
+.arcade-stumble-actions { display: flex; gap: 12px; margin-top: 16px; align-items: stretch; }
+.arcade-stumble-again { flex: 1; font-size: 0.74rem; }
+.arcade-stumble-again:disabled { opacity: .65; cursor: wait; }
+.arcade-stumble-foot {
+  margin: 14px 2px 0; text-align: center; font-size: 0.62rem; letter-spacing: 0.14em;
+  color: var(--arcade-muted); text-transform: uppercase;
+}
+
 /* ---- daily band responsive ---- */
 @media (max-width: 760px) {
   .arcade-daily-grid { grid-template-columns: 1fr; }
   .arcade-daily-row { grid-template-columns: 1fr; }
+  .arcade-daily-duo { grid-template-columns: 1fr; }
+  .arcade-stumble-actions { flex-direction: column; }
 }
 @media (max-width: 520px) {
   .arcade-hero-body { flex-direction: column; align-items: flex-start; }

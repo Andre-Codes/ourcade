@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
 import { getTodaysPoll, simulatedTally } from "../data/polls.js";
 import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import { getTodaysFact } from "../data/facts.js";
+import { getTodaysCuriosity } from "../data/curiosities.js";
+import { getCurrentWeirdThing } from "../data/weird.js";
 import { NEXT_GAME_VOTE, nextGameTally } from "../data/nextGame.js";
 import {
   getPollVote,
@@ -120,13 +122,13 @@ function DailyPoll({ dayKey: key }) {
   );
 }
 
-// ── Today's quizzes teaser (a few to choose from) ─────────────────────────
+// ── Quiz of the Day (one — the page should be finishable, not refillable) ──
 function QuizTeaser({ dayKey: key }) {
-  const quizzes = getTodaysQuizzes(key, 3);
+  const quizzes = getTodaysQuizzes(key, 1);
   if (!quizzes.length) return null;
   return (
     <div className="arcade-widget arcade-quizteaser">
-      <span className="arcade-widget-kicker">🔮 TODAY&apos;S QUIZZES</span>
+      <span className="arcade-widget-kicker">🔮 QUIZ OF THE DAY</span>
       <ul className="arcade-quizteaser-list">
         {quizzes.map((quiz) => {
           const priorId = getQuizResult(quiz.id);
@@ -161,6 +163,57 @@ function GameFact({ dayKey: key }) {
     <div className="arcade-widget arcade-fact">
       <span className="arcade-widget-kicker">💡 GAME FACT</span>
       <p className="arcade-fact-text">{fact}</p>
+    </div>
+  );
+}
+
+// ── Timeless curiosity — fascinating regardless of decade ─────────────────
+function TimelessCuriosity({ dayKey: key }) {
+  const cur = getTodaysCuriosity(key);
+  if (!cur) return null;
+  return (
+    <div className="arcade-widget arcade-curiosity">
+      <span className="arcade-widget-kicker">🌌 TIMELESS CURIOSITY</span>
+      <p className="arcade-curiosity-title">{cur.title}</p>
+      <p className="arcade-curiosity-text">{cur.blurb}</p>
+      {cur.url && (
+        <a
+          className="arcade-deeper"
+          href={cur.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          go deeper ↗
+        </a>
+      )}
+    </div>
+  );
+}
+
+// ── Today's Weird Thing — rotates every few hours, the "we're alive" card ──
+function WeirdThing({ dayKey: key }) {
+  const weird = getCurrentWeirdThing(key);
+  if (!weird) return null;
+  return (
+    <div className="arcade-widget arcade-weird">
+      <span className="arcade-widget-kicker">🔍 TODAY&apos;S WEIRD THING</span>
+      <p className="arcade-weird-title">{weird.title}</p>
+      <p className="arcade-weird-text">{weird.blurb}</p>
+      <div className="arcade-weird-foot">
+        {weird.url && (
+          <a
+            className="arcade-deeper"
+            href={weird.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            see for yourself ↗
+          </a>
+        )}
+        <span className="arcade-weird-note">
+          {weird.foundNote ? `${weird.foundNote} · ` : ""}a new one surfaces every few hours
+        </span>
+      </div>
     </div>
   );
 }
@@ -224,17 +277,19 @@ function NextGameVote() {
   );
 }
 
-// ── Stumble (random game) ─────────────────────────────────────────────────
-function StumbleButton() {
-  const navigate = useNavigate();
-  const stumble = () => {
-    const pick = GAMES[Math.floor(Math.random() * GAMES.length)];
-    if (pick) navigate(`/play/${pick.id}`);
-  };
+// ── Stumble portal — the door to the rabbit hole (/stumble) ───────────────
+function StumblePortal() {
   return (
-    <button type="button" className="arcade-stumble" onClick={stumble}>
-      🎲 STUMBLE — random game, no refunds
-    </button>
+    <Link to="/stumble" className="arcade-stumble-portal">
+      <span className="arcade-stumble-portal-dice" aria-hidden="true">🎲</span>
+      <span className="arcade-stumble-portal-body">
+        <span className="arcade-stumble-portal-title">STUMBLE UPON SOMETHING</span>
+        <span className="arcade-stumble-portal-sub">
+          a forgotten flash game? a weird patent? a website that shouldn&apos;t
+          still exist? no algorithm — just dice. →
+        </span>
+      </span>
+    </Link>
   );
 }
 
@@ -294,8 +349,14 @@ export default function DailyBand() {
         </div>
       </div>
 
+      <div className="arcade-daily-duo">
+        <TimelessCuriosity dayKey={key} />
+        <WeirdThing dayKey={key} />
+      </div>
+
+      <StumblePortal />
+
       <div className="arcade-daily-row">
-        <StumbleButton />
         <MascotTip dayKey={key} streak={streak} />
       </div>
 

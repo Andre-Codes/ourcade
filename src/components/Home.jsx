@@ -190,8 +190,13 @@ export default function Home() {
         <section id="arcade-games">
           <h2 className="arcade-section-title">
             <img className="arcade-heading-badger" src={arcadeBadger} alt="" aria-hidden="true" />
-            GAMES
+            THE FLOOR
           </h2>
+          {!filtering && (
+            <p className="arcade-floor-note">
+              {GAMES.length} cabinets. that&apos;s all of them. that&apos;s the point. ✦
+            </p>
+          )}
           {games.length ? (
             <div className="arcade-grid">
               {games.map((game) => (
@@ -233,7 +238,9 @@ export default function Home() {
           <span className="arcade-badge">Made with Notepad</span>
           <span className="arcade-badge">Valid HTML 4.01</span>
           <span className="arcade-badge">Get Flash ▶</span>
-          <span className="arcade-badge">Ourcade Webring ‹ ›</span>
+          <Link to="/stumble" className="arcade-badge arcade-badge-link" title="Stumble upon something">
+            Ourcade Webring ‹ random ›
+          </Link>
         </div>
 
         <p className="arcade-copy">© 2003 OURCADE — all worlds reserved.</p>

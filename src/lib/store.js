@@ -72,6 +72,55 @@ export function setEightBallMuted(on) {
   write("eightball:muted", on ? "1" : "0");
 }
 
+// ---- stumble: ids already seen THIS SESSION (sessionStorage, not local) ----
+// Session-scoped on purpose: within one sitting you never see a repeat, but a
+// fresh visit starts with the whole pool again. Same try/catch contract as the
+// localStorage helpers — private mode just means repeats become possible.
+function readSession(key) {
+  try {
+    return sessionStorage.getItem(NS + key);
+  } catch {
+    return null;
+  }
+}
+function writeSession(key, value) {
+  try {
+    sessionStorage.setItem(NS + key, value);
+  } catch {
+    /* ignore — stumble degrades to pure random */
+  }
+}
+
+export function getStumbleSeen() {
+  const raw = readSession("stumble:seen");
+  if (!raw) return [];
+  try {
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+export function recordStumbleSeen(id) {
+  const seen = getStumbleSeen();
+  if (!seen.includes(id)) {
+    seen.push(id);
+    writeSession("stumble:seen", JSON.stringify(seen));
+  }
+  return seen;
+}
+// Forget seen ids (all of them, or just those matching a predicate) — used
+// when a draw bucket runs dry so it can start over without resetting the rest.
+export function clearStumbleSeen(predicate) {
+  if (typeof predicate !== "function") {
+    writeSession("stumble:seen", JSON.stringify([]));
+    return [];
+  }
+  const kept = getStumbleSeen().filter((id) => !predicate(id));
+  writeSession("stumble:seen", JSON.stringify(kept));
+  return kept;
+}
+
 // ---- visit streak: consecutive calendar days seen ----
 // Idempotent within a day (safe under React StrictMode's double-mount): the
 // first call for a new day advances the streak, repeat calls return it as-is.
