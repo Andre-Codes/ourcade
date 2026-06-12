@@ -256,6 +256,23 @@ export const MANUAL_WEIRD = [
   { id: "weird-berkshire", title: "A $700 billion company's website from 1997", blurb: "Berkshire Hathaway — Warren Buffett's empire — keeps a homepage that is pure unstyled HTML and refuses to change. It loads instantly. There is a lesson here.", url: "https://www.berkshirehathaway.com" },
 ];
 
+// Today's Weird Thing — the LATE-NIGHT pool. Same shape as MANUAL_WEIRD, but
+// only surfaces during the 🌙 night part (see src/data/weird.js): dreamier,
+// eerier, after-dark stuff that day-folk never see. Rotates a fresh one each
+// night. Keep these genuinely good — night owls earned them.
+export const MANUAL_WEIRD_NIGHT = [
+  { id: "weirdnt-sleep", title: "A 10-hour recording of a 1989 Casio keyboard demo, slowed 800%", blurb: "Someone stretched a cheesy keyboard demo into a vast, drifting ambient cathedral. It should not be beautiful. It is. Headphones, lights off.", url: "https://www.youtube.com/watch?v=YzeRWNkpY9w", foundNote: "best after midnight" },
+  { id: "weirdnt-driftloop", title: "drift — an endless generative night drive", blurb: "A car, an empty highway, rain on the windshield, and a synth that never resolves. It just keeps going. So can you.", url: "https://driveandlisten.herokuapp.com" },
+  { id: "weirdnt-quietplace", title: "The Quiet Place Project", blurb: "A slow, wordless sequence of calming instructions, one screen at a time. It asks you to breathe. At 3am, it lands different.", url: "https://thequietplaceproject.com/thequietplace" },
+  { id: "weirdnt-hi", title: "hi.", blurb: "A single page that just... talks to you, gently, like a friend who's also up too late. People keep it open and cry a little. That's allowed.", url: "https://heyhi.lol" },
+  { id: "weirdnt-stars", title: "Sit under a sky of 9,096 real stars", blurb: "An interactive planetarium of every star visible to the naked eye, from anywhere on Earth, at any date. Find the sky from the night you were born.", url: "https://stuffin.space" },
+  { id: "weirdnt-rain", title: "Rainy Mood, online since 2010", blurb: "Just rain. Sometimes thunder. The internet's longest-running thunderstorm, still falling for anyone who needs it to be quiet.", url: "https://rainymood.com", foundNote: "raining since 2010" },
+  { id: "weirdnt-ocean", title: "A live hydrophone in the deep Pacific", blurb: "Streaming audio from a microphone on the ocean floor off Vancouver Island. Whales, boats, the groan of the deep. Nobody's curating it. It just listens.", url: "https://orcasound.net/listen/" },
+  { id: "weirdnt-pluto", title: "Stand on Pluto and watch the sun rise", blurb: "A quiet, accurate render of the sky from worlds across the solar system. The sun is just another bright star out there. Humbling at 2am.", url: "https://neal.fun/the-sun/" },
+  { id: "weirdnt-deadmalls", title: "An archive of dead American shopping malls", blurb: "Photos and oral histories of the malls that raised a generation and then quietly died. Fluorescent-lit nostalgia with the lights going out.", url: "https://deadmalls.com", foundNote: "you've been here in a dream" },
+  { id: "weirdnt-windows", title: "WindowSwap, but it's everyone's 3am", blurb: "Look out a stranger's window — except now you're choosing the late-night ones. A glowing city, a sleeping cat, rain on someone else's glass.", url: "https://window-swap.com" },
+];
+
 // Stumble artifacts — the 🎲 pool's hand-picked seeds. Shape:
 //   { id, kind, era, title, blurb, year?, url, embed?, credit? }
 // kind: "wiki" | "site" | "patent" | "game" | "video" | "image" | "flash" | "mystery"

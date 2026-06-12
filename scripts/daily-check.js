@@ -6,15 +6,21 @@
    Run:  node scripts/daily-check.js
    ============================================================ */
 
-import { dayKey, rotateDaily } from "../src/lib/daily.js";
+import { dayKey, rotateDaily, dayPart } from "../src/lib/daily.js";
 import { POLLS, getTodaysPoll } from "../src/data/polls.js";
 import { QUIZZES, getTodaysQuiz } from "../src/data/quizzes.js";
 import { getTodaysTip } from "../src/data/flavor.js";
 import { FACTS, getTodaysFact, PERIOD_DAYS as FACT_PERIOD } from "../src/data/facts.js";
 import { CURIOSITIES, getTodaysCuriosity } from "../src/data/curiosities.js";
-import { WEIRD, getCurrentWeirdThing, BLOCKS_PER_DAY } from "../src/data/weird.js";
+import { WEIRD, WEIRD_NIGHT, getCurrentWeirdThing } from "../src/data/weird.js";
+import { getDayPartGreeting } from "../src/data/dayparts.js";
 import { staticArtifacts } from "../src/data/stumble.js";
 import { urlKey } from "./lib/validate-urls.js";
+
+// A day-part object for a given local hour (date is arbitrary — only the hour
+// determines the part). Lets us drive the time-of-day logic headlessly.
+const partAt = (h) => dayPart(new Date(2026, 0, 1, h));
+const PARTS = { morning: partAt(8), afternoon: partAt(14), evening: partAt(19), night: partAt(23) };
 
 const DAYS = 14;
 
@@ -55,8 +61,10 @@ console.log(`\nsample mascot tip (day 1): ${getTodaysTip(keys[0])}`);
 console.log(`sample game fact (day 1): ${getTodaysFact(keys[0])}`);
 console.log(`sample curiosity (day 1): ${getTodaysCuriosity(keys[0])?.title}`);
 console.log(
-  `weird things (day 1, ${BLOCKS_PER_DAY} blocks): ` +
-    Array.from({ length: BLOCKS_PER_DAY }, (_, b) => getCurrentWeirdThing(keys[0], b)?.title).join(" · ")
+  "weird by part (day 1): " +
+    ["morning", "afternoon", "evening", "night"]
+      .map((id) => `${PARTS[id].emoji} ${getCurrentWeirdThing(keys[0], PARTS[id])?.title?.slice(0, 22)}`)
+      .join(" · ")
 );
 console.log("");
 
@@ -101,24 +109,58 @@ check(
 check("curiosity deterministic", getTodaysCuriosity(k0).id === getTodaysCuriosity(k0).id);
 noRepeats("curiosity", (k) => getTodaysCuriosity(k).id, CURIOSITIES.length);
 
-// Weird thing: deterministic per (day, block) and no repeats across a full
-// cycle of day×block steps (the intraday rotation walks one shuffled order).
+// Day-parts: the local hour must map to the right named part (incl. the 0–5
+// pre-dawn wrap back to night).
+{
+  const expect = (h) =>
+    h < 5 ? "night" : h < 11 ? "morning" : h < 17 ? "afternoon" : h < 22 ? "evening" : "night";
+  let bad = null;
+  for (let h = 0; h < 24 && !bad; h++) {
+    const got = partAt(h).id;
+    if (got !== expect(h)) bad = `hour ${h} → ${got} (want ${expect(h)})`;
+  }
+  check("dayPart boundaries map 0–23", !bad, bad || "all 24 hours correct");
+}
+
+// Greeting: deterministic per (day, part) and never empty.
 check(
-  "weird thing deterministic per block",
-  getCurrentWeirdThing(k0, 0).id === getCurrentWeirdThing(k0, 0).id &&
-    getCurrentWeirdThing(k0, 1).id === getCurrentWeirdThing(k0, 1).id
+  "greeting deterministic per part",
+  ["morning", "night"].every(
+    (id) => getDayPartGreeting(PARTS[id], k0) === getDayPartGreeting(PARTS[id], k0)
+  ) && ["morning", "afternoon", "evening", "night"].every((id) => !!getDayPartGreeting(PARTS[id], k0))
+);
+
+// Weird thing — daytime: deterministic per part, and the three daytime parts
+// give DISTINCT picks on a given day (morning ≠ afternoon ≠ evening).
+check(
+  "weird thing deterministic per part",
+  getCurrentWeirdThing(k0, PARTS.afternoon).id === getCurrentWeirdThing(k0, PARTS.afternoon).id
 );
 {
-  const daysNeeded = Math.ceil(WEIRD.length / BLOCKS_PER_DAY);
-  const wKeys = keysFromToday(daysNeeded);
-  const ids = [];
-  for (const k of wKeys)
-    for (let b = 0; b < BLOCKS_PER_DAY; b++) ids.push(getCurrentWeirdThing(k, b).id);
-  const window = ids.slice(0, WEIRD.length);
+  const dayPicks = ["morning", "afternoon", "evening"].map(
+    (id) => getCurrentWeirdThing(k0, PARTS[id]).id
+  );
   check(
-    `weird thing no repeats over ${WEIRD.length}-step cycle (${BLOCKS_PER_DAY}/day)`,
-    new Set(window).size === WEIRD.length,
-    `${new Set(window).size}/${WEIRD.length} unique`
+    "weird thing: 3 daytime parts distinct",
+    new Set(dayPicks).size === 3,
+    `${new Set(dayPicks).size}/3 unique`
+  );
+}
+
+// Weird thing — night: comes from the night-only pool, and cycles that pool
+// with no repeats over its length (one fresh dreamy find per night).
+{
+  const nightIds = new Set(WEIRD_NIGHT.map((w) => w.id));
+  check("weird thing: night draws from the night pool", nightIds.has(getCurrentWeirdThing(k0, PARTS.night).id));
+  const base = new Date();
+  const seq = Array.from({ length: WEIRD_NIGHT.length }, (_, i) => {
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i, 23);
+    return getCurrentWeirdThing(dayKey(d), PARTS.night).id;
+  });
+  check(
+    `weird night-pool no repeats over ${WEIRD_NIGHT.length}-night cycle`,
+    new Set(seq).size === WEIRD_NIGHT.length,
+    `${new Set(seq).size}/${WEIRD_NIGHT.length} unique`
   );
 }
 
@@ -143,9 +185,9 @@ check(
   // No cross-pool overlap: a site on the daily Weird card shouldn't also be in
   // the dice (urlKey = host-level identity except on multi-page hosts).
   const stumbleKeys = new Map(pool.map((a) => [urlKey(a.url), a.id]));
-  const overlaps = WEIRD.filter((w) => stumbleKeys.has(urlKey(w.url))).map(
-    (w) => `${w.id}↔${stumbleKeys.get(urlKey(w.url))}`
-  );
+  const overlaps = [...WEIRD, ...WEIRD_NIGHT]
+    .filter((w) => stumbleKeys.has(urlKey(w.url)))
+    .map((w) => `${w.id}↔${stumbleKeys.get(urlKey(w.url))}`);
   check("weird/stumble pools don't overlap", overlaps.length === 0, overlaps.join(", ") || "disjoint");
 }
 

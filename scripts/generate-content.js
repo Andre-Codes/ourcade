@@ -399,15 +399,18 @@ function validateFacts(facts) {
 // Weird things also dedupe against the stumble pools — the same site showing
 // up on the daily card AND in the dice undercuts both.
 let MANUAL_WEIRD = [];
+let MANUAL_WEIRD_NIGHT = [];
 let MANUAL_CURIOSITIES = [];
 let FEATURED_URLS = [];
 try {
   const manual = await import("../src/data/manual.js");
   MANUAL_WEIRD = manual.MANUAL_WEIRD || [];
+  MANUAL_WEIRD_NIGHT = manual.MANUAL_WEIRD_NIGHT || [];
   MANUAL_CURIOSITIES = manual.MANUAL_CURIOSITIES || [];
   const generatedStumble = (await import("../src/data/generated/stumble.js")).default || [];
   FEATURED_URLS = [
     ...MANUAL_WEIRD,
+    ...MANUAL_WEIRD_NIGHT, // night pool too — a daytime find shouldn't clash with a night one
     ...(manual.MANUAL_ARTIFACTS || []),
     ...(manual.MANUAL_DEEP_CUTS || []),
     ...generatedStumble,
@@ -476,7 +479,7 @@ THESE ARE PRESENTED AS REAL — do NOT invent sites. Use only the FRESH FINDS be
   }));
 
   // structural validation
-  const seenIds = new Set(MANUAL_WEIRD.map((w) => w.id));
+  const seenIds = new Set([...MANUAL_WEIRD, ...MANUAL_WEIRD_NIGHT].map((w) => w.id));
   const seenUrls = new Set(FEATURED_URLS.map(urlKey));
   items = items.filter((w, i) => {
     if (!w.id || !w.title || !w.blurb || !w.url) return req(false, `weird[${i}]: missing fields`), false;

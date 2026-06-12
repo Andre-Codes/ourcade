@@ -34,6 +34,15 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run generate
 
+      # Curiosities aren't part of the main batch (durable Wikipedia-backed
+      # facts, separate schema), so refresh them on the same monthly cadence.
+      # Soft-fail: a curiosity hiccup must not block the main content commit.
+      - name: Refresh Timeless Curiosities
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run generate:curiosities
+
       - name: Verify date-seeded rotation still holds
         run: npm run check:daily
 

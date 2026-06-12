@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { recordDeepCutsUnlocked } from "../lib/store.js";
+import { todayKey, dayPart, getHourOverride } from "../lib/daily.js";
+import { getDayPartGreeting } from "../data/dayparts.js";
 import DailyBand from "./DailyBand.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
@@ -9,6 +11,17 @@ import byteBadger from "../assets/byte-badger.png";
 import arcadeBadger from "../assets/arcade-badger.png";
 
 const VISIT_KEY = "ourcade:visits";
+
+// "2:14am" — honors the ?hour= QA override so the clock matches the previewed
+// part (override has no minutes, so it reads as :00).
+function clockLabel(now) {
+  const oh = getHourOverride();
+  const h24 = oh ?? now.getHours();
+  const m = oh != null ? 0 : now.getMinutes();
+  const ampm = h24 < 12 ? "am" : "pm";
+  const h12 = ((h24 + 11) % 12) + 1;
+  return `${h12}:${String(m).padStart(2, "0")}${ampm}`;
+}
 
 // fake-but-real visitor odometer: bumps a localStorage tally each load, sits on
 // top of a vanity baseline so it reads like a 2003 hit counter.
@@ -84,6 +97,23 @@ export default function Home() {
   // ---- easter egg: click Badger's discman to spin up the walkman ----
   const [walkmanOn, setWalkmanOn] = useState(false);
 
+  // ---- day-parts: the arcade looks/greets differently by time of day ----
+  const key = useMemo(() => todayKey(), []);
+  const [part, setPart] = useState(() => dayPart());
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    // tick once a minute: update the clock chip and, when a boundary passes,
+    // flip the part (CSS transition does the visual fade). Only re-render the
+    // part when its id actually changes, to avoid churn.
+    const id = setInterval(() => {
+      setNow(new Date());
+      const next = dayPart();
+      setPart((prev) => (prev.id === next.id ? prev : next));
+    }, 60000);
+    return () => clearInterval(id);
+  }, []);
+  const greeting = getDayPartGreeting(part, key);
+
   // ---- easter egg: the Konami code unlocks the DEEP CUTS stumble pool ----
   const [deepCutsToast, setDeepCutsToast] = useState(false);
   useEffect(() => {
@@ -138,7 +168,7 @@ export default function Home() {
   const filtering = query.trim() !== "" || activeTags.length > 0;
 
   return (
-    <div className="arcade-home" id="top">
+    <div className="arcade-home" id="top" data-daypart={part.id}>
       {/* ---- retro top nav ---- */}
       <nav className="arcade-nav">
         <a href="#top" className="arcade-tab is-active">HOME</a>
@@ -183,7 +213,24 @@ export default function Home() {
         <p className="arcade-tagline">~ press start, stay a while ~</p>
       </header>
 
-      <DailyBand />
+      {/* day-part greeting: the mascot knows what time it is for you */}
+      <div className="arcade-greeting">
+        <img className="arcade-greeting-face" src={byteBadger} alt="" aria-hidden="true" />
+        <div className="arcade-greeting-body">
+          <div className="arcade-greeting-head">
+            <span className="arcade-greeting-clock">🕹 it&apos;s {clockLabel(now)} at the arcade</span>
+            <span className="arcade-greeting-part">{part.emoji} {part.label}</span>
+          </div>
+          <p className="arcade-greeting-text">{greeting}</p>
+          {part.id !== "night" && (
+            <p className="arcade-greeting-tease">
+              🌙 the late-night arcade opens at 10 — it&apos;s different after dark.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <DailyBand dayPart={part} />
 
       <div className="arcade-search" id="arcade-search">
         <input

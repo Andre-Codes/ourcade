@@ -32,18 +32,66 @@ html, body, #root {
 /* ====================================================================== */
 /*  HOME                                                                   */
 /* ====================================================================== */
+/* Day-part themable colors. Registered via @property so they can smoothly
+   TRANSITION (a plain custom property can't) — that's what makes the arcade
+   fade between morning/afternoon/evening/late-night instead of snapping.
+   Defaults below == the afternoon "full neon" look (the site's classic feel). */
+@property --dp-scan   { syntax: "<color>"; inherits: true; initial-value: rgba(63,255,208,.045); }
+@property --dp-glow-1 { syntax: "<color>"; inherits: true; initial-value: rgba(232,255,71,.07); }
+@property --dp-glow-2 { syntax: "<color>"; inherits: true; initial-value: rgba(255,77,114,.06); }
+@property --dp-bg     { syntax: "<color>"; inherits: true; initial-value: #07080f; }
+@property --dp-vignette { syntax: "<color>"; inherits: true; initial-value: rgba(0,0,0,0); }
+
 .arcade-home {
   min-height: 100vh;
+  /* the vignette layer (transparent center → edges) sits on top of the glows,
+     all behind content; every color is a day-part var so the mood retints. */
   background:
-    repeating-linear-gradient(0deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
-    repeating-linear-gradient(90deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
-    radial-gradient(ellipse 60% 40% at 15% 8%, rgba(232,255,71,.07), transparent 70%),
-    radial-gradient(ellipse 50% 50% at 85% 92%, rgba(255,77,114,.06), transparent 65%),
-    var(--arcade-bg);
+    radial-gradient(ellipse 130% 100% at 50% 50%, transparent 52%, var(--dp-vignette) 100%),
+    repeating-linear-gradient(0deg, transparent 0 39px, var(--dp-scan) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, var(--dp-scan) 39px 40px),
+    radial-gradient(ellipse 60% 40% at 15% 8%, var(--dp-glow-1), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 85% 92%, var(--dp-glow-2), transparent 65%),
+    var(--dp-bg);
   color: var(--arcade-text);
   font-family: 'Share Tech Mono', monospace;
   padding: 18px 16px 56px;
   box-sizing: border-box;
+}
+
+/* ---- day-part themes (mood retint — layout & card colors unchanged) ---- */
+.arcade-home[data-daypart="morning"] {
+  --dp-bg: #080b14; --dp-scan: rgba(63,255,208,.05);
+  --dp-glow-1: rgba(63,255,208,.08); --dp-glow-2: rgba(232,255,71,.06);
+}
+.arcade-home[data-daypart="afternoon"] {
+  --dp-bg: #07080f; --dp-scan: rgba(63,255,208,.045);
+  --dp-glow-1: rgba(232,255,71,.08); --dp-glow-2: rgba(255,77,114,.06);
+}
+.arcade-home[data-daypart="evening"] {
+  --dp-bg: #0b0810; --dp-scan: rgba(180,77,255,.05);
+  --dp-glow-1: rgba(255,160,63,.08); --dp-glow-2: rgba(180,77,255,.08);
+}
+.arcade-home[data-daypart="night"] {
+  --dp-bg: #04050c; --dp-scan: rgba(90,140,255,.06);
+  --dp-glow-1: rgba(99,102,241,.07); --dp-glow-2: rgba(180,77,255,.06);
+  --dp-vignette: rgba(0,0,0,.6);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* the ~0.8s crossfade between parts (incl. the live 10pm flip) */
+  .arcade-home {
+    transition: --dp-bg .8s ease, --dp-scan .8s ease,
+      --dp-glow-1 .8s ease, --dp-glow-2 .8s ease, --dp-vignette .8s ease;
+  }
+  /* faint CRT flicker on the wordmark, late night only */
+  .arcade-home[data-daypart="night"] .arcade-logo { animation: arcade-crt-flicker 5s steps(60) infinite; }
+}
+@keyframes arcade-crt-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: .82; }
+  98% { opacity: 1; }
+  99% { opacity: .9; }
 }
 
 /* ---- top nav ---- */
@@ -244,6 +292,40 @@ html, body, #root {
   font-size: 0.66rem;
   margin-top: 14px;
 }
+
+/* ---- day-part greeting band (the mascot knows what time it is for you) ---- */
+.arcade-greeting {
+  display: flex; align-items: center; gap: 14px;
+  max-width: 720px; margin: 0 auto 26px; padding: 12px 16px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-greeting-face {
+  width: 52px; height: auto; flex: 0 0 auto;
+  filter: drop-shadow(0 0 10px rgba(63,255,208,.5));
+}
+.arcade-greeting-body { flex: 1; min-width: 0; }
+.arcade-greeting-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 4px;
+}
+.arcade-greeting-clock {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.04em;
+  color: var(--neon-aqua); text-shadow: 0 0 8px rgba(63,255,208,.4);
+}
+.arcade-greeting-part {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.04em;
+  color: var(--neon-gold); margin-left: auto;
+}
+.arcade-greeting-text {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; line-height: 1.4;
+  color: #d6e6ff; margin: 0;
+}
+.arcade-greeting-tease {
+  font-size: 0.66rem; letter-spacing: 0.04em; color: var(--arcade-muted);
+  margin: 6px 0 0;
+}
+/* late-night: the greeting glows a touch cooler */
+.arcade-home[data-daypart="night"] .arcade-greeting-part { color: #9aa6ff; }
 
 /* ---- shelf section headings ---- */
 .arcade-section-title {

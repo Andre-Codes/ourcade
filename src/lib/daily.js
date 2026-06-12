@@ -60,6 +60,35 @@ export function getHourOverride() {
   return null;
 }
 
+// Named time-of-day segments (LOCAL hours, like dayKey — each visitor's own
+// clock). Uneven boundaries on purpose (6/6/5/7h), which is exactly why the
+// even-division blockOfDay below can't model them. The homepage retints its
+// theme + greeting per part, and non-night parts also index the Weird Thing.
+// `night` wraps midnight: it covers 22:00 → 04:59.
+const DAY_PARTS = [
+  { id: "morning", label: "MORNING", emoji: "🌅", startHour: 5 },
+  { id: "afternoon", label: "AFTERNOON", emoji: "☀️", startHour: 11 },
+  { id: "evening", label: "AFTER HOURS", emoji: "🌆", startHour: 17 },
+  { id: "night", label: "LATE NIGHT", emoji: "🌙", startHour: 22 },
+];
+export const DAY_PART_COUNT = DAY_PARTS.length;
+
+// Resolve the local hour to its day-part. Honors ?hour= for QA. Returns the
+// part plus its index/count and the hour the NEXT part begins (drives the
+// homepage's live "it just turned late-night" flip).
+export function dayPart(date = new Date()) {
+  const hour = getHourOverride() ?? date.getHours();
+  // Default to the last part (night) so pre-dawn hours 0–4 wrap correctly; the
+  // loop then advances to the latest part whose start hour we've reached.
+  let index = DAY_PARTS.length - 1;
+  for (let i = 0; i < DAY_PARTS.length; i++) {
+    if (hour >= DAY_PARTS[i].startHour) index = i;
+  }
+  const part = DAY_PARTS[index];
+  const nextBoundaryHour = DAY_PARTS[(index + 1) % DAY_PARTS.length].startHour;
+  return { ...part, index, count: DAY_PARTS.length, nextBoundaryHour };
+}
+
 // Which block of the local day we're in (e.g. blocksPerDay=3 → 0 for
 // 00:00-07:59, 1 for 08:00-15:59, 2 for 16:00-23:59). Honors ?hour= so QA can
 // preview any block. Local hours on purpose — blocks roll with the player's

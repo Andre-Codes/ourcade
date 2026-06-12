@@ -5,6 +5,14 @@ name: Refresh Today's Weird Thing
 # Cheap by design: `--only=weird` is one small research call + one structured
 # call (cents/run). Failure is safe — validation writes nothing, so the
 # previous pool keeps rotating. Cadence is the cost lever.
+#
+# NOTE on "I deployed but don't see the change": after this commits + triggers
+# deploy.yml, GitHub Pages serves index.html with Cache-Control: max-age=600,
+# and Safari caches HTML harder still — so the live page can show the OLD
+# hashed bundle (old content) for ~10+ min. Hard-refresh (Cmd+Shift+R) or wait.
+# Also: the card is (day, block)-seeded over the pool, so a fresh pool changes
+# what the rotation surfaces over the day, not necessarily your current slot
+# the instant you redeploy.
 on:
   schedule:
     - cron: "0 6,18 * * *" # twice daily, 06:00 & 18:00 UTC

@@ -190,10 +190,11 @@ function TimelessCuriosity({ dayKey: key }) {
   );
 }
 
-// ── Today's Weird Thing — rotates every few hours, the "we're alive" card ──
-function WeirdThing({ dayKey: key }) {
-  const weird = getCurrentWeirdThing(key);
+// ── Today's Weird Thing — rotates by day-part, the "we're alive" card ──
+function WeirdThing({ dayKey: key, part }) {
+  const weird = getCurrentWeirdThing(key, part);
   if (!weird) return null;
+  const isNight = part?.id === "night";
   return (
     <div className="arcade-widget arcade-weird">
       <span className="arcade-widget-kicker">🔍 TODAY&apos;S WEIRD THING</span>
@@ -211,7 +212,8 @@ function WeirdThing({ dayKey: key }) {
           </a>
         )}
         <span className="arcade-weird-note">
-          {weird.foundNote ? `${weird.foundNote} · ` : ""}a new one surfaces every few hours
+          {weird.foundNote ? `${weird.foundNote} · ` : ""}
+          {isNight ? "a late-night find — day-folk never see this one 🌙" : "a new one surfaces through the day"}
         </span>
       </div>
     </div>
@@ -325,7 +327,7 @@ function SiteNews({ dayKey: key }) {
   );
 }
 
-export default function DailyBand() {
+export default function DailyBand({ dayPart }) {
   // one "today" for the whole band (respects the ?day= dev override)
   const key = useMemo(() => todayKey(), []);
   const [streak, setStreak] = useState(1);
@@ -351,7 +353,7 @@ export default function DailyBand() {
 
       <div className="arcade-daily-duo">
         <TimelessCuriosity dayKey={key} />
-        <WeirdThing dayKey={key} />
+        <WeirdThing dayKey={key} part={dayPart} />
       </div>
 
       <StumblePortal />
