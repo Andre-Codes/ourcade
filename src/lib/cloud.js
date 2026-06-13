@@ -24,6 +24,7 @@ import {
   serverTimestamp,
   increment,
   runTransaction,
+  deleteDoc,
 } from "firebase/firestore";
 
 function uid() {
@@ -306,4 +307,210 @@ export async function markRead(msgId) {
     { read: true },
     { merge: true }
   );
+}
+
+/* ─── M2.5: synced NAMES (contacts) ──────────────────────────────────────────
+   A user's phonebook lives as a JSON string on the private per-account `state`
+   map (users/{uid}.state['nopia:contacts']) — reuses writeState/readState, so
+   no new collection or rule. Shape: [{ name, number }] with `number` the
+   canonical "555-XXXX". The JENNY/OURCADE built-ins stay iframe-local; only
+   real, swapped/added contacts sync here. */
+
+const CONTACTS_KEY = "nopia:contacts";
+
+function parseContacts(raw) {
+  if (!raw) return [];
+  try {
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list.filter((c) => c && c.number) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Read the current (or given) user's synced contacts ([] if none).
+export async function readContacts(forUid) {
+  const state = await readState(forUid);
+  return parseContacts(state[CONTACTS_KEY]);
+}
+
+// Overwrite the contact list (already-merged) for the current user.
+export async function writeContacts(list) {
+  await writeState(CONTACTS_KEY, JSON.stringify(Array.isArray(list) ? list : []));
+}
+
+// Live contact list for the current user. Returns the onSnapshot unsubscribe.
+export function listenContacts(cb) {
+  const id = uid();
+  if (!id) {
+    cb([]);
+    return () => {};
+  }
+  return onSnapshot(
+    doc(db, "users", id),
+    (snap) => cb(parseContacts(snap.exists() && snap.data().state?.[CONTACTS_KEY])),
+    () => cb([])
+  );
+}
+
+// Add (or update the name of) a contact, keyed by canonical number. Idempotent —
+// re-adding the same number just refreshes the name, so accept replays are safe.
+export async function addContact(name, number) {
+  const key = normalizeNumber(number);
+  if (!key) return;
+  const list = await readContacts();
+  const i = list.findIndex((c) => c.number === key);
+  if (i >= 0) list[i] = { name: name || list[i].name || key, number: key };
+  else list.push({ name: name || key, number: key });
+  await writeContacts(list);
+}
+
+/* ─── M2.5: request / accept (the mutual contact swap) ────────────────────────
+   A first text to someone NOT already in your contacts is a REQUEST: it lands
+   in messages/{toUid}/requests instead of their inbox and waits for ACCEPT.
+   On accept the recipient (B) drops the text into their own inbox, adds the
+   sender (A) to their contacts, and signals A — through A's inbox (the only
+   channel B is allowed to write) — to add B back. */
+
+// Write a request to `toUid` (+ a sent mirror so the sender sees it under SENT).
+export async function sendRequest(toUid, body, meta = {}) {
+  const id = uid();
+  if (!id || !toUid || !body) return null;
+  const msgId =
+    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+    Date.now() + "-" + Math.floor(Math.random() * 1e6);
+  const base = {
+    from: id,
+    to: toUid,
+    fromNumber: meta.fromNumber || "",
+    fromName: meta.fromName || "",
+    body: String(body),
+    ts: serverTimestamp(),
+    read: false,
+  };
+  await setDoc(doc(db, "messages", toUid, "requests", msgId), base);
+  setDoc(doc(db, "messages", id, "sent", msgId), {
+    ...base,
+    read: true,
+    toNumber: meta.toNumber || "",
+    toName: meta.toName || "",
+  }).catch(() => {});
+  return msgId;
+}
+
+// Live REQUESTS folder for the current user, newest first.
+export function listenRequests(cb) {
+  const id = uid();
+  if (!id) {
+    cb([]);
+    return () => {};
+  }
+  const q = query(
+    collection(db, "messages", id, "requests"),
+    orderBy("ts", "desc"),
+    limit(100)
+  );
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    () => cb([])
+  );
+}
+
+// Drop a request (DECLINE, or after accepting it).
+export async function declineRequest(reqId) {
+  const id = uid();
+  if (!id || !reqId) return;
+  await deleteDoc(doc(db, "messages", id, "requests", reqId)).catch(() => {});
+}
+
+// Tell `toUid` (A) to add us back as a contact — via a doc in A's inbox carrying
+// kind:'accept' + our swap label. A's inbox listener reconciles it.
+export async function sendAcceptSignal(toUid, meta = {}) {
+  const id = uid();
+  if (!id || !toUid) return;
+  const msgId =
+    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+    Date.now() + "-a" + Math.floor(Math.random() * 1e6);
+  await setDoc(doc(db, "messages", toUid, "inbox", msgId), {
+    from: id,
+    to: toUid,
+    kind: "accept",
+    fromNumber: meta.swapNumber || "",
+    fromName: meta.swapName || "",
+    swapName: meta.swapName || "",
+    swapNumber: meta.swapNumber || "",
+    body: `${meta.swapName || "Someone"} added you`,
+    ts: serverTimestamp(),
+    read: false,
+  }).catch(() => {});
+}
+
+// Accept a request (B's side). `me` = { name, number } for the accepting user.
+// Adds the sender to B's contacts, lands the text in B's inbox (written as
+// from:B with the sender's label fields so it renders "from A"), signals A to
+// add B, then deletes the request.
+export async function acceptRequest(req, me = {}) {
+  const id = uid();
+  if (!id || !req) return;
+  await addContact(req.fromName, req.fromNumber);
+  const inboxId =
+    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+    Date.now() + "-i" + Math.floor(Math.random() * 1e6);
+  await setDoc(doc(db, "messages", id, "inbox", inboxId), {
+    from: id,
+    to: id,
+    fromNumber: req.fromNumber || "",
+    fromName: req.fromName || "",
+    body: String(req.body || ""),
+    ts: serverTimestamp(),
+    read: false,
+  }).catch(() => {});
+  await sendAcceptSignal(req.from, { swapName: me.name, swapNumber: me.number });
+  await declineRequest(req.id);
+}
+
+/* ─── M2.5: ping (notify-only poke) ──────────────────────────────────────────
+   Dialing a number + Call writes a tiny ping doc into the owner's pings folder.
+   Their client rings, shows "PING FROM <number>", then deletes it — no thread,
+   no unread, no accept. */
+
+export async function sendPing(toUid, meta = {}) {
+  const id = uid();
+  if (!id || !toUid) return;
+  const pingId =
+    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+    Date.now() + "-p" + Math.floor(Math.random() * 1e6);
+  await setDoc(doc(db, "messages", toUid, "pings", pingId), {
+    from: id,
+    to: toUid,
+    fromNumber: meta.fromNumber || "",
+    kind: "ping",
+    ts: serverTimestamp(),
+  });
+}
+
+// Live pings for the current user. The caller rings each new one then deletes it.
+export function listenPings(cb) {
+  const id = uid();
+  if (!id) {
+    cb([]);
+    return () => {};
+  }
+  const q = query(
+    collection(db, "messages", id, "pings"),
+    orderBy("ts", "desc"),
+    limit(20)
+  );
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    () => cb([])
+  );
+}
+
+export async function deletePing(pingId) {
+  const id = uid();
+  if (!id || !pingId) return;
+  await deleteDoc(doc(db, "messages", id, "pings", pingId)).catch(() => {});
 }

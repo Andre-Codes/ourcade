@@ -64,10 +64,20 @@ export default function NopiaPhone() {
     // Only ring for messages that arrive AFTER mount, never the opening backlog.
     const mountedAt = Date.now();
     const seen = new Set();
+    const accepted = new Set();   // accept-signal ids already reconciled into NAMES
     let firstInbox = true;
 
     let unsubInbox = () => {};
     let unsubSent = () => {};
+    let unsubContacts = () => {};
+    let unsubRequests = () => {};
+    let unsubPings = () => {};
+
+    // Cached synced contact list (numbers), so send routing (inbox vs request)
+    // is a local check, not an extra read per send.
+    let myContacts = [];
+    const inContacts = (num) => !!num && myContacts.some((c) => c.number === num);
+    const me = () => ({ name: username || "", number: number || "" });
 
     const onMessage = (e) => {
       if (e.origin !== window.location.origin) return;
@@ -84,28 +94,84 @@ export default function NopiaPhone() {
         cloud().then((c) => c?.markRead?.(d.msgId)).catch(() => {});
       } else if (d.type === "nopia:send") {
         relaySend(d.to, d.body);
+      } else if (d.type === "nopia:addcontact") {
+        relayAddContact(d.name, d.number);
+      } else if (d.type === "nopia:accept") {
+        relayAccept(d);
+      } else if (d.type === "nopia:decline") {
+        cloud().then((c) => c?.declineRequest?.(d.reqId)).catch(() => {});
+      } else if (d.type === "nopia:ping") {
+        relayPing(d.to);
       }
     };
+
+    // Resolve a typed recipient ("555-0142" or "@handle") → uid. Returns
+    // { uid, number } or an error string.
+    async function resolveRecipient(c, to) {
+      const raw = String(to || "").trim();
+      if (!raw) return { error: "NO NUMBER" };
+      let toUid = null;
+      let num = "";
+      if (raw.startsWith("@")) {
+        toUid = await c.resolveUsername(raw.slice(1)).catch(() => null);
+      } else {
+        num = c.normalizeNumber(raw) || "";
+        toUid = await c.resolveNumber(raw).catch(() => null);
+        if (!toUid) toUid = await c.resolveUsername(raw).catch(() => null); // bare handle
+      }
+      if (!toUid) return { error: "NO SUCH NUMBER" };
+      if (toUid === uid) return { error: "THAT IS YOU" };
+      return { uid: toUid, number: num };
+    }
 
     async function relaySend(to, body) {
       const c = await cloud();
       if (!c || !body || !String(body).trim()) return;
-      const raw = String(to || "").trim();
-      let toUid = null;
-      if (raw.startsWith("@")) toUid = await c.resolveUsername(raw.slice(1)).catch(() => null);
-      else {
-        toUid = await c.resolveNumber(raw).catch(() => null);
-        if (!toUid) toUid = await c.resolveUsername(raw).catch(() => null); // bare handle
-      }
-      if (!toUid) { post({ type: "nopia:sendresult", ok: false, error: "NO SUCH NUMBER" }); return; }
-      if (toUid === uid) { post({ type: "nopia:sendresult", ok: false, error: "THAT IS YOU" }); return; }
-      await c.sendMessage(toUid, body, {
+      const r = await resolveRecipient(c, to);
+      if (r.error) { post({ type: "nopia:sendresult", ok: false, error: r.error }); return; }
+      const meta = {
         fromNumber: number || "",
         fromName: username || "",
-        toNumber: c.normalizeNumber(raw) || "",
-        toName: raw.startsWith("@") ? raw.slice(1) : "",
-      }).catch(() => {});
-      post({ type: "nopia:sendresult", ok: true });
+        toNumber: r.number || "",
+        toName: String(to).startsWith("@") ? String(to).slice(1) : "",
+      };
+      // Already a contact → straight to their inbox. Not yet → a REQUEST that
+      // they must accept (which swaps contacts both ways).
+      if (inContacts(r.number)) {
+        await c.sendMessage(r.uid, body, meta).catch(() => {});
+        post({ type: "nopia:sendresult", ok: true, error: "MESSAGE SENT" });
+      } else {
+        await c.sendRequest(r.uid, body, meta).catch(() => {});
+        post({ type: "nopia:sendresult", ok: true, error: "REQUEST SENT" });
+      }
+    }
+
+    async function relayAddContact(name, num) {
+      const c = await cloud();
+      if (!c) return;
+      const key = c.normalizeNumber(num) || "";
+      // Only let a real member's number into NAMES.
+      const owner = key ? await c.resolveNumber(key).catch(() => null) : null;
+      if (!owner) { post({ type: "nopia:reqresult", ok: false, error: "NO SUCH NUMBER" }); return; }
+      await c.addContact(name, key).catch(() => {});
+    }
+
+    async function relayAccept(d) {
+      const c = await cloud();
+      if (!c) return;
+      await c.acceptRequest(
+        { id: d.reqId, from: d.from, fromNumber: d.fromNumber, fromName: d.fromName, body: d.body },
+        me()
+      ).catch(() => {});
+      post({ type: "nopia:reqresult", ok: true });
+    }
+
+    async function relayPing(to) {
+      const c = await cloud();
+      if (!c) return;
+      const r = await resolveRecipient(c, to);
+      if (r.error) { post({ type: "nopia:reqresult", ok: false, error: r.error }); return; }
+      await c.sendPing(r.uid, { fromNumber: number || "" }).catch(() => {});
     }
 
     window.addEventListener("message", onMessage);
@@ -117,6 +183,16 @@ export default function NopiaPhone() {
     cloud().then((c) => {
       if (!c) return;
       unsubInbox = c.listenInbox((rows) => {
+        // Accept-signals are reconciled here (not shown as normal texts): when A
+        // accepted us / we accepted A, the counterparty added us back via an
+        // inbox doc — add them to our NAMES and mark it read. Dedup by `seen`.
+        for (const r of rows) {
+          if (r.kind === "accept" && !accepted.has(r.id)) {
+            accepted.add(r.id);
+            c.addContact(r.swapName || r.fromName, r.swapNumber || r.fromNumber).catch(() => {});
+            c.markRead(r.id).catch(() => {});
+          }
+        }
         post({ type: "nopia:inbox", messages: rows });
         if (firstInbox) { rows.forEach((r) => seen.add(r.id)); firstInbox = false; return; }
         // Ring on genuinely-new arrivals only.
@@ -128,6 +204,33 @@ export default function NopiaPhone() {
         }
       });
       unsubSent = c.listenSent((rows) => post({ type: "nopia:sent", messages: rows }));
+
+      // Synced contacts → relay to the iframe AND cache for send routing.
+      unsubContacts = c.listenContacts((list) => {
+        myContacts = Array.isArray(list) ? list : [];
+        post({ type: "nopia:contacts", contacts: myContacts });
+      });
+
+      // Pending requests → REQUESTS folder in the iframe.
+      unsubRequests = c.listenRequests((rows) => post({ type: "nopia:requests", messages: rows }));
+
+      // Pings: ring each genuinely-new one, then delete it (notify-only, no thread).
+      let firstPing = true;
+      const pingSeen = new Set();
+      unsubPings = c.listenPings((rows) => {
+        if (firstPing) {
+          // Clear any backlog silently so opening the phone doesn't ring-storm.
+          rows.forEach((r) => { pingSeen.add(r.id); c.deletePing(r.id).catch(() => {}); });
+          firstPing = false;
+          return;
+        }
+        for (const r of rows) {
+          if (pingSeen.has(r.id)) continue;
+          pingSeen.add(r.id);
+          post({ type: "nopia:incoming-ping", fromNumber: r.fromNumber || "" });
+          c.deletePing(r.id).catch(() => {});
+        }
+      });
     });
 
     return () => {
@@ -135,6 +238,9 @@ export default function NopiaPhone() {
       window.removeEventListener("message", onMessage);
       unsubInbox();
       unsubSent();
+      unsubContacts();
+      unsubRequests();
+      unsubPings();
     };
   }, [claimed, uid, number, username, submit]);
 

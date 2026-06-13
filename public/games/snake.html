@@ -281,7 +281,16 @@
   const PERSONAL = new URLSearchParams(location.search).has('personal');
   let IDENTITY = null;              // {uid, number, username} once the parent answers
   const NAMELABELS = {};            // addr → display name from cloud (for contactName)
+  let SYNCED = [];                  // cloud-synced contacts [{name, number}] (personal mode)
   function postToParent(msg){ try{ if(window.parent!==window) window.parent.postMessage(msg, location.origin); }catch(e){} }
+  // The phonebook the UI shows: built-in DB.contacts (JENNY/OURCADE, addr-based)
+  // plus the cloud-synced ones (number-based). Synced wins on a number clash.
+  function allContacts(){
+    const out = SYNCED.map(c=>({ name:c.name, addr:c.number }));
+    const have = new Set(out.map(c=>c.addr));
+    for(const c of DB.contacts){ if(!have.has(c.addr)) out.push(c); }
+    return out;
+  }
 
   const Transport = {
     send(to, body){
@@ -310,9 +319,11 @@
     }, 1600);
   }
   function contactName(addr){
+    const s = SYNCED.find(c=>c.number===addr); if(s) return s.name;
     const c = DB.contacts.find(c=>c.addr===addr); if(c) return c.name;
     return NAMELABELS[addr] || addr;
   }
+  function isKnownContact(addr){ return SYNCED.some(c=>c.number===addr) || DB.contacts.some(c=>c.addr===addr); }
 
   /* ---------- 5x7 dot-matrix font ---------- */
   const F = {
@@ -848,7 +859,11 @@
     call(){
       if(this.buf===JENNY_NUMBER){ const num=this.buf; this.buf=''; pushScreen(makeCalling('867-5309', false)); playJenny(); return; }
       if(!this.buf) return;
-      const num=this.buf; this.buf=''; pushScreen(makeCalling(num, true));
+      const num=this.buf; this.buf='';
+      // Personal phone: dialing a number PINGS its owner (notify-only). Guest
+      // mode keeps the old fake "NO SIGNAL" call.
+      if(PERSONAL){ postToParent({ type:'nopia:ping', to:num }); pushScreen(makePinging(num)); }
+      else pushScreen(makeCalling(num, true));
     },
     render(){
       const s=fs+2;
@@ -873,6 +888,24 @@
         drawTextCentered('CALLING', baseY, fs+1, ink);
         drawTextCentered(num, baseY+13*fs, fs, ink);
         drawTextCentered('.'.repeat(1+(Math.floor(this.t/350)%3)), baseY+26*fs, fs+1, ink);
+      }
+    };
+  }
+  // Personal-mode "ping" screen: a quick PINGING… that auto-dismisses. The ping
+  // itself was already sent to the parent; this is just feedback.
+  function makePinging(num){
+    return {
+      id:'pinging', statusBar:true, t:0,
+      get soft(){ return ''; },
+      enter(){ this.t=0; },
+      tick(dt){ this.t+=dt; if(this.t>1500) popScreen(); },
+      navi(){ popScreen(); }, back(){ popScreen(); },
+      render(){
+        const baseY = statusH + Math.round((lcdH-statusH)*0.30);
+        if(this.t>1100){ drawTextCentered('PINGED', baseY, fs+1, ink); drawTextCentered(num, baseY+13*fs, fs, ink); return; }
+        drawTextCentered('PINGING', baseY, fs+1, ink);
+        drawTextCentered(num, baseY+13*fs, fs, ink);
+        drawTextCentered('.'.repeat(1+(Math.floor(this.t/300)%3)), baseY+26*fs, fs+1, ink);
       }
     };
   }
@@ -1088,7 +1121,7 @@
     },
     navi(){
       if(!this.text.trim()){ showToast('EMPTY'); return; }
-      if(this.preTo){ Transport.send(this.preTo, this.text); showToast('MESSAGE SENT'); popScreen(); }
+      if(this.preTo){ sendTo(this.preTo, this.text); }
       else openRecipientPicker(this.text);
     },
     back(){ if(this.text){ this.text=this.text.slice(0,-1); this.pk=null; } else popScreen(); },
@@ -1102,20 +1135,112 @@
     }
   };
   function openEditor(preTo){ Editor.text=''; Editor.caseMode=1; Editor.pk=null; Editor.preTo=preTo||null; pushScreen(Editor); }
+
+  // A reusable digit-entry screen (dialer-style). title shown up top; onDone gets
+  // the typed string when the soft key (softLabel) is pressed.
+  function makeNumberEntry(title, softLabel, onDone){
+    return {
+      id:'numentry', statusLeft:'OURCADE', buf:'',
+      get soft(){ return softLabel; },
+      enter(){ this.buf=''; },
+      key(ch){ if(/[0-9*#]/.test(ch) && this.buf.length<20){ this.buf+=ch; dtmf(ch); } },
+      navi(){ if(this.buf) onDone(this.buf); else showToast('ENTER NUMBER'); },
+      back(){ if(this.buf) this.buf=this.buf.slice(0,-1); else popScreen(); },
+      render(){
+        drawTextCentered(title, contentTop(), fs, ink);
+        const midY = statusH + Math.round((lcdH-statusH-softH)/2) - 3*fs;
+        if(this.buf) drawTextCentered(this.buf, midY, fs+2, ink);
+        else if(blinkOn()) drawTextCentered('ENTER NUMBER', midY+2*fs, fs, ink);
+      }
+    };
+  }
+  // A reusable T9 text-entry screen (uses the same multi-tap as Editor). onDone
+  // gets the typed text when the soft key is pressed.
+  function makeTextEntry(title, softLabel, onDone){
+    return {
+      id:'textentry', statusLeft:'OURCADE', text:'', caseMode:1, pk:null, pidx:0, pt:0,
+      get soft(){ return softLabel; },
+      enter(){ this.text=''; this.caseMode=1; this.pk=null; },
+      tick(){ if(this.pk && performance.now()-this.pt>850) this.pk=null; },
+      key(ch){
+        const now=performance.now(); click();
+        if(MTAP[ch]){
+          const set=MTAP[ch];
+          if(this.pk===ch && (now-this.pt)<850){ this.pidx=(this.pidx+1)%set.length; this.text=this.text.slice(0,-1)+Editor.applyCase.call(this,set[this.pidx],true); }
+          else { this.pk=ch; this.pidx=0; this.text+=Editor.applyCase.call(this,set[0],false); }
+          this.pt=now;
+        } else if(ch==='#'){ this.caseMode=(this.caseMode+1)%3; this.pk=null; }
+      },
+      navi(){ if(this.text.trim()) onDone(this.text.trim()); else showToast('EMPTY'); },
+      back(){ if(this.text){ this.text=this.text.slice(0,-1); this.pk=null; } else popScreen(); },
+      render(){
+        drawTextCentered(title, contentTop(), fs, ink);
+        const p=drawWrapped(this.text, contentTop()+11*fs, fs, contentBottom()-9*fs);
+        if(blinkOn()){ ctx.fillStyle=ink; ctx.fillRect(p.x, p.y, 5*fs, 7*fs); }
+        const modes=['abc','Abc','ABC'];
+        drawText(modes[this.caseMode], pad, contentBottom()-7*fs, fs, ink);
+      }
+    };
+  }
+  // Send `body` to a typed recipient, then unwind back to the messages menu.
+  function sendTo(addr, body){ Transport.send(addr, body); showToast(isKnownContact(addr)?'MESSAGE SENT':'REQUEST SENT'); popToMessages(); }
+  function popToMessages(){ while(cur() && cur().id!=='messages' && screenStack.length>1) popScreen(); }
   function openRecipientPicker(body){
     pushScreen(ListScreen({ id:'pickto', title:'SEND TO', numbered:false, items:()=>{
-      if(!DB.contacts.length) return [{label:'(NO NAMES)', run:()=>{}}];
-      return DB.contacts.map(c=>({ label:c.name, run:()=>{ Transport.send(c.addr, body); showToast('MESSAGE SENT'); popScreen(); popScreen(); } }));
+      const items = [{ label:'> ENTER NUMBER', run:()=>{
+        pushScreen(makeNumberEntry('SEND TO', 'Send', (num)=>{ sendTo(num, body); }));
+      }}];
+      for(const c of allContacts()) items.push({ label:c.name, run:()=>{ sendTo(c.addr, body); } });
+      return items;
     }}));
   }
   const MessagesMenu = ListScreen({ id:'messages', title:'MESSAGES', numbered:true, items:()=>{
     const unread = DB.messages.filter(m=>m.folder==='inbox'&&!m.read).length;
-    return [
+    const reqs = DB.messages.filter(m=>m.folder==='requests').length;
+    const items = [
       {label:'INBOX'+(unread?(' ('+unread+')'):''), run:()=>pushScreen(makeFolder('inbox','INBOX'))},
-      {label:'WRITE MESSAGE', run:()=>openEditor(null)},
-      {label:'SENT', run:()=>pushScreen(makeFolder('sent','SENT'))}
+      {label:'WRITE MESSAGE', run:()=>openEditor(null)}
     ];
+    if(reqs) items.push({label:'REQUESTS ('+reqs+')', run:()=>pushScreen(makeRequestsFolder())});
+    items.push({label:'SENT', run:()=>pushScreen(makeFolder('sent','SENT'))});
+    return items;
   }});
+  // REQUESTS — first texts from people not yet in your NAMES. Accept (text moves
+  // to inbox + you both swap contacts) or Decline (dropped).
+  function makeRequestsFolder(){
+    return ListScreen({ id:'reqfolder', title:'REQUESTS', numbered:false, items:()=>{
+      const msgs = DB.messages.filter(m=>m.folder==='requests').slice().reverse();
+      if(!msgs.length) return [{label:'(NONE)', run:()=>{}}];
+      return msgs.map(m=>({ label:contactName(m.from)+': '+m.body.slice(0,12), run:()=>pushScreen(makeRequestView(m)) }));
+    }});
+  }
+  function makeRequestView(m){
+    return {
+      id:'reqview', statusLeft:'OURCADE', sel:0,
+      get soft(){ return this.sel===0 ? 'Accept' : 'Decline'; },
+      enter(){ this.sel=0; },
+      up(){ this.sel=this.sel?0:1; click(); }, down(){ this.sel=this.sel?0:1; click(); },
+      accept(){
+        if(PERSONAL) postToParent({ type:'nopia:accept', reqId:m.id, from:m.from, fromNumber:m.from, fromName:m.fromName||contactName(m.from), body:m.body });
+        m.folder='inbox'; m.read=false;   // optimistic: move request → inbox
+        if(m.fromName && !SYNCED.some(c=>c.number===m.from)) SYNCED.push({ name:m.fromName, number:m.from });
+        showToast('ACCEPTED'); popScreen();
+      },
+      decline(){
+        if(PERSONAL) postToParent({ type:'nopia:decline', reqId:m.id });
+        DB.messages = DB.messages.filter(x=>x.id!==m.id);
+        showToast('DECLINED'); popScreen();
+      },
+      navi(){ this.sel===0 ? this.accept() : this.decline(); },
+      back(){ popScreen(); },
+      render(){
+        drawText('FROM '+contactName(m.from), pad, contentTop(), fs, ink);
+        drawWrapped(m.body, contentTop()+11*fs, fs, contentBottom()-20*fs);
+        const opts=['ACCEPT','DECLINE'];
+        for(let i=0;i<2;i++){ const y=contentBottom()-(17-i*9)*fs; drawText((this.sel===i?'> ':'  ')+opts[i], pad, y, fs, ink); }
+      }
+    };
+  }
   function makeFolder(folder, title){
     return ListScreen({ id:'folder', title, numbered:false, items:()=>{
       const msgs = DB.messages.filter(m=>m.folder===folder).slice().reverse();
@@ -1137,9 +1262,25 @@
       }
     };
   }
+  // Add a contact: type a number, then a name. In personal mode the parent
+  // persists it (and it comes back via nopia:contacts); we optimistically show it.
+  function startAddContact(){
+    pushScreen(makeNumberEntry('NEW NUMBER', 'Next', (num)=>{
+      pushScreen(makeTextEntry('NAME', 'Save', (name)=>{
+        if(PERSONAL){
+          postToParent({ type:'nopia:addcontact', name, number:num });
+          if(!SYNCED.some(c=>c.number===num)) SYNCED.push({ name, number:num });
+        } else {
+          if(!DB.contacts.some(c=>c.addr===num)){ DB.contacts.push({ name, addr:num }); saveDB(); }
+        }
+        showToast('SAVED'); popScreen(); popScreen();
+      }));
+    }));
+  }
   const NamesScreen = ListScreen({ id:'names', title:'NAMES', numbered:false, soft:'Write', items:()=>{
-    if(!DB.contacts.length) return [{label:'(NO NAMES)', run:()=>{}}];
-    return DB.contacts.map(c=>({ label:c.name+' '+c.addr, run:()=>openEditor(c.addr) }));
+    const items = [{ label:'+ ADD CONTACT', run:()=>startAddContact() }];
+    for(const c of allContacts()) items.push({ label:c.name+' '+c.addr, run:()=>openEditor(c.addr) });
+    return items;
   }});
 
   /* ----- Profiles / Settings / Clock ----- */
@@ -1241,6 +1382,9 @@
   function tsOf(m){ const t=m && m.ts; if(!t) return Date.now(); if(typeof t==='number') return t; if(t.seconds) return t.seconds*1000; if(t.toMillis) return t.toMillis(); return Date.now(); }
   function mapInbox(m){ const addr=m.fromNumber||m.from; if(m.fromName) NAMELABELS[addr]=m.fromName; return { id:m.id, from:addr, to:(IDENTITY&&IDENTITY.number)||uid(), body:m.body, ts:tsOf(m), folder:'inbox', read:!!m.read }; }
   function mapSent(m){ const addr=m.toNumber||m.to; if(m.toName) NAMELABELS[addr]=m.toName; return { id:m.id, from:(IDENTITY&&IDENTITY.number)||uid(), to:addr, body:m.body, ts:tsOf(m), folder:'sent', read:true }; }
+  // Requests carry the sender's number + name; render `from` as the number and
+  // keep fromName so makeRequestView can swap it into NAMES on accept.
+  function mapRequest(m){ const addr=m.fromNumber||m.from; if(m.fromName) NAMELABELS[addr]=m.fromName; return { id:m.id, from:addr, fromName:m.fromName||'', to:(IDENTITY&&IDENTITY.number)||uid(), body:m.body, ts:tsOf(m), folder:'requests', read:false }; }
   function replacePartition(folder, rows){
     DB.messages = DB.messages.filter(m=>m.folder!==folder).concat(rows);
     DB.messages.sort((a,b)=>a.ts-b.ts);
@@ -1253,14 +1397,28 @@
         IDENTITY = { uid:d.uid, number:d.number, username:d.username };
         try{ localStorage.setItem('ourcade:nokia:uid', d.uid||'guest'); }catch(_){}
         DB = loadDB();               // re-namespace local settings/snake to the real uid
+      } else if(d.type==='nopia:contacts'){
+        SYNCED = (d.contacts||[]).filter(c=>c && c.number).map(c=>({ name:c.name||c.number, number:c.number }));
       } else if(d.type==='nopia:inbox'){
         replacePartition('inbox', (d.messages||[]).map(mapInbox));
       } else if(d.type==='nopia:sent'){
         replacePartition('sent', (d.messages||[]).map(mapSent));
+      } else if(d.type==='nopia:requests'){
+        replacePartition('requests', (d.messages||[]).map(mapRequest));
       } else if(d.type==='nopia:incoming'){
-        if(d.message){ DB.messages.push(mapInbox(d.message)); if(audible()){ playRingtone(); } showToast('NEW MESSAGE'); }
+        // Ring/toast ONLY — the message is already in DB.messages from the
+        // nopia:inbox snapshot the parent posts in the same callback (pushing
+        // again would duplicate it).
+        if(d.message){
+          if(audible()) playRingtone();
+          showToast(d.message.kind==='accept' ? 'NOW A CONTACT' : 'NEW MESSAGE');
+        }
+      } else if(d.type==='nopia:incoming-ping'){
+        if(audible()) playRingtone(); showToast('PING FROM '+(d.fromNumber||'?'));
       } else if(d.type==='nopia:sendresult'){
-        if(d.ok===false) showToast(d.error||'NOT DELIVERED');
+        showToast(d.error || (d.ok===false ? 'NOT DELIVERED' : 'SENT'));
+      } else if(d.type==='nopia:reqresult'){
+        if(d.error) showToast(d.error);
       }
     });
     postToParent({ type:'nopia:hello' });   // ask the parent for identity

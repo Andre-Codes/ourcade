@@ -153,6 +153,40 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // messages/{owner}/requests/{msgId} — a FIRST text from someone not yet in
+    // the owner's contacts. Same create contract as inbox (any claimed user may
+    // create one addressed here, can't forge `from`), but it waits in REQUESTS
+    // until the owner ACCEPTS (which moves the text into their inbox and swaps
+    // contacts) or DECLINES (delete). Owner-only read/delete; never updated.
+    match /messages/{owner}/requests/{msgId} {
+      allow read: if isOwner(owner);
+      allow create: if signedIn()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to == owner
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 320
+        && request.resource.data.fromName is string;
+      allow update: if false;
+      allow delete: if isOwner(owner);
+    }
+
+    // messages/{owner}/pings/{pingId} — a lightweight, notify-only "poke" from
+    // dialing someone's number. No body, no thread, no accept: the recipient's
+    // client rings, shows "PING FROM <number>", then DELETES the ping (so it
+    // never accumulates or counts as unread). Same open-create trust model as
+    // inbox; can't forge `from`; must carry kind=='ping'.
+    match /messages/{owner}/pings/{pingId} {
+      allow read: if isOwner(owner);
+      allow create: if signedIn()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to == owner
+        && request.resource.data.fromNumber is string
+        && request.resource.data.kind == 'ping';
+      allow update: if false;
+      allow delete: if isOwner(owner);
+    }
+
     // Default deny — future collections (archive) get explicit rules when those
     // milestones land. (archive/* is written by the admin SDK, which bypasses
     // these rules, so it needs no allow here.)
