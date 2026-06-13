@@ -34,6 +34,10 @@ export const SCHEDULE = [
   { type: "news", mode: "pin", from: "2026-06-12", days: 7,
     text: "🎉 OURCADE turns 1 month old this week — free quarters, obviously." },
 
+  { type: "news", mode: "pin", from: "2026-06-12", days: 7,
+    text: "👽 Beware, 'Disclosure Day' movie is out, real alien invasion imminent. All hands have been washed clean." },
+
+
   // { type: "curiosity", mode: "pin", from: "2026-12-21", until: "2026-12-21",
   //   title: "The winter solstice", blurb: "Today is the shortest day of the year up north — from here, the light only grows.", url: "https://en.wikipedia.org/wiki/Winter_solstice" },
 
