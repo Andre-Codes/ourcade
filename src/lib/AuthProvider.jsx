@@ -20,6 +20,10 @@ export const useAuth = () => useContext(AuthContext);
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
+// Once-per-session guard so the lazy number backfill (loadProfile) fires at
+// most once even across re-auths / profile reloads.
+let numberBackfilled = false;
+
 // Load Firebase app + auth + firestore once, as one async chunk (shared with
 // cloud.js via the same ./firebase.js module).
 let fbPromise = null;
@@ -93,6 +97,16 @@ export default function AuthProvider({ children }) {
       if (prof && merged.length !== cloudFavs.length) {
         const c = await import("./cloud.js").catch(() => null);
         c?.writeProfile?.({ favorites: merged }).catch(() => {});
+      }
+      // Lazy phone-number backfill: pre-M2 accounts (claimed before the Nopia
+      // phone shipped) have no number yet — mint one, once per session, and
+      // patch it into local profile state so /me shows it without a reload.
+      if (prof && !prof.number && !numberBackfilled) {
+        numberBackfilled = true;
+        import("./cloud.js")
+          .then((c) => c.allocateNumber())
+          .then((num) => num && setProfile((p) => ({ ...(p || {}), number: num })))
+          .catch(() => {});
       }
     } catch {
       setProfile(null);
@@ -169,6 +183,17 @@ export default function AuthProvider({ children }) {
       /* no store / private mode */
     }
     await claimUsername(m, name, res.user.uid, seedFavs, seedRelics);
+    // Mint this account's permanent Ourcade number. A SEPARATE transaction from
+    // the username claim so the hot global counter never sits on that critical
+    // path — and a failure here is fine (loadProfile backfills next load).
+    let number = null;
+    try {
+      const c = await import("./cloud.js");
+      number = await c.allocateNumber();
+    } catch {
+      /* no number yet — backfilled on next load */
+    }
+    numberBackfilled = true; // we just (tried to) allocate; don't double up
     setUser(res.user);
     setUsername(name);
     setProfile({
@@ -178,6 +203,7 @@ export default function AuthProvider({ children }) {
       bio: "",
       favorites: seedFavs,
       relicCount: seedRelics,
+      number,
     });
     return res.user;
   }

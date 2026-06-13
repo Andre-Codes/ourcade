@@ -85,6 +85,9 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
             {name}
           </h1>
           {p?.bio ? <p className="arcade-profile-bio">{p.bio}</p> : null}
+          {p?.number ? (
+            <p className="arcade-profile-number">📱 {p.number} — text me on Ourcade</p>
+          ) : null}
           {join ? <p className="arcade-profile-join">arcade member since {join}</p> : null}
         </div>
       </div>

@@ -267,18 +267,35 @@
   function saveDB(){ try{ localStorage.setItem(dbKey(), JSON.stringify(DB)); }catch(e){} }
   function factoryReset(){ DB = clone(DEFAULTS); saveDB(); }
 
-  // Messages transport seam — today files locally; future: FirebaseTransport delivers to recipient.
+  /* Messages transport seam. In GUEST/kiosk mode (the public Snake cabinet) it
+     files locally and fakes a reply, exactly as before. In PERSONAL mode (the
+     phone embedded on /me with ?personal=1) it speaks to the React parent over
+     postMessage — the parent holds the Firebase listeners and is the source of
+     truth; DB.messages becomes a render cache the parent hydrates. */
+  const PERSONAL = new URLSearchParams(location.search).has('personal');
+  let IDENTITY = null;              // {uid, number, username} once the parent answers
+  const NAMELABELS = {};            // addr → display name from cloud (for contactName)
+  function postToParent(msg){ try{ if(window.parent!==window) window.parent.postMessage(msg, location.origin); }catch(e){} }
+
   const Transport = {
     send(to, body){
+      if(PERSONAL){
+        // Hand the send to the parent, which resolves the number/@handle → uid
+        // and writes to Firebase. Optimistically echo into SENT for a snappy UI.
+        postToParent({ type:'nopia:send', to, body });
+        const m = { id:Date.now()+'-'+Math.floor(Math.random()*1e4), from:(IDENTITY&&IDENTITY.number)||uid(), to, body, ts:Date.now(), folder:'sent', read:true };
+        DB.messages.push(m);
+        return m;
+      }
       const m = { id:Date.now()+'-'+Math.floor(Math.random()*1e4), from:uid(), to, body, ts:Date.now(), folder:'sent', read:true };
       DB.messages.push(m); saveDB();
-      autoReply(to);                 // demo only; remove once real delivery exists
-      /* TODO FirebaseTransport.send: write {from,to,body,ts} to recipient's inbox */
+      autoReply(to);                 // guest demo only
       return m;
     },
-    poll(){ /* TODO FirebaseTransport.poll: pull new inbox messages into DB.messages */ }
+    poll(){ /* personal mode is push-driven by the parent; nothing to poll */ }
   };
   function autoReply(to){
+    if(PERSONAL) return;             // never fake replies on a real phone
     const replies = ['OK','LOL','ON MY WAY','CALL ME','NICE','HAHA','SEE U SOON','K'];
     setTimeout(()=>{
       DB.messages.push({ id:Date.now()+'-r'+Math.floor(Math.random()*1e4), from:to, to:uid(),
@@ -286,7 +303,10 @@
       saveDB();
     }, 1600);
   }
-  function contactName(addr){ const c = DB.contacts.find(c=>c.addr===addr); return c ? c.name : addr; }
+  function contactName(addr){
+    const c = DB.contacts.find(c=>c.addr===addr); if(c) return c.name;
+    return NAMELABELS[addr] || addr;
+  }
 
   /* ---------- 5x7 dot-matrix font ---------- */
   const F = {
@@ -784,6 +804,7 @@
       const midY = statusH + Math.round((lcdH-statusH-softH)*0.30);
       drawTextCentered(clockStr(), midY, fs+2, ink);
       drawTextCentered(DB.settings.greeting||'OURCADE', midY + 16*fs, fs, ink);
+      if(IDENTITY && IDENTITY.number) drawTextCentered('MY NUMBER '+IDENTITY.number, midY + 28*fs, fs, ink);
       const unread = DB.messages.filter(m=>m.folder==='inbox' && !m.read).length;
       if(unread) drawTextCentered(unread+' MESSAGE'+(unread>1?'S':''), contentBottom()-9*fs, fs, ink);
       if(DB.snake.webPlayed) drawAwardBadge();
@@ -1094,7 +1115,7 @@
       const msgs = DB.messages.filter(m=>m.folder===folder).slice().reverse();
       if(!msgs.length) return [{label:'(EMPTY)', run:()=>{}}];
       return msgs.map(m=>({ label:(folder==='inbox'?contactName(m.from):contactName(m.to))+': '+m.body.slice(0,12),
-        run:()=>{ if(!m.read){ m.read=true; saveDB(); } pushScreen(makeMsgView(m, folder)); } }));
+        run:()=>{ if(!m.read){ m.read=true; saveDB(); if(PERSONAL) postToParent({ type:'nopia:read', msgId:m.id }); } pushScreen(makeMsgView(m, folder)); } }));
     }});
   }
   function makeMsgView(m, folder){
@@ -1206,6 +1227,38 @@
   canvas.addEventListener('click', ()=>{ ensureYT(); if(!('ontouchstart' in window)) screenTap(); });
 
   window.addEventListener('resize', layout);
+
+  /* ---------- personal-mode bridge (parent ⇄ phone over postMessage) ----------
+     Only active when embedded with ?personal=1. The parent (NopiaPhone.jsx) owns
+     the Firebase listeners and relays: identity once, then inbox/sent snapshots
+     (full-replace of that partition) and single live 'incoming' rings. */
+  function tsOf(m){ const t=m && m.ts; if(!t) return Date.now(); if(typeof t==='number') return t; if(t.seconds) return t.seconds*1000; if(t.toMillis) return t.toMillis(); return Date.now(); }
+  function mapInbox(m){ const addr=m.fromNumber||m.from; if(m.fromName) NAMELABELS[addr]=m.fromName; return { id:m.id, from:addr, to:(IDENTITY&&IDENTITY.number)||uid(), body:m.body, ts:tsOf(m), folder:'inbox', read:!!m.read }; }
+  function mapSent(m){ const addr=m.toNumber||m.to; if(m.toName) NAMELABELS[addr]=m.toName; return { id:m.id, from:(IDENTITY&&IDENTITY.number)||uid(), to:addr, body:m.body, ts:tsOf(m), folder:'sent', read:true }; }
+  function replacePartition(folder, rows){
+    DB.messages = DB.messages.filter(m=>m.folder!==folder).concat(rows);
+    DB.messages.sort((a,b)=>a.ts-b.ts);
+  }
+  if(PERSONAL){
+    window.addEventListener('message', e=>{
+      if(e.origin !== location.origin) return;
+      const d = e.data; if(!d || typeof d!=='object') return;
+      if(d.type==='nopia:identity'){
+        IDENTITY = { uid:d.uid, number:d.number, username:d.username };
+        try{ localStorage.setItem('ourcade:nokia:uid', d.uid||'guest'); }catch(_){}
+        DB = loadDB();               // re-namespace local settings/snake to the real uid
+      } else if(d.type==='nopia:inbox'){
+        replacePartition('inbox', (d.messages||[]).map(mapInbox));
+      } else if(d.type==='nopia:sent'){
+        replacePartition('sent', (d.messages||[]).map(mapSent));
+      } else if(d.type==='nopia:incoming'){
+        if(d.message){ DB.messages.push(mapInbox(d.message)); if(audible()){ playRingtone(); } showToast('NEW MESSAGE'); }
+      } else if(d.type==='nopia:sendresult'){
+        if(d.ok===false) showToast(d.error||'NOT DELIVERED');
+      }
+    });
+    postToParent({ type:'nopia:hello' });   // ask the parent for identity
+  }
 
   /* ---------- boot ---------- */
   function boot(){

@@ -90,6 +90,69 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── M2: the Nopia phone (personal numbers + real cross-user texting) ──────
+
+    // numbers/{display} — { uid, number } reverse lookup, e.g. numbers/555-0142.
+    // The phonebook side of the Arcade identity layer: public-readable so any
+    // sender can resolve a typed number → uid; created once by the owning uid
+    // (mirrors usernames); never edited or deleted (a number, once minted, is
+    // permanent).
+    match /numbers/{number} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // meta/phoneCounter — { next: int } global, monotonic allocation counter.
+    // Each new number takes the current `next` and bumps it by inside one
+    // transaction, so allocations never collide. Signed-in read (the claim
+    // transaction needs it); writes may only RAISE `next` and touch nothing
+    // else. Spoofable like scores/polls — acceptable for a hobby arcade (a
+    // bumped counter just skips a number, it can't double-allocate one).
+    match /meta/phoneCounter {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['next'])
+        && request.resource.data.next is int
+        && request.resource.data.next >= 0;
+      allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(['next'])
+        && request.resource.data.next is int
+        && request.resource.data.next > resource.data.next;
+      allow delete: if false;
+    }
+
+    // messages/{owner}/inbox/{msgId} — texts DELIVERED to `owner`. Only the
+    // owner can read their inbox, flip a message to read=true, or delete it.
+    // ANY claimed signed-in user may CREATE a message here (open inbox, like
+    // real SMS) but can't forge `from` (must equal their own uid) and must
+    // address it to this owner. Body is a bounded non-empty string; fromName is
+    // a string (the display label the recipient renders without a second read).
+    // Best-effort/spoofable, same trust model as scores/polls; a per-sender
+    // rate cap is a later Cloud-Function option.
+    match /messages/{owner}/inbox/{msgId} {
+      allow read: if isOwner(owner);
+      allow create: if signedIn()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to == owner
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 320
+        && request.resource.data.fromName is string;
+      allow update: if isOwner(owner)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+        && request.resource.data.read == true;
+      allow delete: if isOwner(owner);
+    }
+
+    // messages/{owner}/sent/{msgId} — the sender's own copy of each text they
+    // sent (so SENT works without a fan-out query). Fully private to its owner;
+    // never edited (a sent message is immutable).
+    match /messages/{owner}/sent/{msgId} {
+      allow read, create, delete: if isOwner(owner);
+      allow update: if false;
+    }
+
     // Default deny — future collections (archive) get explicit rules when those
     // milestones land. (archive/* is written by the admin SDK, which bypasses
     // these rules, so it needs no allow here.)
