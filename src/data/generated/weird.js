@@ -2,70 +2,59 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-size-of-space",
-    "title": "Scroll from a person to the literal edge of the observable universe",
-    "blurb": "Neal.fun zooms you out past the Sun, past black holes, past the Milky Way until your brain politely files for an extension. The cosmic horror is free and runs in your browser.",
-    "url": "https://neal.fun/size-of-space/"
+    "id": "gw-wplace",
+    "title": "A 4-trillion-pixel canvas the whole planet is fighting over",
+    "blurb": "Pick a tile, paint the world, watch a stranger paint over it three seconds later. It's the pixel-war energy of every group project you've ever survived.",
+    "url": "https://wplace.live"
   },
   {
-    "id": "gw-this-is-sand",
-    "title": "Pour digital sand into hypnotic colored dunes",
-    "blurb": "Tap, hold, change colors, repeat — it's a Zen garden for people who grew up rotating Tetris blocks. Weirdly the most relaxing thing on the internet that isn't a screensaver.",
-    "url": "https://thisissand.com"
+    "id": "gw-museum-endangered-sounds",
+    "title": "A museum for the dying sounds of old tech",
+    "blurb": "Dial-up handshakes, the Windows 95 chime, dot-matrix printer screams — all lovingly preserved here so your nervous system can flinch nostalgically.",
+    "url": "http://savethesounds.info",
+    "foundNote": "basically a petting zoo for noises"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "Click dots until they split into a hidden picture",
-    "blurb": "Each tap quarters the circles, dividing forever toward a surprise image. It's Splitter's chill cousin — no game over, just satisfying recursion.",
-    "url": "https://koalastothemax.com"
-  },
-  {
-    "id": "gw-scream-into-void",
-    "title": "Type a scream, watch it dissolve into nothing",
-    "blurb": "A tiny cathartic release valve for the modern soul. No login, no algorithm, no one reads it — just you and the void, the way the early web intended.",
-    "url": "https://screamintothevoid.com"
-  },
-  {
-    "id": "gw-is-it-christmas",
-    "title": "A website that bravely answers one question all year",
-    "blurb": "It says NO. Every single day. Except one, when it flips to YES and you can feel the dial-up-era commitment to a single dumb bit.",
-    "url": "https://isitchristmas.com",
-    "foundNote": "the purest single-serving site"
-  },
-  {
-    "id": "gw-hacker-typer",
-    "title": "Mash any key and become a movie hacker instantly",
-    "blurb": "Fake green code pours across a black screen like you're 'in the mainframe.' Pair with a hoodie and you're basically the antagonist of a 2003 cyber-thriller.",
-    "url": "https://hackertyper.com"
-  },
-  {
-    "id": "gw-omfg-dogs",
-    "title": "Dogs walking on a loop, forever, with a banger soundtrack",
-    "blurb": "Pure 2008 Flash-era energy preserved in amber: spinning pixel pups marching to a chiptune jam. There is no point and that is the point.",
-    "url": "https://www.omfgdogs.com/"
-  },
-  {
-    "id": "gw-find-the-invisible-cow",
-    "title": "Find an invisible cow using only a screaming voice",
-    "blurb": "Your speakers yell COW! louder as you get warmer until you finally click empty space and a cow appears. Best played alone, never in a quiet office.",
-    "url": "https://findtheinvisiblecow.com/"
+    "id": "gw-one-more-tab",
+    "title": "A game that rewards you for never closing a tab",
+    "blurb": "Open it, forget it, and let your chronic tab-hoarding finally pay off with an actual rank. Vindication for the 47 tabs you swore you'd read.",
+    "url": "https://onemoretab.com"
   },
   {
     "id": "gw-procatinator",
-    "title": "Random cat GIFs perfectly synced to random songs",
-    "blurb": "Hit next and the universe occasionally aligns into something transcendent. It's the slot machine of vintage cat content, and the house always pays out cute.",
-    "url": "https://procatinator.com/"
+    "title": "Cat GIFs that hit on the beat, forever",
+    "blurb": "Every refresh pairs a random cat with a song so perfectly it feels intentional. It is not intentional. That's the magic.",
+    "url": "http://procatinator.com"
   },
   {
-    "id": "gw-falling-falling",
-    "title": "Fall through endless color forever while a low drone hums",
-    "blurb": "You're just plummeting through soft gradients into infinity. It's either deeply calming or mildly cursed depending on the day you're having.",
-    "url": "https://www.fallingfalling.com/"
+    "id": "gw-kottke",
+    "title": "A personal blog that's been posting curiosities since dial-up days",
+    "blurb": "One of the web's longest-running blogs, still hand-pouring delightful internet finds daily — and still without a paywall, which is basically a unicorn now.",
+    "url": "https://kottke.org",
+    "foundNote": "online since 1998"
   },
   {
-    "id": "gw-drawing-garden",
-    "title": "Move your mouse and grow a field of flowers",
-    "blurb": "No buttons, no menu, no tutorial — just drag and watch a garden bloom under your cursor. The whole vibe is a soft exhale after a long internet.",
-    "url": "https://drawing.garden/"
+    "id": "gw-hn-popularity",
+    "title": "A hand-ranked leaderboard of personal blogs",
+    "blurb": "Someone is lovingly tracking how indie blogs perform on Hacker News and scoring them by hand. Pure early-web 'I made a thing' spirit.",
+    "url": "https://refactoringenglish.com/tools/hn-popularity/"
+  },
+  {
+    "id": "gw-koalas-to-the-max",
+    "title": "A blurry blob that slowly resolves into a koala",
+    "blurb": "Click to split each pixel-square in half until a hidden picture emerges. It's meditative, it's pointless, and you will absolutely finish all of them.",
+    "url": "https://www.koalastothemax.com"
+  },
+  {
+    "id": "gw-find-invisible-cow",
+    "title": "A site that screams 'COW' louder as you get warmer",
+    "blurb": "There's an invisible cow somewhere on your screen and your job is to find it by following a voice that gets increasingly unhinged. Headphones recommended.",
+    "url": "https://findtheinvisiblecow.com"
+  },
+  {
+    "id": "gw-weavesilk",
+    "title": "Draw glowing symmetrical silk with your mouse",
+    "blurb": "Drag the cursor and it mirrors into impossibly pretty fractal ribbons. Five minutes here and you'll feel like a screensaver from 2004 in the best way.",
+    "url": "http://weavesilk.com"
   }
 ];
