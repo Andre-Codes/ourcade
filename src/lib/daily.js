@@ -215,6 +215,19 @@ export function pickDailyN(list, key, n, salt = 0) {
   return seededShuffle(list, daySeed(`${key}|${salt}`)).slice(0, n);
 }
 
+// Inclusive local-date window test for dev-scheduled content (src/data/schedule.js).
+// `from` is required (YYYY-MM-DD); the window ends at `until` (inclusive) OR lasts
+// `days` from `from`; with neither it's open-ended (active from `from` onward).
+export function isWithinWindow(key, { from, until, days } = {}) {
+  if (!from) return false;
+  const today = dayNumberFromKey(key);
+  const start = dayNumberFromKey(from);
+  if (today < start) return false;
+  if (until) return today <= dayNumberFromKey(until);
+  if (days) return today <= start + Math.max(1, Math.floor(days)) - 1;
+  return true; // open-ended
+}
+
 // Human-readable date for "fresh page baked <date>". Parsed as UTC so it echoes
 // the key exactly rather than re-applying a local offset.
 export function prettyDate(key) {

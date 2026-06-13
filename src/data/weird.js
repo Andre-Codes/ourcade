@@ -12,6 +12,7 @@
 import { rotateIntraday, rotateDaily, dayPart, DAY_PART_COUNT } from "../lib/daily.js";
 import generated from "./generated/weird.js";
 import { MANUAL_WEIRD, MANUAL_WEIRD_NIGHT } from "./manual.js";
+import { activeSchedule } from "./schedule.js";
 
 // Minimal safety net if both pools are ever emptied.
 const FALLBACK = [
@@ -42,10 +43,15 @@ const NIGHT_SALT = 717; // the night pool rotates on its own order
 //              evening each differ), reusing rotateIntraday's headless block arg.
 // `part` defaults to the live local part; scripts pass an explicit one.
 export function getCurrentWeirdThing(key, part = dayPart()) {
+  // The 🌙 late-night secret pool is sacred — dev-scheduled weird things only
+  // affect the daytime parts.
   if (part?.id === "night") {
     const pool = WEIRD_NIGHT.length ? WEIRD_NIGHT : FALLBACK;
     return rotateDaily(pool, key, NIGHT_SALT);
   }
-  const pool = WEIRD.length ? WEIRD : FALLBACK;
-  return rotateIntraday(pool, key, DAY_PART_COUNT, SALT, part?.index ?? 0);
+  const { pinned, pool: extra } = activeSchedule("weird", key);
+  const idx = part?.index ?? 0;
+  if (pinned.length) return rotateIntraday(pinned, key, DAY_PART_COUNT, SALT, idx);
+  const base = WEIRD.length ? WEIRD : FALLBACK;
+  return rotateIntraday([...base, ...extra], key, DAY_PART_COUNT, SALT, idx);
 }

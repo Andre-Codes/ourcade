@@ -164,11 +164,13 @@ export const MANUAL_FACTS = [
 // Site news — plain strings (each is one line in the SITE NEWS ticker).
 export const MANUAL_NEWS = [
   // "NEW: hand-written news lines live here and never get regenerated.",
+  "RUMOR: Byte Badger's walkman is home to some bomb tracks... "
 ];
 
 // Mascot tips — plain strings.
 export const MANUAL_TIPS = [
   // "Pro tip: this hint was written by a human and is here to stay.",
+  "BTW I've got a pretty sick mixed CD... I finally got that song about the Chinese Chicken in there 🐔🍗🧠🛑",
 ];
 
 // Timeless curiosities — shape: { id, title, blurb, url? }. The 🌌 card.
@@ -316,7 +318,8 @@ export const MANUAL_ARTIFACTS = [
   { id: "site:forgotify", kind: "site", era: "current", title: "Forgotify", blurb: "Millions of songs on Spotify have never been played. Not once. Forgotify finds them and gives each one its very first listener: you.", url: "https://forgotify.com" },
   { id: "game:dwarf-fortress", kind: "game", era: "current", title: "Dwarf Fortress", blurb: "Two brothers have spent 20+ years simulating entire worlds — geology, myth, cat alcoholism — in a game so deep its bugs become legends. Losing is fun.", year: "2006", url: "https://en.wikipedia.org/wiki/Dwarf_Fortress" },
   { id: "mystery:webdriver-torso", kind: "mystery", era: "current", title: "Webdriver Torso", blurb: "A YouTube channel uploading thousands of 11-second videos of red and blue rectangles with beeps. The internet spent months suspecting spies. The truth is almost stranger.", year: "2013", url: "https://en.wikipedia.org/wiki/Webdriver_Torso" },
-
+  { id: "site:inblfat", kind: "site", era: "current", title: "In Bb", blurb: "Many people. Many instruments. ONE note; 'B flat'", url: "https://www.inbflat.net" },
+  
   // — timeless: fascinating regardless of decade —
   { id: "site:libraryofbabel", kind: "site", era: "timeless", title: "The Library of Babel", blurb: "A website containing every possible page of text — everything ever written and everything that ever could be, findable at a permanent address. Borges' story, made real.", url: "https://libraryofbabel.info" },
   { id: "wiki:unusual-articles", kind: "wiki", era: "timeless", title: "Wikipedia's list of unusual articles", blurb: "Wikipedia editors maintain an official index of their own strangest pages: the war fought over a bucket, the holy prepuce, Tycho Brahe's moose. Hours vanish here.", url: "https://en.wikipedia.org/wiki/Wikipedia:Unusual_articles" },

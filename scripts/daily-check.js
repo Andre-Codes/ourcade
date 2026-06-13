@@ -6,7 +6,8 @@
    Run:  node scripts/daily-check.js
    ============================================================ */
 
-import { dayKey, rotateDaily, dayPart } from "../src/lib/daily.js";
+import { dayKey, rotateDaily, dayPart, isWithinWindow } from "../src/lib/daily.js";
+import { activeSchedule } from "../src/data/schedule.js";
 import { POLLS, getTodaysPoll } from "../src/data/polls.js";
 import { QUIZZES, getTodaysQuiz } from "../src/data/quizzes.js";
 import { getTodaysTip } from "../src/data/flavor.js";
@@ -189,6 +190,23 @@ check(
     .filter((w) => stumbleKeys.has(urlKey(w.url)))
     .map((w) => `${w.id}↔${stumbleKeys.get(urlKey(w.url))}`);
   check("weird/stumble pools don't overlap", overlaps.length === 0, overlaps.join(", ") || "disjoint");
+}
+
+// ---- dev schedule window logic ----
+check("window: before start is inactive", !isWithinWindow("2026-06-10", { from: "2026-06-12", days: 3 }));
+check("window: start day is active", isWithinWindow("2026-06-12", { from: "2026-06-12", days: 3 }));
+check("window: last day (days) is active", isWithinWindow("2026-06-14", { from: "2026-06-12", days: 3 }));
+check("window: day after (days) is inactive", !isWithinWindow("2026-06-15", { from: "2026-06-12", days: 3 }));
+check("window: until is inclusive", isWithinWindow("2026-06-20", { from: "2026-06-12", until: "2026-06-20" }));
+check("window: past until is inactive", !isWithinWindow("2026-06-21", { from: "2026-06-12", until: "2026-06-20" }));
+check("window: open-ended stays active", isWithinWindow("2030-01-01", { from: "2026-06-12" }));
+check("window: missing from is inactive", !isWithinWindow(k0, {}));
+{
+  const sched = activeSchedule("news", k0);
+  check(
+    "activeSchedule returns {pinned,pool} arrays",
+    Array.isArray(sched.pinned) && Array.isArray(sched.pool)
+  );
 }
 
 console.log(`\n${failures === 0 ? "✓ all checks passed" : "✗ " + failures + " check(s) failed"}\n`);

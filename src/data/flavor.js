@@ -4,6 +4,7 @@
 import { pickDaily, pickDailyN } from "../lib/daily.js";
 import generated from "./generated/flavor.js";
 import { MANUAL_NEWS, MANUAL_TIPS } from "./manual.js";
+import { activeSchedule } from "./schedule.js";
 
 const FALLBACK = {
   tips: [
@@ -49,5 +50,12 @@ export function getTodaysTip(key) {
 }
 
 export function getTodaysNews(key, n = 3) {
-  return pickDailyN(news, key, n, 404);
+  // Dev-scheduled news: pinned lines are always shown during their window;
+  // pool lines just join the rotation. (Both empty unless schedule.js has
+  // active entries, so this matches the old behavior by default.)
+  const { pinned, pool } = activeSchedule("news", key);
+  const rotated = pickDailyN([...news, ...pool], key, n, 404);
+  const seen = new Set(pinned);
+  const filled = rotated.filter((item) => !seen.has(item));
+  return [...pinned, ...filled].slice(0, Math.max(n, pinned.length));
 }

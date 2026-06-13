@@ -6,6 +6,7 @@
 import { rotateDaily } from "../lib/daily.js";
 import generated from "./generated/curiosities.js";
 import { MANUAL_CURIOSITIES } from "./manual.js";
+import { activeSchedule } from "./schedule.js";
 
 // Minimal safety net if MANUAL_CURIOSITIES is ever emptied.
 const FALLBACK = [
@@ -25,8 +26,12 @@ export const CURIOSITIES = [
 
 const SALT = 606; // independent of games(0)/polls(101)/quizzes+facts(202)/tips(303)/news(404)/flash(505)
 
-// Today's curiosity — cycles the whole pool with no repeats until exhausted.
+// Today's curiosity — a pinned dev-scheduled curiosity overrides the rotation
+// for its window (rotating if several are pinned); otherwise pool-scheduled
+// entries just join the normal no-repeat rotation.
 export function getTodaysCuriosity(key) {
-  const pool = CURIOSITIES.length ? CURIOSITIES : FALLBACK;
-  return rotateDaily(pool, key, SALT);
+  const { pinned, pool: extra } = activeSchedule("curiosity", key);
+  if (pinned.length) return rotateDaily(pinned, key, SALT);
+  const base = CURIOSITIES.length ? CURIOSITIES : FALLBACK;
+  return rotateDaily([...base, ...extra], key, SALT);
 }

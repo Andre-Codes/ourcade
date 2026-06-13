@@ -26,6 +26,10 @@ export const TRACKS = [
   { id: "CMX2lPum_pg", title: "Fat Lip", artist: "Sum 41", year: 2001 },
   { id: "QtTR-_Klcq8", title: "Pretty Fly (For a White Guy)", artist: "The Offspring", year: 1998 },
   { id: "4iwHb189X84", title: "Blue (Da Ba Dee)", artist: "Eiffel 65", year: 1999 },
+  { id: "hTWKbfoikeg", title: "Smells Like Teen Spirit", artist: "Nirvana", year: 1991 },
+  { id: "sc5iTNVEOAg", title: "My Own Worst Enemy", artist: "Lit", year: 1999 },
+  { id: "fC_q9KPczAg", title: "One Week", artist: "Barenaked Ladies", year: 1998 },
+  { id: "wq-S8CIU7VA", title: "California", artist: "Phantom Planet", year: 2002 },
 ];
 
 // Fisher–Yates copy so the mix order varies per session without mutating TRACKS.
