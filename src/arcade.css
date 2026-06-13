@@ -560,9 +560,11 @@ main > section + section { margin-top: 44px; }
   letter-spacing: 0.06em; text-align: center; margin: 4px 0 0;
 }
 .arcade-phone-number b { color: #fff; }
-/* the emulator's full-viewport iframe, constrained to a phone-sized stage */
+/* The emulator's full-viewport iframe, constrained to a phone-sized stage tall
+   enough to show the whole shell (screen + keypad). The phone itself scrolls
+   inside the iframe if a device is shorter than this. */
 .arcade-phone-stage {
-  width: 100%; max-width: 380px; aspect-ratio: 9 / 16; margin: 0 auto;
+  width: 100%; max-width: 360px; height: 780px; max-height: 82vh; margin: 0 auto;
   border: 2px solid var(--arcade-border); border-radius: 14px; overflow: hidden;
   background: #000; box-shadow: var(--bevel-in);
 }

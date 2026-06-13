@@ -28,11 +28,15 @@
     font-family:"Lucida Console","DejaVu Sans Mono",Menlo,Consolas,monospace;
     color:#9aa0a8;
     display:flex;
-    align-items:center;
     justify-content:center;
     min-height:100dvh;
     padding:16px;
-    overflow:hidden;
+    /* Let the phone scroll into view when it's taller than the viewport (mobile
+       landscape, short windows) instead of clipping the keypad off the bottom.
+       margin:auto on .phone centers it when it fits, but (unlike align-items)
+       still leaves the top reachable when it overflows. */
+    overflow-y:auto;
+    overflow-x:hidden;
     touch-action:manipulation;
     user-select:none;
     -webkit-user-select:none;
@@ -40,6 +44,7 @@
 
   .phone{
     width:min(360px, 96vw);
+    margin:auto;
     background:linear-gradient(180deg, var(--body-hi), var(--body) 18%, var(--body) 82%, var(--body-lo));
     border-radius:34px 34px 30px 30px;
     padding:16px 18px 20px;
@@ -154,9 +159,10 @@
   .callkey.pressed{transform:translateX(-50%) translateY(2px)!important;}
 
   .hint{font-size:9px;color:#9aa3b5;letter-spacing:1px;text-align:center;margin-top:0;}
-  @media (max-height:760px){
-    .pad{display:none;}
-  }
+  /* The keypad always shows now — the body scrolls when the phone is taller than
+     the viewport, so the pad is reachable instead of clipped (it used to be
+     hidden under 760px tall, which broke texting on the personal phone and on
+     short mobile windows). */
   /* offscreen, audio-only YouTube host. NOT display:none — some browsers pause
      fully-hidden media; 1x1 + opacity:0 keeps the audio alive (same as the site Walkman). */
   #ythost{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;}

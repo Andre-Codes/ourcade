@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES, getGame } from "../data/games.js";
 import { themeColor } from "../data/profilePresets.js";
-import { RELICS, RELIC_COUNT, relicIcon } from "../data/relics.js";
+import { RELICS, relicIcon } from "../data/relics.js";
 import { getDiscoveredLegendaries } from "../lib/store.js";
 
 /* ProfileView — the SHARED presentation of an arcade profile. Rendered both on
    the public /u/:username page and on the owner's own /me (PROFILE tab), so the
    two always look the same. `owner` toggles the few owner-only flourishes:
-   - awards: the public viewer sees only a COUNT + locked silhouettes; the owner
-     sees their actual discovered floppy/disc relics (names, art, dates) read
-     from local private state.
+   - relics: how they're found (the Magic 8-Ball) is a secret, so the profile
+     gives nothing away. The public viewer sees ONLY a "relics found" count (no
+     total, no silhouettes, no source). The owner sees their actual discovered
+     floppy/disc relics (names, art) read from local private state — but only
+     once they have at least one; before that the section is hidden entirely.
    Props: { profile, uid, username, owner } */
 
 // Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
@@ -139,43 +141,33 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
         )}
       </section>
 
-      {/* ── 8-ball relics: owner sees the real haul; everyone else a teaser ── */}
-      <section className="arcade-profile-section">
-        <h2 className="arcade-profile-section-title">💾 8-ball relics</h2>
-        {owner ? (
-          myRelics.length ? (
-            <div className="arcade-relic-grid">
-              {myRelics.map((r) => (
-                <div key={r.id} className={`arcade-relic${r.rarity === "mythic" ? " is-mythic" : ""}`}>
-                  <img className="arcade-relic-icon" src={relicIcon(r, true)} alt={r.text} />
-                  <span className="arcade-relic-text">{r.text}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="arcade-profile-empty">
-              none yet — ask the <Link to="/play/magic-8-ball" className="arcade-back-link">Magic 8-Ball</Link> enough and the rare ones surface.
-            </p>
+      {/* ── Relics. Where they come from (the Magic 8-Ball) is a secret, so we
+           give NOTHING away here. The OWNER sees their own haul only once they
+           have at least one — before that the section is hidden entirely (no
+           how-to). Everyone ELSE sees only a "relics found" count: no total, no
+           silhouettes, no source. ── */}
+      {owner
+        ? myRelics.length > 0 && (
+            <section className="arcade-profile-section">
+              <h2 className="arcade-profile-section-title">💾 relics found</h2>
+              <div className="arcade-relic-grid">
+                {myRelics.map((r) => (
+                  <div key={r.id} className={`arcade-relic${r.rarity === "mythic" ? " is-mythic" : ""}`}>
+                    <img className="arcade-relic-icon" src={relicIcon(r, true)} alt={r.text} />
+                    <span className="arcade-relic-text">{r.text}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
           )
-        ) : (
-          // public teaser: a count + locked silhouettes, no names/graphics.
-          <div className="arcade-relic-teaser">
-            <p className="arcade-profile-empty">
-              {relicCount > 0
-                ? `${relicCount} of ${RELIC_COUNT} relics discovered · the rest stay a mystery 🔒`
-                : `no relics discovered yet — they're hidden in the Magic 8-Ball 🔒`}
-            </p>
-            <div className="arcade-relic-grid">
-              {Array.from({ length: RELIC_COUNT }).map((_, i) => (
-                <div key={i} className="arcade-relic is-locked">
-                  <img className="arcade-relic-icon" src={relicIcon(null, false)} alt="undiscovered relic" />
-                  <span className="arcade-relic-text">{i < relicCount ? "✦ found" : "? ? ?"}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
+        : relicCount > 0 && (
+            <section className="arcade-profile-section">
+              <h2 className="arcade-profile-section-title">💾 relics found</h2>
+              <p className="arcade-profile-empty">
+                {relicCount} relic{relicCount > 1 ? "s" : ""} found
+              </p>
+            </section>
+          )}
     </>
   );
 }
