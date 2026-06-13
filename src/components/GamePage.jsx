@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getGame } from "../data/games.js";
 import { ArcadeChromeContext } from "../arcadeChrome.js";
+import { useArcadeScore } from "../lib/scores.js";
 import NedryGag from "./NedryGag.jsx";
 
 export default function GamePage() {
@@ -9,6 +10,24 @@ export default function GamePage() {
   const game = getGame(id);
   // React games toggle this via useArcadeBackButton; iframe games leave it true.
   const [backVisible, setBackVisible] = useState(true);
+
+  // Iframe score bridge (the Arcade Score Standard for standalone HTML games):
+  // a game posts { type:"ourcade:score", gameId, score } to its parent and we
+  // submit it to the shared board — the SAME contract React games use. The
+  // listener only acts on messages for THIS cabinet, so cross-game leaks can't
+  // happen. submit() itself no-ops for anon / non-scored games.
+  const { submit } = useArcadeScore(id);
+  useEffect(() => {
+    if (!game || game.type !== "iframe" || !game.score) return;
+    const onMsg = (e) => {
+      const d = e?.data;
+      if (!d || d.type !== "ourcade:score" || d.gameId !== id) return;
+      const score = Number(d.score);
+      if (!Number.isNaN(score)) submit(score);
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [id, game, submit]);
 
   if (!game) {
     return (

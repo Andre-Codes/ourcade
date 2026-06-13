@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { drawArtifact, findArtifact } from "../data/stumble.js";
 import { renderStumbleCard } from "../lib/stumbleCard.js";
 import { shareImage } from "../lib/share.js";
 import ShareButton from "./ShareButton.jsx";
+import BackBar from "./BackBar.jsx";
 
 /* /stumble — the discovery portal. One artifact at a time, a giant STUMBLE
    AGAIN button, and no way to filter. Embeds only archive.org iframes and
@@ -163,12 +164,7 @@ export default function StumblePage() {
 
   return (
     <div className="arcade-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" title="Back to Ourcade" aria-label="Back to Ourcade">
-          ‹ BACK TO OURCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      <BackBar />
 
       <div className="arcade-stumble-page">
         <span className="arcade-widget-kicker">🎲 YOU STUMBLED UPON…</span>

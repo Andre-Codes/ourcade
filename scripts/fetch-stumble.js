@@ -24,6 +24,7 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
 import { checkUrls, urlKey } from "./lib/validate-urls.js";
+import { archiveAll } from "./lib/firebase-admin.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
@@ -211,6 +212,9 @@ ${r.hooks}`
       Object.entries(eraCounts).map(([e, n]) => `${e}:${n}`).join(" ") +
       `)`
   );
+  // Archive each surviving artifact to the permanent store (soft-fails).
+  await archiveAll("stumble", alive).catch(() => {});
+
   console.log("\n✓ done — run `node scripts/daily-check.js` to audit the combined pool");
 }
 

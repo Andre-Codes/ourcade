@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GAMES } from "../data/games.js";
-import { recordDeepCutsUnlocked } from "../lib/store.js";
-import { todayKey, dayPart, getHourOverride } from "../lib/daily.js";
+import { recordDeepCutsUnlocked, getFavorites, toggleFavorite } from "../lib/store.js";
+import { todayKey, dayPart, getHourOverride, daySeed, dayNumberFromKey, mulberry32 } from "../lib/daily.js";
 import { getDayPartGreeting } from "../data/dayparts.js";
+import { useAuth } from "../lib/AuthProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
 import byteBadger from "../assets/byte-badger.png";
 import arcadeBadger from "../assets/arcade-badger.png";
-
-const VISIT_KEY = "ourcade:visits";
 
 // "2:14am" — honors the ?hour= QA override so the clock matches the previewed
 // part (override has no minutes, so it reads as :00).
@@ -23,20 +22,23 @@ function clockLabel(now) {
   return `${h12}:${String(m).padStart(2, "0")}${ampm}`;
 }
 
-// fake-but-real visitor odometer: bumps a localStorage tally each load, sits on
-// top of a vanity baseline so it reads like a 2003 hit counter.
+// Date-seeded visitor odometer — a tasteful FAKE (no backend). Starts near 1234
+// and climbs a little every calendar day, with a seeded per-day wobble so some
+// days read busier than others. Stable within a day, the same on every device
+// (like the rest of the date-seeded "fresh page" ritual). Honors ?day=.
+const VISIT_BASE = 1234;
+const VISIT_EPOCH = dayNumberFromKey("2026-06-01"); // day 0 of the count
+function visitorCountForDay(key) {
+  const day = Math.max(0, dayNumberFromKey(key) - VISIT_EPOCH);
+  const rand = mulberry32(daySeed(`visits:${key}`));
+  // steady floor (~80–140/day on average) + a daily swing so it fluctuates
+  const avgPerDay = 80 + Math.floor(rand() * 60); // 80..139 for THIS day
+  const floor = VISIT_BASE + day * 110; // long-run trend
+  const wobble = Math.floor((rand() - 0.5) * 600); // ±~300 day-to-day noise
+  return Math.max(VISIT_BASE, floor + avgPerDay + wobble);
+}
 function useVisitorCount() {
-  const [count, setCount] = useState(13370);
-  useEffect(() => {
-    try {
-      const n = (parseInt(localStorage.getItem(VISIT_KEY) || "0", 10) || 0) + 1;
-      localStorage.setItem(VISIT_KEY, String(n));
-      setCount(13370 + n);
-    } catch (e) {
-      setCount(13371);
-    }
-  }, []);
-  return count;
+  return useMemo(() => visitorCountForDay(todayKey()), []);
 }
 
 function Stars({ rating = 0 }) {
@@ -49,7 +51,66 @@ function Stars({ rating = 0 }) {
   );
 }
 
-function GameCard({ game, cta = "PLAY ▶" }) {
+// The user's favorited gameIds, reactive to store changes (toggles here, cloud
+// hydration in AuthProvider). Drives the ⭐ on each cabinet + the home shelf.
+function useFavorites() {
+  const [favs, setFavs] = useState(() => getFavorites());
+  useEffect(() => {
+    const sync = () => setFavs(getFavorites());
+    window.addEventListener("ourcade:storechange", sync);
+    return () => window.removeEventListener("ourcade:storechange", sync);
+  }, []);
+  return favs;
+}
+
+// stop a card-overlay control from triggering the card's PLAY navigation.
+const stopCard = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+// 🏆 board link — TOP-LEFT, clear of the NEW!/HOT! starburst (which is top-right).
+// Navigates programmatically (a nested <a> inside the card's <Link> is invalid).
+function CardBoardChip({ game }) {
+  const navigate = useNavigate();
+  if (!game.score) return null;
+  return (
+    <button
+      type="button"
+      className="arcade-card-board"
+      title={`${game.title} high scores`}
+      aria-label={`${game.title} high scores`}
+      onClick={(e) => {
+        stopCard(e);
+        navigate(`/scores/${game.id}`);
+      }}
+    >
+      🏆
+    </button>
+  );
+}
+
+// ⭐ favorite toggle — BOTTOM-RIGHT, aligned with the CTA row so it never sits
+// under the starburst or the board chip.
+function CardFav({ game, isFav }) {
+  return (
+    <button
+      type="button"
+      className={`arcade-card-fav${isFav ? " is-fav" : ""}`}
+      title={isFav ? "Remove from your arcade" : "Add to your arcade"}
+      aria-label={isFav ? "Remove favorite" : "Add favorite"}
+      aria-pressed={isFav}
+      onClick={(e) => {
+        stopCard(e);
+        toggleFavorite(game.id);
+      }}
+    >
+      {isFav ? "⭐" : "☆"}
+    </button>
+  );
+}
+
+function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
   return (
     <Link
       to={`/play/${game.id}`}
@@ -57,6 +118,7 @@ function GameCard({ game, cta = "PLAY ▶" }) {
       style={{ "--accent": game.accent }}
     >
       <div className="arcade-card-glow" />
+      <CardBoardChip game={game} />
       {game.badge && (
         <span className={`arcade-burst ${game.badge === "HOT" ? "is-hot" : "is-new"}`}>
           {game.badge}!
@@ -86,6 +148,7 @@ function GameCard({ game, cta = "PLAY ▶" }) {
       </div>
 
       <span className="arcade-card-play">{cta}</span>
+      <CardFav game={game} isFav={isFav} />
     </Link>
   );
 }
@@ -166,6 +229,14 @@ export default function Home() {
   const games = visible.filter((g) => g.category === "game");
   const tools = visible.filter((g) => g.category === "tool");
   const filtering = query.trim() !== "" || activeTags.length > 0;
+  const favs = useFavorites();
+
+  // account chip (anonymous → "claim", named → "@username")
+  const authState = useAuth();
+  const accountLabel =
+    authState && !authState.isAnonymous && authState.username
+      ? `👤 ${authState.username}`
+      : "👤 guest · claim";
 
   return (
     <div className="arcade-home" id="top" data-daypart={part.id}>
@@ -177,6 +248,7 @@ export default function Home() {
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
         <a href="#arcade-foot" className="arcade-tab">F.A.Q.</a>
+        <Link to="/me" className="arcade-tab arcade-tab-account">{accountLabel}</Link>
         <span className="arcade-nav-spark">✦</span>
       </nav>
 
@@ -274,7 +346,7 @@ export default function Home() {
           {games.length ? (
             <div className="arcade-grid">
               {games.map((game) => (
-                <GameCard key={game.id} game={game} cta="PLAY ▶" />
+                <GameCard key={game.id} game={game} cta="PLAY ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
           ) : (
@@ -287,7 +359,7 @@ export default function Home() {
           {tools.length ? (
             <div className="arcade-grid">
               {tools.map((game) => (
-                <GameCard key={game.id} game={game} cta="OPEN ▶" />
+                <GameCard key={game.id} game={game} cta="OPEN ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
           ) : (
