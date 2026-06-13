@@ -2,70 +2,72 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-size-of-space",
-    "title": "Scroll from a person to the literal edge of the observable universe",
-    "blurb": "Neal.fun zooms you out past the Sun, past black holes, past the Milky Way until your brain politely files for an extension. The cosmic horror is free and runs in your browser.",
-    "url": "https://neal.fun/size-of-space/"
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker game that simulates digital burnout on purpose",
+    "blurb": "Neal's Stimulation Clicker piles on autoplay videos, notifications, and a guy doing ASMR until your brain files for divorce. It's a satire of being online that is, ironically, extremely online.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "foundNote": "close other tabs first, trust us"
   },
   {
-    "id": "gw-this-is-sand",
-    "title": "Pour digital sand into hypnotic colored dunes",
-    "blurb": "Tap, hold, change colors, repeat — it's a Zen garden for people who grew up rotating Tetris blocks. Weirdly the most relaxing thing on the internet that isn't a screensaver.",
-    "url": "https://thisissand.com"
+    "id": "gw-nicest-place",
+    "title": "A site that streams strangers giving you virtual hugs",
+    "blurb": "The Nicest Place on the Internet is just real people, arms open, hugging your monitor in a loop. We expected to be cynical about it. We were not.",
+    "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "Click dots until they split into a hidden picture",
-    "blurb": "Each tap quarters the circles, dividing forever toward a surprise image. It's Splitter's chill cousin — no game over, just satisfying recursion.",
-    "url": "https://koalastothemax.com"
+    "id": "gw-incredibox",
+    "title": "Dress tiny beatboxers and they make a whole song",
+    "blurb": "Incredibox lets you drag sounds onto little a cappella guys and suddenly you've produced a banger. Lost more recess to this than to the actual computer lab games.",
+    "url": "https://incredibox.com"
   },
   {
-    "id": "gw-scream-into-void",
-    "title": "Type a scream, watch it dissolve into nothing",
-    "blurb": "A tiny cathartic release valve for the modern soul. No login, no algorithm, no one reads it — just you and the void, the way the early web intended.",
-    "url": "https://screamintothevoid.com"
+    "id": "gw-clickclickclick",
+    "title": "A page that narrates your every click and scroll out loud",
+    "blurb": "Click Click Click watches your mouse, your scrolling, your window-resizing, and comments on all of it like a slightly unsettling sports announcer. A polite reminder that the internet is always taking notes.",
+    "url": "https://clickclickclick.click"
   },
   {
-    "id": "gw-is-it-christmas",
-    "title": "A website that bravely answers one question all year",
-    "blurb": "It says NO. Every single day. Except one, when it flips to YES and you can feel the dial-up-era commitment to a single dumb bit.",
-    "url": "https://isitchristmas.com",
-    "foundNote": "the purest single-serving site"
+    "id": "gw-pixel-thoughts",
+    "title": "Put a worry on a star and watch it drift into space",
+    "blurb": "Pixel Thoughts is a 60-second meditation timer that shrinks your anxiety down to a speck and launches it into the cosmos. Cheaper than a fidget spinner, calmer too.",
+    "url": "https://www.pixelthoughts.co"
   },
   {
-    "id": "gw-hacker-typer",
-    "title": "Mash any key and become a movie hacker instantly",
-    "blurb": "Fake green code pours across a black screen like you're 'in the mainframe.' Pair with a hoodie and you're basically the antagonist of a 2003 cyber-thriller.",
-    "url": "https://hackertyper.com"
+    "id": "gw-cachemonet",
+    "title": "A random GIF and a random song collide on every reload",
+    "blurb": "CacheMonet mashes a looping animation with a mismatched track and somehow it always slaps. Pure 'I clicked refresh 40 times in study hall' energy.",
+    "url": "https://cachemonet.com"
   },
   {
-    "id": "gw-omfg-dogs",
-    "title": "Dogs walking on a loop, forever, with a banger soundtrack",
-    "blurb": "Pure 2008 Flash-era energy preserved in amber: spinning pixel pups marching to a chiptune jam. There is no point and that is the point.",
-    "url": "https://www.omfgdogs.com/"
+    "id": "gw-mapcrunch",
+    "title": "Get teleported to a random spot on Earth via Street View",
+    "blurb": "MapCrunch drops you on a roadside in Mongolia, a parking lot in Iowa, a fjord you can't pronounce. Turn off the location label and it's basically blind GeoGuessr.",
+    "url": "https://www.mapcrunch.com"
   },
   {
-    "id": "gw-find-the-invisible-cow",
-    "title": "Find an invisible cow using only a screaming voice",
-    "blurb": "Your speakers yell COW! louder as you get warmer until you finally click empty space and a cow appears. Best played alone, never in a quiet office.",
-    "url": "https://findtheinvisiblecow.com/"
+    "id": "gw-boredbutton",
+    "title": "One big red button that cures boredom with chaos",
+    "blurb": "The Bored Button flings you to a random pointless toy every press, like The Useless Web's slightly more polished cousin. Warning: there is no exit, only more buttons.",
+    "url": "https://www.boredbutton.com"
   },
   {
-    "id": "gw-procatinator",
-    "title": "Random cat GIFs perfectly synced to random songs",
-    "blurb": "Hit next and the universe occasionally aligns into something transcendent. It's the slot machine of vintage cat content, and the house always pays out cute.",
-    "url": "https://procatinator.com/"
+    "id": "gw-invisible-cow",
+    "title": "Find an invisible cow by following a screaming voice",
+    "blurb": "Find the Invisible Cow yells louder as your cursor gets closer to a cow you cannot see. It is exactly as stupid and joyful as it sounds.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "volume up, dignity down"
   },
   {
-    "id": "gw-falling-falling",
-    "title": "Fall through endless color forever while a low drone hums",
-    "blurb": "You're just plummeting through soft gradients into infinity. It's either deeply calming or mildly cursed depending on the day you're having.",
-    "url": "https://www.fallingfalling.com/"
+    "id": "gw-thisissand",
+    "title": "Pour colored sand into hypnotic layered dunes",
+    "blurb": "thisissand lets you drip rainbow sand into little mountains for an embarrassingly long time. The closest thing to a zen garden your dial-up brain ever needed.",
+    "url": "https://thisissand.com",
+    "foundNote": "online since the flash days"
   },
   {
-    "id": "gw-drawing-garden",
-    "title": "Move your mouse and grow a field of flowers",
-    "blurb": "No buttons, no menu, no tutorial — just drag and watch a garden bloom under your cursor. The whole vibe is a soft exhale after a long internet.",
-    "url": "https://drawing.garden/"
+    "id": "gw-littlealchemy",
+    "title": "Combine four elements until you accidentally invent the internet",
+    "blurb": "Little Alchemy 2 starts with earth, water, air, and fire and ends with you whispering 'wait, how do I make a wizard.' Hundreds of combos, zero self-control.",
+    "url": "https://littlealchemy2.com"
   }
 ];
