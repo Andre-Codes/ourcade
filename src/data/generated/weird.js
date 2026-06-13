@@ -2,72 +2,59 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that simulates digital burnout on purpose",
-    "blurb": "Neal's Stimulation Clicker piles on autoplay videos, notifications, and a guy doing ASMR until your brain files for divorce. It's a satire of being online that is, ironically, extremely online.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "foundNote": "close other tabs first, trust us"
+    "id": "gw-wplace",
+    "title": "A 4-trillion-pixel canvas the whole planet is fighting over",
+    "blurb": "Pick a tile, paint the world, watch a stranger paint over it three seconds later. It's the pixel-war energy of every group project you've ever survived.",
+    "url": "https://wplace.live"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "A site that streams strangers giving you virtual hugs",
-    "blurb": "The Nicest Place on the Internet is just real people, arms open, hugging your monitor in a loop. We expected to be cynical about it. We were not.",
-    "url": "https://thenicestplace.net"
+    "id": "gw-museum-endangered-sounds",
+    "title": "A museum for the dying sounds of old tech",
+    "blurb": "Dial-up handshakes, the Windows 95 chime, dot-matrix printer screams — all lovingly preserved here so your nervous system can flinch nostalgically.",
+    "url": "http://savethesounds.info",
+    "foundNote": "basically a petting zoo for noises"
   },
   {
-    "id": "gw-incredibox",
-    "title": "Dress tiny beatboxers and they make a whole song",
-    "blurb": "Incredibox lets you drag sounds onto little a cappella guys and suddenly you've produced a banger. Lost more recess to this than to the actual computer lab games.",
-    "url": "https://incredibox.com"
+    "id": "gw-one-more-tab",
+    "title": "A game that rewards you for never closing a tab",
+    "blurb": "Open it, forget it, and let your chronic tab-hoarding finally pay off with an actual rank. Vindication for the 47 tabs you swore you'd read.",
+    "url": "https://onemoretab.com"
   },
   {
-    "id": "gw-clickclickclick",
-    "title": "A page that narrates your every click and scroll out loud",
-    "blurb": "Click Click Click watches your mouse, your scrolling, your window-resizing, and comments on all of it like a slightly unsettling sports announcer. A polite reminder that the internet is always taking notes.",
-    "url": "https://clickclickclick.click"
+    "id": "gw-procatinator",
+    "title": "Cat GIFs that hit on the beat, forever",
+    "blurb": "Every refresh pairs a random cat with a song so perfectly it feels intentional. It is not intentional. That's the magic.",
+    "url": "http://procatinator.com"
   },
   {
-    "id": "gw-pixel-thoughts",
-    "title": "Put a worry on a star and watch it drift into space",
-    "blurb": "Pixel Thoughts is a 60-second meditation timer that shrinks your anxiety down to a speck and launches it into the cosmos. Cheaper than a fidget spinner, calmer too.",
-    "url": "https://www.pixelthoughts.co"
+    "id": "gw-kottke",
+    "title": "A personal blog that's been posting curiosities since dial-up days",
+    "blurb": "One of the web's longest-running blogs, still hand-pouring delightful internet finds daily — and still without a paywall, which is basically a unicorn now.",
+    "url": "https://kottke.org",
+    "foundNote": "online since 1998"
   },
   {
-    "id": "gw-cachemonet",
-    "title": "A random GIF and a random song collide on every reload",
-    "blurb": "CacheMonet mashes a looping animation with a mismatched track and somehow it always slaps. Pure 'I clicked refresh 40 times in study hall' energy.",
-    "url": "https://cachemonet.com"
+    "id": "gw-hn-popularity",
+    "title": "A hand-ranked leaderboard of personal blogs",
+    "blurb": "Someone is lovingly tracking how indie blogs perform on Hacker News and scoring them by hand. Pure early-web 'I made a thing' spirit.",
+    "url": "https://refactoringenglish.com/tools/hn-popularity/"
   },
   {
-    "id": "gw-mapcrunch",
-    "title": "Get teleported to a random spot on Earth via Street View",
-    "blurb": "MapCrunch drops you on a roadside in Mongolia, a parking lot in Iowa, a fjord you can't pronounce. Turn off the location label and it's basically blind GeoGuessr.",
-    "url": "https://www.mapcrunch.com"
+    "id": "gw-koalas-to-the-max",
+    "title": "A blurry blob that slowly resolves into a koala",
+    "blurb": "Click to split each pixel-square in half until a hidden picture emerges. It's meditative, it's pointless, and you will absolutely finish all of them.",
+    "url": "https://www.koalastothemax.com"
   },
   {
-    "id": "gw-boredbutton",
-    "title": "One big red button that cures boredom with chaos",
-    "blurb": "The Bored Button flings you to a random pointless toy every press, like The Useless Web's slightly more polished cousin. Warning: there is no exit, only more buttons.",
-    "url": "https://www.boredbutton.com"
+    "id": "gw-find-invisible-cow",
+    "title": "A site that screams 'COW' louder as you get warmer",
+    "blurb": "There's an invisible cow somewhere on your screen and your job is to find it by following a voice that gets increasingly unhinged. Headphones recommended.",
+    "url": "https://findtheinvisiblecow.com"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by following a screaming voice",
-    "blurb": "Find the Invisible Cow yells louder as your cursor gets closer to a cow you cannot see. It is exactly as stupid and joyful as it sounds.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "volume up, dignity down"
-  },
-  {
-    "id": "gw-thisissand",
-    "title": "Pour colored sand into hypnotic layered dunes",
-    "blurb": "thisissand lets you drip rainbow sand into little mountains for an embarrassingly long time. The closest thing to a zen garden your dial-up brain ever needed.",
-    "url": "https://thisissand.com",
-    "foundNote": "online since the flash days"
-  },
-  {
-    "id": "gw-littlealchemy",
-    "title": "Combine four elements until you accidentally invent the internet",
-    "blurb": "Little Alchemy 2 starts with earth, water, air, and fire and ends with you whispering 'wait, how do I make a wizard.' Hundreds of combos, zero self-control.",
-    "url": "https://littlealchemy2.com"
+    "id": "gw-weavesilk",
+    "title": "Draw glowing symmetrical silk with your mouse",
+    "blurb": "Drag the cursor and it mirrors into impossibly pretty fractal ribbons. Five minutes here and you'll feel like a screensaver from 2004 in the best way.",
+    "url": "http://weavesilk.com"
   }
 ];
