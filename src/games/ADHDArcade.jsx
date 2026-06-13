@@ -1,5 +1,16 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useArcadeBackButton } from "../arcadeChrome.js";
+import { useArcadeScore } from "../lib/scores.js";
+
+// Map each minigame's short internal key (the `game` prop on GameOver/GameHUD)
+// to its registry gameId, so a game-over run lands on the right board under the
+// Arcade Score Standard. A key missing here simply isn't submitted.
+const SCORE_GAME_IDS = {
+  tapsurge: "tap-surge",
+  colorpanic: "color-panic",
+  pianotiles: "piano-tiles",
+  splitter: "splitter",
+};
 
 export const GLOBAL_CSS =`
   @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
@@ -236,7 +247,12 @@ function GameHUD({score,lives,color,label,combo,onExit,extra}) {
 function GameOver({score,color,game,onRestart,onExit}) {
   const best=saveHS(game,score);
   const isNew=score>0&&score>=best;
+  // Submit to the shared high-score board (claimed accounts only; the hook
+  // no-ops for anon / unmapped games and only raises a beaten score).
+  const { submit } = useArcadeScore(SCORE_GAME_IDS[game]);
   useEffect(()=>{SFX.gameOver();},[]);
+  useEffect(()=>{ if(SCORE_GAME_IDS[game]) submit(score); },[]); // once per game-over
+
   return (
     <div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,background:T.bg}}>
       <div style={{fontFamily:"'Black Ops One'",fontSize:40,color,textShadow:`0 0 30px ${color}`,animation:"pop 0.5s cubic-bezier(0.34,1.56,0.64,1)"}}>GAME OVER</div>

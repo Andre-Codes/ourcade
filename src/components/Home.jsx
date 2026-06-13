@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GAMES } from "../data/games.js";
-import { recordDeepCutsUnlocked } from "../lib/store.js";
+import { recordDeepCutsUnlocked, getFavorites, toggleFavorite } from "../lib/store.js";
 import { todayKey, dayPart, getHourOverride } from "../lib/daily.js";
 import { getDayPartGreeting } from "../data/dayparts.js";
+import { useAuth } from "../lib/AuthProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
@@ -49,7 +50,61 @@ function Stars({ rating = 0 }) {
   );
 }
 
-function GameCard({ game, cta = "PLAY ▶" }) {
+// The user's favorited gameIds, reactive to store changes (toggles here, cloud
+// hydration in AuthProvider). Drives the ⭐ on each cabinet + the home shelf.
+function useFavorites() {
+  const [favs, setFavs] = useState(() => getFavorites());
+  useEffect(() => {
+    const sync = () => setFavs(getFavorites());
+    window.addEventListener("ourcade:storechange", sync);
+    return () => window.removeEventListener("ourcade:storechange", sync);
+  }, []);
+  return favs;
+}
+
+// The 🏆 (board) + ⭐ (favorite) controls overlaid on a cabinet. The card itself
+// is a <Link>, so these stop the click from bubbling into the PLAY navigation;
+// 🏆 navigates to the board programmatically (a nested <a> would be invalid).
+function CardExtras({ game, isFav }) {
+  const navigate = useNavigate();
+  const stop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  return (
+    <div className="arcade-card-extras">
+      {game.score && (
+        <button
+          type="button"
+          className="arcade-card-chip"
+          title={`${game.title} high scores`}
+          aria-label={`${game.title} high scores`}
+          onClick={(e) => {
+            stop(e);
+            navigate(`/scores/${game.id}`);
+          }}
+        >
+          🏆
+        </button>
+      )}
+      <button
+        type="button"
+        className={`arcade-card-chip${isFav ? " is-fav" : ""}`}
+        title={isFav ? "Remove from your arcade" : "Add to your arcade"}
+        aria-label={isFav ? "Remove favorite" : "Add favorite"}
+        aria-pressed={isFav}
+        onClick={(e) => {
+          stop(e);
+          toggleFavorite(game.id);
+        }}
+      >
+        {isFav ? "⭐" : "☆"}
+      </button>
+    </div>
+  );
+}
+
+function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
   return (
     <Link
       to={`/play/${game.id}`}
@@ -57,6 +112,7 @@ function GameCard({ game, cta = "PLAY ▶" }) {
       style={{ "--accent": game.accent }}
     >
       <div className="arcade-card-glow" />
+      <CardExtras game={game} isFav={isFav} />
       {game.badge && (
         <span className={`arcade-burst ${game.badge === "HOT" ? "is-hot" : "is-new"}`}>
           {game.badge}!
@@ -166,6 +222,14 @@ export default function Home() {
   const games = visible.filter((g) => g.category === "game");
   const tools = visible.filter((g) => g.category === "tool");
   const filtering = query.trim() !== "" || activeTags.length > 0;
+  const favs = useFavorites();
+
+  // account chip (anonymous → "claim", named → "@username")
+  const authState = useAuth();
+  const accountLabel =
+    authState && !authState.isAnonymous && authState.username
+      ? `👤 ${authState.username}`
+      : "👤 guest · claim";
 
   return (
     <div className="arcade-home" id="top" data-daypart={part.id}>
@@ -177,6 +241,7 @@ export default function Home() {
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
         <a href="#arcade-foot" className="arcade-tab">F.A.Q.</a>
+        <Link to="/me" className="arcade-tab arcade-tab-account">{accountLabel}</Link>
         <span className="arcade-nav-spark">✦</span>
       </nav>
 
@@ -274,7 +339,7 @@ export default function Home() {
           {games.length ? (
             <div className="arcade-grid">
               {games.map((game) => (
-                <GameCard key={game.id} game={game} cta="PLAY ▶" />
+                <GameCard key={game.id} game={game} cta="PLAY ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
           ) : (
@@ -287,7 +352,7 @@ export default function Home() {
           {tools.length ? (
             <div className="arcade-grid">
               {tools.map((game) => (
-                <GameCard key={game.id} game={game} cta="OPEN ▶" />
+                <GameCard key={game.id} game={game} cta="OPEN ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
           ) : (

@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// Ourcade Firestore security rules.
+// Milestone 0: each signed-in user (incl. anonymous) owns ONLY their own
+// private profile/state doc; usernames are a public name→uid reservation map.
+// Milestone 1 adds the PUBLIC layer: public `profiles/{uid}` (avatar/bio/
+// favorites) and per-game high-score boards `scores/{gameId}/entries/{uid}`
+// under one monotonic, owner-only write contract.
+// Everything else is denied until later milestones add rules.
+//
+// Paste this into the Firebase Console → Firestore Database → Rules → Publish.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // users/{uid} — profile (username, email, createdAt) + synced `state` map.
+    // Private to its owner (keeps email out of public reach).
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // usernames/{lowercaseName} — { uid, username }. Public-readable so the
+    // claim form can check availability; create-once by the owning uid; never
+    // edited or deleted (a handle, once taken, stays mapped).
+    match /usernames/{name} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // profiles/{uid} — PUBLIC face of an account: { username, avatar, theme,
+    // bio, favorites:[gameId], updatedAt }. World-readable (powers /u/:username
+    // and the score boards); only the owner can write their own. Deliberately
+    // has NO email / private state — that stays on the private users/{uid} doc.
+    match /profiles/{uid} {
+      allow read: if true;
+      allow write: if isOwner(uid);
+    }
+
+    // scores/{gameId}/entries/{uid} — per-game high-score boards under the
+    // Arcade Score Standard: { uid, username, avatar, score, at }. Public read
+    // (anyone can see a board); each user writes ONLY their own entry; score
+    // must be a number, carry a username (claimed accounts only), and can never
+    // DECREASE (an update may only raise it). Boards are best-effort/spoofable
+    // client-side — fine for a hobby arcade; a Cloud Function validator is a
+    // later option.
+    match /scores/{gameId}/entries/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.score is number
+        && request.resource.data.username is string
+        && request.resource.data.username.size() > 0;
+      allow update: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.score is number
+        && request.resource.data.username is string
+        && request.resource.data.username.size() > 0
+        && request.resource.data.score >= resource.data.score;
+      allow delete: if false;
+    }
+
+    // Default deny — future collections (polls, archive) get explicit rules
+    // when those milestones land. (archive/* is written by the admin SDK, which
+    // bypasses these rules, so it needs no allow here.)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

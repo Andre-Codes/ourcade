@@ -589,6 +589,10 @@
     sOver(); deathBlink = 0; SnakeApp.over = true;
     if(score > DB.snake.hi){ DB.snake.hi = score; saveDB(); }
     if(SnakeApp.venue==='web' && score > DB.snake.webBest){ DB.snake.webBest = score; saveDB(); }
+    // Arcade Score Standard: report this run to the Ourcade shell, which
+    // submits it to the shared high-score board (claimed accounts only). The
+    // '*' target is fine — we send only a score, no secrets.
+    try { window.parent !== window && window.parent.postMessage({ type:'ourcade:score', gameId:'snake', score }, '*'); } catch(e){}
   }
 
   /* ---------- field rendering ---------- */

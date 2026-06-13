@@ -1037,6 +1037,52 @@ main > section + section { margin-top: 44px; }
 .arcade-badge-link { text-decoration: none; cursor: pointer; }
 .arcade-badge-link:hover { color: var(--neon-gold); border-color: var(--neon-gold); }
 
+/* ---- account chip in the nav ---- */
+.arcade-tab-account { text-decoration: none; color: var(--neon-gold) !important; }
+.arcade-tab-account:hover { color: #fff !important; }
+
+/* ====================================================================== */
+/*  ACCOUNT PAGE (/me)                                                     */
+/* ====================================================================== */
+.arcade-account { max-width: 460px; margin: 0 auto; padding: 64px 16px 40px; }
+.arcade-account-loading {
+  text-align: center; padding: 80px 16px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.7rem; color: var(--neon-aqua);
+}
+.arcade-account-card {
+  padding: 20px; background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-account-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.arcade-account-tab {
+  flex: 1; font-family: 'Press Start 2P', monospace; font-size: 0.56rem; letter-spacing: 0.03em;
+  color: #8a8fb5; background: #0e101a; border: 2px solid #2a2f4a; border-radius: 8px;
+  padding: 10px 6px; cursor: pointer; transition: all .14s;
+}
+.arcade-account-tab.is-active { color: #0a0a12; background: var(--neon-gold); border-color: #04050b; }
+.arcade-account-form { display: flex; flex-direction: column; gap: 12px; }
+.arcade-account-blurb { font-size: 0.84rem; line-height: 1.5; color: #cbb8f0; margin: 0 0 4px; }
+.arcade-field { display: flex; flex-direction: column; gap: 4px; }
+.arcade-field-label {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.04em; color: var(--neon-aqua);
+}
+.arcade-field-input {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; color: var(--arcade-text);
+  background: #04050b; border: 2px solid #2a2f4a; border-radius: 8px; padding: 10px 12px;
+}
+.arcade-field-input:focus { outline: none; border-color: var(--neon-aqua); }
+.arcade-account-submit { width: 100%; margin-top: 4px; text-align: center; }
+.arcade-account-link {
+  background: none; border: none; color: var(--neon-aqua); font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem; cursor: pointer; text-decoration: underline; padding: 4px;
+}
+.arcade-account-name { font-family: 'Black Ops One', cursive; font-size: 1.5rem; color: var(--arcade-text); margin: 10px 0 2px; }
+.arcade-account-email { font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--arcade-muted); margin: 0 0 14px; }
+.arcade-account-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.arcade-account-foot { margin: 14px 0 0; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--arcade-muted); }
+.arcade-account-error { color: var(--neon-pink); font-size: 0.84rem; margin: 0; }
+.arcade-account-notice { color: var(--neon-aqua); font-size: 0.84rem; margin: 0; }
+
 /* ====================================================================== */
 /*  STUMBLE PAGE (/stumble)                                                */
 /* ====================================================================== */
@@ -1117,3 +1163,180 @@ main > section + section { margin-top: 44px; }
   .arcade-hero-emoji { font-size: 3.2rem; }
   .arcade-hero-title { font-size: 1.25rem; }
 }
+
+/* ====================================================================== */
+/*  HIGH-SCORE BOARD — the Arcade Score Standard's one shared board UI     */
+/* ====================================================================== */
+.arcade-board {
+  background: var(--arcade-surface);
+  border: 2px solid var(--arcade-border);
+  border-radius: 12px;
+  box-shadow: var(--bevel-in);
+  padding: 16px 16px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--arcade-text);
+}
+.arcade-board.is-compact { padding: 12px; }
+.arcade-board-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--arcade-border);
+}
+.arcade-board-emoji { font-size: 1.4rem; }
+.arcade-board-title {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.arcade-board-col {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.52rem; letter-spacing: 0.1em;
+  color: var(--arcade-muted); text-transform: uppercase;
+}
+.arcade-board-empty {
+  color: var(--arcade-muted); text-align: center;
+  font-size: 0.86rem; padding: 18px 0;
+}
+.arcade-board-list { list-style: none; margin: 0; padding: 0; }
+.arcade-board-row {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  border-radius: 7px;
+}
+.arcade-board-row + .arcade-board-row { margin-top: 2px; }
+.arcade-board-row.is-me {
+  background: rgba(63, 255, 208, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(63, 255, 208, 0.35);
+}
+.arcade-board-rank {
+  font-family: 'Press Start 2P', monospace; font-size: 0.7rem;
+  color: var(--arcade-muted); text-align: center;
+}
+.arcade-board-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.arcade-board-av { font-size: 1.1rem; }
+.arcade-board-name {
+  color: var(--arcade-text); text-decoration: none;
+  font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline; }
+.arcade-board-score {
+  font-family: 'Black Ops One', cursive;
+  font-size: 1.05rem; color: var(--neon-gold);
+  text-shadow: 0 0 10px rgba(255, 210, 63, 0.3);
+}
+.arcade-board-yours {
+  margin: 12px 2px 0; padding-top: 10px;
+  border-top: 1px solid var(--arcade-border);
+  text-align: center; font-size: 0.84rem; color: var(--arcade-muted);
+}
+.arcade-board-yours b { color: var(--neon-aqua); }
+
+/* the /scores/:id page wrapper — a single centered board on the arcade stage */
+.arcade-scores-page { max-width: 560px; margin: 0 auto; padding: 8px 0 40px; }
+.arcade-scores-page .arcade-board { margin-top: 8px; }
+
+/* ---- the 🏆 / ⭐ affordances on a home GameCard ---- */
+.arcade-card-extras {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; gap: 6px; z-index: 3;
+}
+.arcade-card-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; padding: 0; font-size: 0.95rem; line-height: 1;
+  background: rgba(7, 8, 15, 0.72); color: var(--arcade-text);
+  border: 1px solid var(--arcade-border); border-radius: 7px;
+  cursor: pointer; text-decoration: none;
+  transition: transform .08s ease, filter .12s ease, background .12s ease;
+}
+.arcade-card-chip:hover { filter: brightness(1.25); transform: translateY(-1px); }
+.arcade-card-chip:active { transform: translateY(0); }
+.arcade-card-chip.is-fav { background: rgba(255, 210, 63, 0.18); border-color: var(--neon-gold); }
+
+/* ====================================================================== */
+/*  PUBLIC PROFILE (/u/:username) + /me profile editor                    */
+/* ====================================================================== */
+.arcade-profile { max-width: 640px; margin: 0 auto; padding: 8px 0 48px; }
+.arcade-profile-head {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--arcade-surface); border: 2px solid var(--arcade-border);
+  border-radius: 14px; box-shadow: var(--bevel-in); padding: 18px 20px;
+}
+.arcade-profile-avatar {
+  font-size: 3rem; width: 72px; height: 72px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.3); border: 2px solid var(--arcade-border); border-radius: 14px;
+}
+.arcade-profile-id { min-width: 0; }
+.arcade-profile-name {
+  font-family: 'Black Ops One', cursive; font-size: 1.6rem; margin: 0; color: var(--arcade-text);
+}
+.arcade-profile-bio {
+  font-family: 'Share Tech Mono', monospace; color: #d6e6ff;
+  margin: 6px 0 0; font-size: 0.92rem; line-height: 1.5;
+}
+.arcade-profile-join {
+  font-size: 0.74rem; color: var(--arcade-muted); margin: 8px 0 0;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.arcade-profile-badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.arcade-profile-badge {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.74rem;
+  padding: 5px 9px; background: rgba(180, 77, 255, 0.14);
+  border: 1px solid var(--neon-violet); border-radius: 20px; color: #e7d3ff;
+}
+.arcade-profile-section { margin-top: 26px; }
+.arcade-profile-section-title {
+  font-family: 'Press Start 2P', monospace; font-size: 0.62rem; letter-spacing: 0.12em;
+  color: var(--arcade-muted); text-transform: uppercase; margin: 0 0 12px;
+}
+.arcade-profile-faves { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 10px; }
+.arcade-profile-fave {
+  display: flex; align-items: center; gap: 8px; padding: 10px;
+  background: var(--arcade-surface); border: 1px solid var(--arcade-border);
+  border-radius: 9px; text-decoration: none; color: var(--arcade-text);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.86rem;
+}
+.arcade-profile-fave:hover { border-color: var(--neon-aqua); }
+.arcade-profile-fave-emoji { font-size: 1.3rem; }
+.arcade-profile-bests { display: grid; gap: 14px; }
+.arcade-profile-empty { color: var(--arcade-muted); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; }
+
+/* /me editor controls */
+.arcade-editor { margin-top: 22px; text-align: left; }
+.arcade-editor-row { margin-top: 16px; }
+.arcade-editor-label {
+  display: block; font-family: 'Press Start 2P', monospace; font-size: 0.55rem;
+  letter-spacing: 0.1em; color: var(--arcade-muted); text-transform: uppercase; margin-bottom: 8px;
+}
+.arcade-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.arcade-picker-opt {
+  width: 42px; height: 42px; font-size: 1.3rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.3); border: 2px solid var(--arcade-border);
+  border-radius: 10px; cursor: pointer; transition: transform .08s ease, border-color .12s ease;
+}
+.arcade-picker-opt:hover { transform: translateY(-1px); }
+.arcade-picker-opt.is-on { border-color: var(--neon-aqua); box-shadow: 0 0 12px rgba(63,255,208,.3); }
+.arcade-picker-swatch { width: 42px; height: 42px; border-radius: 10px; border: 2px solid var(--arcade-border); cursor: pointer; }
+.arcade-picker-swatch.is-on { border-color: #fff; box-shadow: 0 0 0 2px var(--arcade-bg), 0 0 12px currentColor; }
+.arcade-editor-bio {
+  width: 100%; box-sizing: border-box; min-height: 70px; resize: vertical;
+  background: rgba(0,0,0,.35); border: 2px solid var(--arcade-border); border-radius: 8px;
+  color: var(--arcade-text); font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; padding: 10px;
+}
+.arcade-fave-toggle-list { display: flex; flex-direction: column; gap: 6px; }
+.arcade-fave-toggle {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  background: var(--arcade-surface); border: 1px solid var(--arcade-border); border-radius: 8px;
+  color: var(--arcade-text); font-family: 'Share Tech Mono', monospace; cursor: pointer; text-align: left;
+}
+.arcade-fave-toggle.is-on { border-color: var(--neon-gold); }
+.arcade-fave-toggle-star { font-size: 1.1rem; opacity: .35; }
+.arcade-fave-toggle.is-on .arcade-fave-toggle-star { opacity: 1; }

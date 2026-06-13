@@ -19,9 +19,24 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
 import { checkUrls, urlKey } from "./lib/validate-urls.js";
+import { archiveAll } from "./lib/firebase-admin.js";
+import crypto from "node:crypto";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
+
+// Append a freshly-written pool to the permanent Firestore archive
+// (archive/{type}/items/{id}). Soft-fails inside archiveAll, so it never blocks
+// the commit. String pools (tips/news/facts) get a deterministic content-hash
+// id and are wrapped as { text }; object pools archive by their own `id`.
+function archivePool(type, items) {
+  const list = (items || []).map((it) =>
+    typeof it === "string"
+      ? { id: `${type}-${crypto.createHash("sha1").update(it).digest("hex").slice(0, 12)}`, text: it }
+      : it
+  );
+  return archiveAll(type, list).catch(() => {});
+}
 
 // --only=weird / --only=curiosities runs just that pool (and skips the rest).
 const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").split("=")[1] || null;
@@ -499,6 +514,7 @@ THESE ARE PRESENTED AS REAL — do NOT invent sites. Use only the FRESH FINDS be
     return;
   }
   writeModule("weird.js", items, 'Today\'s Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.');
+  await archivePool("weird", items);
   console.log("\n✓ done");
 }
 
@@ -539,6 +555,7 @@ ACCURACY IS THE WHOLE POINT — these are presented as true. Use ONLY widely doc
     return;
   }
   writeModule("curiosities.js", items, "Timeless Curiosity pool. Shape: { id, title, blurb, url } — urls liveness-checked at generation time.");
+  await archivePool("curiosities", items);
   console.log("\n✓ done");
 }
 
@@ -644,6 +661,14 @@ Keep the OURCADE arcade-nostalgia flavor light — the fact itself must stay acc
   );
   writeModule("flavor.js", { tips, news }, "Mascot tips + site news. Shape: { tips:[], news:[] }");
   if (GENERATE_FACTS) writeModule("facts.js", facts, "Daily game facts. Shape: [ string ]");
+
+  // Archive everything just written (permanent "everything ever" store).
+  await archivePool("polls", polls);
+  await archivePool("quizzes", quizzes);
+  await archivePool("tips", tips);
+  await archivePool("news", news);
+  if (GENERATE_FACTS) await archivePool("facts", facts);
+
   console.log("\n✓ done");
 }
 

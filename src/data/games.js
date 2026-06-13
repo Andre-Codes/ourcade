@@ -21,6 +21,20 @@ import { lazy } from "react";
 //  To add a new standalone HTML game:
 //    1. Drop the .html (and assets) in public/games/.
 //    2. Add an entry with type "iframe" and src: "games/your-file.html".
+//
+//  THE ARCADE SCORE STANDARD (optional `score` config):
+//    Add a `score` object and the game automatically gets a high-score board
+//    at #/scores/:id, a 🏆 on its cabinet, and the shared HighScoreBoard UI —
+//    no other wiring. Leave it off and the game simply has no board.
+//      score: {
+//        label: "SCORE",                 // column heading on the board
+//        dir: "desc",                    // "desc" = higher better (default),
+//                                        // "asc" = lower better (e.g. time)
+//        format: (n) => n.toLocaleString(),  // optional; defaults to String(n)
+//      }
+//    React games submit via the shared GameOver hook (ADHDArcade.jsx); iframe
+//    games postMessage { type:"ourcade:score", gameId, score } to the parent
+//    (GamePage.jsx bridges it). Boards are claimed-accounts-only.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const GAMES = [
@@ -65,6 +79,7 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/TapSurge.jsx")),
+    score: { label: "SCORE", dir: "desc", format: (n) => n.toLocaleString() },
   },
   {
     id: "color-panic",
@@ -79,6 +94,7 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/ColorPanic.jsx")),
+    score: { label: "SCORE", dir: "desc", format: (n) => n.toLocaleString() },
   },
   {
     id: "piano-tiles",
@@ -93,6 +109,7 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/PianoTiles.jsx")),
+    score: { label: "SCORE", dir: "desc", format: (n) => n.toLocaleString() },
   },
   {
     id: "splitter",
@@ -107,6 +124,7 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/Splitter.jsx")),
+    score: { label: "SCORE", dir: "desc", format: (n) => n.toLocaleString() },
   },
   {
     id: "mind-flood",
@@ -135,6 +153,7 @@ export const GAMES = [
     category: "game",
     type: "iframe",
     src: "games/snake.html",
+    score: { label: "SCORE", dir: "desc", format: (n) => n.toLocaleString() },
   },
   {
     id: "poker-tracker",
@@ -195,6 +214,12 @@ export const GAMES = [
 ];
 
 export const getGame = (id) => GAMES.find((g) => g.id === id);
+
+// Does this game (id or entry) opt into the Arcade Score Standard?
+export const hasScoreboard = (gameOrId) => {
+  const g = typeof gameOrId === "string" ? getGame(gameOrId) : gameOrId;
+  return !!g?.score;
+};
 
 // Entries on a given home-page shelf, e.g. getByCategory("game" | "tool").
 export const getByCategory = (category) => GAMES.filter((g) => g.category === category);

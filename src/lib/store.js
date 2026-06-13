@@ -1,14 +1,52 @@
 /* ─────────────────────────────────────────────────────────────────────────
    STORE — the one place the daily layer touches persistence.
-   Today this is synchronous localStorage (per-device), wrapped in try/catch
-   exactly like Home's visitor odometer so private-mode / quota errors never
-   crash a render. When accounts land (Supabase, Phase 2), this is the only file
-   that changes: same function names, async bodies, real cross-device data.
+
+   localStorage stays the SYNCHRONOUS source of truth for render (every get* is
+   sync, called inside useState initializers across the app, wrapped in
+   try/catch so private-mode / quota errors never crash). On top of that we now
+   WRITE-THROUGH to Firestore and HYDRATE from it (cross-device per-account
+   sync) — but only in a browser, via a guarded dynamic import of cloud.js, so
+   the Node scripts (daily-check imports this through stumble.js) never load
+   Firebase and stay pure. Anonymous sign-in means sync starts immediately;
+   claiming an account (linkWithCredential) keeps the same uid + data.
    ───────────────────────────────────────────────────────────────────────── */
 
 import { dayNumberFromKey } from "./daily.js";
 
 const NS = "ourcade:";
+
+// ---- cloud sync (browser-only; node returns null and skips all of it) ----
+let cloudPromise = null;
+function cloud() {
+  if (typeof window === "undefined") return null; // daily-check / SSR: no Firebase
+  if (!cloudPromise) cloudPromise = import("./cloud.js").catch(() => null);
+  return cloudPromise;
+}
+// Which localStorage keys participate in per-account sync (NOT session-only
+// stumble:seen, NOT the vanity visit odometer).
+function isSyncKey(key) {
+  return (
+    key.startsWith("poll:") ||
+    key.startsWith("quiz:") ||
+    key === "eightball:legends" ||
+    key === "eightball:muted" ||
+    key === "stumble:deepcuts" ||
+    key === "streak"
+  );
+}
+// Fire-and-forget write-through. Never throws into the caller.
+function pushUp(key, raw) {
+  const p = cloud();
+  if (p) p.then((c) => c && c.writeState(key, raw)).catch(() => {});
+}
+// Notify (future) reactive listeners that cloud hydration changed local data.
+function emitChange() {
+  try {
+    window.dispatchEvent(new Event("ourcade:storechange"));
+  } catch {
+    /* non-browser */
+  }
+}
 
 function read(key) {
   try {
@@ -40,6 +78,7 @@ export function getPollVote(pollId) {
 }
 export function setPollVote(pollId, optionId) {
   write(`poll:${pollId}`, optionId);
+  pushUp(`poll:${pollId}`, optionId);
 }
 
 // ---- quizzes: which result this device got, per quiz id ----
@@ -48,6 +87,7 @@ export function getQuizResult(quizId) {
 }
 export function setQuizResult(quizId, resultId) {
   write(`quiz:${quizId}`, resultId);
+  pushUp(`quiz:${quizId}`, resultId);
 }
 
 // ---- magic 8-ball: discovered legendary answers (the easter-egg collection) ----
@@ -60,7 +100,9 @@ export function recordLegendary(id) {
   const found = getDiscoveredLegendaries();
   if (found.some((f) => f.id === id)) return { found, isNew: false };
   const next = [...found, { id, at: new Date().toISOString() }];
-  write("eightball:legends", JSON.stringify(next));
+  const raw = JSON.stringify(next);
+  write("eightball:legends", raw);
+  pushUp("eightball:legends", raw);
   return { found: next, isNew: true };
 }
 
@@ -69,7 +111,9 @@ export function getEightBallMuted() {
   return read("eightball:muted") === "1";
 }
 export function setEightBallMuted(on) {
-  write("eightball:muted", on ? "1" : "0");
+  const raw = on ? "1" : "0";
+  write("eightball:muted", raw);
+  pushUp("eightball:muted", raw);
 }
 
 // ---- konami deep cuts: secret stumble pool unlock (persists, like legendaries) ----
@@ -80,6 +124,7 @@ export function getDeepCutsUnlocked() {
 export function recordDeepCutsUnlocked() {
   const isNew = !getDeepCutsUnlocked();
   write("stumble:deepcuts", "1");
+  pushUp("stumble:deepcuts", "1");
   return { isNew };
 }
 
@@ -148,6 +193,116 @@ export function recordVisit(today) {
       streak = gap === 1 ? (prev.streak || 0) + 1 : 1; // consecutive vs reset
     }
   }
-  write(`streak`, JSON.stringify({ last: today, streak }));
+  const raw = JSON.stringify({ last: today, streak });
+  write(`streak`, raw);
+  pushUp("streak", raw);
   return { streak, isNewDay };
+}
+
+// ---- favorite games (the user's personal "arcade") ----
+// Favorites live on the PUBLIC profile doc (profiles/{uid}.favorites), not the
+// private `state` map — so they sync via a dedicated path (writeProfile), and
+// AuthProvider merges the cloud copy in on profile fetch. localStorage stays
+// the instant render cache; toggling pushes the new array up for named users.
+export function getFavorites() {
+  return readJSON("favorites", []);
+}
+function writeFavorites(list) {
+  const raw = JSON.stringify(list);
+  write("favorites", raw);
+  // Push the whole array to the public profile (named users only — anon has no
+  // profile doc). Browser-only + fire-and-forget, same contract as pushUp.
+  const p = cloud();
+  if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ favorites: list })).catch(() => {});
+}
+export function toggleFavorite(gameId) {
+  const cur = getFavorites();
+  const next = cur.includes(gameId) ? cur.filter((g) => g !== gameId) : [...cur, gameId];
+  writeFavorites(next);
+  emitChange();
+  return next;
+}
+// Replace local favorites with an explicit list (used by AuthProvider after it
+// merges cloud ∪ local on login). Does NOT push back up — caller owns that.
+export function setFavoritesLocal(list) {
+  write("favorites", JSON.stringify(Array.isArray(list) ? list : []));
+  emitChange();
+}
+
+// ---- cloud hydration: merge the account's Firestore state into localStorage ----
+// Called by AuthProvider once an auth uid is known. Cloud is authoritative for
+// cross-device picks; collections union; streak keeps the strongest. Anything
+// that exists only locally (e.g. created before sign-in) is pushed UP so the
+// account keeps it. Best-effort — failures leave the local-only experience intact.
+function localSyncedMap() {
+  const out = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const full = localStorage.key(i);
+      if (!full || !full.startsWith(NS)) continue;
+      const key = full.slice(NS.length);
+      if (isSyncKey(key)) out[key] = localStorage.getItem(full);
+    }
+  } catch {
+    /* private mode — nothing to push up */
+  }
+  return out;
+}
+
+function mergeValue(key, localRaw, cloudRaw) {
+  if (cloudRaw == null) return localRaw;
+  if (localRaw == null) return cloudRaw;
+  if (key === "streak") {
+    try {
+      const l = JSON.parse(localRaw);
+      const c = JSON.parse(cloudRaw);
+      const ln = l?.last ? dayNumberFromKey(l.last) : -Infinity;
+      const cn = c?.last ? dayNumberFromKey(c.last) : -Infinity;
+      if (cn > ln) return cloudRaw;
+      if (ln > cn) return localRaw;
+      return (c?.streak || 0) >= (l?.streak || 0) ? cloudRaw : localRaw; // same day → higher streak
+    } catch {
+      return cloudRaw;
+    }
+  }
+  if (key === "eightball:legends") {
+    try {
+      const byId = new Map();
+      for (const e of [...JSON.parse(cloudRaw), ...JSON.parse(localRaw)]) {
+        const prev = byId.get(e.id);
+        if (!prev || e.at < prev.at) byId.set(e.id, e); // keep earliest discovery
+      }
+      return JSON.stringify([...byId.values()]);
+    } catch {
+      return cloudRaw;
+    }
+  }
+  return cloudRaw; // poll/quiz/muted/deepcuts: cloud (other devices) wins
+}
+
+export async function hydrateFromCloud(uid) {
+  const p = cloud();
+  if (!p) return;
+  const c = await p;
+  if (!c) return;
+  let cloudState;
+  try {
+    cloudState = await c.readState(uid);
+  } catch {
+    return; // offline / blocked — stay on local
+  }
+  const local = localSyncedMap();
+  const keys = new Set([...Object.keys(cloudState || {}), ...Object.keys(local)]);
+  const pushBack = {};
+  let changed = false;
+  for (const key of keys) {
+    const merged = mergeValue(key, local[key] ?? null, cloudState?.[key] ?? null);
+    if (merged != null && merged !== local[key]) {
+      write(key, merged);
+      changed = true;
+    }
+    if (merged != null && merged !== cloudState?.[key]) pushBack[key] = merged;
+  }
+  if (Object.keys(pushBack).length) c.writeMany(pushBack).catch(() => {});
+  if (changed) emitChange();
 }
