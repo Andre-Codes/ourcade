@@ -660,6 +660,29 @@ main > section + section { margin-top: 44px; }
   border-bottom: 1px solid currentColor;
 }
 
+/* In-flow back bar for normal pages (not fixed — scrolls with content, never
+   overlaps). Replaces the old floating cabinet chrome on non-game pages. */
+.arcade-backbar {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 980px; margin: 0 auto; padding: 14px 16px 4px;
+}
+.arcade-backbar-link {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem; letter-spacing: 0.02em;
+  text-decoration: none; color: #0a0a12;
+  background: linear-gradient(180deg, var(--neon-lime), #9fd400);
+  border: 2px solid #04050b; border-radius: 5px; padding: 9px 11px;
+  box-shadow: var(--bevel); transition: filter .12s ease, transform .08s ease;
+}
+.arcade-backbar-link:hover { filter: brightness(1.12); }
+.arcade-backbar-link:active { transform: translateY(1px); }
+.arcade-backbar-badge {
+  font-family: 'Black Ops One', cursive; font-size: 0.7rem; letter-spacing: 0.1em;
+  color: var(--neon-aqua); text-shadow: 0 0 8px rgba(63,255,208,.5);
+  margin-left: auto;
+}
+@media (max-width: 560px) { .arcade-backbar-badge { display: none; } }
+
 /* ====================================================================== */
 /*  MOTION  (respect reduce-motion: no scroll/blink/pulse)                 */
 /* ====================================================================== */
@@ -1242,22 +1265,51 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 .arcade-scores-page { max-width: 560px; margin: 0 auto; padding: 8px 0 40px; }
 .arcade-scores-page .arcade-board { margin-top: 8px; }
 
-/* ---- the 🏆 / ⭐ affordances on a home GameCard ---- */
-.arcade-card-extras {
-  position: absolute; top: 10px; right: 10px;
-  display: flex; gap: 6px; z-index: 3;
-}
-.arcade-card-chip {
+/* ---- the 🏆 / ⭐ affordances on a home GameCard ----
+   Split across two corners so neither collides with the NEW!/HOT! starburst
+   (which lives top-right): 🏆 sits top-LEFT, ⭐ sits bottom-RIGHT by the CTA. */
+.arcade-card-board,
+.arcade-card-fav {
+  position: absolute; z-index: 4;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; padding: 0; font-size: 0.95rem; line-height: 1;
+  width: 30px; height: 30px; padding: 0; font-size: 1rem; line-height: 1;
   background: rgba(7, 8, 15, 0.72); color: var(--arcade-text);
-  border: 1px solid var(--arcade-border); border-radius: 7px;
+  border: 1px solid var(--arcade-border); border-radius: 8px;
   cursor: pointer; text-decoration: none;
-  transition: transform .08s ease, filter .12s ease, background .12s ease;
+  transition: transform .08s ease, filter .12s ease, background .12s ease, border-color .12s ease;
 }
-.arcade-card-chip:hover { filter: brightness(1.25); transform: translateY(-1px); }
-.arcade-card-chip:active { transform: translateY(0); }
-.arcade-card-chip.is-fav { background: rgba(255, 210, 63, 0.18); border-color: var(--neon-gold); }
+.arcade-card-board { top: 10px; left: 10px; }
+.arcade-card-fav { bottom: 14px; right: 12px; }
+.arcade-card-board:hover,
+.arcade-card-fav:hover { filter: brightness(1.25); transform: translateY(-1px); }
+.arcade-card-board:active,
+.arcade-card-fav:active { transform: translateY(0); }
+.arcade-card-fav.is-fav { background: rgba(255, 210, 63, 0.18); border-color: var(--neon-gold); }
+
+/* ---- 8-ball relics on a profile (owner: real art; public: locked teaser) ---- */
+.arcade-relic-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;
+}
+.arcade-relic {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 12px 8px; border-radius: 10px;
+  background: radial-gradient(circle at 50% 30%, rgba(255,210,63,.12), var(--arcade-surface) 75%);
+  border: 1px solid #6b551c;
+}
+.arcade-relic.is-mythic {
+  background: radial-gradient(circle at 50% 30%, rgba(255,106,213,.16), var(--arcade-surface) 78%);
+  border-color: #ff6ad5;
+}
+.arcade-relic.is-locked { background: var(--arcade-surface); border: 1px dashed var(--arcade-border); opacity: .8; }
+.arcade-relic-icon { width: 46px; height: 46px; object-fit: contain; }
+.arcade-relic.is-locked .arcade-relic-icon { opacity: .5; }
+.arcade-relic:not(.is-locked) .arcade-relic-icon { filter: drop-shadow(0 0 7px rgba(255,210,63,.7)); }
+.arcade-relic-text {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; line-height: 1.3; color: #d6e6ff;
+}
+.arcade-relic-teaser { display: flex; flex-direction: column; gap: 10px; }
+/* the owner's PROFILE tab reuses the public profile layout inside the account card */
+.arcade-account-profile { text-align: left; margin-top: 16px; }
 
 /* ====================================================================== */
 /*  PUBLIC PROFILE (/u/:username) + /me profile editor                    */

@@ -33,15 +33,21 @@ export function getTodaysPoll(key) {
   return rotateDaily(POLLS, key, SALT);
 }
 
-// No backend yet: build believable per-option counts from the day + poll +
-// option, then add this device's real vote (+1). Honest "fake-but-real" — same
-// spirit as the visitor odometer. Swapped for true tallies in Phase 3.
-export function simulatedTally(poll, myVote, key = "") {
-  const counts = poll.options.map((o) => {
-    const base = 40 + (daySeed(`${key}:${poll.id}:${o.id}`) % 460); // 40..499
-    const count = base + (myVote === o.id ? 1 : 0);
-    return { id: o.id, label: o.label, count };
-  });
-  const total = counts.reduce((s, c) => s + c.count, 0) || 1;
-  return counts.map((c) => ({ ...c, pct: Math.round((c.count / total) * 100) }));
+// A tiny per-option vanity seed so a brand-new poll never renders as all-zeros.
+// Small (3..12) and deterministic, so REAL votes quickly dominate — the bars
+// move as actual people vote. `counts` is the live Firestore tally map.
+export function pollSeed(poll, optionId) {
+  return 3 + (daySeed(`seed:${poll.id}:${optionId}`) % 10); // 3..12
+}
+
+// REAL tally: live shared counts (from polls/{id}.counts) + the vanity seed,
+// turned into per-option totals and percentages.
+export function realTally(poll, counts = {}) {
+  const rows = poll.options.map((o) => ({
+    id: o.id,
+    label: o.label,
+    count: pollSeed(poll, o.id) + (Number(counts?.[o.id]) || 0),
+  }));
+  const total = rows.reduce((s, r) => s + r.count, 0) || 1;
+  return rows.map((r) => ({ ...r, pct: Math.round((r.count / total) * 100) }));
 }

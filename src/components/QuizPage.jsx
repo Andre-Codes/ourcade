@@ -5,6 +5,7 @@ import { getGame } from "../data/games.js";
 import { setQuizResult } from "../lib/store.js";
 import { todayKey } from "../lib/daily.js";
 import ShareButton from "./ShareButton.jsx";
+import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
 export default function QuizPage() {
@@ -47,12 +48,7 @@ export default function QuizPage() {
 
   return (
     <div className="arcade-stage arcade-quiz-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" aria-label="Back to Ourcade">
-          ‹ BACK TO OURCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      <BackBar />
 
       <div className="arcade-quiz">
         {!result ? (

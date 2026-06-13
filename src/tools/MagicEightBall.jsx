@@ -8,10 +8,10 @@ import {
 import { playRare, playEpic, playLegendary, playMythic } from "../lib/blips.js";
 import { renderEightBallCard } from "../lib/eightBallCard.js";
 import { shareImage } from "../lib/share.js";
-import goldenFloppy from "../assets/golden-floppy.png";
-import mythicDisc from "../assets/mythic-disc.png";
-import legendLocked from "../assets/legend-locked.png";
+import { RELICS, RELIC_ASSETS } from "../data/relics.js";
 import legendRays from "../assets/legend-rays.png";
+
+const { goldenFloppy, mythicDisc, legendLocked } = RELIC_ASSETS;
 
 // ── Magic 8-Ball ─────────────────────────────────────────────────────────────
 // Self-contained novelty tool. Injects its own theme. Single screen → the
@@ -185,31 +185,15 @@ const ANSWERS = [
   { text: "Byte Badger rolled a natural 20.", tone: "yes", rarity: "epic" },
   { text: 'Byte Badger says "send it."', tone: "yes", rarity: "epic" },
 
-  // ── LEGENDARY ─────────────────────────────────────────────────────────────
-  // stable ids → the Hall of Legends collection survives text edits
-  { id: "golden-floppy", text: "You have discovered the golden floppy disk.", tone: "yes", rarity: "legendary" },
-  { id: "prophecy", text: "The prophecy is fulfilled.", tone: "yes", rarity: "legendary" },
-  { id: "legendary-drop", text: "A legendary drop has appeared.", tone: "yes", rarity: "legendary" },
-  { id: "internet-owes-you", text: "The internet owes you one.", tone: "yes", rarity: "legendary" },
-  { id: "main-character", text: "Congratulations, you're the main character today.", tone: "yes", rarity: "legendary" },
-  { id: "final-pixel", text: "The final pixel has been found.", tone: "yes", rarity: "legendary" },
-  { id: "developer-mode", text: "You unlocked developer mode.", tone: "yes", rarity: "legendary" },
-  { id: "cheat-code", text: "The cheat code worked.", tone: "yes", rarity: "legendary" },
-  { id: "peak-nostalgia", text: "You have achieved peak nostalgia.", tone: "yes", rarity: "legendary" },
-  { id: "badger-salutes", text: "The badger salutes you.", tone: "yes", rarity: "legendary" },
-
-  // ── MYTHIC ────────────────────────────────────────────────────────────────
-  // ~1 in 2000. Not answers — unearthed cultural relics. Each is a thing you'd
-  // literally read off a screen, which is exactly what the 8-ball window is.
-  { id: "safe-to-turn-off", text: "It is now safe to turn off your computer.", tone: "yes", rarity: "mythic" },
-  { id: "died-of-dysentery", text: "You have died of dysentery.", tone: "no", rarity: "mythic" },
-  { id: "youve-got-mail", text: "You've got mail!", tone: "yes", rarity: "mythic" },
+  // ── LEGENDARY + MYTHIC ──────────────────────────────────────────────────
+  // The collectible tier lives in src/data/relics.js (shared with the profile
+  // awards). Spread in here so they stay rollable as 8-ball answers.
+  ...RELICS,
 ];
 
-// Hall collection, rarest first: mythic relics, then legendaries.
-const MYTHICS = ANSWERS.filter((a) => a.rarity === "mythic");
-const LEGENDS = ANSWERS.filter((a) => a.rarity === "legendary");
-const COLLECTIBLES = [...MYTHICS, ...LEGENDS];
+// Hall collection, rarest first (mythic relics, then legendaries) — already in
+// that order in RELICS.
+const COLLECTIBLES = RELICS;
 
 const TONE = { yes: "#3fffd0", maybe: "#ffd23f", no: "#ff6a8a" };
 

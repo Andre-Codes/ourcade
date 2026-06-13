@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
-import { getTodaysPoll, simulatedTally } from "../data/polls.js";
+import { getTodaysPoll, realTally } from "../data/polls.js";
 import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import { getTodaysFact } from "../data/facts.js";
 import { getTodaysCuriosity } from "../data/curiosities.js";
 import { getCurrentWeirdThing } from "../data/weird.js";
-import { NEXT_GAME_VOTE, nextGameTally } from "../data/nextGame.js";
+import { NEXT_GAME_VOTE, nextGameRealTally } from "../data/nextGame.js";
 import {
   getPollVote,
   setPollVote,
@@ -18,6 +18,42 @@ import {
 import FlashTheater from "./FlashTheater.jsx";
 import ShareButton from "./ShareButton.jsx";
 import byteBadger from "../assets/byte-badger.png";
+
+// Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
+let cloudPromise = null;
+function cloud() {
+  if (typeof window === "undefined") return null;
+  if (!cloudPromise) cloudPromise = import("../lib/cloud.js").catch(() => null);
+  return cloudPromise;
+}
+
+// Live shared counts for a poll id ({} until the first vote anywhere). Drives
+// the REAL tally bars; updates as other people vote.
+function usePollCounts(pollId) {
+  const [counts, setCounts] = useState({});
+  useEffect(() => {
+    if (!pollId) return undefined;
+    let unsub = null;
+    let alive = true;
+    const p = cloud();
+    if (p)
+      p.then((c) => {
+        if (!alive || !c) return;
+        unsub = c.listenPoll(pollId, (m) => alive && setCounts(m || {}));
+      }).catch(() => {});
+    return () => {
+      alive = false;
+      if (unsub) unsub();
+    };
+  }, [pollId]);
+  return counts;
+}
+
+// Fire a shared +1 for an option (browser-only, fire-and-forget).
+function castVote(pollId, optionId) {
+  const p = cloud();
+  if (p) p.then((c) => c && c.votePoll(pollId, optionId)).catch(() => {});
+}
 
 // tiny local copy of Home's star row (kept decoupled so Home stays untouched)
 function Stars({ rating = 0 }) {
@@ -67,15 +103,17 @@ function GameOfTheDay({ dayKey: key }) {
 function DailyPoll({ dayKey: key }) {
   const poll = getTodaysPoll(key);
   const [vote, setVote] = useState(() => (poll ? getPollVote(poll.id) : null));
+  const counts = usePollCounts(poll?.id);
   if (!poll) return null;
 
   const choose = (optId) => {
-    if (vote) return; // one vote per device per day
-    setPollVote(poll.id, optId);
+    if (vote) return; // one vote per device per day (local gate)
+    setPollVote(poll.id, optId); // local: remember + sync to account
+    castVote(poll.id, optId); // shared: +1 the real tally for everyone
     setVote(optId);
   };
 
-  const results = vote ? simulatedTally(poll, vote, key) : null;
+  const results = vote ? realTally(poll, counts) : null;
 
   return (
     <div className="arcade-widget arcade-poll">
@@ -223,16 +261,17 @@ function WeirdThing({ dayKey: key, part }) {
 // ── Next-game roadmap vote (standing fixture, not part of the daily rotation) ─
 function NextGameVote() {
   const vote = NEXT_GAME_VOTE; // pinned — same question every day
-  const key = useMemo(() => todayKey(), []);
   const [picked, setPicked] = useState(() => getPollVote(vote.id));
+  const counts = usePollCounts(vote.id);
 
   const choose = (optId) => {
-    if (picked) return; // one vote per device
+    if (picked) return; // one vote per device (local gate)
     setPollVote(vote.id, optId);
+    castVote(vote.id, optId); // shared: +1 the real roadmap tally
     setPicked(optId);
   };
 
-  const results = picked ? nextGameTally(picked, key) : null;
+  const results = picked ? nextGameRealTally(counts) : null;
 
   return (
     <div className="arcade-nextgame">

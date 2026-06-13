@@ -22,6 +22,7 @@ import {
   limit,
   onSnapshot,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 
 function uid() {
@@ -122,4 +123,29 @@ export async function resolveUsername(name) {
   if (!key) return null;
   const snap = await getDoc(doc(db, "usernames", key));
   return snap.exists() ? snap.data().uid || null : null;
+}
+
+/* ─── M1.5: real shared polls ────────────────────────────────────────────────
+   polls/{pollId} = { counts: { <optionId>: number } }. A vote does a single +1
+   increment on one option; results are read live so every visitor sees the same
+   real tally. Anyone signed in (incl. anonymous) may vote (rules-guarded shape;
+   one-per-device enforced client-side). */
+
+// Cast a vote: +1 to this option's count. Creates the doc on the first ever vote.
+export async function votePoll(pollId, optionId) {
+  if (!pollId || !optionId) return;
+  await setDoc(
+    doc(db, "polls", pollId),
+    { counts: { [optionId]: increment(1) } },
+    { merge: true }
+  );
+}
+
+// Live counts map for a poll ({} until the first vote). Returns the unsubscribe.
+export function listenPoll(pollId, cb) {
+  return onSnapshot(
+    doc(db, "polls", pollId),
+    (snap) => cb((snap.exists() && snap.data().counts) || {}),
+    () => cb({}) // permission/offline → empty, never throw
+  );
 }

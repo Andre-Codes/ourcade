@@ -63,9 +63,36 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Default deny — future collections (polls, archive) get explicit rules
-    // when those milestones land. (archive/* is written by the admin SDK, which
-    // bypasses these rules, so it needs no allow here.)
+    // polls/{pollId} — shared, REAL tally counters: { counts: { <optionId>: n } }.
+    // Public read; ANY signed-in visitor (incl. anonymous) may vote. A vote is a
+    // single +1 to exactly one option's count; nothing else may change. One vote
+    // per device is enforced client-side (localStorage) — the rules just keep the
+    // shape honest. Spoofable via devtools; acceptable for a hobby arcade (same
+    // stance as the score boards). No deletes.
+    match /polls/{pollId} {
+      allow read: if true;
+
+      // First vote creates the doc: a single option at exactly 1, nothing else.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['counts'])
+        && request.resource.data.counts.size() == 1
+        && request.resource.data.counts.values().hasOnly([1]);
+
+      // Subsequent votes: only the `counts` map may exist, and exactly ONE
+      // option key may change (a +1 increment from the client). We can't name
+      // the dynamic key in rules to assert old+1 exactly, but constraining the
+      // write to a single affected count key keeps casual abuse to one bump per
+      // request — the accepted trust model (same as the score boards).
+      allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(['counts'])
+        && request.resource.data.counts.diff(resource.data.counts).affectedKeys().size() == 1;
+
+      allow delete: if false;
+    }
+
+    // Default deny — future collections (archive) get explicit rules when those
+    // milestones land. (archive/* is written by the admin SDK, which bypasses
+    // these rules, so it needs no allow here.)
     match /{document=**} {
       allow read, write: if false;
     }

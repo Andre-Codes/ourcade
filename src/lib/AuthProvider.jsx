@@ -38,7 +38,7 @@ function loadFb() {
 // PUBLIC profiles/{uid} doc (avatar/theme/bio/favorites) so /u/:username works
 // the moment an account is claimed. Local favorites earned as a guest are
 // carried up into the new public profile.
-async function claimUsername(m, uname, forUid, seedFavorites) {
+async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount) {
   const uid = forUid || m.auth.currentUser?.uid;
   const name = uname.trim();
   const key = name.toLowerCase();
@@ -60,6 +60,7 @@ async function claimUsername(m, uname, forUid, seedFavorites) {
         theme: DEFAULT_THEME,
         bio: "",
         favorites: Array.isArray(seedFavorites) ? seedFavorites : [],
+        relicCount: Number(seedRelicCount) || 0,
         createdAt: m.serverTimestamp(),
         updatedAt: m.serverTimestamp(),
       },
@@ -156,15 +157,18 @@ export default function AuthProvider({ children }) {
       cur && cur.isAnonymous
         ? await m.linkWithCredential(cur, cred) // keeps uid + all synced data
         : await m.createUserWithEmailAndPassword(m.auth, email, password);
-    // Carry any favorites earned as a guest into the new public profile.
+    // Carry guest-earned favorites + discovered relic count into the new
+    // public profile.
     let seedFavs = [];
+    let seedRelics = 0;
     try {
       const store = await import("./store.js");
       seedFavs = store.getFavorites();
+      seedRelics = store.getDiscoveredLegendaries().length;
     } catch {
       /* no store / private mode */
     }
-    await claimUsername(m, name, res.user.uid, seedFavs);
+    await claimUsername(m, name, res.user.uid, seedFavs, seedRelics);
     setUser(res.user);
     setUsername(name);
     setProfile({
@@ -173,6 +177,7 @@ export default function AuthProvider({ children }) {
       theme: DEFAULT_THEME,
       bio: "",
       favorites: seedFavs,
+      relicCount: seedRelics,
     });
     return res.user;
   }

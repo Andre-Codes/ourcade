@@ -103,7 +103,17 @@ export function recordLegendary(id) {
   const raw = JSON.stringify(next);
   write("eightball:legends", raw);
   pushUp("eightball:legends", raw);
+  // Mirror a PUBLIC count to the profile (names/graphics stay private; only the
+  // tally is shared so others see "N relics discovered"). Named users only.
+  mirrorRelicCount(next.length);
   return { found: next, isNew: true };
+}
+
+// Push the discovered-relic COUNT to the public profile doc (browser-only,
+// fire-and-forget; no-ops for anon since they have no profile doc).
+export function mirrorRelicCount(count) {
+  const p = cloud();
+  if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ relicCount: count })).catch(() => {});
 }
 
 // ---- magic 8-ball: per-device sound mute (default: not muted) ----

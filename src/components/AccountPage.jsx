@@ -4,6 +4,8 @@ import { useAuth } from "../lib/AuthProvider.jsx";
 import { AVATARS, THEMES } from "../data/profilePresets.js";
 import { GAMES } from "../data/games.js";
 import { getFavorites, toggleFavorite } from "../lib/store.js";
+import ProfileView from "./ProfileView.jsx";
+import BackBar from "./BackBar.jsx";
 
 /* /me — claim an account (username + email + password), log in on a new device,
    or manage the signed-in account. Old-internet style: no social logins, just a
@@ -132,12 +134,7 @@ export default function AccountPage() {
 
   const Shell = (inner) => (
     <div className="arcade-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" title="Back to Ourcade" aria-label="Back to Ourcade">
-          ‹ BACK TO OURCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      <BackBar />
       <div className="arcade-account">{inner}</div>
     </div>
   );
@@ -145,44 +142,86 @@ export default function AccountPage() {
   if (!ready) return Shell(<p className="arcade-account-loading">connecting…</p>);
 
   // ── signed-in (named) account ──────────────────────────────────────────
+  // One profile presentation: a PROFILE tab (the same public-style ProfileView
+  // the world sees), an EDIT tab (avatar/theme/bio/favorites pickers), and an
+  // ACCOUNT tab (email + reset + logout). Defaults to PROFILE so /me opens on
+  // "your arcade", not a config form.
   if (user && !isAnonymous) {
+    const meTab = ["profile", "edit", "account"].includes(tab) ? tab : "profile";
     return Shell(
       <div className="arcade-account-card">
-        <span className="arcade-widget-kicker">👤 YOUR ACCOUNT</span>
-        <h2 className="arcade-account-name">{username || "(no username yet)"}</h2>
-        <p className="arcade-account-email">{user.email}</p>
-        {username && (
-          <p className="arcade-account-notice">
-            <Link to={`/u/${username}`} className="arcade-account-link">view your public profile →</Link>
-          </p>
-        )}
+        <div className="arcade-account-tabs">
+          {[
+            ["profile", "PROFILE"],
+            ["edit", "EDIT"],
+            ["account", "ACCOUNT"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`arcade-account-tab${meTab === id ? " is-active" : ""}`}
+              onClick={() => { setTab(id); setError(null); setNotice(null); }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {notice && <p className="arcade-account-notice">{notice}</p>}
         {error && <p className="arcade-account-error">{error}</p>}
 
-        {username && <ProfileEditor profile={profile} updateProfile={updateProfile} />}
+        {meTab === "profile" && (
+          username ? (
+            <div className="arcade-profile arcade-account-profile">
+              <ProfileView profile={profile} uid={user.uid} username={username} owner />
+            </div>
+          ) : (
+            <p className="arcade-account-blurb">finish setting a username to get a public profile.</p>
+          )
+        )}
 
-        <div className="arcade-account-actions">
-          <button
-            type="button"
-            className="arcade-share"
-            disabled={busy}
-            onClick={() => run(async () => {
-              await resetPassword(user.email);
-              setNotice("Password reset email sent.");
-            })}
-          >
-            ✉ Reset password
-          </button>
-          <button
-            type="button"
-            className="arcade-share"
-            disabled={busy}
-            onClick={() => run(() => signOut())}
-          >
-            ⎋ Log out
-          </button>
-        </div>
-        <p className="arcade-account-foot">your streaks, votes & collection are saved to this account ✦</p>
+        {meTab === "edit" && (
+          username ? (
+            <ProfileEditor profile={profile} updateProfile={updateProfile} />
+          ) : (
+            <p className="arcade-account-blurb">no username yet — nothing to edit.</p>
+          )
+        )}
+
+        {meTab === "account" && (
+          <>
+            <span className="arcade-widget-kicker">👤 YOUR ACCOUNT</span>
+            <h2 className="arcade-account-name">{username || "(no username yet)"}</h2>
+            <p className="arcade-account-email">{user.email}</p>
+            {username && (
+              <p className="arcade-account-notice">
+                <Link to={`/u/${username}`} className="arcade-account-link">view your public profile →</Link>
+              </p>
+            )}
+            <div className="arcade-account-actions">
+              <button
+                type="button"
+                className="arcade-share"
+                disabled={busy}
+                onClick={() => run(async () => {
+                  await resetPassword(user.email);
+                  setNotice("Password reset email sent.");
+                })}
+              >
+                ✉ Reset password
+              </button>
+              <button
+                type="button"
+                className="arcade-share"
+                disabled={busy}
+                onClick={() => run(() => signOut())}
+              >
+                ⎋ Log out
+              </button>
+            </div>
+            <p className="arcade-account-foot">your streaks, votes & collection are saved to this account ✦</p>
+          </>
+        )}
       </div>
     );
   }

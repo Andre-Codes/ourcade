@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { getGame } from "../data/games.js";
 import HighScoreBoard from "./HighScoreBoard.jsx";
+import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
 /* #/scores/:gameId — the standalone home for one game's high-score board.
@@ -13,12 +14,7 @@ export default function ScoresPage() {
 
   return (
     <div className="arcade-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" title="Back to Ourcade" aria-label="Back to Ourcade">
-          ‹ BACK TO OURCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      <BackBar />
 
       {!game || !game.score ? (
         <div className="arcade-notfound">

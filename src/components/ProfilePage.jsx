@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { GAMES, getGame } from "../data/games.js";
-import { themeColor } from "../data/profilePresets.js";
+import ProfileView from "./ProfileView.jsx";
+import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
 /* /u/:username — a user's PUBLIC arcade. Resolves username → uid → the public
-   profiles/{uid} doc, then renders only public material: avatar, bio, themed
-   accent, their ⭐ favorites ("their arcade"), 🏆 per-game bests, join date,
-   and derived badges. Private state (8-ball legends, streak — on users/{uid})
-   never appears here; that stays on the owner's own /me. */
+   profiles/{uid} doc, then renders the shared ProfileView (public flavor).
+   Private state (8-ball legends, streak) never appears here; that stays on the
+   owner's own /me. */
 
-// Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
+// Lazy, guarded cloud import (browser-only seam).
 let cloudPromise = null;
 function cloud() {
   if (typeof window === "undefined") return null;
@@ -18,25 +17,13 @@ function cloud() {
   return cloudPromise;
 }
 
-const SCORED_GAMES = GAMES.filter((g) => g.score);
-
-function joinLabel(profile) {
-  const ts = profile?.createdAt;
-  // Firestore Timestamp → Date (has toDate); tolerate plain/missing values.
-  const d = ts?.toDate ? ts.toDate() : null;
-  if (!d) return null;
-  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
 export default function ProfilePage() {
   const { username } = useParams();
   const [state, setState] = useState({ status: "loading", profile: null, uid: null });
-  const [bests, setBests] = useState([]); // [{ game, score }]
 
   useEffect(() => {
     let alive = true;
     setState({ status: "loading", profile: null, uid: null });
-    setBests([]);
     (async () => {
       const c = await cloud();
       if (!c) {
@@ -49,17 +36,7 @@ export default function ProfilePage() {
         return;
       }
       const profile = await c.readProfile(uid).catch(() => null);
-      if (!alive) return;
-      setState({ status: profile ? "ok" : "notfound", profile, uid });
-      if (!profile) return;
-      // Per-game bests: read this user's entry on each scored board.
-      const rows = await Promise.all(
-        SCORED_GAMES.map(async (g) => {
-          const entry = await c.readScore(g.id, uid).catch(() => null);
-          return entry && typeof entry.score === "number" ? { game: g, score: entry.score } : null;
-        })
-      );
-      if (alive) setBests(rows.filter(Boolean));
+      if (alive) setState({ status: profile ? "ok" : "notfound", profile, uid });
     })();
     return () => {
       alive = false;
@@ -68,12 +45,7 @@ export default function ProfilePage() {
 
   const Shell = (inner) => (
     <div className="arcade-stage">
-      <div className="arcade-cabinet-chrome">
-        <Link to="/" className="arcade-back" title="Back to Ourcade" aria-label="Back to Ourcade">
-          ‹ BACK TO OURCADE
-        </Link>
-        <span className="arcade-cabinet-badge" aria-hidden="true">OURCADE</span>
-      </div>
+      <BackBar />
       <div className="arcade-profile">{inner}</div>
     </div>
   );
@@ -88,80 +60,7 @@ export default function ProfilePage() {
     );
   }
 
-  const p = state.profile;
-  const accent = themeColor(p.theme);
-  const favGames = (Array.isArray(p.favorites) ? p.favorites : [])
-    .map(getGame)
-    .filter(Boolean);
-  const join = joinLabel(p);
-
-  // Derived public badges (computed from public data only).
-  const badges = [];
-  badges.push("✔ Claimed");
-  if (favGames.length) badges.push(`⭐ ${favGames.length} favorite${favGames.length > 1 ? "s" : ""}`);
-  if (bests.length) badges.push(`🏆 ${bests.length} board${bests.length > 1 ? "s" : ""}`);
-
   return Shell(
-    <>
-      <div className="arcade-profile-head" style={{ borderColor: accent }}>
-        <div className="arcade-profile-avatar" style={{ borderColor: accent }}>
-          {p.avatar || "🕹️"}
-        </div>
-        <div className="arcade-profile-id">
-          <h1 className="arcade-profile-name" style={{ color: accent, textShadow: `0 0 18px ${accent}55` }}>
-            {p.username || username}
-          </h1>
-          {p.bio ? <p className="arcade-profile-bio">{p.bio}</p> : null}
-          {join ? <p className="arcade-profile-join">arcade member since {join}</p> : null}
-        </div>
-      </div>
-
-      <div className="arcade-profile-badges">
-        {badges.map((b) => (
-          <span key={b} className="arcade-profile-badge">{b}</span>
-        ))}
-      </div>
-
-      <section className="arcade-profile-section">
-        <h2 className="arcade-profile-section-title">⭐ {p.username || username}&apos;s arcade</h2>
-        {favGames.length ? (
-          <div className="arcade-profile-faves">
-            {favGames.map((g) => (
-              <Link key={g.id} to={`/play/${g.id}`} className="arcade-profile-fave">
-                <span className="arcade-profile-fave-emoji">{g.emoji}</span>
-                <span>{g.title}</span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="arcade-profile-empty">no favorites yet.</p>
-        )}
-      </section>
-
-      <section className="arcade-profile-section">
-        <h2 className="arcade-profile-section-title">🏆 high scores</h2>
-        {bests.length ? (
-          <div className="arcade-profile-faves">
-            {bests
-              .slice()
-              .sort((a, b) => b.score - a.score)
-              .map(({ game, score }) => (
-                <Link key={game.id} to={`/scores/${game.id}`} className="arcade-profile-fave">
-                  <span className="arcade-profile-fave-emoji">{game.emoji}</span>
-                  <span>
-                    {game.title}
-                    <br />
-                    <b style={{ color: accent }}>
-                      {game.score?.format ? game.score.format(score) : score}
-                    </b>
-                  </span>
-                </Link>
-              ))}
-          </div>
-        ) : (
-          <p className="arcade-profile-empty">no ranked scores yet.</p>
-        )}
-      </section>
-    </>
+    <ProfileView profile={state.profile} uid={state.uid} username={username} owner={false} />
   );
 }
