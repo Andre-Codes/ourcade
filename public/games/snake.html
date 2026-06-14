@@ -270,7 +270,12 @@
     }catch(e){}
     return d;
   }
-  function saveDB(){ try{ localStorage.setItem(dbKey(), JSON.stringify(DB)); }catch(e){} }
+  // In PERSONAL mode the cloud is the only source of truth for messages, so we
+  // NEVER persist the relayed inbox/sent to localStorage — otherwise a later boot
+  // would loadDB() a stale cache and flash phantom messages before the live
+  // snapshot lands. The in-memory DB.messages still holds the live snapshot for
+  // rendering; only the persisted copy is emptied. GUEST mode persists normally.
+  function saveDB(){ try{ const toStore = PERSONAL ? { ...DB, messages: [] } : DB; localStorage.setItem(dbKey(), JSON.stringify(toStore)); }catch(e){} }
   function factoryReset(){ DB = clone(DEFAULTS); saveDB(); }
 
   /* Messages transport seam. In GUEST/kiosk mode (the public Snake cabinet) it
@@ -1362,15 +1367,18 @@
       if(e.origin !== location.origin) return;
       const d = e.data; if(!d || typeof d!=='object') return;
       if(d.type==='nopia:identity'){
+        // Clear the message cache ONLY on a genuine account switch (uid changed).
+        // The parent re-sends identity many times for the SAME account (hello reply,
+        // onLoad, late number backfill); clearing on EVERY identity — with no
+        // snapshot in the same tick — is what used to wipe INBOX/SENT and leave them
+        // empty. Repeated same-account identity is now inert; the snapshots stay
+        // authoritative via replacePartition. (And saveDB never persists messages in
+        // PERSONAL, so loadDB() below can't reload a stale inbox anyway.)
+        const switching = IDENTITY && IDENTITY.uid && IDENTITY.uid !== d.uid;
         IDENTITY = { uid:d.uid, number:d.number, username:d.username };
         try{ localStorage.setItem('ourcade:nokia:uid', d.uid||'guest'); }catch(_){}
         DB = loadDB();               // re-namespace local settings/snake to the real uid
-        // In personal mode the CLOUD is the only source of truth for messages.
-        // A stale local messages cache (persisted by saveDB on read/etc.) would
-        // otherwise seed the inbox on boot and flash a phantom unread for a beat
-        // before the cloud snapshot replaces the partition. Start empty; the
-        // nopia:inbox/sent snapshots refill it.
-        DB.messages = [];
+        if(switching) DB.messages = [];
       } else if(d.type==='nopia:contacts'){
         SYNCED = (d.contacts||[]).filter(c=>c && c.number).map(c=>({ name:c.name||c.number, number:c.number }));
       } else if(d.type==='nopia:inbox'){

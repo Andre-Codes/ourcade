@@ -99,18 +99,14 @@ export default function PhonePage() {
     };
 
     window.addEventListener("message", onMessage);
-    // Push identity proactively too (in case the iframe loaded before this
-    // effect mounted and its hello was missed).
-    const idTimer = setTimeout(postIdentity, 300);
-    return () => {
-      window.removeEventListener("message", onMessage);
-      clearTimeout(idTimer);
-    };
+    return () => window.removeEventListener("message", onMessage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claimed]);
 
-  // Re-push identity whenever the number resolves/changes (late backfill).
-  useEffect(() => { if (claimed) postIdentity(); /* eslint-disable-next-line */ }, [number, username, uid, claimed]);
+  // Identity is (re)sent on the iframe's `nopia:hello` and on `onLoad`, each time
+  // paired with a full snapshot push — so a standalone 300ms timer and an
+  // identity-only effect are unnecessary. The iframe also no longer wipes its
+  // messages on identity, so repeated identity sends are inert regardless.
 
   // Relay context snapshots to the iframe whenever they change.
   useEffect(() => { post({ type: "nopia:contacts", contacts: contacts || [] }); }, [contacts]);

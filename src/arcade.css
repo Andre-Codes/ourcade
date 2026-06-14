@@ -564,6 +564,7 @@ main > section + section { margin-top: 44px; }
    enough to show the whole shell (screen + keypad). The phone itself scrolls
    inside the iframe if a device is shorter than this. */
 .arcade-phone-stage {
+  position: relative; /* anchor for the (parked) React MESSAGES overlay */
   width: 100%; max-width: 360px; height: 780px; max-height: 82vh; margin: 0 auto;
   border: 2px solid var(--arcade-border); border-radius: 14px; overflow: hidden;
   background: #000; box-shadow: var(--bevel-in);
@@ -575,6 +576,79 @@ main > section + section { margin-top: 44px; }
 .arcade-phone--page { margin-top: 6px; }
 /* Bigger, taller stage than the cramped /me tab — the phone gets the screen. */
 .arcade-phone-stage--full { max-width: 420px; height: 860px; max-height: 92vh; }
+
+/* ---- PARKED: React MESSAGES overlay styles (NokiaMessages.jsx, currently
+   unwired — messaging lives in the canvas emulator). Kept for possible future
+   use; harmless while no .nokia-msgs element is rendered. ---- */
+.nokia-msgs {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column;
+  background: #0b1410; color: #9fffb0;
+  font-family: 'Press Start 2P', monospace; font-size: 0.56rem; line-height: 1.7;
+  letter-spacing: 0.04em;
+}
+.nokia-msgs-status,
+.nokia-msgs-soft {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; gap: 8px; flex: 0 0 auto;
+  background: #061008; color: #6fe89a;
+  border-bottom: 1px solid #13391f;
+}
+.nokia-msgs-soft { border-bottom: 0; border-top: 1px solid #13391f; }
+.nokia-msgs-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 0; }
+
+.nokia-msgs-list { list-style: none; margin: 0; padding: 0; }
+.nokia-msgs-row {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 10px; border: 0; text-align: left; cursor: pointer;
+  background: transparent; color: inherit; font: inherit; letter-spacing: inherit;
+}
+.nokia-msgs-row:hover,
+.nokia-msgs-row:focus-visible { background: #9fffb0; color: #0b1410; outline: none; }
+.nokia-msgs-row-caret { flex: 0 0 auto; opacity: 0.7; }
+.nokia-msgs-row-label { flex: 1 1 auto; word-break: break-word; }
+.nokia-msgs-row-dot {
+  flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--neon-pink); box-shadow: 0 0 6px rgba(255,77,114,.7);
+}
+
+.nokia-msgs-empty,
+.nokia-msgs-confirm { padding: 24px 12px; text-align: center; }
+.nokia-msgs-confirm-row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+
+.nokia-msgs-view { padding: 4px 12px; }
+.nokia-msgs-view-who { color: #6fe89a; margin-bottom: 12px; }
+.nokia-msgs-view-body { color: #d6ffe0; line-height: 2; word-break: break-word; }
+
+.nokia-msgs-compose { display: flex; flex-direction: column; gap: 12px; padding: 10px 12px; }
+.nokia-msgs-field { display: flex; flex-direction: column; gap: 6px; }
+.nokia-msgs-field span { color: #6fe89a; }
+.nokia-msgs-compose input,
+.nokia-msgs-pick,
+.nokia-msgs-text {
+  width: 100%; box-sizing: border-box; padding: 8px;
+  background: #061008; color: #d6ffe0; border: 1px solid #13391f; border-radius: 4px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.52rem; line-height: 1.8;
+}
+.nokia-msgs-text { resize: none; }
+.nokia-msgs-send {
+  align-self: flex-start; padding: 10px 16px; cursor: pointer;
+  background: #9fffb0; color: #0b1410; border: 0; border-radius: 4px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.56rem; letter-spacing: 0.06em;
+}
+.nokia-msgs-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.nokia-msgs-softkey {
+  padding: 4px 8px; cursor: pointer; color: #9fffb0;
+  background: transparent; border: 1px solid #13391f; border-radius: 4px;
+  font: inherit; letter-spacing: inherit;
+}
+
+.nokia-msgs-toast {
+  position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%);
+  z-index: 6; padding: 8px 12px; max-width: 88%; text-align: center;
+  background: #061008; color: #d6ffe0; border: 1px solid #6fe89a; border-radius: 6px;
+  font-size: 0.52rem;
+}
 
 /* unread bubble on the 📱 nav tab (Home) */
 .arcade-nav-badge {
