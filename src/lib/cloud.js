@@ -17,6 +17,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   collection,
   query,
   orderBy,
@@ -320,15 +321,17 @@ export function listenSent(cb) {
   );
 }
 
-// Flip one of the current user's inbox messages to read=true.
+// Flip one of the current user's inbox messages to read=true. Uses updateDoc (not
+// setDoc+merge) so a wrong/absent msgId FAILS cleanly instead of creating a phantom
+// inbox doc with only { read:true } (no ts/body) that would pollute the collection.
 export async function markRead(msgId) {
   const id = uid();
   if (!id || !msgId) return;
-  await setDoc(
-    doc(db, "messages", id, "inbox", msgId),
-    { read: true },
-    { merge: true }
-  );
+  try {
+    await updateDoc(doc(db, "messages", id, "inbox", msgId), { read: true });
+  } catch {
+    /* doc gone or not an inbox message — never create a partial phantom doc */
+  }
 }
 
 /* ─── M2.5: synced NAMES (contacts) ──────────────────────────────────────────

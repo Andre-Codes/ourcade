@@ -32,6 +32,7 @@ jobs:
       - name: Generate content with Claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: npm run generate
 
       # Curiosities aren't part of the main batch (durable Wikipedia-backed
@@ -41,6 +42,7 @@ jobs:
         continue-on-error: true
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: npm run generate:curiosities
 
       - name: Verify date-seeded rotation still holds

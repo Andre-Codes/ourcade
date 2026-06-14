@@ -51,6 +51,17 @@ export default function PhonePage() {
     const s = stateRef.current;
     post({ type: "nopia:identity", uid: s.uid, number: s.number, username: s.username });
   };
+  // Push the full current snapshot set from the latest context (via stateRef) to
+  // the iframe. Called whenever the iframe (re)loads — on a fresh load the iframe
+  // zeroes its DB.messages and only refills from these relays, so we must re-push
+  // the complete set every time it comes up, not rely on the mount-time relay
+  // effects (which can fire before the reloaded iframe's listener is live).
+  const pushSnapshots = () => {
+    const s = stateRef.current;
+    post({ type: "nopia:contacts", contacts: s.contacts || [] });
+    post({ type: "nopia:inbox", messages: s.inbox || [] });
+    post({ type: "nopia:sent", messages: s.sent || [] });
+  };
 
   // ── Bridge: identity handshake + inbound iframe messages → context actions ──
   useEffect(() => {
@@ -66,10 +77,7 @@ export default function PhonePage() {
       if (d.type === "nopia:hello") {
         postIdentity();
         // Push the current snapshots right away so a freshly-loaded phone fills in.
-        const s = stateRef.current;
-        post({ type: "nopia:contacts", contacts: s.contacts });
-        post({ type: "nopia:inbox", messages: s.inbox });
-        post({ type: "nopia:sent", messages: s.sent });
+        pushSnapshots();
       } else if (d.type === "ourcade:score" && d.gameId === "snake") {
         const n = Number(d.score);
         if (!Number.isNaN(n)) a.submit(n);
@@ -154,6 +162,7 @@ export default function PhonePage() {
             src={import.meta.env.BASE_URL + "games/snake.html?personal=1"}
             title="Your Nopia phone"
             allow="autoplay; fullscreen; gamepad"
+            onLoad={() => { postIdentity(); pushSnapshots(); }}
           />
         </div>
       </div>

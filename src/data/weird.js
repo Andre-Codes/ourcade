@@ -9,7 +9,7 @@
    Phase 2 cron with genuinely-current finds) layers on top of the day pool.
    Pure JS — importable by the home UI and by scripts/daily-check.js. */
 
-import { rotateIntraday, rotateDaily, dayPart, DAY_PART_COUNT } from "../lib/daily.js";
+import { rotateIntraday, rotateDaily, dayPart } from "../lib/daily.js";
 import generated from "./generated/weird.js";
 import { MANUAL_WEIRD, MANUAL_WEIRD_NIGHT } from "./manual.js";
 import { activeSchedule } from "./schedule.js";
@@ -36,13 +36,19 @@ export const WEIRD_NIGHT = MANUAL_WEIRD_NIGHT;
 
 const SALT = 707; // independent of every other rotation
 const NIGHT_SALT = 717; // the night pool rotates on its own order
+// ~every 3h — the daytime weird thing freshens through the day. Exported so the
+// headless checker (scripts/daily-check.js) can drive every block deterministically.
+export const WEIRD_BLOCKS_PER_DAY = 8;
 
 // The current weird thing for this part of the day.
 //   • night  → a fresh pick from the dreamy night pool, changing each night.
-//   • else   → the main pool indexed by the day-part (so morning/afternoon/
-//              evening each differ), reusing rotateIntraday's headless block arg.
-// `part` defaults to the live local part; scripts pass an explicit one.
-export function getCurrentWeirdThing(key, part = dayPart()) {
+//   • else   → the main pool stepped through WEIRD_BLOCKS_PER_DAY ~3h blocks, so
+//              a daytime visitor sees a fresh pick every few hours (not just the
+//              3 day-part boundaries). rotateIntraday derives the live block from
+//              the wall clock (honoring ?hour=) when no explicit block is passed.
+// `part` is only used to detect night; daytime rotation is block-driven. `block`
+// overrides the wall-clock block (headless QA only — scripts/daily-check.js).
+export function getCurrentWeirdThing(key, part = dayPart(), block) {
   // The 🌙 late-night secret pool is sacred — dev-scheduled weird things only
   // affect the daytime parts.
   if (part?.id === "night") {
@@ -50,8 +56,7 @@ export function getCurrentWeirdThing(key, part = dayPart()) {
     return rotateDaily(pool, key, NIGHT_SALT);
   }
   const { pinned, pool: extra } = activeSchedule("weird", key);
-  const idx = part?.index ?? 0;
-  if (pinned.length) return rotateIntraday(pinned, key, DAY_PART_COUNT, SALT, idx);
+  if (pinned.length) return rotateIntraday(pinned, key, WEIRD_BLOCKS_PER_DAY, SALT, block);
   const base = WEIRD.length ? WEIRD : FALLBACK;
-  return rotateIntraday([...base, ...extra], key, DAY_PART_COUNT, SALT, idx);
+  return rotateIntraday([...base, ...extra], key, WEIRD_BLOCKS_PER_DAY, SALT, block);
 }

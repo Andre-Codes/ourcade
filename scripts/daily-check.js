@@ -13,7 +13,7 @@ import { QUIZZES, getTodaysQuiz } from "../src/data/quizzes.js";
 import { getTodaysTip } from "../src/data/flavor.js";
 import { FACTS, getTodaysFact, PERIOD_DAYS as FACT_PERIOD } from "../src/data/facts.js";
 import { CURIOSITIES, getTodaysCuriosity } from "../src/data/curiosities.js";
-import { WEIRD, WEIRD_NIGHT, getCurrentWeirdThing } from "../src/data/weird.js";
+import { WEIRD, WEIRD_NIGHT, getCurrentWeirdThing, WEIRD_BLOCKS_PER_DAY } from "../src/data/weird.js";
 import { getDayPartGreeting } from "../src/data/dayparts.js";
 import { staticArtifacts } from "../src/data/stumble.js";
 import { urlKey } from "./lib/validate-urls.js";
@@ -62,10 +62,11 @@ console.log(`\nsample mascot tip (day 1): ${getTodaysTip(keys[0])}`);
 console.log(`sample game fact (day 1): ${getTodaysFact(keys[0])}`);
 console.log(`sample curiosity (day 1): ${getTodaysCuriosity(keys[0])?.title}`);
 console.log(
-  "weird by part (day 1): " +
-    ["morning", "afternoon", "evening", "night"]
-      .map((id) => `${PARTS[id].emoji} ${getCurrentWeirdThing(keys[0], PARTS[id])?.title?.slice(0, 22)}`)
-      .join(" · ")
+  "weird by block (day 1): " +
+    Array.from({ length: WEIRD_BLOCKS_PER_DAY }, (_, b) =>
+      `${b}:${getCurrentWeirdThing(keys[0], PARTS.afternoon, b)?.title?.slice(0, 16)}`
+    ).join(" · ") +
+    ` · 🌙 ${getCurrentWeirdThing(keys[0], PARTS.night)?.title?.slice(0, 16)}`
 );
 console.log("");
 
@@ -131,20 +132,24 @@ check(
   ) && ["morning", "afternoon", "evening", "night"].every((id) => !!getDayPartGreeting(PARTS[id], k0))
 );
 
-// Weird thing — daytime: deterministic per part, and the three daytime parts
-// give DISTINCT picks on a given day (morning ≠ afternoon ≠ evening).
+// Weird thing — daytime: now stepped through WEIRD_BLOCKS_PER_DAY ~3h blocks
+// (block-driven, not day-part-driven), so it freshens several times through the
+// day. Deterministic per block, and the blocks give many DISTINCT picks per day.
 check(
-  "weird thing deterministic per part",
-  getCurrentWeirdThing(k0, PARTS.afternoon).id === getCurrentWeirdThing(k0, PARTS.afternoon).id
+  "weird thing deterministic per block",
+  getCurrentWeirdThing(k0, PARTS.afternoon, 3).id ===
+    getCurrentWeirdThing(k0, PARTS.afternoon, 3).id
 );
 {
-  const dayPicks = ["morning", "afternoon", "evening"].map(
-    (id) => getCurrentWeirdThing(k0, PARTS[id]).id
+  // Drive every block of the day with an explicit block arg (PARTS.afternoon just
+  // keeps us out of the separate night-pool branch).
+  const blockPicks = Array.from({ length: WEIRD_BLOCKS_PER_DAY }, (_, b) =>
+    getCurrentWeirdThing(k0, PARTS.afternoon, b).id
   );
   check(
-    "weird thing: 3 daytime parts distinct",
-    new Set(dayPicks).size === 3,
-    `${new Set(dayPicks).size}/3 unique`
+    `weird thing: ${WEIRD_BLOCKS_PER_DAY} daily blocks give >3 distinct picks`,
+    new Set(blockPicks).size > 3,
+    `${new Set(blockPicks).size}/${WEIRD_BLOCKS_PER_DAY} unique`
   );
 }
 
