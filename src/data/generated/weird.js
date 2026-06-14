@@ -2,59 +2,62 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-wplace",
-    "title": "A 4-trillion-pixel canvas the whole planet is fighting over",
-    "blurb": "Pick a tile, paint the world, watch a stranger paint over it three seconds later. It's the pixel-war energy of every group project you've ever survived.",
-    "url": "https://wplace.live"
-  },
-  {
-    "id": "gw-museum-endangered-sounds",
-    "title": "A museum for the dying sounds of old tech",
-    "blurb": "Dial-up handshakes, the Windows 95 chime, dot-matrix printer screams — all lovingly preserved here so your nervous system can flinch nostalgically.",
-    "url": "http://savethesounds.info",
-    "foundNote": "basically a petting zoo for noises"
-  },
-  {
-    "id": "gw-one-more-tab",
-    "title": "A game that rewards you for never closing a tab",
-    "blurb": "Open it, forget it, and let your chronic tab-hoarding finally pay off with an actual rank. Vindication for the 47 tabs you swore you'd read.",
-    "url": "https://onemoretab.com"
-  },
-  {
-    "id": "gw-procatinator",
-    "title": "Cat GIFs that hit on the beat, forever",
-    "blurb": "Every refresh pairs a random cat with a song so perfectly it feels intentional. It is not intentional. That's the magic.",
-    "url": "http://procatinator.com"
-  },
-  {
-    "id": "gw-kottke",
-    "title": "A personal blog that's been posting curiosities since dial-up days",
-    "blurb": "One of the web's longest-running blogs, still hand-pouring delightful internet finds daily — and still without a paywall, which is basically a unicorn now.",
-    "url": "https://kottke.org",
-    "foundNote": "online since 1998"
-  },
-  {
-    "id": "gw-hn-popularity",
-    "title": "A hand-ranked leaderboard of personal blogs",
-    "blurb": "Someone is lovingly tracking how indie blogs perform on Hacker News and scoring them by hand. Pure early-web 'I made a thing' spirit.",
-    "url": "https://refactoringenglish.com/tools/hn-popularity/"
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker game that simulates internet brain rot — and judges you for it",
+    "blurb": "Neal Agarwal's Stimulation Clicker piles on autoplay videos, notifications, and rain ASMR until your screen looks like 14 browser tabs at once. It's a parody of your own attention span, and you'll keep clicking anyway.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "foundNote": "dropped 2025, already too real"
   },
   {
     "id": "gw-koalas-to-the-max",
-    "title": "A blurry blob that slowly resolves into a koala",
-    "blurb": "Click to split each pixel-square in half until a hidden picture emerges. It's meditative, it's pointless, and you will absolutely finish all of them.",
-    "url": "https://www.koalastothemax.com"
+    "title": "Drag your cursor to split circles until a koala appears",
+    "blurb": "Big circles become smaller circles become an actual picture, one calming subdivision at a time. It's fractal busywork for the part of your brain that misses screensavers.",
+    "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "title": "A site that screams 'COW' louder as you get warmer",
-    "blurb": "There's an invisible cow somewhere on your screen and your job is to find it by following a voice that gets increasingly unhinged. Headphones recommended.",
+    "id": "gw-music-map",
+    "title": "A spiderweb map of bands that sound like your bands",
+    "blurb": "Type an artist and watch a constellation of similar acts float into place — the closer the name, the closer the vibe. It's the 'fans also like' shelf as a galaxy.",
+    "url": "https://music-map.com"
+  },
+  {
+    "id": "gw-xxiivv-webring",
+    "title": "A still-spinning webring for people who build their own weird websites",
+    "blurb": "Hop from one handmade site to the next — diaries, wikis, portfolios, all stubbornly un-corporate. Proof the old-internet 'next site →' button never actually died.",
+    "url": "https://webring.xxiivv.com",
+    "foundNote": "webrings: undefeated"
+  },
+  {
+    "id": "gw-floppy-club",
+    "title": "A club for people who still love floppy disks",
+    "blurb": "1.44mb.club is a tiny ring for folks who make art on floppies — or just keep them around because the little squares are pretty. Save icon: now a lifestyle.",
+    "url": "https://1.44mb.club",
+    "foundNote": "1.44 megabytes of pure nostalgia"
+  },
+  {
+    "id": "gw-collaborative-sentence",
+    "title": "A single sentence the whole internet has been writing since 1994",
+    "blurb": "Douglas Davis started one run-on thought and let anyone on Earth keep adding to it — and they still are. It's a museum piece you can vandalize on purpose.",
+    "url": "https://whitney.org/artport/douglas-davis",
+    "foundNote": "older than most of the internet"
+  },
+  {
+    "id": "gw-invisible-cow",
+    "title": "Find an invisible cow by yelling 'cow' louder as you get closer",
+    "blurb": "Your mouse is hot-or-cold and the site screams 'COW' with increasing urgency until you find the thing you cannot see. Peak computer-lab energy.",
     "url": "https://findtheinvisiblecow.com"
   },
   {
-    "id": "gw-weavesilk",
-    "title": "Draw glowing symmetrical silk with your mouse",
-    "blurb": "Drag the cursor and it mirrors into impossibly pretty fractal ribbons. Five minutes here and you'll feel like a screensaver from 2004 in the best way.",
+    "id": "gw-falling-falling",
+    "title": "An infinite waterfall of color that falls forever with a hum",
+    "blurb": "Endless gradients pour down the screen with an ambient drone. It's a lava lamp for your browser tab — open it, forget it, find it three hours later.",
+    "url": "https://www.fallingfalling.com",
+    "foundNote": "sound on, lights off"
+  },
+  {
+    "id": "gw-weave-silk",
+    "title": "Draw glowing, symmetrical silk that mirrors itself as you go",
+    "blurb": "Every stroke blooms into kaleidoscope ribbons of light. You're not good at art — but Silk makes everything you do look like a CD-ROM screensaver from heaven.",
     "url": "http://weavesilk.com"
   }
 ];
