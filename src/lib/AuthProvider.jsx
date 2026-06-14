@@ -100,7 +100,15 @@ export default function AuthProvider({ children }) {
       const mergedTop8 = cloudTop8.length ? cloudTop8 : localTop8;
       if (store) store.setTop8Local(mergedTop8);
 
-      const next = { ...(prof || {}), favorites: merged, top8: mergedTop8 };
+      // Relic COUNT self-heal: the public badge other viewers see reads
+      // profiles/{uid}.relicCount, but relics found before the mirror existed (or
+      // in a session where the write never landed) leave it stale/missing. The
+      // owner's local discovery list is the truth — if it's higher, push it up.
+      const localRelics = store ? store.getDiscoveredLegendaries().length : 0;
+      const cloudRelics = Number(prof?.relicCount || 0);
+      const relicCount = Math.max(localRelics, cloudRelics);
+
+      const next = { ...(prof || {}), favorites: merged, top8: mergedTop8, relicCount };
       setProfile(next);
       // If local had favorites the cloud was missing, push the union up once.
       if (prof && merged.length !== cloudFavs.length) {
@@ -111,6 +119,11 @@ export default function AuthProvider({ children }) {
       if (prof && !cloudTop8.length && localTop8.length) {
         const c = await import("./cloud.js").catch(() => null);
         c?.writeProfile?.({ top8: mergedTop8 }).catch(() => {});
+      }
+      // Backfill the public relic count if the owner's local truth is higher.
+      if (prof && localRelics > cloudRelics) {
+        const c = await import("./cloud.js").catch(() => null);
+        c?.writeProfile?.({ relicCount: localRelics }).catch(() => {});
       }
       // Lazy phone-number backfill: pre-M2 accounts (claimed before the Nopia
       // phone shipped) have no number yet — mint one, once per session, and
@@ -142,7 +155,9 @@ export default function AuthProvider({ children }) {
           }
           setUser(u);
           setReady(true);
-          import("./store.js").then((s) => s.hydrateFromCloud(u.uid)).catch(() => {});
+          const hydrated = import("./store.js")
+            .then((s) => s.hydrateFromCloud(u.uid))
+            .catch(() => {});
           if (u.isAnonymous) {
             setUsername(null);
             setProfile(null);
@@ -153,6 +168,9 @@ export default function AuthProvider({ children }) {
             } catch {
               setUsername(null);
             }
+            // Wait for the local cache to hydrate first so the relicCount/Top 8
+            // carry-up reads the account's real local truth, not an empty cache.
+            await hydrated;
             loadProfile(m, u.uid);
           }
         });

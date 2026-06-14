@@ -50,3 +50,13 @@ export async function randomAnimation(excludeId) {
     excludeId && pool.length > 1 ? pool.filter((a) => a.id !== excludeId) : pool;
   return list[Math.floor(Math.random() * list.length)];
 }
+
+// Resolve a specific animation by id (for deep links like /flash?play=<id>).
+// Checks the eager featured set first, then the lazy pool; null if unknown.
+export async function findAnimation(id) {
+  if (!id) return null;
+  const inFeatured = FEATURED.find((a) => a.id === id);
+  if (inFeatured) return inFeatured;
+  const pool = await loadPool();
+  return pool.find((a) => a.id === id) || null;
+}

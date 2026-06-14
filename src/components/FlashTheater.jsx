@@ -14,9 +14,9 @@ import Top8HeartButton from "./Top8HeartButton.jsx";
 // the whole pool IN PLACE (no navigation). key={anim.id} forces a clean iframe
 // remount so the new SWF actually reloads on swap. The full pool loads lazily on
 // the first stumble (randomAnimation is async), so there's a brief busy state.
-export default function FlashTheater({ dayKey, compact = false, browseTo }) {
+export default function FlashTheater({ dayKey, compact = false, browseTo, initialAnim }) {
   const [anim, setAnim] = useState(
-    () => getTodaysAnimation(dayKey) || FEATURED[0]
+    () => initialAnim || getTodaysAnimation(dayKey) || FEATURED[0]
   );
   const [busy, setBusy] = useState(false);
   if (!anim) return null;

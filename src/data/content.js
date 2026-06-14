@@ -38,7 +38,8 @@ function resolveFlash(id, title) {
   const f = FEATURED.find((a) => a.id === id);
   const t = title || f?.title;
   if (!t) return null; // not in the eager set and no stored title → can't show it
-  return { type: "flash", id, icon: ICON.flash, title: t, href: `https://archive.org/details/${id}` };
+  // Open in Ourcade's own flash viewer (/flash?play=<id>), not archive.org.
+  return { type: "flash", id, icon: ICON.flash, title: t, to: `/flash?play=${encodeURIComponent(id)}` };
 }
 
 // Resolve one Top 8 entry → display info, or null if it can't be shown.
