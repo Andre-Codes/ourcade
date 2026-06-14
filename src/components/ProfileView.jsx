@@ -39,10 +39,47 @@ function ownerRelics() {
   return RELICS.filter((r) => found.has(r.id)).map((r) => ({ ...r, at: found.get(r.id) }));
 }
 
+// A read popup for Top 8 items that have no destination of their own (a game
+// fact, say) — tapping the tile opens the full text here. Closes on the ✕,
+// backdrop click, or Escape.
+function Top8Popup({ item: it, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const kicker = { fact: "💡 game fact", curiosity: "🌌 curiosity", weird: "🔍 weird thing" }[it.type] || it.icon;
+  return (
+    <div className="arcade-top8-modal-bg" onClick={onClose}>
+      <div
+        className="arcade-top8-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={it.sub || it.type}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="arcade-top8-modal-close"
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <span className="arcade-top8-modal-kicker">{kicker}</span>
+        <p className="arcade-top8-modal-body">{it.title}</p>
+      </div>
+    </div>
+  );
+}
+
 // One Top 8 slot. Games link to /play (internal), curiosity/weird/flash open
-// their source in a new tab, facts are plain text. The owner gets a ✕ to clear
-// the slot (stopPropagation so it never triggers the tile's own link).
+// their source in a new tab. Items with no destination of their own (facts) are
+// tappable too — they open a read popup with the full text. The owner gets a ✕
+// to clear the slot (stopPropagation so it never triggers the tile's action).
 function Top8Tile({ item: it, owner, onRemove }) {
+  const [open, setOpen] = useState(false);
   const inner = (
     <>
       <span className="arcade-profile-fave-emoji">{it.icon}</span>
@@ -86,10 +123,20 @@ function Top8Tile({ item: it, owner, onRemove }) {
       </a>
     );
   }
+  // No link of its own → a button that pops up the full text to read. The owner's
+  // ✕ is a sibling (a <button> can't nest a <button>), positioned by the wrapper.
   return (
-    <div className="arcade-profile-fave arcade-top8-tile is-static">
-      {inner}
+    <div className="arcade-top8-tilewrap">
+      <button
+        type="button"
+        className="arcade-profile-fave arcade-top8-tile is-static"
+        title="Tap to read"
+        onClick={() => setOpen(true)}
+      >
+        {inner}
+      </button>
       {remove}
+      {open && <Top8Popup item={it} onClose={() => setOpen(false)} />}
     </div>
   );
 }
