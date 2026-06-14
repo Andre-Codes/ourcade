@@ -2,62 +2,58 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that simulates internet brain rot — and judges you for it",
-    "blurb": "Neal Agarwal's Stimulation Clicker piles on autoplay videos, notifications, and rain ASMR until your screen looks like 14 browser tabs at once. It's a parody of your own attention span, and you'll keep clicking anyway.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "foundNote": "dropped 2025, already too real"
+    "id": "gw-centennial-bulb",
+    "title": "A 24/7 cam pointed at a lightbulb from 1901",
+    "blurb": "A California firehouse bulb has been glowing since before sliced bread, and there's a livestream so you can confirm it's still on. Outlived your phone, your charger, and your last three laptops.",
+    "url": "https://www.centennialbulb.org/cam.htm",
+    "foundNote": "burning since 1901"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "Drag your cursor to split circles until a koala appears",
-    "blurb": "Big circles become smaller circles become an actual picture, one calming subdivision at a time. It's fractal busywork for the part of your brain that misses screensavers.",
-    "url": "https://koalastothemax.com"
+    "id": "gw-bruno-simon",
+    "title": "A résumé you play by driving a tiny car",
+    "blurb": "A developer built his entire portfolio as a 3D world you explore by zooming a little toy car around. Imagine if your school's 'About Me' PowerPoint had a working gas pedal.",
+    "url": "https://bruno-simon.com"
   },
   {
-    "id": "gw-music-map",
-    "title": "A spiderweb map of bands that sound like your bands",
-    "blurb": "Type an artist and watch a constellation of similar acts float into place — the closer the name, the closer the vibe. It's the 'fans also like' shelf as a galaxy.",
-    "url": "https://music-map.com"
+    "id": "gw-ncase",
+    "title": "Serious topics, turned into toys you can poke",
+    "blurb": "Nicky Case makes little playable essays that explain big ideas by letting you fiddle with the gears yourself. Like a Flash tutorial that actually wanted you to learn something.",
+    "url": "https://ncase.me"
   },
   {
-    "id": "gw-xxiivv-webring",
-    "title": "A still-spinning webring for people who build their own weird websites",
-    "blurb": "Hop from one handmade site to the next — diaries, wikis, portfolios, all stubbornly un-corporate. Proof the old-internet 'next site →' button never actually died.",
-    "url": "https://webring.xxiivv.com",
-    "foundNote": "webrings: undefeated"
+    "id": "gw-zen-zone",
+    "title": "Move your mouse, make calm shapes",
+    "blurb": "Drag your cursor around and generative ribbons of color follow it like a screensaver that loves you. Best viewed when you're supposed to be doing something else.",
+    "url": "https://thezen.zone"
   },
   {
-    "id": "gw-floppy-club",
-    "title": "A club for people who still love floppy disks",
-    "blurb": "1.44mb.club is a tiny ring for folks who make art on floppies — or just keep them around because the little squares are pretty. Save icon: now a lifestyle.",
-    "url": "https://1.44mb.club",
-    "foundNote": "1.44 megabytes of pure nostalgia"
+    "id": "gw-pixel-thoughts",
+    "title": "A 60-second meditation that yeets your worry into space",
+    "blurb": "Type whatever's stressing you out, watch it shrink into a star, and let it drift off for one minute. Cheaper than therapy, slower than panicking.",
+    "url": "https://pixelthoughts.co"
   },
   {
-    "id": "gw-collaborative-sentence",
-    "title": "A single sentence the whole internet has been writing since 1994",
-    "blurb": "Douglas Davis started one run-on thought and let anyone on Earth keep adding to it — and they still are. It's a museum piece you can vandalize on purpose.",
-    "url": "https://whitney.org/artport/douglas-davis",
-    "foundNote": "older than most of the internet"
+    "id": "gw-nicest-place",
+    "title": "An endless stream of strangers hugging you",
+    "blurb": "Real people filmed themselves opening their arms for a virtual hug, and it just keeps playing. The exact opposite vibe of every comments section ever made.",
+    "url": "https://thenicestplace.net"
+  },
+  {
+    "id": "gw-koalas",
+    "title": "Find one koala by clicking forever",
+    "blurb": "Tap to split big colored circles into smaller ones until a hidden koala slowly comes into focus. Strangely meditative, secretly a sneaky binary-search lesson.",
+    "url": "http://www.koalastothemax.com"
   },
   {
     "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by yelling 'cow' louder as you get closer",
-    "blurb": "Your mouse is hot-or-cold and the site screams 'COW' with increasing urgency until you find the thing you cannot see. Peak computer-lab energy.",
+    "title": "Find an invisible cow by yelling at your screen",
+    "blurb": "It tells you you're getting 'WARMER' as you drag your mouse toward a cow you cannot see, narrated by a guy fully committed to the bit. The 'MOO' payoff is worth it.",
     "url": "https://findtheinvisiblecow.com"
   },
   {
-    "id": "gw-falling-falling",
-    "title": "An infinite waterfall of color that falls forever with a hum",
-    "blurb": "Endless gradients pour down the screen with an ambient drone. It's a lava lamp for your browser tab — open it, forget it, find it three hours later.",
-    "url": "https://www.fallingfalling.com",
-    "foundNote": "sound on, lights off"
-  },
-  {
-    "id": "gw-weave-silk",
-    "title": "Draw glowing, symmetrical silk that mirrors itself as you go",
-    "blurb": "Every stroke blooms into kaleidoscope ribbons of light. You're not good at art — but Silk makes everything you do look like a CD-ROM screensaver from heaven.",
+    "id": "gw-weavesilk",
+    "title": "Draw glowing symmetrical space-art with your mouse",
+    "blurb": "Every stroke mirrors and shimmers until you've accidentally made something gallery-worthy. The closest most of us will ever get to being a Windows Media Player visualizer.",
     "url": "http://weavesilk.com"
   }
 ];
