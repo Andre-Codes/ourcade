@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { GAMES, getGame } from "../data/games.js";
 import { themeColor } from "../data/profilePresets.js";
 import { RELICS, relicIcon } from "../data/relics.js";
-import { getDiscoveredLegendaries } from "../lib/store.js";
+import { getDiscoveredLegendaries, getTop8, removeTop8 } from "../lib/store.js";
+import { resolveTop8 } from "../data/content.js";
 
 /* ProfileView — the SHARED presentation of an arcade profile. Rendered both on
    the public /u/:username page and on the owner's own /me (PROFILE tab), so the
@@ -38,8 +39,75 @@ function ownerRelics() {
   return RELICS.filter((r) => found.has(r.id)).map((r) => ({ ...r, at: found.get(r.id) }));
 }
 
+// One Top 8 slot. Games link to /play (internal), curiosity/weird/flash open
+// their source in a new tab, facts are plain text. The owner gets a ✕ to clear
+// the slot (stopPropagation so it never triggers the tile's own link).
+function Top8Tile({ item: it, owner, onRemove }) {
+  const inner = (
+    <>
+      <span className="arcade-profile-fave-emoji">{it.icon}</span>
+      <span>{it.title}</span>
+    </>
+  );
+  const remove = owner ? (
+    <button
+      type="button"
+      className="arcade-top8-remove"
+      title="Remove from your Top 8"
+      aria-label="Remove from your Top 8"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onRemove(it.type, it.id);
+      }}
+    >
+      ✕
+    </button>
+  ) : null;
+
+  if (it.to) {
+    return (
+      <Link to={it.to} className="arcade-profile-fave arcade-top8-tile">
+        {inner}
+        {remove}
+      </Link>
+    );
+  }
+  if (it.href) {
+    return (
+      <a
+        href={it.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="arcade-profile-fave arcade-top8-tile"
+      >
+        {inner}
+        {remove}
+      </a>
+    );
+  }
+  return (
+    <div className="arcade-profile-fave arcade-top8-tile is-static">
+      {inner}
+      {remove}
+    </div>
+  );
+}
+
 export default function ProfileView({ profile: p, uid, username, owner = false }) {
   const [bests, setBests] = useState([]); // [{ game, score }]
+
+  // Top 8: the owner reads live local truth (so a just-hearted item shows at
+  // once + can be removed here), staying in sync via the shared store event; a
+  // public viewer reads the mirrored profile array. Same split as relics.
+  const [ownerTop8, setOwnerTop8] = useState(() => (owner ? getTop8() : []));
+  useEffect(() => {
+    if (!owner) return;
+    const sync = () => setOwnerTop8(getTop8());
+    sync();
+    window.addEventListener("ourcade:storechange", sync);
+    return () => window.removeEventListener("ourcade:storechange", sync);
+  }, [owner]);
 
   useEffect(() => {
     if (!uid) return;
@@ -70,9 +138,15 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   const myRelics = owner ? ownerRelics() : [];
   const relicCount = owner ? myRelics.length : Number(p?.relicCount || 0);
 
+  // Top 8: owner = live local; public = mirrored array. Resolve each { type, id }
+  // to display info, dropping any that no longer resolve (removed/renamed item).
+  const rawTop8 = owner ? ownerTop8 : Array.isArray(p?.top8) ? p.top8 : [];
+  const top8 = rawTop8.map(resolveTop8).filter(Boolean);
+
   // Derived public badges (computed from public data only).
   const badges = ["✔ Claimed"];
   if (favGames.length) badges.push(`⭐ ${favGames.length} favorite${favGames.length > 1 ? "s" : ""}`);
+  if (top8.length) badges.push(`❤️ Top ${top8.length}`);
   if (bests.length) badges.push(`🏆 ${bests.length} board${bests.length > 1 ? "s" : ""}`);
   if (relicCount) badges.push(`💾 ${relicCount} relic${relicCount > 1 ? "s" : ""}`);
 
@@ -115,6 +189,24 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
           <p className="arcade-profile-empty">no favorites yet.</p>
         )}
       </section>
+
+      {/* ── Top 8 — a MySpace-style showcase of anything in the arcade (flash,
+           curiosity, fact, weird thing, game). Visible to every viewer; the owner
+           also gets a ✕ to clear a slot. Hidden for visitors when empty. ── */}
+      {(owner || top8.length > 0) && (
+        <section className="arcade-profile-section">
+          <h2 className="arcade-profile-section-title">❤️ {name}&apos;s Top 8</h2>
+          {top8.length ? (
+            <div className="arcade-profile-faves">
+              {top8.map((it) => (
+                <Top8Tile key={`${it.type}:${it.id}`} item={it} owner={owner} onRemove={removeTop8} />
+              ))}
+            </div>
+          ) : (
+            <p className="arcade-profile-empty">no Top 8 yet — tap the ❤️ on anything around the arcade.</p>
+          )}
+        </section>
+      )}
 
       <section className="arcade-profile-section">
         <h2 className="arcade-profile-section-title">🏆 high scores</h2>

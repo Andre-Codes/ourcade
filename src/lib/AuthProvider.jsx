@@ -42,7 +42,7 @@ function loadFb() {
 // PUBLIC profiles/{uid} doc (avatar/theme/bio/favorites) so /u/:username works
 // the moment an account is claimed. Local favorites earned as a guest are
 // carried up into the new public profile.
-async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount) {
+async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount, seedTop8) {
   const uid = forUid || m.auth.currentUser?.uid;
   const name = uname.trim();
   const key = name.toLowerCase();
@@ -65,6 +65,7 @@ async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount) {
         bio: "",
         favorites: Array.isArray(seedFavorites) ? seedFavorites : [],
         relicCount: Number(seedRelicCount) || 0,
+        top8: Array.isArray(seedTop8) ? seedTop8 : [],
         createdAt: m.serverTimestamp(),
         updatedAt: m.serverTimestamp(),
       },
@@ -91,12 +92,25 @@ export default function AuthProvider({ children }) {
       const cloudFavs = Array.isArray(prof?.favorites) ? prof.favorites : [];
       const merged = Array.from(new Set([...cloudFavs, ...localFavs]));
       if (store) store.setFavoritesLocal(merged);
-      const next = { ...(prof || {}), favorites: merged };
+
+      // Top 8 is an ORDERED, capped showcase (not a set), so a union could exceed
+      // 8 / reorder — cloud wins when it has any, else carry up the guest's local.
+      const localTop8 = store ? store.getTop8() : [];
+      const cloudTop8 = Array.isArray(prof?.top8) ? prof.top8 : [];
+      const mergedTop8 = cloudTop8.length ? cloudTop8 : localTop8;
+      if (store) store.setTop8Local(mergedTop8);
+
+      const next = { ...(prof || {}), favorites: merged, top8: mergedTop8 };
       setProfile(next);
       // If local had favorites the cloud was missing, push the union up once.
       if (prof && merged.length !== cloudFavs.length) {
         const c = await import("./cloud.js").catch(() => null);
         c?.writeProfile?.({ favorites: merged }).catch(() => {});
+      }
+      // First-login carry-up: cloud had no Top 8 but the guest built one locally.
+      if (prof && !cloudTop8.length && localTop8.length) {
+        const c = await import("./cloud.js").catch(() => null);
+        c?.writeProfile?.({ top8: mergedTop8 }).catch(() => {});
       }
       // Lazy phone-number backfill: pre-M2 accounts (claimed before the Nopia
       // phone shipped) have no number yet — mint one, once per session, and
@@ -171,18 +185,20 @@ export default function AuthProvider({ children }) {
       cur && cur.isAnonymous
         ? await m.linkWithCredential(cur, cred) // keeps uid + all synced data
         : await m.createUserWithEmailAndPassword(m.auth, email, password);
-    // Carry guest-earned favorites + discovered relic count into the new
+    // Carry guest-earned favorites + discovered relic count + Top 8 into the new
     // public profile.
     let seedFavs = [];
     let seedRelics = 0;
+    let seedTop8 = [];
     try {
       const store = await import("./store.js");
       seedFavs = store.getFavorites();
       seedRelics = store.getDiscoveredLegendaries().length;
+      seedTop8 = store.getTop8();
     } catch {
       /* no store / private mode */
     }
-    await claimUsername(m, name, res.user.uid, seedFavs, seedRelics);
+    await claimUsername(m, name, res.user.uid, seedFavs, seedRelics, seedTop8);
     // Mint this account's permanent Ourcade number. A SEPARATE transaction from
     // the username claim so the hot global counter never sits on that critical
     // path — and a failure here is fine (loadProfile backfills next load).
@@ -203,6 +219,7 @@ export default function AuthProvider({ children }) {
       bio: "",
       favorites: seedFavs,
       relicCount: seedRelics,
+      top8: seedTop8,
       number,
     });
     return res.user;

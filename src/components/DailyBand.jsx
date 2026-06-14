@@ -17,6 +17,8 @@ import {
 } from "../lib/store.js";
 import FlashTheater from "./FlashTheater.jsx";
 import ShareButton from "./ShareButton.jsx";
+import Top8HeartButton from "./Top8HeartButton.jsx";
+import { factId } from "../data/content.js";
 import byteBadger from "../assets/byte-badger.png";
 
 // Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
@@ -199,7 +201,10 @@ function GameFact({ dayKey: key }) {
   if (!fact) return null;
   return (
     <div className="arcade-widget arcade-fact">
-      <span className="arcade-widget-kicker">💡 GAME FACT</span>
+      <div className="arcade-widget-head">
+        <span className="arcade-widget-kicker">💡 GAME FACT</span>
+        <Top8HeartButton type="fact" id={factId(fact)} title="this game fact" />
+      </div>
       <p className="arcade-fact-text">{fact}</p>
     </div>
   );
@@ -211,7 +216,10 @@ function TimelessCuriosity({ dayKey: key }) {
   if (!cur) return null;
   return (
     <div className="arcade-widget arcade-curiosity">
-      <span className="arcade-widget-kicker">🌌 TIMELESS CURIOSITY</span>
+      <div className="arcade-widget-head">
+        <span className="arcade-widget-kicker">🌌 TIMELESS CURIOSITY</span>
+        <Top8HeartButton type="curiosity" id={cur.id} title={cur.title} />
+      </div>
       <p className="arcade-curiosity-title">{cur.title}</p>
       <p className="arcade-curiosity-text">{cur.blurb}</p>
       {cur.url && (
@@ -235,7 +243,10 @@ function WeirdThing({ dayKey: key, part }) {
   const isNight = part?.id === "night";
   return (
     <div className="arcade-widget arcade-weird">
-      <span className="arcade-widget-kicker">🔍 TODAY&apos;S WEIRD THING</span>
+      <div className="arcade-widget-head">
+        <span className="arcade-widget-kicker">🔍 TODAY&apos;S WEIRD THING</span>
+        <Top8HeartButton type="weird" id={weird.id} title={weird.title} />
+      </div>
       <p className="arcade-weird-title">{weird.title}</p>
       <p className="arcade-weird-text">{weird.blurb}</p>
       <div className="arcade-weird-foot">

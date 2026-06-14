@@ -7,6 +7,7 @@ import {
   randomAnimation,
 } from "../data/animations.js";
 import ShareButton from "./ShareButton.jsx";
+import Top8HeartButton from "./Top8HeartButton.jsx";
 
 // Shared by the daily band (compact) and the /flash page (full). Renders today's
 // featured animation as an archive.org embed; STUMBLE swaps in a random one from
@@ -71,6 +72,12 @@ export default function FlashTheater({ dayKey, compact = false, browseTo }) {
           label="Share"
           title="Ourcade — Flash Theater"
           text={`"${anim.title}"${anim.creator ? ` by ${anim.creator}` : ""} on Ourcade Flash Theater`}
+        />
+        <Top8HeartButton
+          type="flash"
+          id={anim.id}
+          extra={{ title: anim.title }}
+          title={anim.title}
         />
       </div>
     </div>

@@ -61,8 +61,8 @@ export default function NopiaPhone() {
     };
     const sendIdentity = () => post({ type: "nopia:identity", uid, number, username });
 
-    // Only ring for messages that arrive AFTER mount, never the opening backlog.
-    const mountedAt = Date.now();
+    // Only ring for messages that arrive AFTER mount, never the opening backlog
+    // (the first snapshot seeds `seen`; anything new after is a real arrival).
     const seen = new Set();
     const accepted = new Set();   // accept-signal ids already reconciled into NAMES
     let firstInbox = true;
@@ -159,9 +159,18 @@ export default function NopiaPhone() {
     async function relayAccept(d) {
       const c = await cloud();
       if (!c) return;
+      // The accept swaps contacts both ways: A is told to add us back via an
+      // accept-signal that carries OUR number. If our number hasn't resolved yet
+      // (just-claimed race), allocate it now so the signal isn't empty — an empty
+      // swapNumber would make A's addContact no-op and break reciprocity.
+      let myNumber = number;
+      if (!myNumber) {
+        myNumber = await c.allocateNumber().catch(() => null);
+        if (myNumber) { setNumber(myNumber); updateProfile?.({ number: myNumber }).catch?.(() => {}); }
+      }
       await c.acceptRequest(
         { id: d.reqId, from: d.from, fromNumber: d.fromNumber, fromName: d.fromName, body: d.body },
-        me()
+        { name: username || "", number: myNumber || "" }
       ).catch(() => {});
       post({ type: "nopia:reqresult", ok: true });
     }
@@ -188,19 +197,29 @@ export default function NopiaPhone() {
         // inbox doc — add them to our NAMES and mark it read. Dedup by `seen`.
         for (const r of rows) {
           if (r.kind === "accept" && !accepted.has(r.id)) {
-            accepted.add(r.id);
-            c.addContact(r.swapName || r.fromName, r.swapNumber || r.fromNumber).catch(() => {});
-            c.markRead(r.id).catch(() => {});
+            const swapNum = r.swapNumber || r.fromNumber;
+            // Only reconcile (and mark this signal handled) once it carries a real
+            // number — an empty one would no-op addContact and silently drop the
+            // swap. A corrected/late signal still gets a chance on a later snapshot.
+            if (swapNum) {
+              accepted.add(r.id);
+              c.addContact(r.swapName || r.fromName, swapNum).catch(() => {});
+              c.markRead(r.id).catch(() => {});
+            }
           }
         }
         post({ type: "nopia:inbox", messages: rows });
+        // The first snapshot is the opening backlog — seed `seen` so it never
+        // rings. After that, any id not in `seen` is a genuinely-new arrival.
         if (firstInbox) { rows.forEach((r) => seen.add(r.id)); firstInbox = false; return; }
-        // Ring on genuinely-new arrivals only.
+        // Ring on genuinely-new arrivals only. We dedup purely by `seen` (not a
+        // wall-clock vs mountedAt compare, which dropped rings when a message's
+        // serverTimestamp resolved a hair before the client clock / under skew).
+        // Accept-signals ring too — snake.html shows them as "NOW A CONTACT".
         for (const r of rows) {
           if (seen.has(r.id)) continue;
           seen.add(r.id);
-          const ms = r.ts?.toMillis ? r.ts.toMillis() : (r.ts?.seconds ? r.ts.seconds * 1000 : Date.now());
-          if (ms >= mountedAt) post({ type: "nopia:incoming", message: r });
+          post({ type: "nopia:incoming", message: r });
         }
       });
       unsubSent = c.listenSent((rows) => post({ type: "nopia:sent", messages: rows }));
@@ -242,7 +261,7 @@ export default function NopiaPhone() {
       unsubRequests();
       unsubPings();
     };
-  }, [claimed, uid, number, username, submit]);
+  }, [claimed, uid, number, username, submit, updateProfile]);
 
   if (!claimed) {
     return (

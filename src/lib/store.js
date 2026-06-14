@@ -239,6 +239,59 @@ export function setFavoritesLocal(list) {
   emitChange();
 }
 
+// ---- Top 8 (a MySpace-style showcase of heterogeneous Ourcade content) ----
+// Same model as favorites: lives on the PUBLIC profile (profiles/{uid}.top8) so
+// any viewer sees any user's Top 8; localStorage is the instant render cache.
+// Each entry is { type, id } (type ∈ flash|curiosity|fact|weird|game), resolved
+// at render time via data/content.js — except flash, which also carries `title`
+// (its full pool is a lazy chunk we don't want to pull into a profile view).
+// Append-order, hard cap of 8.
+export const TOP8_MAX = 8;
+
+export function getTop8() {
+  const list = readJSON("top8", []);
+  return Array.isArray(list)
+    ? list.filter((e) => e && e.type && e.id).slice(0, TOP8_MAX)
+    : [];
+}
+function writeTop8(list) {
+  const next = (Array.isArray(list) ? list : []).slice(0, TOP8_MAX);
+  write("top8", JSON.stringify(next));
+  // Push the whole array to the public profile (named users only). Fire-and-forget.
+  const p = cloud();
+  if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ top8: next })).catch(() => {});
+  return next;
+}
+export function isInTop8(type, id) {
+  return getTop8().some((e) => e.type === type && e.id === id);
+}
+// Add (or remove if already present). Returns { list, full }: full=true means
+// the add was REJECTED because the showcase already holds 8 — the caller surfaces
+// "remove one first" and nothing is stored.
+export function toggleTop8(type, id, extra) {
+  const cur = getTop8();
+  const i = cur.findIndex((e) => e.type === type && e.id === id);
+  if (i >= 0) {
+    const next = writeTop8(cur.filter((_, idx) => idx !== i));
+    emitChange();
+    return { list: next, full: false };
+  }
+  if (cur.length >= TOP8_MAX) return { list: cur, full: true };
+  const next = writeTop8([...cur, { type, id, ...(extra || {}) }]);
+  emitChange();
+  return { list: next, full: false };
+}
+export function removeTop8(type, id) {
+  const next = writeTop8(getTop8().filter((e) => !(e.type === type && e.id === id)));
+  emitChange();
+  return next;
+}
+// Replace local Top 8 with an explicit list (AuthProvider on login). No push-back.
+export function setTop8Local(list) {
+  write("top8", JSON.stringify(Array.isArray(list) ? list.slice(0, TOP8_MAX) : []));
+  emitChange();
+}
+
 // ---- cloud hydration: merge the account's Firestore state into localStorage ----
 // Called by AuthProvider once an auth uid is known. Cloud is authoritative for
 // cross-device picks; collections union; streak keeps the strongest. Anything

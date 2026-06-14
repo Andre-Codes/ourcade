@@ -50,12 +50,16 @@ export function getTodaysTip(key) {
 }
 
 export function getTodaysNews(key, n = 3) {
-  // Dev-scheduled news: pinned lines are always shown during their window;
-  // pool lines just join the rotation. (Both empty unless schedule.js has
-  // active entries, so this matches the old behavior by default.)
+  // Dev-scheduled news: pinned (scheduled) lines are shown IN FULL during their
+  // window, ALONGSIDE n generated items — so scheduling 2 things yields 2 + 3 = 5,
+  // not a 3-item cap that crowds out the generated ones. Pool lines just join the
+  // rotation. (Both empty unless schedule.js has active entries, so with nothing
+  // scheduled this is exactly the old behavior: n generated items.)
   const { pinned, pool } = activeSchedule("news", key);
-  const rotated = pickDailyN([...news, ...pool], key, n, 404);
+  // Ask for enough candidates that, after removing any that collide with pinned,
+  // we can still fill n generated slots.
+  const rotated = pickDailyN([...news, ...pool], key, n + pinned.length, 404);
   const seen = new Set(pinned);
-  const filled = rotated.filter((item) => !seen.has(item));
-  return [...pinned, ...filled].slice(0, Math.max(n, pinned.length));
+  const filled = rotated.filter((item) => !seen.has(item)).slice(0, n);
+  return [...pinned, ...filled];
 }

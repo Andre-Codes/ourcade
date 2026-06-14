@@ -447,9 +447,9 @@ export async function sendAcceptSignal(toUid, meta = {}) {
 }
 
 // Accept a request (B's side). `me` = { name, number } for the accepting user.
-// Adds the sender to B's contacts, lands the text in B's inbox (written as
-// from:B with the sender's label fields so it renders "from A"), signals A to
-// add B, then deletes the request.
+// Adds the sender (A) to B's contacts, lands the text in B's inbox attributed to
+// A (from:A, to:B) so it threads + replies correctly, signals A to add B back,
+// then deletes the request.
 export async function acceptRequest(req, me = {}) {
   const id = uid();
   if (!id || !req) return;
@@ -458,7 +458,7 @@ export async function acceptRequest(req, me = {}) {
     (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
     Date.now() + "-i" + Math.floor(Math.random() * 1e6);
   await setDoc(doc(db, "messages", id, "inbox", inboxId), {
-    from: id,
+    from: req.from || id,
     to: id,
     fromNumber: req.fromNumber || "",
     fromName: req.fromName || "",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { embedUrl, randomAnimation } from "../data/animations.js";
 import ShareButton from "./ShareButton.jsx";
+import Top8HeartButton from "./Top8HeartButton.jsx";
 
 // Lean-back "channel": roams the WHOLE pool, auto-advancing on a timer. We can't
 // know when a SWF actually ends (archive.org is a cross-origin iframe, no end
@@ -77,6 +78,12 @@ export default function FlashChannel() {
           label="Share"
           title="Ourcade — Flash Channel"
           text={`Watching "${anim.title}"${anim.creator ? ` by ${anim.creator}` : ""} on the Ourcade Flash Channel`}
+        />
+        <Top8HeartButton
+          type="flash"
+          id={anim.id}
+          extra={{ title: anim.title }}
+          title={anim.title}
         />
       </div>
 

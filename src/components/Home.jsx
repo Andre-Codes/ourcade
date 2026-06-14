@@ -6,6 +6,7 @@ import { todayKey, dayPart, getHourOverride, daySeed, dayNumberFromKey, mulberry
 import { getDayPartGreeting } from "../data/dayparts.js";
 import { useAuth } from "../lib/AuthProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
+import Top8HeartButton from "./Top8HeartButton.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
 import byteBadger from "../assets/byte-badger.png";
@@ -149,6 +150,7 @@ function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
 
       <span className="arcade-card-play">{cta}</span>
       <CardFav game={game} isFav={isFav} />
+      <Top8HeartButton type="game" id={game.id} title={game.title} className="is-card" />
     </Link>
   );
 }
