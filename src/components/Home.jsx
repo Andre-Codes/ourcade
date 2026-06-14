@@ -5,6 +5,7 @@ import { recordDeepCutsUnlocked, getFavorites, toggleFavorite } from "../lib/sto
 import { todayKey, dayPart, getHourOverride, daySeed, dayNumberFromKey, mulberry32 } from "../lib/daily.js";
 import { getDayPartGreeting } from "../data/dayparts.js";
 import { useAuth } from "../lib/AuthProvider.jsx";
+import { usePhone } from "../lib/PhoneProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import Walkman from "./Walkman.jsx";
@@ -239,6 +240,8 @@ export default function Home() {
     authState && !authState.isAnonymous && authState.username
       ? `👤 ${authState.username}`
       : "👤 guest · claim";
+  // claimed accounts get a 📱 nav entry with a live unread badge.
+  const { claimed: hasPhone, unreadCount = 0 } = usePhone() || {};
 
   return (
     <div className="arcade-home" id="top" data-daypart={part.id}>
@@ -250,6 +253,13 @@ export default function Home() {
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
         <a href="#arcade-foot" className="arcade-tab">F.A.Q.</a>
+        {hasPhone && (
+          <Link to="/phone" className="arcade-tab arcade-tab-account" aria-label="your phone">
+            📱{unreadCount > 0 && (
+              <span className="arcade-nav-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
+          </Link>
+        )}
         <Link to="/me" className="arcade-tab arcade-tab-account">{accountLabel}</Link>
         <span className="arcade-nav-spark">✦</span>
       </nav>

@@ -571,6 +571,53 @@ main > section + section { margin-top: 44px; }
 .arcade-phone-stage .arcade-iframe { width: 100%; height: 100%; }
 .arcade-phone-gate { padding: 24px 8px; text-align: center; }
 
+/* ---- dedicated full-page phone (/phone) ---- */
+.arcade-phone--page { margin-top: 6px; }
+/* Bigger, taller stage than the cramped /me tab — the phone gets the screen. */
+.arcade-phone-stage--full { max-width: 420px; height: 860px; max-height: 92vh; }
+
+/* unread bubble on the 📱 nav tab (Home) */
+.arcade-nav-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.1em; height: 1.1em; margin-left: 2px; padding: 0 0.25em;
+  font-size: 0.62em; line-height: 1; vertical-align: super;
+  color: #fff; background: var(--neon-pink); border-radius: 999px;
+  box-shadow: 0 0 8px rgba(255,77,114,.6);
+}
+
+/* floating 📱 button (every route except Home + /phone) */
+.arcade-phone-fab {
+  position: fixed; right: 16px; bottom: 16px; z-index: 2147483100;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; text-decoration: none; font-size: 24px; line-height: 1;
+  background: linear-gradient(180deg, #14182a, #0a0c16);
+  border: 2px solid var(--neon-aqua); border-radius: 50%;
+  box-shadow: var(--bevel), 0 0 16px rgba(63,255,208,.3);
+}
+.arcade-phone-fab:active { transform: translateY(1px); }
+.arcade-phone-fab-badge {
+  position: absolute; top: -4px; right: -4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; line-height: 1;
+  color: #fff; background: var(--neon-pink); border-radius: 999px;
+  box-shadow: 0 0 8px rgba(255,77,114,.6);
+}
+
+/* site-wide "new text" banner (any route except /phone) */
+.arcade-phone-toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 2147483100; max-width: min(92vw, 460px); padding: 12px 16px;
+  text-align: center; text-decoration: none;
+  font-family: 'Press Start 2P', monospace; font-size: 0.56rem; line-height: 1.6;
+  color: var(--arcade-text); background: linear-gradient(180deg, #0d1f1c, #07120f);
+  border: 2px solid var(--neon-aqua); border-radius: 10px;
+  box-shadow: var(--bevel), 0 0 24px rgba(63,255,208,.3);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arcade-phone-toast { animation: arcade-toast-in .35s ease; }
+}
+
 /* ---- search + tag filter (home discovery) ---- */
 .arcade-search {
   max-width: 1100px;

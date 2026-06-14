@@ -295,12 +295,14 @@
   const Transport = {
     send(to, body){
       if(PERSONAL){
-        // Hand the send to the parent, which resolves the number/@handle → uid
-        // and writes to Firebase. Optimistically echo into SENT for a snappy UI.
+        // Hand the send to the parent, which resolves the number/@handle → uid,
+        // writes to Firebase, AND echoes an optimistic row into its own sent[]
+        // state under the cloud id — so the snapshot it posts back already shows
+        // this message. We add nothing locally (a local-id echo would collide
+        // with that snapshot and get wiped by replacePartition); the rAF loop
+        // redraws SENT from the authoritative nopia:sent snapshot.
         postToParent({ type:'nopia:send', to, body });
-        const m = { id:Date.now()+'-'+Math.floor(Math.random()*1e4), from:(IDENTITY&&IDENTITY.number)||uid(), to, body, ts:Date.now(), folder:'sent', read:true };
-        DB.messages.push(m);
-        return m;
+        return null;
       }
       const m = { id:Date.now()+'-'+Math.floor(Math.random()*1e4), from:uid(), to, body, ts:Date.now(), folder:'sent', read:true };
       DB.messages.push(m); saveDB();

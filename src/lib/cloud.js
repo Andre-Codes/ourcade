@@ -228,17 +228,21 @@ export async function allocateNumber() {
   });
 }
 
-// Send a text to `toUid`. Writes the canonical copy into the recipient's inbox
-// and a mirror into the sender's own sent folder under one shared id, so SENT
+// Send a text to `toUid`. Writes a mirror into the sender's own sent folder AND
+// the canonical copy into the recipient's inbox under one shared id, so SENT
 // works without a fan-out query. `meta` carries { fromNumber, fromName } — the
-// label the recipient renders. A failed sent-mirror is cosmetic (the delivery
-// already landed). Returns the message id.
-export async function sendMessage(toUid, body, meta = {}) {
+// label the recipient renders. Pass `msgId` to reuse a caller-generated id (so
+// an optimistic local row and the cloud doc share the same id and reconcile
+// cleanly). We write SENT FIRST and await it — it's an own-doc write that can't
+// fail on permissions, so the sender always keeps their copy even if delivery
+// fails. Returns { id, delivered }; delivered=false means the inbox write threw.
+export async function sendMessage(toUid, body, meta = {}, msgId) {
   const id = uid();
-  if (!id || !toUid || !body) return null;
-  const msgId =
-    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
-    Date.now() + "-" + Math.floor(Math.random() * 1e6);
+  if (!id || !toUid || !body) return { id: null, delivered: false };
+  if (!msgId)
+    msgId =
+      (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+      Date.now() + "-" + Math.floor(Math.random() * 1e6);
   const base = {
     from: id,
     to: toUid,
@@ -248,15 +252,22 @@ export async function sendMessage(toUid, body, meta = {}) {
     ts: serverTimestamp(),
     read: false,
   };
-  await setDoc(doc(db, "messages", toUid, "inbox", msgId), base);
-  // Mirror to the sender's sent folder (toNumber/toName label the recipient).
-  setDoc(doc(db, "messages", id, "sent", msgId), {
+  // Sender's sent copy first (own-doc, always allowed) so it never goes missing.
+  await setDoc(doc(db, "messages", id, "sent", msgId), {
     ...base,
     read: true,
     toNumber: meta.toNumber || "",
     toName: meta.toName || "",
-  }).catch(() => {});
-  return msgId;
+  });
+  // Then the delivery into the recipient's inbox — this is the write that can
+  // fail (offline / rules); a failure leaves SENT intact and reports it.
+  let delivered = true;
+  try {
+    await setDoc(doc(db, "messages", toUid, "inbox", msgId), base);
+  } catch {
+    delivered = false;
+  }
+  return { id: msgId, delivered };
 }
 
 // Live inbox for the current user, newest first. cb gets an array of message
@@ -373,12 +384,16 @@ export async function addContact(name, number) {
    channel B is allowed to write) — to add B back. */
 
 // Write a request to `toUid` (+ a sent mirror so the sender sees it under SENT).
-export async function sendRequest(toUid, body, meta = {}) {
+// Same sent-first / await-delivery discipline as sendMessage: the sender's SENT
+// copy is written first and awaited, the request write into the recipient is the
+// fallible one. Returns { id, delivered }.
+export async function sendRequest(toUid, body, meta = {}, msgId) {
   const id = uid();
-  if (!id || !toUid || !body) return null;
-  const msgId =
-    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
-    Date.now() + "-" + Math.floor(Math.random() * 1e6);
+  if (!id || !toUid || !body) return { id: null, delivered: false };
+  if (!msgId)
+    msgId =
+      (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+      Date.now() + "-" + Math.floor(Math.random() * 1e6);
   const base = {
     from: id,
     to: toUid,
@@ -388,14 +403,19 @@ export async function sendRequest(toUid, body, meta = {}) {
     ts: serverTimestamp(),
     read: false,
   };
-  await setDoc(doc(db, "messages", toUid, "requests", msgId), base);
-  setDoc(doc(db, "messages", id, "sent", msgId), {
+  await setDoc(doc(db, "messages", id, "sent", msgId), {
     ...base,
     read: true,
     toNumber: meta.toNumber || "",
     toName: meta.toName || "",
-  }).catch(() => {});
-  return msgId;
+  });
+  let delivered = true;
+  try {
+    await setDoc(doc(db, "messages", toUid, "requests", msgId), base);
+  } catch {
+    delivered = false;
+  }
+  return { id: msgId, delivered };
 }
 
 // Live REQUESTS folder for the current user, newest first.

@@ -9,6 +9,7 @@ const StumblePage = lazy(() => import("./components/StumblePage.jsx"));
 const AccountPage = lazy(() => import("./components/AccountPage.jsx"));
 const ScoresPage = lazy(() => import("./components/ScoresPage.jsx"));
 const ProfilePage = lazy(() => import("./components/ProfilePage.jsx"));
+const PhonePage = lazy(() => import("./components/PhonePage.jsx"));
 
 function Loading() {
   return <div className="arcade-loading">Loading…</div>;
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/flash" element={<FlashPage />} />
         <Route path="/stumble" element={<StumblePage />} />
         <Route path="/me" element={<AccountPage />} />
+        <Route path="/phone" element={<PhonePage />} />
         <Route path="/scores/:gameId" element={<ScoresPage />} />
         <Route path="/u/:username" element={<ProfilePage />} />
         <Route path="*" element={<Home />} />

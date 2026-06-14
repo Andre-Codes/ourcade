@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/AuthProvider.jsx";
 import { AVATARS, THEMES } from "../data/profilePresets.js";
@@ -6,10 +6,6 @@ import { GAMES } from "../data/games.js";
 import { getFavorites, toggleFavorite } from "../lib/store.js";
 import ProfileView from "./ProfileView.jsx";
 import BackBar from "./BackBar.jsx";
-
-// Lazy so the phone's iframe + Firebase listeners only mount when the PHONE tab
-// is actually opened (mirrors the lazy-cloud discipline elsewhere).
-const NopiaPhone = lazy(() => import("./NopiaPhone.jsx"));
 
 /* /me — claim an account (username + email + password), log in on a new device,
    or manage the signed-in account. Old-internet style: no social logins, just a
@@ -151,13 +147,12 @@ export default function AccountPage() {
   // ACCOUNT tab (email + reset + logout). Defaults to PROFILE so /me opens on
   // "your arcade", not a config form.
   if (user && !isAnonymous) {
-    const meTab = ["profile", "phone", "edit", "account"].includes(tab) ? tab : "profile";
+    const meTab = ["profile", "edit", "account"].includes(tab) ? tab : "profile";
     return Shell(
       <div className="arcade-account-card">
         <div className="arcade-account-tabs">
           {[
             ["profile", "PROFILE"],
-            ["phone", "PHONE"],
             ["edit", "EDIT"],
             ["account", "ACCOUNT"],
           ].map(([id, label]) => (
@@ -185,16 +180,6 @@ export default function AccountPage() {
           )
         )}
 
-        {meTab === "phone" && (
-          username ? (
-            <Suspense fallback={<p className="arcade-account-loading">waking the phone…</p>}>
-              <NopiaPhone />
-            </Suspense>
-          ) : (
-            <p className="arcade-account-blurb">finish setting a username to get your phone & number.</p>
-          )
-        )}
-
         {meTab === "edit" && (
           username ? (
             <ProfileEditor profile={profile} updateProfile={updateProfile} />
@@ -210,6 +195,11 @@ export default function AccountPage() {
             <p className="arcade-account-email">{user.email}</p>
             {profile?.number && (
               <p className="arcade-account-email">📱 {profile.number}</p>
+            )}
+            {username && (
+              <p className="arcade-account-notice">
+                <Link to="/phone" className="arcade-account-link">📱 open your phone →</Link>
+              </p>
             )}
             {username && (
               <p className="arcade-account-notice">
