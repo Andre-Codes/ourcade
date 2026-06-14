@@ -60,12 +60,7 @@ export default function PhoneChrome() {
 
   useEffect(() => {
     if (!incomingSeq || onPhonePage) return;
-    const m = lastIncoming.message;
-    const text =
-      m && m.kind === "accept"
-        ? `📱 ${senderLabel(contacts, m)} is now a contact`
-        : `📱 new text from ${senderLabel(contacts, m)}`;
-    setToast(text);
+    setToast(`📱 new text from ${senderLabel(contacts, lastIncoming.message)}`);
     const t = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -9,7 +9,7 @@ import BackBar from "./BackBar.jsx";
    a THIN ADAPTER between the always-on PhoneProvider context and that sandboxed
    iframe: the iframe can't import Firebase, so PhoneProvider holds the live
    listeners and this page just relays context → iframe (identity + snapshots +
-   ring signals) and iframe → context (send/accept/addcontact/ping/read/decline).
+   ring signals) and iframe → context (send/addcontact/ping/read/clearmessages).
 
    It holds NO Firestore listeners — that's the provider's job, app-wide. So a
    text that arrives while you're elsewhere has already rung/toasted via the
@@ -23,15 +23,13 @@ export default function PhonePage() {
     number,
     inbox,
     sent,
-    requests,
     contacts,
     lastIncoming,
     lastPing,
     relaySend,
     relayAddContact,
-    relayAccept,
     relayPing,
-    decline,
+    clearMessages,
     markRead,
   } = phone;
 
@@ -41,9 +39,9 @@ export default function PhonePage() {
   // Latest context values in refs so the (stable) message handler + identity
   // sender always read fresh data without re-binding listeners.
   const stateRef = useRef({});
-  stateRef.current = { uid, username, number, inbox, sent, requests, contacts };
+  stateRef.current = { uid, username, number, inbox, sent, contacts };
   const actionsRef = useRef({});
-  actionsRef.current = { relaySend, relayAddContact, relayAccept, relayPing, decline, markRead, submit };
+  actionsRef.current = { relaySend, relayAddContact, relayPing, clearMessages, markRead, submit };
 
   const post = (msg) => {
     const win = iframeRef.current?.contentWindow;
@@ -72,7 +70,6 @@ export default function PhonePage() {
         post({ type: "nopia:contacts", contacts: s.contacts });
         post({ type: "nopia:inbox", messages: s.inbox });
         post({ type: "nopia:sent", messages: s.sent });
-        post({ type: "nopia:requests", messages: s.requests });
       } else if (d.type === "ourcade:score" && d.gameId === "snake") {
         const n = Number(d.score);
         if (!Number.isNaN(n)) a.submit(n);
@@ -84,14 +81,12 @@ export default function PhonePage() {
       } else if (d.type === "nopia:addcontact") {
         const r = await a.relayAddContact(d.name, d.number);
         post({ type: "nopia:reqresult", ok: r.ok, error: r.error });
-      } else if (d.type === "nopia:accept") {
-        const r = await a.relayAccept(d);
-        post({ type: "nopia:reqresult", ok: r.ok, error: r.error });
-      } else if (d.type === "nopia:decline") {
-        a.decline(d.reqId);
       } else if (d.type === "nopia:ping") {
         const r = await a.relayPing(d.to);
         post({ type: "nopia:reqresult", ok: r.ok, error: r.error });
+      } else if (d.type === "nopia:clearmessages") {
+        const r = await a.clearMessages();
+        post({ type: "nopia:reqresult", ok: r.ok, error: r.ok ? "CLEARED" : "FAILED" });
       }
     };
 
@@ -113,7 +108,6 @@ export default function PhonePage() {
   useEffect(() => { post({ type: "nopia:contacts", contacts: contacts || [] }); }, [contacts]);
   useEffect(() => { post({ type: "nopia:inbox", messages: inbox || [] }); }, [inbox]);
   useEffect(() => { post({ type: "nopia:sent", messages: sent || [] }); }, [sent]);
-  useEffect(() => { post({ type: "nopia:requests", messages: requests || [] }); }, [requests]);
 
   // Forward genuinely-new arrivals as in-phone ring/toast — but skip the value
   // already present at mount (the provider already toasted it elsewhere; we

@@ -17,10 +17,12 @@ import PhoneChrome from "../components/PhoneChrome.jsx";
    (and rings / toasts / bumps the nav badge) wherever you are on Ourcade.
 
    The phone EMULATOR (the iframe) only exists on /phone; this provider holds no
-   iframe. It owns: the 5 listeners, the live inbox/sent/requests/contacts
-   state, the "new arrival" ring/notify decision, the unread count, and the
-   cloud ACTIONS (send/accept/addcontact/ping/decline/markRead) — which are just
-   Firestore calls + number resolution and never need the iframe. PhonePage is a
+   iframe. It owns: the 4 listeners (inbox/sent/contacts/pings), the live
+   inbox/sent/contacts state, the "new arrival" ring/notify decision, the unread
+   count, and the cloud ACTIONS (send/addcontact/ping/clearMessages/markRead) —
+   which are just Firestore calls + number resolution and never need the iframe.
+   Texting is open (no request/accept gate): a send goes straight to the
+   recipient's inbox and both sides auto-add each other to NAMES. PhonePage is a
    thin adapter that renders the iframe and wires it to this context. Cloud is
    the source of truth; the phone (and this state) is a render cache. */
 
@@ -42,7 +44,6 @@ export default function PhoneProvider({ children }) {
   const [number, setNumber] = useState(profile?.number || null);
   const [inbox, setInbox] = useState([]);
   const [sent, setSent] = useState([]);
-  const [requests, setRequests] = useState([]);
   const [contacts, setContacts] = useState([]);
   // Monotonic-seq signals the page forwards to the iframe (in-phone ring) and
   // the chrome turns into a site-wide toast. seq lets a consumer fire only on a
@@ -50,7 +51,7 @@ export default function PhoneProvider({ children }) {
   const [lastIncoming, setLastIncoming] = useState({ seq: 0, message: null });
   const [lastPing, setLastPing] = useState({ seq: 0, fromNumber: "" });
 
-  // Refs so actions + the accept reconciler read the LATEST identity/contacts
+  // Refs so actions + the inbox auto-add read the LATEST identity/contacts
   // without forcing the listener effect to re-subscribe (it keys on [claimed,
   // uid] only). Kept fresh by the syncing effect just below.
   const numberRef = useRef(number);
@@ -83,9 +84,6 @@ export default function PhoneProvider({ children }) {
   }, [claimed, number, updateProfile]);
 
   // ── ACTIONS (pure cloud calls; no iframe). Each returns { ok, error }. ──────
-  const inContacts = (num) =>
-    !!num && contactsRef.current.some((c) => c.number === num);
-
   // Resolve a typed recipient ("555-0142" or "@handle") → { uid, number } or
   // { error }.
   async function resolveRecipient(c, to) {
@@ -139,14 +137,26 @@ export default function PhoneProvider({ children }) {
       setSent((prev) =>
         prev.some((m) => m.id === msgId) ? prev : [optimistic, ...prev]
       );
-      // Already a contact → straight to their inbox. Not yet → a REQUEST they
-      // must accept (which swaps contacts both ways).
-      const known = inContacts(r.number);
-      const res = known
-        ? await c.sendMessage(r.uid, body, meta, msgId).catch(() => ({ delivered: false }))
-        : await c.sendRequest(r.uid, body, meta, msgId).catch(() => ({ delivered: false }));
-      if (!res.delivered) return { ok: true, error: "NOT DELIVERED" };
-      return { ok: true, error: known ? "MESSAGE SENT" : "REQUEST SENT" };
+      // No gate: every text goes straight to the recipient's inbox.
+      const res = await c
+        .sendMessage(r.uid, body, meta, msgId)
+        .catch(() => ({ delivered: false }));
+      // Auto-add the recipient to our NAMES (both-ways: the recipient adds us on
+      // receipt). Only for a genuinely-new correspondent — guarded so a repeat
+      // text costs no extra read/write. The @handle path leaves r.number empty,
+      // so resolve the canonical number + username from their public profile.
+      if (res.delivered) {
+        try {
+          const known = r.number && contactsRef.current.some((x) => x.number === r.number);
+          if (!known) {
+            const pc = await c.readPublicContact(r.uid).catch(() => null);
+            if (pc && pc.number && !contactsRef.current.some((x) => x.number === pc.number)) {
+              await c.addContact(pc.name, pc.number).catch(() => {});
+            }
+          }
+        } catch { /* auto-add is best-effort */ }
+      }
+      return { ok: true, error: res.delivered ? "MESSAGE SENT" : "NOT DELIVERED" };
     }
 
     async function relayAddContact(name, num) {
@@ -160,29 +170,6 @@ export default function PhoneProvider({ children }) {
       return { ok: true };
     }
 
-    async function relayAccept(d) {
-      const c = await cloud();
-      if (!c) return { ok: false, error: "OFFLINE" };
-      // The accept swaps contacts both ways: A is told to add us back via an
-      // accept-signal carrying OUR number. If our number hasn't resolved yet
-      // (just-claimed race), allocate it now so the signal isn't empty.
-      let myNumber = numberRef.current;
-      if (!myNumber) {
-        myNumber = await c.allocateNumber().catch(() => null);
-        if (myNumber) {
-          setNumber(myNumber);
-          updateProfile?.({ number: myNumber }).catch?.(() => {});
-        }
-      }
-      await c
-        .acceptRequest(
-          { id: d.reqId, from: d.from, fromNumber: d.fromNumber, fromName: d.fromName, body: d.body },
-          { name: usernameRef.current || "", number: myNumber || "" }
-        )
-        .catch(() => {});
-      return { ok: true };
-    }
-
     async function relayPing(to) {
       const c = await cloud();
       if (!c) return { ok: false, error: "OFFLINE" };
@@ -192,10 +179,11 @@ export default function PhoneProvider({ children }) {
       return { ok: true };
     }
 
-    async function decline(reqId) {
+    async function clearMessages() {
       const c = await cloud();
-      await c?.declineRequest?.(reqId).catch(() => {});
-      return { ok: true };
+      if (!c) return { ok: false };
+      const r = await c.clearMyMessages().catch(() => null);
+      return { ok: !!r };
     }
 
     async function markRead(msgId) {
@@ -204,22 +192,21 @@ export default function PhoneProvider({ children }) {
       return { ok: true };
     }
 
-    return { relaySend, relayAddContact, relayAccept, relayPing, decline, markRead };
+    return { relaySend, relayAddContact, relayPing, clearMessages, markRead };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, updateProfile]);
 
-  // ── LISTENERS — the ONLY place the 5 message subscriptions ever run. ────────
+  // ── LISTENERS — the ONLY place the 4 message subscriptions ever run. ────────
   useEffect(() => {
     if (!claimed || !uid) {
       // Logged out / anonymous → clear any prior account's cached state.
-      setInbox([]); setSent([]); setRequests([]); setContacts([]);
+      setInbox([]); setSent([]); setContacts([]);
       return;
     }
 
     let unsubInbox = () => {};
     let unsubSent = () => {};
     let unsubContacts = () => {};
-    let unsubRequests = () => {};
     let unsubPings = () => {};
 
     // Ring/notify only for messages that arrive AFTER mount, never the opening
@@ -228,39 +215,39 @@ export default function PhoneProvider({ children }) {
     // ONCE at login — so a message that lands while you're on any other page is
     // a post-firstInbox arrival and DOES notify.
     const seen = new Set();
-    const accepted = new Set(); // accept-signal ids already reconciled into NAMES
     let firstInbox = true;
     let firstPing = true;
     const pingSeen = new Set();
 
     cloud().then((c) => {
       if (!c) return;
+      // Auto-add the sender of an inbound text to our NAMES (both-ways: the
+      // sender added us when they sent it). Idempotent + guarded so it only
+      // writes for a number we don't already have. The inbox snapshot can land
+      // before the contacts snapshot, so contactsRef may be momentarily empty —
+      // worst case is one redundant write resolving to the same list (addContact
+      // dedups by number), which is fine.
+      const ensureContact = (r) => {
+        const num = r.fromNumber || "";
+        if (!num) return;
+        if (contactsRef.current.some((x) => x.number === num)) return;
+        c.addContact(r.fromName || num, num).catch(() => {});
+      };
+
       unsubInbox = c.listenInbox((rows) => {
-        // Accept-signals are reconciled here (not shown as normal texts): when
-        // A accepted us / we accepted A, the counterparty added us back via an
-        // inbox doc — add them to our NAMES and mark it read. Dedup by `seen`.
-        for (const r of rows) {
-          if (r.kind === "accept" && !accepted.has(r.id)) {
-            const swapNum = r.swapNumber || r.fromNumber;
-            // Only reconcile (and mark handled) once it carries a real number —
-            // an empty one would no-op addContact and silently drop the swap. A
-            // corrected/late signal still gets a chance on a later snapshot.
-            if (swapNum) {
-              accepted.add(r.id);
-              c.addContact(r.swapName || r.fromName, swapNum).catch(() => {});
-              c.markRead(r.id).catch(() => {});
-            }
-          }
-        }
         setInbox(rows);
         // The first snapshot is the opening backlog — seed `seen` so it never
-        // rings. After that, any id not in `seen` is a genuinely-new arrival.
-        if (firstInbox) { rows.forEach((r) => seen.add(r.id)); firstInbox = false; return; }
-        // Ring on genuinely-new arrivals only (dedup purely by `seen`).
-        // Accept-signals notify too — they read as "NOW A CONTACT".
+        // rings, but still populate NAMES from existing threads.
+        if (firstInbox) {
+          rows.forEach((r) => { seen.add(r.id); ensureContact(r); });
+          firstInbox = false;
+          return;
+        }
+        // Genuinely-new arrivals (dedup by `seen`): add the sender + ring.
         for (const r of rows) {
           if (seen.has(r.id)) continue;
           seen.add(r.id);
+          ensureContact(r);
           setLastIncoming({ seq: ++seqRef.current, message: r });
         }
       });
@@ -270,8 +257,6 @@ export default function PhoneProvider({ children }) {
       unsubContacts = c.listenContacts((list) =>
         setContacts(Array.isArray(list) ? list : [])
       );
-
-      unsubRequests = c.listenRequests((rows) => setRequests(rows));
 
       // Pings: signal each genuinely-new one, then delete it (notify-only).
       unsubPings = c.listenPings((rows) => {
@@ -294,18 +279,14 @@ export default function PhoneProvider({ children }) {
       unsubInbox();
       unsubSent();
       unsubContacts();
-      unsubRequests();
       unsubPings();
     };
   }, [claimed, uid]);
 
-  // Unread count — single source of truth for every badge (nav + fab). Exclude
-  // accept-signal rows (auto-read reconciler signals, not messages); count
-  // requests (they still need an ACCEPT).
+  // Unread count — single source of truth for every badge (nav + fab).
   const unreadCount = useMemo(
-    () =>
-      inbox.filter((m) => !m.read && m.kind !== "accept").length + requests.length,
-    [inbox, requests]
+    () => inbox.filter((m) => !m.read).length,
+    [inbox]
   );
 
   const value = useMemo(
@@ -314,14 +295,13 @@ export default function PhoneProvider({ children }) {
       number,
       inbox,
       sent,
-      requests,
       contacts,
       unreadCount,
       lastIncoming,
       lastPing,
       ...actions,
     }),
-    [claimed, number, inbox, sent, requests, contacts, unreadCount, lastIncoming, lastPing, actions]
+    [claimed, number, inbox, sent, contacts, unreadCount, lastIncoming, lastPing, actions]
   );
 
   return (

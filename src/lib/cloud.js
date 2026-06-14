@@ -15,6 +15,7 @@ import { auth, db } from "./firebase.js";
 import {
   doc,
   getDoc,
+  getDocs,
   setDoc,
   collection,
   query,
@@ -117,6 +118,16 @@ export async function writeProfile(patch) {
     { ...patch, updatedAt: serverTimestamp() },
     { merge: true }
   );
+}
+
+// Public { name, number } for a uid, from the world-readable profile. Used to
+// auto-add a recipient to the sender's contacts by their real username +
+// canonical number (the @handle send path leaves us only their uid). null if
+// the profile is missing or hasn't been allocated a number yet.
+export async function readPublicContact(forUid) {
+  const p = await readProfile(forUid);
+  if (!p || !p.number) return null;
+  return { name: p.username || "", number: p.number };
 }
 
 // Resolve a username (any case) → its uid, via the public usernames map.
@@ -376,118 +387,25 @@ export async function addContact(name, number) {
   await writeContacts(list);
 }
 
-/* ─── M2.5: request / accept (the mutual contact swap) ────────────────────────
-   A first text to someone NOT already in your contacts is a REQUEST: it lands
-   in messages/{toUid}/requests instead of their inbox and waits for ACCEPT.
-   On accept the recipient (B) drops the text into their own inbox, adds the
-   sender (A) to their contacts, and signals A — through A's inbox (the only
-   channel B is allowed to write) — to add B back. */
-
-// Write a request to `toUid` (+ a sent mirror so the sender sees it under SENT).
-// Same sent-first / await-delivery discipline as sendMessage: the sender's SENT
-// copy is written first and awaited, the request write into the recipient is the
-// fallible one. Returns { id, delivered }.
-export async function sendRequest(toUid, body, meta = {}, msgId) {
+// Wipe the current user's OWN message data (inbox + sent, plus any leftover
+// requests from the retired request/accept flow). Owner-delete is permitted on
+// all three subcollections by the rules. Backs the in-phone CLEAR MESSAGES
+// action so a test account can start fresh. Returns { deleted } for the toast.
+export async function clearMyMessages() {
   const id = uid();
-  if (!id || !toUid || !body) return { id: null, delivered: false };
-  if (!msgId)
-    msgId =
-      (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
-      Date.now() + "-" + Math.floor(Math.random() * 1e6);
-  const base = {
-    from: id,
-    to: toUid,
-    fromNumber: meta.fromNumber || "",
-    fromName: meta.fromName || "",
-    body: String(body),
-    ts: serverTimestamp(),
-    read: false,
-  };
-  await setDoc(doc(db, "messages", id, "sent", msgId), {
-    ...base,
-    read: true,
-    toNumber: meta.toNumber || "",
-    toName: meta.toName || "",
-  });
-  let delivered = true;
-  try {
-    await setDoc(doc(db, "messages", toUid, "requests", msgId), base);
-  } catch {
-    delivered = false;
+  if (!id) return { deleted: 0 };
+  let deleted = 0;
+  for (const folder of ["inbox", "sent", "requests"]) {
+    const snap = await getDocs(collection(db, "messages", id, folder));
+    await Promise.all(
+      snap.docs.map((d) =>
+        deleteDoc(doc(db, "messages", id, folder, d.id))
+          .then(() => { deleted += 1; })
+          .catch(() => {})
+      )
+    );
   }
-  return { id: msgId, delivered };
-}
-
-// Live REQUESTS folder for the current user, newest first.
-export function listenRequests(cb) {
-  const id = uid();
-  if (!id) {
-    cb([]);
-    return () => {};
-  }
-  const q = query(
-    collection(db, "messages", id, "requests"),
-    orderBy("ts", "desc"),
-    limit(100)
-  );
-  return onSnapshot(
-    q,
-    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-    () => cb([])
-  );
-}
-
-// Drop a request (DECLINE, or after accepting it).
-export async function declineRequest(reqId) {
-  const id = uid();
-  if (!id || !reqId) return;
-  await deleteDoc(doc(db, "messages", id, "requests", reqId)).catch(() => {});
-}
-
-// Tell `toUid` (A) to add us back as a contact — via a doc in A's inbox carrying
-// kind:'accept' + our swap label. A's inbox listener reconciles it.
-export async function sendAcceptSignal(toUid, meta = {}) {
-  const id = uid();
-  if (!id || !toUid) return;
-  const msgId =
-    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
-    Date.now() + "-a" + Math.floor(Math.random() * 1e6);
-  await setDoc(doc(db, "messages", toUid, "inbox", msgId), {
-    from: id,
-    to: toUid,
-    kind: "accept",
-    fromNumber: meta.swapNumber || "",
-    fromName: meta.swapName || "",
-    swapName: meta.swapName || "",
-    swapNumber: meta.swapNumber || "",
-    body: `${meta.swapName || "Someone"} added you`,
-    ts: serverTimestamp(),
-    read: false,
-  }).catch(() => {});
-}
-
-// Accept a request (B's side). `me` = { name, number } for the accepting user.
-// Adds the sender (A) to B's contacts, lands the text in B's inbox attributed to
-// A (from:A, to:B) so it threads + replies correctly, signals A to add B back,
-// then deletes the request.
-export async function acceptRequest(req, me = {}) {
-  const id = uid();
-  if (!id || !req) return;
-  await addContact(req.fromName, req.fromNumber);
-  const inboxId =
-    (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
-    Date.now() + "-i" + Math.floor(Math.random() * 1e6);
-  await setDoc(doc(db, "messages", id, "inbox", inboxId), {
-    from: req.from || id,
-    to: id,
-    fromNumber: req.fromNumber || "",
-    fromName: req.fromName || "",
-    body: String(req.body || ""),
-    ts: serverTimestamp(),
-    read: false,
-  }).catch(() => {});
-  await sendAcceptSignal(req.from, { swapName: me.name, swapNumber: me.number });
-  await declineRequest(req.id);
+  return { deleted };
 }
 
 /* ─── M2.5: ping (notify-only poke) ──────────────────────────────────────────

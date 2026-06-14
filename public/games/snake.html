@@ -325,7 +325,6 @@
     const c = DB.contacts.find(c=>c.addr===addr); if(c) return c.name;
     return NAMELABELS[addr] || addr;
   }
-  function isKnownContact(addr){ return SYNCED.some(c=>c.number===addr) || DB.contacts.some(c=>c.addr===addr); }
 
   /* ---------- 5x7 dot-matrix font ---------- */
   const F = {
@@ -1184,8 +1183,9 @@
       }
     };
   }
-  // Send `body` to a typed recipient, then unwind back to the messages menu.
-  function sendTo(addr, body){ Transport.send(addr, body); showToast(isKnownContact(addr)?'MESSAGE SENT':'REQUEST SENT'); popToMessages(); }
+  // Send `body` to a typed recipient, then unwind back to the messages menu. The
+  // authoritative result (and any "NOT DELIVERED") arrives via nopia:sendresult.
+  function sendTo(addr, body){ Transport.send(addr, body); showToast('SENDING…'); popToMessages(); }
   function popToMessages(){ while(cur() && cur().id!=='messages' && screenStack.length>1) popScreen(); }
   function openRecipientPicker(body){
     pushScreen(ListScreen({ id:'pickto', title:'SEND TO', numbered:false, items:()=>{
@@ -1198,51 +1198,15 @@
   }
   const MessagesMenu = ListScreen({ id:'messages', title:'MESSAGES', numbered:true, items:()=>{
     const unread = DB.messages.filter(m=>m.folder==='inbox'&&!m.read).length;
-    const reqs = DB.messages.filter(m=>m.folder==='requests').length;
     const items = [
       {label:'INBOX'+(unread?(' ('+unread+')'):''), run:()=>pushScreen(makeFolder('inbox','INBOX'))},
-      {label:'WRITE MESSAGE', run:()=>openEditor(null)}
+      {label:'WRITE MESSAGE', run:()=>openEditor(null)},
+      {label:'SENT', run:()=>pushScreen(makeFolder('sent','SENT'))}
     ];
-    if(reqs) items.push({label:'REQUESTS ('+reqs+')', run:()=>pushScreen(makeRequestsFolder())});
-    items.push({label:'SENT', run:()=>pushScreen(makeFolder('sent','SENT'))});
+    // Personal mode only: wipe this account's cloud inbox/sent (start fresh).
+    if(PERSONAL) items.push({label:'CLEAR MESSAGES', run:()=>{ postToParent({ type:'nopia:clearmessages' }); showToast('CLEARING…'); }});
     return items;
   }});
-  // REQUESTS — first texts from people not yet in your NAMES. Accept (text moves
-  // to inbox + you both swap contacts) or Decline (dropped).
-  function makeRequestsFolder(){
-    return ListScreen({ id:'reqfolder', title:'REQUESTS', numbered:false, items:()=>{
-      const msgs = DB.messages.filter(m=>m.folder==='requests').slice().reverse();
-      if(!msgs.length) return [{label:'(NONE)', run:()=>{}}];
-      return msgs.map(m=>({ label:contactName(m.from)+': '+m.body.slice(0,12), run:()=>pushScreen(makeRequestView(m)) }));
-    }});
-  }
-  function makeRequestView(m){
-    return {
-      id:'reqview', statusLeft:'OURCADE', sel:0,
-      get soft(){ return this.sel===0 ? 'Accept' : 'Decline'; },
-      enter(){ this.sel=0; },
-      up(){ this.sel=this.sel?0:1; click(); }, down(){ this.sel=this.sel?0:1; click(); },
-      accept(){
-        if(PERSONAL) postToParent({ type:'nopia:accept', reqId:m.id, from:m.from, fromNumber:m.from, fromName:m.fromName||contactName(m.from), body:m.body });
-        m.folder='inbox'; m.read=false;   // optimistic: move request → inbox
-        if(m.fromName && !SYNCED.some(c=>c.number===m.from)) SYNCED.push({ name:m.fromName, number:m.from });
-        showToast('ACCEPTED'); popScreen();
-      },
-      decline(){
-        if(PERSONAL) postToParent({ type:'nopia:decline', reqId:m.id });
-        DB.messages = DB.messages.filter(x=>x.id!==m.id);
-        showToast('DECLINED'); popScreen();
-      },
-      navi(){ this.sel===0 ? this.accept() : this.decline(); },
-      back(){ popScreen(); },
-      render(){
-        drawText('FROM '+contactName(m.from), pad, contentTop(), fs, ink);
-        drawWrapped(m.body, contentTop()+11*fs, fs, contentBottom()-20*fs);
-        const opts=['ACCEPT','DECLINE'];
-        for(let i=0;i<2;i++){ const y=contentBottom()-(17-i*9)*fs; drawText((this.sel===i?'> ':'  ')+opts[i], pad, y, fs, ink); }
-      }
-    };
-  }
   function makeFolder(folder, title){
     return ListScreen({ id:'folder', title, numbered:false, items:()=>{
       const msgs = DB.messages.filter(m=>m.folder===folder).slice().reverse();
@@ -1378,20 +1342,22 @@
   window.addEventListener('resize', layout);
 
   /* ---------- personal-mode bridge (parent ⇄ phone over postMessage) ----------
-     Only active when embedded with ?personal=1. The parent (NopiaPhone.jsx) owns
-     the Firebase listeners and relays: identity once, then inbox/sent snapshots
-     (full-replace of that partition) and single live 'incoming' rings. */
+     Only active when embedded with ?personal=1. The parent (PhoneProvider, via
+     PhonePage) owns the Firebase listeners and relays: identity once, then
+     inbox/sent snapshots (full-replace of that partition) and single live
+     'incoming' rings. Texting is open — no request/accept gate. */
   function tsOf(m){ const t=m && m.ts; if(!t) return Date.now(); if(typeof t==='number') return t; if(t.seconds) return t.seconds*1000; if(t.toMillis) return t.toMillis(); return Date.now(); }
   function mapInbox(m){ const addr=m.fromNumber||m.from; if(m.fromName) NAMELABELS[addr]=m.fromName; return { id:m.id, from:addr, to:(IDENTITY&&IDENTITY.number)||uid(), body:m.body, ts:tsOf(m), folder:'inbox', read:!!m.read }; }
   function mapSent(m){ const addr=m.toNumber||m.to; if(m.toName) NAMELABELS[addr]=m.toName; return { id:m.id, from:(IDENTITY&&IDENTITY.number)||uid(), to:addr, body:m.body, ts:tsOf(m), folder:'sent', read:true }; }
-  // Requests carry the sender's number + name; render `from` as the number and
-  // keep fromName so makeRequestView can swap it into NAMES on accept.
-  function mapRequest(m){ const addr=m.fromNumber||m.from; if(m.fromName) NAMELABELS[addr]=m.fromName; return { id:m.id, from:addr, fromName:m.fromName||'', to:(IDENTITY&&IDENTITY.number)||uid(), body:m.body, ts:tsOf(m), folder:'requests', read:false }; }
   function replacePartition(folder, rows){
     DB.messages = DB.messages.filter(m=>m.folder!==folder).concat(rows);
     DB.messages.sort((a,b)=>a.ts-b.ts);
   }
   if(PERSONAL){
+    // Cloud is the only source of truth for messages here — never let the local
+    // cache seed the inbox (it would flash a phantom unread on boot before the
+    // first cloud snapshot lands). Clear synchronously, before the first frame.
+    DB.messages = [];
     window.addEventListener('message', e=>{
       if(e.origin !== location.origin) return;
       const d = e.data; if(!d || typeof d!=='object') return;
@@ -1399,21 +1365,25 @@
         IDENTITY = { uid:d.uid, number:d.number, username:d.username };
         try{ localStorage.setItem('ourcade:nokia:uid', d.uid||'guest'); }catch(_){}
         DB = loadDB();               // re-namespace local settings/snake to the real uid
+        // In personal mode the CLOUD is the only source of truth for messages.
+        // A stale local messages cache (persisted by saveDB on read/etc.) would
+        // otherwise seed the inbox on boot and flash a phantom unread for a beat
+        // before the cloud snapshot replaces the partition. Start empty; the
+        // nopia:inbox/sent snapshots refill it.
+        DB.messages = [];
       } else if(d.type==='nopia:contacts'){
         SYNCED = (d.contacts||[]).filter(c=>c && c.number).map(c=>({ name:c.name||c.number, number:c.number }));
       } else if(d.type==='nopia:inbox'){
         replacePartition('inbox', (d.messages||[]).map(mapInbox));
       } else if(d.type==='nopia:sent'){
         replacePartition('sent', (d.messages||[]).map(mapSent));
-      } else if(d.type==='nopia:requests'){
-        replacePartition('requests', (d.messages||[]).map(mapRequest));
       } else if(d.type==='nopia:incoming'){
         // Ring/toast ONLY — the message is already in DB.messages from the
         // nopia:inbox snapshot the parent posts in the same callback (pushing
         // again would duplicate it).
         if(d.message){
           if(audible()) playRingtone();
-          showToast(d.message.kind==='accept' ? 'NOW A CONTACT' : 'NEW MESSAGE');
+          showToast('NEW MESSAGE');
         }
       } else if(d.type==='nopia:incoming-ping'){
         if(audible()) playRingtone(); showToast('PING FROM '+(d.fromNumber||'?'));
