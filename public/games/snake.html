@@ -1012,14 +1012,18 @@
   // retuning `scroll` re-times a whole level proportionally). Vertical
   // positions are `yf` fractions of the play height, resolved at spawn.
   const SI_LEVELS = [
-    { scroll: 0.9, events: [
-      { at: 120,  kind:'wave', etype:'straight', n:3, yf:0.30, gap:170, hp:1 },
-      { at: 560,  kind:'wave', etype:'sine',     n:4, yf:0.50, gap:150 },
+    { scroll: 1.0, events: [
+      { at: 100,  kind:'wave', etype:'straight', n:4, yf:0.30, gap:95,  hp:1 },
+      { at: 420,  kind:'wave', etype:'sine',     n:5, yf:0.50, gap:90 },
+      { at: 760,  kind:'wave', etype:'straight', n:4, yf:0.20, gap:85,  hp:1 },
       { at: 1000, kind:'terrain', len:520, top:[0,0,.18,.28,.28,.18,0], bot:[.22,.22,0,0,0,.22,.22] },
-      { at: 1080, kind:'turret', side:'bot', hp:3, fireMs:1700 },
-      { at: 1700, kind:'wave', etype:'diver',    n:2, yf:0.0,  gap:130 },
-      { at: 2050, kind:'powerup', pkind:'P', yf:0.5 },
-      { at: 2400, kind:'wave', etype:'straight', n:4, yf:0.45, gap:110, hp:2 },
+      { at: 1060, kind:'turret', side:'bot', hp:3, fireMs:1500 },
+      { at: 1120, kind:'wave', etype:'sine',     n:4, yf:0.45, gap:80 },
+      { at: 1500, kind:'wave', etype:'diver',    n:3, yf:0.0,  gap:95 },
+      { at: 1820, kind:'powerup', pkind:'P', yf:0.5 },
+      { at: 1900, kind:'wave', etype:'straight', n:5, yf:0.55, gap:80,  hp:1 },
+      { at: 2250, kind:'wave', etype:'sine',     n:5, yf:0.4,  gap:75 },
+      { at: 2600, kind:'wave', etype:'straight', n:5, yf:0.45, gap:70,  hp:2 },
       { at: 3000, kind:'boss', boss:'WARDEN' },
     ]},
     { scroll: 1.05, events: [
@@ -1079,11 +1083,11 @@
   // Bosses: a phase machine selected by HP%. enterTo is a fraction of lcdW.
   // phases[0..3] map to the 100-75 / 75-50 / 50-25 / 25-0 HP bands.
   const SI_BOSSES = {
-    WARDEN:      { hp:22, wf:0.30, hf:0.55, enterTo:0.62, phases:[
-      { move:'hover',  fire:'spread3', fireMs:1500 },
-      { move:'hover',  fire:'spread3', fireMs:1250 },
-      { move:'sweep',  fire:'aimed2',  fireMs:1050 },
-      { move:'sweep',  fire:'aimed2',  fireMs:850  } ]},
+    WARDEN:      { hp:38, wf:0.30, hf:0.55, enterTo:0.62, phases:[
+      { move:'hover',  fire:'spread3', fireMs:1050 },
+      { move:'sweep',  fire:'spread3', fireMs:900  },
+      { move:'sweep',  fire:'aimed2',  fireMs:780  },
+      { move:'charge', fire:'aimed2',  fireMs:640  } ]},
     RAZORBACK:   { hp:30, wf:0.32, hf:0.6,  enterTo:0.6,  phases:[
       { move:'sweep',  fire:'spread3', fireMs:1300 },
       { move:'sweep',  fire:'aimed2',  fireMs:1050 },
