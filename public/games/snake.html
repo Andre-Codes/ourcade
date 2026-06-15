@@ -945,6 +945,7 @@
   ]});
   const SpaceImpactMenu = ListScreen({ id:'simenu', title:'SPACE IMPACT', numbered:false, items:()=>[
     {label:'NEW GAME', run:()=>{ SpaceImpactApp.start(); pushScreen(SpaceImpactApp); }},
+    {label:'LEVELS '+SI_LEVELS.length, run:()=>showToast(SI_LEVELS.length+' LEVELS')},
     {label:'TOP SCORE '+DB.spaceimpact.hi, run:()=>showToast('HI '+DB.spaceimpact.hi)}
   ]});
   const SnakeApp = {
@@ -987,14 +988,182 @@
     }
   };
 
-  /* ----- Space Impact (phone-only — no public page, no registry entry) -----
-     A trimmed, nostalgia-first take on the Nokia classic. The ship is pinned to
-     the left and only moves up/down; the world scrolls by way of enemies +
-     bullets streaming leftward. v1 ships straight flyers + sine-wave flyers and
-     a single weapon upgrade; divers, turrets, terrain and bosses are
-     intentionally deferred. Auto-fire keeps the only live control the d-pad
-     (up/down), so it never fights Snake's hard-wired setDir(). Drawn in the LCD
-     pixel space with chunky fillRects — no smoothing, authentically blocky. */
+  /* ===================================================================
+     SPACE IMPACT — full faithful rebuild (phone-only; no public page).
+     A nostalgia-first take on the Nokia classic. The ship is pinned to the
+     left and only moves up/down; forward motion is the illusion of a world
+     scrolling leftward. This rebuild adds the things that make Space Impact
+     memorable: weapon levels 1-4 (persist between levels, decay one step on
+     death), the full enemy mix (straight / sine / diver / turret), scrolling
+     terrain tunnels, a 5-level hand-authored campaign, and end-of-level
+     bosses with HP phases at 75/50/25%.
+
+     Structure: SI_LEVELS (authorable timelines), SI_BOSSES (boss defs), and
+     SI (pure behavior helpers) keep the data and behavior out of the screen
+     object so SpaceImpactApp stays close to its original shape and the
+     screen-object contract the rAF loop relies on is untouched.
+
+     Auto-fire keeps the only live control the d-pad (up/down) so it never
+     fights Snake's hard-wired setDir(). Everything is chunky fillRects in the
+     LCD pixel space — no smoothing, authentically blocky. All motion is
+     v*dt*0.06 (px/ms), dt clamped to 60ms so a GC stall can't teleport. */
+
+  // Levels are sorted timelines keyed by world-X (`at`, absolute px — so
+  // retuning `scroll` re-times a whole level proportionally). Vertical
+  // positions are `yf` fractions of the play height, resolved at spawn.
+  const SI_LEVELS = [
+    { scroll: 0.9, events: [
+      { at: 120,  kind:'wave', etype:'straight', n:3, yf:0.30, gap:170, hp:1 },
+      { at: 560,  kind:'wave', etype:'sine',     n:4, yf:0.50, gap:150 },
+      { at: 1000, kind:'terrain', len:520, top:[0,0,.18,.28,.28,.18,0], bot:[.22,.22,0,0,0,.22,.22] },
+      { at: 1080, kind:'turret', side:'bot', hp:3, fireMs:1700 },
+      { at: 1700, kind:'wave', etype:'diver',    n:2, yf:0.0,  gap:130 },
+      { at: 2050, kind:'powerup', pkind:'P', yf:0.5 },
+      { at: 2400, kind:'wave', etype:'straight', n:4, yf:0.45, gap:110, hp:2 },
+      { at: 3000, kind:'boss', boss:'WARDEN' },
+    ]},
+    { scroll: 1.05, events: [
+      { at: 140,  kind:'wave', etype:'sine',     n:5, yf:0.35, gap:130 },
+      { at: 700,  kind:'wave', etype:'straight', n:4, yf:0.6,  gap:110, hp:2 },
+      { at: 1100, kind:'terrain', len:620, top:[0,.2,.3,.36,.36,.3,.2,0], bot:[.2,.2,.1,0,0,.1,.2,.2] },
+      { at: 1180, kind:'turret', side:'top', hp:3, fireMs:1500 },
+      { at: 1320, kind:'turret', side:'bot', hp:3, fireMs:1500 },
+      { at: 1900, kind:'wave', etype:'diver',    n:3, yf:0.0,  gap:110 },
+      { at: 2200, kind:'powerup', pkind:'P', yf:0.4 },
+      { at: 2500, kind:'wave', etype:'sine',     n:5, yf:0.5,  gap:90 },
+      { at: 2900, kind:'powerup', pkind:'S', yf:0.6 },
+      { at: 3300, kind:'boss', boss:'RAZORBACK' },
+    ]},
+    { scroll: 1.2, events: [
+      { at: 120,  kind:'wave', etype:'diver',    n:3, yf:0.0,  gap:120 },
+      { at: 560,  kind:'terrain', len:760, top:[0,.24,.34,.42,.42,.34,.42,.34,.24,0], bot:[.24,.24,.14,.06,.06,.14,.06,.14,.24,.24] },
+      { at: 640,  kind:'turret', side:'bot', hp:4, fireMs:1400 },
+      { at: 900,  kind:'turret', side:'top', hp:4, fireMs:1400 },
+      { at: 1500, kind:'wave', etype:'straight', n:6, yf:0.4,  gap:80, hp:2 },
+      { at: 1900, kind:'powerup', pkind:'P', yf:0.5 },
+      { at: 2200, kind:'wave', etype:'sine',     n:5, yf:0.55, gap:80 },
+      { at: 2600, kind:'wave', etype:'diver',    n:3, yf:0.0,  gap:90 },
+      { at: 3000, kind:'powerup', pkind:'1', yf:0.3 },
+      { at: 3400, kind:'boss', boss:'DREADNOUGHT' },
+    ]},
+    { scroll: 1.32, events: [
+      { at: 120,  kind:'wave', etype:'sine',     n:6, yf:0.4,  gap:90 },
+      { at: 600,  kind:'wave', etype:'diver',    n:4, yf:0.0,  gap:90 },
+      { at: 1000, kind:'terrain', len:880, top:[.1,.3,.4,.46,.46,.4,.46,.4,.3,.46,.3,.1], bot:[.2,.2,.12,.06,.06,.12,.06,.12,.2,.06,.2,.2] },
+      { at: 1080, kind:'turret', side:'bot', hp:4, fireMs:1200 },
+      { at: 1280, kind:'turret', side:'top', hp:4, fireMs:1200 },
+      { at: 1500, kind:'turret', side:'bot', hp:4, fireMs:1200 },
+      { at: 2100, kind:'wave', etype:'straight', n:7, yf:0.45, gap:70, hp:2 },
+      { at: 2400, kind:'powerup', pkind:'P', yf:0.5 },
+      { at: 2700, kind:'wave', etype:'sine',     n:6, yf:0.5,  gap:70 },
+      { at: 3100, kind:'powerup', pkind:'S', yf:0.6 },
+      { at: 3500, kind:'boss', boss:'LEVIATHAN' },
+    ]},
+    { scroll: 1.45, events: [
+      { at: 120,  kind:'wave', etype:'diver',    n:4, yf:0.0,  gap:80 },
+      { at: 520,  kind:'wave', etype:'sine',     n:6, yf:0.45, gap:75 },
+      { at: 950,  kind:'terrain', len:980, top:[.2,.36,.46,.5,.5,.46,.5,.46,.36,.5,.36,.5,.2], bot:[.2,.16,.08,.04,.04,.08,.04,.08,.16,.04,.16,.04,.2] },
+      { at: 1040, kind:'turret', side:'bot', hp:5, fireMs:1100 },
+      { at: 1240, kind:'turret', side:'top', hp:5, fireMs:1100 },
+      { at: 1440, kind:'turret', side:'bot', hp:5, fireMs:1100 },
+      { at: 1640, kind:'turret', side:'top', hp:5, fireMs:1100 },
+      { at: 2200, kind:'wave', etype:'straight', n:8, yf:0.5,  gap:60, hp:3 },
+      { at: 2500, kind:'powerup', pkind:'P', yf:0.4 },
+      { at: 2700, kind:'wave', etype:'diver',    n:5, yf:0.0,  gap:70 },
+      { at: 2950, kind:'powerup', pkind:'1', yf:0.6 },
+      { at: 3200, kind:'wave', etype:'sine',     n:7, yf:0.5,  gap:60 },
+      { at: 3700, kind:'boss', boss:'OVERLORD' },
+    ]},
+  ];
+
+  // Bosses: a phase machine selected by HP%. enterTo is a fraction of lcdW.
+  // phases[0..3] map to the 100-75 / 75-50 / 50-25 / 25-0 HP bands.
+  const SI_BOSSES = {
+    WARDEN:      { hp:22, wf:0.30, hf:0.55, enterTo:0.62, phases:[
+      { move:'hover',  fire:'spread3', fireMs:1500 },
+      { move:'hover',  fire:'spread3', fireMs:1250 },
+      { move:'sweep',  fire:'aimed2',  fireMs:1050 },
+      { move:'sweep',  fire:'aimed2',  fireMs:850  } ]},
+    RAZORBACK:   { hp:30, wf:0.32, hf:0.6,  enterTo:0.6,  phases:[
+      { move:'sweep',  fire:'spread3', fireMs:1300 },
+      { move:'sweep',  fire:'aimed2',  fireMs:1050 },
+      { move:'charge', fire:'aimed2',  fireMs:950  },
+      { move:'charge', fire:'spread3', fireMs:750  } ]},
+    DREADNOUGHT: { hp:40, wf:0.36, hf:0.66, enterTo:0.6,  phases:[
+      { move:'hover',  fire:'spread3', fireMs:1150 },
+      { move:'sweep',  fire:'spread3', fireMs:1000 },
+      { move:'sweep',  fire:'aimed2',  fireMs:850  },
+      { move:'charge', fire:'aimed2',  fireMs:680  } ]},
+    LEVIATHAN:   { hp:52, wf:0.38, hf:0.7,  enterTo:0.58, phases:[
+      { move:'sweep',  fire:'spread3', fireMs:1050 },
+      { move:'sweep',  fire:'aimed2',  fireMs:880  },
+      { move:'charge', fire:'spread3', fireMs:760  },
+      { move:'charge', fire:'aimed2',  fireMs:600  } ]},
+    OVERLORD:    { hp:68, wf:0.42, hf:0.76, enterTo:0.56, phases:[
+      { move:'sweep',  fire:'spread3', fireMs:950  },
+      { move:'charge', fire:'aimed2',  fireMs:800  },
+      { move:'charge', fire:'spread3', fireMs:650  },
+      { move:'charge', fire:'aimed2',  fireMs:520  } ]},
+  };
+
+  // Pure behavior helpers — no state of their own; `s` is the SpaceImpactApp.
+  const SI = {
+    // per-type enemy motion. straight/sine fly in screen space; turret is
+    // map-locked (its world-X minus the camera).
+    enemyUpdate: {
+      straight(e,s,dt){ e.x += e.vx*dt*0.06; },
+      sine(e,s,dt){ e.x += e.vx*dt*0.06; e.y = e.baseY + Math.sin(s.t*e.freq + e.phase)*e.amp; },
+      diver(e,s,dt){
+        e.x += e.vx*dt*0.06;
+        if(!e.locked && e.x < lcdW*0.8){ e.locked = true; e.vy = ((s.shipY - e.y) > 0 ? 1 : -1) * e.dvy; }
+        if(e.locked){ e.y += e.vy*dt*0.06; }
+      },
+      turret(e,s,dt){ e.x = e.wx - s.camX; e.alive = e.x + e.w > 0 && e.x < lcdW + 4; },
+    },
+    // per-type enemy fire. straight/sine shoot straight left; turret aims at
+    // the ship's current Y; divers don't fire (the dive IS the attack).
+    enemyFire(e, s){
+      const bx = e.x, by = e.y + (e.h>>1);
+      if(e.type==='turret'){
+        const ty = s.shipY + (s.shipH>>1);
+        const dy = ty - by, dx = -Math.max(20, bx);
+        const m = Math.hypot(dx, dy) || 1, spd = 1.6 + 0.12*s.levelIdx;
+        s.pushEBullet({ x:bx, y:by, vx:dx/m*spd, vy:dy/m*spd });
+      } else {
+        s.pushEBullet({ x:bx, y:by, vx:-(1.4 + 0.12*s.levelIdx + Math.random()*0.5), vy:0 });
+      }
+    },
+    // boss movement patterns (mutate boss.y / boss.x within the arena).
+    bossMove: {
+      hover(b,s,dt){ b.y = b.baseY + Math.sin(s.t*0.0026 + b.phase)*Math.min(10, b.range*0.4); },
+      sweep(b,s,dt){ b.y = b.baseY + Math.sin(s.t*0.0024 + b.phase)*b.range; },
+      charge(b,s,dt){
+        b.y = b.baseY + Math.sin(s.t*0.003 + b.phase)*b.range*0.5;
+        if(b.chargeT==null){ b.chargeT = 0; b.chargeDir = 1; }
+        b.chargeT += dt;
+        if(b.chargeDir>0){ b.x -= 0.9*dt*0.06; if(b.x <= s.shipX + s.shipW + 14){ b.chargeDir = -1; } }
+        else { b.x += 0.6*dt*0.06; if(b.x >= b.homeX){ b.x = b.homeX; b.chargeDir = 1; } }
+      },
+    },
+    // boss fire patterns -> enemy bullets.
+    bossFire: {
+      spread3(b,s){ const x=b.x, y=b.y + (b.h>>1), spd=1.7;
+        for(const vy of [-0.9,0,0.9]) s.pushEBullet({ x, y, vx:-spd, vy }); },
+      aimed2(b,s){ const x=b.x, y=b.y + (b.h>>1), ty=s.shipY + (s.shipH>>1);
+        for(const off of [-3,3]){ const dy=(ty+off)-y, dx=-Math.max(20,x), m=Math.hypot(dx,dy)||1, spd=2.0;
+          s.pushEBullet({ x, y, vx:dx/m*spd, vy:dy/m*spd }); } },
+    },
+    // per-type enemy render in the chunky fillRect idiom.
+    drawEnemy(e){
+      const ex = Math.round(e.x), ey = Math.round(e.y);
+      ctx.fillStyle = ink; ctx.fillRect(ex, ey, e.w, e.h);
+      ctx.fillStyle = bg; // eye notch -> reads as facing left
+      ctx.fillRect(ex+1, ey+1, 2, 2);
+      if(e.type==='diver'){ ctx.fillStyle = ink; ctx.fillRect(ex-2, ey + (e.h>>1) - 1, 2, 2); } // nose fin
+      if(e.type==='turret'){ ctx.fillStyle = ink; const by = e.side==='bot' ? ey-2 : ey+e.h; ctx.fillRect(ex+(e.w>>1)-1, by, 2, 2); } // barrel
+    },
+  };
+
   const SpaceImpactApp = {
     id:'spaceimpact', statusBar:false, paused:false, over:false,
     get soft(){ return ''; },
@@ -1005,53 +1174,118 @@
       this.shipW = Math.max(7, Math.round(cell*0.7));
       this.shipH = Math.max(5, Math.round(cell*0.5));
       this.shipX = pad + 2;
-      this.shipY = this.top + Math.round(this.h/2);
-      this.bullets = []; this.enemies = []; this.eBullets = []; this.powerups = [];
       this.score = 0; this.lives = 3; this.weapon = 1;
-      this.fireAcc = 0; this.spawnAcc = 0; this.t = 0; this.invuln = 0;
+      this.won = false;
+      this.levelIdx = 0;
+      this.beginLevel();
       this.paused = false; this.over = false; last = 0;
     },
+    // reset everything that belongs to a single level; keep score/lives/weapon
+    beginLevel(){
+      this.shipY = this.top + Math.round(this.h/2);
+      this.bullets = []; this.enemies = []; this.eBullets = []; this.powerups = [];
+      this.terrain = []; this.pending = []; this.fx = [];
+      this.boss = null; this.phase = 'scroll';
+      this.camX = 0; this.lastCamX = 0; this.evIdx = 0;
+      this.scrollSpd = (SI_LEVELS[this.levelIdx] || SI_LEVELS[0]).scroll;
+      this.fireAcc = 0; this.t = 0; this.invuln = 0;
+      this.banner = 'LEVEL ' + (this.levelIdx+1); this.bannerT = 1400;
+    },
+    nextLevel(){
+      this.levelIdx++;
+      if(this.levelIdx >= SI_LEVELS.length){ this.win(); return; }
+      this.beginLevel();
+    },
     // ── helpers ──────────────────────────────────────────────────────────
-    spawnEnemy(){
-      // difficulty ramps with score: faster + denser over time
-      const lvl = 1 + Math.floor(this.score/150);
-      const sine = Math.random() < 0.45;
-      const size = Math.random() < 0.25 ? 'med' : 'small';
-      const w = size==='med' ? Math.max(9, Math.round(cell*0.85)) : Math.max(6, Math.round(cell*0.6));
-      const hh = size==='med' ? Math.max(7, Math.round(cell*0.65)) : Math.max(5, Math.round(cell*0.45));
-      const y0 = this.top + 4 + Math.random()*(this.h - hh - 8);
-      this.enemies.push({
-        x: lcdW, y: y0, baseY: y0, w, h: hh, size,
-        hp: size==='med' ? 2 : 1,
-        vx: -(0.6 + 0.18*lvl + Math.random()*0.4),
-        sine, amp: 6 + Math.random()*10, freq: 0.004 + Math.random()*0.004, phase: Math.random()*6.28,
-        fireAt: 600 + Math.random()*1400, fireT: 0,
-      });
+    yOf(yf){ return this.top + 4 + yf*(this.h - 8); },
+    pushEBullet(b){ this.eBullets.push(b); if(this.eBullets.length > 24) this.eBullets.shift(); },
+    // resolve a level event into live objects (or a pending spawner)
+    spawnEvent(ev){
+      if(ev.kind==='wave'){
+        this.pending.push({ etype:ev.etype, left:ev.n, gap:ev.gap, accDist:0, yf:ev.yf, hp:ev.hp });
+      } else if(ev.kind==='terrain'){
+        const w = Math.max(6, cell);
+        const cols = Math.max(2, Math.round(ev.len / w));
+        const sample = (arr, i) => { const f = i/(cols-1)*(arr.length-1); const a=arr[Math.floor(f)], b=arr[Math.min(arr.length-1, Math.ceil(f))]; return a + (b-a)*(f-Math.floor(f)); };
+        for(let i=0;i<cols;i++){
+          this.terrain.push({ wx: this.camX + lcdW + i*w, w,
+            topH: Math.round(sample(ev.top, i) * this.h),
+            botH: Math.round(sample(ev.bot, i) * this.h) });
+        }
+      } else if(ev.kind==='turret'){
+        const w = Math.max(7, Math.round(cell*0.7)), hh = Math.max(6, Math.round(cell*0.6));
+        const y = ev.side==='bot' ? this.bottom - hh : this.top;
+        this.enemies.push({ type:'turret', side:ev.side, wx: this.camX + lcdW, x: lcdW, y, baseY:y,
+          w, h:hh, hp: ev.hp, vx:0, fireAt: ev.fireMs, fireT: Math.random()*ev.fireMs, alive:true });
+      } else if(ev.kind==='powerup'){
+        this.powerups.push({ x: lcdW, y: this.yOf(ev.yf), vx:-1.0, kind: ev.pkind });
+      } else if(ev.kind==='boss'){
+        this.pendingBoss = ev.boss;
+      }
+    },
+    // emit one enemy from a pending wave spawner
+    emitEnemy(p){
+      const lvlMul = 1 + 0.16*this.levelIdx;
+      const y0 = this.yOf(p.yf);
+      if(p.etype==='diver'){
+        this.enemies.push({ type:'diver', x: lcdW, y: this.top + 2, baseY:this.top+2, w: Math.max(6, Math.round(cell*0.6)), h: Math.max(5, Math.round(cell*0.45)),
+          hp: 1, vx: -(1.0 + 0.2*lvlMul + Math.random()*0.3), dvy: 1.1 + 0.15*this.levelIdx, locked:false, vy:0,
+          fireAt: 99999, fireT: 0 });
+      } else {
+        const sine = p.etype==='sine';
+        const med = (p.hp||1) >= 2;
+        const w = med ? Math.max(9, Math.round(cell*0.85)) : Math.max(6, Math.round(cell*0.6));
+        const hh = med ? Math.max(7, Math.round(cell*0.65)) : Math.max(5, Math.round(cell*0.45));
+        this.enemies.push({ type: p.etype, x: lcdW, y: y0, baseY: y0, w, h: hh, size: med?'med':'small',
+          hp: p.hp || 1, vx: -(0.6 + 0.18*lvlMul + Math.random()*0.4),
+          amp: sine ? 6 + Math.random()*10 : 0, freq: 0.004 + Math.random()*0.004, phase: Math.random()*6.28,
+          fireAt: 700 + Math.random()*1400, fireT: 0 });
+      }
     },
     fire(){
-      const cx = this.shipX + this.shipW, cy = this.shipY + Math.round(this.shipH/2);
-      const spd = 3.4;
-      if(this.weapon >= 2){
-        this.bullets.push({ x:cx, y:cy-2, vx:spd, vy:0 });
-        this.bullets.push({ x:cx, y:cy+2, vx:spd, vy:0 });
-      } else {
-        this.bullets.push({ x:cx, y:cy, vx:spd, vy:0 });
-      }
+      const cx = this.shipX + this.shipW, cy = this.shipY + Math.round(this.shipH/2), spd = 3.4;
+      const W = this.weapon, push = (y,vy) => this.bullets.push({ x:cx, y, vx:spd, vy });
+      if(W===1){ push(cy,0); }
+      else if(W===2){ push(cy-2,0); push(cy+2,0); }
+      else if(W===3){ push(cy,0); push(cy-3,0); push(cy+3,0); }
+      else { push(cy,0); push(cy-2,-0.5); push(cy+2,0.5); push(cy-4,-1.0); push(cy+4,1.0); }
       beep(880, 0.03, 0.03);
     },
     hitShip(){
-      if(this.invuln > 0) return;
+      if(this.invuln > 0 || this.over) return;
       this.lives--; beep(140, 0.16, 0.05);
+      this.weapon = Math.max(1, this.weapon-1); // decay one step, don't reset
       if(this.lives <= 0){ this.die(); return; }
       this.invuln = 1400; // brief respawn grace
-      this.shipY = this.top + Math.round(this.h/2);
+      this.shipY = this.recenterY();
       this.eBullets = []; // clear the air so respawn isn't instant death
     },
+    // respawn at the widest local terrain opening so we aren't reborn in rock
+    recenterY(){
+      const col = this.terrainColAtShip();
+      if(!col) return this.top + Math.round(this.h/2);
+      const openTop = this.top + col.topH, openBot = this.bottom - col.botH;
+      return Math.round((openTop + openBot)/2 - this.shipH/2);
+    },
+    crash(){ this.hitShip(); },
     die(){
       this.over = true; beep(90, 0.3, 0.06);
+      this.submitScore();
+    },
+    win(){
+      this.over = true; this.won = true; beep(1200, 0.18, 0.05);
+      this.submitScore();
+    },
+    submitScore(){
       if(this.score > DB.spaceimpact.hi){ DB.spaceimpact.hi = this.score; saveDB(); }
       try { window.parent !== window && window.parent.postMessage(
         { type:'ourcade:score', gameId:'space-impact', score:this.score }, '*'); } catch(e){}
+    },
+    // the terrain column the (fixed-X) ship currently overlaps, or null
+    terrainColAtShip(){
+      const wx = this.shipX + this.camX;
+      for(const c of this.terrain){ if(wx + this.shipW > c.wx && wx < c.wx + c.w) return c; }
+      return null;
     },
     // ── simulation ───────────────────────────────────────────────────────
     tick(dt){
@@ -1060,48 +1294,119 @@
       dt = Math.min(dt, 60); // clamp big frame gaps
       this.t += dt;
       if(this.invuln > 0) this.invuln -= dt;
+      if(this.bannerT > 0) this.bannerT -= dt;
 
-      // auto-fire
-      this.fireAcc += dt;
-      while(this.fireAcc >= 220){ this.fireAcc -= 220; this.fire(); }
+      // auto-fire (only live during the fight, not the boss explosion)
+      if(!(this.boss && this.boss.dying != null)){
+        this.fireAcc += dt;
+        while(this.fireAcc >= 220){ this.fireAcc -= 220; this.fire(); }
+      }
 
-      // spawn enemies (cadence tightens with score)
-      this.spawnAcc += dt;
-      const spawnEvery = Math.max(450, 1100 - this.score*1.2);
-      while(this.spawnAcc >= spawnEvery){ this.spawnAcc -= spawnEvery; this.spawnEnemy(); }
-
-      // bullets
-      for(const b of this.bullets){ b.x += b.vx*dt*0.06; }
-      this.bullets = this.bullets.filter(b => b.x < lcdW + 4);
-
-      // enemies
-      for(const e of this.enemies){
-        e.x += e.vx*dt*0.06;
-        if(e.sine) e.y = e.baseY + Math.sin((this.t)*e.freq + e.phase)*e.amp;
-        e.fireT += dt;
-        if(e.fireT >= e.fireAt && e.x < lcdW*0.92){
-          e.fireT = 0;
-          this.eBullets.push({ x:e.x, y:e.y + Math.round(e.h/2), vx:-(1.4 + Math.random()*0.6) });
+      // advance the world. scroll is frozen once we enter the boss arena.
+      if(this.phase === 'scroll'){
+        this.lastCamX = this.camX;
+        this.camX += this.scrollSpd*dt*0.06;
+        const camDelta = this.camX - this.lastCamX;
+        // frontier spawner: fire events as their map-X crosses the right edge
+        const lvl = SI_LEVELS[this.levelIdx], frontier = this.camX + lcdW;
+        while(this.evIdx < lvl.events.length && lvl.events[this.evIdx].at <= frontier){
+          this.spawnEvent(lvl.events[this.evIdx]); this.evIdx++;
+        }
+        // pending waves emit one enemy every `gap` world-px
+        for(const p of this.pending){
+          p.accDist += camDelta;
+          while(p.left > 0 && p.accDist >= p.gap){ p.accDist -= p.gap; p.left--; this.emitEnemy(p); }
+        }
+        this.pending = this.pending.filter(p => p.left > 0);
+        // cull terrain that has scrolled fully off the left
+        this.terrain = this.terrain.filter(c => c.wx + c.w - this.camX > 0);
+        // level events exhausted + screen cleared -> head to the boss
+        if(this.evIdx >= lvl.events.length && this.pending.length === 0 &&
+           this.enemies.length === 0 && this.terrain.length === 0){
+          this.phase = 'clear';
+        }
+      } else if(this.phase === 'clear'){
+        // brief settle before the boss; clear lingering threats
+        if(this.enemies.length === 0 && this.eBullets.length === 0){
+          this.spawnBoss();
         }
       }
-      this.enemies = this.enemies.filter(e => e.x + e.w > 0);
+
+      // player bullets
+      for(const b of this.bullets){ b.x += b.vx*dt*0.06; b.y += (b.vy||0)*dt*0.06; }
+      this.bullets = this.bullets.filter(b => b.x < lcdW + 4 && b.y > this.top-6 && b.y < this.bottom+6);
+
+      // enemies (per-type motion + fire)
+      for(const e of this.enemies){
+        (SI.enemyUpdate[e.type] || SI.enemyUpdate.straight)(e, this, dt);
+        e.fireT += dt;
+        if(e.fireT >= e.fireAt && e.x < lcdW*0.94 && e.type !== 'diver'){ e.fireT = 0; SI.enemyFire(e, this); }
+      }
+      this.enemies = this.enemies.filter(e => (e.type==='turret' ? e.alive : (e.x + e.w > 0)) && e.y < this.bottom + 30);
+
+      // boss
+      if(this.boss) this.updateBoss(dt);
 
       // enemy bullets
-      for(const eb of this.eBullets){ eb.x += eb.vx*dt*0.06; }
-      this.eBullets = this.eBullets.filter(eb => eb.x > -4);
+      for(const eb of this.eBullets){ eb.x += eb.vx*dt*0.06; eb.y += (eb.vy||0)*dt*0.06; }
+      this.eBullets = this.eBullets.filter(eb => eb.x > -4 && eb.x < lcdW+4 && eb.y > this.top-6 && eb.y < this.bottom+6);
 
       // powerups drift left
       for(const p of this.powerups){ p.x += p.vx*dt*0.06; }
       this.powerups = this.powerups.filter(p => p.x + 6 > 0);
 
+      // explosion fx
+      for(const f of this.fx){ f.t += dt; }
+      this.fx = this.fx.filter(f => f.t < f.life);
+
       this.collisions();
+    },
+    spawnBoss(){
+      const def = SI_BOSSES[this.pendingBoss];
+      const w = Math.max(18, Math.round(lcdW*def.wf)), h = Math.max(16, Math.round(this.h*def.hf));
+      const baseY = this.top + Math.round((this.h - h)/2);
+      this.boss = { name:this.pendingBoss, w, h, hp:def.hp, maxHp:def.hp, def,
+        x: lcdW, homeX: Math.round(lcdW*def.enterTo), baseY, y: baseY,
+        range: Math.max(6, Math.round((this.h - h)/2 - 2)), phase: Math.random()*6.28,
+        entering:true, fireT:0, flash:0, dying:null, phaseIdx:0 };
+      // make the arena winnable + give the player a clean entrance
+      this.weapon = Math.max(2, this.weapon); this.eBullets = []; this.enemies = [];
+      this.phase = 'boss'; this.banner = 'WARNING'; this.bannerT = 1400; beep(180, 0.4, 0.05);
+    },
+    updateBoss(dt){
+      const b = this.boss;
+      if(b.dying != null){
+        b.dying += dt;
+        if(b.dying >= 600){ this.boss = null; this.nextLevel(); }
+        return;
+      }
+      if(b.entering){
+        b.x -= 1.6*dt*0.06;
+        if(b.x <= b.homeX){ b.x = b.homeX; b.entering = false; }
+        return;
+      }
+      if(b.flash > 0) b.flash -= dt;
+      // phase by HP band: 0 (100-75) .. 3 (25-0)
+      const pct = b.hp / b.maxHp;
+      const idx = pct > 0.75 ? 0 : pct > 0.5 ? 1 : pct > 0.25 ? 2 : 3;
+      if(idx !== b.phaseIdx){ b.phaseIdx = idx; b.flash = 200; beep(220, 0.18, 0.05); }
+      const phase = b.def.phases[idx];
+      (SI.bossMove[phase.move] || SI.bossMove.hover)(b, this, dt);
+      b.fireT += dt;
+      if(b.fireT >= phase.fireMs){ b.fireT = 0; (SI.bossFire[phase.fire] || SI.bossFire.spread3)(b, this); }
+    },
+    killBoss(){
+      const b = this.boss; b.dying = 0; this.score += 250; beep(70, 0.5, 0.06);
+      // a bounded explosion: a few expanding rect rings centered on the boss
+      const cx = b.x + (b.w>>1), cy = b.y + (b.h>>1);
+      for(let i=0;i<6;i++) this.fx.push({ x:cx, y:cy, t:-i*70, life:520, r:2 + i*3 });
     },
     collisions(){
       const sx=this.shipX, sy=this.shipY, sw=this.shipW, sh=this.shipH;
       const overlap = (ax,ay,aw,ah, bx,by,bw,bh) =>
         ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
 
-      // player bullets vs enemies
+      // player bullets vs enemies + boss
       for(const b of this.bullets){
         if(b.dead) continue;
         for(const e of this.enemies){
@@ -1110,14 +1415,17 @@
             b.dead = true; e.hp--;
             if(e.hp <= 0){
               e.dead = true;
-              this.score += e.size==='med' ? 20 : 10;
+              this.score += e.type==='turret' ? 30 : (e.size==='med' ? 20 : 10);
               beep(660, 0.05, 0.04);
-              if(Math.random() < 0.08){ // occasional weapon drop
-                this.powerups.push({ x:e.x, y:e.y, vx:-1.0, kind:'P' });
-              }
+              if(e.type!=='turret' && Math.random() < 0.07) this.powerups.push({ x:e.x, y:e.y, vx:-1.0, kind:'P' });
             }
             break;
           }
+        }
+        if(!b.dead && this.boss && this.boss.dying == null && !this.boss.entering &&
+           overlap(b.x,b.y,3,2, this.boss.x,this.boss.y,this.boss.w,this.boss.h)){
+          b.dead = true; this.boss.hp--; this.boss.flash = 120; beep(520, 0.03, 0.03);
+          if(this.boss.hp <= 0) this.killBoss();
         }
       }
       this.bullets = this.bullets.filter(b => !b.dead);
@@ -1126,14 +1434,21 @@
       // ship vs powerups
       for(const p of this.powerups){
         if(overlap(sx,sy,sw,sh, p.x-3,p.y-3,8,8)){
-          p.dead = true; this.weapon = Math.min(2, this.weapon+1);
-          this.score += 5; beep(1046, 0.08, 0.05); showToast('WEAPON UP');
+          p.dead = true;
+          if(p.kind==='P'){ this.weapon = Math.min(4, this.weapon+1); this.score += 5; beep(1046, 0.08, 0.05); showToast('WEAPON UP'); }
+          else if(p.kind==='1'){ this.lives++; beep(1318, 0.12, 0.05); showToast('EXTRA LIFE'); }
+          else { this.score += 50; beep(1046, 0.06, 0.05); showToast('BONUS'); }
         }
       }
       this.powerups = this.powerups.filter(p => !p.dead);
 
-      // ship vs enemies / enemy bullets
-      for(const e of this.enemies){ if(overlap(sx,sy,sw,sh, e.x,e.y,e.w,e.h)){ this.hitShip(); break; } }
+      if(this.over) return;
+      // ship vs terrain (O(1) column lookup; ship X is fixed)
+      const col = this.terrainColAtShip();
+      if(col && (sy < this.top + col.topH || sy + sh > this.bottom - col.botH)) this.crash();
+      // ship vs enemies / boss / enemy bullets
+      if(!this.over) for(const e of this.enemies){ if(overlap(sx,sy,sw,sh, e.x,e.y,e.w,e.h)){ this.hitShip(); break; } }
+      if(!this.over && this.boss && this.boss.dying == null && overlap(sx,sy,sw,sh, this.boss.x,this.boss.y,this.boss.w,this.boss.h)) this.hitShip();
       if(!this.over) for(const eb of this.eBullets){ if(overlap(sx,sy,sw,sh, eb.x-2,eb.y-1,4,2)){ eb.dead=true; this.hitShip(); break; } }
       this.eBullets = this.eBullets.filter(eb => !eb.dead);
     },
@@ -1153,6 +1468,38 @@
         ctx.fillStyle = ink;
         ctx.fillRect(lcdW - pad - (i+1)*(pipR*2+2), statusH + 2, pipR*2, pipR);
       }
+      // terrain (behind everything)
+      ctx.fillStyle = ink;
+      for(const c of this.terrain){
+        const sx = Math.round(c.wx - this.camX);
+        if(sx + c.w < 0 || sx > lcdW) continue;
+        if(c.topH > 0) ctx.fillRect(sx, this.top, c.w, c.topH);
+        if(c.botH > 0) ctx.fillRect(sx, this.bottom - c.botH, c.w, c.botH);
+      }
+      // powerups (hollow box; glyph by kind)
+      for(const p of this.powerups){
+        if(p.kind==='1' && !blinkOn()) continue; // 1UP blinks to read as rare
+        ctx.fillStyle = ink; ctx.fillRect(Math.round(p.x)-3, Math.round(p.y)-3, 8, 8);
+        ctx.fillStyle = bg; ctx.fillRect(Math.round(p.x)-2, Math.round(p.y)-2, 6, 6);
+        drawText(p.kind, Math.round(p.x)-1, Math.round(p.y)-3, 1, ink);
+      }
+      // enemies (per type)
+      for(const e of this.enemies) SI.drawEnemy(e);
+      // boss
+      if(this.boss){
+        const b = this.boss, bx = Math.round(b.x), by = Math.round(b.y);
+        if(b.dying != null){
+          // bounded explosion: expanding rings centered on the boss
+          for(const f of this.fx){ if(f.t < 0) continue; const r = Math.round(f.r + f.t*0.03);
+            ctx.fillStyle = (Math.floor(f.t/60)%2===0) ? ink : bg;
+            ctx.fillRect(Math.round(f.x)-r, Math.round(f.y)-r, r*2, r*2); }
+        } else {
+          const flashing = b.flash > 0 && blinkOn();
+          ctx.fillStyle = flashing ? bg : ink; ctx.fillRect(bx, by, b.w, b.h);
+          ctx.fillStyle = flashing ? ink : bg; ctx.fillRect(bx+2, by + (b.h>>1) - 2, 4, 4); // core weak-point
+          ctx.fillStyle = flashing ? ink : bg; ctx.fillRect(bx, by + (b.h>>2), 2, 3); ctx.fillRect(bx, by + b.h - (b.h>>2) - 3, 2, 3); // guns
+        }
+      }
       // ship (blink during invulnerability)
       if(!(this.invuln > 0 && Math.floor(this.t/120)%2===0)){
         ctx.fillStyle = ink;
@@ -1165,21 +1512,14 @@
       ctx.fillStyle = ink;
       for(const b of this.bullets) ctx.fillRect(Math.round(b.x), Math.round(b.y), 3, 2);
       for(const eb of this.eBullets) ctx.fillRect(Math.round(eb.x), Math.round(eb.y), 2, 2);
-      // enemies
-      for(const e of this.enemies){
-        ctx.fillStyle = ink;
-        ctx.fillRect(Math.round(e.x), Math.round(e.y), e.w, e.h);
-        ctx.fillStyle = bg; // little eye notch so they read as facing left
-        ctx.fillRect(Math.round(e.x)+1, Math.round(e.y)+1, 2, 2);
-      }
-      // powerups (hollow box with P)
-      for(const p of this.powerups){
-        ctx.fillStyle = ink; ctx.fillRect(Math.round(p.x)-3, Math.round(p.y)-3, 8, 8);
-        ctx.fillStyle = bg; ctx.fillRect(Math.round(p.x)-2, Math.round(p.y)-2, 6, 6);
-        drawText('P', Math.round(p.x)-1, Math.round(p.y)-3, 1, ink);
-      }
+      // weapon level chip (top-left under status)
+      drawText('W'+this.weapon, this.shipX, this.top, 1, ink);
+      // transient banner (LEVEL n / WARNING)
+      if(this.bannerT > 0 && !this.paused && !this.over) drawTextCentered(this.banner, this.top + Math.round(this.h*0.35), fs+1, ink);
       if(this.paused) overlayBox([{t:'PAUSED',s:fs+1},{t:'CENTER RESUMES',s:fs,blink:true}]);
-      else if(this.over) overlayBox([{t:'GAME OVER',s:fs+1},{t:'SCORE '+this.score,s:fs},{t:'HI '+DB.spaceimpact.hi,s:fs},{t:'CENTER RETRY',s:fs,blink:true}]);
+      else if(this.over) overlayBox(this.won
+        ? [{t:'YOU WIN',s:fs+1},{t:'SCORE '+this.score,s:fs},{t:'HI '+DB.spaceimpact.hi,s:fs},{t:'CENTER RETRY',s:fs,blink:true}]
+        : [{t:'GAME OVER',s:fs+1},{t:'SCORE '+this.score,s:fs},{t:'HI '+DB.spaceimpact.hi,s:fs},{t:'CENTER RETRY',s:fs,blink:true}]);
     }
   };
 
