@@ -2,7 +2,7 @@
    DAILY — deterministic, date-seeded content selection
    Pure JS (no React / no DOM required) so this can be imported by the home
    components AND by headless node scripts (scripts/daily-check.js), the same
-   way descent/engine.js is shared with scripts/descent-sim.js.
+   way pits-and-portals/engine.js is shared with scripts/pits-and-portals-sim.js.
 
    The whole site's "fresh every day" feel rests on one idea: a given local
    calendar day always maps to the same picks, on every device — a shared

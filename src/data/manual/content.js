@@ -1,5 +1,6 @@
 /* ─────────────────────────────────────────────────────────────────────────
    MANUAL CONTENT CONFIG  ·  edit this file by hand
+   (part of the hand-edit hub in src/data/manual/ — see README.md there)
 
    Anything you add here joins the normal daily rotation alongside the
    AI-generated content in src/data/generated/*. Unlike that folder, this file
@@ -20,7 +21,7 @@ export const MANUAL_POLLS = [
   //   id: "manual-best-cabinet",
   //   question: "Best cabinet in the arcade?",
   //   options: [
-  //     { id: "descent", label: "🕯️ The Descent" },
+  //     { id: "pits", label: "🕯️ Pits and Portals" },
   //     { id: "crawler", label: "🗝️ Crypt Crawler" },
   //     { id: "tap", label: "⚡ Tap Surge" },
   //   ],
@@ -38,7 +39,7 @@ export const MANUAL_QUIZZES = [
   //   intro: "Six bites of truth.",
   //   results: [
   //     { id: "chips", title: "Hot Chips", emoji: "🔥", blurb: "Loud and a little reckless.", gameId: "tap-surge" },
-  //     { id: "soda",  title: "Flat Soda",  emoji: "🥤", blurb: "Chill, sweet, in no hurry.", gameId: "descent" },
+  //     { id: "soda",  title: "Flat Soda",  emoji: "🥤", blurb: "Chill, sweet, in no hurry.", gameId: "pits-and-portals" },
   //   ],
   //   questions: [
   //     { q: "Pick a vibe:", answers: [

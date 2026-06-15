@@ -18,7 +18,7 @@
 
 import { loadPool } from "./animations.js";
 import generated from "./generated/stumble.js";
-import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual.js";
+import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual/content.js";
 import {
   getStumbleSeen,
   recordStumbleSeen,

@@ -240,6 +240,7 @@
   const DEFAULTS = {
     settings:{ soundOn:true, profile:'GENERAL', keypadTones:true, maze:false, level:3, greeting:'OURCADE', clock24:true },
     snake:{ hi:0, webPlayed:false, webBest:0 },
+    spaceimpact:{ hi:0 },
     contacts:[ {name:'JENNY', addr:'8675309'}, {name:'OURCADE', addr:'6287'} ],
     messages:[],
     composer:[]
@@ -933,13 +934,18 @@
 
   /* ----- Games / Snake ----- */
   const GamesMenu = ListScreen({ id:'games', title:'GAMES', numbered:true, items:()=>[
-    {label:'SNAKE', run:()=>pushScreen(SnakeMenu)}
+    {label:'SNAKE', run:()=>pushScreen(SnakeMenu)},
+    {label:'SPACE IMPACT', run:()=>pushScreen(SpaceImpactMenu)}
   ]});
   const SnakeMenu = ListScreen({ id:'snakemenu', title:'SNAKE', numbered:false, items:()=>[
     {label:'NEW GAME', run:()=>{ SnakeApp.start('phone'); pushScreen(SnakeApp); }},
     {label:'LEVEL '+DB.settings.level, run:()=>{ DB.settings.level=(DB.settings.level%9)+1; saveDB(); }},
     {label:'MAZE '+(DB.settings.maze?'ON':'OFF'), run:()=>{ DB.settings.maze=!DB.settings.maze; saveDB(); }},
     {label:'TOP SCORE '+DB.snake.hi, run:()=>showToast('HI '+DB.snake.hi)}
+  ]});
+  const SpaceImpactMenu = ListScreen({ id:'simenu', title:'SPACE IMPACT', numbered:false, items:()=>[
+    {label:'NEW GAME', run:()=>{ SpaceImpactApp.start(); pushScreen(SpaceImpactApp); }},
+    {label:'TOP SCORE '+DB.spaceimpact.hi, run:()=>showToast('HI '+DB.spaceimpact.hi)}
   ]});
   const SnakeApp = {
     id:'snake', statusBar:false, venue:'phone', paused:false, over:false,
@@ -978,6 +984,202 @@
       const bt=oy-3, bb=oy-3+gh*fcell+6;
       if(this.paused) overlayRegion([{t:'PAUSED',s:fs+1},{t:'CENTER RESUMES',s:fs,blink:true}], bt, bb);
       else if(this.over) overlayRegion([{t:'GAME OVER',s:fs},{t:'SCORE '+score,s:fs},{t:'CENTER RETRY',s:fs,blink:true},{t:'END EXITS',s:fs}], bt, bb);
+    }
+  };
+
+  /* ----- Space Impact (phone-only — no public page, no registry entry) -----
+     A trimmed, nostalgia-first take on the Nokia classic. The ship is pinned to
+     the left and only moves up/down; the world scrolls by way of enemies +
+     bullets streaming leftward. v1 ships straight flyers + sine-wave flyers and
+     a single weapon upgrade; divers, turrets, terrain and bosses are
+     intentionally deferred. Auto-fire keeps the only live control the d-pad
+     (up/down), so it never fights Snake's hard-wired setDir(). Drawn in the LCD
+     pixel space with chunky fillRects — no smoothing, authentically blocky. */
+  const SpaceImpactApp = {
+    id:'spaceimpact', statusBar:false, paused:false, over:false,
+    get soft(){ return ''; },
+    start(){
+      // play area sits below the status bar, inset by a small margin
+      this.top = statusH + 2; this.bottom = lcdH - 2;
+      this.h = this.bottom - this.top;
+      this.shipW = Math.max(7, Math.round(cell*0.7));
+      this.shipH = Math.max(5, Math.round(cell*0.5));
+      this.shipX = pad + 2;
+      this.shipY = this.top + Math.round(this.h/2);
+      this.bullets = []; this.enemies = []; this.eBullets = []; this.powerups = [];
+      this.score = 0; this.lives = 3; this.weapon = 1;
+      this.fireAcc = 0; this.spawnAcc = 0; this.t = 0; this.invuln = 0;
+      this.paused = false; this.over = false; last = 0;
+    },
+    // ── helpers ──────────────────────────────────────────────────────────
+    spawnEnemy(){
+      // difficulty ramps with score: faster + denser over time
+      const lvl = 1 + Math.floor(this.score/150);
+      const sine = Math.random() < 0.45;
+      const size = Math.random() < 0.25 ? 'med' : 'small';
+      const w = size==='med' ? Math.max(9, Math.round(cell*0.85)) : Math.max(6, Math.round(cell*0.6));
+      const hh = size==='med' ? Math.max(7, Math.round(cell*0.65)) : Math.max(5, Math.round(cell*0.45));
+      const y0 = this.top + 4 + Math.random()*(this.h - hh - 8);
+      this.enemies.push({
+        x: lcdW, y: y0, baseY: y0, w, h: hh, size,
+        hp: size==='med' ? 2 : 1,
+        vx: -(0.6 + 0.18*lvl + Math.random()*0.4),
+        sine, amp: 6 + Math.random()*10, freq: 0.004 + Math.random()*0.004, phase: Math.random()*6.28,
+        fireAt: 600 + Math.random()*1400, fireT: 0,
+      });
+    },
+    fire(){
+      const cx = this.shipX + this.shipW, cy = this.shipY + Math.round(this.shipH/2);
+      const spd = 3.4;
+      if(this.weapon >= 2){
+        this.bullets.push({ x:cx, y:cy-2, vx:spd, vy:0 });
+        this.bullets.push({ x:cx, y:cy+2, vx:spd, vy:0 });
+      } else {
+        this.bullets.push({ x:cx, y:cy, vx:spd, vy:0 });
+      }
+      beep(880, 0.03, 0.03);
+    },
+    hitShip(){
+      if(this.invuln > 0) return;
+      this.lives--; beep(140, 0.16, 0.05);
+      if(this.lives <= 0){ this.die(); return; }
+      this.invuln = 1400; // brief respawn grace
+      this.shipY = this.top + Math.round(this.h/2);
+      this.eBullets = []; // clear the air so respawn isn't instant death
+    },
+    die(){
+      this.over = true; beep(90, 0.3, 0.06);
+      if(this.score > DB.spaceimpact.hi){ DB.spaceimpact.hi = this.score; saveDB(); }
+      try { window.parent !== window && window.parent.postMessage(
+        { type:'ourcade:score', gameId:'space-impact', score:this.score }, '*'); } catch(e){}
+    },
+    // ── simulation ───────────────────────────────────────────────────────
+    tick(dt){
+      if(this.over){ this.t += dt; return; }
+      if(this.paused) return;
+      dt = Math.min(dt, 60); // clamp big frame gaps
+      this.t += dt;
+      if(this.invuln > 0) this.invuln -= dt;
+
+      // auto-fire
+      this.fireAcc += dt;
+      while(this.fireAcc >= 220){ this.fireAcc -= 220; this.fire(); }
+
+      // spawn enemies (cadence tightens with score)
+      this.spawnAcc += dt;
+      const spawnEvery = Math.max(450, 1100 - this.score*1.2);
+      while(this.spawnAcc >= spawnEvery){ this.spawnAcc -= spawnEvery; this.spawnEnemy(); }
+
+      // bullets
+      for(const b of this.bullets){ b.x += b.vx*dt*0.06; }
+      this.bullets = this.bullets.filter(b => b.x < lcdW + 4);
+
+      // enemies
+      for(const e of this.enemies){
+        e.x += e.vx*dt*0.06;
+        if(e.sine) e.y = e.baseY + Math.sin((this.t)*e.freq + e.phase)*e.amp;
+        e.fireT += dt;
+        if(e.fireT >= e.fireAt && e.x < lcdW*0.92){
+          e.fireT = 0;
+          this.eBullets.push({ x:e.x, y:e.y + Math.round(e.h/2), vx:-(1.4 + Math.random()*0.6) });
+        }
+      }
+      this.enemies = this.enemies.filter(e => e.x + e.w > 0);
+
+      // enemy bullets
+      for(const eb of this.eBullets){ eb.x += eb.vx*dt*0.06; }
+      this.eBullets = this.eBullets.filter(eb => eb.x > -4);
+
+      // powerups drift left
+      for(const p of this.powerups){ p.x += p.vx*dt*0.06; }
+      this.powerups = this.powerups.filter(p => p.x + 6 > 0);
+
+      this.collisions();
+    },
+    collisions(){
+      const sx=this.shipX, sy=this.shipY, sw=this.shipW, sh=this.shipH;
+      const overlap = (ax,ay,aw,ah, bx,by,bw,bh) =>
+        ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+
+      // player bullets vs enemies
+      for(const b of this.bullets){
+        if(b.dead) continue;
+        for(const e of this.enemies){
+          if(e.hp <= 0) continue;
+          if(overlap(b.x,b.y,3,2, e.x,e.y,e.w,e.h)){
+            b.dead = true; e.hp--;
+            if(e.hp <= 0){
+              e.dead = true;
+              this.score += e.size==='med' ? 20 : 10;
+              beep(660, 0.05, 0.04);
+              if(Math.random() < 0.08){ // occasional weapon drop
+                this.powerups.push({ x:e.x, y:e.y, vx:-1.0, kind:'P' });
+              }
+            }
+            break;
+          }
+        }
+      }
+      this.bullets = this.bullets.filter(b => !b.dead);
+      this.enemies = this.enemies.filter(e => !e.dead);
+
+      // ship vs powerups
+      for(const p of this.powerups){
+        if(overlap(sx,sy,sw,sh, p.x-3,p.y-3,8,8)){
+          p.dead = true; this.weapon = Math.min(2, this.weapon+1);
+          this.score += 5; beep(1046, 0.08, 0.05); showToast('WEAPON UP');
+        }
+      }
+      this.powerups = this.powerups.filter(p => !p.dead);
+
+      // ship vs enemies / enemy bullets
+      for(const e of this.enemies){ if(overlap(sx,sy,sw,sh, e.x,e.y,e.w,e.h)){ this.hitShip(); break; } }
+      if(!this.over) for(const eb of this.eBullets){ if(overlap(sx,sy,sw,sh, eb.x-2,eb.y-1,4,2)){ eb.dead=true; this.hitShip(); break; } }
+      this.eBullets = this.eBullets.filter(eb => !eb.dead);
+    },
+    // ── input ────────────────────────────────────────────────────────────
+    up(){ if(!this.paused && !this.over) this.shipY = Math.max(this.top, this.shipY - Math.round(cell*0.7)); },
+    down(){ if(!this.paused && !this.over) this.shipY = Math.min(this.bottom - this.shipH, this.shipY + Math.round(cell*0.7)); },
+    key(ch){ if(ch==='2') this.up(); else if(ch==='8') this.down(); else if(ch==='5') this.navi(); },
+    navi(){ if(this.over) this.start(); else this.paused = !this.paused; },
+    back(){ popScreen(); },
+    tap(){ this.navi(); },
+    // ── render ───────────────────────────────────────────────────────────
+    render(){
+      // HUD: score left, lives as pips right
+      drawStatusBar(String(this.score).padStart(5,'0'));
+      const pipR = Math.max(2, fs);
+      for(let i=0;i<this.lives;i++){
+        ctx.fillStyle = ink;
+        ctx.fillRect(lcdW - pad - (i+1)*(pipR*2+2), statusH + 2, pipR*2, pipR);
+      }
+      // ship (blink during invulnerability)
+      if(!(this.invuln > 0 && Math.floor(this.t/120)%2===0)){
+        ctx.fillStyle = ink;
+        const sx=this.shipX, sy=this.shipY, sw=this.shipW, sh=this.shipH;
+        ctx.fillRect(sx, sy + Math.round(sh*0.3), sw, Math.round(sh*0.4)); // body
+        ctx.fillRect(sx + sw - 2, sy, 2, sh);                              // nose
+        ctx.fillRect(sx, sy, 2, sh);                                       // tail
+      }
+      // bullets
+      ctx.fillStyle = ink;
+      for(const b of this.bullets) ctx.fillRect(Math.round(b.x), Math.round(b.y), 3, 2);
+      for(const eb of this.eBullets) ctx.fillRect(Math.round(eb.x), Math.round(eb.y), 2, 2);
+      // enemies
+      for(const e of this.enemies){
+        ctx.fillStyle = ink;
+        ctx.fillRect(Math.round(e.x), Math.round(e.y), e.w, e.h);
+        ctx.fillStyle = bg; // little eye notch so they read as facing left
+        ctx.fillRect(Math.round(e.x)+1, Math.round(e.y)+1, 2, 2);
+      }
+      // powerups (hollow box with P)
+      for(const p of this.powerups){
+        ctx.fillStyle = ink; ctx.fillRect(Math.round(p.x)-3, Math.round(p.y)-3, 8, 8);
+        ctx.fillStyle = bg; ctx.fillRect(Math.round(p.x)-2, Math.round(p.y)-2, 6, 6);
+        drawText('P', Math.round(p.x)-1, Math.round(p.y)-3, 1, ink);
+      }
+      if(this.paused) overlayBox([{t:'PAUSED',s:fs+1},{t:'CENTER RESUMES',s:fs,blink:true}]);
+      else if(this.over) overlayBox([{t:'GAME OVER',s:fs+1},{t:'SCORE '+this.score,s:fs},{t:'HI '+DB.spaceimpact.hi,s:fs},{t:'CENTER RETRY',s:fs,blink:true}]);
     }
   };
 

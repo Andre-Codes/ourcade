@@ -5,8 +5,8 @@
 
 import { rotateDaily } from "../lib/daily.js";
 import generated from "./generated/curiosities.js";
-import { MANUAL_CURIOSITIES } from "./manual.js";
-import { activeSchedule } from "./schedule.js";
+import { MANUAL_CURIOSITIES } from "./manual/content.js";
+import { activeSchedule } from "./manual/schedule.js";
 
 // Minimal safety net if MANUAL_CURIOSITIES is ever emptied.
 const FALLBACK = [

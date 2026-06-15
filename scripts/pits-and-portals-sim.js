@@ -1,14 +1,14 @@
 /* ============================================================
-   THE DESCENT — headless balance simulator
+   PITS AND PORTALS — headless balance simulator
    Drives the real engine (no React) to measure generation
    difficulty and the ember economy, so constants are tuned from
-   data rather than feel. Run:  node scripts/descent-sim.js
+   data rather than feel. Run:  node scripts/pits-and-portals-sim.js
    ============================================================ */
 
 import {
   EM, STYLE, styleRank, BOSS_EVERY, VESSELS, RELIC_EVERY, PREMIUM_COST, PREMIUM_DRAW,
   generateFloor, withIntents, resolve, enumActions, cleanSolution, stateKey, regionFrom, key,
-} from "../src/games/descent/engine.js";
+} from "../src/games/pits-and-portals/engine.js";
 
 const MAXDEPTH = 25;
 const TRIALS = 60;          // runs per archetype
@@ -158,7 +158,7 @@ function checkInvariants() {
 const avg = (a) => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
 const f1 = (x) => x.toFixed(1);
 
-console.log("THE DESCENT — balance sim  (depth cap " + MAXDEPTH + ", " + TRIALS + " runs/archetype)\n");
+console.log("PITS AND PORTALS — balance sim  (depth cap " + MAXDEPTH + ", " + TRIALS + " runs/archetype)\n");
 
 console.log("INVARIANTS  (" + INVARIANT_FLOORS + " floors)");
 const inv = checkInvariants();

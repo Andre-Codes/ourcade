@@ -11,8 +11,8 @@
 
 import { rotateIntraday, rotateDaily, dayPart } from "../lib/daily.js";
 import generated from "./generated/weird.js";
-import { MANUAL_WEIRD, MANUAL_WEIRD_NIGHT } from "./manual.js";
-import { activeSchedule } from "./schedule.js";
+import { MANUAL_WEIRD, MANUAL_WEIRD_NIGHT } from "./manual/content.js";
+import { activeSchedule } from "./manual/schedule.js";
 
 // Minimal safety net if both pools are ever emptied.
 const FALLBACK = [

@@ -1,13 +1,13 @@
 /* ============================================================
    DAILY-CHECK — headless verifier for the date-seeded daily layer.
-   Same idea as scripts/descent-sim.js: drive the real selection
+   Same idea as scripts/pits-and-portals-sim.js: drive the real selection
    logic (no React) to confirm "today" is deterministic and that
    picks rotate through their pools without early repeats.
    Run:  node scripts/daily-check.js
    ============================================================ */
 
 import { dayKey, rotateDaily, dayPart, isWithinWindow } from "../src/lib/daily.js";
-import { activeSchedule } from "../src/data/schedule.js";
+import { activeSchedule } from "../src/data/manual/schedule.js";
 import { POLLS, getTodaysPoll } from "../src/data/polls.js";
 import { QUIZZES, getTodaysQuiz } from "../src/data/quizzes.js";
 import { getTodaysTip } from "../src/data/flavor.js";

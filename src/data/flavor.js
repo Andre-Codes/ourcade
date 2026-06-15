@@ -3,8 +3,8 @@
 
 import { pickDaily, pickDailyN } from "../lib/daily.js";
 import generated from "./generated/flavor.js";
-import { MANUAL_NEWS, MANUAL_TIPS } from "./manual.js";
-import { activeSchedule } from "./schedule.js";
+import { MANUAL_NEWS, MANUAL_TIPS } from "./manual/content.js";
+import { activeSchedule } from "./manual/schedule.js";
 
 const FALLBACK = {
   tips: [

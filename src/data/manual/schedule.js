@@ -25,7 +25,7 @@
    Examples (uncomment / copy):
    ───────────────────────────────────────────────────────────────────────── */
 
-import { isWithinWindow } from "../lib/daily.js";
+import { isWithinWindow } from "../../lib/daily.js";
 
 export const SCHEDULE = [
   // { type: "news", mode: "pin", from: "2026-06-20", days: 7,

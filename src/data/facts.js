@@ -15,7 +15,7 @@
    path (the deferred "🎲 another fact" button). */
 
 import { rotateEvery } from "../lib/daily.js";
-import { MANUAL_FACTS } from "./manual.js";
+import { MANUAL_FACTS } from "./manual/content.js";
 // import generated from "./generated/facts.js"; // AI pool — disabled for now
 
 // Minimal safety net if MANUAL_FACTS is ever emptied.

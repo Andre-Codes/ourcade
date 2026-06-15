@@ -4,7 +4,7 @@
 
 import { rotateDaily, daySeed } from "../lib/daily.js";
 import generated from "./generated/polls.js";
-import { MANUAL_POLLS } from "./manual.js";
+import { MANUAL_POLLS } from "./manual/content.js";
 
 // Minimal safety net — the real variety lives in generated/polls.js.
 const FALLBACK = [

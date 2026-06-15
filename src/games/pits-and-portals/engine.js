@@ -1,8 +1,8 @@
 /* ============================================================
-   THE DESCENT — pure engine (no React / no DOM)
+   PITS AND PORTALS — pure engine (no React / no DOM)
    All game logic + tuning constants live here so both the React
-   component (Descent.jsx) and the headless balance simulator
-   (scripts/descent-sim.js) share one source of truth.
+   component (PitsAndPortals.jsx) and the headless balance simulator
+   (scripts/pits-and-portals-sim.js) share one source of truth.
 
    Perfect information + stage-then-commit. You are fragile
    (3 HP, no healing) and kill mostly by repositioning threats.

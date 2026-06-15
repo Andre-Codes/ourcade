@@ -8,6 +8,7 @@ import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import { getTodaysFact } from "../data/facts.js";
 import { getTodaysCuriosity } from "../data/curiosities.js";
 import { getCurrentWeirdThing } from "../data/weird.js";
+import { MOVIES } from "../data/manual/movies.js";
 import { NEXT_GAME_VOTE, nextGameRealTally } from "../data/nextGame.js";
 import {
   getPollVote,
@@ -361,6 +362,36 @@ function MascotTip({ dayKey: key, streak }) {
   );
 }
 
+// ── Now in theaters — the one thing the multiplex won't tell you: is it ───
+// worth sitting through the credits? Hand-curated in data/manual/movies.js;
+// the card simply lists everything currently in that file (no rotation).
+function NowInTheaters() {
+  if (!MOVIES.length) return null;
+  return (
+    <div className="arcade-widget arcade-credits">
+      <span className="arcade-widget-kicker">🎬 STAY FOR THE CREDITS?</span>
+      <ul className="arcade-credits-list">
+        {MOVIES.map((m) => {
+          const stay = m.stinger === "yes";
+          return (
+            <li key={m.id} className="arcade-credits-row">
+              <div className="arcade-credits-head">
+                <span className="arcade-credits-title">{m.title}</span>
+                <span
+                  className={`arcade-credits-chip${stay ? " is-stay" : " is-none"}`}
+                >
+                  {stay ? "✅ STAY" : "🚫 nothing extra"}
+                </span>
+              </div>
+              {m.credits && <p className="arcade-credits-note">{m.credits}</p>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 // ── Site news box ─────────────────────────────────────────────────────────
 function SiteNews({ dayKey: key }) {
   const items = getTodaysNews(key, 3);
@@ -415,6 +446,8 @@ export default function DailyBand({ dayPart }) {
       <NextGameVote />
 
       <FlashTheater dayKey={key} compact browseTo="/flash" />
+
+      <NowInTheaters />
 
       <SiteNews dayKey={key} />
     </section>

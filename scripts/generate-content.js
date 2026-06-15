@@ -44,7 +44,7 @@ const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").split("="
 // How big a batch to ask for. One run = a month-plus of date-seeded daily rotation.
 const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30 };
 
-// Facts are hand-curated (see MANUAL_FACTS in src/data/manual.js); the home runs
+// Facts are hand-curated (see MANUAL_FACTS in src/data/manual/content.js); the home runs
 // on those only. Set true to also (re)generate the supplemental generated/facts.js.
 const GENERATE_FACTS = false;
 
@@ -418,7 +418,7 @@ let MANUAL_WEIRD_NIGHT = [];
 let MANUAL_CURIOSITIES = [];
 let FEATURED_URLS = [];
 try {
-  const manual = await import("../src/data/manual.js");
+  const manual = await import("../src/data/manual/content.js");
   MANUAL_WEIRD = manual.MANUAL_WEIRD || [];
   MANUAL_WEIRD_NIGHT = manual.MANUAL_WEIRD_NIGHT || [];
   MANUAL_CURIOSITIES = manual.MANUAL_CURIOSITIES || [];
@@ -614,7 +614,7 @@ Make every result reachable, and make sure two different answer paths could plau
     `Generate ${COUNT.tips} one-line mascot tips and ${COUNT.news} one-line "site news" blurbs. Tips: dumb-but-charming advice from the arcade mascot (a little pixel gremlin). News: breezy fake site updates in the spirit of a 2003 webmaster (e.g. "NEW CABINET: ...", "RUMOR: ...", "MAINTENANCE: ..."). Each line stands alone, <= ~120 chars, no numbering or quotes.${newsTopical}`
   );
 
-  // Facts are hand-curated for now (MANUAL_FACTS in src/data/manual.js) and the
+  // Facts are hand-curated for now (MANUAL_FACTS in src/data/manual/content.js) and the
   // home uses ONLY those, so we skip the API call by default — real-world facts
   // can't be web-grounded during structured output, and a known-true set beats a
   // drifty one. Flip GENERATE_FACTS to regenerate the supplemental generated/facts.js.

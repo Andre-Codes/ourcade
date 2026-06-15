@@ -3,7 +3,7 @@
 
 import { rotateDaily, rotateDailyN } from "../lib/daily.js";
 import generated from "./generated/quizzes.js";
-import { MANUAL_QUIZZES } from "./manual.js";
+import { MANUAL_QUIZZES } from "./manual/content.js";
 
 const FALLBACK = [
   {
@@ -11,7 +11,7 @@ const FALLBACK = [
     title: "Which Ourcade Game Are You?",
     intro: "Six quick questions. No wrong answers, only vibes.",
     results: [
-      { id: "descent", title: "The Descent", emoji: "🕯️", blurb: "Careful and calculating. You read the room before you make a move.", gameId: "descent" },
+      { id: "pits", title: "Pits and Portals", emoji: "🕯️", blurb: "Careful and calculating. You read the room before you make a move.", gameId: "pits-and-portals" },
       { id: "tap", title: "Tap Surge", emoji: "⚡", blurb: "Pure reflex, zero patience. You're already three moves ahead while everyone else loads.", gameId: "tap-surge" },
       { id: "crawler", title: "Crypt Crawler", emoji: "🗝️", blurb: "Grindy and relentless. You'd rather earn the win the long way and remember every step.", gameId: "crypt-crawler" },
     ],
@@ -19,7 +19,7 @@ const FALLBACK = [
       {
         q: "Pick a vibe:",
         answers: [
-          { label: "Quiet and tense", weights: { descent: 3 } },
+          { label: "Quiet and tense", weights: { pits: 3 } },
           { label: "Loud and fast", weights: { tap: 3 } },
           { label: "Slow and stubborn", weights: { crawler: 3 } },
         ],
@@ -27,8 +27,8 @@ const FALLBACK = [
       {
         q: "It's the weekend. You're...",
         answers: [
-          { label: "Planning the whole thing on paper", weights: { descent: 2, crawler: 1 } },
-          { label: "Out the door before the plan finishes", weights: { tap: 2, descent: 1 } },
+          { label: "Planning the whole thing on paper", weights: { pits: 2, crawler: 1 } },
+          { label: "Out the door before the plan finishes", weights: { tap: 2, pits: 1 } },
           { label: "Doing the same thing you always do, perfectly", weights: { crawler: 2 } },
         ],
       },
@@ -36,22 +36,22 @@ const FALLBACK = [
         q: "Pick a snack:",
         answers: [
           { label: "Whatever's closest, eaten in two bites", weights: { tap: 2 } },
-          { label: "A careful little plate, arranged", weights: { descent: 2, crawler: 1 } },
+          { label: "A careful little plate, arranged", weights: { pits: 2, crawler: 1 } },
           { label: "The economy-size bag, rationed for hours", weights: { crawler: 2 } },
         ],
       },
       {
         q: "Something breaks. First instinct?",
         answers: [
-          { label: "Stop, breathe, diagnose", weights: { descent: 2 } },
+          { label: "Stop, breathe, diagnose", weights: { pits: 2 } },
           { label: "Smack it and try again immediately", weights: { tap: 2, crawler: 1 } },
-          { label: "Start over from the very beginning", weights: { crawler: 2, descent: 1 } },
+          { label: "Start over from the very beginning", weights: { crawler: 2, pits: 1 } },
         ],
       },
       {
         q: "Pick a color:",
         answers: [
-          { label: "Candle-lit amber", weights: { descent: 2 } },
+          { label: "Candle-lit amber", weights: { pits: 2 } },
           { label: "Electric blue", weights: { tap: 2 } },
           { label: "Mossy dungeon green", weights: { crawler: 2 } },
         ],
@@ -59,7 +59,7 @@ const FALLBACK = [
       {
         q: "Your idea of a win?",
         answers: [
-          { label: "A clean run, no mistakes", weights: { descent: 2, crawler: 1 } },
+          { label: "A clean run, no mistakes", weights: { pits: 2, crawler: 1 } },
           { label: "A new high score by 0.2 seconds", weights: { tap: 3 } },
           { label: "Finally clearing the floor that's haunted you", weights: { crawler: 3 } },
         ],

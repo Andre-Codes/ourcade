@@ -34,7 +34,10 @@ export default function Walkman({ on, onStop }) {
           events: {
             // Argument form (array of video IDs) — the object form only takes a
             // real playlist/search list, not an ad-hoc list of ids.
-            onReady: (e) => e.target.loadPlaylist(shuffled().map((t) => t.id)),
+            onReady: (e) => {
+              e.target.loadPlaylist(shuffled().map((t) => t.id));
+              e.target.playVideo();
+            },
             onStateChange: (e) => {
               if (e.data === YT.PlayerState.PLAYING) {
                 const d = e.target.getVideoData?.();

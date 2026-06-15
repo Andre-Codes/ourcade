@@ -7,8 +7,12 @@ import {
   REC0, ACH, ACH_ORDER, RELICS, RELIC_ORDER, RELIC_EVERY, CONSUMABLES,
   SATCHEL_MAX, PREMIUM_COST, INSPECT,
   withIntents, resolve, generateFloor, farEdgeSpawn, rollVerbDraft,
-} from "./descent/engine";
+} from "./pits-and-portals/engine";
 import { useArcadeBackButton } from "../arcadeChrome.js";
+
+// Persistent meta key. window.storage was never wired up (silently dead), so we
+// use localStorage with the ourcade: prefix like the rest of the app.
+const META_KEY = "ourcade:pits-and-portals:meta";
 
 
 /* ---------- token glyphs ---------- */
@@ -286,32 +290,31 @@ export default function App() {
   // load persistent meta once on mount (storage may be absent — fail soft)
   useEffect(() => {
     let alive = true;
-    (async () => {
-      try {
-        if (typeof window !== "undefined" && window.storage) {
-          const r = await window.storage.get("descent:meta");
-          if (alive && r && r.value) {
-            const m = JSON.parse(r.value);
-            setEmbers(m.embers || 0);
-            const u = Array.isArray(m.unlocked) && m.unlocked.length ? m.unlocked : ["wanderer"];
-            setUnlocked(u);
-            setSelectedVessel(u.includes(m.selected) ? m.selected : "wanderer");
-            setBest(m.best || 0);
-            if (m.records) setRecords({ ...REC0, ...m.records });
-            if (Array.isArray(m.achievements)) setAchievements(m.achievements);
-            if ((m.best || 0) > 0) return;
-          }
-        }
-      } catch (e) {}
-      if (alive) setSanctumTab("guide"); // first-timer: open the guide
-    })();
+    try {
+      const raw =
+        typeof window !== "undefined" && window.localStorage
+          ? window.localStorage.getItem(META_KEY)
+          : null;
+      if (alive && raw) {
+        const m = JSON.parse(raw);
+        setEmbers(m.embers || 0);
+        const u = Array.isArray(m.unlocked) && m.unlocked.length ? m.unlocked : ["wanderer"];
+        setUnlocked(u);
+        setSelectedVessel(u.includes(m.selected) ? m.selected : "wanderer");
+        setBest(m.best || 0);
+        if (m.records) setRecords({ ...REC0, ...m.records });
+        if (Array.isArray(m.achievements)) setAchievements(m.achievements);
+        if ((m.best || 0) > 0) return () => { alive = false; };
+      }
+    } catch (e) {}
+    if (alive) setSanctumTab("guide"); // first-timer: open the guide
     return () => { alive = false; };
   }, []);
 
   const saveMeta = useCallback((next) => {
     try {
-      if (typeof window !== "undefined" && window.storage)
-        Promise.resolve(window.storage.set("descent:meta", JSON.stringify(next), false)).catch(() => {});
+      if (typeof window !== "undefined" && window.localStorage)
+        window.localStorage.setItem(META_KEY, JSON.stringify(next));
     } catch (e) {}
   }, []);
 
@@ -1000,7 +1003,7 @@ export default function App() {
             )}
           </div>
           <div className="titleWrap">
-            <div className="title">THE DESCENT</div>
+            <div className="title">PITS AND PORTALS</div>
             {modifier && uiActive && (
               <button className="modTag" onClick={() => { setShowModNote((s) => !s); setTimeout(() => setShowModNote(false), 3500); }}>
                 {MODIFIERS[modifier].label}
@@ -1184,7 +1187,7 @@ export default function App() {
             <div className="crest" aria-hidden="true">
               <svg viewBox="0 0 64 40" width="64" height="40"><path d="M2 20h18l4-8 8 16 4-8h18" stroke="var(--gold)" strokeWidth="2" fill="none" strokeLinecap="round" /><circle cx="32" cy="20" r="4" fill="var(--gold)" /></svg>
             </div>
-            <h1>THE DESCENT</h1>
+            <h1>PITS AND PORTALS</h1>
             <div className="purse">
               <span className="purseEmber">✦ {embers}</span>
               <span className="purseSep" />

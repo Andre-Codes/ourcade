@@ -48,7 +48,7 @@ const client = new Anthropic();
 let KNOWN_IDS = new Set();
 let KNOWN_URLS = new Set(); // urlKey()-normalized
 try {
-  const manual = await import("../src/data/manual.js");
+  const manual = await import("../src/data/manual/content.js");
   const generatedWeird = (await import("../src/data/generated/weird.js")).default || [];
   for (const a of [
     ...(manual.MANUAL_ARTIFACTS || []),

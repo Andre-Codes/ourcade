@@ -1177,6 +1177,24 @@ main > section + section { margin-top: 44px; }
 .arcade-weird-foot { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: space-between; }
 .arcade-weird-note { font-size: 0.62rem; letter-spacing: 0.08em; color: var(--arcade-muted); text-transform: uppercase; }
 
+/* now in theaters — "stay for the credits?" marquee, amber like a ticket stub */
+.arcade-credits .arcade-widget-kicker { color: #ffc24b; text-shadow: 0 0 8px rgba(255,194,75,.4); }
+.arcade-credits-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.arcade-credits-row { border-top: 1px solid #2a2f4a; padding-top: 10px; }
+.arcade-credits-row:first-child { border-top: 0; padding-top: 0; }
+.arcade-credits-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; justify-content: space-between; }
+.arcade-credits-title { font-family: 'Black Ops One', cursive; font-size: 0.95rem; color: #ffe9b0; }
+.arcade-credits-chip {
+  font-family: 'Press Start 2P', monospace; font-size: 0.46rem; letter-spacing: 0.04em;
+  padding: 4px 7px; border-radius: 6px; border: 1px solid; white-space: nowrap;
+}
+.arcade-credits-chip.is-stay { color: #6bffae; border-color: #1f6b46; background: rgba(63,255,160,.08); }
+.arcade-credits-chip.is-none { color: var(--arcade-muted); border-color: #3a3f5a; background: rgba(255,255,255,.03); }
+.arcade-credits-note {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 1.5;
+  color: #d6e6ff; margin: 6px 0 0;
+}
+
 /* shared "go deeper →" outbound link */
 .arcade-deeper {
   font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--neon-lime);
