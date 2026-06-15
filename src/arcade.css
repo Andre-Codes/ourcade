@@ -1063,6 +1063,10 @@ main > section + section { margin-top: 44px; }
 .arcade-flash-meta { margin: 10px 2px 0; font-size: 0.82rem; line-height: 1.45; color: #cbb8f0; }
 .arcade-flash-title { font-family: 'Black Ops One', cursive; font-size: 1rem; color: var(--neon-aqua); }
 .arcade-flash-by, .arcade-flash-year { color: var(--arcade-muted); }
+.arcade-flash-note {
+  margin: 4px 2px 0; font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.04em; color: var(--arcade-muted);
+}
 .arcade-flash-stumble { display: block; width: 100%; margin-top: 12px; }
 .arcade-flash-actions { display: flex; gap: 10px; margin-top: 12px; align-items: stretch; }
 .arcade-flash-actions .arcade-flash-stumble { flex: 1; margin-top: 0; }
@@ -1106,13 +1110,16 @@ main > section + section { margin-top: 44px; }
 /*  QUIZ PAGE                                                              */
 /* ====================================================================== */
 .arcade-quiz-stage {
-  display: flex; align-items: center; justify-content: center; padding: 28px 16px;
+  display: flex; flex-direction: column; align-items: center; padding: 28px 16px;
   background:
     repeating-linear-gradient(0deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
     repeating-linear-gradient(90deg, transparent 0 39px, rgba(63,255,208,.045) 39px 40px),
     var(--arcade-bg);
   font-family: 'Share Tech Mono', monospace;
 }
+/* keep the back bar spanning the page like other pages; the card centers below */
+.arcade-quiz-stage > .arcade-backbar { width: 100%; align-self: stretch; }
+.arcade-quiz-stage > .arcade-quiz { margin-top: 4vh; }
 .arcade-quiz {
   width: 100%; max-width: 540px;
   background: linear-gradient(180deg, #14172a, var(--arcade-surface));

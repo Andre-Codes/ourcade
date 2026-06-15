@@ -59,6 +59,8 @@ export default function FlashTheater({ dayKey, compact = false, browseTo, initia
         {anim.year && <span className="arcade-flash-year"> ({anim.year})</span>}
       </p>
 
+      <p className="arcade-flash-note">📱 best viewed in landscape</p>
+
       <div className="arcade-flash-actions">
         <button
           type="button"

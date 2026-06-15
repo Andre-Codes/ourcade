@@ -26,7 +26,7 @@ export const GLOBAL_CSS =`
   @keyframes glow     { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.5)} }
   @keyframes graceFlash { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @keyframes surgeRing  { from{stroke-dashoffset:0} to{stroke-dashoffset:var(--circ)} }
-  @keyframes surgeDanger{ 0%,100%{box-shadow:inset 0 0 0 0 rgba(255,45,78,0)} 50%{box-shadow:inset 0 0 70px 6px rgba(255,45,78,0.38)} }
+  @keyframes surgeDanger{ 0%,100%{box-shadow:inset 0 0 0 0 rgba(255,45,78,0);background:rgba(255,45,78,0)} 50%{box-shadow:inset 0 0 120px 18px rgba(255,45,78,0.6);background:rgba(255,45,78,0.07)} }
   @keyframes surgeDeath { 0%{transform:translate(0,0)} 15%{transform:translate(-9px,5px)} 30%{transform:translate(8px,-6px)} 45%{transform:translate(-7px,-4px)} 60%{transform:translate(6px,6px)} 75%{transform:translate(-4px,3px)} 100%{transform:translate(0,0)} }
 `;
 
@@ -215,8 +215,19 @@ function Countdown({n,color}) {
   );
 }
 
-const HS_KEY = "adhd_arcade_v3";
-function loadHS(){try{return JSON.parse(localStorage.getItem(HS_KEY)||"{}");}catch{return {};}}
+const HS_KEY = "ourcade:adhd_arcade";
+const HS_KEY_LEGACY = "adhd_arcade_v3";   // pre-convention key; carried over once below
+function loadHS(){
+  try{
+    let raw=localStorage.getItem(HS_KEY);
+    // one-time migration: copy the legacy blob so existing bests survive the rename
+    if(raw==null){
+      const legacy=localStorage.getItem(HS_KEY_LEGACY);
+      if(legacy!=null){localStorage.setItem(HS_KEY,legacy);raw=legacy;}
+    }
+    return JSON.parse(raw||"{}");
+  }catch{return {};}
+}
 function saveHS(game,score){
   const hs=loadHS();
   if(!hs[game]||score>hs[game]){hs[game]=score;localStorage.setItem(HS_KEY,JSON.stringify(hs));}
@@ -318,7 +329,6 @@ export function TapSurge({onExit}) {
   const [popups,setPopups]       = useState([]);
   const [combo,setCombo]         = useState(0);
   const [flashWrong,setFlashWrong] = useState(false);
-  const [speedPct,setSpeedPct]   = useState(0);
   const [dotColor,setDotColor]   = useState(surgeNodeColor(0));
   const [dying,setDying]         = useState(false);
 
@@ -391,8 +401,6 @@ export function TapSurge({onExit}) {
     const color=surgeNodeColor(scoreRef.current);
     setDotColor(color);
     setNodes(n=>[...n,{id,x,y,born:Date.now(),lifeMs:life,color}]);
-    const spawnNow=surgeSpawnMs(scoreRef.current);
-    setSpeedPct(Math.round(((2200-spawnNow)/(2200-300))*100));
     // Expiry — any dot that goes untapped is a miss
     setTimeout(()=>{
       if(gameOverRef.current) return;
@@ -445,10 +453,12 @@ export function TapSurge({onExit}) {
     const touch=e.touches?.[0]||e;
     const px=(touch.clientX||e.clientX)-rect.left;
     const py=(touch.clientY||e.clientY)-rect.top;
+    // Forgiving backstop: a near-miss just outside the dot costs nothing. Widen it
+    // on small screens (shaky thumbs) — scales with play-area width, clamped 40–64px.
+    const hitR=Math.max(40,Math.min(64,rect.width*0.11));
     const hitAny=nodesRef.current.some(nd=>{
       const dx=px-nd.x,dy=py-nd.y;
-      // forgiving backstop: a near-miss just outside the dot costs nothing
-      return Math.sqrt(dx*dx+dy*dy)<40;
+      return Math.sqrt(dx*dx+dy*dy)<hitR;
     });
     if(hitAny) return;
     SFX.surgeWrongTap();
@@ -467,7 +477,7 @@ export function TapSurge({onExit}) {
     clearTimeout(spawnTimer.current);
     gameOverRef.current=false; missRef.current=0; scoreRef.current=0; lastMissRef.current=0;
     setNodes([]);setScore(0);setMisses(0);setCombo(0);
-    setSpeedPct(0);setDotColor(surgeNodeColor(0));
+    setDotColor(surgeNodeColor(0));
     setGameOver(false);setCountdown(3);setRunning(false);setDying(false);
   };
 
@@ -475,6 +485,11 @@ export function TapSurge({onExit}) {
 
   const hudColor=dotColor;
   const danger=misses>=2;   // one life left
+  // Difficulty progress, derived from score so the bar moves smoothly with every
+  // tap/penalty instead of jumping only on spawn (matches the spawn/life curves).
+  const speedPct=Math.round(Math.min(score/3000,1)*100);
+  // Combo multiplier mirrors the scoring logic in tapNode (×2 at 5, ×4 at 10).
+  const comboMult=combo>=10?4:combo>=5?2:1;
   return (
     <div
       style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",
@@ -487,8 +502,8 @@ export function TapSurge({onExit}) {
         <button onPointerDown={onExit} style={{background:"#ffffff08",border:"1px solid #ffffff12",color:"#ffffff55",padding:"5px 10px",borderRadius:4,fontFamily:"'Share Tech Mono'",fontSize:12,cursor:"pointer",flexShrink:0}}>←</button>
         <span style={{fontFamily:"'Black Ops One'",fontSize:13,color:hudColor,textShadow:`0 0 8px ${hudColor}`,flexShrink:0,transition:"color 1.5s"}}>TAP SURGE</span>
         <div style={{flex:1}}/>
-        {speedPct>0&&<span style={{color:"#ffffff28",fontFamily:"'Share Tech Mono'",fontSize:9}}>{speedPct}% SPD</span>}
-        {combo>=3&&<span style={{color:T.gold,fontFamily:"'Black Ops One'",fontSize:12,textShadow:`0 0 8px ${T.gold}`,animation:"pulse 0.5s infinite"}}>×{combo}</span>}
+        {speedPct>0&&<span style={{color:"#ffffff28",fontFamily:"'Share Tech Mono'",fontSize:9}}>{speedPct}% MAX</span>}
+        {comboMult>1&&<span style={{color:T.gold,fontFamily:"'Black Ops One'",fontSize:12,textShadow:`0 0 8px ${T.gold}`,animation:"pulse 0.5s infinite"}}>×{comboMult}</span>}
         <span style={{color:"#ffffff28",fontFamily:"'Share Tech Mono'",fontSize:9}}>BEST <span style={{color:hudColor}}>{loadHS()["tapsurge"]||0}</span></span>
         <span style={{fontFamily:"'Black Ops One'",fontSize:22,color:hudColor,textShadow:`0 0 10px ${hudColor}`,minWidth:44,textAlign:"right",transition:"color 1.5s"}}>{score}</span>
         <div style={{display:"flex",gap:3,flexShrink:0,animation:danger?"pulse 0.6s infinite":"none"}}>
