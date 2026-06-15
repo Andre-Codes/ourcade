@@ -14,7 +14,8 @@
     "fetch:stumble": "node scripts/fetch-stumble.js",
     "research": "node scripts/research-topics.js",
     "check:daily": "node scripts/daily-check.js",
-    "assets:mascots": "node scripts/process-mascots.js"
+    "assets:mascots": "node scripts/process-mascots.js",
+    "assets:featured": "node scripts/process-featured.js"
   },
   "dependencies": {
     "firebase": "^12.14.0",

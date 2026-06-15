@@ -922,6 +922,17 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-hero:hover .arcade-hero-play { filter: brightness(1.1); }
 
+/* ---- featured game (real, external game) — hero variant with art ---- */
+.arcade-featured { --accent: #6ad6ff; margin-top: 18px; } /* default; per-game accent overrides inline */
+.arcade-featured .arcade-hero-screen {
+  width: 168px; height: 118px; padding: 0; overflow: hidden;
+}
+.arcade-featured-art { width: 100%; height: 100%; object-fit: cover; display: block; }
+.arcade-featured-meta {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.74rem;
+  letter-spacing: 0.04em; color: var(--arcade-muted); margin: 6px 0 8px;
+}
+
 /* ---- shared widget box (poll + quiz teaser) ---- */
 .arcade-widget {
   position: relative; display: block; padding: 14px;
@@ -1185,6 +1196,7 @@ main > section + section { margin-top: 44px; }
 .arcade-weird-note { font-size: 0.62rem; letter-spacing: 0.08em; color: var(--arcade-muted); text-transform: uppercase; }
 
 /* now in theaters — "stay for the credits?" marquee, amber like a ticket stub */
+.arcade-credits { margin-top: 18px; }
 .arcade-credits .arcade-widget-kicker { color: #ffc24b; text-shadow: 0 0 8px rgba(255,194,75,.4); }
 .arcade-credits-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .arcade-credits-row { border-top: 1px solid #2a2f4a; padding-top: 10px; }
@@ -1359,6 +1371,7 @@ main > section + section { margin-top: 44px; }
 @media (max-width: 520px) {
   .arcade-hero-body { flex-direction: column; align-items: flex-start; }
   .arcade-hero-screen { width: 100%; height: 96px; }
+  .arcade-featured .arcade-hero-screen { width: 100%; height: 150px; }
   .arcade-hero-emoji { font-size: 3.2rem; }
   .arcade-hero-title { font-size: 1.25rem; }
 }

@@ -9,6 +9,7 @@ import { getTodaysFact } from "../data/facts.js";
 import { getTodaysCuriosity } from "../data/curiosities.js";
 import { getCurrentWeirdThing } from "../data/weird.js";
 import { MOVIES } from "../data/manual/movies.js";
+import { FEATURED } from "../data/manual/featured.js";
 import { NEXT_GAME_VOTE, nextGameRealTally } from "../data/nextGame.js";
 import {
   getPollVote,
@@ -21,6 +22,13 @@ import ShareButton from "./ShareButton.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import { factId } from "../data/content.js";
 import byteBadger from "../assets/byte-badger.png";
+
+// Optimized Featured Game art, resolved by slug (npm run assets:featured).
+// Eager glob → a plain { path: url } map; basenames are looked up at render.
+const FEATURED_IMAGES = import.meta.glob("../assets/featured/*.webp", {
+  eager: true,
+  import: "default",
+});
 
 // Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
 let cloudPromise = null;
@@ -81,7 +89,7 @@ function GameOfTheDay({ dayKey: key }) {
       style={{ "--accent": game.accent }}
     >
       <div className="arcade-hero-glow" />
-      <span className="arcade-hero-kicker">★ GAME OF THE DAY ★</span>
+      <span className="arcade-hero-kicker">★ OURCADE GAME OF THE DAY ★</span>
       <div className="arcade-hero-body">
         <div className="arcade-hero-screen">
           <span className="arcade-hero-emoji">{game.emoji}</span>
@@ -365,6 +373,49 @@ function MascotTip({ dayKey: key, streak }) {
 // ── Now in theaters — the one thing the multiplex won't tell you: is it ───
 // worth sitting through the credits? Hand-curated in data/manual/movies.js;
 // the card simply lists everything currently in that file (no rotation).
+// ── Featured Game (a real, external game worth a look) ────────────────────
+function FeaturedGame() {
+  if (!FEATURED.length) return null;
+  const game = FEATURED[0];
+  const art = game.image
+    ? FEATURED_IMAGES[`../assets/featured/${game.image}.webp`]
+    : null;
+  const meta = [game.tagline, game.year].filter(Boolean).join(" · ");
+  return (
+    <a
+      href={game.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="arcade-hero arcade-featured"
+      style={game.accent ? { "--accent": game.accent } : undefined}
+    >
+      <div className="arcade-hero-glow" />
+      <span className="arcade-hero-kicker">★ FEATURED GAME ★</span>
+      <div className="arcade-hero-body">
+        <div className="arcade-hero-screen">
+          {art ? (
+            <img
+              className="arcade-featured-art"
+              src={art}
+              alt={game.title}
+              loading="lazy"
+            />
+          ) : (
+            <span className="arcade-hero-emoji">🎮</span>
+          )}
+        </div>
+        <div className="arcade-hero-info">
+          <h3 className="arcade-hero-title">{game.title}</h3>
+          {meta && <div className="arcade-featured-meta">{meta}</div>}
+          <p className="arcade-hero-blurb">{game.blurb}</p>
+          <span className="arcade-hero-play">LEARN MORE ↗</span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+// ── Now in theaters ───────────────────────────────────────────────────────
 function NowInTheaters() {
   if (!MOVIES.length) return null;
   return (
@@ -446,6 +497,8 @@ export default function DailyBand({ dayPart }) {
       <NextGameVote />
 
       <FlashTheater dayKey={key} compact browseTo="/flash" />
+
+      <FeaturedGame />
 
       <NowInTheaters />
 
