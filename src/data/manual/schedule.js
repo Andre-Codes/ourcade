@@ -34,6 +34,10 @@ export const SCHEDULE = [
   { type: "news", mode: "pin", from: "2026-06-12", days: 7,
     text: "🎉 OURCADE turns 1 month old this week — free quarters, obviously." },
 
+  { type: "news", mode: "pin", from: "2026-06-12",
+    text: "📞 Create an account and you'll get a free Nopia 3310. T9 your friends! (no joke)" },
+
+
   { type: "news", mode: "pin", from: "2026-06-12", days: 7,
     text: "👽 Beware, 'Disclosure Day' movie is out, real alien invasion imminent. All hands have been washed clean." },
 

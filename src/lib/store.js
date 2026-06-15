@@ -126,6 +126,16 @@ export function setEightBallMuted(on) {
   pushUp("eightball:muted", raw);
 }
 
+// ---- soundboard: per-device sound mute (default: not muted) ----
+export function getSoundboardMuted() {
+  return read("soundboard:muted") === "1";
+}
+export function setSoundboardMuted(on) {
+  const raw = on ? "1" : "0";
+  write("soundboard:muted", raw);
+  pushUp("soundboard:muted", raw);
+}
+
 // ---- konami deep cuts: secret stumble pool unlock (persists, like legendaries) ----
 export function getDeepCutsUnlocked() {
   return read("stumble:deepcuts") === "1";
