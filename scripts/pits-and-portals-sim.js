@@ -42,12 +42,13 @@ function bfsPath(pits, stairs, player0, enemies0, nodeCap = 20000) {
    "greedy" = take any safe pit-kill that keeps the floor solvable, else advance.
    Both stay hitless (every floor is solver-guaranteed), so they never die — the
    run simply ends at MAXDEPTH. Returns this floor's ember gains + updated style. */
-function playFloor(fs, ai, style0) {
+function playFloor(fs, ai, style0, idle0) {
   const { pits, stairs } = fs;
   let player = fs.player;
   let enemies = fs.enemies; // already withIntents
   let walls = [];
   let style = style0;
+  let idle = idle0; // consecutive idle WAITs (first after any action/kill is free)
   let runKE = 0, kills = 0, pkills = 0, dmg = 0, waits = 0, safeSum = 0, safeTurns = 0;
   let path = null;
 
@@ -85,9 +86,11 @@ function playFloor(fs, ai, style0) {
 
     let ke = 0, kt = 0, pk = 0, boss = 0;
     for (const e of pv.events) if (e.kind === "kill") { ke += e.boss ? EM.boss : EM.kill; kt++; if (e.byPlayer) pk++; if (e.boss) boss++; }
-    // style (hitless: a hit never happens here)
-    if (pk > 0) style = style + pk + (boss > 0 ? 2 : 0);
-    else if (a.type === "wait") style = Math.max(0, style - 1);
+    // style (hitless: a hit never happens here). The first WAIT after any action
+    // or kill is free (grace); decay only on the 2nd+ consecutive WAIT.
+    if (pk > 0) { style = style + pk + (boss > 0 ? 2 : 0); idle = 0; }
+    else if (a.type === "wait") { if (idle === 0) idle = 1; else { style = Math.max(0, style - 1); idle += 1; } }
+    else idle = 0;
     runKE += Math.round(ke * STYLE.mult[styleRank(style)]);
     kills += kt; pkills += pk;
 
@@ -97,24 +100,24 @@ function playFloor(fs, ai, style0) {
       const purge = pv.enemies.length === 0;
       if (purge) runKE += EM.purge;
       if (fs.modifier) runKE += EM.mod;
-      return { runKE, clean, purge, style, kills, pkills, waits, safeAvg: safeSum / safeTurns, turns: t + 1 };
+      return { runKE, clean, purge, style, idle, kills, pkills, waits, safeAvg: safeSum / safeTurns, turns: t + 1 };
     }
     enemies = withIntents(pv.player, pv.enemies, pits, pv.walls);
   }
-  return { runKE, clean: dmg === 0, purge: false, style, kills, pkills, waits, safeAvg: safeSum / Math.max(1, safeTurns), turns: 250, stuck: true };
+  return { runKE, clean: dmg === 0, purge: false, style, idle, kills, pkills, waits, safeAvg: safeSum / Math.max(1, safeTurns), turns: 250, stuck: true };
 }
 
 /* ---------- one full run to MAXDEPTH ---------- */
 function playRun(ai) {
-  let style = 0, cleanClears = 0, runKE = 0;
+  let style = 0, idle = 0, cleanClears = 0, runKE = 0;
   let kills = 0, pkills = 0, waits = 0, stuck = false;
   const emberAt = {};       // cumulative embers snapshot at each depth
   const safeByDepth = {};   // tightness sample at each depth
   let topStyle = 0;
   for (let depth = 1; depth <= MAXDEPTH; depth++) {
     const floor = generateFloor(depth);
-    const r = playFloor(floor, ai, style);
-    style = r.style; topStyle = Math.max(topStyle, styleRank(style));
+    const r = playFloor(floor, ai, style, idle);
+    style = r.style; idle = r.idle; topStyle = Math.max(topStyle, styleRank(style));
     if (r.clean) cleanClears++;
     runKE += r.runKE; kills += r.kills; pkills += r.pkills; waits += r.waits;
     if (r.stuck) stuck = true;

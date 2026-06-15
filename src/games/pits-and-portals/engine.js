@@ -193,6 +193,25 @@ export function chargerIntent(c, player, pits, enemies, wallSet) {
     if (enemies.some((e) => e.id !== c.id && e.x === t.x && e.y === t.y)) continue;
     return { kind: "move", tile: { x: t.x, y: t.y } };
   }
+  // Both axis steps are blocked (e.g. a pit between us). Rather than freeze — which
+  // lets the player farm cooldowns risk-free across a pit — route laterally: take
+  // the first open neighbour (DIRS order) that gets strictly closer, else one that
+  // holds equal distance, circling toward a flank. Deterministic (no RNG) so the
+  // solver models the same approach. Never a strictly-farther step (no retreat),
+  // and the pit/wall/enemy guards keep it from walking into the chasm.
+  const cur = manhattan(c, player);
+  let closer = null, closerD = cur, lateral = null;
+  for (const [dx, dy] of DIRS) {
+    const nx = c.x + dx, ny = c.y + dy;
+    if (!inBounds(nx, ny) || (nx === player.x && ny === player.y)) continue;
+    if (pits.has(key(nx, ny)) || wallSet.has(key(nx, ny))) continue;
+    if (enemies.some((e) => e.id !== c.id && e.x === nx && e.y === ny)) continue;
+    const d = manhattan({ x: nx, y: ny }, player);
+    if (d < closerD) { closerD = d; closer = { x: nx, y: ny }; }
+    else if (d === cur && !lateral) lateral = { x: nx, y: ny };
+  }
+  const step = closer || lateral;
+  if (step) return { kind: "move", tile: step };
   return { kind: "idle" };
 }
 
@@ -240,20 +259,24 @@ export function warlordIntent(b, player, pits, enemies, wallSet) {
   const si = strikerIntent(b, player, pits, enemies, wallSet);
   let tile = ci.kind === "idle" ? null : ci.tile;
   // The Warlord refuses to stall: when both direct steps are blocked, it routes
-  // around the obstacle — taking any open neighbour that gets it strictly closer.
-  // Deterministic (DIRS order, no RNG) so the solver models the same approach.
+  // around the obstacle — preferring any open neighbour that gets it strictly
+  // closer, and failing that a lateral step that holds equal distance (circling a
+  // pit standoff so it isn't a free farm). Never a strictly-farther step (no
+  // retreat). Deterministic (DIRS order, no RNG) so the solver models the same
+  // approach; the pit/wall/enemy guards keep it out of the chasm.
   if (!tile) {
     const cur = manhattan(b, player);
-    let best = null, bestD = cur;
+    let closer = null, closerD = cur, lateral = null;
     for (const [dx, dy] of DIRS) {
       const nx = b.x + dx, ny = b.y + dy;
       if (!inBounds(nx, ny) || (nx === player.x && ny === player.y)) continue;
       if (pits.has(key(nx, ny)) || wallSet.has(key(nx, ny))) continue;
       if (enemies.some((e) => e.id !== b.id && e.x === nx && e.y === ny)) continue;
       const d = manhattan({ x: nx, y: ny }, player);
-      if (d < bestD) { bestD = d; best = { x: nx, y: ny }; }
+      if (d < closerD) { closerD = d; closer = { x: nx, y: ny }; }
+      else if (d === cur && !lateral) lateral = { x: nx, y: ny };
     }
-    if (best) tile = best;
+    tile = closer || lateral;
   }
   const beam = si.kind === "beam" ? si.tiles : null;
   if (!tile && !beam) return { kind: "idle" };

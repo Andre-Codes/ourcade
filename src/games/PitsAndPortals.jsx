@@ -270,6 +270,9 @@ export default function App() {
   const [showModNote, setShowModNote] = useState(false);
   const [inspect, setInspect] = useState(null); // {name, tone, desc} info card, or null
   const [stylePoints, setStylePoints] = useState(0); // accumulated style; rank derives from it
+  // consecutive idle WAITs not yet decayed: the first WAIT after any action or kill
+  // is free (grace), so a single pause never ends a streak. Carries across floors.
+  const [idleWaits, setIdleWaits] = useState(0);
   const styleStep = styleRank(stylePoints);
   const [runBestStyle, setRunBestStyle] = useState(0);
   const relicSet = useMemo(() => new Set(relics), [relics]);
@@ -405,6 +408,7 @@ export default function App() {
     setCleanPurges(0);
     setRunBossKills(0);
     setStylePoints(0);
+    setIdleWaits(0);
     setRunBestStyle(0);
     setRelics([]);
     setSatchel([]);
@@ -716,13 +720,19 @@ export default function App() {
       // bleed a point; a hit shatters it (Iron Resolve floors it at ×1.5). Ranks
       // need rising cumulative points, so ×3 RELENTLESS demands sustained hunting.
       let newPoints = stylePoints;
-      if (hpTaken > 0) newPoints = relicSet.has("iron") ? Math.min(stylePoints, STYLE.thresh[1]) : 0;
-      else if (pkills > 0) newPoints = stylePoints + pkills + (bossSlain > 0 ? 2 : 0);
-      else if (waited) newPoints = Math.max(0, stylePoints - 1);
+      let nextIdle = idleWaits;
+      if (hpTaken > 0) { newPoints = relicSet.has("iron") ? Math.min(stylePoints, STYLE.thresh[1]) : 0; nextIdle = 0; }
+      else if (pkills > 0) { newPoints = stylePoints + pkills + (bossSlain > 0 ? 2 : 0); nextIdle = 0; }
+      else if (waited) {
+        // first WAIT after any action/kill is free (grace); decay only on the 2nd+
+        if (idleWaits === 0) nextIdle = 1;
+        else { newPoints = Math.max(0, stylePoints - 1); nextIdle = idleWaits + 1; }
+      } else nextIdle = 0; // any non-wait, non-kill action refreshes the grace
       const oldStep = styleRank(stylePoints);
       const newStep = styleRank(newPoints);
       const keScaled = Math.round(ke * STYLE.mult[newStep]);
       setStylePoints(newPoints);
+      setIdleWaits(nextIdle);
       const peakStyle = Math.max(runBestStyle, newStep);
       if (peakStyle !== runBestStyle) setRunBestStyle(peakStyle);
       if (keScaled > 0) setRunKE((v) => v + keScaled);
@@ -822,9 +832,15 @@ export default function App() {
           const base = v.id === usedVerb ? v.baseCd : Math.max(0, v.cd - 1);
           return { ...v, cd: Math.max(0, base - blood) };
         }));
-        const nextPursuit = waited ? pursuit + (modifier === "hunting" ? 2 : 1) : Math.max(0, pursuit - 1);
+        // A "stalled" turn is any loitering: a literal WAIT, or a move/verb that
+        // got no closer to the portal and slew nothing — so pacing back and forth
+        // can no longer dodge pursuit (and farm a pit-blocked boss) for free.
+        // Advancing toward the portal, or killing, still drains pursuit.
+        const advanced = manhattan(pv.player, floor.stairs) < manhattan(player, floor.stairs);
+        const stalled = waited || (!advanced && kills === 0);
+        const nextPursuit = stalled ? pursuit + (modifier === "hunting" ? 2 : 1) : Math.max(0, pursuit - 1);
         let live = pv.enemies;
-        if (waited && nextPursuit >= PURSUIT_MAX && live.length < 6) {
+        if (stalled && nextPursuit >= PURSUIT_MAX && live.length < 6) {
           const spawn = farEdgeSpawn(pv.player, live, floor.pits, floor.stairs);
           if (spawn) {
             const nid = Math.max(0, ...live.map((e) => e.id)) + 1;
@@ -840,7 +856,7 @@ export default function App() {
         setPhase("play");
       }
     }, RESOLVE_MS);
-  }, [phase, floor, staged, player, enemies, walls, hp, floorDamage, depth, cleanClears, pursuit, wards, playEvents, embers, best, unlocked, selectedVessel, saveMeta, runKE, runKills, modifier, purgeClears, cleanPurges, runBossKills, stylePoints, runBestStyle, records, achievements, showToast, relics, relicSet, floorWard, satchel, cacheTaken, spawnFx]);
+  }, [phase, floor, staged, player, enemies, walls, hp, floorDamage, depth, cleanClears, pursuit, wards, playEvents, embers, best, unlocked, selectedVessel, saveMeta, runKE, runKills, modifier, purgeClears, cleanPurges, runBossKills, stylePoints, idleWaits, runBestStyle, records, achievements, showToast, relics, relicSet, floorWard, satchel, cacheTaken, spawnFx]);
   commitRef.current = commit;
 
   const chooseReward = useCallback((r) => {
