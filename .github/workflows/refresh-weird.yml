@@ -15,7 +15,12 @@ name: Refresh Today's Weird Thing
 # the instant you redeploy.
 on:
   schedule:
-    - cron: "0 6,18 * * *" # twice daily, 06:00 & 18:00 UTC
+    # Every other day at 06:00 UTC. One run yields ~14 fresh items, and the card
+    # cycles the whole pool with no repeats before it turns over — so a daily (let
+    # alone twice-daily) refresh replaced the pool faster than a visitor could see
+    # it. (`*/2` is day-of-month, so the gap shortens slightly across month ends —
+    # harmless here.) Bump back up if you want fresher topical finds.
+    - cron: "0 6 */2 * *"
   workflow_dispatch:
 
 permissions:

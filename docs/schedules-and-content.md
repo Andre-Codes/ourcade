@@ -133,11 +133,11 @@ AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is
 | Workflow | Schedule | What it regenerates | Local command |
 |---|---|---|---|
 | [generate-content.yml](../.github/workflows/generate-content.yml) | **Monthly** — `0 9 1 * *` (1st @ 09:00 UTC) | polls, quizzes, tips, news (+ curiosities, soft-fail) | `npm run generate` |
-| [refresh-weird.yml](../.github/workflows/refresh-weird.yml) | **Twice daily** — `0 6,18 * * *` (06:00 & 18:00 UTC) | the 🔍 Weird Thing pool only (URL-liveness gated) | `npm run generate:weird` |
+| [refresh-weird.yml](../.github/workflows/refresh-weird.yml) | **Every other day** — `0 6 */2 * *` (06:00 UTC) | the 🔍 Weird Thing pool only (URL-liveness gated) | `npm run generate:weird` |
 
 Both also run on-demand via **`workflow_dispatch`**.
 
-**Cadence rationale:** topical references (movies/memes/news) stay relevant for months, so a monthly refresh keeps them at most ~a month old. The Weird Thing pool is cheap (one small research + one structured call, cents/run) and runs more often to stay genuinely current.
+**Cadence rationale:** topical references (movies/memes/news) stay relevant for months, so a monthly refresh keeps them at most ~a month old. The Weird Thing pool is cheap (one small research + one structured call, cents/run) and runs more often to stay genuinely current — but every other day is plenty: one run yields ~14 fresh items and the card cycles the whole pool (no repeats) before it turns over, so a faster refresh would replace the pool before a visitor could even see it. Bump the cron up if you want fresher topical finds.
 
 **Safety built in:**
 1. Every run executes `npm run check:daily` to verify the date-seeded rotation still holds.
