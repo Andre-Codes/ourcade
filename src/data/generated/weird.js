@@ -2,58 +2,79 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-centennial-bulb",
-    "title": "A 24/7 cam pointed at a lightbulb from 1901",
-    "blurb": "A California firehouse bulb has been glowing since before sliced bread, and there's a livestream so you can confirm it's still on. Outlived your phone, your charger, and your last three laptops.",
-    "url": "https://www.centennialbulb.org/cam.htm",
-    "foundNote": "burning since 1901"
-  },
-  {
-    "id": "gw-bruno-simon",
-    "title": "A résumé you play by driving a tiny car",
-    "blurb": "A developer built his entire portfolio as a 3D world you explore by zooming a little toy car around. Imagine if your school's 'About Me' PowerPoint had a working gas pedal.",
-    "url": "https://bruno-simon.com"
-  },
-  {
-    "id": "gw-ncase",
-    "title": "Serious topics, turned into toys you can poke",
-    "blurb": "Nicky Case makes little playable essays that explain big ideas by letting you fiddle with the gears yourself. Like a Flash tutorial that actually wanted you to learn something.",
-    "url": "https://ncase.me"
-  },
-  {
-    "id": "gw-zen-zone",
-    "title": "Move your mouse, make calm shapes",
-    "blurb": "Drag your cursor around and generative ribbons of color follow it like a screensaver that loves you. Best viewed when you're supposed to be doing something else.",
-    "url": "https://thezen.zone"
-  },
-  {
-    "id": "gw-pixel-thoughts",
-    "title": "A 60-second meditation that yeets your worry into space",
-    "blurb": "Type whatever's stressing you out, watch it shrink into a star, and let it drift off for one minute. Cheaper than therapy, slower than panicking.",
-    "url": "https://pixelthoughts.co"
+    "id": "gw-this-is-sand",
+    "title": "Pour digital sand into hypnotic layers",
+    "blurb": "This Is Sand lets you rain colored grains down the screen and watch them stack into smooth little dunes. It's been quietly absorbing afternoons since 2008, and it will absorb yours too.",
+    "url": "https://thisissand.com",
+    "foundNote": "art project, time vampire, same thing"
   },
   {
     "id": "gw-nicest-place",
-    "title": "An endless stream of strangers hugging you",
-    "blurb": "Real people filmed themselves opening their arms for a virtual hug, and it just keeps playing. The exact opposite vibe of every comments section ever made.",
-    "url": "https://thenicestplace.net"
+    "title": "A page of strangers offering you a hug",
+    "blurb": "The Nicest Place on the Internet is exactly that — a loop of people opening their arms toward your monitor. It's the opposite of the comments section, and it works disturbingly well.",
+    "url": "https://thenicestplace.net",
+    "foundNote": "no notes, just hugs"
   },
   {
-    "id": "gw-koalas",
-    "title": "Find one koala by clicking forever",
-    "blurb": "Tap to split big colored circles into smaller ones until a hidden koala slowly comes into focus. Strangely meditative, secretly a sneaky binary-search lesson.",
-    "url": "http://www.koalastothemax.com"
+    "id": "gw-absurd-website",
+    "title": "One absurd web toy a month, 48 and counting",
+    "blurb": "absurd.website is one creator's running streak of beautifully pointless browser experiments. Click around — some are art, some are nonsense, all of them feel like finding a stranger's sketchbook.",
+    "url": "https://absurd.website",
+    "foundNote": "still going, still absurd"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by yelling at your screen",
-    "blurb": "It tells you you're getting 'WARMER' as you drag your mouse toward a cow you cannot see, narrated by a guy fully committed to the bit. The 'MOO' payoff is worth it.",
-    "url": "https://findtheinvisiblecow.com"
+    "id": "gw-incredibox",
+    "title": "Dress little guys up and make them beatbox",
+    "blurb": "Incredibox lets you drag sounds onto a row of humming animated dudes until they're a full a cappella track. Over 100 million people have wasted glorious hours here since '09. Join them.",
+    "url": "https://incredibox.com",
+    "foundNote": "actually used in music classrooms now"
   },
   {
-    "id": "gw-weavesilk",
-    "title": "Draw glowing symmetrical space-art with your mouse",
-    "blurb": "Every stroke mirrors and shimmers until you've accidentally made something gallery-worthy. The closest most of us will ever get to being a Windows Media Player visualizer.",
-    "url": "http://weavesilk.com"
+    "id": "gw-true-size",
+    "title": "Drag countries around to expose the map's lies",
+    "blurb": "The True Size Of… lets you grab any country and slide it across the globe to see how badly your school map fibbed. Greenland is going to disappoint you. In a good way.",
+    "url": "https://thetruesize.com",
+    "foundNote": "the Mercator projection owes us all money"
+  },
+  {
+    "id": "gw-pudding",
+    "title": "Data journalism that looks like an art installation",
+    "blurb": "The Pudding turns spreadsheets into scrollable visual stories — the kind of thing you start reading 'real quick' and resurface from forty minutes later. Smart, weird, gorgeous.",
+    "url": "https://pudding.cool"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "title": "A pug in a rug, and a timer judging your loyalty",
+    "blurb": "Puginarug.com is one looping pug burrito and a clock counting how long you've stayed to honor it. There is no goal. There is only the pug. Do not let it down.",
+    "url": "https://puginarug.com",
+    "foundNote": "the timer resets if you leave. no pressure"
+  },
+  {
+    "id": "gw-koalas-to-the-max",
+    "title": "A blurry blob that resolves into one koala",
+    "blurb": "Koalas to the Max starts as four giant dots and splits smaller every time your cursor sweeps through, until — surprise — it's a koala. Oddly soothing, weirdly addictive.",
+    "url": "https://koalastothemax.com",
+    "foundNote": "keep going, trust the process"
+  },
+  {
+    "id": "gw-mapcrunch",
+    "title": "Teleport to a random spot on Street View",
+    "blurb": "MapCrunch drops you somewhere on Earth at random — a gas station in Iceland, a dirt road in Mongolia. Hit the button and play 'where on the planet am I' until dinner.",
+    "url": "https://mapcrunch.com",
+    "foundNote": "the original armchair travel button"
+  },
+  {
+    "id": "gw-falling-falling",
+    "title": "A site that just falls forever, with sound",
+    "blurb": "FallingFalling.com is endless gradients tumbling past while a drone hums underneath. It is either a meditation aid or a cursed screensaver, and we genuinely cannot tell.",
+    "url": "https://www.fallingfalling.com",
+    "foundNote": "do NOT open with the volume up at work"
+  },
+  {
+    "id": "gw-this-person",
+    "title": "A face that has never existed, refreshed on demand",
+    "blurb": "ThisPersonDoesNotExist conjures a totally convincing human portrait every time you reload — none of them are real. Stare too long and the existential dread is free.",
+    "url": "https://thispersondoesnotexist.com",
+    "foundNote": "refresh = brand new fake person"
   }
 ];
