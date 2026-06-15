@@ -46,7 +46,8 @@ function flashToArtifact(a) {
       ? `A Flash-era classic by ${a.creator}, straight from the archive.`
       : "A Flash-era classic, straight from the archive.",
     year: a.year,
-    url: `https://archive.org/details/${a.id}`,
+    // Keep flash on Ourcade — our own Flash Channel, never out to archive.org.
+    url: `${typeof window !== "undefined" ? window.location.href.split("#")[0] : ""}#/flash?play=${encodeURIComponent(a.id)}`,
     embed: { type: "archive", id: a.id, aspect: a.aspect },
     credit: a.creator,
   };

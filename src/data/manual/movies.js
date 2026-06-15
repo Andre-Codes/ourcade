@@ -34,6 +34,7 @@ export const MOVIES = [
     id: "disclosure-day-2026",
     title: "Disclosure Day",
     stinger: "no",
+    credits: "👽 no."
   },
   {
     id: "scary-movie-2026",

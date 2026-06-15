@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { drawArtifact, findArtifact } from "../data/stumble.js";
 import { renderStumbleCard } from "../lib/stumbleCard.js";
 import { shareImage } from "../lib/share.js";
@@ -82,6 +82,9 @@ function ArtifactCard({ artifact }) {
   const kindChip = KIND_LABEL[artifact.kind];
   const host = hostnameOf(artifact.url);
   const embed = artifact.embed;
+  // Flash plays inline here; keep people on Ourcade — link to our own Flash
+  // Theater (/flash?play=<id>), never out to archive.org.
+  const isFlash = artifact.kind === "flash" && embed?.type === "archive";
 
   return (
     <div className="arcade-stumble-card">
@@ -116,15 +119,24 @@ function ArtifactCard({ artifact }) {
         <p className="arcade-stumble-credit">by {artifact.credit}</p>
       )}
 
-      {artifact.url && (
-        <a
+      {isFlash ? (
+        <Link
           className="arcade-stumble-open"
-          href={artifact.url}
-          target="_blank"
-          rel="noopener noreferrer"
+          to={`/flash?play=${encodeURIComponent(embed.id)}`}
         >
-          {embed ? `view on ${host} ↗` : `OPEN ${host} ↗`}
-        </a>
+          📺 watch on the Flash Channel →
+        </Link>
+      ) : (
+        artifact.url && (
+          <a
+            className="arcade-stumble-open"
+            href={artifact.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {embed ? `view on ${host} ↗` : `OPEN ${host} ↗`}
+          </a>
+        )
       )}
     </div>
   );
