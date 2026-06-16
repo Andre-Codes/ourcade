@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 
 // ── Wheel of Names ──────────────────────────────────────────────────────────
 // Self-contained party tool. Injects its own theme (only one tool mounts per
 // route; the arcade shell CSS is all `arcade-` prefixed, so a global reset here
-// is safe). Names persist to localStorage. Single screen → the shell's
-// "‹ BACK TO OURCADE" button stays visible, so no useArcadeBackButton needed.
+// is safe). Names persist to localStorage (shared ourcade: util). Single screen
+// → the shell's "‹ BACK TO OURCADE" button stays visible, no useArcadeBackButton.
 
-const STORAGE_KEY = "ourcade:wheel:names";
+const STORAGE_KEY = "wheel:names";
 const DEFAULT_NAMES = ["Alex", "Sam", "Jordan", "Taylor", "Casey", "Riley"];
 
 const SEGMENT_COLORS = [
@@ -167,14 +168,8 @@ function arcPath(cx, cy, r, startDeg, endDeg) {
 }
 
 function loadNames() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) return arr;
-    }
-  } catch (e) { /* ignore */ }
-  return DEFAULT_NAMES;
+  const arr = lsGetJSON(STORAGE_KEY, null);
+  return Array.isArray(arr) ? arr : DEFAULT_NAMES;
 }
 
 export default function WheelOfNames() {
@@ -189,7 +184,7 @@ export default function WheelOfNames() {
   useEffect(() => {
     const parsed = text.split("\n").map((s) => s.trim()).filter(Boolean);
     setNames(parsed);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch (e) { /* ignore */ }
+    lsSetJSON(STORAGE_KEY, parsed);
   }, [text]);
 
   const N = names.length;

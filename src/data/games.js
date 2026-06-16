@@ -39,6 +39,43 @@ import { lazy } from "react";
 
 export const GAMES = [
   {
+    id: "relic-run",
+    title: "Daily Relic Run",
+    blurb: "A Wikipedia-race through a haunted 2003 webring. Same start and relic for everyone each day — surf the fake retro pages and reach today's lost relic in the fewest clicks.",
+    emoji: "🖱️",
+    accent: "#3fffd0",
+    tags: ["daily", "maze", "old-web", "solo"],
+    badge: "NEW",
+    rating: 5,
+    plays: 0,
+    category: "game",
+    type: "react",
+    component: lazy(() => import("../games/RelicRun.jsx")),
+    // Board ranks the daily run by fewest clicks (asc = lower is better).
+    // Free-play "Random Relic Run" never submits.
+    score: { label: "CLICKS", dir: "asc" },
+  },
+  // The Daily Quarter (Wordle-style word game) is PARKED — replaced as the daily
+  // game by Daily Relic Run (too close to Wordle). Source files are kept on disk
+  // (src/games/QuarterGame.jsx, src/games/quarter/, src/data/quarterWords.js,
+  // scripts/quarter-text.js); un-comment this entry to bring it back.
+  // {
+  //   id: "quarter",
+  //   title: "The Daily Quarter",
+  //   blurb: "One word a day — six guesses, same puzzle for everyone. Spend your quarter wisely. Come back tomorrow for a fresh one.",
+  //   emoji: "🪙",
+  //   accent: "#ffd45e",
+  //   tags: ["daily", "word", "puzzle", "solo"],
+  //   badge: "DAILY",
+  //   rating: 5,
+  //   plays: 0,
+  //   category: "game",
+  //   type: "react",
+  //   component: lazy(() => import("../games/QuarterGame.jsx")),
+  //   // Board ranks by fewest guesses (asc = lower is better). A miss never submits.
+  //   score: { label: "GUESSES", dir: "asc", format: (n) => `${n}/6` },
+  // },
+  {
     id: "pits-and-portals",
     title: "Pits and Portals",
     blurb: "A fragile-hero puzzle-roguelike. No healing — survive by shoving threats into the pits. Every floor is verified beatable hitless.",

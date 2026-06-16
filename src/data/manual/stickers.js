@@ -33,6 +33,8 @@
 
 // id (from games.js) → sticker key (from STICKER_LABELS). Edit freely.
 export const STICKERS = {
+  "relic-run": "DAILY",
+  "quarter": "DAILY", // parked (see games.js) — harmless unused entry
   "pits-and-portals": "NEW",
   "crypt-crawler": "NEW",
   "tap-surge": "HOT",
@@ -46,6 +48,7 @@ export const STICKER_LABELS = {
   STAR: "★",
   TOP: "TOP!",
   FREE: "FREE!",
+  DAILY: "DAILY",
 };
 
 // Resolve a game's sticker: this file first, then the legacy `badge` field on

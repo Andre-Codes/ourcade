@@ -9,10 +9,11 @@ import {
   withIntents, resolve, generateFloor, farEdgeSpawn, rollVerbDraft,
 } from "./pits-and-portals/engine";
 import { useArcadeBackButton } from "../arcadeChrome.js";
+import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 
 // Persistent meta key. window.storage was never wired up (silently dead), so we
-// use localStorage with the ourcade: prefix like the rest of the app.
-const META_KEY = "ourcade:pits-and-portals:meta";
+// use the shared ourcade:-prefixed localStorage util like the rest of the app.
+const META_KEY = "pits-and-portals:meta";
 
 
 /* ---------- token glyphs ---------- */
@@ -293,32 +294,23 @@ export default function App() {
   // load persistent meta once on mount (storage may be absent — fail soft)
   useEffect(() => {
     let alive = true;
-    try {
-      const raw =
-        typeof window !== "undefined" && window.localStorage
-          ? window.localStorage.getItem(META_KEY)
-          : null;
-      if (alive && raw) {
-        const m = JSON.parse(raw);
-        setEmbers(m.embers || 0);
-        const u = Array.isArray(m.unlocked) && m.unlocked.length ? m.unlocked : ["wanderer"];
-        setUnlocked(u);
-        setSelectedVessel(u.includes(m.selected) ? m.selected : "wanderer");
-        setBest(m.best || 0);
-        if (m.records) setRecords({ ...REC0, ...m.records });
-        if (Array.isArray(m.achievements)) setAchievements(m.achievements);
-        if ((m.best || 0) > 0) return () => { alive = false; };
-      }
-    } catch (e) {}
+    const m = lsGetJSON(META_KEY, null);
+    if (alive && m) {
+      setEmbers(m.embers || 0);
+      const u = Array.isArray(m.unlocked) && m.unlocked.length ? m.unlocked : ["wanderer"];
+      setUnlocked(u);
+      setSelectedVessel(u.includes(m.selected) ? m.selected : "wanderer");
+      setBest(m.best || 0);
+      if (m.records) setRecords({ ...REC0, ...m.records });
+      if (Array.isArray(m.achievements)) setAchievements(m.achievements);
+      if ((m.best || 0) > 0) return () => { alive = false; };
+    }
     if (alive) setSanctumTab("guide"); // first-timer: open the guide
     return () => { alive = false; };
   }, []);
 
   const saveMeta = useCallback((next) => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage)
-        window.localStorage.setItem(META_KEY, JSON.stringify(next));
-    } catch (e) {}
+    lsSetJSON(META_KEY, next);
   }, []);
 
   const spawnFx = useCallback((kind, x, y, tiles, val) => {

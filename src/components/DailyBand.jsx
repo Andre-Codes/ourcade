@@ -22,7 +22,7 @@ import FlashTheater from "./FlashTheater.jsx";
 import ShareButton from "./ShareButton.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import { factId } from "../data/content.js";
-import byteBadger from "../assets/byte-badger.png";
+import byteBadger from "../assets/byte-badger.webp";
 
 // Optimized Featured Game art, resolved by slug (npm run assets:featured).
 // Eager glob → a plain { path: url } map; basenames are looked up at render.

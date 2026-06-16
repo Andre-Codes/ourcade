@@ -72,6 +72,46 @@ function readJSON(key, fallback) {
   }
 }
 
+/* ── generic, ourcade:-prefixed localStorage for self-contained features ──
+   Use these from any game/tool that needs its OWN local state (a high score,
+   settings, progress) instead of touching window.localStorage directly. They
+   share the `ourcade:` namespace and the try/catch contract above, so private
+   mode / quota errors degrade gracefully and keys never collide across the app.
+
+   These do NOT cloud-sync — that's reserved for the curated isSyncKey set; this
+   is purely local. The string getters take a `key` WITHOUT the `ourcade:`
+   prefix (it's added for you). A `legacyKey` lets a caller transparently migrate
+   off an old un-prefixed key without losing the user's saved value. */
+export function lsGet(key, fallback = null, legacyKey) {
+  const v = read(key);
+  if (v != null) return v;
+  if (legacyKey) {
+    try {
+      const old = localStorage.getItem(legacyKey);
+      if (old != null) {
+        write(key, old); // migrate forward, once
+        try { localStorage.removeItem(legacyKey); } catch { /* ignore */ }
+        return old;
+      }
+    } catch { /* private mode — fall through */ }
+  }
+  return fallback;
+}
+export function lsSet(key, value) {
+  write(key, value == null ? "" : String(value));
+}
+export function lsRemove(key) {
+  try { localStorage.removeItem(NS + key); } catch { /* ignore */ }
+}
+export function lsGetJSON(key, fallback, legacyKey) {
+  const raw = lsGet(key, null, legacyKey);
+  if (raw == null) return fallback;
+  try { return JSON.parse(raw); } catch { return fallback; }
+}
+export function lsSetJSON(key, value) {
+  try { lsSet(key, JSON.stringify(value)); } catch { /* ignore */ }
+}
+
 // ---- daily poll: which option this device picked, per poll id ----
 export function getPollVote(pollId) {
   return read(`poll:${pollId}`);

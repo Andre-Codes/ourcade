@@ -17,7 +17,10 @@
 
 let dbPromise = null; // null until first use; resolves to a Firestore or null
 
-async function getDb() {
+// Exported so other admin scripts (e.g. scripts/quarter-text.js) reuse the same
+// soft-failing init + single app instance. Resolves to a Firestore handle, or
+// null when FIREBASE_SERVICE_ACCOUNT is missing/invalid (callers should no-op).
+export async function getDb() {
   if (dbPromise) return dbPromise;
   dbPromise = (async () => {
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT;

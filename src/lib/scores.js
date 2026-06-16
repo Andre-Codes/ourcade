@@ -19,6 +19,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthProvider.jsx";
 import { getGame } from "../data/games.js";
+import { lsGet, lsSet } from "./store.js";
 
 // Lazy, guarded cloud import (mirrors store.js's cloud() seam).
 let cloudPromise = null;
@@ -39,22 +40,16 @@ function isBetter(gameId, a, b) {
 }
 
 // Instant-UI cache of the player's own best, so the game-over screen and board
-// don't wait on a network round-trip. Keyed per game.
-const BEST_KEY = (gameId) => `ourcade:best:${gameId}`;
+// don't wait on a network round-trip. Keyed per game. Stored via the shared
+// ourcade:-prefixed localStorage util (lsGet adds the prefix), so the physical
+// key stays `ourcade:best:<gameId>` exactly as before.
+const BEST_KEY = (gameId) => `best:${gameId}`;
 function readLocalBest(gameId) {
-  try {
-    const raw = localStorage.getItem(BEST_KEY(gameId));
-    return raw == null ? null : Number(raw);
-  } catch {
-    return null;
-  }
+  const raw = lsGet(BEST_KEY(gameId));
+  return raw == null ? null : Number(raw);
 }
 function writeLocalBest(gameId, score) {
-  try {
-    localStorage.setItem(BEST_KEY(gameId), String(score));
-  } catch {
-    /* private mode — fine */
-  }
+  lsSet(BEST_KEY(gameId), score);
 }
 
 // Submit a run + read your best for one game.

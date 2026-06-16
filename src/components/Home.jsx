@@ -11,8 +11,8 @@ import DailyBand from "./DailyBand.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
-import byteBadger from "../assets/byte-badger.png";
-import arcadeBadger from "../assets/arcade-badger.png";
+import byteBadger from "../assets/byte-badger.webp";
+import arcadeBadger from "../assets/arcade-badger.webp";
 
 // "2:14am" — honors the ?hour= QA override so the clock matches the previewed
 // part (override has no minutes, so it reads as :00).

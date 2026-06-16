@@ -19,10 +19,14 @@ export default function FlashTheater({ dayKey, compact = false, browseTo, initia
     () => initialAnim || getTodaysAnimation(dayKey) || FEATURED[0]
   );
   const [busy, setBusy] = useState(false);
+  // archive.org embeds occasionally fail to load (rate limits, dead ids); show a
+  // graceful note instead of a blank screen. Reset whenever the short changes.
+  const [failed, setFailed] = useState(false);
   if (!anim) return null;
 
   const stumble = async () => {
     setBusy(true);
+    setFailed(false);
     const next = await randomAnimation(anim.id);
     if (next) setAnim(next);
     setBusy(false);
@@ -43,14 +47,21 @@ export default function FlashTheater({ dayKey, compact = false, browseTo, initia
         className="arcade-flash-screen"
         style={anim.aspect ? { "--flash-aspect": anim.aspect } : undefined}
       >
-        <iframe
-          key={anim.id}
-          className="arcade-flash-frame"
-          src={embedUrl(anim)}
-          title={anim.title}
-          allowFullScreen
-          loading="lazy"
-        />
+        {failed ? (
+          <div className="arcade-flash-frame arcade-flash-fallback">
+            <p>📼 this reel won’t play right now — try another.</p>
+          </div>
+        ) : (
+          <iframe
+            key={anim.id}
+            className="arcade-flash-frame"
+            src={embedUrl(anim)}
+            title={anim.title}
+            allowFullScreen
+            loading="lazy"
+            onError={() => setFailed(true)}
+          />
+        )}
       </div>
 
       <p className="arcade-flash-meta">

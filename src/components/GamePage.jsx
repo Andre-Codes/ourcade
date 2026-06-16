@@ -10,6 +10,8 @@ export default function GamePage() {
   const game = getGame(id);
   // React games toggle this via useArcadeBackButton; iframe games leave it true.
   const [backVisible, setBackVisible] = useState(true);
+  // Set if the standalone HTML game's iframe fails to load (bad path, blocked).
+  const [iframeFailed, setIframeFailed] = useState(false);
 
   // Iframe score bridge (the Arcade Score Standard for standalone HTML games):
   // a game posts { type:"ourcade:score", gameId, score } to its parent and we
@@ -50,13 +52,22 @@ export default function GamePage() {
       )}
 
       {game.type === "iframe" ? (
-        <iframe
-          className="arcade-iframe"
-          src={import.meta.env.BASE_URL + game.src}
-          title={game.title}
-          // allow audio/fullscreen for games that use them
-          allow="autoplay; fullscreen; gamepad"
-        />
+        iframeFailed ? (
+          <div className="arcade-iframe arcade-iframe-fallback">
+            <p style={{ fontSize: "2.5rem", margin: 0 }} aria-hidden="true">🕹️</p>
+            <p>This cabinet wouldn’t boot. Try again, or pick another game.</p>
+            <Link to="/" className="arcade-back-link">← back to the floor</Link>
+          </div>
+        ) : (
+          <iframe
+            className="arcade-iframe"
+            src={import.meta.env.BASE_URL + game.src}
+            title={game.title}
+            // allow audio/fullscreen for games that use them
+            allow="autoplay; fullscreen; gamepad"
+            onError={() => setIframeFailed(true)}
+          />
+        )
       ) : (
         <ArcadeChromeContext.Provider value={setBackVisible}>
           <div className="arcade-react-game">

@@ -1,5 +1,6 @@
 import React, { useReducer, useEffect, useRef, useState, useCallback } from "react";
 import { useArcadeBackButton } from "../arcadeChrome.js";
+import { lsGet, lsSet, lsRemove } from "../lib/store.js";
 
 /* ============================================================
    CRYPT OF THE HOLLOW KING
@@ -1667,20 +1668,17 @@ const MUTE_KEY = "crypt:muted:v1";
 const META_KEY = "crypt:meta:v3";
 
 // ---- persistence ----
-// Synchronous localStorage wrapper. Synchronous matters: the latest state lands
-// on disk the instant an action resolves, so it survives a tab close, refresh,
-// or the OS killing a backgrounded mobile tab — no async write left in flight.
-// Every call is guarded so private-mode / disabled-storage never crashes the game.
+// Synchronous localStorage wrapper, now delegating to the shared ourcade: util
+// (lsGet/lsSet) so this game shares the app's single namespaced, guarded store.
+// Synchronous still matters: the latest state lands on disk the instant an action
+// resolves, surviving a tab close / refresh / the OS killing a backgrounded tab.
+// The keys (crypt:*) were previously stored UN-prefixed; passing each as the
+// legacyKey carries an existing player's save forward to the ourcade: namespace
+// on first read, so nobody loses progress.
 const store = {
-  get(key) {
-    try { return window.localStorage.getItem(key); } catch (e) { return null; }
-  },
-  set(key, value) {
-    try { window.localStorage.setItem(key, value); return true; } catch (e) { return false; }
-  },
-  remove(key) {
-    try { window.localStorage.removeItem(key); } catch (e) {}
-  },
+  get(key) { return lsGet(key, null, key); },   // legacyKey === key: migrate raw → prefixed
+  set(key, value) { lsSet(key, value); return true; },
+  remove(key) { lsRemove(key); },
 };
 
 // today's date as YYYY-MM-DD (local) and a stable integer seed from it

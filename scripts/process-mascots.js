@@ -33,16 +33,26 @@ async function main() {
   await mkdir(PUBLIC, { recursive: true });
 
   // 1. Primary mascot — header + daily band (transparent, ~512px wide).
+  // Emitted as BOTH .png (legacy) and .webp; the homepage imports the .webp,
+  // which is ~3-4× smaller for the same art and the heaviest thing on first paint.
   await trimmed(SRC_BYTE)
     .resize({ width: 512, withoutEnlargement: true })
     .png({ compressionLevel: 9, quality: 90 })
     .toFile(join(ASSETS, "byte-badger.png"));
+  await trimmed(SRC_BYTE)
+    .resize({ width: 512, withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toFile(join(ASSETS, "byte-badger.webp"));
 
   // 2. Games-area variant — beside the GAMES heading (transparent, ~512px wide).
   await trimmed(SRC_ARCADE)
     .resize({ width: 512, withoutEnlargement: true })
     .png({ compressionLevel: 9, quality: 90 })
     .toFile(join(ASSETS, "arcade-badger.png"));
+  await trimmed(SRC_ARCADE)
+    .resize({ width: 512, withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toFile(join(ASSETS, "arcade-badger.webp"));
 
   // 3. Favicon 32x32 (transparent).
   await trimmed(SRC_BYTE)
@@ -104,8 +114,8 @@ async function main() {
   }
 
   console.log("Assets generated:");
-  console.log("  src/assets/byte-badger.png");
-  console.log("  src/assets/arcade-badger.png");
+  console.log("  src/assets/byte-badger.png + .webp");
+  console.log("  src/assets/arcade-badger.png + .webp");
   console.log("  src/assets/golden-floppy.png");
   console.log("  src/assets/legend-locked.png");
   console.log("  src/assets/legend-rays.png");

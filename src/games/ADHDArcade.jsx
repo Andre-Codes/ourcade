@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 
 // Map each minigame's short internal key (the `game` prop on GameOver/GameHUD)
 // to its registry gameId, so a game-over run lands on the right board under the
@@ -215,22 +216,16 @@ function Countdown({n,color}) {
   );
 }
 
-const HS_KEY = "ourcade:adhd_arcade";
-const HS_KEY_LEGACY = "adhd_arcade_v3";   // pre-convention key; carried over once below
+const HS_KEY = "adhd_arcade";              // → ourcade:adhd_arcade (prefix added by util)
+const HS_KEY_LEGACY = "adhd_arcade_v3";    // pre-convention key; migrated once via lsGet
 function loadHS(){
-  try{
-    let raw=localStorage.getItem(HS_KEY);
-    // one-time migration: copy the legacy blob so existing bests survive the rename
-    if(raw==null){
-      const legacy=localStorage.getItem(HS_KEY_LEGACY);
-      if(legacy!=null){localStorage.setItem(HS_KEY,legacy);raw=legacy;}
-    }
-    return JSON.parse(raw||"{}");
-  }catch{return {};}
+  // lsGetJSON transparently carries the legacy un-prefixed blob over the first
+  // time it's read, so existing bests survive the rename.
+  return lsGetJSON(HS_KEY, {}, HS_KEY_LEGACY) || {};
 }
 function saveHS(game,score){
   const hs=loadHS();
-  if(!hs[game]||score>hs[game]){hs[game]=score;localStorage.setItem(HS_KEY,JSON.stringify(hs));}
+  if(!hs[game]||score>hs[game]){hs[game]=score;lsSetJSON(HS_KEY,hs);}
   return Math.max(score,hs[game]||0);
 }
 
