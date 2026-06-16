@@ -12,12 +12,12 @@ Every card on the homepage is assembled from up to three stacked sources. Think 
 
 | Layer | File(s) | Who edits it | Touched by `npm run generate`? |
 |---|---|---|---|
-| ✋ **Manual** (hand-curated) | [src/data/manual.js](../src/data/manual.js) | **You, by hand** | ❌ Never |
+| ✋ **Manual** (hand-curated) | [src/data/manual/](../src/data/manual/) — `content.js` + the standalone `movies.js` / `featured.js` / `onthisday.js` | **You, by hand** | ❌ Never |
 | 🤖 **Generated** (AI-authored) | [src/data/generated/*.js](../src/data/generated/) | Claude, via scripts/CI | ✅ Overwritten each run |
-| 🗓️ **Scheduled** (date-windowed) | [src/data/schedule.js](../src/data/schedule.js) | **You, by hand** | ❌ Never |
+| 🗓️ **Scheduled** (date-windowed) | [src/data/manual/schedule.js](../src/data/manual/schedule.js) | **You, by hand** | ❌ Never |
 | 🛟 *Fallback* | inline in each consumer | (safety net only) | ❌ Never |
 
-> **Golden rule:** the AI generators **only ever rewrite `src/data/generated/*`**. Your hand-edited `manual.js` and `schedule.js` are sacred — they survive every regeneration. The fallback is a tiny built-in list so a card never renders empty if a generated batch is missing.
+> **Golden rule:** the AI generators **only ever rewrite `src/data/generated/*`**. Your hand-edited files under `src/data/manual/` (including `schedule.js`) are sacred — they survive every regeneration. The fallback is a tiny built-in list so a card never renders empty if a generated batch is missing.
 
 **How they merge** (typical pattern, e.g. [polls.js](../src/data/polls.js)):
 
@@ -48,7 +48,7 @@ All timing lives in one pure-JS file: [src/lib/daily.js](../src/lib/daily.js). I
 A few moving parts worth knowing:
 
 - **Day-parts** — `dayPart()` splits the local day into four uneven moods: 🌅 **Morning** (5–11), ☀️ **Afternoon** (11–17), 🌆 **After Hours** (17–22), 🌙 **Late Night** (22–5, wraps midnight). The homepage retints itself and swaps greetings per part.
-- **Salts** — each content type gets its own salt so pools don't move in lockstep: games `0` · polls `101` · facts/quizzes `202` · tips `303` · news `404` · flash `505` · curiosities `606` · weird `707` · weird-night `717`.
+- **Salts** — each content type gets its own salt so pools don't move in lockstep: games `0` · polls `101` · facts/quizzes `202` · tips `303` · news `404` · flash `505` · curiosities `606` · weird `707` · weird-night `717` · 💧 countdown `909` · on-this-day `1010` · buzz `1111` · hot-or-not `1212`.
 - **Dev/QA overrides** — append `?day=YYYY-MM-DD` and/or `?hour=0-23` to the URL to preview any future day or hour without touching your clock.
 
 ---
@@ -83,7 +83,36 @@ A few moving parts worth knowing:
 
 ---
 
-## 🗓️ Scheduled content ([src/data/schedule.js](../src/data/schedule.js))
+## 💧 The Water Cooler ([/watercooler](../src/components/WaterCoolerPage.jsx))
+
+A **separate page** (linked from the top nav), not part of the homepage band — a pop-culture destination for people who come for current events & buzz, not (only) games: *"what the whole internet is talking about today."* Same three-layer + date-seeded model as everything else (same "today" for everyone, finite page, no feed). Four cards:
+
+### 📻 The Countdown
+- **File:** [src/data/countdowns.js](../src/data/countdowns.js) · **Cadence:** daily (`rotateDaily`, salt 909)
+- **Pools:** `MANUAL_COUNTDOWNS` (✋) → `generated/countdowns.js` (🤖) → fallback (🛟)
+- A whole **TRL/Billboard-style top-5 chart is the unit of rotation** (the ranking *is* the content), so finished chart *sets* rotate day-to-day rather than being assembled from loose entries. Each entry's `trend` field (`up`/`down`/`same`/`new`) drives the ▲▼—★ arrow — it's **flavor set by the content, not computed** from real chart movement.
+
+### 📅 On This Day
+- **File:** [src/data/onthisday.js](../src/data/onthisday.js) · **Cadence:** **date-keyed** (an MM-DD lookup, *not* rotation; salt 1010 only disambiguates multiple years on the same date)
+- **Pool:** [src/data/manual/onthisday.js](../src/data/manual/onthisday.js) `ON_THIS_DAY` (✋) → `generated/onthisday.js` (🤖, **gated off**) → fallback (🛟)
+- The almanac throwback (#1 song / in theaters / on TV on this calendar date, ~1995–2009). It looks up today's MM-DD; with several matching years it `rotateDaily`s among them; with **no exact match it falls back to the nearest earlier date** so the card is never blank.
+- ⚠️ This is the **one content type that deliberately uses hard calendar dates** (the date *is* the content) and **AI generation is intentionally DISABLED** (`GENERATE_ONTHISDAY` off): "#1 song / box office on an exact date" is a checkable fact LLMs get plausibly-but-subtly wrong, so — like Game Facts — the hand-verified set is the source of truth.
+
+### 💬 The Buzz
+- **File:** [src/data/buzz.js](../src/data/buzz.js) · **Cadence:** **3 per day** (`rotateDailyN`, salt 1111)
+- **Pools:** `MANUAL_BUZZ` (✋) → `generated/buzz.js` (🤖) → fallback (🛟)
+- Short tabloid/water-cooler blurbs in dry 2000s-e-zine voice; each has a `tag` chip (`GOSSIP` / `RUMOR` / `SIGHTING` / `HOT TAKE`).
+
+### 🔥 Hot or Not
+- **File:** [src/data/hotornot.js](../src/data/hotornot.js) · **Cadence:** **5 per day** (`rotateDailyN`, salt 1212)
+- **Pools:** `MANUAL_HOTORNOT` (✋) → `generated/hotornot.js` (🤖) → fallback (🛟)
+- The interactive 2000s-web staple. Each subject is **normalized to the poll shape**, so it reuses the live Firestore vote/tally infra (the same `usePollCounts`/`castVote`/`realTally` seam as the Daily Poll, lifted into [src/lib/votes.js](../src/lib/votes.js)) with **no new backend**. The loader hard-codes the two options so vote ids are always exactly `hot` / `not`, and ids are namespaced `hon-*` so they never collide with daily-poll ids.
+
+> The Water Cooler doesn't currently honor `schedule.js` (no pinning), unlike News/Curiosity/Weird.
+
+---
+
+## 🗓️ Scheduled content ([src/data/manual/schedule.js](../src/data/manual/schedule.js))
 
 This is the **hand-edited dev scheduling layer** — pin or pool a specific **News**, **Curiosity**, or **Weird Thing** to a date window. The AI generators never touch this file, so anything here persists across regeneration.
 
@@ -132,7 +161,7 @@ AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is
 
 | Workflow | Schedule | What it regenerates | Local command |
 |---|---|---|---|
-| [generate-content.yml](../.github/workflows/generate-content.yml) | **Monthly** — `0 9 1 * *` (1st @ 09:00 UTC) | polls, quizzes, tips, news (+ curiosities, soft-fail) | `npm run generate` |
+| [generate-content.yml](../.github/workflows/generate-content.yml) | **Monthly** — `0 9 1 * *` (1st @ 09:00 UTC) | polls, quizzes, tips, news, 💧 Water Cooler (countdowns + buzz + hot-or-not) (+ curiosities, soft-fail) | `npm run generate` |
 | [refresh-weird.yml](../.github/workflows/refresh-weird.yml) | **Every other day** — `0 6 */2 * *` (06:00 UTC) | the 🔍 Weird Thing pool only (URL-liveness gated) | `npm run generate:weird` |
 
 Both also run on-demand via **`workflow_dispatch`**.
@@ -148,9 +177,10 @@ Both also run on-demand via **`workflow_dispatch`**.
 > 🐢 **"I deployed but don't see the change":** GitHub Pages serves `index.html` with a ~10-min cache and Safari caches HTML even harder. Hard-refresh (Cmd/Ctrl+Shift+R) or wait. Also, the Weird Thing is `(day, block)`-seeded — a fresh pool changes what surfaces *over the day*, not necessarily your current slot the instant you redeploy.
 
 ### Other local generate commands
-- `npm run generate` — full monthly batch
+- `npm run generate` — full monthly batch (includes the 💧 Water Cooler pools)
 - `npm run generate:weird` — just the Weird Thing pool
 - `npm run generate:curiosities` — just the 🌌 curiosities
+- `npm run generate:watercooler` — just the 💧 Water Cooler pools (countdowns + buzz + hot-or-not); On-This-Day stays manual
 - `npm run research` — proves real-time web search is firing (writes `generated/_research.md`)
 - `npm run check:daily` — headless validation of every rotation/window
 
@@ -160,9 +190,9 @@ The `generated/_*.md` files (`_research.md`, `_weird.md`, `_stumble.md`, `_flash
 
 ## TL;DR cheat sheet
 
-- **Want to add an evergreen item to the rotation?** → edit `manual.js` (survives regeneration, joins the daily mix).
-- **Want to announce something for a date range?** → add a `pin` entry to `schedule.js`.
-- **Want to nudge a specific item into rotation for a while?** → add a `pool` entry to `schedule.js`.
+- **Want to add an evergreen item to the rotation?** → edit `src/data/manual/content.js` (survives regeneration, joins the daily mix).
+- **Want to announce something for a date range?** → add a `pin` entry to `src/data/manual/schedule.js`.
+- **Want to nudge a specific item into rotation for a while?** → add a `pool` entry to `src/data/manual/schedule.js`.
 - **Want fresher AI content now?** → run the relevant workflow via `workflow_dispatch`, or `npm run generate*` locally.
 - **Never hand-edit `src/data/generated/*`** — the next AI run will overwrite it.
 - **The 🌙 Late-Night Weird pool is hand-curated and off-limits to the generators and the scheduler** — keep it special.
