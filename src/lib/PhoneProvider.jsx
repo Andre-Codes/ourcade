@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthProvider.jsx";
 import PhoneChrome from "../components/PhoneChrome.jsx";
+import PhoneOverlay from "../components/PhoneOverlay.jsx";
 
 /* PhoneProvider — the always-on heart of the Nopia phone.
 
@@ -50,6 +51,11 @@ export default function PhoneProvider({ children }) {
   // genuinely-new bump (and skip the value that's already on screen at mount).
   const [lastIncoming, setLastIncoming] = useState({ seq: 0, message: null });
   const [lastPing, setLastPing] = useState({ seq: 0, fromNumber: "" });
+
+  // Pop-up overlay open/close — pure state, no navigation, so whatever's behind
+  // the phone (an in-progress game and all) stays mounted. The FAB/toast open it
+  // and PhoneOverlay renders it above every route.
+  const [open, setOpen] = useState(false);
 
   // Refs so actions + the inbox auto-add read the LATEST identity/contacts
   // without forcing the listener effect to re-subscribe (it keys on [claimed,
@@ -289,6 +295,16 @@ export default function PhoneProvider({ children }) {
     [inbox]
   );
 
+  // Stable open/close handlers for the pop-up overlay (FAB, toast, Escape, ✕).
+  const overlay = useMemo(
+    () => ({
+      openPhone: () => setOpen(true),
+      closePhone: () => setOpen(false),
+      togglePhone: () => setOpen((v) => !v),
+    }),
+    []
+  );
+
   const value = useMemo(
     () => ({
       claimed,
@@ -299,15 +315,18 @@ export default function PhoneProvider({ children }) {
       unreadCount,
       lastIncoming,
       lastPing,
+      open,
+      ...overlay,
       ...actions,
     }),
-    [claimed, number, inbox, sent, contacts, unreadCount, lastIncoming, lastPing, actions]
+    [claimed, number, inbox, sent, contacts, unreadCount, lastIncoming, lastPing, open, overlay, actions]
   );
 
   return (
     <PhoneContext.Provider value={value}>
       {children}
       <PhoneChrome />
+      <PhoneOverlay />
     </PhoneContext.Provider>
   );
 }

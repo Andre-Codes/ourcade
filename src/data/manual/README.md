@@ -10,6 +10,7 @@ place to add or tweak content without it getting clobbered.
 | `schedule.js` | Pin/pool a specific News / Curiosity / Weird item to a date window.           |
 | `movies.js`   | Movies currently in theaters + their post-credits verdict (the homepage "STAY FOR THE CREDITS?" card). |
 | `featured.js` | Real-world games to spotlight in the homepage "FEATURED GAME" card (shows the first entry, newest-first). Drop art in `assets-src/featured/<slug>.(png\|jpg)` and run `npm run assets:featured` to make the optimized `src/assets/featured/<slug>.webp`. |
+| `stickers.js` | The corner flair on game cards — `NEW!`, `HOT!`, `★`, etc. Maps a game id to a sticker; wins over the legacy `badge:` field in `games.js`. |
 
 Each file has a header comment documenting its entry shape. After editing,
 run `node scripts/daily-check.js` to sanity-check the rotation.

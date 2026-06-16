@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GAMES } from "../data/games.js";
+import { getSticker } from "../data/manual/stickers.js";
 import { recordDeepCutsUnlocked, getFavorites, toggleFavorite } from "../lib/store.js";
 import { todayKey, dayPart, getHourOverride, daySeed, dayNumberFromKey, mulberry32 } from "../lib/daily.js";
 import { getDayPartGreeting } from "../data/dayparts.js";
@@ -113,6 +114,9 @@ function CardFav({ game, isFav }) {
 }
 
 function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
+  // Corner sticker comes from src/data/manual/stickers.js (dev-editable),
+  // falling back to the game's legacy `badge` field.
+  const sticker = getSticker(game);
   return (
     <Link
       to={`/play/${game.id}`}
@@ -121,9 +125,9 @@ function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
     >
       <div className="arcade-card-glow" />
       <CardBoardChip game={game} />
-      {game.badge && (
-        <span className={`arcade-burst ${game.badge === "HOT" ? "is-hot" : "is-new"}`}>
-          {game.badge}!
+      {sticker && (
+        <span className={`arcade-burst is-${sticker.key.toLowerCase()}`}>
+          {sticker.label}
         </span>
       )}
 

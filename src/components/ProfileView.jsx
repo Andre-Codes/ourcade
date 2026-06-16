@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES, getGame } from "../data/games.js";
 import { themeColor } from "../data/profilePresets.js";
 import { RELICS, relicIcon } from "../data/relics.js";
 import { getDiscoveredLegendaries, getTop8, removeTop8 } from "../lib/store.js";
 import { resolveTop8 } from "../data/content.js";
+import { renderContactCard } from "../lib/contactCard.js";
+import { shareImage } from "../lib/share.js";
 
 /* ProfileView — the SHARED presentation of an arcade profile. Rendered both on
    the public /u/:username page and on the owner's own /me (PROFILE tab), so the
@@ -25,6 +27,54 @@ function cloud() {
 }
 
 const SCORED_GAMES = GAMES.filter((g) => g.score);
+
+// Owner-only "share my number": renders the profile to a PNG contact card and
+// hands it to the OS share sheet (or downloads it + copies the profile link on
+// desktop). The shared link points at the public /u/:username page so whoever
+// receives it lands somewhere they can text back.
+function ShareNumberButton({ profile }) {
+  const [status, setStatus] = useState(null); // "busy" | "saved" | "failed" | null
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const onClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (status === "busy") return;
+    setStatus("busy");
+    try {
+      const blob = await renderContactCard({
+        number: profile.number,
+        username: profile.username,
+        avatar: profile.avatar,
+        bio: profile.bio,
+      });
+      const base = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
+      const url = `${base}#/u/${profile.username}`;
+      const result = await shareImage({
+        blob,
+        filename: `ourcade-${profile.username}.png`,
+        title: "My Ourcade number",
+        text: `📱 my Ourcade number: ${profile.number} — text me on Ourcade`,
+        url,
+      });
+      setStatus(result === "saved" ? "saved" : result === "failed" ? "failed" : null);
+    } catch {
+      setStatus("failed");
+    }
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setStatus(null), 1800);
+  };
+
+  const label =
+    status === "busy" ? "…" : status === "saved" ? "✓ Saved!" : status === "failed" ? "Failed" : "📇 Share my number";
+
+  return (
+    <button type="button" className="arcade-share is-contact" onClick={onClick}>
+      {label}
+    </button>
+  );
+}
 
 function joinLabel(profile) {
   const ts = profile?.createdAt;
@@ -210,6 +260,16 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
           {p?.bio ? <p className="arcade-profile-bio">{p.bio}</p> : null}
           {p?.number ? (
             <p className="arcade-profile-number">📱 {p.number} — text me on Ourcade</p>
+          ) : null}
+          {owner && p?.number && (p?.username || username) ? (
+            <ShareNumberButton
+              profile={{
+                number: p.number,
+                username: p.username || username,
+                avatar: p.avatar,
+                bio: p.bio,
+              }}
+            />
           ) : null}
           {join ? <p className="arcade-profile-join">arcade member since {join}</p> : null}
         </div>

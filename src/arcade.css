@@ -459,6 +459,10 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-burst.is-new { background: var(--neon-lime); }
 .arcade-burst.is-hot { background: var(--neon-pink); color: #fff; }
+/* extra sticker colors — see src/data/manual/stickers.js */
+.arcade-burst.is-star { background: var(--neon-gold); font-size: 0.9rem; }
+.arcade-burst.is-top { background: var(--neon-aqua); }
+.arcade-burst.is-free { background: var(--neon-violet); color: #fff; }
 
 /* ====================================================================== */
 /*  FOOTER                                                                 */
@@ -688,9 +692,43 @@ main > section + section { margin-top: 44px; }
   border: 2px solid var(--neon-aqua); border-radius: 10px;
   box-shadow: var(--bevel), 0 0 24px rgba(63,255,208,.3);
 }
+.arcade-phone-fab { cursor: pointer; font-family: inherit; }
+.arcade-phone-toast { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) {
   .arcade-phone-toast { animation: arcade-toast-in .35s ease; }
 }
+
+/* ---- pop-up phone overlay (PhoneOverlay.jsx) ---------------------------- */
+/* Floats above every route — incl. games — without navigating, so the page
+   behind it stays mounted. Kept mounted (display toggled) so the Nopia iframe
+   survives between opens. Sits just above the FAB/toast layer. */
+.arcade-phone-overlay-bg {
+  display: none;
+  position: fixed; inset: 0; z-index: 2147483200;
+  align-items: center; justify-content: center; padding: 16px;
+  background: rgba(5,5,10,.84); backdrop-filter: blur(3px);
+}
+.arcade-phone-overlay-bg.is-open { display: flex; }
+.arcade-phone-overlay {
+  position: relative;
+  width: 100%; max-width: 420px; max-height: 96vh;
+  display: flex; flex-direction: column;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arcade-phone-overlay-bg.is-open .arcade-phone-overlay { animation: arcade-toast-in .25s ease; }
+}
+.arcade-phone-overlay .arcade-phone--page { margin-top: 0; }
+.arcade-phone-overlay .arcade-phone-stage--full { height: auto; max-height: 86vh; }
+.arcade-phone-overlay-close {
+  position: absolute; top: -10px; right: -10px; z-index: 2;
+  width: 36px; height: 36px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace; font-size: 0.7rem; line-height: 1;
+  color: var(--arcade-text); background: linear-gradient(180deg, #1a1030, #0c0718);
+  border: 2px solid var(--neon-pink); border-radius: 50%;
+  box-shadow: var(--bevel), 0 0 18px rgba(255,106,138,.4);
+}
+.arcade-phone-overlay-close:active { transform: translateY(1px); }
 
 /* ---- search + tag filter (home discovery) ---- */
 .arcade-search {
@@ -1024,6 +1062,9 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-share:hover { border-color: var(--neon-aqua); filter: brightness(1.08); }
 .arcade-share:active { transform: translateY(1px); }
+/* "share my number" on the owner's profile — magenta accent, a touch of breathing room. */
+.arcade-share.is-contact { margin-top: 8px; color: var(--neon-pink); border-color: #3a1c33; }
+.arcade-share.is-contact:hover { border-color: var(--neon-pink); }
 
 /* ---- mascot + streak ---- */
 .arcade-mascot {

@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { usePhone } from "../lib/PhoneProvider.jsx";
 
 /* PhoneChrome — the site-wide presence of the phone. Rendered once by
    PhoneProvider, so it's present on every route. Two pieces:
 
-   • PhoneFab — a floating 📱 button with an unread badge, so you can jump to the
-     phone (and see you have unread texts) from anywhere. Hidden on Home (its nav
-     already has the icon) and on /phone (you're already there).
+   • PhoneFab — a floating 📱 button with an unread badge, so you can pop the
+     phone up (and see you have unread texts) from anywhere. It opens the
+     overlay IN PLACE (no navigation), so whatever you were doing — including an
+     in-progress game — stays mounted behind it. Hidden on Home (its nav already
+     has the icon) and while the overlay is already open.
    • PhoneToast — a brief "new text from X" banner when a message/ping arrives
-     while you're NOT on /phone (on /phone the Nokia rings instead — single
-     notify). Clicking it opens the phone.
+     while the phone isn't on screen. Clicking it opens the phone overlay.
 
    Old-web on purpose: a toast + a badge, no OS notification permission prompt. */
 
@@ -23,43 +24,58 @@ function senderLabel(contacts, msg) {
   return (c && c.name) || msg.fromName || num || "SOMEONE";
 }
 
-function PhoneFab({ unreadCount }) {
+function PhoneFab({ unreadCount, onOpen }) {
   return (
-    <Link to="/phone" className="arcade-phone-fab" aria-label="open your phone">
+    <button
+      type="button"
+      className="arcade-phone-fab"
+      aria-label="open your phone"
+      onClick={onOpen}
+    >
       <span aria-hidden="true">📱</span>
       {unreadCount > 0 && (
         <span className="arcade-phone-fab-badge">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
 
-function PhoneToast({ text }) {
+function PhoneToast({ text, onOpen }) {
   if (!text) return null;
   return (
-    <Link to="/phone" className="arcade-phone-toast" role="status">
+    <button type="button" className="arcade-phone-toast" onClick={onOpen} role="status">
       {text}
-    </Link>
+    </button>
   );
 }
 
 export default function PhoneChrome() {
   const phone = usePhone() || {};
-  const { claimed, unreadCount = 0, contacts = [], lastIncoming, lastPing } = phone;
+  const {
+    claimed,
+    unreadCount = 0,
+    contacts = [],
+    lastIncoming,
+    lastPing,
+    open,
+    openPhone,
+  } = phone;
   const { pathname } = useLocation();
-  const onPhonePage = pathname === "/phone";
 
   const [toast, setToast] = useState(null);
 
-  // Fire a toast on a genuinely-new arrival (seq bump), but only when we're not
-  // already on the phone page (there the emulator rings/toasts itself).
+  // Fire a toast on a genuinely-new arrival (seq bump), but only when the phone
+  // isn't already on screen (the overlay is open, or we're on the /phone page —
+  // there the emulator rings/toasts itself).
+  const onPhonePage = pathname === "/phone";
+  const phoneVisible = open || onPhonePage;
   const incomingSeq = lastIncoming?.seq || 0;
   const pingSeq = lastPing?.seq || 0;
 
   useEffect(() => {
-    if (!incomingSeq || onPhonePage) return;
+    if (!incomingSeq || phoneVisible) return;
     setToast(`📱 new text from ${senderLabel(contacts, lastIncoming.message)}`);
     const t = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(t);
@@ -67,24 +83,26 @@ export default function PhoneChrome() {
   }, [incomingSeq]);
 
   useEffect(() => {
-    if (!pingSeq || onPhonePage) return;
+    if (!pingSeq || phoneVisible) return;
     setToast(`📱 ping from ${lastPing.fromNumber || "?"}`);
     const t = setTimeout(() => setToast(null), 4500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pingSeq]);
 
-  // Clear any lingering toast the moment we land on the phone page.
+  // Clear any lingering toast the moment the phone comes on screen.
   useEffect(() => {
-    if (onPhonePage) setToast(null);
-  }, [onPhonePage]);
+    if (phoneVisible) setToast(null);
+  }, [phoneVisible]);
 
   if (!claimed) return null;
 
   return (
     <>
-      {!onPhonePage && pathname !== "/" && <PhoneFab unreadCount={unreadCount} />}
-      {!onPhonePage && <PhoneToast text={toast} />}
+      {!phoneVisible && pathname !== "/" && (
+        <PhoneFab unreadCount={unreadCount} onOpen={openPhone} />
+      )}
+      {!phoneVisible && <PhoneToast text={toast} onOpen={openPhone} />}
     </>
   );
 }
