@@ -42,11 +42,17 @@ function archivePool(type, items) {
 const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").split("=")[1] || null;
 
 // How big a batch to ask for. One run = a month-plus of date-seeded daily rotation.
-const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30 };
+const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30, countdowns: 16, buzz: 60, hotornot: 50, onthisday: 40 };
 
 // Facts are hand-curated (see MANUAL_FACTS in src/data/manual/content.js); the home runs
 // on those only. Set true to also (re)generate the supplemental generated/facts.js.
 const GENERATE_FACTS = false;
+
+// On-This-Day (the 💧 Water Cooler almanac) is hand-curated (ON_THIS_DAY in
+// src/data/manual/onthisday.js): "#1 song / box office on a date" is a checkable
+// fact, so — like facts — a known-true set beats a drifty one. Flip this to true
+// only AFTER accuracy-reviewing the result, to regenerate generated/onthisday.js.
+const GENERATE_ONTHISDAY = false;
 
 loadEnv(ROOT);
 
@@ -330,6 +336,128 @@ const curiositiesSchema = {
   required: ["curiosities"],
 };
 
+// ---- The Water Cooler (/watercooler) schemas ----
+const countdownsSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    countdowns: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" }, // TRL-style header, e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"
+          unit: { type: "string", enum: ["song", "movie", "show"] },
+          blurb: { type: "string" }, // optional dek; "" if none
+          entries: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                rank: { type: "integer" }, // 1..5
+                title: { type: "string" },
+                by: { type: "string" }, // artist/studio; "" if n/a
+                note: { type: "string" }, // dry one-liner; "" if none
+                trend: { type: "string", enum: ["up", "down", "same", "new"] },
+              },
+              required: ["rank", "title", "by", "note", "trend"],
+            },
+          },
+        },
+        required: ["id", "title", "unit", "blurb", "entries"],
+      },
+    },
+  },
+  required: ["countdowns"],
+};
+
+const buzzSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    buzz: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          text: { type: "string" }, // one tabloid-style line, <= ~160 chars
+          tag: { type: "string", enum: ["GOSSIP", "RUMOR", "SIGHTING", "HOT TAKE"] },
+        },
+        required: ["id", "text", "tag"],
+      },
+    },
+  },
+  required: ["buzz"],
+};
+
+const hotornotSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    // The model emits ONLY { id, subject, emoji }; the loader hard-codes the
+    // [HOT, NOT] options so vote ids stay exactly "hot"/"not".
+    subjects: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" }, // kebab-case, must start with "hon-"
+          subject: { type: "string" }, // the thing being rated, <= ~6 words
+          emoji: { type: "string" }, // a single representative emoji
+        },
+        required: ["id", "subject", "emoji"],
+      },
+    },
+  },
+  required: ["subjects"],
+};
+
+const onthisdaySchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    days: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string" },
+          md: { type: "string" }, // "MM-DD"
+          year: { type: "integer" }, // ~1995-2009
+          no1Song: {
+            type: "object",
+            additionalProperties: false,
+            properties: { title: { type: "string" }, by: { type: "string" } },
+            required: ["title", "by"],
+          },
+          inTheaters: {
+            type: "object",
+            additionalProperties: false,
+            properties: { title: { type: "string" } },
+            required: ["title"],
+          },
+          onTV: {
+            type: "object",
+            additionalProperties: false,
+            properties: { title: { type: "string" } },
+            required: ["title"],
+          },
+          blurb: { type: "string" }, // dry recap; "" if none
+        },
+        required: ["id", "md", "year", "no1Song", "inTheaters", "onTV", "blurb"],
+      },
+    },
+  },
+  required: ["days"],
+};
+
 // ---- validation gate: collect every problem, write nothing if any exist ----
 const errors = [];
 const req = (cond, msg) => {
@@ -416,12 +544,18 @@ function validateFacts(facts) {
 let MANUAL_WEIRD = [];
 let MANUAL_WEIRD_NIGHT = [];
 let MANUAL_CURIOSITIES = [];
+let MANUAL_COUNTDOWNS = [];
+let MANUAL_BUZZ = [];
+let MANUAL_HOTORNOT = [];
 let FEATURED_URLS = [];
 try {
   const manual = await import("../src/data/manual/content.js");
   MANUAL_WEIRD = manual.MANUAL_WEIRD || [];
   MANUAL_WEIRD_NIGHT = manual.MANUAL_WEIRD_NIGHT || [];
   MANUAL_CURIOSITIES = manual.MANUAL_CURIOSITIES || [];
+  MANUAL_COUNTDOWNS = manual.MANUAL_COUNTDOWNS || [];
+  MANUAL_BUZZ = manual.MANUAL_BUZZ || [];
+  MANUAL_HOTORNOT = manual.MANUAL_HOTORNOT || [];
   const generatedStumble = (await import("../src/data/generated/stumble.js")).default || [];
   FEATURED_URLS = [
     ...MANUAL_WEIRD,
@@ -559,6 +693,188 @@ ACCURACY IS THE WHOLE POINT — these are presented as true. Use ONLY widely doc
   console.log("\n✓ done");
 }
 
+// ---- The Water Cooler (/watercooler) — pop-culture pools ----
+// Countdowns + Buzz + Hot-or-Not in one pass (they share the same topical
+// research). These are the site's most time-sensitive pools, so the cron runs
+// `--only=watercooler` to refresh just them cheaply. They carry NO urls, so
+// there's no liveness gate — just structural validation, then write + archive.
+async function generateWatercooler() {
+  console.log("Generating the Water Cooler pools (countdowns + buzz + hot-or-not)…");
+  // --only=watercooler skips main()'s research, so pull hooks here too.
+  if (!TOPICAL) TOPICAL = await researchTopics();
+  const topical = !!TOPICAL;
+
+  // — The Countdown —
+  const countdownsData = await generate(
+    "countdowns",
+    countdownsSchema,
+    `Generate ${COUNT.countdowns} TRL/Billboard-style top-5 countdowns for the 📻 THE COUNTDOWN card on OURCADE's "Water Cooler" pop-culture page. Each is a complete, ordered chart — the ranking is the content. Fields: a kebab-case id starting with "ctd-", a punchy ALL-CAPS title (e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"), unit ("song" | "movie" | "show"), an optional one-line blurb ("" if none), and EXACTLY 5 entries. Each entry: rank 1-5 (each rank used once), title (the real thing by name), by (artist/studio — "" if n/a), note (a dry one-line quip in the site's 2000s-e-zine voice — "" if none), and trend ("up" | "down" | "same" | "new").
+${topical
+      ? `Make most countdowns TOPICAL: rank REAL current songs/movies/shows from the TOPICAL HOOKS by name, then add the dry early-2000s twist in the notes. Keep them understandable a few weeks from now; non-defamatory and good-natured. Mix in a couple of evergreen 2000s-nostalgia charts too.`
+      : `No current hooks this run — lean on evergreen 2000s-nostalgia and arcade-culture countdowns (name real era-defining songs/movies/shows). Keep it good-natured and non-defamatory.`}
+Unique ids. No duplicate chart concepts.`
+  );
+
+  // — The Buzz —
+  const buzzData = await generate(
+    "buzz",
+    buzzSchema,
+    `Generate ${COUNT.buzz} short water-cooler/tabloid blurbs for the 💬 THE BUZZ card on OURCADE's "Water Cooler" page. Each: a kebab-case id starting with "bz-", text (one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory), and tag ("GOSSIP" | "RUMOR" | "SIGHTING" | "HOT TAKE").
+${topical
+      ? `Make about half TOPICAL: riff on REAL current entertainment from the TOPICAL HOOKS (name the actual show/song/movie/trend), then add the early-2000s framing. The rest can be evergreen celebrity/pop-culture archetypes (reboots, feuds-that-aren't, vinyl/flip-phone revivals). Keep every line understandable weeks later and non-defamatory — no real allegations about real people.`
+      : `No current hooks this run — write evergreen pop-culture archetype blurbs (reboots, "not feuding" statements, nostalgia revivals, streaming-becomes-cable). Good-natured, non-defamatory.`}
+Unique ids. No duplicates.`
+  );
+
+  // — Hot or Not —
+  const hotornotData = await generate(
+    "hotornot",
+    hotornotSchema,
+    `Generate ${COUNT.hotornot} "Hot or Not" subjects for the 🔥 card on OURCADE's "Water Cooler" page — the interactive 2000s-web staple where visitors vote HOT or NOT. Each: a kebab-case id starting with "hon-", subject (the thing being rated, <= ~6 words), and emoji (one representative emoji). Do NOT include options — the page hard-codes HOT/NOT.
+${topical
+      ? `Make about half TOPICAL: rate REAL current trends/things from the TOPICAL HOOKS by name. The rest should be evergreen 2000s-revival debates (low-rise jeans, frosted tips, flip phones, trucker hats, physical media). Keep them light, debatable, and non-defamatory — rate THINGS and TRENDS, not real people's character.`
+      : `No current hooks this run — write evergreen 2000s-revival "hot or not" debates (fashion, gadgets, internet habits, snacks). Light and debatable; rate things/trends, not real people.`}
+Unique ids. No duplicate subjects.`
+  );
+
+  // — normalize + structural validation (no urls → no liveness gate) —
+  const countdowns = (countdownsData.countdowns || []).map((c) => ({
+    id: String(c.id || "").trim(),
+    title: String(c.title || "").trim(),
+    unit: String(c.unit || "").trim(),
+    ...(String(c.blurb || "").trim() ? { blurb: String(c.blurb).trim() } : {}),
+    entries: (c.entries || [])
+      .map((e) => ({
+        rank: Number(e.rank),
+        title: String(e.title || "").trim(),
+        ...(String(e.by || "").trim() ? { by: String(e.by).trim() } : {}),
+        ...(String(e.note || "").trim() ? { note: String(e.note).trim() } : {}),
+        trend: String(e.trend || "").trim(),
+      }))
+      .sort((a, b) => a.rank - b.rank),
+  }));
+  const buzz = (buzzData.buzz || []).map((b) => ({
+    id: String(b.id || "").trim(),
+    text: String(b.text || "").trim(),
+    tag: String(b.tag || "").trim(),
+  }));
+  const hotornot = (hotornotData.subjects || []).map((s) => ({
+    id: String(s.id || "").trim(),
+    subject: String(s.subject || "").trim(),
+    emoji: String(s.emoji || "").trim(),
+  }));
+
+  // Countdowns: malformed → recorded error; duplicate id (incl. vs manual) →
+  // silently dropped (the model reusing a hand-curated id is expected overlap,
+  // not a failure). Must be exactly 5 entries, ranks 1..5, valid trends.
+  const TRENDS = new Set(["up", "down", "same", "new"]);
+  const cSeen = new Set(MANUAL_COUNTDOWNS.map((c) => c.id));
+  const cValid = countdowns.filter((c, i) => {
+    const ranks = c.entries.map((e) => e.rank).sort((a, b) => a - b);
+    const wellFormed = c.id && c.title && c.entries.length === 5 &&
+      ranks.every((r, j) => r === j + 1) &&
+      c.entries.every((e) => e.title && TRENDS.has(e.trend));
+    if (!wellFormed) { req(false, `countdown[${i}] (${c.id || "?"}): needs id, title, 5 entries (ranks 1..5), valid trends`); return false; }
+    if (cSeen.has(c.id)) return false; // silent dedupe
+    cSeen.add(c.id);
+    return true;
+  });
+  req(cValid.length >= 8, `countdowns: only ${cValid.length} valid (need >=8) — keeping the previous pool`);
+
+  // Buzz: malformed → error; duplicate id → silently dropped.
+  const TAGS = new Set(["GOSSIP", "RUMOR", "SIGHTING", "HOT TAKE"]);
+  const bSeen = new Set(MANUAL_BUZZ.map((b) => b.id));
+  const bValid = buzz.filter((b, i) => {
+    const wellFormed = b.id && b.text && TAGS.has(b.tag) && b.text.length <= 180;
+    if (!wellFormed) { req(false, `buzz[${i}] (${b.id || "?"}): needs id, text (<=180), valid tag`); return false; }
+    if (bSeen.has(b.id)) return false; // silent dedupe
+    bSeen.add(b.id);
+    return true;
+  });
+  req(bValid.length >= 20, `buzz: only ${bValid.length} valid (need >=20) — keeping the previous pool`);
+
+  // Hot-or-Not: malformed → error; duplicate id → silently dropped. Must use the
+  // hon- namespace so ids never collide with daily-poll ids in Firestore.
+  const hSeen = new Set(MANUAL_HOTORNOT.map((s) => s.id));
+  const hValid = hotornot.filter((s, i) => {
+    const wellFormed = s.id && s.id.startsWith("hon-") && s.subject && s.emoji;
+    if (!wellFormed) { req(false, `hotornot[${i}] (${s.id || "?"}): needs hon-* id, subject, emoji`); return false; }
+    if (hSeen.has(s.id)) return false; // silent dedupe
+    hSeen.add(s.id);
+    return true;
+  });
+  req(hValid.length >= 20, `hotornot: only ${hValid.length} valid (need >=20) — keeping the previous pool`);
+
+  if (errors.length) {
+    console.error(`\n✗ validation failed (${errors.length}) — writing nothing:`);
+    for (const e of errors) console.error(`  - ${e}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  writeModule("countdowns.js", cValid, "The Countdown pool. Shape: { id, title, unit, blurb?, entries:[{rank,title,by?,note?,trend}] }");
+  writeModule("buzz.js", bValid, "The Buzz pool. Shape: { id, text, tag }");
+  writeModule("hotornot.js", hValid, "Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].");
+  await archivePool("countdowns", cValid);
+  await archivePool("buzz", bValid);
+  await archivePool("hotornot", hValid);
+  console.log("\n✓ done");
+}
+
+// On-This-Day generation — GATED OFF (GENERATE_ONTHISDAY) by default because
+// "#1 song / box office on a date" is a checkable fact and the hand-verified
+// ON_THIS_DAY pool is the source of truth. Run only after accuracy review.
+async function generateOnThisDay() {
+  console.log("Generating the On-This-Day almanac…");
+  let MANUAL_OTD = [];
+  try {
+    MANUAL_OTD = (await import("../src/data/manual/onthisday.js")).ON_THIS_DAY || [];
+  } catch { /* none yet */ }
+
+  // This type DELIBERATELY uses hard calendar dates (the date IS the content),
+  // so it overrides the system's "no hard dates" voice rule and ignores the
+  // live TOPICAL hooks — these are historical almanac facts, not current events.
+  const data = await generate(
+    "onthisday",
+    onthisdaySchema,
+    `Generate ${COUNT.onthisday} "On This Day" almanac entries for OURCADE's "Water Cooler" page. UNLIKE the rest of the site, these are HISTORICAL entries anchored to REAL past dates (roughly 1995-2009) — hard calendar dates are REQUIRED and ARE the content. Do NOT reference anything current. Each entry: a kebab-case id like "otd-MMDD-YYYY", md ("MM-DD"), year (the throwback year), no1Song ({ title, by } — what was #1 on the charts that date), inTheaters ({ title } — what topped/opened at the box office), onTV ({ title } — the show everyone was talking about), and a dry one-line blurb in 2000s-nostalgia voice ("" if none).
+
+ACCURACY IS THE WHOLE POINT — these are presented as true historical facts. Use ONLY well-documented #1 songs, top box-office films, and era-defining TV you are confident are correct for that exact date/year; when unsure, pick a different well-known date. Spread entries across many different calendar months and days. Unique ids and dates.`
+  );
+
+  const days = (data.days || []).map((d) => ({
+    id: String(d.id || "").trim(),
+    md: String(d.md || "").trim(),
+    year: Number(d.year),
+    no1Song: { title: String(d.no1Song?.title || "").trim(), by: String(d.no1Song?.by || "").trim() },
+    inTheaters: { title: String(d.inTheaters?.title || "").trim() },
+    onTV: { title: String(d.onTV?.title || "").trim() },
+    ...(String(d.blurb || "").trim() ? { blurb: String(d.blurb).trim() } : {}),
+  }));
+
+  const MD = /^\d{2}-\d{2}$/;
+  const seen = new Set(MANUAL_OTD.map((e) => e.id));
+  const valid = days.filter((d, i) => {
+    const wellFormed = d.id && MD.test(d.md) && Number.isFinite(d.year) &&
+      d.no1Song.title && d.inTheaters.title && d.onTV.title;
+    if (!wellFormed) { req(false, `onthisday[${i}] (${d.id || "?"}): needs id, MM-DD, year, and all three slots`); return false; }
+    if (seen.has(d.id)) return false; // silent dedupe
+    seen.add(d.id);
+    return true;
+  });
+  req(valid.length >= 20, `onthisday: only ${valid.length} valid (need >=20) — keeping the previous pool`);
+
+  if (errors.length) {
+    console.error(`\n✗ validation failed (${errors.length}) — writing nothing:`);
+    for (const e of errors) console.error(`  - ${e}`);
+    process.exitCode = 1;
+    return;
+  }
+  writeModule("onthisday.js", valid, "On-This-Day almanac. Shape: { id, md, year, no1Song:{title,by}, inTheaters:{title}, onTV:{title}, blurb? }");
+  await archivePool("onthisday", valid);
+  console.log("\n✓ done");
+}
+
 function writeModule(file, value, note) {
   const banner =
     `// AUTO-GENERATED by scripts/generate-content.js — do not edit by hand.\n` +
@@ -573,8 +889,10 @@ async function main() {
   // touches — or pays for — the big monthly polls/quizzes/flavor batch).
   if (ONLY === "weird") return generateWeird();
   if (ONLY === "curiosities") return generateCuriosities();
+  if (ONLY === "watercooler") return generateWatercooler();
+  if (ONLY === "onthisday") return generateOnThisDay();
   if (ONLY) {
-    console.error(`Unknown --only=${ONLY} (expected "weird" or "curiosities").`);
+    console.error(`Unknown --only=${ONLY} (expected "weird", "curiosities", "watercooler", or "onthisday").`);
     process.exitCode = 1;
     return;
   }
@@ -668,6 +986,13 @@ Keep the OURCADE arcade-nostalgia flavor light — the fact itself must stay acc
   await archivePool("tips", tips);
   await archivePool("news", news);
   if (GENERATE_FACTS) await archivePool("facts", facts);
+
+  // The Water Cooler pop-culture pools are part of the monthly run too (they
+  // reuse the TOPICAL hooks already fetched above). They run their own
+  // validation gate + write, so a Water Cooler failure won't unwind the pools
+  // already written above. On-This-Day stays gated (manual is source of truth).
+  await generateWatercooler();
+  if (GENERATE_ONTHISDAY) await generateOnThisDay();
 
   console.log("\n✓ done");
 }

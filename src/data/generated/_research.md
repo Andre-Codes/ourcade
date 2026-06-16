@@ -1,203 +1,160 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-06-08T23:40:04.173Z
+# Generated 2026-06-16T02:21:49.490Z
 # web_search_requests = 6
 
 ## Search queries Claude actually ran
-- most popular new movies TV shows June 2026
-- trending music albums songs 2026
-- biggest new video games June 2026
-- viral internet memes trending right now June 2026
-- Billboard Hot 100 number one song this week June 2026
-- box office summer 2026 movies biggest hits
+- new movies TV shows trending June 2026
+- popular new music albums songs June 2026
+- most popular video games June 2026 new releases
+- viral internet meme trends June 2026
+- summer 2026 blockbuster movies box office theaters
+- pop culture news June 2026 celebrity
 
 ## Sources returned ([page_age] title / url)
-- [4 days ago] New Movies and Shows Streaming in June: What to Watch on Netflix, Prime Video, Disney+, HBO Max and More | Rotten Tomatoes
-  https://editorial.rottentomatoes.com/article/new-movies-and-shows-streaming-in-june-2026-what-to-watch-on-netflix-prime-video-disney-hbo-max-and-more/
-- [1 week ago] All the new movies and TV shows streaming in June
+- [2 weeks ago] All the new movies and TV shows streaming in June
   https://www.boston.com/culture/streaming/2026/06/02/new-movies-tv-streaming-june-2026/
-- [5 days ago] The best new TV shows and movies to stream in June 2026 | Stuff
-  https://www.stuff.tv/features/the-best-new-tv-shows-and-movies-to-stream-in-june-2026/
-- [1 week ago] The 5 Most Anticipated TV Shows of June | Rotten Tomatoes
+- [2 weeks ago] 20 new shows and movies to watch in June 2026: 'The Bear,' 'House of the Dragon' and more
+  https://www.yahoo.com/entertainment/tv/articles/20-shows-movies-watch-june-040000868.html
+- [2 weeks ago] The 5 Most Anticipated TV Shows of June | Rotten Tomatoes
   https://editorial.rottentomatoes.com/article/most-anticipated-tv-of-june-2026/
-- [1 week ago] Netflix’s New Releases Coming in June 2026
-  https://www.hollywoodreporter.com/tv/tv-news/netflix-june-2026-new-releases-movies-tv-1236610298/
-- [3 days ago] Top 21 New Movies Streaming in June 2026
-  https://www.thewrap.com/creative-content/what-to-watch/best-new-streaming-movies-june-2026/
-- [3 days ago] 15 Best New Movies to Streaming in June 2026: ‘Avatar: Fire and Ash,’ ‘Hoppers,’ ‘Forbidden Fruits’ and More
-  https://variety.com/lists/best-movies-streaming-june-2026/
-- [1 week ago] 6 TV and Streaming Shows You Should Binge-Watch in June | Rotten Tomatoes
+- [5 days ago] The Ultimate Guide to What to Watch on Netflix, Hulu, Prime Video, HBO Max, and More in June 2026 - TV Guide
+  https://www.tvguide.com/news/ultimate-guide-what-to-watch-netflix-hulu-prime-video-hbo-max-more-june-2026/
+- [1 month ago] 33 TV Shows That Are Premiering Or Returning In Summer 2026 That Are Worth Checking Out
+  https://www.buzzfeed.com/noradominick/summer-tv-preview-2026
+- [2 weeks ago] TV Shows (June 2026) | Rotten Tomatoes
+  https://www.rottentomatoes.com/browse/tv_series_browse
+- [2 weeks ago] 6 TV and Streaming Shows You Should Binge-Watch in June | Rotten Tomatoes
   https://editorial.rottentomatoes.com/article/6-tv-and-streaming-shows-you-should-binge-watch-in-june-2026/
-- [6 days ago] What are the most anticipated albums of 2026?
-  https://numero.com/en/culture-en/music/the-most-anticipated-albums-of-2026/
-- [4 days ago] New Albums in 2026: a Calendar/List of Upcoming Music Releases We're Excited About | Stereofox Music Blog
-  https://www.stereofox.com/articles/new-upcoming-albums-2026/
-- [7 hours ago] The Best Albums of 2026 So Far - Treble Zine
-  https://www.treblezine.com/the-48-best-albums-of-2026-so-far/
-- [6 days ago] Billboard 200: Chart-topping albums of 2026
-  https://www.goldderby.com/lists/billboard-200-chart-topping-albums-of-2026/
-- [10 hours ago] The 50 best albums of 2026 so far
-  https://www.pastemagazine.com/music/best-albums/the-50-best-albums-of-2026-so-far
-- [1 week ago] New Albums in 2026: Calendar of New Music Releases Coming
+- [1 week ago] New TV Shows (June 2026) | Rotten Tomatoes
+  https://www.rottentomatoes.com/browse/tv_series_browse/sort:newest
+- [date ?] Our guide on what to watch in June 2024 include 'House of the Dragon,' 'The Boys' and 'The Bear'
+  https://forums.tomsguide.com/threads/what-to-watch-in-june-2024-11-new-shows-and-movies-coming-to-netflix-max-and-more.533584/post-2037092
+- [1 month ago] Here's a Look Ahead to June 2026's New Music Releases
+  https://ultimateclassicrock.com/june-2026-new-music-releases/
+- [3 days ago] The 50 best songs of 2026 so far
+  https://www.pastemagazine.com/music/best-songs/the-50-best-songs-of-2026-so-far
+- [2 weeks ago] New Albums in 2026: Calendar of New Music Releases Coming
   https://www.billboard.com/lists/new-albums-2026-calendar-new-music-releases-this-year/
-- [4 days ago] The 40 Best Albums of 2026 So Far - by josh terry
-  https://www.noexpectations.fyi/p/the-40-best-albums-of-2026-so-far
-- [1 week ago] The 50 Best Albums Of 2026 So Far
-  https://stereogum.com/2500311/the-50-best-albums-of-2026-so-far/lists/album-list
-- [3 days ago] 2026 Upcoming Games Release Schedule - GameSpot
-  https://www.gamespot.com/articles/2026-upcoming-games-release-schedule/1100-6534941/
-- [1 week ago] Upcoming Video Game Release Dates Schedule | VGC
-  https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/
-- [1 week ago] The Biggest New Game Releases Of June 2026 - GameSpot
-  https://www.gamespot.com/gallery/the-biggest-new-game-releases-of-june-2026/
-- [5 days ago] Upcoming 2026 games: All the new PC games you won't want to miss, from big hits to hidden gems
-  https://www.pcgamer.com/games/new-pc-games-2026/
-- [1 week ago] The Top 10 Video Games Releasing in June 2026 - Men's Journal
-  https://www.mensjournal.com/entertainment/top-10-video-games-releasing-in-june-2026
-- [1 week ago] June 2026 Video Game Releases: Full List And Highlights
-  https://screenrant.com/june-2026-video-games-releases-schedule-lineup/
-- [1 day ago] The Biggest Upcoming Video Game Releases Revealed at June 2026 Showcases - Gaminglikeaboss.com
-  https://gaminglikeaboss.com/gaming-news/the-biggest-upcoming-video-game-releases-revealed-at-june-2026-showcases/
-- [13 hours ago] New games 2026 and beyond: The biggest video game release dates for PS5, Xbox Series X, PC, Switch, and more
+- [1 week ago] New album releases 2026: Dates for Madonna, Ariana Grande, Niall Horan and more | Official Charts
+  https://www.officialcharts.com/chart-news/new-album-releases-2026/
+- [4 days ago] New Music Friday release radar for June 12, 2026: top albums, song releases | DraftKings Network
+  https://dknetwork.draftkings.com/2026/06/11/new-music-friday-release-radar-for-june-12-2026-top-albums-song-releases/
+- [date ?] new music friday june 27 2025
+  https://www.npr.org/2025/06/27/1254874778/new-music-friday-june-27-2025
+- [date ?] new music friday june 21 peso pluma
+  https://www.npr.org/2024/06/21/1197962261/new-music-friday-june-21-peso-pluma
+- [date ?] new music friday june 20 2025
+  https://www.npr.org/2025/06/20/1254460264/new-music-friday-june-20-2025
+- [5 days ago] New games 2026 and beyond: The biggest video game release dates for PS5, Xbox Series X, PC, Switch, and more
   https://www.gamesradar.com/video-game-release-dates/
-- [17 hours ago] 2026 Video Game Release Dates Calendar | GameRant
-  https://gamerant.com/video-game/release-dates/2026/
-- [5 days ago] Top Trending Memes on Social Media (June 2026)
+- [2 weeks ago] The Biggest New Game Releases Of June 2026 - GameSpot
+  https://www.gamespot.com/gallery/the-biggest-new-game-releases-of-june-2026/
+- [2 weeks ago] The Top 10 Video Games Releasing in June 2026 - Men's Journal
+  https://www.mensjournal.com/entertainment/top-10-video-games-releasing-in-june-2026
+- [date ?] 2026 Video Game Release Schedule - Game Informer
+  https://gameinformer.com/2026
+- [2 weeks ago] Upcoming Video Game Release Dates Schedule | VGC
+  https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/
+- [3 days ago] New 2026 games: Our release date calendar | PC Gamer
+  https://www.pcgamer.com/games/new-pc-games-2026/
+- [date ?] forums.tomsguide.com
+  https://forums.tomsguide.com/threads/5-biggest-new-games-launching-in-june-2024-for-ps5-nintendo-switch-xbox-and-pc.533643/latest
+- [date ?] gamivo unveils top 10 most anticipated video games of 2026
+  https://www.barchart.com/story/news/36721991/gamivo-unveils-top-10-most-anticipated-video-games-of-2026
+- [date ?] GAMIVO Unveils Top 10 Most Anticipated Video Games Of 2026
+  https://markets.financialcontent.com/dowtheoryletters/article/getnews-2025-12-19-gamivo-unveils-top-10-most-anticipated-video-games-of-2026
+- [2 weeks ago] Viral Trends on Social Media | June, 2026 (STARTUP EDITION)
+  https://blog.mean.ceo/viral-trends-on-social-media-june-2026/
+- [1 week ago] First Meme of June 2026 | TikTok
+  https://www.tiktok.com/discover/first-meme-of-june-2026
+- [2 weeks ago] Top Trending Memes on Social Media (June 2026)
   https://napoleoncat.com/blog/trending-memes/
-- [date ?] Category:Internet memes introduced in 2026 - Wikipedia
-  https://en.wikipedia.org/wiki/Category:Internet_memes_introduced_in_2026
-- [March 31, 2026] The Funniest Memes Of 2026 (So Far)
-  https://www.ranker.com/list/funny-memes-2026/alby-thompson
-- [1 week ago] Top Trending Memes 2026: What's Viral Now?
+- [2 weeks ago] Top Trending Memes 2026: What's Viral Now?
   https://www.accio.com/business/top-trending-memes-2026
-- [date ?] The best 2026 memes :) Memedroid
-  https://www.memedroid.com/memes/tag/2026
-- [January 9, 2026] These Are The 51 Best Memes Of 2026 So Far
-  https://brobible.com/culture/article/51-best-memes-of-2026-so-far/
-- [1 month ago] The 51 Best Memes To Start The First Full Week Of 2026
-  https://brobible.com/culture/article/the-51-best-memes-to-start-the-first-full-week-of-2026/
-- [April 3, 2026] 30+ Popular Memes Right Now in 2026 | SocialBu Blog
-  https://socialbu.com/blog/popular-memes-right-now
-- [January 7, 2026] 'Already fumbled 2026, 2027 is gonna be my year': 27 Memes for 27 reasons to smile - Memebase - Funny Memes
-  https://cheezburger.com/43918853/already-fumbled-2026-2027-is-gonna-be-my-year-27-memes-for-27-reasons-to-smile
-- [date ?] Viral Songs 2026 💯 Memes 2026 - playlist by Soave
-  https://open.spotify.com/playlist/4dtq8OZV8jokVPKN5acww1
-- [1 week ago] List of Billboard Hot 100 number ones of 2026 - Wikipedia
-  https://en.wikipedia.org/wiki/List_of_Billboard_Hot_100_number_ones_of_2026
-- [2 weeks ago] Billboard Hot 100™
-  https://www.billboard.com/charts/hot-100/
-- [1 week ago] Billboard Hot 100: Every No. 1 song of 2026
-  https://www.goldderby.com/lists/billboard-hot-100-every-no-1-song-of-2026/
-- [date ?] Billboard Hot 100 | Official Charts
-  https://www.officialcharts.com/charts/billboard-hot-100-chart/
-- [date ?] Billboard Top 100 This Week 2026 - Top 100 Billboard Songs 2026 (Best Billboard Music 2026) - Redlist - Music List | Spotify
-  https://open.spotify.com/embed/playlist/0EN2gQhhn0rCYUR5BY1UJy
-- [1 day ago] Billboard's 2026 Year-End Charts | Billboard
-  https://www.billboard.com/charts/year-end/
-- [1 week ago] Drake’s ‘Janice STFU’ Becomes His First Multi-Week Hot 100 No. 1 This Decade
-  https://www.billboard.com/lists/drake-janice-stfu-hot-100-number-one-second-week/
-- [1 day ago] Billboard – Music Charts, News, Photos & Video
-  https://www.billboard.com/
-- [1 week ago] Chart Landing Pages – Billboard
-  https://www.billboard.com/charts/
-- [1 week ago] Billboard Hot 100 Top 10 Countdown For June 6th, 2026 | Billboard News
-  https://www.billboard.com/video/billboard-hot-100-top-10-countdown-for-june-6th-2026/
-- [1 day ago] List of 2026 box office number-one films in the United States - Wikipedia
-  https://en.wikipedia.org/wiki/List_of_2026_box_office_number-one_films_in_the_United_States
-- [1 month ago] Summer 2026's Box Office Is Officially Off To A Great Start
-  https://screenrant.com/summer-2026-box-office-season-start/
-- [date ?] ‘Backrooms’ At $212M+ WW Is A24’s Highest Grossing Movie Ever, Besting Timothée Chalamet’s ‘Marty Supreme’ – Sunday Box Office Update
-  https://deadline.com/2026/06/box-office-backrooms-a24-record-1236942792/
-- [date ?] Box Office: 'Scary Movie 6' Starts Strong With $24.7 Million on Friday
-  https://variety.com/2026/film/box-office/box-office-scary-movie-masters-of-the-universe-backrooms-1236768580/
-- [date ?] Box Office: 'Scary Movie' Opening To $52M+ Franchise Record, 'Masters of the Universe' $31M+
-  https://deadline.com/2026/06/box-office-scary-movie-masters-of-the-universe-backrooms-1236941701/
-- [date ?] 2026 Worldwide Box Office - Box Office Mojo
-  https://www.boxofficemojo.com/year/world/
-- [6 hours ago] Ranked: The Highest Grossing Summer Movies (2010–2026)
-  https://www.visualcapitalist.com/sp/ter02-ranked-highest-grossing-summer-movies-2010-2026/
-- [3 days ago] Summer blockbusters box office 2026: list of best movies to see - Fast Company
+- [date ?] 2026 Memes | MemesGuy - Viral Trends & Internet Culture
+  https://memesguy.com/year/2026
+- [1 week ago] Chinese Memes June 2026 — What's Viral on RedNote Now | RedNoteMeme
+  https://rednotememe.com/chinese-internet-slang-2026
+- [2 weeks ago] Summer blockbusters box office 2026: list of best movies to see - Fast Company
   https://www.fastcompany.com/91554256/summer-blockbusters-box-office-2026-list-best-movies-to-see
-- [date ?] Domestic Box Office For 2026 - Box Office Mojo
-  https://www.boxofficemojo.com/year/2026/
-- [9 hours ago] 2026 in film - Wikipedia
-  https://en.wikipedia.org/wiki/2026_in_film
+- [2 weeks ago] 35 Summer Movies To Watch In 2026: Blockbusters, Horror & Family Picks
+  https://icecreamconvos.com/summer-movies-2026-watchlist/
+- [2 weeks ago] The summer box office is off to a hot start as weekend ticket sales top $160 million
+  https://www.cnbc.com/2026/05/12/summer-box-office-weekend-ticket-sales.html
+- [15 hours ago] The 15 Most Anticipated Movies Releasing in Summer 2026: ‘Supergirl,’ ‘The Odyssey,’ and More
+  https://www.complex.com/pop-culture/a/khal/most-anticipated-summer-2026-movies-preview
+- [3 days ago] Movies To Watch This Summer: From 'Office Romance' To 'Supergirl'
+  https://deadline.com/lists/summer-movie-preview-2026-theaters-streaming/
+- [9 hours ago] 10 Highest-Grossing Movies Of 2026 (So Far)
+  https://screenrant.com/highest-grossing-movies-2026-box-office/
+- [date ?] List of 2026 box office number-one films in the United States
+  https://en.wikipedia.org/wiki/List_of_2026_box_office_number-one_films_in_the_United_States
+- [date ?] List of 2026 box office number-one films in Indonesia
+  https://en.wikipedia.org/wiki/List_of_2026_box_office_number-one_films_in_Indonesia
+- [2 days ago] Take Fox News Digital’s Pop Culture Quiz, and test your celebrity knowledge | Fox News
+  https://www.foxnews.com/entertainment/test-your-pop-culture-from-hollywood-heartland-8
+- [date ?] Celebrity, Pop Culture, TV, and Book Reviews - Good Morning America
+  https://www.goodmorningamerica.com/culture
+- [February 24, 2026] The Official 2026 Pop Culture Ins & Outs
+  https://www.betches.com/article/entertainment/the-official-2026-pop-culture-ins-outs-702941-20260102
+- [date ?] Celebrities who have June birthdays
+  https://www.aol.com/news/celebrities-june-birthdays-144521515.html
+- [date ?] 26 Pop Culture Events to Look Forward to in 2026: Taylor Frankie Paul’s ‘Bachelorette’ Season and More
+  https://www.aol.com/articles/26-pop-culture-events-look-003019154.html
+- [date ?] the latest pop culture news once upon a time in hollywood pink s superstar daughter and the voice winner 60129861532
+  https://www.nbcnews.com/nightly-news/video/the-latest-pop-culture-news-once-upon-a-time-in-hollywood-pink-s-superstar-daughter-and-the-voice-winner-60129861532
+- [date ?] Here Are Some Well-Informed 2026 Pop Culture Predictions, Courtesy of Cosmo Editors
+  https://www.aol.com/articles/well-informed-2026-pop-culture-200600524.html
 
 ## Hooks derived from the above
-I'll search for current pop culture trends across multiple categories to find the best hooks for your arcade site.
-Let me search for video games, viral memes, and pop culture news.
-Let me get the latest chart-topping songs and notable pop-culture news.
-- 
-Grand Theft Auto 6
- — 
-the most-anticipated game launch in years, with its console release set for November
-; perfect retro-vs-modern arcade fodder.
-- 
-Star Fox (Switch 2)
- — 
-Nintendo's revival of the series, a remake of Star Fox 64, landing June 25
-; pure arcade nostalgia.
-- 
-Dead or Alive: Last Round
- — 
-the fighting franchise celebrating its 30th anniversary in 2026
-, a nod to arcade beat-'em-up glory days.
-- 
-Marvel's Wolverine
- — 
-Insomniac's hyper-violent brawler, the star of June's State of Play, with a September 15 launch locked in
-.
-- 
-The 7th Guest Remake
- — 
-a groundbreaking CD-ROM-era puzzle classic, now remade for modern platforms
-; retro PC vibes.
-- 
-Drake — "Janice STFU"
- — 
-his 14th Hot 100 No. 1 and first multi-week chart-topper this decade
-, off his album ICEMAN.
-- 
-Ella Langley — "Choosin' Texas"
- — 
-the year's longest-running No. 1 single, with 10 non-consecutive weeks atop the Hot 100
-; country crossover juggernaut.
-- 
-Olivia Rodrigo — "The Cure"
- — 
-a top-five debut ahead of her album You Seem Pretty Sad for a Girl So in Love
-.
-- 
-The Super Mario Galaxy Movie
- — 
-the biggest hit of 2026 so far, on its way to crossing $1 billion
-; the ultimate video-game-to-screen nostalgia play.
-- 
-Scary Movie 6
- — 
-heading to a franchise-record opening of $52M+ at the domestic box office
-; meme-ready horror comedy.
-- 
-Backrooms
- — 
-now A24's highest-grossing movie ever at $212M+ worldwide
-; born from a viral internet creepypasta.
-- 
-House of the Dragon Season 3 & Avatar: Fire and Ash
- — 
-HBO's Targaryen saga returns June 21 while Cameron's Pandora epic hits Disney+
-.
-- 
-Avatar: The Last Airbender (Netflix live-action S2)
- — 
-returning with a vast Ba Sing Se set and fan-favorite Toph finally joining the gang
-.
-- 
-The "KitKat Heist" memes
- — 
-based on a real robbery of over 400,000 KitKat bars, the absurd scale made it perfect meme material
-.
-- 
-The "chill guy" meme
- — 
-more a social-media movement than a meme, used to explain how we act in awkward situations because we're just chill guys
-.
+I'll search for current pop culture trends across multiple categories to find what's buzzing right now.
+Let me search for video games, viral memes, and more pop culture news.
+Let me get a bit more on summer 2026 blockbuster movies and notable pop-culture news to round this out.
+- **GTA VI** — Rockstar's mega-sequel finally lands Nov 19, 2026, returning to a Vice City with dual protagonists Jason and Lucia; 
+it's supposed to be the most expensive, biggest, most bombastic game ever created, with some experts predicting it'll shake the whole gaming industry.
+
+- **The Bear (final season)** — 
+FX's chef drama is ending with its fifth season, which hits Hulu all at once on June 25.
+
+- **House of the Dragon S3** — 
+The Targaryen war drama returns putting us right in the middle of a war as doom and ruin surround everyone as the Battle of the Gullet approaches.
+
+- **Supergirl** — 
+Big superhero fare kicking off the summer movie season,
+ with Milly Alcock as the Girl of Steel and Jason Momoa added as Lobo (June 26).
+- **The Super Mario Galaxy Movie** — 
+The year's #1 film with $427 million domestic,
+ a pixel-perfect nostalgia goldmine for an arcade site.
+- **Final Fantasy VII Rebirth (Switch 2 / Xbox)** — 
+The long-anticipated arrival lands on both consoles on June 3,
+ classic RPG fuel.
+- **Dead or Alive: Last Round** — 
+A celebration of the franchise's 30th anniversary, harkening back to arcade glory days.
+
+- **Gothic Remake** — 
+A ground-up overhaul hoping to reignite interest in "eurojank roleplaying romps" (June 5).
+
+- **Olivia Rodrigo – "You Seem Pretty Sad For A Girl So In Love"** — 
+The three-time Grammy winner's third studio album just dropped.
+
+- **Zara Larsson – "Midnight Sun: Girls Trip"** — 
+A remixed, reduxed, all-women collection riding viral buzz.
+
+- **The Vampire Lestat** — 
+AMC's revamped third season puts Lestat center-stage as he shoots to stardom,
+ a rock-and-roll vampire glow-up.
+- **"Saxophone Gets Louder" meme** — 
+A simple, dramatic, universally relatable trend that completely took over social media.
+
+- **The "KitKat Heist" meme** — 
+Based on a real robbery where over 400,000 KitKat bars were stolen across Europe, the sheer scale and absurdity made it perfect meme material.
+
+- **Nihilistic Penguin meme** — 
+Quickly adopted by dozens of brands including BMW and Lidl, showcasing its viral potential and emotional relatability.
+
+- **Devil Wears Prada 2** — 
+Led the summer box office, adding $41.6 million during its second week,
+ a Y2K-nostalgia fashion juggernaut.
+- **Taylor Swift & Travis Kelce wedding buzz** — 
+Fan theories allege a June 13, 2026 wedding, the only Saturday of 2026 on the 13th, her favorite number,
+ keeping "Tayvis" all over timelines.

@@ -249,6 +249,7 @@ export default function Home() {
       <nav className="arcade-nav">
         <a href="#top" className="arcade-tab is-active">HOME</a>
         <a href="#arcade-today" className="arcade-tab arcade-tab-hot">TODAY!</a>
+        <Link to="/watercooler" className="arcade-tab arcade-tab-hot">💧 WATER COOLER</Link>
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>

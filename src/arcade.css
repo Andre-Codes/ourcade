@@ -1665,3 +1665,76 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 .arcade-fave-toggle.is-on { border-color: var(--neon-gold); }
 .arcade-fave-toggle-star { font-size: 1.1rem; opacity: .35; }
 .arcade-fave-toggle.is-on .arcade-fave-toggle-star { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE WATER COOLER (/watercooler) — pop-culture destination. Reuses the shared
+   .arcade-widget box and .arcade-poll-* bars (Hot or Not); the rest is a thin
+   layer of section-specific styling in the same neon-on-dark register.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.arcade-watercooler { max-width: 760px; margin: 0 auto 48px; padding: 8px 16px 0; display: flex; flex-direction: column; gap: 16px; }
+.arcade-watercooler-head { text-align: center; margin: 6px 0 2px; }
+.arcade-watercooler-title {
+  font-family: 'Black Ops One', cursive; font-size: 1.8rem; letter-spacing: 0.02em; margin: 0;
+  color: var(--neon-aqua); text-shadow: 0 0 14px rgba(63,255,208,.5);
+}
+.arcade-watercooler-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; color: #cbb8f0; margin: 6px 0 0; }
+.arcade-watercooler-date { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: var(--arcade-muted); letter-spacing: 0.06em; margin: 8px 0 0; }
+.arcade-watercooler-foot { font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--arcade-muted); text-align: center; letter-spacing: 0.03em; margin: 6px 0 0; }
+
+/* ---- The Countdown (TRL/Billboard top-5) ---- */
+.arcade-countdown .arcade-widget-kicker { color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4); }
+.arcade-countdown-title { font-family: 'Black Ops One', cursive; font-size: 1.04rem; margin: 9px 0 2px; }
+.arcade-countdown-blurb { font-family: 'Share Tech Mono', monospace; font-size: 0.76rem; color: var(--arcade-muted); margin: 0 0 10px; }
+.arcade-countdown-share { margin-left: auto; }
+.arcade-countdown-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: none; }
+.arcade-countdown-row {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: start; gap: 10px;
+  padding: 9px 11px; background: #120c1f; border: 2px solid #3a2a5a; border-radius: 8px;
+}
+.arcade-countdown-rank { font-family: 'Press Start 2P', monospace; font-size: 0.84rem; color: var(--neon-gold); line-height: 1.2; min-width: 1ch; }
+.arcade-countdown-trend { font-size: 0.78rem; line-height: 1.4; }
+.arcade-countdown-trend.is-up { color: var(--neon-lime); }
+.arcade-countdown-trend.is-down { color: var(--neon-pink); }
+.arcade-countdown-trend.is-same { color: var(--arcade-muted); }
+.arcade-countdown-trend.is-new { color: var(--neon-aqua); }
+.arcade-countdown-body { display: flex; flex-direction: column; gap: 3px; }
+.arcade-countdown-name { font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: #ffe9b0; }
+.arcade-countdown-by { color: #cbb8f0; }
+.arcade-countdown-note { font-size: 0.74rem; color: var(--arcade-muted); line-height: 1.4; }
+
+/* ---- On This Day (calendar-keyed throwback) ---- */
+.arcade-otd .arcade-widget-kicker { color: var(--neon-violet); text-shadow: 0 0 8px rgba(180,77,255,.4); }
+.arcade-otd-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 0; }
+.arcade-otd-card {
+  display: flex; flex-direction: column; gap: 4px; padding: 10px;
+  background: #04050b; border: 1px solid #2a2f4a; border-radius: 8px;
+}
+.arcade-otd-cat { font-family: 'Press Start 2P', monospace; font-size: 0.46rem; letter-spacing: 0.06em; color: var(--neon-aqua); }
+.arcade-otd-thing { font-family: 'Share Tech Mono', monospace; font-size: 0.86rem; color: #ffe9b0; line-height: 1.35; }
+.arcade-otd-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--arcade-muted); }
+.arcade-otd-blurb { font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; color: #d6e6ff; line-height: 1.5; margin: 10px 0 0; }
+@media (max-width: 560px) { .arcade-otd-cards { grid-template-columns: 1fr; } }
+
+/* ---- The Buzz (tabloid blurbs) ---- */
+.arcade-buzz .arcade-widget-kicker { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,77,114,.4); }
+.arcade-buzz-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.arcade-buzz-row { display: flex; flex-direction: column; gap: 5px; }
+.arcade-buzz-tag {
+  align-self: flex-start; font-family: 'Press Start 2P', monospace; font-size: 0.44rem; letter-spacing: 0.06em;
+  color: #1a0a00; background: var(--neon-pink); border-radius: 4px; padding: 3px 6px;
+}
+.arcade-buzz-text { font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; color: #d6e6ff; line-height: 1.5; }
+
+/* ---- Hot or Not (interactive — reuses .arcade-poll-* bars) ---- */
+.arcade-hon .arcade-widget-kicker { color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4); }
+.arcade-hon-intro { font-family: 'Share Tech Mono', monospace; font-size: 0.76rem; color: var(--arcade-muted); margin: 8px 0 12px; letter-spacing: 0.02em; }
+.arcade-hon-grid { display: flex; flex-direction: column; gap: 12px; }
+.arcade-hon-subject {
+  padding: 11px 12px; background: linear-gradient(180deg, #17122a, var(--arcade-surface));
+  border: 1px solid #2a2f4a; border-radius: 10px;
+}
+.arcade-hon-head { display: flex; align-items: center; gap: 9px; margin: 0 0 9px; }
+.arcade-hon-emoji { font-size: 1.3rem; flex: 0 0 auto; }
+.arcade-hon-name { font-family: 'Black Ops One', cursive; font-size: 0.94rem; color: #ffe9b0; }
+.arcade-hon-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.arcade-hon-options .arcade-poll-opt { text-align: center; }

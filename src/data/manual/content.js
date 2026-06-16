@@ -350,3 +350,101 @@ export const MANUAL_DEEP_CUTS = [
   { id: "deep:agloe", kind: "wiki", era: "timeless", title: "Agloe, the fake town that became real", blurb: "Mapmakers invented Agloe, New York as a copyright trap. Then someone built a general store there, named it after the 'town' — and the fake place legally existed for decades.", url: "https://en.wikipedia.org/wiki/Agloe,_New_York" },
   { id: "deep:logic-named-joe", kind: "wiki", era: "timeless", title: "The 1946 story that predicted the internet", blurb: "'A Logic Named Joe' imagined a home terminal on every desk, connected to shared data, answering any question — and the moderation crisis that follows. Written before the transistor.", year: "1946", url: "https://en.wikipedia.org/wiki/A_Logic_Named_Joe" },
 ];
+
+/* ─── THE WATER COOLER (/watercooler) ──────────────────────────────────────
+   Pop-culture content for the dedicated 💧 page. Same manual+generated split as
+   everything above; these hand-edited seeds lead the pool and persist across
+   `npm run generate`. Keep the voice dry, warm, 2000s-e-zine — name the real
+   thing, then give it the early-2000s twist. (On-This-Day lives in its own file,
+   src/data/manual/onthisday.js, because it's keyed by calendar date, not rotated.)
+   ────────────────────────────────────────────────────────────────────────── */
+
+// THE COUNTDOWN — whole TRL/Billboard-style top-5 chart SETS. Rotated as a unit
+// (the ranking IS the content), one set per day. Shape:
+//   { id, title, unit:"song"|"movie"|"show", blurb?,
+//     entries: [{ rank:1..5, title, by?, note?, trend:"up"|"down"|"same"|"new" }] }
+// Always EXACTLY 5 entries, ranks 1..5. `trend` drives the ↑↓– arrow; `note` is
+// the dry one-liner under each pick. These go stale — refresh the topical ones
+// monthly (npm run generate) and keep a few evergreen sets here so the page is
+// never empty between runs.
+export const MANUAL_COUNTDOWNS = [
+  {
+    id: "ctd-songs-stuck",
+    title: "TOP 5 SONGS STUCK IN EVERYONE'S HEAD",
+    unit: "song",
+    blurb: "as decided by the entire internet, no take-backs",
+    entries: [
+      { rank: 1, title: "the one from the show everyone's watching", by: "you know the one", note: "you're humming it right now. that's the request line working.", trend: "up" },
+      { rank: 2, title: "the throwback that won't die", by: "an artist from 2003", note: "a TikTok unearthed it and now it's everywhere again. the cycle is complete.", trend: "new" },
+      { rank: 3, title: "the summer single", by: "the pop star of the moment", note: "engineered in a lab to be unskippable. it worked.", trend: "down" },
+      { rank: 4, title: "the sad one you secretly love", by: "the sensitive one", note: "for staring out the bus window like it's a music video.", trend: "same" },
+      { rank: 5, title: "the novelty track", by: "an account, not a band", note: "it shouldn't chart. it's charting. respect the chaos.", trend: "up" },
+    ],
+  },
+  {
+    id: "ctd-rewatch-comfort",
+    title: "TOP 5 SHOWS THE INTERNET WON'T SHUT UP ABOUT",
+    unit: "show",
+    blurb: "the group chat has opinions",
+    entries: [
+      { rank: 1, title: "the prestige drama with the twist", note: "do NOT read the replies until you've finished. they have no mercy.", trend: "same" },
+      { rank: 2, title: "the comfort sitcom on its 9th rewatch", note: "you've seen every episode. you'll watch it again tonight. that's the deal.", trend: "up" },
+      { rank: 3, title: "the reality show that's actually art", note: "trash, but the kind you'd defend in a college essay.", trend: "up" },
+      { rank: 4, title: "the animated one for 'kids'", note: "the adults are crying harder than the kids. it's fine. everyone's fine.", trend: "new" },
+      { rank: 5, title: "the show that got cancelled too soon", note: "RIP. the fandom is still lighting candles in the tag.", trend: "down" },
+    ],
+  },
+  {
+    id: "ctd-box-office",
+    title: "TOP 5 AT THE BOX OFFICE-OF-THE-MIND",
+    unit: "movie",
+    blurb: "what the whole multiplex is arguing about",
+    entries: [
+      { rank: 1, title: "the blockbuster sequel nobody asked for but everyone saw", note: "it made a billion dollars. you saw it twice. let's not pretend.", trend: "same" },
+      { rank: 2, title: "the original idea that snuck through", note: "an actual new story. in this economy. cherish it.", trend: "new" },
+      { rank: 3, title: "the indie that became a meme", note: "you haven't seen it but you can quote it. that's modern cinema.", trend: "up" },
+      { rank: 4, title: "the legacy reboot", note: "same title, new cast, your childhood used as a hostage. you went anyway.", trend: "down" },
+      { rank: 5, title: "the one that's better than it had any right to be", note: "the trailer was a disaster. the movie is a 9. the internet is shocked.", trend: "up" },
+    ],
+  },
+];
+
+// THE BUZZ — short water-cooler/tabloid blurbs, dry 2000s e-zine humor. Shown a
+// few per day (rotateDailyN). Shape: { id, text (<=160 chars), tag } where tag is
+// one of GOSSIP | RUMOR | SIGHTING | HOT TAKE (drives the small chip). No URL —
+// these are flavor, not links. Inherently topical; keep them understandable a few
+// weeks later and refresh the time-sensitive ones via npm run generate.
+export const MANUAL_BUZZ = [
+  { id: "bz-reboot", text: "Another beloved 2000s franchise is getting rebooted. The original cast is 'in talks,' which is Hollywood for 'we asked, they're thinking about the check.'", tag: "RUMOR" },
+  { id: "bz-feud", text: "Two pop stars are 'not feuding,' according to a statement that nobody asked them for, which is how you know they are absolutely feuding.", tag: "GOSSIP" },
+  { id: "bz-vinyl", text: "Vinyl outsold CDs again. Somewhere, a teenager just discovered the album their parents played on a CD changer in a minivan. The wheel turns.", tag: "HOT TAKE" },
+  { id: "bz-celebrity-coffee", text: "SIGHTING: a celebrity was photographed holding an iced coffee. The internet has produced 4,000 words of analysis. This is the content economy working as designed.", tag: "SIGHTING" },
+  { id: "bz-flip-phone", text: "Flip phones are back. Not for the battery life — for the dramatic snap when you hang up. You cannot slam an end call on a glass slab and they know it.", tag: "HOT TAKE" },
+  { id: "bz-album-leak", text: "An album 'leaked' three days early. By 'leaked' the label means 'we leaked it.' By 'three days early' they mean 'right on the marketing schedule.'", tag: "RUMOR" },
+  { id: "bz-cameo", text: "A washed-up 2000s heartthrob just had a scene-stealing cameo and the entire timeline collectively gasped. The comeback arc is the only renewable resource left.", tag: "GOSSIP" },
+  { id: "bz-streaming-price", text: "Your streaming service raised its price again and added ads. It is, slowly and with great confidence, reinventing cable television. Welcome home.", tag: "HOT TAKE" },
+  { id: "bz-low-rise", text: "Low-rise jeans are back in stores. Everyone who survived them the first time is staring into the middle distance, hearing a dial-up tone.", tag: "SIGHTING" },
+  { id: "bz-secret-show", text: "RUMOR: a huge act is playing a 'secret' show at a tiny venue. It's secret in the way a billboard is secret. Tickets resold for a mortgage payment in nine minutes.", tag: "RUMOR" },
+  { id: "bz-award-snub", text: "The award nominations dropped and your favorite got snubbed. The acceptable response is a measured, dignified post. You will not be doing that.", tag: "HOT TAKE" },
+  { id: "bz-mall", text: "A mascot for a dead mall chain got a tribute account with 200k followers. Nostalgia is now a load-bearing industry. The food court lives on, in spirit.", tag: "SIGHTING" },
+];
+
+// HOT OR NOT — the interactive 2000s-web staple, normalized to the POLL shape so
+// it reuses the exact vote/tally/Firebase infra (see src/lib/votes.js + polls.js).
+// You provide { id (hon-…, namespaced so it never collides with daily polls),
+// subject, emoji }; the loader hard-codes the two options [HOT, NOT] so vote ids
+// are always exactly "hot" / "not". A daily slate (rotateDailyN) gives a fresh set.
+export const MANUAL_HOTORNOT = [
+  { id: "hon-low-rise-jeans", subject: "Low-rise jeans (the sequel)", emoji: "👖" },
+  { id: "hon-frosted-tips", subject: "Frosted tips, unironically", emoji: "💇" },
+  { id: "hon-cargo-pants", subject: "Cargo pants with eleven pockets", emoji: "🩳" },
+  { id: "hon-flip-phone", subject: "Carrying a flip phone in 2026", emoji: "📱" },
+  { id: "hon-trucker-hat", subject: "The trucker hat revival", emoji: "🧢" },
+  { id: "hon-emo-fringe", subject: "The emo side-swept fringe", emoji: "🖤" },
+  { id: "hon-y2k-aesthetic", subject: "The whole Y2K aesthetic, again", emoji: "💿" },
+  { id: "hon-juicy-tracksuit", subject: "The velour tracksuit", emoji: "🛼" },
+  { id: "hon-dvd-collection", subject: "Owning physical DVDs again", emoji: "📀" },
+  { id: "hon-band-tshirt", subject: "Band tee for a band you can't name", emoji: "🎸" },
+  { id: "hon-side-part", subject: "The side part vs. the middle part war", emoji: "💈" },
+  { id: "hon-myspace-top8", subject: "Ranking your friends in a Top 8", emoji: "🏆" },
+];

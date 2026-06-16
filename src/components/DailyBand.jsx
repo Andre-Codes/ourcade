@@ -17,6 +17,7 @@ import {
   getQuizResult,
   recordVisit,
 } from "../lib/store.js";
+import { usePollCounts, castVote } from "../lib/votes.js";
 import FlashTheater from "./FlashTheater.jsx";
 import ShareButton from "./ShareButton.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
@@ -29,42 +30,6 @@ const FEATURED_IMAGES = import.meta.glob("../assets/featured/*.webp", {
   eager: true,
   import: "default",
 });
-
-// Lazy, guarded cloud import (browser-only seam, same as scores.js/store.js).
-let cloudPromise = null;
-function cloud() {
-  if (typeof window === "undefined") return null;
-  if (!cloudPromise) cloudPromise = import("../lib/cloud.js").catch(() => null);
-  return cloudPromise;
-}
-
-// Live shared counts for a poll id ({} until the first vote anywhere). Drives
-// the REAL tally bars; updates as other people vote.
-function usePollCounts(pollId) {
-  const [counts, setCounts] = useState({});
-  useEffect(() => {
-    if (!pollId) return undefined;
-    let unsub = null;
-    let alive = true;
-    const p = cloud();
-    if (p)
-      p.then((c) => {
-        if (!alive || !c) return;
-        unsub = c.listenPoll(pollId, (m) => alive && setCounts(m || {}));
-      }).catch(() => {});
-    return () => {
-      alive = false;
-      if (unsub) unsub();
-    };
-  }, [pollId]);
-  return counts;
-}
-
-// Fire a shared +1 for an option (browser-only, fire-and-forget).
-function castVote(pollId, optionId) {
-  const p = cloud();
-  if (p) p.then((c) => c && c.votePoll(pollId, optionId)).catch(() => {});
-}
 
 // tiny local copy of Home's star row (kept decoupled so Home stays untouched)
 function Stars({ rating = 0 }) {

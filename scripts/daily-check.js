@@ -16,6 +16,10 @@ import { CURIOSITIES, getTodaysCuriosity } from "../src/data/curiosities.js";
 import { WEIRD, WEIRD_NIGHT, getCurrentWeirdThing, WEIRD_BLOCKS_PER_DAY } from "../src/data/weird.js";
 import { getDayPartGreeting } from "../src/data/dayparts.js";
 import { staticArtifacts } from "../src/data/stumble.js";
+import { COUNTDOWNS, getTodaysCountdown } from "../src/data/countdowns.js";
+import { BUZZ, getTodaysBuzz } from "../src/data/buzz.js";
+import { HOT_OR_NOT, getTodaysHotOrNot } from "../src/data/hotornot.js";
+import { ON_THIS_DAY_ALL, getOnThisDay } from "../src/data/onthisday.js";
 import { urlKey } from "./lib/validate-urls.js";
 
 // A day-part object for a given local hour (date is arbitrary — only the hour
@@ -195,6 +199,64 @@ check(
     .filter((w) => stumbleKeys.has(urlKey(w.url)))
     .map((w) => `${w.id}↔${stumbleKeys.get(urlKey(w.url))}`);
   check("weird/stumble pools don't overlap", overlaps.length === 0, overlaps.join(", ") || "disjoint");
+}
+
+// ---- The Water Cooler (/watercooler) ----
+
+// Countdown: deterministic, cycles its pool of chart sets with no early repeats,
+// and every set is a well-formed top-5 (ranks 1..5, valid trend).
+check("countdown deterministic", getTodaysCountdown(k0).id === getTodaysCountdown(k0).id);
+noRepeats("countdown", (k) => getTodaysCountdown(k).id, COUNTDOWNS.length);
+{
+  const TRENDS = new Set(["up", "down", "same", "new"]);
+  const bad = COUNTDOWNS.filter((c) => {
+    if (!c.id || !c.title || !Array.isArray(c.entries) || c.entries.length !== 5) return true;
+    const ranks = c.entries.map((e) => e.rank).sort((a, b) => a - b);
+    const ranksOk = ranks.every((r, i) => r === i + 1);
+    const entriesOk = c.entries.every((e) => e.title && TRENDS.has(e.trend));
+    return !ranksOk || !entriesOk;
+  });
+  check("countdown sets well-formed (5 entries, ranks 1..5, valid trend)", bad.length === 0,
+    bad.length ? `bad: ${bad.map((c) => c.id || "?").join(", ")}` : `${COUNTDOWNS.length} sets`);
+}
+
+// Buzz: deterministic, returns N distinct blurbs, cycles the pool with no early repeats.
+check("buzz deterministic", getTodaysBuzz(k0, 3).map((b) => b.id).join() === getTodaysBuzz(k0, 3).map((b) => b.id).join());
+check("buzz returns 3 distinct ids", new Set(getTodaysBuzz(k0, 3).map((b) => b.id)).size === Math.min(3, BUZZ.length));
+noRepeats("buzz", (k) => getTodaysBuzz(k, 1)[0].id, BUZZ.length);
+
+// Hot or Not: deterministic, 5 distinct subjects per day, each normalized to the
+// poll shape with EXACTLY the [hot, not] options, cycles the pool with no repeats.
+check("hot-or-not deterministic", getTodaysHotOrNot(k0, 5).map((s) => s.id).join() === getTodaysHotOrNot(k0, 5).map((s) => s.id).join());
+check("hot-or-not returns 5 distinct subjects", new Set(getTodaysHotOrNot(k0, 5).map((s) => s.id)).size === Math.min(5, HOT_OR_NOT.length));
+{
+  const badOpts = HOT_OR_NOT.filter((s) => {
+    const ids = (s.options || []).map((o) => o.id).sort().join(",");
+    return ids !== "hot,not";
+  });
+  check("hot-or-not subjects all have [hot,not] options", badOpts.length === 0,
+    badOpts.length ? `bad: ${badOpts.map((s) => s.id).join(", ")}` : `${HOT_OR_NOT.length} subjects`);
+}
+noRepeats("hot-or-not", (k) => getTodaysHotOrNot(k, 1)[0].id, HOT_OR_NOT.length);
+
+// On This Day: deterministic; date-KEYED (exact MM-DD match returns that md);
+// no-match dates still return a non-null fallback; every entry is well-formed.
+check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id);
+{
+  // A key whose MM-DD definitely exists in the seed list (use the first entry's md).
+  const someMd = ON_THIS_DAY_ALL[0]?.md;
+  const exactKey = someMd ? `2026-${someMd}` : null;
+  check("on-this-day exact md match", !exactKey || getOnThisDay(exactKey)?.md === someMd,
+    exactKey ? `${exactKey} → ${getOnThisDay(exactKey)?.md}` : "no seed");
+  // A date no entry covers must still resolve (nearest-earlier fallback).
+  check("on-this-day never blank on a no-match date", !!getOnThisDay("2026-02-29") || !!getOnThisDay("2026-12-31"));
+  const MD = /^\d{2}-\d{2}$/;
+  const bad = ON_THIS_DAY_ALL.filter(
+    (e) => !e.id || !MD.test(e.md || "") || typeof e.year !== "number" ||
+      !(e.no1Song || e.inTheaters || e.onTV)
+  );
+  check("on-this-day entries well-formed", bad.length === 0,
+    bad.length ? `bad: ${bad.map((e) => e.id || "?").join(", ")}` : `${ON_THIS_DAY_ALL.length} dates`);
 }
 
 // ---- dev schedule window logic ----

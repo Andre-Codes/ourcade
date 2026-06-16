@@ -10,6 +10,7 @@
     "generate": "node scripts/generate-content.js",
     "generate:weird": "node scripts/generate-content.js --only=weird",
     "generate:curiosities": "node scripts/generate-content.js --only=curiosities",
+    "generate:watercooler": "node scripts/generate-content.js --only=watercooler",
     "fetch:flash": "node scripts/fetch-flash.js",
     "fetch:stumble": "node scripts/fetch-stumble.js",
     "research": "node scripts/research-topics.js",
