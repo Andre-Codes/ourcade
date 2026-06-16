@@ -717,8 +717,11 @@ main > section + section { margin-top: 44px; }
 @media (prefers-reduced-motion: no-preference) {
   .arcade-phone-overlay-bg.is-open .arcade-phone-overlay { animation: arcade-toast-in .25s ease; }
 }
-.arcade-phone-overlay .arcade-phone--page { margin-top: 0; }
-.arcade-phone-overlay .arcade-phone-stage--full { height: auto; max-height: 86vh; }
+.arcade-phone-overlay .arcade-phone--page { margin-top: 0; width: 100%; }
+/* Fill the overlay: a real height (not auto, which collapses the iframe to 0),
+   leaving room for the number line above and the close button, capped to 860px
+   on tall desktop screens. */
+.arcade-phone-overlay .arcade-phone-stage--full { height: 78vh; max-height: 820px; }
 .arcade-phone-overlay-close {
   position: absolute; top: -10px; right: -10px; z-index: 2;
   width: 36px; height: 36px; cursor: pointer;
@@ -729,6 +732,13 @@ main > section + section { margin-top: 44px; }
   box-shadow: var(--bevel), 0 0 18px rgba(255,106,138,.4);
 }
 .arcade-phone-overlay-close:active { transform: translateY(1px); }
+/* On narrow screens the panel hugs the viewport edges, so tuck the close button
+   just inside the top-right corner (above the iframe) instead of floating off
+   the edge where it can clip. */
+@media (max-width: 460px) {
+  .arcade-phone-overlay-bg { padding: 10px; }
+  .arcade-phone-overlay-close { top: 0; right: 0; }
+}
 
 /* ---- search + tag filter (home discovery) ---- */
 .arcade-search {
