@@ -37,7 +37,15 @@ function rr(ctx, x, y, w, h, r) {
 }
 
 // { name, stats: [{ label, value }], verdict } → PNG Blob (1080×1080).
-export async function renderNameCard({ name, stats = [], verdict }) {
+export async function renderNameCard({
+  name,
+  stats = [],
+  verdict,
+  rank,
+  signature,
+  confidence,
+  anomaly,
+}) {
   if (typeof document !== "undefined" && document.fonts?.ready) {
     try {
       await document.fonts.ready;
@@ -85,16 +93,31 @@ export async function renderNameCard({ name, stats = [], verdict }) {
   }
   ctx.shadowColor = "rgba(63,255,208,0.5)";
   ctx.shadowBlur = 18;
-  ctx.fillText(subject, S / 2, 186);
+  ctx.fillText(subject, S / 2, 178);
   ctx.shadowBlur = 0;
+
+  // ── rank + anomaly ────────────────────────────────────────────────────────
+  if (rank) {
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 26px 'Press Start 2P', monospace";
+    ctx.fillText(`RANK: ${rank}`, S / 2, 232);
+  }
+  if (anomaly) {
+    ctx.fillStyle = "#3fa9ff";
+    ctx.font = "700 22px 'Press Start 2P', monospace";
+    ctx.shadowColor = "rgba(63,169,255,0.6)";
+    ctx.shadowBlur = 14;
+    ctx.fillText(anomaly, S / 2, 272);
+    ctx.shadowBlur = 0;
+  }
 
   // ── stat bars ─────────────────────────────────────────────────────────────
   const rows = stats.slice(0, 6);
   const barX = 130;
   const barW = S - barX * 2;
   const barH = 34;
-  const rowGap = 78;
-  let y = 300;
+  const rowGap = 76;
+  let y = anomaly ? 332 : 312;
   ctx.textBaseline = "alphabetic";
   rows.forEach((s, i) => {
     const color = BAR_COLORS[i % BAR_COLORS.length];
@@ -140,6 +163,21 @@ export async function renderNameCard({ name, stats = [], verdict }) {
     const vy = Math.max(y + 30, S - 230);
     vLines.forEach((ln, i) => ctx.fillText(ln, S / 2, vy + i * 48));
     ctx.shadowBlur = 0;
+  }
+
+  // ── provenance strip (signature + confidence — pure mystique) ─────────────
+  const prov = [
+    signature ? `SIG: ${signature}` : null,
+    confidence ? `CONFIDENCE: ${confidence}%` : null,
+  ]
+    .filter(Boolean)
+    .join("   ·   ");
+  if (prov) {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#5b6386";
+    ctx.font = "20px 'Share Tech Mono', monospace";
+    ctx.fillText(prov, S / 2, S - 108);
   }
 
   // ── footer wordmark ─────────────────────────────────────────────────────

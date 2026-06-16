@@ -2,6 +2,8 @@
 
 Drop audio files here for the Ourcade Soundboard (`src/tools/Soundboard.jsx`).
 
+source: https://www.101soundboards.com/search/halo%203
+
 - The board reads its `SOUNDS` table and **probes each file on load** — a pad
   only appears if its file actually exists, so you can add clips incrementally
   and never ship a broken button.

@@ -1,18 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { playRare, playEpic } from "../lib/blips.js";
+import { useEffect, useRef, useState } from "react";
+import { playRare, playEpic, playLegendary } from "../lib/blips.js";
 import { renderNameCard } from "../lib/nameCard.js";
 import { shareImage } from "../lib/share.js";
+import {
+  VERDICTS as RAW_VERDICTS,
+  RANK_TITLES,
+  METRICS,
+  LOG_LINES,
+} from "../data/manual/nameOTron.js";
 
 // ── Name-O-Tron 3000 ─────────────────────────────────────────────────────────
-// Self-contained novelty tool — a GeoCities-quiz "analyzer." Type a name, hit
-// ANALYZE, and a fake supercomputer prints a personality readout: animated %
-// bars + a punchy verdict. Injects its own theme (arcade shell CSS is all
-// `arcade-` prefixed, so a local reset is safe). Single screen → the shell's
-// "‹ BACK TO OURCADE" stays visible (no useArcadeBackButton needed).
+// Self-contained novelty "analyzer." Type a name, hit ANALYZE, and a fake
+// supercomputer prints a personality readout: six stat bars + a verdict + a
+// rank, wrapped in a scrolling "computation" log and stamped with an opaque
+// signature. Injects its own theme (arcade shell CSS is all `arcade-` prefixed,
+// so a local reset is safe). Single screen → the shell's "‹ BACK TO OURCADE"
+// stays visible (no useArcadeBackButton needed).
 //
-// Everything is DETERMINISTIC: the same input always yields the same readout.
-// We hash the normalized input to a 32-bit seed, then a small PRNG draws each
-// stat and indexes the verdict — so a shared card matches what the friend sees.
+// Everything is DETERMINISTIC and offline: we read real features of the input
+// (length, vowels, rare letters, symmetry…), fold them with a seeded jitter
+// into each bar, then pick a verdict from a tagged pool by what the analysis
+// "found." Same input → identical bars, verdict, rank, log, and signature, so a
+// shared card reproduces for whoever opens it — but the mapping is deliberately
+// opaque, so it reads like a real machine sized you up. The witty lines live in
+// src/data/manual/nameOTron.js (hand-edited / pasted), NOT here.
 
 // FNV-1a string hash → unsigned 32-bit. Stable across reloads/browsers.
 function hashString(str) {
@@ -36,65 +47,213 @@ function mulberry32(seed) {
   };
 }
 
-const METRICS = [
-  "COOLNESS",
-  "MYSTERY",
-  "ARCADE SKILL",
-  "GIGABYTES OF CHARISMA",
-  "DIAL-UP PATIENCE",
-  "LEADERBOARD DESTINY",
-];
+const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
-// Verdicts, in the 8-Ball's voice — old-internet + arcade flavored.
-const VERDICTS = [
-  "Born to top the leaderboard.",
-  "404: chill not found.",
-  "Certified webring royalty.",
-  "Would absolutely beat the final boss on the first try.",
-  "Powered entirely by Mountain Dew and spite.",
-  "The dial-up gods smile upon this one.",
-  "Suspiciously good at hiding the browser tab.",
-  "A rare drop. Handle with care.",
-  "Peaked during the GeoCities era. Still peaking.",
-  "Has definitely rage-quit at least once today.",
-  "The kind of legend forums whisper about.",
-  "Reads the patch notes. All of them.",
-  "Secretly the high score you can't beat.",
-  "Loading personality… 99%… (it's fine).",
-  "Touch grass? Couldn't be this one.",
-  "Built different. Possibly out of LEGO.",
-  "The chosen one of the computer lab.",
-  "Mostly harmless. Occasionally glorious.",
-  "Would survive a kernel panic with grace.",
-  "Speedrun of life: any%, no resets.",
-  "Guestbook says: an absolute icon.",
-  "Has a lucky controller and isn't afraid to use it.",
-  "Runs at a stable 60fps under pressure.",
-  "Probably hoarding rare floppy disks.",
-];
+// Normalize the raw pool entries (bare string OR {text, tags, tier}) once.
+const VERDICTS = (Array.isArray(RAW_VERDICTS) ? RAW_VERDICTS : [])
+  .map((v) =>
+    typeof v === "string"
+      ? { text: v, tags: [], tier: "common" }
+      : { text: v.text, tags: v.tags || [], tier: v.tier || "common" }
+  )
+  .filter((v) => v && typeof v.text === "string" && v.text.length);
 
-// Rank tier from the average score — drives the headline color + label.
-function rankOf(avg) {
-  if (avg >= 85) return { label: "S — LEGENDARY", color: "#ffd23f" };
-  if (avg >= 70) return { label: "A — ELITE", color: "#3fffd0" };
-  if (avg >= 55) return { label: "B — SOLID", color: "#3fa9ff" };
-  if (avg >= 40) return { label: "C — PROMISING", color: "#b44dff" };
-  return { label: "D — A WORK IN PROGRESS", color: "#ff6a8a" };
+// Last-resort line so the toy never renders undefined even with an empty pool.
+const FALLBACK_VERDICT = "The Name-O-Tron is recalibrating. Try again.";
+
+// Built-in static rank labels (used when a RANK_TITLES tier pool is empty).
+const RANK_BASE = {
+  S: { label: "S — LEGENDARY", color: "#ffd23f" },
+  A: { label: "A — ELITE", color: "#3fffd0" },
+  B: { label: "B — SOLID", color: "#3fa9ff" },
+  C: { label: "C — PROMISING", color: "#b44dff" },
+  D: { label: "D — A WORK IN PROGRESS", color: "#ff6a8a" },
+};
+
+const RARITY = {
+  rare: { weight: 1 / 12, label: "⚠ ANOMALY DETECTED", color: "#3fa9ff" },
+  secret: { weight: 1 / 60, label: "✦ LEGENDARY SIGNAL ✦", color: "#ffd23f" },
+};
+
+// ── feature extraction ──────────────────────────────────────────────────────
+// Everything the "analysis" pretends to read. All guarded so weird input
+// (emoji, symbols-only, one char, non-Latin) never produces NaN.
+function extractFeatures(raw) {
+  const trimmed = raw.trim();
+  const lower = trimmed.toLowerCase();
+  const letters = lower.replace(/[^a-z]/g, "");
+  const len = trimmed.length;
+  const lettersLen = letters.length || 0;
+  const vowels = (letters.match(/[aeiou]/g) || []).length;
+  const vowelRatio = lettersLen ? vowels / lettersLen : 0.5;
+  const uniqueLetters = new Set(letters).size;
+  const rareLetters = (letters.match(/[qxzjkvw]/g) || []).length;
+  const doubled = (lower.match(/(.)\1/g) || []).length;
+  const hasDigit = /\d/.test(trimmed);
+  const hasSymbol = /[^a-z0-9\s]/i.test(trimmed);
+  const allCaps = /[A-Z]/.test(trimmed) && trimmed === trimmed.toUpperCase();
+  // letterSum: a→1…z→26, folded to 0..1
+  let sum = 0;
+  for (const ch of letters) sum += ch.charCodeAt(0) - 96;
+  const letterSum01 = lettersLen ? (sum % 101) / 100 : 0.5;
+  const canon = letters || lower.replace(/\s/g, "");
+  const palindrome = canon.length > 2 && canon === [...canon].reverse().join("");
+  const firstCharCode = trimmed ? trimmed.charCodeAt(0) : 0;
+  return {
+    len,
+    lettersLen,
+    vowelRatio,
+    uniqueLetters,
+    rareLetters,
+    doubled,
+    hasDigit,
+    hasSymbol,
+    allCaps,
+    letterSum01,
+    palindrome,
+    firstCharCode,
+    long: len >= 14,
+  };
 }
 
-// Pure analysis: normalized input → { stats, verdict, rank, avg }.
+// Per-metric formulas, indexed to METRICS order. Each blends real features with
+// a seeded jitter, then clamps to a flattering-ish 12..98 range. The exact mix
+// is intentionally opaque — bars visibly move with the name without being
+// predictable. `j` is a fresh jitter in [-1,1] per metric.
+const METRIC_FORMULAS = [
+  // 0 COOLNESS — rare letters + symmetry + swagger jitter
+  (f, j) => 52 + f.rareLetters * 9 + (f.palindrome ? 14 : 0) + j * 22,
+  // 1 MYSTERY — symbols/digits/rare letters up; very short or super-common down
+  (f, j) => 40 + (f.hasSymbol ? 16 : 0) + (f.hasDigit ? 10 : 0) + f.rareLetters * 7 + j * 24,
+  // 2 ARCADE SKILL — letterSum resonance + seeded skill
+  (f, j) => 30 + f.letterSum01 * 50 + j * 26,
+  // 3 GIGABYTES OF CHARISMA — vowels carry charisma
+  (f, j) => 28 + f.vowelRatio * 60 + j * 20,
+  // 4 DIAL-UP PATIENCE — length helps, doubled letters (stutters) hurt
+  (f, j) => 34 + clamp(f.len * 2.4, 0, 40) - f.doubled * 8 + j * 18,
+  // 5 LEADERBOARD DESTINY — unique letters + first-letter fate + jitter
+  (f, j) => 36 + f.uniqueLetters * 4 + (f.firstCharCode % 17) + j * 20,
+];
+
+// Map a dominant metric index → the verdict tag it themes to (METRICS order).
+const METRIC_TAGS = ["coolness", "mystery", "skill", "charisma", "patience", "destiny"];
+
+// Deterministic hex signature from the seed, e.g. "7F3A-1C09".
+function signature(seed) {
+  const a = (seed >>> 16).toString(16).toUpperCase().padStart(4, "0");
+  const b = (seed & 0xffff).toString(16).toUpperCase().padStart(4, "0");
+  return `${a}-${b}`;
+}
+
+function rankOf(avg, rng) {
+  let tier;
+  if (avg >= 85) tier = "S";
+  else if (avg >= 70) tier = "A";
+  else if (avg >= 55) tier = "B";
+  else if (avg >= 40) tier = "C";
+  else tier = "D";
+  const base = RANK_BASE[tier];
+  const pool = (RANK_TITLES && RANK_TITLES[tier]) || [];
+  const label = pool.length ? pool[Math.floor(rng() * pool.length)] : base.label;
+  return { tier, label, color: base.color };
+}
+
+// Pick a verdict: feature-triggered first, then a seeded rarity roll, then the
+// dominant-stat themed bucket, then common. Always falls back to common, then
+// to a built-in line. Returns { text, tier } where tier marks rare/secret for
+// the ANOMALY chip.
+function pickVerdict(features, dominantTag, rng) {
+  if (!VERDICTS.length) return { text: FALLBACK_VERDICT, tier: "common" };
+
+  const byTag = (tag) => VERDICTS.filter((v) => v.tags.includes(tag));
+  const choose = (pool) => pool[Math.floor(rng() * pool.length)];
+
+  // 1. Hard feature triggers (the machine "noticed" structure) — highest priority.
+  if (features.palindrome) {
+    const p = byTag("palindrome");
+    if (p.length) return { ...choose(p) };
+  }
+  if (features.allCaps) {
+    const p = byTag("allcaps");
+    if (p.length) return { ...choose(p) };
+  }
+
+  // 2. Seeded rarity roll — secret first (rarest), then rare.
+  const roll = rng();
+  if (roll < RARITY.secret.weight) {
+    const p = VERDICTS.filter((v) => v.tier === "secret");
+    if (p.length) return { ...choose(p) };
+  }
+  if (roll < RARITY.secret.weight + RARITY.rare.weight) {
+    const p = VERDICTS.filter((v) => v.tier === "rare");
+    if (p.length) return { ...choose(p) };
+  }
+
+  // 3. Soft feature flavor (digit / long) — only sometimes, so it stays special.
+  if (features.hasDigit && rng() < 0.4) {
+    const p = byTag("hasdigit");
+    if (p.length) return { ...choose(p) };
+  }
+  if (features.long && rng() < 0.4) {
+    const p = byTag("long");
+    if (p.length) return { ...choose(p) };
+  }
+
+  // 4. Dominant-stat themed bucket — the reading "says" what it found.
+  if (dominantTag && rng() < 0.65) {
+    const p = byTag(dominantTag);
+    if (p.length) return { ...choose(p) };
+  }
+
+  // 5. Common pool (anything untagged, non-tiered) → else anything.
+  const common = VERDICTS.filter((v) => v.tier === "common" && !v.tags.length);
+  return { ...choose(common.length ? common : VERDICTS) };
+}
+
+// Build the deterministic scrolling log from LOG_LINES (with {n}/{sig} fills).
+function buildLog(seed, sig, rng) {
+  const lines = Array.isArray(LOG_LINES) ? LOG_LINES.slice() : [];
+  if (!lines.length) return ["COMPILING VERDICT…"];
+  // Always end on the last entry ("compiling"); pick 3–4 of the rest in order.
+  const tail = lines[lines.length - 1];
+  const head = lines.slice(0, -1);
+  // deterministic subset preserving order
+  const want = 3 + Math.floor(rng() * 2);
+  const chosen = head.filter(() => rng() < 0.6).slice(0, want);
+  const picked = (chosen.length ? chosen : head.slice(0, want)).concat(tail);
+  return picked.map((l) =>
+    l.replace(/\{n\}/g, String(1 + Math.floor(rng() * 4))).replace(/\{sig\}/g, `0x${sig.split("-")[0]}`)
+  );
+}
+
+// Full deterministic analysis: normalized input → everything the panel renders.
 function analyze(rawName) {
-  const name = rawName.trim().toLowerCase().replace(/\s+/g, " ");
-  const seed = hashString(name || "anonymous");
-  const rng = mulberry32(seed);
-  const stats = METRICS.map((label) => ({
-    label,
-    // bias toward the readable middle-high range so it feels flattering-ish
-    value: Math.round(18 + rng() * 80),
-  }));
-  const verdict = VERDICTS[seed % VERDICTS.length];
+  const subject = rawName.trim();
+  const norm = subject.toLowerCase().replace(/\s+/g, " ");
+  const seed = hashString(norm || "anonymous");
+  const features = extractFeatures(subject);
+
+  // Bars: feature mix + per-metric seeded jitter.
+  const barRng = mulberry32(seed);
+  const stats = METRICS.map((label, i) => {
+    const j = barRng() * 2 - 1; // [-1,1]
+    const formula = METRIC_FORMULAS[i % METRIC_FORMULAS.length];
+    const value = Math.round(clamp(formula(features, j), 12, 98));
+    return { label, value };
+  });
+
   const avg = Math.round(stats.reduce((s, m) => s + m.value, 0) / stats.length);
-  return { stats, verdict, rank: rankOf(avg), avg };
+  const dominantIdx = stats.reduce((best, s, i, arr) => (s.value > arr[best].value ? i : best), 0);
+  const dominantTag = METRIC_TAGS[dominantIdx % METRIC_TAGS.length];
+
+  // Separate, offset RNG streams so verdict / rank / log don't move in lockstep.
+  const verdict = pickVerdict(features, dominantTag, mulberry32((seed ^ 0x9e3779b9) >>> 0));
+  const rank = rankOf(avg, mulberry32((seed ^ 0x85ebca6b) >>> 0));
+  const sig = signature(seed);
+  const confidence = (90 + (seed % 100) / 10).toFixed(1); // 90.0–99.9, deterministic
+  const log = buildLog(seed, sig, mulberry32((seed ^ 0xc2b2ae35) >>> 0));
+
+  return { subject, stats, avg, verdict, rank, sig, confidence, log };
 }
 
 const BAR_COLORS = ["#3fffd0", "#ffd23f", "#b44dff", "#ff6a8a", "#3fa9ff", "#e8ff47"];
@@ -144,14 +303,20 @@ const style = `
   }
   .not-go:disabled { opacity: .5; cursor: not-allowed; }
 
-  /* ── analyzing beat ──────────────────────────────────────────────────────── */
+  /* ── analyzing beat: scrolling fake-process log ─────────────────────────── */
   .not-analyzing {
-    width: min(560px, 94vw); text-align: center; padding: 40px 0;
-    font-family: 'Press Start 2P', monospace; font-size: 0.8rem; letter-spacing: 0.08em;
-    color: #3fffd0; text-shadow: 0 0 14px rgba(63,255,208,.5);
-    animation: not-blink 0.7s steps(2) infinite;
+    width: min(560px, 94vw); min-height: 150px; padding: 18px 20px;
+    background: #06070d; border: 2px solid #1c2740; border-radius: 12px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; line-height: 1.8;
+    color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.4);
+    box-shadow: inset 0 0 30px rgba(63,255,208,.06);
   }
-  @keyframes not-blink { 50% { opacity: .35; } }
+  .not-log-line { white-space: pre-wrap; animation: not-type .25s ease both; }
+  .not-log-line::before { content: "> "; color: #6b708f; }
+  .not-log-cursor { display: inline-block; width: 9px; height: 1em; vertical-align: -2px;
+    background: #3fffd0; animation: not-blink .7s steps(2) infinite; }
+  @keyframes not-type { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+  @keyframes not-blink { 50% { opacity: 0; } }
 
   /* ── readout panel ───────────────────────────────────────────────────────── */
   .not-panel {
@@ -169,10 +334,29 @@ const style = `
     word-break: break-word;
   }
   .not-rank {
-    text-align: center; margin: 6px 0 20px;
+    text-align: center; margin: 6px 0 4px;
     font-family: 'Press Start 2P', monospace; font-size: 0.7rem; letter-spacing: 0.08em;
     color: var(--rank, #fff); text-shadow: 0 0 12px var(--rank, #fff);
   }
+
+  /* provenance strip — signature + confidence (pure mystique) */
+  .not-meta {
+    display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 16px; font-size: 0.58rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #5b6386;
+  }
+  .not-meta b { color: #9fb4ff; font-weight: 400; }
+
+  /* anomaly chip (rare/secret tiers) */
+  .not-anomaly {
+    display: block; width: fit-content; margin: 0 auto 14px;
+    font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.12em;
+    padding: 5px 9px; border-radius: 5px; text-transform: uppercase;
+    color: var(--a, #fff); border: 1px solid var(--a, #fff);
+    background: rgba(0,0,0,.4); box-shadow: 0 0 12px var(--a, #fff);
+    animation: not-anomaly-pop .45s cubic-bezier(.2,1.5,.4,1);
+  }
+  @keyframes not-anomaly-pop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
 
   .not-bar { margin-bottom: 14px; }
   .not-bar-top {
@@ -215,17 +399,19 @@ const style = `
 
 export default function NameORon() {
   const [name, setName] = useState("");
-  const [result, setResult] = useState(null); // { subject, stats, verdict, rank }
+  const [result, setResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [logShown, setLogShown] = useState(0); // how many log lines are visible
   const [revealed, setRevealed] = useState(false); // drives the bar-fill transition
   const [shareStatus, setShareStatus] = useState(null);
-  const beatTimer = useRef(null);
+  const pendingLog = useRef([]);
+  const logTimer = useRef(null);
   const revealTimer = useRef(null);
   const shareTimer = useRef(null);
 
   useEffect(
     () => () => {
-      clearTimeout(beatTimer.current);
+      clearInterval(logTimer.current);
       clearTimeout(revealTimer.current);
       clearTimeout(shareTimer.current);
     },
@@ -235,21 +421,32 @@ export default function NameORon() {
   const run = () => {
     const subject = name.trim();
     if (!subject || analyzing) return;
+    const data = analyze(subject);
+
     setAnalyzing(true);
     setRevealed(false);
     setResult(null);
     setShareStatus(null);
+    setLogShown(0);
+    pendingLog.current = data.log;
     playRare(); // "analyzing" cue, gated by this click gesture
-    clearTimeout(beatTimer.current);
-    beatTimer.current = setTimeout(() => {
-      const { stats, verdict, rank } = analyze(subject);
-      setResult({ subject, stats, verdict, rank });
-      setAnalyzing(false);
-      playEpic(); // "done" flourish
-      // next frame: flip `revealed` so the bars animate from 0 → value
-      clearTimeout(revealTimer.current);
-      revealTimer.current = setTimeout(() => setRevealed(true), 60);
-    }, 750);
+
+    // Reveal log lines one at a time (~190ms each), then show the result.
+    clearInterval(logTimer.current);
+    let i = 0;
+    logTimer.current = setInterval(() => {
+      i += 1;
+      setLogShown(i);
+      if (i >= pendingLog.current.length) {
+        clearInterval(logTimer.current);
+        setResult(data);
+        setAnalyzing(false);
+        if (data.verdict.tier === "secret") playLegendary();
+        else playEpic();
+        clearTimeout(revealTimer.current);
+        revealTimer.current = setTimeout(() => setRevealed(true), 60);
+      }
+    }, 190);
   };
 
   const shareVerdict = async () => {
@@ -259,13 +456,17 @@ export default function NameORon() {
       const blob = await renderNameCard({
         name: result.subject,
         stats: result.stats,
-        verdict: result.verdict,
+        verdict: result.verdict.text,
+        rank: result.rank.label,
+        signature: result.sig,
+        confidence: result.confidence,
+        anomaly: RARITY[result.verdict.tier] ? RARITY[result.verdict.tier].label : null,
       });
       const status = await shareImage({
         blob,
         filename: "ourcade-name-o-tron.png",
         title: "Ourcade — Name-O-Tron 3000",
-        text: `The Name-O-Tron analyzed "${result.subject}": ${result.verdict}`,
+        text: `The Name-O-Tron analyzed "${result.subject}": ${result.verdict.text}`,
       });
       setShareStatus(status === "cancelled" ? null : status);
     } catch {
@@ -281,6 +482,8 @@ export default function NameORon() {
     : shareStatus === "failed" ? "Couldn’t share"
     : shareStatus === "working" ? "…rendering"
     : "📸 Share this verdict";
+
+  const anomaly = result && RARITY[result.verdict.tier];
 
   return (
     <>
@@ -312,7 +515,14 @@ export default function NameORon() {
         </form>
 
         {analyzing && (
-          <div className="not-analyzing">▚ ANALYZING ▚ crunching the bits…</div>
+          <div className="not-analyzing" aria-live="polite">
+            {pendingLog.current.slice(0, logShown).map((line, i) => (
+              <div className="not-log-line" key={i}>
+                {line}
+                {i === logShown - 1 && <span className="not-log-cursor" />}
+              </div>
+            ))}
+          </div>
         )}
 
         {result && !analyzing && (
@@ -321,11 +531,21 @@ export default function NameORon() {
             <div className="not-rank" style={{ "--rank": result.rank.color }}>
               RANK: {result.rank.label}
             </div>
+            <div className="not-meta">
+              <span>SIG: <b>{result.sig}</b></span>
+              <span>CONFIDENCE: <b>{result.confidence}%</b></span>
+            </div>
+
+            {anomaly && (
+              <span className="not-anomaly" style={{ "--a": anomaly.color }}>
+                {anomaly.label}
+              </span>
+            )}
 
             {result.stats.map((s, i) => {
               const c = BAR_COLORS[i % BAR_COLORS.length];
               return (
-                <div className="not-bar" key={s.label} style={{ "--c": c }}>
+                <div className="not-bar" key={`${s.label}-${i}`} style={{ "--c": c }}>
                   <div className="not-bar-top">
                     <span className="not-bar-label">{s.label}</span>
                     <span className="not-bar-pct">{s.value}%</span>
@@ -340,7 +560,7 @@ export default function NameORon() {
               );
             })}
 
-            <p className="not-verdict">“{result.verdict}”</p>
+            <p className="not-verdict">“{result.verdict.text}”</p>
 
             <div className="not-actions">
               <button className="not-pill share" onClick={shareVerdict} disabled={shareStatus === "working"}>
