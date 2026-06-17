@@ -345,7 +345,9 @@ const CSS = `
 .rr-badges{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
 .rr-badge{font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;
   background:#16273f;color:#9fd9ff;border:1px solid #25415f;border-radius:5px;padding:3px 8px}
-.rr-badge-era{color:#9fb6c9}
+/* Era keeps its natural mixed case (NOT uppercased): a capital pixel "S" reads
+   like a "5", so "2000s" would look like "20005". Lowercase "s" is unambiguous. */
+.rr-badge-era{color:#9fb6c9;text-transform:none;letter-spacing:.02em}
 .rr-body{font-size:.95rem;line-height:1.55;color:#c4d6e6;margin:0 0 14px}
 .rr-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .rr-tag{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:#6f93ad;background:#0e1a2c;
