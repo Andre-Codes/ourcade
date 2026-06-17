@@ -66,6 +66,13 @@ const FAQS = [
 ];
 
 export default function FAQPage() {
+  // HashRouter owns the URL hash (#/faq), so bare #id anchors clobber the route
+  // instead of scrolling. Jump programmatically and keep the route intact.
+  const jumpTo = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="arcade-stage">
       <BackBar />
@@ -80,7 +87,7 @@ export default function FAQPage() {
           <ol>
             {FAQS.map((item) => (
               <li key={item.id}>
-                <a href={`#${item.id}`}>{item.q}</a>
+                <a href={`#${item.id}`} onClick={(e) => jumpTo(e, item.id)}>{item.q}</a>
               </li>
             ))}
           </ol>
@@ -96,7 +103,7 @@ export default function FAQPage() {
             {item.a.map((para, j) => (
               <p key={j} className="arcade-faq-a">{para}</p>
             ))}
-            <a className="arcade-faq-top" href="#faq-top">↑ back to top</a>
+            <a className="arcade-faq-top" href="#faq-top" onClick={(e) => jumpTo(e, "faq-top")}>↑ back to top</a>
           </div>
         ))}
       </div>

@@ -1,14 +1,21 @@
 // Ourcade Daily Relic Run node graph
 // Generated as a static, reusable graph for deterministic daily route puzzles.
 // Links are neighbor node IDs. The graph is intentionally connected and cross-linked.
+//
+// TOPOLOGY ONLY: each node here owns its graph data (links, category, relic). The
+// readable wiki-style ARTICLE prose lives in ./relicArticles.js and is merged in
+// at the bottom of this file (node.article = RELIC_ARTICLES[id]), so this file
+// stays a small, reviewable graph while the long prose lives apart.
 
-export const RELIC_NODES = Object.freeze({
+import { RELIC_ARTICLES } from "./relicArticles.js";
+import { inspectArticle } from "../games/relic-run/article.js";
+
+const RAW_RELIC_NODES = {
   "hamster-dance": {
     "id": "hamster-dance",
     "title": "Hamster Dance Shrine",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A tiny temple to looping rodents, squeaky vocals, and the discovery that a webpage could become a shared fever dream. The carpet is made of animated GIF crumbs.",
     "tags": [
       "meme",
       "viral",
@@ -33,7 +40,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Peanut Butter Jelly Time",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A dancing banana spins forever beside a song that has chemically bonded with the phrase 'one more loop.' This page smells like Flash, lunchboxes, and bad decisions at full volume.",
     "tags": [
       "meme",
       "viral",
@@ -58,7 +64,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Badger Badger Badger Den",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Badgers bounce in disciplined rows while mushrooms and snakes quietly ruin everyone’s productivity. A perfect Ourcade relic: nonsense, rhythm, and woodland authority.",
     "tags": [
       "meme",
       "viral",
@@ -83,7 +88,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Numa Numa Webcam Room",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A bedroom webcam stage where lip-sync enthusiasm achieved escape velocity. The chair has no idea it is part of internet history.",
     "tags": [
       "meme",
       "viral",
@@ -108,7 +112,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Dancing Baby Nursery",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A low-poly baby cha-chas under fluorescent office lighting, proving that forwarded attachments could become folklore. The floor is suspiciously shiny.",
     "tags": [
       "meme",
       "viral",
@@ -133,7 +136,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "All Your Base Command Deck",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A glitchy sci-fi bridge where mistranslated arcade dialogue became the battle flag of early web absurdity. Every monitor says something grammatically hazardous.",
     "tags": [
       "meme",
       "viral",
@@ -158,7 +160,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Star Wars Kid Tape Room",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A grainy practice room with a borrowed-looking staff and the uneasy sense that virality used to arrive without asking permission. Handle with more kindness than the old web did.",
     "tags": [
       "meme",
       "viral",
@@ -183,7 +184,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Dramatic Chipmunk Cliff",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Five seconds of furry cinema stretched into a thousand reaction posts. The wind machine is tiny but emotionally devastating.",
     "tags": [
       "meme",
       "viral",
@@ -207,7 +207,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Numa Forum Mirror",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A copied, reuploaded, hotlinked echo of a viral clip, lovingly preserved by people with usernames like xXdragonmp3Xx. The comments argue about codecs.",
     "tags": [
       "meme",
       "viral",
@@ -231,7 +230,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Leekspin Loop",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "An anime leek twirls on a perfect loop while a Finnish folk fragment hypnotizes anyone who left the tab open. The progress bar is decorative; there is no escape.",
     "tags": [
       "meme",
       "viral",
@@ -255,7 +253,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Llama Song Pasture",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A bright field where llamas, ducks, and baked potatoes are sorted by rhyme instead of taxonomy. Biology has filed a formal complaint.",
     "tags": [
       "meme",
       "viral",
@@ -278,7 +275,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Magical Trevor Tent",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A cheerful little stage where magic happens mostly because the song insists it does. The cow is not impressed, but the loop is undefeated.",
     "tags": [
       "meme",
       "viral",
@@ -301,7 +297,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "End of Ze World Bunker",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A crudely animated crisis briefing where geopolitical doom is delivered with quoteable nonsense and submarine logic. The map is probably not accredited.",
     "tags": [
       "meme",
       "viral",
@@ -325,7 +320,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Rickroll Redirect",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A perfectly ordinary link that is absolutely not what it claims to be. The browser status bar looks innocent, which is exactly how it gets you.",
     "tags": [
       "meme",
       "viral",
@@ -349,7 +343,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Keyboard Cat Green Room",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A cat waits at the keys to play off failure with courtroom-level timing. The bench is small; the cultural footprint is not.",
     "tags": [
       "meme",
       "viral",
@@ -373,7 +366,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Pancake Bunny Photo Shelf",
     "category": "meme",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A calm rabbit balances breakfast with impossible dignity. This is the kind of image the old web would pass around like sacred office evidence.",
     "tags": [
       "meme",
       "viral",
@@ -397,7 +389,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Newgrounds Portal",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A glowing orange-black gate of animations, games, ratings, blams, saves, and usernames that seemed forged in a garage full of soda cans. The portal hums with Flash-era danger.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -427,7 +418,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Alien Hominid Crash Site",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A yellow alien crawls from a smoking UFO while agents swarm the lawn. It has the scrappy energy of a web game that punched through the browser ceiling.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -450,7 +440,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Pico School Hallway",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A chaotic school corridor drawn in thick Flash lines, where Newgrounds mascot lore feels like it escaped from a notebook margin. The lockers know too much.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -474,7 +463,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Madness Combat Wasteland",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A gray desert of faceless agents, improbably violent timing, and animation loops that made stick-figure action feel operatic. Somewhere, a boombox is overqualified.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -498,7 +486,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Fancy Pants Adventure Hills",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A hand-drawn side-scrolling slope where momentum is king and the pants are, legally speaking, very fancy. Collectibles hide where curiosity goes to stretch its legs.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -521,7 +508,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Line Rider Sketchbook",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A blank page, a sled, and the terrible power to draw physics into a wall. Every elegant track begins as confidence and ends as a faceplant.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -545,7 +531,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Stick RPG Paper City",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A flat little city where work, study, sleep, and suspicious side hustles fight for your stick-person calendar. Capitalism has never looked thinner.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -569,7 +554,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Defend Your Castle Wall",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A white castle wall besieged by tiny stick attackers who underestimated mouse velocity. Minimal art, maximal panic.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -593,7 +577,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Bloons Dart Booth",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A monkey, a handful of darts, and a screen full of balloons waiting to become statistics. The popping sound has more dopamine than it should.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -617,7 +600,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Motherload Mining Shaft",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A drill noses into Mars-colored dirt in search of ore, upgrades, and that dangerous thought: just one more trip down. Fuel anxiety lives here rent-free.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -641,7 +623,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Impossible Quiz Trapdoor",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A bright quiz panel smiles while preparing to punish literal thinking. The correct answer is probably not correct in any normal, human sense.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -665,7 +646,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Punk-O-Matic Garage",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A grimy garage sequencer where tiny punk riffs stack into songs that sound like victory over homework. The drummer is powered by pure loop energy.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -689,7 +669,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Desktop Tower Defense Desk",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A blank office desktop becomes a maze of pellet towers and pathing regret. Productivity was already gone; the stapler saw everything.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -714,7 +693,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Copter Game Tunnel",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A green cave, one button, and a helicopter with the durability of wet tissue. The difficulty curve is less a curve and more a ceiling fan.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -738,7 +716,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Club Penguin Plaza",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A snowy social hub where waddling counted as transportation and furniture placement was a lifestyle statement. The pizza parlor is somehow always relevant.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -762,7 +739,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Neopets Faerieland",
     "category": "flash-game",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A pastel floating kingdom of quests, shops, games, and tiny economic decisions disguised as pet care. The omelette economy is stronger than expected.",
     "tags": [
       "flash-game",
       "browser-game",
@@ -788,7 +764,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "GeoCities Homepage",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A personal homepage with starry backgrounds, blue links, and the proud confidence of someone who just learned HTML. Best viewed with patience and a dial-up modem.",
     "tags": [
       "early-web",
       "homepage",
@@ -817,7 +792,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Angelfire Attic",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A dusty free-hosted page stacked with fan shrines, banner ads, and text colors selected during a sugar emergency. The sidebar is load-bearing.",
     "tags": [
       "early-web",
       "homepage",
@@ -840,7 +814,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Tripod Page",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A narrow old web page held together by free hosting, a big logo, and the belief that every hobby deserves six subpages. The footer has survived three design eras.",
     "tags": [
       "early-web",
       "homepage",
@@ -865,7 +838,6 @@ export const RELIC_NODES = Object.freeze({
     "relic": { "id": "webring-token", "where": "token" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A circular hallway of 'next,' 'previous,' and 'random site' buttons. Nobody owns the route; everyone owns one weird room in it.",
     "tags": [
       "early-web",
       "homepage",
@@ -893,7 +865,6 @@ export const RELIC_NODES = Object.freeze({
     "relic": { "id": "guestbook-signature", "where": "signature" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A guestbook with glitter dividers, kind strangers, spam bots, and one message from 2003 asking you to sign their page back. Internet etiquette had stamps on it.",
     "tags": [
       "early-web",
       "homepage",
@@ -920,7 +891,6 @@ export const RELIC_NODES = Object.freeze({
     "relic": { "id": "geo-under-construction", "where": "sign" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A quarry where tiny workers shovel pixels forever beneath blinking caution stripes. Nothing is finished, which is how you know it is authentic.",
     "tags": [
       "early-web",
       "homepage",
@@ -944,7 +914,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Hit Counter Vault",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Seven little digits roll upward with casino seriousness. Whether the count is real is between you, the script, and a very trusting visitor.",
     "tags": [
       "early-web",
       "homepage",
@@ -968,7 +937,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Marquee Museum",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Text scrolls sideways with the confidence of a parade float. The exhibit plaque simply reads: 'Because we could.'",
     "tags": [
       "early-web",
       "homepage",
@@ -992,7 +960,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Tiled Background Swamp",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A 32-by-32 texture repeats into infinity, turning one tiny starfield into a visual weather system. Depth perception has left the chat.",
     "tags": [
       "early-web",
       "homepage",
@@ -1018,7 +985,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "MIDI Zone",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A jukebox of tiny songs that begin without warning and somehow make a homepage feel like a boss room. The stop button is theoretical.",
     "tags": [
       "early-web",
       "homepage",
@@ -1045,7 +1011,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Blink Tag Lighthouse",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Words flash on and off with lighthouse urgency, guiding sailors away from readable typography. The bulb is powered by bad taste and sincerity.",
     "tags": [
       "early-web",
       "homepage",
@@ -1069,7 +1034,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Frameset Labyrinth",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Nested frames divide the page into panes, scrollbars, and mild architectural confusion. Somewhere inside is the actual content, allegedly.",
     "tags": [
       "early-web",
       "homepage",
@@ -1093,7 +1057,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Splash Page Gate",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "An intro page asks you to choose HTML, Flash, low bandwidth, high bandwidth, or spiritual surrender. The enter button is smaller than the logo.",
     "tags": [
       "early-web",
       "homepage",
@@ -1116,7 +1079,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Best Viewed 800x600 Shrine",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A solemn badge declares the correct screen resolution like a royal decree. Modern responsive design waits outside, pretending not to laugh.",
     "tags": [
       "early-web",
       "homepage",
@@ -1140,7 +1102,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Email Me GIF Mailbox",
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A spinning envelope begs for contact, usually through an address your spam filter now treats like folklore. The mail flag is permanently excited.",
     "tags": [
       "early-web",
       "homepage",
@@ -1166,7 +1127,6 @@ export const RELIC_NODES = Object.freeze({
     "relic": { "id": "broken-button-88x31", "where": "button" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A gallery of tiny trophies for 'Cool Site,' 'Top 100,' and 'Mom Said This Was Neat.' Prestige used to be 88 pixels wide.",
     "tags": [
       "early-web",
       "homepage",
@@ -1187,9 +1147,9 @@ export const RELIC_NODES = Object.freeze({
   "winamp-skins": {
     "id": "winamp-skins",
     "title": "Winamp Skin Drawer",
+    "relic": { "id": "winamp-skin-wsz", "where": "skin" },
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A drawer of chrome, flames, brushed metal, aliens, and UI buttons too tiny for adult fingers. It really whips the playlist into shape.",
     "tags": [
       "software",
       "desktop",
@@ -1215,7 +1175,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "LimeWire Library",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A shared folder full of mystery MP3s, suspicious filenames, and one file that claims to be both a song and a life choice. The progress bar lies beautifully.",
     "tags": [
       "software",
       "desktop",
@@ -1241,7 +1200,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Napster Basement",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A peer-to-peer basement where music discovery felt thrilling, chaotic, and legally haunted. The modem blinks like it has a lawyer.",
     "tags": [
       "software",
       "desktop",
@@ -1265,7 +1223,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "KaZaA Kiosk",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A neon file-sharing kiosk stocked with toolbars, mislabeled downloads, and confidence it did not earn. Every button wants administrative privileges.",
     "tags": [
       "software",
       "desktop",
@@ -1289,7 +1246,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "RealPlayer Popup",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A media player appears with the energy of a software update wearing cologne. It promises streaming and delivers buffering as performance art.",
     "tags": [
       "software",
       "desktop",
@@ -1312,7 +1268,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "QuickTime Trailer Booth",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A glossy trailer window loads one heroic sliver at a time. You came for movie magic and stayed because the blue bar moved three pixels.",
     "tags": [
       "software",
       "desktop",
@@ -1341,7 +1296,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Windows Media Visualizer Dome",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Colors pulse, tunnels spin, and your MP3 becomes a screen saver with ambitions. Nobody understands the preset names; that is part of the ceremony.",
     "tags": [
       "software",
       "desktop",
@@ -1366,7 +1320,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "AIM Away Message Desk",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A tiny status note tries to encode mood, lyrics, homework pressure, and interpersonal strategy in twelve lines. The door creaks every time someone signs on.",
     "tags": [
       "software",
       "desktop",
@@ -1391,7 +1344,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "ICQ Uh-Oh Switchboard",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A message arrives with the famous 'uh-oh' chirp and the room immediately knows your business. The contact list is a museum of numbers and nicknames.",
     "tags": [
       "software",
       "desktop",
@@ -1414,7 +1366,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "MSN Wink Vault",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A vault of animated nudges, oversized emoticons, and conversation effects that entered the room before your actual sentence did. Subtlety was unavailable.",
     "tags": [
       "software",
       "desktop",
@@ -1437,7 +1388,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "BonziBuddy Office",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A purple gorilla assistant smiles from a desktop office where help and spyware-adjacent vibes sit uncomfortably close. The banana bowl is a privacy concern.",
     "tags": [
       "software",
       "desktop",
@@ -1460,7 +1410,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Ask Jeeves Desk",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A polite butler stands behind a search desk, ready to parse your question like the web is a formal dining room. The answers may or may not be wearing gloves.",
     "tags": [
       "software",
       "desktop",
@@ -1482,7 +1431,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Yahoo Directory Stacks",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A hand-sorted directory of categories, subcategories, and surprisingly specific rabbit holes. Search existed, but browsing still had shelves.",
     "tags": [
       "software",
       "desktop",
@@ -1506,7 +1454,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "AltaVista Oracle",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A search oracle with a serious logo and the power to find pages no human had updated since lunch in 1998. The query box smells like ozone.",
     "tags": [
       "software",
       "desktop",
@@ -1529,7 +1476,6 @@ export const RELIC_NODES = Object.freeze({
     "relic": { "id": "first-pixel", "where": "pixel" },
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A browser helm pointed toward starfields, framesets, and pages that proudly resize your window. The wheel squeaks in JavaScript.",
     "tags": [
       "software",
       "desktop",
@@ -1553,7 +1499,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Internet Explorer 6 Basement",
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A blue-e basement full of layout bugs, security warnings, and CSS hacks written like emergency plumbing. Everything works until it doesn’t.",
     "tags": [
       "software",
       "desktop",
@@ -1577,9 +1522,9 @@ export const RELIC_NODES = Object.freeze({
   "nokia-3310": {
     "id": "nokia-3310",
     "title": "Nokia 3310 Brick",
+    "relic": { "id": "unbreakable-brick", "where": "brick" },
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A small indestructible phone hums with monochrome menus, T9 typing, and Snake-shaped muscle memory. It could survive a fall and probably a minor prophecy.",
     "tags": [
       "hardware",
       "files",
@@ -1603,7 +1548,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Motorola Razr Mirror",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A thin flip phone snaps shut with theatrical authority. The outside screen has exactly enough pixels to feel important.",
     "tags": [
       "hardware",
       "files",
@@ -1627,7 +1571,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "iPod Click Wheel Shrine",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A white wheel circles through artists, albums, and the sacred act of deciding what song defines this hallway walk. The click sound is tactile nostalgia.",
     "tags": [
       "hardware",
       "files",
@@ -1652,7 +1595,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Game Boy Advance Backpack",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A purple handheld waits beside AA batteries and a link cable nobody remembered to bring. The screen is wider than your patience in sunlight.",
     "tags": [
       "hardware",
       "files",
@@ -1677,7 +1619,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "GBA SP Backlight Chapel",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A clamshell opens and suddenly night gaming becomes civilized. The hinge click deserves its own soundboard.",
     "tags": [
       "hardware",
       "files",
@@ -1699,7 +1640,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "PS2 Memory Card Slot",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "An 8MB rectangle guards entire childhoods with a seriousness usually reserved for bank vaults. Do not overwrite your cousin’s save.",
     "tags": [
       "hardware",
       "files",
@@ -1721,7 +1661,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Dreamcast VMU Pocket",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A tiny memory card with a screen blinks like it knows the future came too soon. It wants to be a pet, a save slot, and a secret device all at once.",
     "tags": [
       "hardware",
       "files",
@@ -1745,7 +1684,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "CRT Monitor Glow",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A heavy glass monitor warms the desk and bends light into soft scanline memory. Somewhere nearby, degauss makes the sound of science sneezing.",
     "tags": [
       "hardware",
       "files",
@@ -1769,7 +1707,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Translucent iMac G3 Cove",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A colorful shell of translucent plastic makes the computer look like candy with a keyboard. Beige towers suddenly feel underdressed.",
     "tags": [
       "hardware",
       "files",
@@ -1793,7 +1730,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Dell Dimension Tower",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A beige-and-black tower sighs under family photos, printer drivers, and three browser toolbars. The fan noise is a domestic soundtrack.",
     "tags": [
       "hardware",
       "files",
@@ -1817,7 +1753,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Floppy Disk Drawer",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A 3.5-inch square holds a tiny kingdom of homework, save files, and labels written in increasingly desperate handwriting. The metal shutter guards ancient secrets.",
     "tags": [
       "hardware",
       "files",
@@ -1840,7 +1775,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "CD-R Spindle",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A plastic tower of blank discs promises mixes, backups, installers, and one shiny coaster. Permanent marker fumes count as atmosphere.",
     "tags": [
       "hardware",
       "files",
@@ -1865,7 +1799,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "ZIP File Chest",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A compressed chest with a name like final_final_REAL.zip. It might contain treasure, duplicate folders, or one executable everyone pretends is fine.",
     "tags": [
       "hardware",
       "files",
@@ -1889,7 +1822,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "SWF File Vault",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A small Flash file waits like a sealed arcade cabinet: animation, game logic, vector art, and one era’s worth of browser magic packed inside.",
     "tags": [
       "hardware",
       "files",
@@ -1919,7 +1851,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Animated GIF Aquarium",
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Looping sprites swim endlessly in a glass tank of transparent backgrounds. Some sparkle, some dance, some explain that your page is under construction.",
     "tags": [
       "hardware",
       "files",
@@ -1946,9 +1877,9 @@ export const RELIC_NODES = Object.freeze({
   "mp3-hoard": {
     "id": "mp3-hoard",
     "title": "MP3 Hoard",
+    "relic": { "id": "first-ripped-mp3", "where": "rip" },
     "category": "device-file",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A directory of tracks with filenames that include artists, rumors, bitrate pride, and at least one typo preserved forever. The ID3 tags are feral.",
     "tags": [
       "hardware",
       "files",
@@ -1977,7 +1908,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Forum Signature Forge",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A workshop for banners, quotes, sprites, and PC specs displayed under every post. The signature is longer than the argument above it.",
     "tags": [
       "community",
       "social-web",
@@ -2008,7 +1938,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "phpBB Thread Hall",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Blue-gray tables, tiny icons, quoted replies, and a moderator with a lock button. The thread title begins normal and ends in anthropology.",
     "tags": [
       "community",
       "social-web",
@@ -2034,7 +1963,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "LiveJournal Entry",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A private-public diary page with mood icons, music fields, and comments that require social archaeology. The lock icon is doing emotional labor.",
     "tags": [
       "community",
       "social-web",
@@ -2057,7 +1985,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Xanga Diary",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A glittery blog page where layouts, surveys, song lyrics, and teenage formatting choices form a complete fossil record. The background may be louder than the post.",
     "tags": [
       "community",
       "social-web",
@@ -2081,7 +2008,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Myspace Profile Stage",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A customized profile stage with autoplay music, glitter comments, and enough CSS to injure the page. Everyone is in someone’s Top 8, politically.",
     "tags": [
       "community",
       "social-web",
@@ -2109,7 +2035,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Top 8 Drama Court",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A tiny social courtroom where friendship rankings become public evidence. The judge bangs a gavel made of profile comments.",
     "tags": [
       "community",
       "social-web",
@@ -2132,7 +2057,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Photobucket Bucket",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A bucket of hosted images, avatars, forum banners, and future broken links. The watermark is already circling overhead.",
     "tags": [
       "community",
       "social-web",
@@ -2157,7 +2081,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Broken Image Host Graveyard",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A cemetery of missing thumbnails and hotlink scars. Each red X marks a forum post that used to make sense.",
     "tags": [
       "community",
       "social-web",
@@ -2182,7 +2105,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Slashdot Frontpage",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A dense frontpage where nerd news arrives with comments, moderation, and the occasional server-melting link. The headline wears a pocket protector.",
     "tags": [
       "community",
       "social-web",
@@ -2206,7 +2128,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Fark Headline Desk",
     "category": "community",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A snarky headline desk where news becomes a contest in compressed weirdness. The tags do half the punching.",
     "tags": [
       "community",
       "social-web",
@@ -2232,7 +2153,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Popup Ad Alley",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A narrow alley where windows multiply like gremlins offering smileys, prizes, and panic. Closing one simply informs the others.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2258,7 +2178,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Spyware Scan Van",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A suspicious van promises to scan your computer for threats it may have personally invited. The progress bar is mostly theater.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2284,7 +2203,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Download Button Decoy",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "Five shiny buttons shout 'DOWNLOAD,' and only one is not a trap. The safest option is probably to close the laptop and go outside.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2309,7 +2227,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "404 Page Basement",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A basement labeled 'file not found' with a custom joke, a broken nav link, and one lonely home button. The missing page has entered witness protection.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2335,7 +2252,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "CAPTCHA Goblin Bridge",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A squinting goblin demands you identify warped letters, tiny traffic lights, or your own fading humanity. The bridge toll is patience.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2359,7 +2275,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Chain Email Crypt",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A forwarded message promises luck, doom, friendship, and consequences for breaking the chain. It has seventeen nested headers and no mercy.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2384,7 +2299,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Dancing Cursor Trail",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A trail of stars chases your mouse with joyful disregard for performance. Every movement becomes a parade your processor did not request.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2408,7 +2322,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Browser Toolbar Stack",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A browser window squeezed by search bars, coupon bars, weather bars, and one toolbar nobody remembers installing. The webpage is now a letterbox film.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2432,9 +2345,9 @@ export const RELIC_NODES = Object.freeze({
   "flashpoint-archive": {
     "id": "flashpoint-archive",
     "title": "Flashpoint Archive Vault",
+    "relic": { "id": "preserved-swf", "where": "file" },
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A preservation vault built for browser games and animations that would otherwise vanish into plugin history. The shelves are labeled by nostalgia and dependency.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2461,7 +2374,6 @@ export const RELIC_NODES = Object.freeze({
     "title": "Ruffle Emulator Workshop",
     "category": "hazard",
     "era": "late-1990s-to-mid-2000s",
-    "body": "A modern workshop where old SWF files get a second chance in the browser. The tools are new; the loading bars are vintage.",
     "tags": [
       "web-hazard",
       "browser-chaos",
@@ -2480,7 +2392,20 @@ export const RELIC_NODES = Object.freeze({
       "swf-file"
     ]
   }
-});
+};
+
+// Merge the readable article prose onto each node, then deep-freeze. Topology
+// (links/category/relic) comes from RAW_RELIC_NODES above; the wiki-style article
+// ({ lead, history, legacy, seeAlso }) comes from relicArticles.js. The two are
+// kept in lockstep by validateRelicNodes() (every link in an article == node.links).
+export const RELIC_NODES = Object.freeze(
+  Object.fromEntries(
+    Object.entries(RAW_RELIC_NODES).map(([id, node]) => [
+      id,
+      Object.freeze({ ...node, article: RELIC_ARTICLES[id] }),
+    ])
+  )
+);
 
 export const RELIC_NODE_IDS = Object.freeze(Object.keys(RELIC_NODES));
 
@@ -2511,6 +2436,51 @@ export function validateRelicNodes(nodes = RELIC_NODES) {
 
       if (link === id) {
         errors.push(`${id} links to itself.`);
+      }
+    }
+
+    // ── Article integrity (the wiki prose must faithfully express the graph) ──
+    // Every node must have an authored article with at least a lead.
+    const article = node.article;
+    if (!article || !article.lead) {
+      errors.push(`${id} is missing an article (lead required).`);
+    } else {
+      const { linkIds, relicCount, relicArmsLink, selfLinks, malformed } =
+        inspectArticle(article, id);
+
+      // (5) Well-formed tokens.
+      if (malformed) errors.push(`${id} article has a malformed/unclosed [[ token.`);
+      // (4) No self-link in prose.
+      for (const sl of selfLinks) errors.push(`${id} article links to itself: ${sl}.`);
+
+      const links = new Set(node.links || []);
+      // (1) Coverage: every graph edge is reachable from the article UI.
+      for (const link of links) {
+        if (!linkIds.has(link)) {
+          errors.push(`${id} article never links to neighbor: ${link}.`);
+        }
+      }
+      // (2) No phantom links: the article can't navigate where the graph doesn't.
+      // (3) Resolvable: a linked id must be a real node.
+      for (const link of linkIds) {
+        if (!links.has(link)) {
+          errors.push(`${id} article links to non-neighbor: ${link}.`);
+        }
+        if (!idSet.has(link)) {
+          errors.push(`${id} article links to missing node: ${link}.`);
+        }
+      }
+      // (6) Relic-token integrity: a {{relic}} appears iff the node has a relic,
+      //     exactly once, and must arm a link.
+      const wantEgg = !!node.relic;
+      if (wantEgg && relicCount !== 1) {
+        errors.push(`${id} has a relic but ${relicCount} {{relic}} token(s) (want 1).`);
+      }
+      if (!wantEgg && relicCount !== 0) {
+        errors.push(`${id} has no relic but ${relicCount} {{relic}} token(s).`);
+      }
+      if (relicCount > 0 && !relicArmsLink) {
+        errors.push(`${id} has a {{relic}} token that arms no link.`);
       }
     }
   }

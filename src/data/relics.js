@@ -60,6 +60,11 @@ export const RELIC_RUN_RELICS = [
   { id: "guestbook-signature", text: "A signature left in a forgotten guestbook.", rarity: "legendary", source: "relic-run" },
   { id: "webring-token", text: "An intact webring token, still warm.", rarity: "mythic", source: "relic-run" },
   { id: "first-pixel", text: "The very first pixel ever lit on the old web.", rarity: "crystal", source: "relic-run" },
+  // Newer eggs, hidden as a disguised word in each node's fake-wiki article.
+  { id: "winamp-skin-wsz", text: "A still-warm Winamp skin (.wsz).", rarity: "legendary", source: "relic-run" },
+  { id: "preserved-swf", text: "A perfectly preserved .swf, still playable.", rarity: "legendary", source: "relic-run" },
+  { id: "unbreakable-brick", text: "The indestructible brick that outlived its century.", rarity: "legendary", source: "relic-run" },
+  { id: "first-ripped-mp3", text: "The first MP3 anyone ever ripped.", rarity: "mythic", source: "relic-run" },
 ];
 
 // Every relic in the game, from every source. Resolve any discovered id here.

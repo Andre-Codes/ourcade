@@ -277,7 +277,7 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
               }}
             />
           ) : null}
-          {join ? <p className="arcade-profile-join">arcade member since {join}</p> : null}
+          {join ? <p className="arcade-profile-join">Ourcade member since {join}</p> : null}
         </div>
       </div>
 

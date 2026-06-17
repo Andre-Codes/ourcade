@@ -44,7 +44,8 @@ export default function QuizPage() {
     setResult(null);
   };
 
-  const playable = result && getGame(result.gameId);
+  const game = result && getGame(result.gameId);
+  const playLabel = game?.category === "tool" ? "TRY THIS ▶" : "PLAY THIS ▶";
 
   return (
     <div className="arcade-stage arcade-quiz-stage">
@@ -79,13 +80,13 @@ export default function QuizPage() {
             <h1 className="arcade-quiz-result-title">{result.title}</h1>
             <p className="arcade-quiz-result-blurb">{result.blurb}</p>
             <div className="arcade-quiz-result-actions">
-              {playable && (
+              {game && (
                 <button
                   type="button"
                   className="arcade-quiz-play"
                   onClick={() => navigate(`/play/${result.gameId}`)}
                 >
-                  PLAY THIS ▶
+                  {playLabel}
                 </button>
               )}
               <button type="button" className="arcade-quiz-retake" onClick={retake}>

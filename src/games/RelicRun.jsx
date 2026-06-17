@@ -8,6 +8,7 @@ import RelicCelebration from "../components/RelicCelebration.jsx";
 import {
   dailyChallenge, node, runNumber, shareText, rating, prettyEra, streakMilestone,
 } from "./relic-run/logic.js";
+import { parseArticleText } from "./relic-run/article.js";
 
 /* DAILY RELIC RUN — a deterministic "old internet maze". Everyone gets the same
    seeded start page and target page each local day and surfs fake retro web
@@ -27,16 +28,6 @@ import {
 
 const STATE_KEY = "relic:state";   // { day, path:[ids], clicks, done, won, startedAt, elapsedMs }
 const STREAK_KEY = "relic:streak"; // { last:dayKey, streak, best }
-
-// Tiny glyph for a node's hidden relic, by its `where` flavor (relicNodes.js).
-// Deliberately understated so it reads as part of the page, not a button.
-const RELIC_EGG_GLYPH = {
-  sign: "🚧",
-  button: "▪",
-  signature: "✍",
-  token: "◈",
-  pixel: "▫",
-};
 
 function freshState(day, start) {
   return { day, path: [start], clicks: 0, done: false, won: false, startedAt: null, elapsedMs: 0 };
@@ -67,15 +58,96 @@ function fmtTime(ms) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
+// Render one wiki-token prose field into text runs + inline link buttons. A
+// link token becomes a real <button> styled as a classic blue link so it can
+// drive goTo; a relic-armed token (or the [[#|…]] sentinel) pockets the relic
+// instead of navigating, and — until found — wears the faintest glint. Visited
+// links go visited-purple via rr-wlink-seen, mirroring the old grid's seen state.
+function renderProse(src, { path, onNav, onRelic, relicFound }) {
+  return parseArticleText(src, (id) => node(id).title).map((seg, i) => {
+    if (seg.text != null) return <span key={i}>{seg.text}</span>;
+    const isRelic = seg.relic && !relicFound;
+    if (seg.link === "#" || isRelic) {
+      // Relic anchor: looks like a link, but does not navigate.
+      return (
+        <button
+          key={i}
+          type="button"
+          className={`rr-wlink${isRelic ? " rr-wlink-relic" : ""}`}
+          aria-label={isRelic ? "something glints here" : undefined}
+          title={isRelic ? "…huh, that looks clickable." : undefined}
+          onClick={isRelic ? onRelic : undefined}
+        >
+          {seg.label}
+        </button>
+      );
+    }
+    const seen = path.includes(seg.link);
+    return (
+      <button
+        key={i}
+        type="button"
+        className={`rr-wlink${seen ? " rr-wlink-seen" : ""}`}
+        onClick={() => onNav(seg.link)}
+      >
+        {seg.label}
+      </button>
+    );
+  });
+}
+
+// The readable fake-wiki page for the current node: a lead paragraph, optional
+// History/Legacy sections, and a "See also" list for any links not woven into
+// prose. All links (and the hidden relic) live inside the prose now — there is
+// no separate "Related links" grid.
+function Article({ article, ctx }) {
+  return (
+    <div className="rr-article">
+      <p className="rr-lead">{renderProse(article.lead, ctx)}</p>
+      {article.history && (
+        <>
+          <h3 className="rr-h">History</h3>
+          <p className="rr-para">{renderProse(article.history, ctx)}</p>
+        </>
+      )}
+      {article.legacy && (
+        <>
+          <h3 className="rr-h">Legacy</h3>
+          <p className="rr-para">{renderProse(article.legacy, ctx)}</p>
+        </>
+      )}
+      {article.seeAlso?.length > 0 && (
+        <>
+          <h3 className="rr-h">See also</h3>
+          <ul className="rr-seealso">
+            {article.seeAlso.map((id) => {
+              const seen = ctx.path.includes(id);
+              return (
+                <li key={id}>
+                  <button
+                    type="button"
+                    className={`rr-wlink${seen ? " rr-wlink-seen" : ""}`}
+                    onClick={() => ctx.onNav(id)}
+                  >
+                    {node(id).title}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function RelicRun() {
   const day = useMemo(() => todayKey(), []);
   const rNum = useMemo(() => runNumber(day), [day]);
   const { submit } = useArcadeScore("relic-run");
 
-  // The daily puzzle. A "random" free-play run swaps in a different challenge
-  // (seeded off a throwaway key) and is flagged so it never persists or submits.
-  const [chal, setChal] = useState(() => dailyChallenge(day));
-  const [random, setRandom] = useState(false);
+  // The daily puzzle.
+  const [chal] = useState(() => dailyChallenge(day));
 
   const [started, setStarted] = useState(false);
   const [state, setState] = useState(() => loadDayState(day, chal.start));
@@ -117,21 +189,20 @@ export default function RelicRun() {
 
   // If the saved state is already done, jump straight past the start screen.
   useEffect(() => {
-    if (!random && state.done) setStarted(true);
-  }, [random, state.done]);
+    if (state.done) setStarted(true);
+  }, [state.done]);
 
-  // Persist per-day progress whenever it changes (skip free-play runs).
+  // Persist per-day progress whenever it changes.
   useEffect(() => {
-    if (!random) lsSetJSON(STATE_KEY, state);
-  }, [state, random]);
+    lsSetJSON(STATE_KEY, state);
+  }, [state]);
 
   // On the FIRST landing on a solved state (a fresh finish OR a reload of an
-  // already-finished day), once and never for free-play: submit the score AND
-  // bump the daily streak. bumpStreak is idempotent per day, so a reload won't
-  // double-count; we diff prev→next to know whether THIS finish advanced the
-  // streak (only then do we celebrate a milestone). Best streak is mirrored up.
+  // already-finished day), once: submit the score AND bump the daily streak.
+  // bumpStreak is idempotent per day, so a reload won't double-count; we diff
+  // prev→next to know whether THIS finish advanced the streak (only then do we
+  // celebrate a milestone). Best streak is mirrored up.
   useEffect(() => {
-    if (random) return;
     if (state.done && state.won && !submittedRef.current) {
       submittedRef.current = true;
       submit(state.clicks); // dir:"asc" — fewer clicks is better
@@ -145,7 +216,7 @@ export default function RelicRun() {
         if (m) setMilestone(m);
       }
     }
-  }, [random, state.done, state.won, state.clicks, state.day, submit]);
+  }, [state.done, state.won, state.clicks, state.day, submit]);
 
   // Only read on the win screen (where state.done is true); the timer is not
   // shown during play, so no live tick is needed.
@@ -170,19 +241,7 @@ export default function RelicRun() {
       }
       return { ...s, path, clicks };
     });
-  }, [chal.target, random]);
-
-  // Start a fresh random run (free-play). Seeded off a throwaway key so it's a
-  // valid in-par puzzle, but it does NOT touch saved progress or the board.
-  const startRandom = useCallback(() => {
-    const key = `random-${Math.random().toString(36).slice(2)}`;
-    const rc = dailyChallenge(key);
-    submittedRef.current = true; // belt-and-suspenders: never submit a random run
-    setChal(rc);
-    setRandom(true);
-    setState({ day: key, path: [rc.start], clicks: 0, done: false, won: false, startedAt: Date.now(), elapsedMs: 0 });
-    setStarted(true);
-  }, []);
+  }, [chal.target]);
 
   // Replay an archived day via the ?day= override (deterministic, like Quarter's
   // archive). Simplest reliable path: navigate with the query and reload.
@@ -196,8 +255,8 @@ export default function RelicRun() {
   }, [day]);
 
   const share = useMemo(
-    () => shareText(random ? day : day, state.clicks, chal.par),
-    [random, day, state.clicks, chal.par]
+    () => shareText(day, state.clicks, chal.par),
+    [day, state.clicks, chal.par]
   );
 
   // ── START SCREEN ──────────────────────────────────────────────────────────
@@ -255,7 +314,7 @@ export default function RelicRun() {
         <style>{CSS}</style>
         <div className="rr-app">
           <div className="rr-win">
-            <div className="rr-winbang">You found {random ? "the" : "today's"} relic.</div>
+            <div className="rr-winbang">You found today's relic.</div>
             <div className="rr-wintarget">{target.title}</div>
 
             <div className="rr-stats">
@@ -266,7 +325,7 @@ export default function RelicRun() {
 
             <div className="rr-rating">{rating(state.clicks, chal.par)}</div>
 
-            {!random && streak.streak > 0 && (
+            {streak.streak > 0 && (
               <div className="rr-winstreak">🔥 {streak.streak}-day streak</div>
             )}
             {milestone && (
@@ -285,19 +344,14 @@ export default function RelicRun() {
             </div>
 
             <div className="rr-actions">
-              {!random && (
-                <ShareButton
-                  label="Copy Result"
-                  title="Ourcade — Daily Relic Run"
-                  text={share}
-                />
-              )}
+              <ShareButton
+                label="Copy Result"
+                title="Ourcade — Daily Relic Run"
+                text={share}
+              />
               <button className="rr-btn" onClick={playArchive}>Play Archive</button>
-              <button className="rr-btn" onClick={startRandom}>Random Relic Run</button>
             </div>
-            {!random && (
-              <p className="rr-next">a fresh relic drops at midnight, your time.</p>
-            )}
+            <p className="rr-next">a fresh relic drops at midnight, your time.</p>
           </div>
         </div>
       </>
@@ -336,43 +390,23 @@ export default function RelicRun() {
               <span className="rr-badge">{cur.category}</span>
               <span className="rr-badge rr-badge-era">{prettyEra(cur.era)}</span>
             </div>
-            <p className="rr-body">{cur.body}</p>
+            {/* The readable article. Every neighbor link is woven into the prose
+                as an inline blue link (clicking navigates + costs a click); the
+                hidden relic, if any, is a disguised word in the text that pockets
+                a collectible WITHOUT navigating or costing a click. */}
+            <Article
+              article={cur.article}
+              ctx={{
+                path: state.path,
+                onNav: goTo,
+                onRelic: () => cur.relic && grabRelic(cur.relic.id),
+                relicFound: cur.relic ? foundRelics.has(cur.relic.id) : false,
+              }}
+            />
+
             {cur.tags?.length > 0 && (
               <div className="rr-tags">{cur.tags.map((t) => <span className="rr-tag" key={t}>{t}</span>)}</div>
             )}
-
-            {/* Hidden relic: a subtle, oddly-clickable trinket some pages carry.
-                Clicking it pockets a collectible — it does NOT navigate, cost a
-                click, or change par. Once found, it's gone for this device. */}
-            {cur.relic && !foundRelics.has(cur.relic.id) && (
-              <button
-                type="button"
-                className="rr-egg"
-                aria-label="something glints on this page"
-                title="…huh, that looks clickable."
-                onClick={() => grabRelic(cur.relic.id)}
-              >
-                {RELIC_EGG_GLYPH[cur.relic.where] || "✦"}
-              </button>
-            )}
-
-            <div className="rr-linkshead">Related links</div>
-            <div className="rr-links">
-              {cur.links.map((id) => {
-                const ln = node(id);
-                const seen = state.path.includes(id);
-                return (
-                  <button
-                    key={id}
-                    className={`rr-link${seen ? " rr-link-seen" : ""}`}
-                    onClick={() => goTo(id)}
-                  >
-                    <span className="rr-linktitle">🔗 {ln.title}</span>
-                    <span className="rr-linkmeta">{ln.category}</span>
-                  </button>
-                );
-              })}
-            </div>
           </div>
         </div>
 
@@ -436,19 +470,29 @@ const CSS = `
 /* Era keeps its natural mixed case (NOT uppercased): a capital pixel "S" reads
    like a "5", so "2000s" would look like "20005". Lowercase "s" is unambiguous. */
 .rr-badge-era{color:#9fb6c9;text-transform:none;letter-spacing:.02em}
-.rr-body{font-size:.95rem;line-height:1.55;color:#c4d6e6;margin:0 0 14px}
+
+/* fake-wiki article: a lead paragraph, History/Legacy sections, See also list */
+.rr-article{margin:0 0 6px}
+.rr-lead{font-size:1rem;line-height:1.62;color:#c4d6e6;margin:0 0 14px}
+.rr-h{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#5f87a0;margin:18px 0 6px;border-bottom:1px solid #1c2c44;padding-bottom:4px}
+.rr-para{font-size:.95rem;line-height:1.6;color:#c4d6e6;margin:0 0 12px}
+.rr-seealso{margin:0 0 4px;padding-left:18px;color:#c4d6e6}
+.rr-seealso li{margin:3px 0}
+/* inline blue wiki-link rendered as a button so it can drive goTo. Resets to
+   inline text so it wraps mid-sentence like a real link. */
+.rr-wlink{display:inline;font:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;
+  color:#6cb6ff;text-decoration:underline;text-underline-offset:2px;border-radius:2px}
+.rr-wlink:hover{color:#9fd2ff}
+.rr-wlink:focus-visible{outline:2px solid #3fffd0;outline-offset:2px}
+.rr-wlink-seen{color:#9a7fb6}            /* visited-link purple, the classic tell */
+/* relic anchor: visually a normal link — the secret is it pockets a relic and
+   doesn't navigate. Only the faintest glint on hover rewards the curious. */
+.rr-wlink-relic:hover{color:#ffd23f;text-shadow:0 0 8px rgba(255,210,63,.55)}
+
 .rr-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .rr-tag{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:#6f93ad;background:#0e1a2c;
   border:1px solid #1c2c44;border-radius:4px;padding:2px 7px}
-
-/* hidden relic trinket — understated, but a faint glint on hover/focus rewards
-   the curious without screaming "button". Never affects clicks/par. */
-.rr-egg{position:relative;display:inline-flex;align-items:center;justify-content:center;
-  margin:0 0 14px;padding:2px 6px;font-size:.82rem;line-height:1;background:transparent;
-  border:1px solid transparent;border-radius:5px;color:#3a5a72;cursor:pointer;opacity:.6;
-  transition:opacity .15s,color .15s,border-color .15s,text-shadow .15s}
-.rr-egg:hover,.rr-egg:focus-visible{opacity:1;color:#ffd23f;border-color:#3a5a72;
-  text-shadow:0 0 10px rgba(255,210,63,.6);outline:none}
 
 /* relic-found toast — floats over the cabinet for a few seconds */
 .rr-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:20;max-width:min(92vw,440px);
@@ -456,15 +500,6 @@ const CSS = `
   color:#06141a;background:linear-gradient(180deg,#ffe27a,#ffd23f);border:2px solid #b8902a;border-radius:10px;
   padding:11px 16px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:rr-toast-in .22s ease both}
 @keyframes rr-toast-in{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
-.rr-linkshead{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
-  color:#5f87a0;margin-bottom:9px}
-.rr-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px}
-.rr-link{display:flex;flex-direction:column;gap:3px;text-align:left;background:#0e1a2c;
-  border:2px solid #20344f;border-radius:9px;padding:11px 12px;cursor:pointer;transition:transform .08s,border-color .12s,background .12s}
-.rr-link:hover{transform:translateY(-2px);border-color:#3fffd0;background:#11233a}
-.rr-link-seen{opacity:.55}
-.rr-linktitle{font-size:.92rem;font-weight:700;color:#e9f3ff}
-.rr-linkmeta{font-family:'Share Tech Mono',monospace;font-size:.64rem;color:#6f93ad;text-transform:uppercase;letter-spacing:.04em}
 
 /* breadcrumbs */
 .rr-breadcrumbs{max-width:680px;width:100%;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#4f6f88;
@@ -497,7 +532,7 @@ const CSS = `
 
 @media(max-width:420px){
   .rr-pagetitle{font-size:1.25rem}
-  .rr-links{grid-template-columns:1fr}
+  .rr-lead{font-size:.95rem}
   .rr-stats{gap:18px}
   .rr-stat b{font-size:1.4rem}
 }
