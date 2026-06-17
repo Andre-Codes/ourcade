@@ -2,79 +2,83 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-this-is-sand",
-    "title": "Pour digital sand into hypnotic layers",
-    "blurb": "This Is Sand lets you rain colored grains down the screen and watch them stack into smooth little dunes. It's been quietly absorbing afternoons since 2008, and it will absorb yours too.",
-    "url": "https://thisissand.com",
-    "foundNote": "art project, time vampire, same thing"
+    "id": "gw-staggering-beauty",
+    "title": "A worm noodle that throws a rave if you shake your mouse",
+    "blurb": "It's a calm little squiggle following your cursor — until you whip it around and it loses its entire mind in a strobe meltdown. (Flashy-lights warning, fittingly.)",
+    "url": "http://www.staggeringbeauty.com",
+    "foundNote": "do not show this to your screensaver"
   },
   {
     "id": "gw-nicest-place",
-    "title": "A page of strangers offering you a hug",
-    "blurb": "The Nicest Place on the Internet is exactly that — a loop of people opening their arms toward your monitor. It's the opposite of the comments section, and it works disturbingly well.",
-    "url": "https://thenicestplace.net",
-    "foundNote": "no notes, just hugs"
+    "title": "A nonstop stream of strangers giving you a hug",
+    "blurb": "Real people, real GIFs, just opening their arms at you forever. The opposite of every comment section ever written.",
+    "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-absurd-website",
-    "title": "One absurd web toy a month, 48 and counting",
-    "blurb": "absurd.website is one creator's running streak of beautifully pointless browser experiments. Click around — some are art, some are nonsense, all of them feel like finding a stranger's sketchbook.",
-    "url": "https://absurd.website",
-    "foundNote": "still going, still absurd"
+    "id": "gw-scream-void",
+    "title": "A digital void you can scream all your problems into",
+    "blurb": "Type your frustration, hit the button, and yeet it into nowhere. Cheaper than therapy, louder than a 56k modem.",
+    "url": "https://screamintothevoid.com"
   },
   {
-    "id": "gw-incredibox",
-    "title": "Dress little guys up and make them beatbox",
-    "blurb": "Incredibox lets you drag sounds onto a row of humming animated dudes until they're a full a cappella track. Over 100 million people have wasted glorious hours here since '09. Join them.",
-    "url": "https://incredibox.com",
-    "foundNote": "actually used in music classrooms now"
+    "id": "gw-procatinator",
+    "title": "Cat GIFs bolted onto random songs, on purpose",
+    "blurb": "A loop of a cat doing something dumb, scored by whatever banger the site felt like. It should not work. It works.",
+    "url": "https://procatinator.com",
+    "foundNote": "the synergy is unexplained"
   },
   {
-    "id": "gw-true-size",
-    "title": "Drag countries around to expose the map's lies",
-    "blurb": "The True Size Of… lets you grab any country and slide it across the globe to see how badly your school map fibbed. Greenland is going to disappoint you. In a good way.",
-    "url": "https://thetruesize.com",
-    "foundNote": "the Mercator projection owes us all money"
+    "id": "gw-typelit",
+    "title": "Retype an entire novel, one keystroke at a time",
+    "blurb": "Pick a classic and physically type the whole book while it grades your WPM. The most productive way to procrastinate ever invented.",
+    "url": "https://www.typelit.io",
+    "foundNote": "Moby-Dick has opinions about your accuracy"
   },
   {
-    "id": "gw-pudding",
-    "title": "Data journalism that looks like an art installation",
-    "blurb": "The Pudding turns spreadsheets into scrollable visual stories — the kind of thing you start reading 'real quick' and resurface from forty minutes later. Smart, weird, gorgeous.",
-    "url": "https://pudding.cool"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug in a rug, and a timer judging your loyalty",
-    "blurb": "Puginarug.com is one looping pug burrito and a clock counting how long you've stayed to honor it. There is no goal. There is only the pug. Do not let it down.",
-    "url": "https://puginarug.com",
-    "foundNote": "the timer resets if you leave. no pressure"
-  },
-  {
-    "id": "gw-koalas-to-the-max",
-    "title": "A blurry blob that resolves into one koala",
-    "blurb": "Koalas to the Max starts as four giant dots and splits smaller every time your cursor sweeps through, until — surprise — it's a koala. Oddly soothing, weirdly addictive.",
-    "url": "https://koalastothemax.com",
-    "foundNote": "keep going, trust the process"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "title": "Teleport to a random spot on Street View",
-    "blurb": "MapCrunch drops you somewhere on Earth at random — a gas station in Iceland, a dirt road in Mongolia. Hit the button and play 'where on the planet am I' until dinner.",
-    "url": "https://mapcrunch.com",
-    "foundNote": "the original armchair travel button"
-  },
-  {
-    "id": "gw-falling-falling",
-    "title": "A site that just falls forever, with sound",
-    "blurb": "FallingFalling.com is endless gradients tumbling past while a drone hums underneath. It is either a meditation aid or a cursed screensaver, and we genuinely cannot tell.",
-    "url": "https://www.fallingfalling.com",
-    "foundNote": "do NOT open with the volume up at work"
+    "id": "gw-quiet-place",
+    "title": "A website that walks you away from the internet for two minutes",
+    "blurb": "Minimal, paced, and weirdly soothing — it gently coaxes you off the dopamine treadmill before dumping you back in. We'll allow it.",
+    "url": "https://thequietplaceproject.xyz"
   },
   {
     "id": "gw-this-person",
-    "title": "A face that has never existed, refreshed on demand",
-    "blurb": "ThisPersonDoesNotExist conjures a totally convincing human portrait every time you reload — none of them are real. Stare too long and the existential dread is free.",
+    "title": "A face of a person who has never existed",
+    "blurb": "Refresh and an AI invents a brand-new human who isn't real and never was. Genuinely cursed, technically miraculous.",
     "url": "https://thispersondoesnotexist.com",
-    "foundNote": "refresh = brand new fake person"
+    "foundNote": "check the earrings, they always glitch"
+  },
+  {
+    "id": "gw-koalas-max",
+    "title": "A pixelated koala you click into existence",
+    "blurb": "Tap the blocks and they split into smaller blocks until a koala slowly resolves out of the noise. Satisfying like bubble wrap.",
+    "url": "https://www.koalastothemax.com"
+  },
+  {
+    "id": "gw-weavesilk",
+    "title": "Drag your mouse and make glowing symmetrical art",
+    "blurb": "Wave your cursor around and it blooms into mirror-image silk patterns you didn't earn. Instant gallery opening, zero talent required.",
+    "url": "http://weavesilk.com",
+    "foundNote": "MS Paint could never"
+  },
+  {
+    "id": "gw-fallingfalling",
+    "title": "An endless wall of falling colors with a sound to match",
+    "blurb": "Hypnotic, slightly menacing, fully unskippable. It just keeps falling, like your serotonin on a Sunday night.",
+    "url": "https://www.fallingfalling.com",
+    "foundNote": "sound on, brain off"
+  },
+  {
+    "id": "gw-floor796",
+    "title": "A giant animated spaceship floor that never stops growing",
+    "blurb": "One enormous pixel scene crammed with thousands of tiny moving gags and references, hand-drawn frame by frame. Wally would weep.",
+    "url": "https://floor796.com",
+    "foundNote": "still being expanded, somehow"
+  },
+  {
+    "id": "gw-isit-christmas",
+    "title": "A site that answers one question: is it Christmas?",
+    "blurb": "It says NO. It will say NO most of the year. The single most committed single-purpose website on the web.",
+    "url": "https://isitchristmas.com",
+    "foundNote": "honest. brutal. correct."
   }
 ];
