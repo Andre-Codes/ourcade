@@ -4,7 +4,7 @@ import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
-  dailyChallenge, node, runNumber, shareText, rating,
+  dailyChallenge, node, runNumber, shareText, rating, prettyEra,
 } from "./relic-run/logic.js";
 
 /* DAILY RELIC RUN — a deterministic "old internet maze". Everyone gets the same
@@ -68,7 +68,6 @@ export default function RelicRun() {
   const [started, setStarted] = useState(false);
   const [state, setState] = useState(() => loadDayState(day, chal.start));
   const [streak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
-  const [now, setNow] = useState(Date.now());
   const submittedRef = useRef(false);
 
   const current = state.path[state.path.length - 1];
@@ -85,13 +84,6 @@ export default function RelicRun() {
     if (!random) lsSetJSON(STATE_KEY, state);
   }, [state, random]);
 
-  // Live timer tick while surfing (1s is enough for the status display).
-  useEffect(() => {
-    if (!started || state.done) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [started, state.done]);
-
   // Submit the daily run's click count once, the first time we land on a solved
   // state (covers a fresh finish AND a reload of an already-finished day). Never
   // for free-play.
@@ -103,11 +95,9 @@ export default function RelicRun() {
     }
   }, [random, state.done, state.won, state.clicks, submit]);
 
-  const elapsedMs = state.done
-    ? state.elapsedMs
-    : state.startedAt
-      ? now - state.startedAt
-      : 0;
+  // Only read on the win screen (where state.done is true); the timer is not
+  // shown during play, so no live tick is needed.
+  const elapsedMs = state.elapsedMs;
 
   const beginRun = useCallback(() => {
     setStarted(true);
@@ -186,6 +176,12 @@ export default function RelicRun() {
               No par, no hints. Just surf.
             </p>
 
+            <p className="rr-tip">
+              🔎 Stuck? Googling each relic is half the fun — dig into what these
+              old pages, games, and gadgets actually were and you'll start spotting
+              how they connect.
+            </p>
+
             <button className="rr-go" onClick={beginRun}>Start Surfing →</button>
             {streak.streak > 0 && (
               <div className="rr-streak">🔥 {streak.streak}-day streak</div>
@@ -253,7 +249,6 @@ export default function RelicRun() {
         <div className="rr-statusbar">
           <span className="rr-status"><b className="rr-target">◎ {target.title}</b></span>
           <span className="rr-status">🖱️ {state.clicks}</span>
-          <span className="rr-status">⏱ {fmtTime(elapsedMs)}</span>
         </div>
 
         <div className="rr-browser">
@@ -266,7 +261,7 @@ export default function RelicRun() {
             <h2 className="rr-pagetitle">{cur.title}</h2>
             <div className="rr-badges">
               <span className="rr-badge">{cur.category}</span>
-              <span className="rr-badge rr-badge-era">{cur.era}</span>
+              <span className="rr-badge rr-badge-era">{prettyEra(cur.era)}</span>
             </div>
             <p className="rr-body">{cur.body}</p>
             {cur.tags?.length > 0 && (
@@ -285,7 +280,7 @@ export default function RelicRun() {
                     onClick={() => goTo(id)}
                   >
                     <span className="rr-linktitle">🔗 {ln.title}</span>
-                    <span className="rr-linkmeta">{ln.category} • {ln.era}</span>
+                    <span className="rr-linkmeta">{ln.category}</span>
                   </button>
                 );
               })}
@@ -325,6 +320,8 @@ const CSS = `
 .rr-startval{font-size:1.18rem;font-weight:800;color:#e9f3ff}
 .rr-startarrow{color:#3a5a72;font-size:.9rem;margin:2px 0}
 .rr-blurb{font-size:.86rem;line-height:1.5;color:#9fb6c9;margin:2px 0}
+.rr-tip{font-size:.82rem;line-height:1.5;color:#9fe0d0;margin:0;background:rgba(63,255,208,.06);
+  border:1px solid rgba(63,255,208,.22);border-radius:9px;padding:10px 13px}
 .rr-go{font-family:'Press Start 2P',monospace;font-size:.78rem;background:#3fffd0;color:#06141a;border:0;
   border-radius:10px;padding:14px 22px;cursor:pointer;box-shadow:0 6px 22px rgba(63,255,208,.3);transition:transform .1s}
 .rr-go:hover{transform:translateY(-2px)}

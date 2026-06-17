@@ -38,6 +38,22 @@ export function node(id) {
   return RELIC_NODES[id];
 }
 
+// Humanize the raw era slug for display. The data uses one slug for every node
+// ("late-1990s-to-mid-2000s"); rendered in the pixel/mono font its trailing "s"
+// reads like a "5" ("…2000s" looks like "…20005"). Convert decade slugs to
+// apostrophe form and join with an en-dash so it reads naturally and loses the
+// 5/s ambiguity, e.g. "late '90s – mid 2000s". Falls back to the raw value for
+// any future era we don't have a rule for.
+export function prettyEra(era) {
+  if (!era) return "";
+  const part = (s) =>
+    s
+      .replace(/-/g, " ")
+      .replace(/\b19(\d0)s\b/g, "’$1s") // 1990s → ’90s
+      .trim();
+  return era.split("-to-").map(part).join(" – ");
+}
+
 // BFS shortest path over node.links. Returns an array of ids start→target
 // (inclusive of both ends), or null if unreachable. Edges are directed (we only
 // follow `links`), though the supplied graph happens to be near-symmetric.
