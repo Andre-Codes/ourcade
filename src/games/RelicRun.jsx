@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
-import { lsGetJSON, lsSetJSON } from "../lib/store.js";
+import { lsGetJSON, lsSetJSON, recordRelic, getDiscoveredRelics, mirrorRelicRunStreak } from "../lib/store.js";
+import { relicById } from "../data/relics.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
+import RelicCelebration from "../components/RelicCelebration.jsx";
 import {
-  dailyChallenge, node, runNumber, shareText, rating, prettyEra,
+  dailyChallenge, node, runNumber, shareText, rating, prettyEra, streakMilestone,
 } from "./relic-run/logic.js";
 
 /* DAILY RELIC RUN — a deterministic "old internet maze". Everyone gets the same
@@ -25,6 +27,16 @@ import {
 
 const STATE_KEY = "relic:state";   // { day, path:[ids], clicks, done, won, startedAt, elapsedMs }
 const STREAK_KEY = "relic:streak"; // { last:dayKey, streak, best }
+
+// Tiny glyph for a node's hidden relic, by its `where` flavor (relicNodes.js).
+// Deliberately understated so it reads as part of the page, not a button.
+const RELIC_EGG_GLYPH = {
+  sign: "🚧",
+  button: "▪",
+  signature: "✍",
+  token: "◈",
+  pixel: "▫",
+};
 
 function freshState(day, start) {
   return { day, path: [start], clicks: 0, done: false, won: false, startedAt: null, elapsedMs: 0 };
@@ -67,8 +79,37 @@ export default function RelicRun() {
 
   const [started, setStarted] = useState(false);
   const [state, setState] = useState(() => loadDayState(day, chal.start));
-  const [streak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
+  const [streak, setStreak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
+  const [milestone, setMilestone] = useState(null); // celebratory line when a streak threshold is freshly crossed
   const submittedRef = useRef(false);
+
+  // Site-wide relics (easter eggs): which ones THIS device has already found, so
+  // a node's hidden trinket shows only until it's collected. Finding a relic
+  // never costs a click or affects par. The reveal scales with the tier: a rare
+  // CRYSTAL relic pops the grand, site-wide RelicCelebration overlay; lesser
+  // tiers get a quick in-cabinet toast.
+  const [foundRelics, setFoundRelics] = useState(() => new Set(getDiscoveredRelics().map((r) => r.id)));
+  const [relicToast, setRelicToast] = useState(null); // string | null
+  const [relicCele, setRelicCele] = useState(null);    // { relic, isNew } | null
+  const toastTimer = useRef(null);
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  const grabRelic = useCallback((relicId) => {
+    const { isNew } = recordRelic(relicId);
+    setFoundRelics((prev) => new Set(prev).add(relicId));
+    const def = relicById(relicId);
+    if (def?.rarity === "crystal") {
+      // The top tier always earns the grand reveal — even on a re-find, since the
+      // overlay distinguishes NEW vs already-collected itself.
+      setRelicCele({ relic: def, isNew });
+      return;
+    }
+    if (isNew) {
+      setRelicToast(def?.text ? `🏺 You unearthed a relic!\n${def.text}` : "🏺 You unearthed a relic!");
+      clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setRelicToast(null), 3200);
+    }
+  }, []);
 
   const current = state.path[state.path.length - 1];
   const cur = node(current);
@@ -84,16 +125,27 @@ export default function RelicRun() {
     if (!random) lsSetJSON(STATE_KEY, state);
   }, [state, random]);
 
-  // Submit the daily run's click count once, the first time we land on a solved
-  // state (covers a fresh finish AND a reload of an already-finished day). Never
-  // for free-play.
+  // On the FIRST landing on a solved state (a fresh finish OR a reload of an
+  // already-finished day), once and never for free-play: submit the score AND
+  // bump the daily streak. bumpStreak is idempotent per day, so a reload won't
+  // double-count; we diff prev→next to know whether THIS finish advanced the
+  // streak (only then do we celebrate a milestone). Best streak is mirrored up.
   useEffect(() => {
     if (random) return;
     if (state.done && state.won && !submittedRef.current) {
       submittedRef.current = true;
       submit(state.clicks); // dir:"asc" — fewer clicks is better
+      const prev = lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 };
+      const next = bumpStreak(state.day);
+      setStreak(next);
+      const advanced = prev.last !== state.day; // this call actually moved it
+      if (advanced) {
+        if (next.best > (prev.best || 0)) mirrorRelicRunStreak(next.best);
+        const m = streakMilestone(next.streak);
+        if (m) setMilestone(m);
+      }
     }
-  }, [random, state.done, state.won, state.clicks, submit]);
+  }, [random, state.done, state.won, state.clicks, state.day, submit]);
 
   // Only read on the win screen (where state.done is true); the timer is not
   // shown during play, so no live tick is needed.
@@ -112,9 +164,9 @@ export default function RelicRun() {
       const won = id === chal.target;
       const elapsedMs = s.startedAt ? Date.now() - s.startedAt : 0;
       if (won) {
-        const next = { ...s, path, clicks, done: true, won: true, elapsedMs };
-        if (!random) bumpStreak(s.day);
-        return next;
+        // Streak bump + milestone now happen in the win effect (idempotent,
+        // fires once on first solved-landing) — not here in the reducer.
+        return { ...s, path, clicks, done: true, won: true, elapsedMs };
       }
       return { ...s, path, clicks };
     });
@@ -179,12 +231,16 @@ export default function RelicRun() {
             <p className="rr-tip">
               🔎 Stuck? Googling each relic is half the fun — dig into what these
               old pages, games, and gadgets actually were and you'll start spotting
-              how they connect.
+              how they connect. And keep your eyes peeled: a few pages hide a relic
+              worth pocketing.
             </p>
 
             <button className="rr-go" onClick={beginRun}>Start Surfing →</button>
             {streak.streak > 0 && (
-              <div className="rr-streak">🔥 {streak.streak}-day streak</div>
+              <div className="rr-streak">
+                🔥 {streak.streak}-day streak
+                {streak.best > streak.streak ? ` · best ${streak.best}` : ""}
+              </div>
             )}
           </div>
         </div>
@@ -209,6 +265,13 @@ export default function RelicRun() {
             </div>
 
             <div className="rr-rating">{rating(state.clicks, chal.par)}</div>
+
+            {!random && streak.streak > 0 && (
+              <div className="rr-winstreak">🔥 {streak.streak}-day streak</div>
+            )}
+            {milestone && (
+              <div className="rr-milestone">{milestone}</div>
+            )}
 
             <div className="rr-trail">
               {state.path.map((id, i) => (
@@ -246,6 +309,16 @@ export default function RelicRun() {
     <>
       <style>{CSS}</style>
       <div className="rr-app">
+        {relicToast && (
+          <div className="rr-toast" role="status">{relicToast}</div>
+        )}
+        {relicCele && (
+          <RelicCelebration
+            relic={relicCele.relic}
+            isNew={relicCele.isNew}
+            onClose={() => setRelicCele(null)}
+          />
+        )}
         <div className="rr-statusbar">
           <span className="rr-status"><b className="rr-target">◎ {target.title}</b></span>
           <span className="rr-status">🖱️ {state.clicks}</span>
@@ -266,6 +339,21 @@ export default function RelicRun() {
             <p className="rr-body">{cur.body}</p>
             {cur.tags?.length > 0 && (
               <div className="rr-tags">{cur.tags.map((t) => <span className="rr-tag" key={t}>{t}</span>)}</div>
+            )}
+
+            {/* Hidden relic: a subtle, oddly-clickable trinket some pages carry.
+                Clicking it pockets a collectible — it does NOT navigate, cost a
+                click, or change par. Once found, it's gone for this device. */}
+            {cur.relic && !foundRelics.has(cur.relic.id) && (
+              <button
+                type="button"
+                className="rr-egg"
+                aria-label="something glints on this page"
+                title="…huh, that looks clickable."
+                onClick={() => grabRelic(cur.relic.id)}
+              >
+                {RELIC_EGG_GLYPH[cur.relic.where] || "✦"}
+              </button>
             )}
 
             <div className="rr-linkshead">Related links</div>
@@ -352,6 +440,22 @@ const CSS = `
 .rr-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .rr-tag{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:#6f93ad;background:#0e1a2c;
   border:1px solid #1c2c44;border-radius:4px;padding:2px 7px}
+
+/* hidden relic trinket — understated, but a faint glint on hover/focus rewards
+   the curious without screaming "button". Never affects clicks/par. */
+.rr-egg{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  margin:0 0 14px;padding:2px 6px;font-size:.82rem;line-height:1;background:transparent;
+  border:1px solid transparent;border-radius:5px;color:#3a5a72;cursor:pointer;opacity:.6;
+  transition:opacity .15s,color .15s,border-color .15s,text-shadow .15s}
+.rr-egg:hover,.rr-egg:focus-visible{opacity:1;color:#ffd23f;border-color:#3a5a72;
+  text-shadow:0 0 10px rgba(255,210,63,.6);outline:none}
+
+/* relic-found toast — floats over the cabinet for a few seconds */
+.rr-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:20;max-width:min(92vw,440px);
+  white-space:pre-line;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.82rem;line-height:1.45;
+  color:#06141a;background:linear-gradient(180deg,#ffe27a,#ffd23f);border:2px solid #b8902a;border-radius:10px;
+  padding:11px 16px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:rr-toast-in .22s ease both}
+@keyframes rr-toast-in{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
 .rr-linkshead{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
   color:#5f87a0;margin-bottom:9px}
 .rr-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px}
@@ -376,6 +480,10 @@ const CSS = `
 .rr-stat b{font-size:1.7rem;color:#e9f3ff}
 .rr-stat span{font-family:'Share Tech Mono',monospace;font-size:.64rem;letter-spacing:.12em;color:#5f87a0}
 .rr-rating{font-family:'Press Start 2P',monospace;font-size:.72rem;color:#ff9a52}
+.rr-winstreak{font-family:'Share Tech Mono',monospace;font-size:.84rem;color:#ff9a52}
+.rr-milestone{font-family:'Share Tech Mono',monospace;font-size:.86rem;color:#06141a;text-align:center;
+  background:linear-gradient(180deg,#ffe27a,#ffd23f);border:2px solid #b8902a;border-radius:9px;
+  padding:8px 14px;box-shadow:0 6px 18px rgba(255,210,63,.3)}
 .rr-trail{width:100%;background:#0e1726;border:2px solid #1c2c44;border-radius:10px;padding:12px 14px;
   display:flex;flex-direction:column;gap:2px;text-align:left}
 .rr-trailrow{display:flex;align-items:center;gap:7px}

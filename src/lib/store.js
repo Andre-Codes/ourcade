@@ -130,30 +130,47 @@ export function setQuizResult(quizId, resultId) {
   pushUp(`quiz:${quizId}`, resultId);
 }
 
-// ---- magic 8-ball: discovered legendary answers (the easter-egg collection) ----
-export function getDiscoveredLegendaries() {
+// ---- relics: the site-wide easter-egg collection ----
+// One discovered-relic list shared by EVERY source (the Magic 8-Ball, the Daily
+// Relic Run, future eggs). The storage key stays "eightball:legends" so existing
+// saves + cloud sync keep working with zero migration — only the API names are
+// generalized. recordLegendary/getDiscoveredLegendaries remain as aliases for
+// the 8-ball + the profile/auth carry-up paths that still use those names.
+export function getDiscoveredRelics() {
   return readJSON("eightball:legends", []);
 }
-// Idempotent: re-discovering a known legendary returns isNew:false and leaves
-// the original discovery date untouched.
-export function recordLegendary(id) {
-  const found = getDiscoveredLegendaries();
+// Idempotent: re-discovering a known relic returns isNew:false and leaves the
+// original discovery date untouched. `id` must match a definition in relics.js
+// (ALL_RELICS) for the profile to resolve its art/text.
+export function recordRelic(id) {
+  const found = getDiscoveredRelics();
   if (found.some((f) => f.id === id)) return { found, isNew: false };
   const next = [...found, { id, at: new Date().toISOString() }];
   const raw = JSON.stringify(next);
   write("eightball:legends", raw);
   pushUp("eightball:legends", raw);
   // Mirror a PUBLIC count to the profile (names/graphics stay private; only the
-  // tally is shared so others see "N relics discovered"). Named users only.
+  // tally is shared so others see "N relics found"). Named users only.
   mirrorRelicCount(next.length);
   return { found: next, isNew: true };
 }
+// Back-compat aliases (the 8-ball + AuthProvider + ProfileView still call these).
+export const getDiscoveredLegendaries = getDiscoveredRelics;
+export const recordLegendary = recordRelic;
 
 // Push the discovered-relic COUNT to the public profile doc (browser-only,
 // fire-and-forget; no-ops for anon since they have no profile doc).
 export function mirrorRelicCount(count) {
   const p = cloud();
   if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ relicCount: count })).catch(() => {});
+}
+
+// Push the user's BEST Daily Relic Run streak to the public profile so others
+// see it as a badge. Same contract as mirrorRelicCount (browser-only, fire-and-
+// forget, named users only). Called from RelicRun's bumpStreak on a new best.
+export function mirrorRelicRunStreak(best) {
+  const p = cloud();
+  if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ relicRunStreak: best })).catch(() => {});
 }
 
 // ---- magic 8-ball: per-device sound mute (default: not muted) ----

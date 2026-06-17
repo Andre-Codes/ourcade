@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES, getGame } from "../data/games.js";
 import { themeColor } from "../data/profilePresets.js";
-import { RELICS, relicIcon } from "../data/relics.js";
-import { getDiscoveredLegendaries, getTop8, removeTop8 } from "../lib/store.js";
+import { ALL_RELICS, relicIcon } from "../data/relics.js";
+import { getDiscoveredRelics, getTop8, removeTop8, lsGetJSON } from "../lib/store.js";
 import { resolveTop8 } from "../data/content.js";
 import { renderContactCard } from "../lib/contactCard.js";
 import { shareImage } from "../lib/share.js";
@@ -83,10 +83,10 @@ function joinLabel(profile) {
   return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
-// Owner-only: their discovered relics, rarest first, with discovery dates.
+// Owner-only: their discovered relics (any source), rarest first, with dates.
 function ownerRelics() {
-  const found = new Map(getDiscoveredLegendaries().map((f) => [f.id, f.at]));
-  return RELICS.filter((r) => found.has(r.id)).map((r) => ({ ...r, at: found.get(r.id) }));
+  const found = new Map(getDiscoveredRelics().map((f) => [f.id, f.at]));
+  return ALL_RELICS.filter((r) => found.has(r.id)).map((r) => ({ ...r, at: found.get(r.id) }));
 }
 
 // A read popup for Top 8 items that have no destination of their own (a game
@@ -235,6 +235,11 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   const myRelics = owner ? ownerRelics() : [];
   const relicCount = owner ? myRelics.length : Number(p?.relicCount || 0);
 
+  // best Daily Relic Run streak: owner reads local truth; public reads mirror.
+  const relicRunStreak = owner
+    ? Number(lsGetJSON("relic:streak", null)?.best || 0)
+    : Number(p?.relicRunStreak || 0);
+
   // Top 8: owner = live local; public = mirrored array. Resolve each { type, id }
   // to display info, dropping any that no longer resolve (removed/renamed item).
   const rawTop8 = owner ? ownerTop8 : Array.isArray(p?.top8) ? p.top8 : [];
@@ -246,6 +251,7 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   if (top8.length) badges.push(`❤️ Top ${top8.length}`);
   if (bests.length) badges.push(`🏆 ${bests.length} board${bests.length > 1 ? "s" : ""}`);
   if (relicCount) badges.push(`💾 ${relicCount} relic${relicCount > 1 ? "s" : ""}`);
+  if (relicRunStreak > 1) badges.push(`🏺 ${relicRunStreak}-day relic streak`);
 
   return (
     <>
@@ -351,7 +357,7 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
               <h2 className="arcade-profile-section-title">💾 relics found</h2>
               <div className="arcade-relic-grid">
                 {myRelics.map((r) => (
-                  <div key={r.id} className={`arcade-relic${r.rarity === "mythic" ? " is-mythic" : ""}`}>
+                  <div key={r.id} className={`arcade-relic${r.rarity === "crystal" ? " is-crystal" : r.rarity === "mythic" ? " is-mythic" : ""}`}>
                     <img className="arcade-relic-icon" src={relicIcon(r, true)} alt={r.text} />
                     <span className="arcade-relic-text">{r.text}</span>
                   </div>

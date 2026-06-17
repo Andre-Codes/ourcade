@@ -498,6 +498,7 @@ const style = `
   .eb-hall-close { cursor: pointer; background: none; border: none; color: #6b708f; font-size: 1.6rem; line-height: 1; }
   .eb-hall-close:hover { color: #fff; }
   .eb-hall-sub { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: #6b708f; margin-bottom: 18px; }
+  .eb-hall-note { display: inline-block; margin-top: 5px; font-size: 0.58rem; letter-spacing: 0.04em; text-transform: none; color: #565b78; }
   .eb-hall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
   .eb-card {
     border-radius: 10px; padding: 14px 12px; text-align: center; min-height: 132px;
@@ -806,7 +807,9 @@ export default function MagicEightBall() {
               </button>
             </div>
             <div className="eb-hall-sub">
-              {foundCount} of {COLLECTIBLES.length} relics & legends discovered
+              {foundCount} of {COLLECTIBLES.length} 8-Ball legends rolled
+              <br />
+              <span className="eb-hall-note">(relics also turn up elsewhere around Ourcade)</span>
             </div>
             <div className="eb-hall-grid">
               {COLLECTIBLES.map((l) => {

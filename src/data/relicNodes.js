@@ -862,6 +862,7 @@ export const RELIC_NODES = Object.freeze({
   "webring-hub": {
     "id": "webring-hub",
     "title": "Webring Hub",
+    "relic": { "id": "webring-token", "where": "token" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
     "body": "A circular hallway of 'next,' 'previous,' and 'random site' buttons. Nobody owns the route; everyone owns one weird room in it.",
@@ -889,6 +890,7 @@ export const RELIC_NODES = Object.freeze({
   "guestbook": {
     "id": "guestbook",
     "title": "Guestbook Chamber",
+    "relic": { "id": "guestbook-signature", "where": "signature" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
     "body": "A guestbook with glitter dividers, kind strangers, spam bots, and one message from 2003 asking you to sign their page back. Internet etiquette had stamps on it.",
@@ -915,6 +917,7 @@ export const RELIC_NODES = Object.freeze({
   "under-construction": {
     "id": "under-construction",
     "title": "Under Construction GIF Quarry",
+    "relic": { "id": "geo-under-construction", "where": "sign" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
     "body": "A quarry where tiny workers shovel pixels forever beneath blinking caution stripes. Nothing is finished, which is how you know it is authentic.",
@@ -1160,6 +1163,7 @@ export const RELIC_NODES = Object.freeze({
   "award-badge-wall": {
     "id": "award-badge-wall",
     "title": "Award Badge Wall",
+    "relic": { "id": "broken-button-88x31", "where": "button" },
     "category": "web-relic",
     "era": "late-1990s-to-mid-2000s",
     "body": "A gallery of tiny trophies for 'Cool Site,' 'Top 100,' and 'Mom Said This Was Neat.' Prestige used to be 88 pixels wide.",
@@ -1522,6 +1526,7 @@ export const RELIC_NODES = Object.freeze({
   "netscape-navigator": {
     "id": "netscape-navigator",
     "title": "Netscape Navigator Helm",
+    "relic": { "id": "first-pixel", "where": "pixel" },
     "category": "software",
     "era": "late-1990s-to-mid-2000s",
     "body": "A browser helm pointed toward starfields, framesets, and pages that proudly resize your window. The wheel squeaks in JavaScript.",

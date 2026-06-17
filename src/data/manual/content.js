@@ -165,13 +165,23 @@ export const MANUAL_FACTS = [
 // Site news — plain strings (each is one line in the SITE NEWS ticker).
 export const MANUAL_NEWS = [
   // "NEW: hand-written news lines live here and never get regenerated.",
-  "RUMOR: Byte Badger's walkman is home to some bomb tracks... "
+  "RUMOR: Byte Badger's walkman is home to some bomb tracks... ",
+  "NOW OPEN: the Water Cooler — gather 'round for today's countdown, gossip, and Hot or Not on current pop culture.",
+  "💧 The Water Cooler refills every morning: a fresh countdown chart, on-this-day, and the buzz.",
+  "WATER COOLER REPORT: somebody voted 'hot' on something deeply not. We respect the chaos.",
+  "Bored of games? The Water Cooler's got what everyone's talking about today — no algorithm required.",
+  "TIP JAR: the Water Cooler's 'On This Day' dug up something you completely forgot existed.",
 ];
 
 // Mascot tips — plain strings.
 export const MANUAL_TIPS = [
   // "Pro tip: this hint was written by a human and is here to stay.",
   "BTW I've got a pretty sick mixed CD... I finally got that song about the Chinese Chicken in there 🐔🍗🧠🛑",
+  "Psst — hit the 💧 Water Cooler in the nav. It's where the whole arcade gathers to gossip.",
+  "The Water Cooler swaps in a fresh top-5 Countdown every day. Yesterday's chart is gone forever.",
+  "Stuck for something to do? The Water Cooler's Hot or Not lets you settle the day's big debates.",
+  "The Water Cooler isn't a feed — it's a finite page. Read it all, then go touch grass. I won't tell.",
+  "Heads up: the Water Cooler's 'On This Day' is my favorite rabbit hole. Bring a snack.",
 ];
 
 // Timeless curiosities — shape: { id, title, blurb, url? }. The 🌌 card.

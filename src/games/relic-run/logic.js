@@ -142,6 +142,19 @@ export function rating(clicks, par) {
   return "Lost in the Webring";
 }
 
+// Streak milestones. Returns a celebratory line when `streak` (consecutive days
+// completed) hits a milestone, else null — so the win screen only shouts on the
+// days that earned it. Pure: no React, no storage.
+const STREAK_MILESTONES = {
+  3: "🔥 3-day streak! You're a regular now.",
+  7: "🔥 7 days straight — a full week of relics!",
+  30: "🔥 30-day streak. The old web salutes you.",
+  100: "🔥 100 days. You ARE the webring.",
+};
+export function streakMilestone(streak) {
+  return STREAK_MILESTONES[streak] || null;
+}
+
 // Win-screen share block. Par stays HIDDEN until here (no par/hints during play),
 // so the share text is the first place a player learns the optimal length.
 export function shareText(dayKey, clicks, par) {

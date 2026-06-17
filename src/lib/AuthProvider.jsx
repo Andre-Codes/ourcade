@@ -42,7 +42,7 @@ function loadFb() {
 // PUBLIC profiles/{uid} doc (avatar/theme/bio/favorites) so /u/:username works
 // the moment an account is claimed. Local favorites earned as a guest are
 // carried up into the new public profile.
-async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount, seedTop8) {
+async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount, seedTop8, seedRelicRunStreak) {
   const uid = forUid || m.auth.currentUser?.uid;
   const name = uname.trim();
   const key = name.toLowerCase();
@@ -65,6 +65,7 @@ async function claimUsername(m, uname, forUid, seedFavorites, seedRelicCount, se
         bio: "",
         favorites: Array.isArray(seedFavorites) ? seedFavorites : [],
         relicCount: Number(seedRelicCount) || 0,
+        relicRunStreak: Number(seedRelicRunStreak) || 0,
         top8: Array.isArray(seedTop8) ? seedTop8 : [],
         createdAt: m.serverTimestamp(),
         updatedAt: m.serverTimestamp(),
@@ -203,20 +204,22 @@ export default function AuthProvider({ children }) {
       cur && cur.isAnonymous
         ? await m.linkWithCredential(cur, cred) // keeps uid + all synced data
         : await m.createUserWithEmailAndPassword(m.auth, email, password);
-    // Carry guest-earned favorites + discovered relic count + Top 8 into the new
-    // public profile.
+    // Carry guest-earned favorites + discovered relic count + Top 8 + best Daily
+    // Relic Run streak into the new public profile.
     let seedFavs = [];
     let seedRelics = 0;
     let seedTop8 = [];
+    let seedRelicRunStreak = 0;
     try {
       const store = await import("./store.js");
       seedFavs = store.getFavorites();
-      seedRelics = store.getDiscoveredLegendaries().length;
+      seedRelics = store.getDiscoveredRelics().length;
       seedTop8 = store.getTop8();
+      seedRelicRunStreak = Number(store.lsGetJSON("relic:streak", null)?.best || 0);
     } catch {
       /* no store / private mode */
     }
-    await claimUsername(m, name, res.user.uid, seedFavs, seedRelics, seedTop8);
+    await claimUsername(m, name, res.user.uid, seedFavs, seedRelics, seedTop8, seedRelicRunStreak);
     // Mint this account's permanent Ourcade number. A SEPARATE transaction from
     // the username claim so the hot global counter never sits on that critical
     // path — and a failure here is fine (loadProfile backfills next load).
@@ -237,6 +240,7 @@ export default function AuthProvider({ children }) {
       bio: "",
       favorites: seedFavs,
       relicCount: seedRelics,
+      relicRunStreak: seedRelicRunStreak,
       top8: seedTop8,
       number,
     });

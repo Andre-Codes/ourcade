@@ -253,11 +253,12 @@ export default function Home() {
       <nav className="arcade-nav">
         <a href="#top" className="arcade-tab is-active">HOME</a>
         <a href="#arcade-today" className="arcade-tab arcade-tab-hot">TODAY!</a>
-        <Link to="/watercooler" className="arcade-tab arcade-tab-hot">💧 WATER COOLER</Link>
+        <Link to="/watercooler" className="arcade-tab arcade-tab-cool">💧 WATER COOLER</Link>
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
-        <a href="#arcade-games" className="arcade-tab arcade-tab-hot">NEW!</a>
-        <a href="#arcade-foot" className="arcade-tab">F.A.Q.</a>
+        <Link to="/new" className="arcade-tab arcade-tab-hot">NEW!</Link>
+        <Link to="/play/relic-run" className="arcade-tab arcade-tab-redhot">🏺 DAILY RUN</Link>
+        <Link to="/faq" className="arcade-tab">F.A.Q.</Link>
         {hasPhone && (
           <Link to="/phone" className="arcade-tab arcade-tab-account" aria-label="your phone">
             📱{unreadCount > 0 && (

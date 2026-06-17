@@ -126,6 +126,13 @@ html, body, #root {
 .arcade-tab:active { transform: translateY(1px); }
 .arcade-tab.is-active { color: #0a0a12; background: linear-gradient(180deg, var(--neon-lime), #9fd400); }
 .arcade-tab-hot { color: var(--neon-pink); }
+/* Water Cooler: a distinct, calm aqua tab — deliberately NOT flashing (no blink
+   rule in the motion block below), so it reads as its own cool-toned thing next
+   to the hot pink/red tabs. */
+.arcade-tab-cool { color: var(--neon-aqua); border-color: var(--neon-aqua); }
+/* Daily Relic Run: a red flashing tab (blink lives in the motion block) — a
+   different alarm color from the pink hot tabs so it stands apart. */
+.arcade-tab-redhot { color: #ff4d4d; }
 .arcade-nav-spark { color: var(--neon-aqua); font-size: 0.8rem; text-shadow: 0 0 8px var(--neon-aqua); }
 
 /* ---- header / logo ---- */
@@ -883,6 +890,7 @@ main > section + section { margin-top: 44px; }
   .arcade-marquee-track { animation: arcade-marquee 20s linear infinite; }
   .arcade-bestview { animation: arcade-blink 1.2s steps(1, end) infinite; }
   .arcade-tab-hot { animation: arcade-blink 1.2s steps(1, end) infinite; }
+  .arcade-tab-redhot { animation: arcade-blink 1.2s steps(1, end) infinite; }
   .arcade-burst { animation: arcade-pulse 1s ease-in-out infinite; }
 }
 @keyframes arcade-marquee {
@@ -1356,6 +1364,38 @@ main > section + section { margin-top: 44px; }
 .arcade-account-notice { color: var(--neon-aqua); font-size: 0.84rem; margin: 0; }
 
 /* ====================================================================== */
+/*  NEW GAMES PAGE (/new)                                                  */
+/* ====================================================================== */
+.arcade-newpage { max-width: 980px; margin: 0 auto; padding: 64px 16px 48px; }
+.arcade-newpage-title {
+  font-family: 'Black Ops One', cursive; font-size: 2rem; margin: 8px 0 6px; color: #fff;
+}
+.arcade-newpage-sub {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.86rem; line-height: 1.5;
+  color: var(--arcade-muted); margin: 0 0 22px; max-width: 560px;
+}
+
+/* ====================================================================== */
+/*  FAQ PAGE (/faq) — deliberately retro plain-HTML look                   */
+/* ====================================================================== */
+.arcade-faq { max-width: 760px; margin: 0 auto; padding: 64px 18px 56px; font-family: 'Share Tech Mono', monospace; color: #d6e0f5; }
+.arcade-faq-title { font-family: 'Black Ops One', cursive; font-size: 1.8rem; color: #fff; margin: 8px 0 2px; }
+.arcade-faq-updated { font-size: 0.72rem; color: var(--arcade-muted); margin: 0 0 18px; letter-spacing: 0.04em; }
+.arcade-faq hr { border: 0; border-top: 1px dashed #2a2f4a; margin: 26px 0; }
+.arcade-faq-toc { background: #04050b; border: 1px solid #2a2f4a; border-radius: 8px; padding: 14px 16px; margin: 0 0 8px; }
+.arcade-faq-toc-head { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.06em; color: var(--neon-aqua); margin: 0 0 10px; }
+.arcade-faq-toc ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 5px; }
+.arcade-faq-toc a { color: var(--neon-aqua); text-decoration: none; }
+.arcade-faq-toc a:hover { text-decoration: underline; }
+.arcade-faq-q { font-family: 'Black Ops One', cursive; font-size: 1.06rem; color: #fff; margin: 0 0 8px; scroll-margin-top: 80px; }
+.arcade-faq-q .arcade-faq-num { color: var(--neon-pink); margin-right: 6px; }
+.arcade-faq-a { font-size: 0.9rem; line-height: 1.6; color: #c4d0e6; margin: 0; }
+.arcade-faq-a a { color: var(--neon-aqua); }
+.arcade-faq-a + .arcade-faq-a { margin-top: 10px; }
+.arcade-faq-top { display: inline-block; margin-top: 8px; font-size: 0.72rem; color: var(--arcade-muted); text-decoration: none; }
+.arcade-faq-top:hover { color: var(--neon-aqua); }
+
+/* ====================================================================== */
 /*  STUMBLE PAGE (/stumble)                                                */
 /* ====================================================================== */
 .arcade-stumble-page { max-width: 760px; margin: 0 auto; padding: 64px 16px 40px; }
@@ -1550,6 +1590,14 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
   background: radial-gradient(circle at 50% 30%, rgba(255,106,213,.16), var(--arcade-surface) 78%);
   border-color: #ff6ad5;
 }
+/* crystal — the top tier (crystal cartridge): the most premium, a prismatic
+   cyan glow that out-shines both the gold floppy and the pink/mythic disc. */
+.arcade-relic.is-crystal {
+  background: radial-gradient(circle at 50% 30%, rgba(63,255,208,.20), var(--arcade-surface) 80%);
+  border-color: var(--neon-aqua);
+  box-shadow: 0 0 14px rgba(63,255,208,.35);
+}
+.arcade-relic.is-crystal .arcade-relic-icon { filter: drop-shadow(0 0 9px rgba(63,255,208,.85)); }
 .arcade-relic.is-locked { background: var(--arcade-surface); border: 1px dashed var(--arcade-border); opacity: .8; }
 .arcade-relic-icon { width: 46px; height: 46px; object-fit: contain; }
 .arcade-relic.is-locked .arcade-relic-icon { opacity: .5; }
