@@ -49,15 +49,15 @@ export function resolveTop8(entry) {
   switch (type) {
     case "game": {
       const g = getGame(id);
-      return g ? { type, id, icon: g.emoji || ICON.game, title: g.title, to: `/play/${g.id}` } : null;
+      return g ? { type, id, icon: g.emoji || ICON.game, title: g.title, desc: g.blurb || "", to: `/play/${g.id}` } : null;
     }
     case "curiosity": {
       const c = CURIOSITIES.find((x) => x.id === id);
-      return c ? { type, id, icon: ICON.curiosity, title: c.title, href: c.url || null } : null;
+      return c ? { type, id, icon: ICON.curiosity, title: c.title, desc: c.blurb || "", href: c.url || null } : null;
     }
     case "weird": {
       const w = WEIRD.find((x) => x.id === id) || WEIRD_NIGHT.find((x) => x.id === id);
-      return w ? { type, id, icon: ICON.weird, title: w.title, href: w.url || null } : null;
+      return w ? { type, id, icon: ICON.weird, title: w.title, desc: w.blurb || "", href: w.url || null } : null;
     }
     case "fact": {
       const t = factText(id);

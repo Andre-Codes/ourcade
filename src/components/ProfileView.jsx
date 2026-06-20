@@ -89,9 +89,10 @@ function ownerRelics() {
   return ALL_RELICS.filter((r) => found.has(r.id)).map((r) => ({ ...r, at: found.get(r.id) }));
 }
 
-// A read popup for Top 8 items that have no destination of their own (a game
-// fact, say) — tapping the tile opens the full text here. Closes on the ✕,
-// backdrop click, or Escape.
+// An info popup for a Top 8 tile. Every tile opens this first (so a tap previews
+// the item instead of jumping straight to it); when the item has a destination,
+// the popup offers a button to go there. Facts have no destination — they just
+// show their full text. Closes on the ✕, backdrop click, or Escape.
 function Top8Popup({ item: it, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -99,14 +100,17 @@ function Top8Popup({ item: it, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const kicker = { fact: "💡 game fact", curiosity: "🌌 curiosity", weird: "🔍 weird thing" }[it.type] || it.icon;
+  const kicker =
+    { game: "🕹️ game", flash: "📼 flash", fact: "💡 game fact", curiosity: "🌌 curiosity", weird: "🔍 weird thing" }[
+      it.type
+    ] || it.icon;
   return (
     <div className="arcade-top8-modal-bg" onClick={onClose}>
       <div
         className="arcade-top8-modal"
         role="dialog"
         aria-modal="true"
-        aria-label={it.sub || it.type}
+        aria-label={it.title || it.sub || it.type}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -119,23 +123,33 @@ function Top8Popup({ item: it, onClose }) {
         </button>
         <span className="arcade-top8-modal-kicker">{kicker}</span>
         <p className="arcade-top8-modal-body">{it.title}</p>
+        {it.desc ? <p className="arcade-top8-modal-desc">{it.desc}</p> : null}
+        {it.to ? (
+          <Link to={it.to} className="arcade-top8-modal-cta" onClick={onClose}>
+            Go to it ▶
+          </Link>
+        ) : it.href ? (
+          <a
+            href={it.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="arcade-top8-modal-cta"
+            onClick={onClose}
+          >
+            Open ▶
+          </a>
+        ) : null}
       </div>
     </div>
   );
 }
 
-// One Top 8 slot. Games link to /play (internal), curiosity/weird/flash open
-// their source in a new tab. Items with no destination of their own (facts) are
-// tappable too — they open a read popup with the full text. The owner gets a ✕
-// to clear the slot (stopPropagation so it never triggers the tile's action).
+// One Top 8 slot. Every tile is a button that opens an info popup first — the
+// popup previews the item and (when it has one) offers a button to its
+// destination, rather than the tile jumping straight there. The owner's ✕ is a
+// sibling (a <button> can't nest a <button>), positioned by the wrapper.
 function Top8Tile({ item: it, owner, onRemove }) {
   const [open, setOpen] = useState(false);
-  const inner = (
-    <>
-      <span className="arcade-profile-fave-emoji">{it.icon}</span>
-      <span>{it.title}</span>
-    </>
-  );
   const remove = owner ? (
     <button
       type="button"
@@ -152,38 +166,16 @@ function Top8Tile({ item: it, owner, onRemove }) {
     </button>
   ) : null;
 
-  if (it.to) {
-    return (
-      <Link to={it.to} className="arcade-profile-fave arcade-top8-tile">
-        {inner}
-        {remove}
-      </Link>
-    );
-  }
-  if (it.href) {
-    return (
-      <a
-        href={it.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="arcade-profile-fave arcade-top8-tile"
-      >
-        {inner}
-        {remove}
-      </a>
-    );
-  }
-  // No link of its own → a button that pops up the full text to read. The owner's
-  // ✕ is a sibling (a <button> can't nest a <button>), positioned by the wrapper.
   return (
     <div className="arcade-top8-tilewrap">
       <button
         type="button"
         className="arcade-profile-fave arcade-top8-tile is-static"
-        title="Tap to read"
+        title="Tap for details"
         onClick={() => setOpen(true)}
       >
-        {inner}
+        <span className="arcade-profile-fave-emoji">{it.icon}</span>
+        <span>{it.title}</span>
       </button>
       {remove}
       {open && <Top8Popup item={it} onClose={() => setOpen(false)} />}
@@ -254,18 +246,18 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   if (favGames.length) badges.push(`⭐ ${favGames.length} favorite${favGames.length > 1 ? "s" : ""}`);
   if (top8.length) badges.push(`❤️ Top ${top8.length}`);
   if (bests.length) badges.push(`🏆 ${bests.length} board${bests.length > 1 ? "s" : ""}`);
-  if (relicCount) badges.push(`💾 ${relicCount} relic${relicCount > 1 ? "s" : ""}`);
+  if (relicCount) badges.push(`💾 ${relicCount} relic${relicCount > 1 ? "s" : ""} found`);
   if (owner) {
     if (relicRunCurrent > 1) {
       badges.push(
-        `🔥 ${relicRunCurrent}-day relic streak` +
+        `🔥 ${relicRunCurrent}-day Daily Run streak` +
           (relicRunStreak > relicRunCurrent ? ` · best ${relicRunStreak}` : "")
       );
     } else if (relicRunStreak > 1) {
-      badges.push(`🏺 best ${relicRunStreak}-day relic streak`);
+      badges.push(`🔥 best ${relicRunStreak}-day Daily Run streak`);
     }
   } else if (relicRunStreak > 1) {
-    badges.push(`🏺 ${relicRunStreak}-day relic streak`);
+    badges.push(`🔥 ${relicRunStreak}-day Daily Run streak`);
   }
 
   return (

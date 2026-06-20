@@ -589,7 +589,11 @@
       playerVars:{ controls:0, disablekb:1, playsinline:1, rel:0, origin:location.origin },
       events:{
         onReady:()=>{ ytReady = true; if(ytWanted) playJenny(); },
-        onStateChange:(e)=>{ if(e.data===YT.PlayerState.ENDED){ const s=cur(); if(s && s.id==='calling' && s.hang) s.hang(); } },
+        onStateChange:(e)=>{
+          const s=cur();
+          if(e.data===YT.PlayerState.PLAYING){ if(s && s.id==='calling' && !s.fail && !s.connected) s.connect && s.connect(); }
+          else if(e.data===YT.PlayerState.ENDED){ if(s && s.id==='calling' && s.hang) s.hang(); }
+        },
         onError:()=>{ ytIdx++; if(ytWanted && ytIdx < JENNY_IDS.length){ try{ ytPlayer.loadVideoById(JENNY_IDS[ytIdx]); }catch(e){} } }
       }
     });
@@ -900,15 +904,25 @@
   };
   function makeCalling(num, fail){
     return {
-      id:'calling', statusBar:true, t:0, fail:!!fail,
+      id:'calling', statusBar:true, t:0, fail:!!fail, connected:false, dur:0,
       get soft(){ return this.fail ? '' : 'End'; },
       enter(){ this.t=0; if(this.fail) sOver(); },
-      tick(dt){ this.t+=dt; if(this.fail && this.t>1400) popScreen(); },
+      // The song actually started playing → the "call" is picked up. Reset the
+      // duration clock so the timer counts from connect, not from dialling.
+      connect(){ this.connected=true; this.dur=0; },
+      tick(dt){ this.t+=dt; if(this.connected) this.dur+=dt; if(this.fail && this.t>1400) popScreen(); },
       navi(){ this.hang(); }, back(){ this.hang(); },
       hang(){ stopJenny(); popScreen(); },
       render(){
         const baseY = statusH + Math.round((lcdH-statusH)*0.30);
         if(this.fail){ drawTextCentered('NO SIGNAL', baseY, fs+1, ink); drawTextCentered('BUSY', baseY+13*fs, fs, ink); return; }
+        if(this.connected){
+          const s=Math.floor(this.dur/1000), mm=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0');
+          drawTextCentered('CONNECTED', baseY, fs+1, ink);
+          drawTextCentered(num, baseY+13*fs, fs, ink);
+          drawTextCentered(mm+':'+ss, baseY+26*fs, fs+1, ink);
+          return;
+        }
         drawTextCentered('CALLING', baseY, fs+1, ink);
         drawTextCentered(num, baseY+13*fs, fs, ink);
         drawTextCentered('.'.repeat(1+(Math.floor(this.t/350)%3)), baseY+26*fs, fs+1, ink);

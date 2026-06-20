@@ -236,6 +236,9 @@ export default function Home() {
   const games = visible.filter((g) => g.category === "game");
   const tools = visible.filter((g) => g.category === "tool");
   const filtering = query.trim() !== "" || activeTags.length > 0;
+  // Nedry only wags when NOTHING matches anywhere — an empty shelf whose sibling
+  // still has hits gets a quiet one-liner, not the full gag.
+  const noMatches = games.length === 0 && tools.length === 0;
   const favs = useFavorites();
 
   // account chip (anonymous → "claim", named → "@username")
@@ -257,7 +260,7 @@ export default function Home() {
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <Link to="/new" className="arcade-tab arcade-tab-hot">NEW!</Link>
-        <Link to="/play/relic-run" className="arcade-tab arcade-tab-redhot">🏺 DAILY RUN</Link>
+        <Link to="/play/relic-run" className="arcade-tab arcade-tab-redhot">🔥 DAILY RUN</Link>
         <Link to="/faq" className="arcade-tab">F.A.Q.</Link>
         {hasPhone && (
           <Link to="/phone" className="arcade-tab arcade-tab-account" aria-label="your phone">
@@ -367,8 +370,10 @@ export default function Home() {
                 <GameCard key={game.id} game={game} cta="PLAY ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
+          ) : noMatches ? (
+            <NedryGag message="Nothing matches — try another tag." />
           ) : (
-            <NedryGag message="No cabinets match — try another tag." />
+            <p className="arcade-floor-note">No cabinets match this filter — check Tools &amp; Toys.</p>
           )}
         </section>
 
@@ -380,8 +385,8 @@ export default function Home() {
                 <GameCard key={game.id} game={game} cta="OPEN ▶" isFav={favs.includes(game.id)} />
               ))}
             </div>
-          ) : (
-            <NedryGag message="No tools match — try another tag." />
+          ) : noMatches ? null : (
+            <p className="arcade-floor-note">No tools match this filter — check The Floor.</p>
           )}
         </section>
       </main>

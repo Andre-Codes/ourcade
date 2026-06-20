@@ -1717,6 +1717,21 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
   transition: color .12s ease, border-color .12s ease;
 }
 .arcade-top8-modal-close:hover { color: var(--neon-pink); border-color: var(--neon-pink); }
+.arcade-top8-modal-desc {
+  margin: 10px 0 0; font-family: 'Share Tech Mono', monospace;
+  font-size: 0.86rem; line-height: 1.5; color: var(--arcade-muted);
+}
+.arcade-top8-modal-cta {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.04em; text-decoration: none;
+  color: var(--arcade-bg); background: var(--neon-aqua);
+  border: 1px solid var(--neon-aqua);
+  transition: filter .12s ease, transform .08s ease;
+}
+.arcade-top8-modal-cta:hover { filter: brightness(1.12); }
+.arcade-top8-modal-cta:active { transform: translateY(1px); }
 
 /* ---- ❤️ add-to-Top-8 heart (on content widgets, cards, flash players) ---- */
 .arcade-widget-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

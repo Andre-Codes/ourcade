@@ -147,7 +147,7 @@ export function rating(clicks, par) {
 // days that earned it. Pure: no React, no storage.
 const STREAK_MILESTONES = {
   3: "🔥 3-day streak! You're a regular now.",
-  7: "🔥 7 days straight — a full week of relics!",
+  7: "🔥 7 days straight — a full week of runs!",
   30: "🔥 30-day streak. The old web salutes you.",
   100: "🔥 100 days. You ARE the webring.",
 };
@@ -161,8 +161,8 @@ export function shareText(dayKey, clicks, par) {
   const n = runNumber(dayKey);
   const mice = "🖱️".repeat(Math.min(Math.max(clicks, 1), 12));
   return [
-    `Ourcade Daily Relic Run #${n}`,
-    `Found the relic in ${clicks} click${clicks === 1 ? "" : "s"}.`,
+    `Ourcade Daily Run #${n}`,
+    `Found the page in ${clicks} click${clicks === 1 ? "" : "s"}.`,
     `Par: ${par}`,
     mice,
     `No popups survived.`,

@@ -40,8 +40,8 @@ import { lazy } from "react";
 export const GAMES = [
   {
     id: "relic-run",
-    title: "Daily Relic Run",
-    blurb: "A Wikipedia-race through a haunted 2003 webring. Same start and relic for everyone each day — surf the fake retro pages and reach today's lost relic in the fewest clicks.",
+    title: "Daily Run",
+    blurb: "A Wikipedia-race through a haunted 2003 webring. Same start and target for everyone each day — surf the fake retro pages and reach today's lost page in the fewest clicks.",
     emoji: "🖱️",
     accent: "#3fffd0",
     tags: ["daily", "maze", "old-web", "solo"],

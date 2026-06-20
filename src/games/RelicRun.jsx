@@ -282,13 +282,13 @@ export default function RelicRun() {
             </div>
 
             <p className="rr-blurb">
-              Find today's lost internet relic in as few clicks as possible.
+              Find today's lost internet page in as few clicks as possible.
               Everyone gets the same maze today — links move you page to page.
               No par, no hints. Just surf.
             </p>
 
             <p className="rr-tip">
-              🔎 Stuck? Googling each relic is half the fun — dig into what these
+              🔎 Stuck? Googling each page is half the fun — dig into what these
               old pages, games, and gadgets actually were and you'll start spotting
               how they connect. And keep your eyes peeled: a few pages hide a relic
               worth pocketing.
@@ -314,7 +314,7 @@ export default function RelicRun() {
         <style>{CSS}</style>
         <div className="rr-app">
           <div className="rr-win">
-            <div className="rr-winbang">You found today's relic.</div>
+            <div className="rr-winbang">You found today's page.</div>
             <div className="rr-wintarget">{target.title}</div>
 
             <div className="rr-stats">
@@ -346,12 +346,12 @@ export default function RelicRun() {
             <div className="rr-actions">
               <ShareButton
                 label="Copy Result"
-                title="Ourcade — Daily Relic Run"
+                title="Ourcade — Daily Run"
                 text={share}
               />
               <button className="rr-btn" onClick={playArchive}>Play Archive</button>
             </div>
-            <p className="rr-next">a fresh relic drops at midnight, your time.</p>
+            <p className="rr-next">a fresh run drops at midnight, your time.</p>
           </div>
         </div>
       </>

@@ -29,7 +29,7 @@ const FAQS = [
     q: "What can I actually do here?",
     a: [
       "Plenty. The Games shelf has original cabinets you can play in the browser. Today's Arcade (the daily band on the home page) refreshes every day with a tip, the site news, a daily poll, and odd curiosities.",
-      "The Daily Relic Run is a deterministic \"old internet maze\" — everyone gets the same start and target page each day and races to find the relic in the fewest clicks. The Water Cooler is the pop-culture page: today's countdown, on-this-day, the buzz, and a Hot-or-Not. /stumble flings you at a random artifact from the web. And there's a Phone you can use to text other Ourcade members.",
+      "The Daily Run is a deterministic \"old internet maze\" — everyone gets the same start and target page each day and races to find the lost page in the fewest clicks. The Water Cooler is the pop-culture page: today's countdown, on-this-day, the buzz, and a Hot-or-Not. /stumble flings you at a random artifact from the web. And there's a Phone you can use to text other Ourcade members.",
     ],
   },
   {
@@ -44,7 +44,7 @@ const FAQS = [
     id: "q5",
     q: "What are relics? (the little 💾 things)",
     a: [
-      "Relics are hidden collectibles scattered around Ourcade — golden floppy disks, rarer CDs, and the occasional something special. The Magic 8-Ball drops them on rare rolls, and a few are tucked away as easter eggs in places like the Daily Relic Run, waiting for someone curious enough to click the right thing.",
+      "Relics are hidden collectibles scattered around Ourcade — golden floppy disks, rarer CDs, and the occasional something special. The Magic 8-Ball drops them on rare rolls, and a few are tucked away as easter eggs in places like the Daily Run, waiting for someone curious enough to click the right thing.",
       "Find one and it's saved to your profile forever. We're not going to tell you where they all are — that's the fun.",
     ],
   },
