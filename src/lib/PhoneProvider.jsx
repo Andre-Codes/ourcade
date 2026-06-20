@@ -7,6 +7,8 @@ import {
   useState,
 } from "react";
 import { useAuth } from "./AuthProvider.jsx";
+import { isBadger, badgerReply, BADGER_ADDR, BADGER_NAME } from "./badger.js";
+import { lsGetJSON, lsSetJSON, recordRelic } from "./store.js";
 import PhoneChrome from "../components/PhoneChrome.jsx";
 import PhoneOverlay from "../components/PhoneOverlay.jsx";
 
@@ -51,6 +53,15 @@ export default function PhoneProvider({ children }) {
   // genuinely-new bump (and skip the value that's already on screen at mount).
   const [lastIncoming, setLastIncoming] = useState({ seq: 0, message: null });
   const [lastPing, setLastPing] = useState({ seq: 0, fromNumber: "" });
+
+  // Byte Badger — the built-in virtual contact. Its thread is LOCAL ONLY (not in
+  // Firebase): texting it is intercepted in relaySend, the reply comes from the
+  // pre-baked tree, and both turns are stored here. `badgerTick` bumps to
+  // recompute the memoized inbox/sent merges (badgerRef is a ref so writes don't
+  // re-render on their own). Persisted under ourcade:phone:badger.
+  const badgerRef = useRef(lsGetJSON("phone:badger", []) || []);
+  const [badgerTick, setBadgerTick] = useState(0);
+  const bumpBadger = () => setBadgerTick((t) => t + 1);
 
   // Pop-up overlay open/close — pure state, no navigation, so whatever's behind
   // the phone (an in-progress game and all) stays mounted. The FAB/toast open it
@@ -111,6 +122,38 @@ export default function PhoneProvider({ children }) {
 
   const actions = useMemo(() => {
     async function relaySend(to, body) {
+      // Byte Badger is a LOCAL virtual contact — never hits the cloud. Echo the
+      // outgoing text + a pre-baked reply into the local thread, persist, and
+      // fire the same in-phone ring the real inbox uses.
+      if (isBadger(to)) {
+        if (!body || !String(body).trim()) return { ok: false, error: "EMPTY" };
+        const now = Date.now();
+        const mkId = () =>
+          (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
+          now + "-" + Math.floor(Math.random() * 1e6);
+        const sentRow = {
+          id: mkId(), to: BADGER_ADDR, toNumber: BADGER_ADDR, toName: BADGER_NAME,
+          body: String(body), ts: now, read: true,
+        };
+        const history = badgerRef.current.map((t) => ({
+          from: t.from === BADGER_ADDR ? "badger" : "me", body: t.body, ts: t.ts,
+        }));
+        history.push({ from: "me", body: String(body), ts: now });
+        let { text, awardRelic, alreadyText } = badgerReply(body, history);
+        if (awardRelic) {
+          const { isNew } = recordRelic(awardRelic);
+          if (!isNew && alreadyText) text = alreadyText;
+        }
+        const inRow = {
+          id: mkId(), from: BADGER_ADDR, fromNumber: BADGER_ADDR, fromName: BADGER_NAME,
+          body: text, ts: now + 1, read: false,
+        };
+        badgerRef.current = [...badgerRef.current, sentRow, inRow];
+        lsSetJSON("phone:badger", badgerRef.current);
+        bumpBadger();
+        setLastIncoming({ seq: ++seqRef.current, message: inRow });
+        return { ok: true, error: "MESSAGE SENT" };
+      }
       const c = await cloud();
       if (!c || !body || !String(body).trim()) return { ok: false, error: "EMPTY" };
       const r = await resolveRecipient(c, to);
@@ -193,6 +236,17 @@ export default function PhoneProvider({ children }) {
     }
 
     async function markRead(msgId) {
+      // Badger messages aren't in Firebase, so cloud markRead can't clear them —
+      // flip the local row directly or the unread badge would stick app-wide.
+      const i = badgerRef.current.findIndex((m) => m.id === msgId);
+      if (i >= 0) {
+        if (!badgerRef.current[i].read) {
+          badgerRef.current = badgerRef.current.map((m, j) => (j === i ? { ...m, read: true } : m));
+          lsSetJSON("phone:badger", badgerRef.current);
+          bumpBadger();
+        }
+        return { ok: true };
+      }
       const c = await cloud();
       await c?.markRead?.(msgId).catch(() => {});
       return { ok: true };
@@ -289,10 +343,24 @@ export default function PhoneProvider({ children }) {
     };
   }, [claimed, uid]);
 
-  // Unread count — single source of truth for every badge (nav + fab).
+  // Fold the local Byte Badger thread into the cloud inbox/sent so it shows in
+  // the phone like any contact. Plain concat — the iframe re-sorts each
+  // partition by timestamp on every push (replacePartition in snake.html), so
+  // order here doesn't matter. badgerTick drives recompute (badgerRef is a ref).
+  const mergedInbox = useMemo(
+    () => [...inbox, ...badgerRef.current.filter((t) => t.from === BADGER_ADDR)],
+    [inbox, badgerTick]
+  );
+  const mergedSent = useMemo(
+    () => [...sent, ...badgerRef.current.filter((t) => t.to === BADGER_ADDR)],
+    [sent, badgerTick]
+  );
+
+  // Unread count — single source of truth for every badge (nav + fab). Includes
+  // unread Badger replies so a reply bumps the badge like a real text.
   const unreadCount = useMemo(
-    () => inbox.filter((m) => !m.read).length,
-    [inbox]
+    () => mergedInbox.filter((m) => !m.read).length,
+    [mergedInbox]
   );
 
   // Stable open/close handlers for the pop-up overlay (FAB, toast, Escape, ✕).
@@ -309,8 +377,8 @@ export default function PhoneProvider({ children }) {
     () => ({
       claimed,
       number,
-      inbox,
-      sent,
+      inbox: mergedInbox,
+      sent: mergedSent,
       contacts,
       unreadCount,
       lastIncoming,
@@ -319,7 +387,7 @@ export default function PhoneProvider({ children }) {
       ...overlay,
       ...actions,
     }),
-    [claimed, number, inbox, sent, contacts, unreadCount, lastIncoming, lastPing, open, overlay, actions]
+    [claimed, number, mergedInbox, mergedSent, contacts, unreadCount, lastIncoming, lastPing, open, overlay, actions]
   );
 
   return (

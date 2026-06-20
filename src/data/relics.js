@@ -67,8 +67,15 @@ export const RELIC_RUN_RELICS = [
   { id: "first-ripped-mp3", text: "The first MP3 anyone ever ripped.", rarity: "mythic", source: "relic-run" },
 ];
 
+// Relics granted through the Nopia phone. Texting BYTE BADGER the secret
+// passphrase ("Wassup") earns the only one so far — a mythic for finding the
+// den. `source: "phone"` is lore/flavor only, like the others.
+export const PHONE_RELICS = [
+  { id: "byte-badger-secret", text: "Byte Badger let you into the den.", rarity: "mythic", source: "phone" },
+];
+
 // Every relic in the game, from every source. Resolve any discovered id here.
-export const ALL_RELICS = [...RELICS, ...RELIC_RUN_RELICS];
+export const ALL_RELICS = [...RELICS, ...RELIC_RUN_RELICS, ...PHONE_RELICS];
 
 export const RELIC_COUNT = ALL_RELICS.length;
 const RELIC_BY_ID = new Map(ALL_RELICS.map((r) => [r.id, r]));

@@ -235,10 +235,14 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   const myRelics = owner ? ownerRelics() : [];
   const relicCount = owner ? myRelics.length : Number(p?.relicCount || 0);
 
-  // best Daily Relic Run streak: owner reads local truth; public reads mirror.
+  // Daily Relic Run streak. Public viewers only ever see the mirrored BEST
+  // (current streak is ephemeral and never mirrored); the owner additionally
+  // reads the live CURRENT streak from local truth, matching the win screen.
+  const relicStreak = owner ? lsGetJSON("relic:streak", null) || {} : null;
   const relicRunStreak = owner
-    ? Number(lsGetJSON("relic:streak", null)?.best || 0)
+    ? Number(relicStreak.best || 0)
     : Number(p?.relicRunStreak || 0);
+  const relicRunCurrent = owner ? Number(relicStreak.streak || 0) : 0;
 
   // Top 8: owner = live local; public = mirrored array. Resolve each { type, id }
   // to display info, dropping any that no longer resolve (removed/renamed item).
@@ -251,7 +255,18 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   if (top8.length) badges.push(`❤️ Top ${top8.length}`);
   if (bests.length) badges.push(`🏆 ${bests.length} board${bests.length > 1 ? "s" : ""}`);
   if (relicCount) badges.push(`💾 ${relicCount} relic${relicCount > 1 ? "s" : ""}`);
-  if (relicRunStreak > 1) badges.push(`🏺 ${relicRunStreak}-day relic streak`);
+  if (owner) {
+    if (relicRunCurrent > 1) {
+      badges.push(
+        `🔥 ${relicRunCurrent}-day relic streak` +
+          (relicRunStreak > relicRunCurrent ? ` · best ${relicRunStreak}` : "")
+      );
+    } else if (relicRunStreak > 1) {
+      badges.push(`🏺 best ${relicRunStreak}-day relic streak`);
+    }
+  } else if (relicRunStreak > 1) {
+    badges.push(`🏺 ${relicRunStreak}-day relic streak`);
+  }
 
   return (
     <>

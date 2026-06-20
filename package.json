@@ -11,6 +11,7 @@
     "generate:weird": "node scripts/generate-content.js --only=weird",
     "generate:curiosities": "node scripts/generate-content.js --only=curiosities",
     "generate:watercooler": "node scripts/generate-content.js --only=watercooler",
+    "generate:badger": "node scripts/generate-badger.js",
     "fetch:flash": "node scripts/fetch-flash.js",
     "fetch:stumble": "node scripts/fetch-stumble.js",
     "quarter:text": "node scripts/quarter-text.js",

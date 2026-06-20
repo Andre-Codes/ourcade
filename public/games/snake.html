@@ -237,11 +237,17 @@
      FirebaseTransport must replace to deliver a text to another user's phone). */
   function uid(){ try{ return localStorage.getItem('ourcade:nokia:uid') || 'guest'; }catch(e){ return 'guest'; } }
   function dbKey(){ return 'ourcade:nokia:' + uid(); }
+  // The lone built-in contact: BYTE BADGER, the arcade keeper you can text. Its
+  // address is a non-numeric handle so it can never collide with a real Ourcade
+  // number — the parent intercepts sends to it locally (no Firebase). JENNY/
+  // OURCADE used to be seeded here; dialing 8675309 is still an easter egg (see
+  // JENNY_NUMBER below), but the contacts are gone.
+  const BADGER_ADDR = 'BADGER';
   const DEFAULTS = {
     settings:{ soundOn:true, profile:'GENERAL', keypadTones:true, maze:false, level:3, greeting:'OURCADE', clock24:true },
     snake:{ hi:0, webPlayed:false, webBest:0 },
     spaceimpact:{ hi:0 },
-    contacts:[ {name:'JENNY', addr:'8675309'}, {name:'OURCADE', addr:'6287'} ],
+    contacts:[ {name:'BYTE BADGER', addr:BADGER_ADDR} ],
     messages:[],
     composer:[]
   };
@@ -261,6 +267,14 @@
     let d = null;
     try{ d = JSON.parse(localStorage.getItem(dbKey()) || 'null'); }catch(e){ d = null; }
     d = deepDefaults(d, DEFAULTS);
+    // Prune the retired JENNY/OURCADE default contacts from returning phones
+    // (deepDefaults only ADDS missing keys, never removes), and make sure the
+    // built-in BYTE BADGER contact is present. Idempotent.
+    if(Array.isArray(d.contacts)){
+      d.contacts = d.contacts.filter(c => !(c && (c.addr==='8675309' || c.addr==='6287')));
+      if(!d.contacts.some(c => c && c.addr===BADGER_ADDR))
+        d.contacts.unshift({ name:'BYTE BADGER', addr:BADGER_ADDR });
+    }
     // one-time migration of the old flat snake keys
     try{
       const lh = parseInt(localStorage.getItem('ourcade:snake:hi'));
@@ -289,7 +303,7 @@
   const NAMELABELS = {};            // addr → display name from cloud (for contactName)
   let SYNCED = [];                  // cloud-synced contacts [{name, number}] (personal mode)
   function postToParent(msg){ try{ if(window.parent!==window) window.parent.postMessage(msg, location.origin); }catch(e){} }
-  // The phonebook the UI shows: built-in DB.contacts (JENNY/OURCADE, addr-based)
+  // The phonebook the UI shows: built-in DB.contacts (BYTE BADGER, addr-based)
   // plus the cloud-synced ones (number-based). Synced wins on a number clash.
   function allContacts(){
     const out = SYNCED.map(c=>({ name:c.name, addr:c.number }));
