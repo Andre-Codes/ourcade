@@ -10,7 +10,7 @@ import {
 } from "./relic-run/logic.js";
 import { parseArticleText } from "./relic-run/article.js";
 
-/* DAILY RELIC RUN — a deterministic "old internet maze". Everyone gets the same
+/* DAILY RUN — a deterministic "old internet maze". Everyone gets the same
    seeded start page and target page each local day and surfs fake retro web
    pages (Flash games, memes, GeoCities relics, old devices, 404s…) trying to
    reach the relic in the fewest clicks.
@@ -266,7 +266,7 @@ export default function RelicRun() {
         <style>{CSS}</style>
         <div className="rr-app">
           <div className="rr-start">
-            <h1 className="rr-title">🖱️ DAILY RELIC RUN</h1>
+            <h1 className="rr-title">🖱️ DAILY RUN</h1>
             <div className="rr-sub">#{rNum} · {prettyDate(day)}</div>
 
             <div className="rr-startcard">
@@ -284,7 +284,7 @@ export default function RelicRun() {
             <p className="rr-blurb">
               Find today's lost internet page in as few clicks as possible.
               Everyone gets the same maze today — links move you page to page.
-              No par, no hints. Just surf.
+              Just surf.
             </p>
 
             <p className="rr-tip">

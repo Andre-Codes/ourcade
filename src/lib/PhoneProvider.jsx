@@ -9,8 +9,10 @@ import {
 import { useAuth } from "./AuthProvider.jsx";
 import { isBadger, badgerReply, BADGER_NUMBER, BADGER_NAME } from "./badger.js";
 import { lsGetJSON, lsSetJSON, recordRelic } from "./store.js";
+import { relicById } from "../data/relics.js";
 import PhoneChrome from "../components/PhoneChrome.jsx";
 import PhoneOverlay from "../components/PhoneOverlay.jsx";
+import DenCelebration from "../components/DenCelebration.jsx";
 
 /* PhoneProvider — the always-on heart of the Nopia phone.
 
@@ -74,6 +76,13 @@ export default function PhoneProvider({ children }) {
   // the phone (an in-progress game and all) stays mounted. The FAB/toast open it
   // and PhoneOverlay renders it above every route.
   const [open, setOpen] = useState(false);
+
+  // Den relic celebration. Texting Badger "wassup" awards the relic immediately,
+  // but the VISUAL is deferred to phone-close (the chat stays immersive; leaving
+  // is the rewarding beat). `pendingRelicCele` is queued on award; closePhone
+  // flushes it into `relicCele`, which renders the DenCelebration overlay.
+  const [pendingRelicCele, setPendingRelicCele] = useState(null); // { relic, isNew } | null
+  const [relicCele, setRelicCele] = useState(null);               // { relic, isNew } | null
 
   // Refs so actions + the inbox auto-add read the LATEST identity/contacts
   // without forcing the listener effect to re-subscribe (it keys on [claimed,
@@ -160,6 +169,9 @@ export default function PhoneProvider({ children }) {
           if (awardRelic) {
             const { isNew } = recordRelic(awardRelic);
             if (!isNew && alreadyText) text = alreadyText;
+            // Queue the den reveal — it fires when the user closes the phone.
+            const relic = relicById(awardRelic);
+            if (relic) setPendingRelicCele({ relic, isNew });
           }
           const inRow = {
             id: mkId(), from: BADGER_NUMBER, fromNumber: BADGER_NUMBER, fromName: BADGER_NAME,
@@ -389,7 +401,11 @@ export default function PhoneProvider({ children }) {
   const overlay = useMemo(
     () => ({
       openPhone: () => setOpen(true),
-      closePhone: () => setOpen(false),
+      // Closing the phone flushes any queued den reveal into view.
+      closePhone: () => {
+        setOpen(false);
+        setPendingRelicCele((p) => { if (p) setRelicCele(p); return null; });
+      },
       togglePhone: () => setOpen((v) => !v),
     }),
     []
@@ -417,6 +433,13 @@ export default function PhoneProvider({ children }) {
       {children}
       <PhoneChrome />
       <PhoneOverlay />
+      {relicCele && (
+        <DenCelebration
+          relic={relicCele.relic}
+          isNew={relicCele.isNew}
+          onClose={() => setRelicCele(null)}
+        />
+      )}
     </PhoneContext.Provider>
   );
 }

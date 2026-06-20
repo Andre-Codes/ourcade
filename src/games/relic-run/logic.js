@@ -1,4 +1,4 @@
-/* DAILY RELIC RUN — pure puzzle logic.
+/* DAILY RUN — pure puzzle logic.
 
    No React, no DOM: the same module decides the day's start/target and grades a
    run for BOTH the playable cabinet (RelicRun.jsx) and the headless verifier

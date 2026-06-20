@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   DAILY RELIC RUN — fake-wiki articles, one per node.
+   DAILY RUN — fake-wiki articles, one per node.
 
    These are the readable, encyclopedia-style pages a player surfs. Topology
    (which pages connect) lives in relicNodes.js as `links`; the prose here is a

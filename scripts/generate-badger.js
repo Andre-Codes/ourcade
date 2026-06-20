@@ -1,8 +1,13 @@
 /* ============================================================
    GENERATE-BADGER — build-time generator for Byte Badger's reply
    script tree (the brain behind the phone's built-in contact).
-   Calls Claude once to author a rich, in-character branching
-   tree, validates it, and writes src/data/generated/badger.js.
+   Calls Claude to author a rich, in-character tree — the core
+   on-site intents PLUS a large conversational "brain" of nostalgia
+   / early-2000s TOPIC cards (generated one themed batch per
+   cluster) — validates it, and writes src/data/generated/badger.js.
+   The runtime (src/lib/badger.js) RETRIEVES over these cards; there
+   is no live model at runtime, so this is where the breadth comes
+   from. Add a cluster to TOPIC_CLUSTERS to widen what he knows.
 
    NEVER runs in the browser — Ourcade is a static site, so the
    runtime (src/lib/badger.js) only PICKS over this pre-baked
@@ -35,6 +40,8 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 
+const arr = (v) => (Array.isArray(v) ? v : []);
+
 // The intents the runtime engine matches on. The generator must produce ALL of
 // these ids (and may add more); each needs keywords + several replies. The
 // secret passphrase itself is NOT generated (it lives in src/lib/badger.js so
@@ -44,6 +51,40 @@ const REQUIRED_INTENTS = [
   "greeting", "who", "games", "relics", "help",
   "compliment", "insult", "smalltalk", "bye", "jenny",
 ];
+
+// The conversational BRAIN: themed clusters of nostalgia / early-2000s topics
+// Byte Badger can actually chat about, generated in focused batches (one model
+// call per cluster) and merged into a single `topics` array. This is what makes
+// him feel "pseudo-AI" — broad recall over a big baked KB, retrieved at runtime
+// (see src/lib/badger.js) rather than improvised by a live model. Add clusters
+// freely; each just needs to keep producing { id, keywords, replies } cards.
+const TOPIC_CLUSTERS = [
+  {
+    id: "early-internet",
+    brief:
+      "The early/dial-up internet: dial-up & 56k modems & AOL, AIM/ICQ/MSN messenger & away messages, Napster/LimeWire/Kazaa file-sharing, Winamp, Geocities/Angelfire/Tripod homepages, webrings, guestbooks & hit counters, MySpace (Top 8, Tom, profile songs), Newgrounds/Flash (.swf) culture, Ask Jeeves/AltaVista/Netscape, classic web memes (All Your Base, Numa Numa, Hamster Dance, Leeroy Jenkins).",
+  },
+  {
+    id: "games-consoles",
+    brief:
+      "Games & consoles of the era: N64 (GoldenEye, Mario 64, the 3-prong controller, Rumble Pak), PS1/PS2 (memory cards, GTA, Crash, Tony Hawk), Game Boy/GBA (worm light, link cable), Pokémon (MissingNo, starters, holo Charizard, trading cards), blowing on cartridges, cheat codes (Konami code, GameShark), LAN parties (Halo, Counter-Strike), RuneScape, Club Penguin, Neopets, Smash Bros, real-life arcades (quarters, DDR, claw machines).",
+  },
+  {
+    id: "tech-gadgets",
+    brief:
+      "Tech & gadgets: CRT/tube TVs (degauss, rabbit ears), VCRs (be kind rewind), floppy & zip disks, burning CD-Rs, MP3s, iPods (click wheel, white earbuds, iTunes), Tamagotchi & digital pets, old phones (Nokia 3310, Razr flip, T9 texting, polyphonic ringtones), the Y2K bug.",
+  },
+  {
+    id: "pop-culture",
+    brief:
+      "Y2K & 2000s pop culture: Y2K fashion (frosted tips, JNCO jeans, butterfly clips, trucker hats, Von Dutch/Ed Hardy), Blockbuster & video stores (late fees), MTV/TRL & boy bands & pop-punk, Saturday-morning cartoons & Toonami, the school computer lab (Oregon Trail, Mavis Beacon, Kid Pix, Encarta), mall culture.",
+  },
+];
+
+// Aim for a rich brain. Per-cluster target the model writes; the floor below is
+// what a run must clear to be allowed to overwrite the committed seed.
+const TOPICS_PER_CLUSTER = 10;
+const MIN_TOPICS = 24;
 
 const SYSTEM = `You are writing the complete dialogue script for BYTE BADGER, the resident keeper-mascot of OURCADE (theourcade.com) — a tiny, hand-made browser arcade built to feel like the early-2000s internet (Newgrounds / AddictingGames / school-computer-lab energy). Byte Badger "lives" inside the site's retro Nokia-style phone as a contact you can text, and replies like a real (if slightly unhinged) texting buddy.
 
@@ -81,24 +122,29 @@ Produce:
 
 const replyArray = { type: "array", items: { type: "string" } };
 
+// A topic/intent card: the shared shape the runtime ranks over. `keywords` is the
+// retrieval surface; `replies` are what Badger says; `followups` (optional) let
+// him deepen a thread when the user lingers on the same subject.
+const cardSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    id: { type: "string" },
+    keywords: { type: "array", items: { type: "string" } },
+    replies: replyArray,
+    followups: replyArray,
+    era: { type: "string" },
+    tags: { type: "array", items: { type: "string" } },
+  },
+  required: ["id", "keywords", "replies"],
+};
+
 const schema = {
   type: "object",
   additionalProperties: false,
   properties: {
     greeting: replyArray,
-    intents: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          id: { type: "string" },
-          keywords: { type: "array", items: { type: "string" } },
-          replies: replyArray,
-        },
-        required: ["id", "keywords", "replies"],
-      },
-    },
+    intents: { type: "array", items: cardSchema },
     fallback: replyArray,
     secretReward: replyArray,
     secretAlready: replyArray,
@@ -106,34 +152,66 @@ const schema = {
   required: ["greeting", "intents", "fallback", "secretReward", "secretAlready"],
 };
 
-async function generate() {
+// Topics come back as their own object so each themed batch is a focused call.
+const topicsSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: { topics: { type: "array", items: cardSchema } },
+  required: ["topics"],
+};
+
+// Cache the persona system prompt across every call in the run (the core call +
+// one per topic cluster), same trick generate-content.js uses.
+const SYSTEM_BLOCKS = [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }];
+
+// One structured call → parsed JSON. Shared by the core tree and each cluster.
+async function callJSON(label, prompt, outSchema, maxTokens) {
   const stream = client.messages.stream({
     model: "claude-opus-4-8",
-    max_tokens: 32000,
+    max_tokens: maxTokens,
     thinking: { type: "adaptive" },
     output_config: {
       effort: "high",
-      format: { type: "json_schema", schema },
+      format: { type: "json_schema", schema: outSchema },
     },
-    system: SYSTEM,
-    messages: [{ role: "user", content: PROMPT }],
+    system: SYSTEM_BLOCKS,
+    messages: [{ role: "user", content: prompt }],
   });
   const msg = await stream.finalMessage();
   const text = msg.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-  const usage = msg.usage || {};
-  console.log(`  badger: ${usage.output_tokens ?? "?"} out tok`);
+  console.log(`  ${label}: ${msg.usage?.output_tokens ?? "?"} out tok`);
   try {
     return JSON.parse(text);
   } catch (e) {
-    throw new Error(`badger: model did not return valid JSON (${e.message})`);
+    throw new Error(`${label}: model did not return valid JSON (${e.message})`);
   }
+}
+
+// The core tree: greeting + on-site intents + fallback + secret lines.
+async function generateCore() {
+  return callJSON("core", PROMPT, schema, 32000);
+}
+
+// One themed batch of conversational topic cards. Returns an array of cards.
+async function generateCluster(cluster) {
+  const prompt = `Write Byte Badger's CONVERSATIONAL TOPIC CARDS for this theme so he can actually chat about it like a nostalgic buddy — not just point at the arcade.
+
+THEME (${cluster.id}): ${cluster.brief}
+
+Produce ${TOPICS_PER_CLUSTER}+ topic cards as { id, keywords, replies, followups?, era?, tags? }:
+- id: short kebab-case (e.g. "dialup-internet", "n64", "tamagotchi"). One distinct subject per card.
+- keywords: 6-12 lowercase ways a user might bring it up — names, slang, common phrasings, misspellings, abbreviations (e.g. "dial up","56k","aol","modem"). These are how the card gets matched, so be generous and specific. Prefer DISTINCTIVE terms over generic ones like "game"/"cool".
+- replies: 4-6 distinct, in-character SMS-length lines (<= ~160 chars) — warm, dry, specific, funny. Real memories, not vague vibes.
+- followups (optional): 1-2 lines that nudge toward a related topic to keep the thread alive.
+Stay fully in Byte Badger's voice. Return ONLY data matching the schema.`;
+  const out = await callJSON(`topics:${cluster.id}`, prompt, topicsSchema, 24000);
+  return arr(out.topics);
 }
 
 // Validate the tree before writing — a bad/incomplete tree should fail the run,
 // never overwrite the committed seed with something the engine can't use.
 function validate(tree) {
   const errors = [];
-  const arr = (v) => Array.isArray(v) ? v : [];
   if (arr(tree.greeting).length < 2) errors.push("greeting needs >= 2 lines");
   if (arr(tree.fallback).length < 2) errors.push("fallback needs >= 2 lines");
   if (arr(tree.secretReward).length < 1) errors.push("secretReward needs >= 1 line");
@@ -150,6 +228,19 @@ function validate(tree) {
   for (const id of REQUIRED_INTENTS) {
     if (!seen.has(id)) errors.push(`missing required intent "${id}"`);
   }
+
+  // Topics — the conversational brain. Each card needs a match surface + lines,
+  // and the run must clear a floor so a thin generation can't gut the brain.
+  const topics = arr(tree.topics);
+  if (topics.length < MIN_TOPICS) {
+    errors.push(`topics needs >= ${MIN_TOPICS} cards (got ${topics.length})`);
+  }
+  for (const t of topics) {
+    const id = t && t.id;
+    if (!id) { errors.push("a topic is missing its id"); continue; }
+    if (arr(t.keywords).length < 1) errors.push(`topic "${id}" needs >= 1 keyword`);
+    if (arr(t.replies).length < 3) errors.push(`topic "${id}" needs >= 3 replies`);
+  }
   return errors;
 }
 
@@ -158,15 +249,27 @@ function writeModule(tree) {
     `// AUTO-GENERATED by scripts/generate-badger.js — do not edit by hand.\n` +
     `// Byte Badger's reply script tree. See src/lib/badger.js for the runtime.\n` +
     `// The secret passphrase is NOT here — it lives in the engine so it can't drift.\n`;
-  const value = { version: 1, ...tree };
+  const value = { version: 2, ...tree };
   fs.writeFileSync(path.join(OUT_DIR, "badger.js"), `${banner}export default ${JSON.stringify(value, null, 2)};\n`);
-  console.log(`  wrote src/data/generated/badger.js (${arr(tree.intents).length} intents)`);
+  console.log(`  wrote src/data/generated/badger.js (${arr(tree.intents).length} intents, ${arr(tree.topics).length} topics)`);
 }
-const arr = (v) => Array.isArray(v) ? v : [];
 
 async function main() {
   console.log("Generating Byte Badger reply tree…");
-  const tree = await generate();
+  // Core tree first, then each topic cluster (sequential keeps the cached system
+  // prompt warm and the logs readable). Merge all cluster cards into `topics`.
+  const tree = await generateCore();
+  const topics = [];
+  const ids = new Set();
+  for (const cluster of TOPIC_CLUSTERS) {
+    const cards = await generateCluster(cluster);
+    for (const c of cards) {
+      // De-dupe by id across clusters — first writer wins.
+      if (c && c.id && !ids.has(c.id)) { ids.add(c.id); topics.push(c); }
+    }
+  }
+  tree.topics = topics;
+
   const errors = validate(tree);
   if (errors.length) {
     console.error("✗ validation failed — NOT writing badger.js:");

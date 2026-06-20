@@ -1,4 +1,4 @@
-/* DAILY RELIC RUN — fake-wiki article parser.
+/* DAILY RUN — fake-wiki article parser.
 
    Pure, no React, no DOM — so it's shared by the playable cabinet (RelicRun.jsx)
    and the headless verifier (scripts/relic-run-check.js), exactly like logic.js.

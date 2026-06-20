@@ -47,9 +47,14 @@ content generator. Each file has a header comment explaining its format.
 | Change the spotlighted real-world game        | [`src/data/manual/featured.js`](src/data/manual/featured.js) |
 | Change the "what genre next?" vote options    | [`src/data/nextGame.js`](src/data/nextGame.js) |
 | Change the time-of-day greetings              | [`src/data/dayparts.js`](src/data/dayparts.js) |
+| Teach Byte Badger (the phone NPC) new things  | [`src/data/generated/badger.js`](src/data/generated/badger.js) ⚠️ |
 
 > There's also a hub guide at
 > [`src/data/manual/README.md`](src/data/manual/README.md).
+
+> ⚠️ **`badger.js` is a generated file** (the one exception in this table). You
+> *can* hand-edit it, but `npm run generate:badger` will overwrite your edits. For
+> a permanent change, see the Byte Badger note below.
 
 ### Common quick edits
 
@@ -65,6 +70,24 @@ content generator. Each file has a header comment explaining its format.
   touch for the catalog). React game → `.jsx` in `src/games/`,
   `type: "react"`. Standalone HTML → file in `public/games/`, `type: "iframe"`.
   Full recipe is in the main [`README.md`](README.md).
+
+### Byte Badger — the phone's chatty NPC
+
+Texting **Byte Badger** (the `555-0001` contact in the in-app phone) gets
+in-character replies about games, secrets, and a *lot* of early-2000s / old-web
+nostalgia. He **feels** like a chatbot but there's **no live AI** — Ourcade is a
+static site. He's a big pre-written "brain" (`topics` of keyword → replies) that
+the phone matches against as you text. Saying the secret word **"wassup"** opens
+the den and awards a relic (you'll see a little celebration when you close the
+phone).
+
+To **make him smarter / give him new topics**, the proper way is to add a theme
+to `TOPIC_CLUSTERS` in [`scripts/generate-badger.js`](scripts/generate-badger.js)
+and re-run `npm run generate:badger` (needs an API key — it re-authors his whole
+brain). For a quick, no-API tweak you can hand-add a card to the `topics` array
+in `src/data/generated/badger.js` (copy the shape of an existing one:
+`{ id, keywords, replies }`) — just remember a future `generate:badger` run will
+overwrite it. The deep how-it-works is in [`AGENTS.md`](AGENTS.md) §6a.
 
 ---
 
@@ -103,4 +126,6 @@ Anything code-level, e.g.:
 - styling beyond what a config value covers (`src/arcade.css`)
 - building a new game/tool component
 - Firebase rules, auth, the phone subsystem, or the share/contact cards
+- changing **how** Byte Badger matches/replies (his engine in `src/lib/badger.js`),
+  vs. just adding topics, which you can do yourself (above)
 - anything in `src/lib/`, `src/components/`, or `scripts/`

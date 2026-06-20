@@ -172,6 +172,58 @@ UI** (a sandboxed iframe).
 `nopia:send`, `nopia:read`, `nopia:addcontact`, `nopia:ping`,
 `nopia:clearmessages`, and `ourcade:score`.
 
+### 6a. Byte Badger — the offline "pseudo-AI" contact
+
+The phone ships a built-in NPC contact, **Byte Badger** (number `555-0001`, the
+same number `scripts/quarter-text.js` uses for the Daily Quarter, so the live
+chat and daily texts thread together). Texting him gets in-character replies that
+feel conversational — but there is **no live LLM at runtime**. Ourcade is a
+static site, so Badger is a **large pre-baked knowledge base + a small runtime
+retrieval engine**. Two pieces:
+
+- **`src/lib/badger.js`** — the pure (no React/Firebase, node-testable) engine.
+  `badgerReply(userText, history)` → `{ text, awardRelic?, alreadyText? }`. It:
+  1. checks the **secret passphrase** ("wassup", matched by `SECRET_PATTERNS`)
+     and signals a relic award — this regex lives in the engine, **not** the
+     generated tree, so it can never drift when the tree is regenerated;
+  2. otherwise **retrieves** the best-scoring card across `intents` (on-site
+     topics: games/relics/help/jenny/…) **and** `topics` (the conversational
+     brain). Scoring (`scoreCard`) combines word-boundary phrase matching with
+     stopword-filtered **token overlap**, each match weighted by **token rarity
+     (IDF-lite, `TOKEN_CARD_COUNT`)** so a specific term ("n64") outscores a
+     generic one ("game");
+  3. below `SCORE_THRESHOLD`, stays in character and **warmly redirects** (a
+     fallback line + a rotating "ask me about X" topic teaser) — never a flat
+     "I don't know";
+  4. uses **light conversational memory** from `history`: avoid repeating the
+     last line, and prefer a card's `followups` when the user lingers on the same
+     topic.
+- **`src/data/generated/badger.js`** — the baked tree the engine reads:
+  `greeting`, `intents`, `fallback`, `secretReward`/`secretAlready`, and the big
+  **`topics`** array (each card = `{ id, keywords, replies, followups?, era?,
+  tags? }`). Like all of `generated/`, it's **clobbered on regen** — but the
+  *passphrase is never in here*. It's safe to hand-tune keywords/replies as a
+  seed; just know a regen overwrites them.
+- **`scripts/generate-badger.js`** — the build-time author. Same SDK conventions
+  as the other generators (`claude-opus-4-8`, json_schema, adaptive thinking,
+  cached system prompt). It writes the core tree in one call, then generates the
+  `topics` brain **one themed batch per `TOPIC_CLUSTERS` entry** and merges
+  (de-duped by id). `validate()` enforces a topic floor (`MIN_TOPICS`) and
+  **writes nothing on failure**, so a thin run can't gut the committed brain. Run
+  `npm run generate:badger` (needs `ANTHROPIC_API_KEY`); it's a manual,
+  eyeball-the-output tool — the persona is evergreen, so CI never re-rolls it.
+  **To widen what Badger knows, add a cluster to `TOPIC_CLUSTERS` and re-run**
+  (or hand-add `topics` cards to the seed for a no-API tweak).
+
+**Relic on "wassup":** the award is performed by the caller, not the engine.
+`PhoneProvider.relaySend` intercepts Badger texts locally (never hits Firestore;
+the thread is stored under `ourcade:phone:badger`), and when `awardRelic` comes
+back it calls `recordRelic` immediately, then **queues** a celebration. The
+visual is **deferred to phone-close**: `closePhone` flushes the queued relic into
+`src/components/DenCelebration.jsx` (a den/badger-themed full-screen reveal,
+distinct from the crystal-tier `RelicCelebration` — this relic is *mythic*). So
+the chat stays immersive and *leaving* the phone is the rewarding beat.
+
 ---
 
 ## 7. Shareable cards & sharing
@@ -202,7 +254,8 @@ somewhere the recipient can text back.
 
 **Content scripts** (build-time only; need `ANTHROPIC_API_KEY`):
 `npm run generate` (full batch), `npm run generate:weird`,
-`npm run generate:curiosities`, `npm run research` (proves live web search),
+`npm run generate:curiosities`, `npm run generate:badger` (re-author Byte
+Badger's brain — see §6a), `npm run research` (proves live web search),
 `npm run check:daily` (headless: verify every rotation still resolves).
 Game-balance sims also live here (e.g. `scripts/pits-and-portals-sim.js`).
 
@@ -235,7 +288,8 @@ src/
     *.js                 merge points + dayparts, nextGame, relics, profilePresets, …
   lib/
     AuthProvider.jsx     auth + profile
-    PhoneProvider.jsx    app-wide phone listeners + actions
+    PhoneProvider.jsx    app-wide phone listeners + actions + Badger relic reveal
+    badger.js            Byte Badger's offline retrieval engine (§6a)
     daily.js             date-seeded rotation engine
     cloud.js / firebase.js / store.js / scores.js / votes.js
     share.js / *Card.js  share + canvas card renderers

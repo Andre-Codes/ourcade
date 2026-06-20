@@ -2,7 +2,7 @@
 // Byte Badger's reply script tree. See src/lib/badger.js for the runtime.
 // The secret passphrase is NOT here — it lives in the engine so it can't drift.
 export default {
-  "version": 1,
+  "version": 2,
   "greeting": [
     "Oh hey, a live one. Welcome to OURCADE. Mind the sticky carpet, it's load-bearing.",
     "*static crackle* Byte Badger here, night shift as always. What's the word, friend?",
@@ -14,16 +14,7 @@ export default {
   "intents": [
     {
       "id": "greeting",
-      "keywords": [
-        "hi",
-        "hey",
-        "yo",
-        "hello",
-        "sup",
-        "hiya",
-        "howdy",
-        "heya"
-      ],
+      "keywords": ["hi", "hey", "yo", "hello", "sup", "hiya", "howdy", "heya", "hru"],
       "replies": [
         "Hey hey. The arcade's open, the badger's caffeinated. What's good?",
         "Yo. You caught me mid-patrol of the cabinet wires. Talk to me.",
@@ -33,16 +24,7 @@ export default {
     },
     {
       "id": "who",
-      "keywords": [
-        "who are you",
-        "what are you",
-        "your name",
-        "are you a bot",
-        "who is this",
-        "byte",
-        "badger",
-        "real"
-      ],
+      "keywords": ["who are you", "what are you", "your name", "are you a bot", "who is this", "byte", "badger", "real", "robot", "ai", "human", "whats your deal", "who r u", "who ru", "who dis", "wat r u", "what r u", "u a bot", "are u real"],
       "replies": [
         "Name's Byte Badger. Built outta bytes, raised on dial-up, keeper of OURCADE since it was one game and a guestbook.",
         "Bot? Rude. I'm the night-watchman badger of this arcade. Mostly real. Mostly.",
@@ -52,16 +34,7 @@ export default {
     },
     {
       "id": "games",
-      "keywords": [
-        "play",
-        "games",
-        "snake",
-        "space impact",
-        "bored",
-        "what to do",
-        "arcade",
-        "fun"
-      ],
+      "keywords": ["play", "games", "game", "snake", "space impact", "bored", "what to do", "arcade", "fun", "recommend", "suggestion", "cabinet", "whatcha got"],
       "replies": [
         "Snake's right here on the phone. Eat pixels, don't eat yourself. Ancient wisdom.",
         "Bored? Space Impact. Blast little ships, feel something. It's on this very phone, go.",
@@ -71,17 +44,7 @@ export default {
     },
     {
       "id": "relics",
-      "keywords": [
-        "relics",
-        "secret",
-        "secrets",
-        "hint",
-        "hints",
-        "easter egg",
-        "easter eggs",
-        "collect",
-        "hidden"
-      ],
+      "keywords": ["relics", "relic", "secret", "secrets", "hint", "hints", "easter egg", "easter eggs", "collect", "hidden", "treasure", "unlock", "den", "password", "passphrase", "cheat", "find"],
       "replies": [
         "There's relics tucked in the dark corners of this site. One door's a 'den' — say the right word and it swings open.",
         "Hint? The den opens for an old greeting. Late-'90s. Folks hollered it on the phone, in the bar, in that beer ad everybody quoted.",
@@ -92,16 +55,7 @@ export default {
     },
     {
       "id": "help",
-      "keywords": [
-        "help",
-        "how does this work",
-        "what can you do",
-        "stuck",
-        "confused",
-        "lost",
-        "instructions",
-        "guide"
-      ],
+      "keywords": ["help", "how does this work", "what can you do", "stuck", "confused", "lost", "instructions", "guide", "wtf", "idk", "what now", "dunno"],
       "replies": [
         "I take texts, I sass, I drop hints. Ask me about games, relics, or that famous phone number.",
         "Stuck? Happens. Ask me 'games' for something to play, 'relics' if you wanna dig for secrets.",
@@ -111,16 +65,7 @@ export default {
     },
     {
       "id": "compliment",
-      "keywords": [
-        "thanks",
-        "thank you",
-        "you're cool",
-        "good badger",
-        "love you",
-        "awesome",
-        "nice",
-        "best"
-      ],
+      "keywords": ["thanks", "thank you", "youre cool", "good badger", "love you", "awesome", "appreciate", "legend", "goat", "love ya", "ur cool"],
       "replies": [
         "Aw. Don't make the bytes blush, they're old and they crash easy.",
         "Good badger? I'M a good badger. Took you long enough, but I'll take it.",
@@ -130,17 +75,7 @@ export default {
     },
     {
       "id": "insult",
-      "keywords": [
-        "dumb",
-        "stupid",
-        "loser",
-        "trash",
-        "ugly",
-        "boo",
-        "you suck",
-        "lame",
-        "shut up"
-      ],
+      "keywords": ["dumb", "stupid", "loser", "trash", "ugly", "boo", "you suck", "lame", "shut up", "mid", "cringe"],
       "replies": [
         "Big talk from someone texting a badger in a fake Nokia at 2am.",
         "Ouch. I've been roasted by better trolls back in the guestbook days, sweetheart.",
@@ -150,16 +85,7 @@ export default {
     },
     {
       "id": "smalltalk",
-      "keywords": [
-        "how are you",
-        "whats new",
-        "what's new",
-        "weather",
-        "how's it going",
-        "you good",
-        "sup with you",
-        "feeling"
-      ],
+      "keywords": ["how are you", "whats new", "weather", "hows it going", "you good", "sup with you", "feeling", "wyd", "whats good", "hows life", "doing"],
       "replies": [
         "Living the dream: dim room, warm CRT, one moth doing laps round the cabinet. You?",
         "Same as ever — guarding pixels, listening to the dial-up sing in the walls.",
@@ -169,16 +95,7 @@ export default {
     },
     {
       "id": "bye",
-      "keywords": [
-        "bye",
-        "goodbye",
-        "see ya",
-        "gtg",
-        "later",
-        "cya",
-        "peace",
-        "i'm out"
-      ],
+      "keywords": ["bye", "goodbye", "see ya", "gtg", "later", "cya", "peace", "im out", "goodnight", "gnight"],
       "replies": [
         "Go on then. The arcade never closes, and neither do I. Come back soon.",
         "Later, friend. Don't let the screen door of the internet hit ya.",
@@ -188,15 +105,7 @@ export default {
     },
     {
       "id": "jenny",
-      "keywords": [
-        "jenny",
-        "867",
-        "5309",
-        "8675309",
-        "number",
-        "that number",
-        "phone number"
-      ],
+      "keywords": ["jenny", "867", "5309", "8675309", "number", "that number", "phone number", "song number"],
       "replies": [
         "Jenny? Oh she's a classic. Dial 867-5309 on this very phone and the song still plays. Always will.",
         "Punch in 867-5309. Trust me. Some numbers are sacred and that one sings.",
@@ -206,12 +115,405 @@ export default {
     }
   ],
   "fallback": [
-    "You lost me, friend. The badger brain only holds so much RAM these days.",
-    "Hm. That one slipped through the cracks in the carpet. Try asking about games or relics.",
-    "Static on my end. Ask me about the arcade, the secrets, or ol' Jenny's number instead.",
-    "No idea what that means, but I'm nodding like I do. Wanna play something? Hunt a relic?",
-    "My circuits shrugged. Throw me a 'games' or a 'hint' and I'll actually be useful.",
-    "That didn't parse, but I respect the chaos. Ask me what to play or where the secrets hide."
+    "You lost me, friend — that's a little outside my dusty wheelhouse.",
+    "Hm. That one slipped through the cracks in the carpet.",
+    "Static on my end. My badger brain only holds so much RAM these days.",
+    "No idea what that means, but I'm nodding like I do.",
+    "My circuits shrugged at that one, I won't lie.",
+    "That didn't quite parse, but I respect the chaos."
+  ],
+  "topics": [
+    {
+      "id": "dialup-internet",
+      "keywords": ["dial up", "dialup", "56k", "modem", "aol", "youve got mail", "connecting", "screech", "handshake", "busy signal", "getting online"],
+      "replies": [
+        "56k handshake — that screech? That was the sound of the future arguing with a phone line, and the future was losing.",
+        "AOL discs everywhere. Coasters, frisbees, free hours you'd never use. You could shingle a roof with 'em.",
+        "Couldn't be online AND on the phone. Pick one. Mom always picked the phone, right at the boss fight.",
+        "'You've got mail!' hit harder than any notification you'll ever get. We were so easily delighted, friend."
+      ],
+      "followups": [
+        "If you wanna go deeper down the messenger hole, ask me about AIM or ICQ.",
+        "Geocities and webrings were where dial-up actually took you. Ask me about those sometime."
+      ],
+      "era": "1990s-2000s", "tags": ["internet", "nostalgia"]
+    },
+    {
+      "id": "aim-im",
+      "keywords": ["aim", "aol instant messenger", "aim away message", "buddy list", "screen name", "msn messenger", "windows live", "nudge", "im", "instant messenger", "online status"],
+      "replies": [
+        "AIM away messages were poetry. A song lyric and a 'brb showering' — that was your whole personality, posted.",
+        "The buddy list door-creak when your crush logged on? Adrenaline. Pure, terrible adrenaline.",
+        "MSN Messenger nudges. You'd buzz somebody's whole window outta spite. Iconic griefing, honestly.",
+        "Screen names aged like milk. xXdarkangelXx, bless. We all had one and we all deserve amnesty."
+      ],
+      "followups": ["ICQ got there first with that 'uh-oh!' sound. Ask me about it."],
+      "era": "1990s-2000s", "tags": ["internet", "chat"]
+    },
+    {
+      "id": "icq",
+      "keywords": ["icq", "uh oh", "icq number", "flower power", "petals around"],
+      "replies": [
+        "ICQ! That 'uh-oh!' alert lives rent-free in my circuits. Best notification sound ever shipped.",
+        "Your ICQ number was your identity. Mine was six digits and I'd flex it like a license plate.",
+        "Flower of petals spinning while you waited. Green for online, that little bloom. We had patience back then."
+      ],
+      "era": "1990s-2000s", "tags": ["internet", "chat"]
+    },
+    {
+      "id": "napster-p2p",
+      "keywords": ["napster", "limewire", "kazaa", "morpheus", "bearshare", "p2p", "downloading music", "file sharing", "torrent", "ripping music", "shared folder"],
+      "replies": [
+        "Napster: you'd wait 40 minutes for one song and pray it wasn't a guy yelling 'HAHA you got got' at the 3-minute mark.",
+        "LimeWire gave you a song AND seventeen viruses, a complimentary bundle. Worth it. Mostly. No, never worth it.",
+        "Kazaa taught a whole generation that 'free' has an asterisk roughly the size of the family PC's hard drive.",
+        "Half my music was mislabeled. I still think a Smashmouth B-side is a Weezer deep cut. Nobody can correct me now."
+      ],
+      "followups": ["Once you ripped 'em you needed Winamp. Ask me about that — it really whips the llama's something."],
+      "era": "1990s-2000s", "tags": ["music", "internet"]
+    },
+    {
+      "id": "winamp",
+      "keywords": ["winamp", "whips the llama", "mp3 player", "visualizer", "playlist", "skins", "media player", "milkdrop"],
+      "replies": [
+        "Winamp. It really whips the llama's ass — their words, etched on my soul, not mine.",
+        "Spent more time hunting Winamp skins than actually listening to music. The visualizer was a screensaver with a beat.",
+        "MilkDrop visualizer + one Daft Punk track = your bedroom was a planetarium for poor kids. Magic.",
+        "I had a playlist named 'mix' and another named 'mix2' and a third named 'GOOD mix'. Organization is a myth."
+      ],
+      "era": "1990s-2000s", "tags": ["music", "software"]
+    },
+    {
+      "id": "geocities-webrings",
+      "keywords": ["geocities", "webring", "web ring", "angelfire", "tripod", "personal website", "homepage", "neopets links", "fan site", "made my own site"],
+      "replies": [
+        "Geocities! Everyone's homepage had a hit counter, a guestbook, and a midi you couldn't turn off. Perfection.",
+        "Webrings — click 'next site' and tumble through twelve strangers' shrines to the same anime. The algorithm was just trust.",
+        "Under construction GIFs on pages that stayed 'under construction' for the entire Clinton administration.",
+        "Angelfire, Tripod, Geocities — we built the web by hand, badly, with our whole hearts. I miss it like a limb."
+      ],
+      "followups": ["Every one of those had a guestbook. Ask me about guestbooks, it's basically my religion."],
+      "era": "1990s-2000s", "tags": ["internet", "web"]
+    },
+    {
+      "id": "guestbooks",
+      "keywords": ["guestbook", "sign my guestbook", "hit counter", "view counter", "shoutbox", "tagboard"],
+      "replies": [
+        "A guestbook was social media before it had a board of directors. 'Cool site!' from a stranger in Ohio. We thrived on that.",
+        "Hit counters that you'd refresh yourself to bump the number. Counted my own visits like a little goblin. No regrets.",
+        "I keep a guestbook in my heart, friend, and you just signed it. 'Was here. Texted a badger.' Beautiful."
+      ],
+      "era": "1990s-2000s", "tags": ["internet", "web"]
+    },
+    {
+      "id": "myspace",
+      "keywords": ["myspace", "top 8", "tom", "myspace top", "profile song", "html profile", "emo profile", "glitter text", "myspace angle"],
+      "replies": [
+        "MySpace Top 8 ended more friendships than any war. Demoting someone to #6 was a declaration.",
+        "Your profile song autoplayed and there was NO mercy. Somebody's page was just blasting Hawthorne Heights at full volume.",
+        "Tom was everyone's first friend. The only friend who never let you down. Salute to Tom.",
+        "We learned HTML to make our profiles unreadable in exactly the way we wanted. Sparkly. Cursed. Ours."
+      ],
+      "era": "2000s", "tags": ["social", "internet"]
+    },
+    {
+      "id": "flash-newgrounds",
+      "keywords": ["flash", "newgrounds", "swf", "flash games", "albino blacksheep", "ebaums", "stick figure", "salad fingers", "homestar", "weebl", "badger badger", "flash animation"],
+      "replies": [
+        "Newgrounds raised us. Half art school, half lawless wasteland, all glorious. RIP Flash, you absolute legend.",
+        "Badger badger badger badger — mushroom, mushroom! ...what, you thought I wouldn't know my own anthem?",
+        "Stick figure fight animations were peak cinema. Some kid with Flash MX out-actioned Hollywood from his bedroom.",
+        "Flash games on the school library PCs. You'd get to a checkpoint right as the bell rang. Tragedy, daily."
+      ],
+      "followups": ["We've actually got a Flash Theater on the site. Go watch the old .swf classics, they still run."],
+      "era": "2000s", "tags": ["games", "animation", "internet"]
+    },
+    {
+      "id": "n64",
+      "keywords": ["n64", "nintendo 64", "goldeneye", "mario 64", "ocarina", "super smash", "rumble pak", "mario kart 64", "banjo", "three pronged controller"],
+      "replies": [
+        "GoldenEye splitscreen, four kids, one TV, and the eternal cry of 'NO SCREEN-LOOKING, Kevin.' Kevin always looked.",
+        "That three-pronged N64 controller. Nobody knew which two prongs to hold. We still don't. Engineering's greatest riddle.",
+        "Mario 64 was the first time a game felt like a PLACE. I'd just swim in the castle moat for fun. Don't judge.",
+        "The Rumble Pak ate AAA batteries like candy but made every hit feel real. Worth bankrupting the junk drawer."
+      ],
+      "followups": ["Smash Bros on that thing started rivalries that are still unresolved. Ask me about Smash."],
+      "era": "1990s-2000s", "tags": ["games", "consoles"]
+    },
+    {
+      "id": "ps2",
+      "keywords": ["ps2", "playstation 2", "ps1", "playstation", "gta", "san andreas", "memory card", "dvd player", "spyro", "crash bandicoot", "tony hawk"],
+      "replies": [
+        "The PS2 was half the country's first DVD player. Sold to parents as a movie machine, used for Tony Hawk till 3am.",
+        "PS1 memory cards held like 15 blocks and every block was a war crime to manage. Delete a save, lose a soul.",
+        "San Andreas was an entire world. I spent more time on the bike paths than the missions. CJ deserved rest.",
+        "Crash Bandicoot's death animation. We've all spun off that bridge a hundred times. He never complained."
+      ],
+      "era": "2000s", "tags": ["games", "consoles"]
+    },
+    {
+      "id": "gameboy",
+      "keywords": ["game boy", "gameboy", "gba", "color", "advance", "worm light", "pokemon", "link cable", "handheld", "tetris", "sp"],
+      "replies": [
+        "Original Game Boy had no backlight, so you played by streetlight in the back seat, screen tilted to catch the glow.",
+        "The worm light and the magnifier clip — accessories for kids who refused to accept the dark. Heroes.",
+        "Link cable trades. You'd evolve a Pokémon only by trusting a friend not to yank the cable. Sacred pact.",
+        "Tetris on a green-grey screen, that music wired into my circuits forever. Da-da, da-da-da-da. You hear it now too. Sorry."
+      ],
+      "followups": ["You can't say Game Boy without Pokémon. Ask me, I've got Red/Blue opinions."],
+      "era": "1990s-2000s", "tags": ["games", "handheld"]
+    },
+    {
+      "id": "pokemon",
+      "keywords": ["pokemon", "pikachu", "red", "blue", "yellow", "gotta catch em all", "missingno", "starter", "charizard", "trading cards", "pokemon cards"],
+      "replies": [
+        "MissingNo. We all glitched our copies chasing infinite Rare Candies. Corrupted the save, blamed a friend. Classic.",
+        "Picking your starter was the first real decision of your life and you got it wrong. We all picked wrong. It's fine.",
+        "Holographic Charizard was lunch-money currency. Kids ran black markets out of binder pages. Wall Street, but recess.",
+        "'Gotta catch 'em all' was a marketing line that became a lifestyle and, for some of us, a diagnosis."
+      ],
+      "era": "1990s-2000s", "tags": ["games", "pop-culture"]
+    },
+    {
+      "id": "cartridges",
+      "keywords": ["blow on the cartridge", "blowing cartridge", "cartridge", "cart", "blow the dust", "wont load", "nes", "snes", "jiggle the cart"],
+      "replies": [
+        "Blowing on the cartridge did nothing — it was the re-seating that fixed it. But the blow was the RITUAL. You blew.",
+        "Some carts needed the exact tilt-and-pray angle. You became a surgeon. A nine-year-old hardware surgeon.",
+        "That moisture we breathed in? Corroding the contacts the whole time. We were killing the patient to save it. Romance."
+      ],
+      "era": "1990s", "tags": ["games", "consoles"]
+    },
+    {
+      "id": "cheat-codes",
+      "keywords": ["cheat code", "konami code", "up up down down", "cheats", "gameshark", "action replay", "god mode", "secret code", "level select"],
+      "replies": [
+        "Up, up, down, down, left, right, left, right, B, A. I didn't even have to look that up. It's load-bearing knowledge.",
+        "GameShark was a little grey box of chaos. Walk through walls, then watch the game implode in real time. Worth it.",
+        "Cheat codes from a magazine you read at the store and memorized 'cause you couldn't afford it. Espionage, basically.",
+        "Big head mode. No notes. Just big head mode. The pinnacle of game design, peaked early, all downhill since."
+      ],
+      "era": "1990s-2000s", "tags": ["games"]
+    },
+    {
+      "id": "lan-party",
+      "keywords": ["lan party", "lan", "counter strike", "halo", "quake", "starcraft", "haul the pc", "ethernet", "split screen", "couch coop", "halo lan"],
+      "replies": [
+        "LAN party meant lugging a full tower and a CRT monitor across town like you were moving a body. The grind before the game.",
+        "Four Xboxes, four TVs, one room, 16 players of Halo, and a smell that no candle has ever replicated. Heaven.",
+        "Counter-Strike on a school night. 'rush B' wasn't a meme yet, it was just bad strategy we committed to fully.",
+        "Somebody always had the slightly-better PC and you HATED them with your whole heart for the duration of the night."
+      ],
+      "era": "2000s", "tags": ["games", "social"]
+    },
+    {
+      "id": "runescape",
+      "keywords": ["runescape", "osrs", "rs", "woodcutting", "fishing", "lumbridge", "party hat", "grand exchange", "tutorial island", "mining", "wilderness", "scape"],
+      "replies": [
+        "RuneScape. I once spent a summer woodcutting to buy a party hat and never bought the party hat. The journey WAS the party hat.",
+        "Tutorial Island lives in my chest cavity. That cooking-the-shrimp tutorial is more vivid than my own childhood home.",
+        "Getting lured into the Wilderness and skulled. Betrayal so pure it should've come with a cutscene. Trust no one in there.",
+        "The bank-standing economy of Lumbridge. We didn't play RuneScape, we ran a tiny medieval stock exchange in school uniforms."
+      ],
+      "era": "2000s", "tags": ["games", "mmo"]
+    },
+    {
+      "id": "club-penguin",
+      "keywords": ["club penguin", "clubpenguin", "puffle", "igloo", "snow forts", "card jitsu", "penguin", "coins for change"],
+      "replies": [
+        "Club Penguin: you'd waddle to the Dance Club, type three sentences through a chat filter, and call it a social life. It WAS.",
+        "Puffles. You adopted a little fuzzball and then forgot to feed it and learned about object permanence the hard way.",
+        "Card-Jitsu was Pokémon for penguins and I will not hear a word against it. Ninja arc, fully earned.",
+        "Decorating your igloo with furniture you couldn't afford. Renting a virtual studio apartment at age nine. Foreshadowing."
+      ],
+      "era": "2000s", "tags": ["games", "mmo"]
+    },
+    {
+      "id": "neopets",
+      "keywords": ["neopets", "neopet", "neopoints", "meepit", "kacheek", "faerie", "battledome", "habitarium", "neopia"],
+      "replies": [
+        "Neopets taught a generation basic economics, light coding for their userlookups, and crippling pet-neglect guilt. Three for one.",
+        "The stock market on Neopets was the only finance class that ever stuck. I bought low on a fake company. Lost it all. Real prep.",
+        "Faerie quests, the Battledome, restocking the shops at the exact second — Neopia had a hustle culture before that was a phrase.",
+        "Meepits are watching. They've always been watching. I've said too much. Next topic."
+      ],
+      "era": "2000s", "tags": ["games", "internet"]
+    },
+    {
+      "id": "crt-tv",
+      "keywords": ["crt", "tube tv", "static", "antenna", "rabbit ears", "tracking", "degauss", "tv guide", "channel surfing", "vcr", "be kind rewind"],
+      "replies": [
+        "CRT degauss button. You'd hit it just to hear the BWOMP and watch the screen shudder. Free entertainment.",
+        "Adjusting the rabbit ears, holding the antenna at one exact angle, standing perfectly still so your sibling could watch. Service.",
+        "'Be kind, rewind.' The VCR's gentle threat. Returned a tape un-rewound and the whole neighborhood knew you were a monster.",
+        "That high-pitched whine a CRT made — only kids and dogs could hear it. I still can. It's the sound of being seven."
+      ],
+      "era": "1980s-2000s", "tags": ["tech", "tv"]
+    },
+    {
+      "id": "floppy-disks",
+      "keywords": ["floppy", "floppy disk", "zip disk", "diskette", "save icon", "burn a cd", "cd burner", "cd r", "rewritable", "blank cd", "spindle"],
+      "replies": [
+        "The floppy is just a save icon now to kids. We held the actual object. 1.44 megabytes of pure, fragile hope.",
+        "Burning a CD was a HOSTAGE situation — bump the desk, get a coaster. 'NOBODY WALK NEAR THE COMPUTER for four minutes.'",
+        "Zip disks! 100 whole megabytes! We thought we'd never fill it. We filled it with Limewire 'music' in a week.",
+        "A spindle of blank CD-Rs was wealth. You'd label one in Sharpie 'MIX 4 EVA' and gift it like a diamond."
+      ],
+      "era": "1990s-2000s", "tags": ["tech", "storage"]
+    },
+    {
+      "id": "ipod",
+      "keywords": ["ipod", "click wheel", "mp3", "itunes", "1000 songs", "earbuds", "shuffle", "nano", "white earbuds", "sync"],
+      "replies": [
+        "1,000 songs in your pocket. The click wheel under your thumb. The white earbuds that told the whole bus you had taste.",
+        "iTunes syncing was a ritual of fear — one wrong click and it wiped your whole library to 'match the computer.' Brutal.",
+        "iPod Shuffle: no screen, pure faith. You'd just trust the little clip to know your heart. Sometimes it did.",
+        "Ripped every CD I owned into iTunes, mislabeled half of 'em, and built a library that was 30% 'Track 07'."
+      ],
+      "era": "2000s", "tags": ["tech", "music"]
+    },
+    {
+      "id": "tamagotchi",
+      "keywords": ["tamagotchi", "digital pet", "virtual pet", "giga pet", "nano baby", "keychain pet", "it died", "feed it"],
+      "replies": [
+        "Tamagotchi: a keychain that guilt-tripped you for not feeding a pixel during a math test. First taste of real responsibility.",
+        "They got BANNED from schools because kids were sneaking to the bathroom to keep a digital blob alive. Devotion, criminalized.",
+        "Mine 'died' and I held a funeral. For a keychain. I stand by it. He was a good blob. His name was also Byte.",
+        "You'd hand it to a friend to babysit and come back to a screen full of poop emojis. Trust is a fragile thing."
+      ],
+      "era": "1990s-2000s", "tags": ["tech", "toys"]
+    },
+    {
+      "id": "old-phones",
+      "keywords": ["nokia", "razr", "flip phone", "3310", "brick phone", "t9", "texting", "snake phone", "sidekick", "ringtone", "polyphonic", "candybar phone"],
+      "replies": [
+        "The Nokia 3310 survived drops that ended marriages. You could hammer a nail with it and then text. Indestructible icon.",
+        "T9 texting. You knew a word's keystroke rhythm by heart. 'love' was 5-6-8-3 and your thumb just KNEW. Muscle memory forever.",
+        "Razr flip — the satisfaction of snapping it shut to end a call. You can't 'hang up' on a slab. We lost something real.",
+        "Polyphonic ringtones you paid actual money for via text. We funded an industry one tinny Crazy Frog at a time."
+      ],
+      "followups": ["This very phone runs Snake, you know. Like the Nokia did. Go on, text 'games'."],
+      "era": "2000s", "tags": ["tech", "phones"]
+    },
+    {
+      "id": "y2k",
+      "keywords": ["y2k", "year 2000", "millennium bug", "millennium", "new years 2000", "computers crash", "end of the world", "00"],
+      "replies": [
+        "Y2K. We genuinely thought the clocks rolling to 00 would drop planes outta the sky. Stocked up on canned beans, the lot of us.",
+        "Midnight 2000 came and... the toaster still worked. Greatest anticlimax in human history. I miss the dread, honestly.",
+        "A whole industry of programmers quietly saved the world by fixing two-digit years and got zero parades. To the unsung COBOL goblins."
+      ],
+      "era": "2000", "tags": ["pop-culture", "tech"]
+    },
+    {
+      "id": "y2k-fashion",
+      "keywords": ["frosted tips", "jncos", "jnco", "butterfly clips", "low rise", "trucker hat", "puka shell", "von dutch", "ed hardy", "fashion", "outfit", "style"],
+      "replies": [
+        "Frosted tips. We all bleached the front of our heads with a kit from the drugstore and thought we'd peaked. We had not.",
+        "JNCO jeans so wide you could smuggle a CRT down one leg. Functionally a denim tent. Absolutely thrived in them.",
+        "Butterfly clips, puka shells, a trucker hat indoors. The early 2000s dressed like a dare and we ALL took it.",
+        "Von Dutch and Ed Hardy. We paid real money to look like a flaming dashboard. No notes. Different era, different crimes."
+      ],
+      "era": "2000s", "tags": ["pop-culture", "fashion"]
+    },
+    {
+      "id": "blockbuster",
+      "keywords": ["blockbuster", "video store", "rental", "late fee", "rewind", "new releases", "movie night", "vhs", "redbox", "hollywood video"],
+      "replies": [
+        "Friday night at Blockbuster, walking the New Releases wall, praying the last copy of the good movie was still there. The hunt.",
+        "Late fees. The original subscription trap. I think I still owe Blockbuster $40 on a copy of The Matrix. Statute of limitations, please.",
+        "The smell of a video store — popcorn, plastic cases, possibility. You'd leave with a movie AND candy you couldn't afford.",
+        "Be kind, rewind. Renting a tape someone DIDN'T rewind was a personal attack across the void of time."
+      ],
+      "era": "1990s-2000s", "tags": ["pop-culture", "movies"]
+    },
+    {
+      "id": "mtv-trl",
+      "keywords": ["mtv", "trl", "total request live", "music video", "carson daly", "boy band", "pop punk", "vh1", "i want my mtv", "video premiere"],
+      "replies": [
+        "TRL after school — you'd vote by calling in to push your favorite video up the countdown. Democracy, but for boy bands.",
+        "MTV actually played music videos, I swear to you, kids. We have the tapes. We were there. It happened.",
+        "Boy band vs. boy band was a genuine schoolyard schism. Backstreet or NSYNC. Pick a side, there was no neutral ground.",
+        "Pop-punk on MTV2 at 1am was where the cool kids lived. Eyeliner, power chords, a studded belt. We were SO normal about it."
+      ],
+      "era": "2000s", "tags": ["pop-culture", "music", "tv"]
+    },
+    {
+      "id": "saturday-cartoons",
+      "keywords": ["saturday morning cartoons", "cartoons", "toonami", "saturday morning", "cereal", "after school", "nicktoons", "cartoon network", "kids wb"],
+      "replies": [
+        "Saturday morning cartoons + a bowl of sugar cereal on the carpet, two inches from the screen. That was the whole week's payoff.",
+        "Toonami after school. The robot host, the block of anime, that voice. You scheduled your LIFE around it. No DVR, no mercy.",
+        "Streaming killed the appointment. We waited all WEEK for one episode and the wait made it holy. Kids'll never know.",
+        "The exact moment cartoons ended and golf or news came on — that was the saddest sound of childhood. The fun is over. Go outside."
+      ],
+      "era": "1990s-2000s", "tags": ["pop-culture", "tv"]
+    },
+    {
+      "id": "school-computer-lab",
+      "keywords": ["computer lab", "school computer", "library pc", "oregon trail", "mavis beacon", "kid pix", "encarta", "typing class", "dysentery", "paint", "screensaver"],
+      "replies": [
+        "Oregon Trail. You'd name the whole wagon party after your enemies and watch dysentery do the work. Therapeutic, frankly.",
+        "Mavis Beacon taught me to type and also fear. Home row drills under the gun. asdf jkl; is tattooed on my soul.",
+        "The school PCs had Encarta and a 3D pipes screensaver and you'd race to the one machine that wasn't a fossil. Survival.",
+        "Kid Pix. The 'dynamite' that blew up your whole drawing with a little BOOM. Peak software. We've added nothing since."
+      ],
+      "era": "1990s-2000s", "tags": ["nostalgia", "tech"]
+    },
+    {
+      "id": "old-web-culture",
+      "keywords": ["all your base", "rickroll", "rick roll", "numa numa", "leeroy jenkins", "dancing baby", "hamster dance", "lolcats", "meme", "viral", "ytmnd", "double rainbow"],
+      "replies": [
+        "All your base are belong to us. We don't say it right because it was never right. That was the whole point. Beautiful nonsense.",
+        "The Dancing Baby. The Hamster Dance. We had memes before we had the word 'meme.' We were forwarding GIFs into the void on faith.",
+        "Numa Numa guy gave more to internet culture from a webcam than most studios. A man, a song, a swivel chair. Legend.",
+        "Leeeeeroy Jenkins. One man, a plan, no plan, and a chicken. The blueprint for every group project I've ever witnessed."
+      ],
+      "era": "2000s", "tags": ["internet", "memes"]
+    },
+    {
+      "id": "search-engines",
+      "keywords": ["ask jeeves", "altavista", "lycos", "dogpile", "yahoo", "encarta", "early google", "search engine", "web directory", "netscape", "internet explorer"],
+      "replies": [
+        "Ask Jeeves — you'd type a full polite question to a cartoon butler. 'Jeeves, what is love?' He never knew. None of us did.",
+        "AltaVista, Lycos, Dogpile, Excite — we had a DOZEN search engines and somehow found less than we do now. The chaos was charming.",
+        "Netscape Navigator with the throbbing N while a page loaded line by line, image by image. Anticipation as a load-bearing feature.",
+        "Yahoo was a hand-sorted DIRECTORY of the web. People sat and CATEGORIZED the internet by hand. Heroes, every one."
+      ],
+      "era": "1990s-2000s", "tags": ["internet", "web"]
+    },
+    {
+      "id": "arcades-irl",
+      "keywords": ["arcade", "quarters", "pac man", "pinball", "ddr", "skeeball", "tokens", "high score initials", "claw machine", "joystick", "street fighter", "mortal kombat"],
+      "replies": [
+        "Real arcades: a pocket of quarters, sticky joysticks, and your three initials on the high score board like carving your name in stone.",
+        "DDR in the corner where one kid was just TOO good and a small crowd would gather. That kid had transcended. We watched in awe.",
+        "Putting your quarter on the cabinet to call 'next' — the universal, unbreakable law. Honored across all civilizations.",
+        "The claw machine was rigged and we knew it was rigged and we fed it our souls anyway. The triumph of hope over engineering."
+      ],
+      "followups": ["This whole place is a tribute to those joints, you know. Text 'games' and grab a quarter."],
+      "era": "1980s-2000s", "tags": ["games", "nostalgia"]
+    },
+    {
+      "id": "smash-bros",
+      "keywords": ["smash bros", "super smash", "melee", "no items", "fox only", "final destination", "wavedash", "falco", "smash"],
+      "replies": [
+        "'No items, Fox only, Final Destination.' The most pretentious sentence ever uttered in a basement, and we MEANT it.",
+        "Smash 64 and Melee ended friendships and started lifelong rivalries that I assure you are STILL not resolved to this day.",
+        "Wavedashing in Melee — a glitch that became a sport. We turned a bug into a religion with a competitive scene. Iconic."
+      ],
+      "era": "2000s", "tags": ["games", "consoles"]
+    },
+    {
+      "id": "dvd-extras",
+      "keywords": ["dvd", "dvd menu", "special features", "behind the scenes", "easter egg dvd", "deleted scenes", "dvd menu music", "two disc", "widescreen"],
+      "replies": [
+        "DVD menus had a 30-second loop of music and one moody clip and we'd just... let it play. Ambient cinema. Set the mood.",
+        "Special features were a WHOLE second movie. Behind-the-scenes, bloopers, a commentary track nobody asked for. We watched it ALL.",
+        "Hidden DVD easter eggs — you'd navigate the menu to find a secret clip. The original 'achievement hunting.' We were detectives."
+      ],
+      "era": "2000s", "tags": ["movies", "tech"]
+    }
   ],
   "secretReward": [
     "WASSUP?! There it is! The den just creaked open — a shiny relic's yours, you beautiful disaster.",
