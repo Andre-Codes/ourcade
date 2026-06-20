@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { isBadger, badgerReply, BADGER_ADDR, BADGER_NAME } from "./badger.js";
+import { isBadger, badgerReply, BADGER_NUMBER, BADGER_NAME } from "./badger.js";
 import { lsGetJSON, lsSetJSON, recordRelic } from "./store.js";
 import PhoneChrome from "../components/PhoneChrome.jsx";
 import PhoneOverlay from "../components/PhoneOverlay.jsx";
@@ -37,6 +37,10 @@ function cloud() {
   return cloudPromise;
 }
 
+// Byte Badger waits a beat before replying, so it feels like he's typing rather
+// than answering instantly (no typing indicator — just the pause, then the ring).
+const BADGER_REPLY_DELAY_MS = 5000;
+
 const PhoneContext = createContext(null);
 export const usePhone = () => useContext(PhoneContext);
 
@@ -62,6 +66,9 @@ export default function PhoneProvider({ children }) {
   const badgerRef = useRef(lsGetJSON("phone:badger", []) || []);
   const [badgerTick, setBadgerTick] = useState(0);
   const bumpBadger = () => setBadgerTick((t) => t + 1);
+  // Pending reply timers (Badger waits a beat before answering — see relaySend).
+  const badgerTimers = useRef(new Set());
+  useEffect(() => () => { badgerTimers.current.forEach(clearTimeout); badgerTimers.current.clear(); }, []);
 
   // Pop-up overlay open/close — pure state, no navigation, so whatever's behind
   // the phone (an in-progress game and all) stays mounted. The FAB/toast open it
@@ -122,36 +129,48 @@ export default function PhoneProvider({ children }) {
 
   const actions = useMemo(() => {
     async function relaySend(to, body) {
-      // Byte Badger is a LOCAL virtual contact — never hits the cloud. Echo the
-      // outgoing text + a pre-baked reply into the local thread, persist, and
-      // fire the same in-phone ring the real inbox uses.
+      // Byte Badger (the NPC at 555-0001) is intercepted LOCALLY — never hits the
+      // cloud. The outgoing text shows immediately; the reply lands after a short
+      // pause (so he feels like he's typing). Rows carry the 555-0001 number and
+      // "Byte Badger" name so this live chat threads with the daily Quarter texts.
       if (isBadger(to)) {
         if (!body || !String(body).trim()) return { ok: false, error: "EMPTY" };
         const now = Date.now();
         const mkId = () =>
           (globalThis.crypto?.randomUUID && globalThis.crypto.randomUUID()) ||
           now + "-" + Math.floor(Math.random() * 1e6);
+        // Phase 1 — echo the user's text right away.
         const sentRow = {
-          id: mkId(), to: BADGER_ADDR, toNumber: BADGER_ADDR, toName: BADGER_NAME,
+          id: mkId(), to: BADGER_NUMBER, toNumber: BADGER_NUMBER, toName: BADGER_NAME,
           body: String(body), ts: now, read: true,
         };
+        // History captured NOW (including this line) so the reply is deterministic
+        // w.r.t. send order even if several sends are pending at once.
         const history = badgerRef.current.map((t) => ({
-          from: t.from === BADGER_ADDR ? "badger" : "me", body: t.body, ts: t.ts,
+          from: t.fromNumber === BADGER_NUMBER ? "badger" : "me", body: t.body, ts: t.ts,
         }));
         history.push({ from: "me", body: String(body), ts: now });
-        let { text, awardRelic, alreadyText } = badgerReply(body, history);
-        if (awardRelic) {
-          const { isNew } = recordRelic(awardRelic);
-          if (!isNew && alreadyText) text = alreadyText;
-        }
-        const inRow = {
-          id: mkId(), from: BADGER_ADDR, fromNumber: BADGER_ADDR, fromName: BADGER_NAME,
-          body: text, ts: now + 1, read: false,
-        };
-        badgerRef.current = [...badgerRef.current, sentRow, inRow];
+        badgerRef.current = [...badgerRef.current, sentRow];
         lsSetJSON("phone:badger", badgerRef.current);
         bumpBadger();
-        setLastIncoming({ seq: ++seqRef.current, message: inRow });
+        // Phase 2 — after a beat, compute + deliver Badger's reply.
+        const timer = setTimeout(() => {
+          badgerTimers.current.delete(timer);
+          let { text, awardRelic, alreadyText } = badgerReply(body, history);
+          if (awardRelic) {
+            const { isNew } = recordRelic(awardRelic);
+            if (!isNew && alreadyText) text = alreadyText;
+          }
+          const inRow = {
+            id: mkId(), from: BADGER_NUMBER, fromNumber: BADGER_NUMBER, fromName: BADGER_NAME,
+            body: text, ts: Date.now(), read: false,
+          };
+          badgerRef.current = [...badgerRef.current, inRow];
+          lsSetJSON("phone:badger", badgerRef.current);
+          bumpBadger();
+          setLastIncoming({ seq: ++seqRef.current, message: inRow });
+        }, BADGER_REPLY_DELAY_MS);
+        badgerTimers.current.add(timer);
         return { ok: true, error: "MESSAGE SENT" };
       }
       const c = await cloud();
@@ -343,16 +362,19 @@ export default function PhoneProvider({ children }) {
     };
   }, [claimed, uid]);
 
-  // Fold the local Byte Badger thread into the cloud inbox/sent so it shows in
-  // the phone like any contact. Plain concat — the iframe re-sorts each
-  // partition by timestamp on every push (replacePartition in snake.html), so
-  // order here doesn't matter. badgerTick drives recompute (badgerRef is a ref).
+  // Fold the local Byte Badger live-chat thread into the cloud inbox/sent so it
+  // shows in the phone alongside the (cloud) daily Quarter texts on the same
+  // 555-0001 number. Plain concat — the iframe re-sorts each partition by
+  // timestamp on every push (replacePartition in snake.html), so order here
+  // doesn't matter. badgerRef only holds live-chat turns (never the Quarter
+  // texts, which live in the cloud inbox), so no duplication. badgerTick drives
+  // recompute (badgerRef is a ref).
   const mergedInbox = useMemo(
-    () => [...inbox, ...badgerRef.current.filter((t) => t.from === BADGER_ADDR)],
+    () => [...inbox, ...badgerRef.current.filter((t) => t.fromNumber === BADGER_NUMBER)],
     [inbox, badgerTick]
   );
   const mergedSent = useMemo(
-    () => [...sent, ...badgerRef.current.filter((t) => t.to === BADGER_ADDR)],
+    () => [...sent, ...badgerRef.current.filter((t) => t.toNumber === BADGER_NUMBER)],
     [sent, badgerTick]
   );
 

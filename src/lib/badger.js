@@ -15,8 +15,12 @@
 
 import TREE from "../data/generated/badger.js";
 
-export const BADGER_ADDR = "BADGER";
-export const BADGER_NAME = "BYTE BADGER";
+// Byte Badger's identity is the in-world NPC number 555-0001 — the SAME number
+// scripts/quarter-text.js uses to send the Daily Quarter. Sharing the number
+// means the live chat and the daily texts thread together in the phone, and the
+// 555-0001 contact that gets auto-added on the first Quarter text routes here.
+export const BADGER_NUMBER = "555-0001";
+export const BADGER_NAME = "Byte Badger";
 export const BADGER_RELIC_ID = "byte-badger-secret";
 
 // The easter-egg passphrase: the late-'90s Budweiser / Scary Movie "Wassup".
@@ -29,10 +33,15 @@ function norm(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-// Is this recipient Byte Badger? (the built-in contact's addr, name, or @handle)
+// Is this recipient Byte Badger? Match his number (555-0001 in any punctuation)
+// or his name/@handle, so both "select the contact" and "type the number" route
+// into the local intercept instead of the cloud.
+const BADGER_DIGITS = BADGER_NUMBER.replace(/[^\d]/g, ""); // "5550001"
 export function isBadger(to) {
+  const digits = String(to || "").replace(/[^\d]/g, "");
+  if (digits && digits === BADGER_DIGITS) return true;
   const t = norm(to);
-  return t === "badger" || t === "byte badger" || t === "byte badger badger" || t === "badger badger";
+  return t === "badger" || t === "byte badger";
 }
 
 function spokeBefore(history) {

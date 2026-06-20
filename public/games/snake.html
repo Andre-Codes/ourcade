@@ -237,17 +237,18 @@
      FirebaseTransport must replace to deliver a text to another user's phone). */
   function uid(){ try{ return localStorage.getItem('ourcade:nokia:uid') || 'guest'; }catch(e){ return 'guest'; } }
   function dbKey(){ return 'ourcade:nokia:' + uid(); }
-  // The lone built-in contact: BYTE BADGER, the arcade keeper you can text. Its
-  // address is a non-numeric handle so it can never collide with a real Ourcade
-  // number — the parent intercepts sends to it locally (no Firebase). JENNY/
-  // OURCADE used to be seeded here; dialing 8675309 is still an easter egg (see
-  // JENNY_NUMBER below), but the contacts are gone.
-  const BADGER_ADDR = 'BADGER';
+  // The lone built-in contact: Byte Badger, the arcade keeper you can text. He
+  // lives at the in-world NPC number 555-0001 (the same number the Daily Quarter
+  // texts come from), so live chat and those daily texts share one thread; the
+  // parent intercepts sends to that number locally (no Firebase round-trip).
+  // JENNY/OURCADE used to be seeded here; dialing 8675309 is still an easter egg
+  // (see JENNY_NUMBER below), but the contacts are gone.
+  const BADGER_NUMBER = '555-0001';
   const DEFAULTS = {
     settings:{ soundOn:true, profile:'GENERAL', keypadTones:true, maze:false, level:3, greeting:'OURCADE', clock24:true },
     snake:{ hi:0, webPlayed:false, webBest:0 },
     spaceimpact:{ hi:0 },
-    contacts:[ {name:'BYTE BADGER', addr:BADGER_ADDR} ],
+    contacts:[ {name:'Byte Badger', addr:BADGER_NUMBER} ],
     messages:[],
     composer:[]
   };
@@ -267,13 +268,14 @@
     let d = null;
     try{ d = JSON.parse(localStorage.getItem(dbKey()) || 'null'); }catch(e){ d = null; }
     d = deepDefaults(d, DEFAULTS);
-    // Prune the retired JENNY/OURCADE default contacts from returning phones
-    // (deepDefaults only ADDS missing keys, never removes), and make sure the
-    // built-in BYTE BADGER contact is present. Idempotent.
+    // Prune retired default contacts from returning phones (deepDefaults only
+    // ADDS missing keys, never removes): the old JENNY/OURCADE seeds AND the
+    // first-version 'BADGER' handle (Byte Badger now lives at 555-0001). Then
+    // make sure the built-in Byte Badger contact is present. Idempotent.
     if(Array.isArray(d.contacts)){
-      d.contacts = d.contacts.filter(c => !(c && (c.addr==='8675309' || c.addr==='6287')));
-      if(!d.contacts.some(c => c && c.addr===BADGER_ADDR))
-        d.contacts.unshift({ name:'BYTE BADGER', addr:BADGER_ADDR });
+      d.contacts = d.contacts.filter(c => !(c && (c.addr==='8675309' || c.addr==='6287' || c.addr==='BADGER')));
+      if(!d.contacts.some(c => c && c.addr===BADGER_NUMBER))
+        d.contacts.unshift({ name:'Byte Badger', addr:BADGER_NUMBER });
     }
     // one-time migration of the old flat snake keys
     try{
@@ -303,8 +305,9 @@
   const NAMELABELS = {};            // addr → display name from cloud (for contactName)
   let SYNCED = [];                  // cloud-synced contacts [{name, number}] (personal mode)
   function postToParent(msg){ try{ if(window.parent!==window) window.parent.postMessage(msg, location.origin); }catch(e){} }
-  // The phonebook the UI shows: built-in DB.contacts (BYTE BADGER, addr-based)
-  // plus the cloud-synced ones (number-based). Synced wins on a number clash.
+  // The phonebook the UI shows: built-in DB.contacts (Byte Badger @ 555-0001)
+  // plus the cloud-synced ones (number-based). Synced wins on a number clash —
+  // so the auto-added 555-0001 contact dedups against the built-in seed.
   function allContacts(){
     const out = SYNCED.map(c=>({ name:c.name, addr:c.number }));
     const have = new Set(out.map(c=>c.addr));
