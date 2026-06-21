@@ -14,10 +14,20 @@ const FALLBACK = [
   { id: "bz-fallback-3", text: "Your streaming service raised its price and added ads. It is slowly, confidently reinventing cable. Welcome home.", tag: "HOT TAKE" },
 ];
 
+// Some generated/older entries prefix the text with their own tag ("RUMOR: …"),
+// which would double up next to the tag chip in the UI. Strip a single leading
+// TAG: so the chip is the only place the tag shows. Defensive — harmless on
+// already-clean items.
+const TAG_PREFIX = /^\s*(GOSSIP|RUMOR|SIGHTING|HOT TAKE)\s*:\s*/i;
+function clean(b) {
+  const text = String(b.text || "").replace(TAG_PREFIX, "").trim();
+  return text === b.text ? b : { ...b, text };
+}
+
 export const BUZZ = [
   ...MANUAL_BUZZ,
   ...(Array.isArray(generated) && generated.length ? generated : []),
-];
+].map(clean);
 
 const SALT = 1111; // independent of all other pools (see src/lib/daily.js)
 

@@ -387,8 +387,10 @@ const buzzSchema = {
           id: { type: "string" },
           text: { type: "string" }, // one tabloid-style line, <= ~160 chars
           tag: { type: "string", enum: ["GOSSIP", "RUMOR", "SIGHTING", "HOT TAKE"] },
+          source: { type: "string" }, // "read more" url for topical blurbs; "" if none
+          sourceLabel: { type: "string" }, // short outlet/host label; "" if none
         },
-        required: ["id", "text", "tag"],
+        required: ["id", "text", "tag", "source", "sourceLabel"],
       },
     },
   },
@@ -710,8 +712,8 @@ async function generateWatercooler() {
     countdownsSchema,
     `Generate ${COUNT.countdowns} TRL/Billboard-style top-5 countdowns for the 📻 THE COUNTDOWN card on OURCADE's "Water Cooler" pop-culture page. Each is a complete, ordered chart — the ranking is the content. Fields: a kebab-case id starting with "ctd-", a punchy ALL-CAPS title (e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"), unit ("song" | "movie" | "show"), an optional one-line blurb ("" if none), and EXACTLY 5 entries. Each entry: rank 1-5 (each rank used once), title (the real thing by name), by (artist/studio — "" if n/a), note (a dry one-line quip in the site's 2000s-e-zine voice — "" if none), and trend ("up" | "down" | "same" | "new").
 ${topical
-      ? `Make most countdowns TOPICAL: rank REAL current songs/movies/shows from the TOPICAL HOOKS by name, then add the dry early-2000s twist in the notes. Keep them understandable a few weeks from now; non-defamatory and good-natured. Mix in a couple of evergreen 2000s-nostalgia charts too.`
-      : `No current hooks this run — lean on evergreen 2000s-nostalgia and arcade-culture countdowns (name real era-defining songs/movies/shows). Keep it good-natured and non-defamatory.`}
+      ? `Make MOST countdowns TOPICAL and REAL: the "title" and "by" fields MUST be the actual current song/movie/show and its real artist/studio from the TOPICAL HOOKS — name real things, NOT vague placeholders like "the one everyone's watching". Put ALL the dry early-2000s wink in the "note" only. Keep them understandable a few weeks from now; non-defamatory and good-natured. Include 2-3 evergreen 2000s-nostalgia charts (also naming real era-defining titles) for texture.`
+      : `No current hooks this run — lean on evergreen 2000s-nostalgia and arcade-culture countdowns, naming REAL era-defining songs/movies/shows by title/artist (not vague placeholders). Keep it good-natured and non-defamatory.`}
 Unique ids. No duplicate chart concepts.`
   );
 
@@ -719,10 +721,12 @@ Unique ids. No duplicate chart concepts.`
   const buzzData = await generate(
     "buzz",
     buzzSchema,
-    `Generate ${COUNT.buzz} short water-cooler/tabloid blurbs for the 💬 THE BUZZ card on OURCADE's "Water Cooler" page. Each: a kebab-case id starting with "bz-", text (one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory), and tag ("GOSSIP" | "RUMOR" | "SIGHTING" | "HOT TAKE").
+    `Generate ${COUNT.buzz} short water-cooler/tabloid blurbs for the 💬 THE BUZZ card on OURCADE's "Water Cooler" page. Each: a kebab-case id starting with "bz-", text (one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory; do NOT prefix the text with the tag — the UI shows the tag separately, so "text" must NOT begin with "RUMOR:"/"GOSSIP:"/etc.), tag ("GOSSIP" | "RUMOR" | "SIGHTING" | "HOT TAKE"), and a source pair for "read more".
+
+SOURCES: for any blurb that names a REAL current thing (a real show/song/movie/game/trend), set "source" to a durable, canonical URL for that thing — the official site, its Wikipedia article, or a major outlet's landing page — and "sourceLabel" to a short label (e.g. "Wikipedia", "Variety", the site's name). The url must be one you are confident points at the named thing; when you are NOT confident, set both "source" and "sourceLabel" to "". For evergreen archetype blurbs (no specific real subject), set both to "". Do NOT invent or guess URLs — a missing source is fine; a wrong one is not.
 ${topical
-      ? `Make about half TOPICAL: riff on REAL current entertainment from the TOPICAL HOOKS (name the actual show/song/movie/trend), then add the early-2000s framing. The rest can be evergreen celebrity/pop-culture archetypes (reboots, feuds-that-aren't, vinyl/flip-phone revivals). Keep every line understandable weeks later and non-defamatory — no real allegations about real people.`
-      : `No current hooks this run — write evergreen pop-culture archetype blurbs (reboots, "not feuding" statements, nostalgia revivals, streaming-becomes-cable). Good-natured, non-defamatory.`}
+      ? `Make about half TOPICAL: riff on REAL current entertainment from the TOPICAL HOOKS (name the actual show/song/movie/trend) WITH a source, then add the early-2000s framing. The rest can be evergreen celebrity/pop-culture archetypes (reboots, feuds-that-aren't, vinyl/flip-phone revivals) with empty sources. Keep every line understandable weeks later and non-defamatory — no real allegations about real people.`
+      : `No current hooks this run — write evergreen pop-culture archetype blurbs (reboots, "not feuding" statements, nostalgia revivals, streaming-becomes-cable) with empty sources. Good-natured, non-defamatory.`}
 Unique ids. No duplicates.`
   );
 
@@ -753,11 +757,17 @@ Unique ids. No duplicate subjects.`
       }))
       .sort((a, b) => a.rank - b.rank),
   }));
-  const buzz = (buzzData.buzz || []).map((b) => ({
-    id: String(b.id || "").trim(),
-    text: String(b.text || "").trim(),
-    tag: String(b.tag || "").trim(),
-  }));
+  const buzz = (buzzData.buzz || []).map((b) => {
+    const source = String(b.source || "").trim();
+    const sourceLabel = String(b.sourceLabel || "").trim();
+    return {
+      id: String(b.id || "").trim(),
+      text: String(b.text || "").trim(),
+      tag: String(b.tag || "").trim(),
+      // a source only counts if it's a real http(s) url; carry its label alongside
+      ...(/^https?:\/\//i.test(source) ? { source, ...(sourceLabel ? { sourceLabel } : {}) } : {}),
+    };
+  });
   const hotornot = (hotornotData.subjects || []).map((s) => ({
     id: String(s.id || "").trim(),
     subject: String(s.subject || "").trim(),
@@ -793,6 +803,24 @@ Unique ids. No duplicate subjects.`
   });
   req(bValid.length >= 20, `buzz: only ${bValid.length} valid (need >=20) — keeping the previous pool`);
 
+  // Buzz sources: liveness-check the "read more" urls. UNLIKE weird/curiosities
+  // (where a dead url drops the whole item), here the blurb stands alone — so a
+  // dead source is just STRIPPED, keeping the dispatch. Reuses checkUrls.
+  const buzzUrls = bValid.map((b) => b.source).filter(Boolean);
+  if (buzzUrls.length) {
+    const live = await checkUrls(buzzUrls);
+    let stripped = 0;
+    for (const b of bValid) {
+      if (b.source && !live.get(b.source)?.alive) {
+        console.warn(`  buzz: strip dead source on ${b.id} (${b.source})`);
+        delete b.source;
+        delete b.sourceLabel;
+        stripped++;
+      }
+    }
+    console.log(`  buzz: ${buzzUrls.length - stripped}/${buzzUrls.length} sources alive`);
+  }
+
   // Hot-or-Not: malformed → error; duplicate id → silently dropped. Must use the
   // hon- namespace so ids never collide with daily-poll ids in Firestore.
   const hSeen = new Set(MANUAL_HOTORNOT.map((s) => s.id));
@@ -813,7 +841,7 @@ Unique ids. No duplicate subjects.`
   }
 
   writeModule("countdowns.js", cValid, "The Countdown pool. Shape: { id, title, unit, blurb?, entries:[{rank,title,by?,note?,trend}] }");
-  writeModule("buzz.js", bValid, "The Buzz pool. Shape: { id, text, tag }");
+  writeModule("buzz.js", bValid, "The Buzz pool. Shape: { id, text, tag, source?, sourceLabel? } — source urls liveness-checked at generation time.");
   writeModule("hotornot.js", hValid, "Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].");
   await archivePool("countdowns", cValid);
   await archivePool("buzz", bValid);

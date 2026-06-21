@@ -427,7 +427,7 @@ export const MANUAL_BUZZ = [
   { id: "bz-reboot", text: "Another beloved 2000s franchise is getting rebooted. The original cast is 'in talks,' which is Hollywood for 'we asked, they're thinking about the check.'", tag: "RUMOR" },
   { id: "bz-feud", text: "Two pop stars are 'not feuding,' according to a statement that nobody asked them for, which is how you know they are absolutely feuding.", tag: "GOSSIP" },
   { id: "bz-vinyl", text: "Vinyl outsold CDs again. Somewhere, a teenager just discovered the album their parents played on a CD changer in a minivan. The wheel turns.", tag: "HOT TAKE" },
-  { id: "bz-celebrity-coffee", text: "SIGHTING: a celebrity was photographed holding an iced coffee. The internet has produced 4,000 words of analysis. This is the content economy working as designed.", tag: "SIGHTING" },
+  { id: "bz-celebrity-coffee", text: "A celebrity was photographed holding an iced coffee. The internet has produced 4,000 words of analysis. This is the content economy working as designed.", tag: "SIGHTING" },
   { id: "bz-flip-phone", text: "Flip phones are back. Not for the battery life — for the dramatic snap when you hang up. You cannot slam an end call on a glass slab and they know it.", tag: "HOT TAKE" },
   { id: "bz-album-leak", text: "An album 'leaked' three days early. By 'leaked' the label means 'we leaked it.' By 'three days early' they mean 'right on the marketing schedule.'", tag: "RUMOR" },
   { id: "bz-cameo", text: "A washed-up 2000s heartthrob just had a scene-stealing cameo and the entire timeline collectively gasped. The comeback arc is the only renewable resource left.", tag: "GOSSIP" },

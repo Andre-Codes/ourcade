@@ -1795,19 +1795,47 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
    .arcade-widget box and .arcade-poll-* bars (Hot or Not); the rest is a thin
    layer of section-specific styling in the same neon-on-dark register.
    ═══════════════════════════════════════════════════════════════════════════ */
-.arcade-watercooler { max-width: 760px; margin: 0 auto 48px; padding: 8px 16px 0; display: flex; flex-direction: column; gap: 16px; }
-.arcade-watercooler-head { text-align: center; margin: 6px 0 2px; }
+.arcade-watercooler { max-width: 940px; margin: 0 auto 48px; padding: 8px 16px 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ---- masthead: a dated "edition", broadsheet structure in neon ---- */
+.arcade-watercooler-head { margin: 6px 0 0; }
+.arcade-watercooler-masthead {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center; text-align: center;
+}
 .arcade-watercooler-title {
   font-family: 'Black Ops One', cursive; font-size: 1.8rem; letter-spacing: 0.02em; margin: 0;
   color: var(--neon-aqua); text-shadow: 0 0 14px rgba(63,255,208,.5);
 }
-.arcade-watercooler-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; color: #cbb8f0; margin: 6px 0 0; }
-.arcade-watercooler-date { font-family: 'Press Start 2P', monospace; font-size: 0.5rem; color: var(--arcade-muted); letter-spacing: 0.06em; margin: 8px 0 0; }
+.arcade-watercooler-standing {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: #cbb8f0; letter-spacing: 0.04em;
+}
+.arcade-watercooler-edition {
+  display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  margin: 10px 0 0; padding: 7px 0; border-top: 1px solid #2a2f4a; border-bottom: 1px solid #2a2f4a;
+}
+.arcade-watercooler-edition-label {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.08em;
+  color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4);
+}
+.arcade-watercooler-edition-date { font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; color: #d6e6ff; letter-spacing: 0.04em; }
+.arcade-watercooler-lede {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; color: #d6e6ff; line-height: 1.6;
+  text-align: center; max-width: 640px; margin: 11px auto 0;
+}
 .arcade-watercooler-foot { font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--arcade-muted); text-align: center; letter-spacing: 0.03em; margin: 6px 0 0; }
+
+/* ---- two-column body: Buzz (main) + On This Day (sidebar), 1-col on mobile ---- */
+.arcade-watercooler-body { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; align-items: start; }
+@media (max-width: 720px) { .arcade-watercooler-body { grid-template-columns: 1fr; } }
+
+/* ---- section headers: kicker + orienting standfirst, with a hairline rule ---- */
+.arcade-sec-head { align-items: flex-start; padding-bottom: 9px; margin-bottom: 2px; border-bottom: 1px solid #2a2f4a; }
+.arcade-sec-head-text { display: flex; flex-direction: column; gap: 5px; }
+.arcade-sec-standfirst { font-family: 'Share Tech Mono', monospace; font-size: 0.76rem; color: var(--arcade-muted); line-height: 1.45; }
 
 /* ---- The Countdown (TRL/Billboard top-5) ---- */
 .arcade-countdown .arcade-widget-kicker { color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4); }
-.arcade-countdown-title { font-family: 'Black Ops One', cursive; font-size: 1.04rem; margin: 9px 0 2px; }
+.arcade-countdown-title { font-family: 'Black Ops One', cursive; font-size: 1.04rem; margin: 11px 0 2px; }
 .arcade-countdown-blurb { font-family: 'Share Tech Mono', monospace; font-size: 0.76rem; color: var(--arcade-muted); margin: 0 0 10px; }
 .arcade-countdown-share { margin-left: auto; }
 .arcade-countdown-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: none; }
@@ -1826,28 +1854,35 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 .arcade-countdown-by { color: #cbb8f0; }
 .arcade-countdown-note { font-size: 0.74rem; color: var(--arcade-muted); line-height: 1.4; }
 
-/* ---- On This Day (calendar-keyed throwback) ---- */
+/* ---- On This Day (real, dated Wikipedia-sourced events) ---- */
 .arcade-otd .arcade-widget-kicker { color: var(--neon-violet); text-shadow: 0 0 8px rgba(180,77,255,.4); }
-.arcade-otd-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 0; }
-.arcade-otd-card {
-  display: flex; flex-direction: column; gap: 4px; padding: 10px;
-  background: #04050b; border: 1px solid #2a2f4a; border-radius: 8px;
+.arcade-otd-events { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.arcade-otd-event {
+  display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 11px;
+  padding: 10px 0; border-bottom: 1px dashed #2a2f4a;
 }
-.arcade-otd-cat { font-family: 'Press Start 2P', monospace; font-size: 0.46rem; letter-spacing: 0.06em; color: var(--neon-aqua); }
-.arcade-otd-thing { font-family: 'Share Tech Mono', monospace; font-size: 0.86rem; color: #ffe9b0; line-height: 1.35; }
-.arcade-otd-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--arcade-muted); }
-.arcade-otd-blurb { font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; color: #d6e6ff; line-height: 1.5; margin: 10px 0 0; }
-@media (max-width: 560px) { .arcade-otd-cards { grid-template-columns: 1fr; } }
+.arcade-otd-event:last-child { border-bottom: 0; padding-bottom: 0; }
+.arcade-otd-event:first-child { padding-top: 2px; }
+.arcade-otd-year {
+  font-family: 'Black Ops One', cursive; font-size: 1.3rem; line-height: 1; letter-spacing: 0.01em;
+  color: var(--neon-violet); text-shadow: 0 0 10px rgba(180,77,255,.4); min-width: 3.4ch;
+}
+.arcade-otd-event-body { display: flex; flex-direction: column; gap: 5px; }
+.arcade-otd-event-text { font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; color: #d6e6ff; line-height: 1.5; }
+.arcade-otd-source { align-self: flex-start; font-size: 0.74rem; }
 
-/* ---- The Buzz (tabloid blurbs) ---- */
+/* ---- The Buzz (the day's dispatches — a dense, tagged briefs column) ---- */
 .arcade-buzz .arcade-widget-kicker { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,77,114,.4); }
-.arcade-buzz-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.arcade-buzz-row { display: flex; flex-direction: column; gap: 5px; }
+.arcade-buzz-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; }
+.arcade-buzz-row { display: flex; flex-direction: column; gap: 4px; padding: 9px 0; border-bottom: 1px dashed #2a2f4a; }
+.arcade-buzz-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.arcade-buzz-row:first-child { padding-top: 2px; }
 .arcade-buzz-tag {
   align-self: flex-start; font-family: 'Press Start 2P', monospace; font-size: 0.44rem; letter-spacing: 0.06em;
   color: #1a0a00; background: var(--neon-pink); border-radius: 4px; padding: 3px 6px;
 }
 .arcade-buzz-text { font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; color: #d6e6ff; line-height: 1.5; }
+.arcade-buzz-source { align-self: flex-start; margin-top: 2px; font-size: 0.74rem; }
 
 /* ---- Hot or Not (interactive — reuses .arcade-poll-* bars) ---- */
 .arcade-hon .arcade-widget-kicker { color: var(--neon-gold); text-shadow: 0 0 8px rgba(255,210,63,.4); }

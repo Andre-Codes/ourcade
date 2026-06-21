@@ -1,31 +1,37 @@
 /* On This Day — the 💧 Water Cooler's almanac. UNLIKE every other pool this is keyed
    by CALENDAR DATE, not rotated: we look up today's MM-DD and surface the matching
-   throwback (what was #1 / in theaters / on TV on that date in ~1995–2009). Hand-
-   verified entries (src/data/manual/onthisday.js) are the source of truth; the
-   generated supplement is gated off by default. Pure JS — importable by the UI and
-   by scripts/daily-check.js.
+   entry — a few REAL, dated historical events for that date, each with a Wikipedia
+   "read more" source. The events come from the official Wikimedia "On This Day"
+   feed, prebuilt across all 366 days by scripts/fetch-onthisday.js into
+   generated/onthisday.js. Hand-curated overrides (src/data/manual/onthisday.js)
+   lead the pool when present. Pure JS — importable by the UI and by daily-check.js.
 
    Determinism: a given calendar date always resolves to the same entry. When several
-   throwback years share one MM-DD we rotateDaily among them (still deterministic per
-   day, but it varies year to year). When no exact MM-DD exists we fall back to the
-   nearest EARLIER calendar date so the card is never blank. */
+   entries share one MM-DD we rotateDaily among them (still deterministic per day).
+   When no exact MM-DD exists we fall back to the nearest EARLIER calendar date so the
+   card is never blank.
+
+   Entry shape: { id, md, events: [{ year, text, source, sourceTitle }] }. */
 
 import { rotateDaily } from "../lib/daily.js";
 import generated from "./generated/onthisday.js";
 import { ON_THIS_DAY } from "./manual/onthisday.js";
 
-const SALT = 1010; // only used to disambiguate multiple years on the same MM-DD
+const SALT = 1010; // only used to disambiguate multiple entries on the same MM-DD
 
-// Minimal safety net if the manual list is ever emptied (keeps the card alive).
+// Minimal safety net if both pools are ever emptied (keeps the card alive).
 const FALLBACK = [
   {
     id: "otd-fallback",
     md: "01-01",
-    year: 2000,
-    no1Song: { title: "Smooth", by: "Santana feat. Rob Thomas" },
-    inTheaters: { title: "Stuart Little" },
-    onTV: { title: "Who Wants to Be a Millionaire" },
-    blurb: "The world did not end. The Y2K bug went out with a whimper.",
+    events: [
+      {
+        year: 2000,
+        text: "The Y2K scare passed without major incident as the world's computers rolled over to the year 2000.",
+        source: "https://en.wikipedia.org/wiki/Year_2000_problem",
+        sourceTitle: "Year 2000 problem",
+      },
+    ],
   },
 ];
 

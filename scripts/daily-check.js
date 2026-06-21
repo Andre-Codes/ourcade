@@ -224,6 +224,12 @@ noRepeats("countdown", (k) => getTodaysCountdown(k).id, COUNTDOWNS.length);
 check("buzz deterministic", getTodaysBuzz(k0, 3).map((b) => b.id).join() === getTodaysBuzz(k0, 3).map((b) => b.id).join());
 check("buzz returns 3 distinct ids", new Set(getTodaysBuzz(k0, 3).map((b) => b.id)).size === Math.min(3, BUZZ.length));
 noRepeats("buzz", (k) => getTodaysBuzz(k, 1)[0].id, BUZZ.length);
+{
+  // Any buzz item that carries a "read more" source must have a valid http(s) url.
+  const badSrc = BUZZ.filter((b) => b.source && !/^https?:\/\//i.test(b.source));
+  check("buzz sources are valid urls", badSrc.length === 0,
+    badSrc.length ? `bad: ${badSrc.map((b) => b.id).join(", ")}` : `${BUZZ.filter((b) => b.source).length} sourced`);
+}
 
 // Hot or Not: deterministic, 5 distinct subjects per day, each normalized to the
 // poll shape with EXACTLY the [hot, not] options, cycles the pool with no repeats.
@@ -251,11 +257,13 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   // A date no entry covers must still resolve (nearest-earlier fallback).
   check("on-this-day never blank on a no-match date", !!getOnThisDay("2026-02-29") || !!getOnThisDay("2026-12-31"));
   const MD = /^\d{2}-\d{2}$/;
+  const isUrl = (u) => /^https?:\/\//i.test(String(u || ""));
   const bad = ON_THIS_DAY_ALL.filter(
-    (e) => !e.id || !MD.test(e.md || "") || typeof e.year !== "number" ||
-      !(e.no1Song || e.inTheaters || e.onTV)
+    (e) => !e.id || !MD.test(e.md || "") ||
+      !Array.isArray(e.events) || e.events.length === 0 ||
+      e.events.some((ev) => typeof ev.year !== "number" || !ev.text || !isUrl(ev.source))
   );
-  check("on-this-day entries well-formed", bad.length === 0,
+  check("on-this-day entries well-formed (events + sources)", bad.length === 0,
     bad.length ? `bad: ${bad.map((e) => e.id || "?").join(", ")}` : `${ON_THIS_DAY_ALL.length} dates`);
 }
 
