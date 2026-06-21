@@ -2,63 +2,63 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-wplace",
-    "title": "A whole-Earth map you can deface, one pixel at a time",
-    "blurb": "It's r/place but stretched over the actual globe — thousands of strangers fighting tile-by-tile to draw flags, frogs, and unspeakable doodles on the planet. Pure 2003 webring chaos with GPS coordinates.",
-    "url": "https://wplace.live"
+    "id": "gw-find-invisible-cow",
+    "title": "Hunt a cow you can only hear",
+    "blurb": "Drag your mouse around a blank screen while a voice MOOs louder the closer you get. Somehow more tense than any boss fight in Crypt of the Hollow King.",
+    "url": "https://findtheinvisiblecow.com/",
+    "foundNote": "headphones recommended, dignity optional"
   },
   {
-    "id": "gw-pudding",
-    "title": "Visual essays that out-nerd your group chat",
-    "blurb": "Beautiful interactive data stories about everything from one-hit wonders to the height of NBA players. It's like a museum exhibit and a slideshow had a very smart baby.",
-    "url": "https://pudding.cool"
+    "id": "gw-nicest-place",
+    "title": "Strangers will send you a hug",
+    "blurb": "A loop of regular people opening their arms to the camera just for you. It's the wholesome flip-side of every comment section, and we're choosing to believe in it.",
+    "url": "https://thenicestplace.net/"
   },
   {
-    "id": "gw-endless-horse",
-    "title": "An ASCII horse with legs that go on forever",
-    "blurb": "No menu, no point, no end. Just a little horse and four legs that keep scrolling into infinity. We respect the commitment.",
-    "url": "http://endless.horse"
+    "id": "gw-myretrotvs",
+    "title": "Channel-surf a TV from 1987",
+    "blurb": "Flip through fuzzy old broadcasts on a glowing CRT, complete with static between channels. It's the rerun you didn't know your brain still missed.",
+    "url": "https://myretrotvs.com/",
+    "foundNote": "adjust the rabbit ears"
   },
   {
-    "id": "gw-geopixels",
-    "title": "Collaborative pixel art painted onto the real world map",
-    "blurb": "Thousands of people drawing tiny masterpieces on top of actual geography, in real time. Half art project, half turf war, fully hypnotic.",
-    "url": "https://www.geopixels.net"
+    "id": "gw-this-is-sand",
+    "title": "Pour endless colored sand into a jar",
+    "blurb": "Drag to drip layer after layer of sand into hypnotic gradients. The most peaceful thing you can do with a mouse since the Windows 98 maze screensaver.",
+    "url": "https://thisissand.com/"
   },
   {
-    "id": "gw-weird-one",
-    "title": "A website generator that prints you a personal homepage",
-    "blurb": "Type in a few details about yourself and it spits out a little site, GeoCities-style. The personal homepage is back, baby, and it never should have left.",
-    "url": "https://weird.one"
+    "id": "gw-click-click-click",
+    "title": "A website that narrates your every move",
+    "blurb": "It watches your clicks, scrolls, and window-resizing and comments on all of it in real time. Faintly unsettling, like a guidance counselor who really got into web design.",
+    "url": "https://clickclickclick.click/",
+    "foundNote": "it sees you fidgeting"
   },
   {
     "id": "gw-pug-in-a-rug",
-    "title": "A site that asks the only question that matters: is this a pug in a rug?",
-    "blurb": "It is a pug. It is in a rug. The page confirms it for you, lovingly, with no further agenda. Sometimes the early web just wanted you to be okay.",
-    "url": "https://puginarug.com"
+    "title": "A counter that just wants to find a pug",
+    "blurb": "It keeps insisting 'no pug in a rug'... until, eventually, there is a pug in a rug. The patience-versus-payoff ratio is deeply 2009.",
+    "url": "https://puginarug.com/",
+    "foundNote": "good things come to those who wait"
   },
   {
-    "id": "gw-this-person",
-    "title": "A photo of a person who has never existed",
-    "blurb": "Refresh and a brand-new, totally fake human face appears, generated from scratch. Unsettling, mesmerizing, and a great way to lose ten minutes.",
-    "url": "https://thispersondoesnotexist.com"
-  },
-  {
-    "id": "gw-invisible-cow",
-    "title": "Find the invisible cow using only a yelling voice",
-    "blurb": "Move your mouse and a deeply enthusiastic narrator screams 'COW!' louder as you get closer. It's a Marco Polo for your monitor and it absolutely rules.",
-    "url": "https://findtheinvisiblecow.com"
-  },
-  {
-    "id": "gw-falling-falling",
-    "title": "An endless screen of colors falling forever",
-    "blurb": "Hypnotic gradient bands tumbling downward with an ambient drone underneath. Equal parts screensaver, lava lamp, and gentle existential crisis.",
-    "url": "https://www.fallingfalling.com"
+    "id": "gw-cornify",
+    "title": "Add unicorns and rainbows to literally anything",
+    "blurb": "A button that sprays glittering unicorns across whatever page you're on. Peak GeoCities-brain energy, lovingly preserved into the present day.",
+    "url": "https://www.cornify.com/",
+    "foundNote": "sparkle responsibly"
   },
   {
     "id": "gw-koalas",
-    "title": "Tap to reveal a hidden picture, one quadrant at a time",
-    "blurb": "Start with four giant colored squares, keep clicking, and a photo slowly assembles itself out of thousands of tiny dots. Strangely soothing, deeply early-web.",
-    "url": "https://koalastothemax.com"
+    "title": "Pixel dots that slowly become a koala",
+    "blurb": "Tap to keep splitting big colored squares into smaller ones until a fuzzy koala materializes out of the blur. Strangely satisfying, like defragging your hard drive.",
+    "url": "https://www.koalastothemax.com/"
+  },
+  {
+    "id": "gw-mynoise",
+    "title": "A studio of background-noise machines",
+    "blurb": "Mix rain, cafes, distant trains, and humming machines into your own focus soundscape with about a thousand sliders. Mind Flood pairs nicely with the 'cozy storm' setting.",
+    "url": "https://mynoise.net/",
+    "foundNote": "sliders for days"
   }
 ];
