@@ -2,689 +2,683 @@
 // The Countdown pool. Shape: { id, title, unit, blurb?, entries:[{rank,title,by?,note?,trend}] }
 export default [
   {
-    "id": "ctd-most-anticipated-games",
-    "title": "TOP 5 GAMES WE'RE COUNTING DOWN TO",
+    "id": "ctd-feed-sounds",
+    "title": "TOP 5 SOUNDS GLUED TO YOUR FOR-YOU PAGE",
     "unit": "song",
-    "blurb": "Pretend these cartridges. They are not cartridges.",
+    "blurb": "The audio living rent-free in everyone's skull this month.",
     "entries": [
       {
         "rank": 1,
-        "title": "GTA VI",
-        "by": "Rockstar Games",
-        "note": "Vice City returns with Jason and Lucia — the most expensive thing ever made that you'll still mostly use to drive into the ocean.",
-        "trend": "up"
+        "title": "Du bist gut genug",
+        "by": "TikTok",
+        "note": "A tender lyric chopped into bait. Pure AIM-away-message energy.",
+        "trend": "new"
       },
       {
         "rank": 2,
-        "title": "Final Fantasy VII Rebirth",
-        "by": "Square Enix",
-        "note": "Now on Switch 2 and Xbox. Cloud's hair still defies the dial-up era it was born in.",
-        "trend": "new"
+        "title": "Murder on the Dancefloor",
+        "by": "Sophie Ellis-Bextor",
+        "note": "Proof that 2026 is just 2016 wearing 2002's outfit.",
+        "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Dead or Alive: Last Round",
-        "by": "Team Ninja",
-        "note": "30 years of arcade-cabinet button-mashing. Smells like quarters and a sticky joystick.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Gothic Remake",
-        "by": "Alkimia Interactive",
-        "note": "Eurojank roleplaying, reborn. Like a LAN party that argues about lore.",
+        "title": "Nihilistic Penguin",
+        "by": "Unknown",
+        "note": "That doomed little waddle is all of us walking to first period.",
         "trend": "new"
       },
       {
+        "rank": 4,
+        "title": "Mr. Brightside",
+        "by": "The Killers",
+        "note": "Never trends because it never actually left.",
+        "trend": "same"
+      },
+      {
         "rank": 5,
-        "title": "Pits and Portals",
-        "by": "Ourcade",
-        "note": "No mega-budget, no horse-shaped marketing. Just shove a goblin into a pit, hero.",
-        "trend": "up"
+        "title": "Axel F",
+        "by": "Crazy Frog",
+        "note": "Ringtone royalty refusing to retire gracefully.",
+        "trend": "down"
       }
     ]
   },
   {
-    "id": "ctd-songs-stuck-in-head",
-    "title": "TOP 5 SONGS STUCK IN EVERYONE'S HEAD",
+    "id": "ctd-sad-girl-anthems",
+    "title": "TOP 5 CRY-IN-THE-CAR ANTHEMS",
     "unit": "song",
-    "blurb": "Free earworm, no uninstaller included.",
     "entries": [
       {
         "rank": 1,
         "title": "You Seem Pretty Sad For A Girl So In Love",
         "by": "Olivia Rodrigo",
-        "note": "Would've been a burned mix-CD track #3, scrawled in Sharpie, no question.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "Midnight Sun: Girls Trip",
-        "by": "Zara Larsson",
-        "note": "A redux remix collection — basically a Limewire folder that actually downloaded right.",
+        "note": "Title's longer than a dial-up handshake, but it'll wreck you faster.",
         "trend": "new"
       },
       {
+        "rank": 2,
+        "title": "Complicated",
+        "by": "Avril Lavigne",
+        "note": "Why'd you have to go and make things so... timeless.",
+        "trend": "same"
+      },
+      {
         "rank": 3,
-        "title": "Saxophone Gets Louder",
-        "by": "the internet",
-        "note": "Not a song so much as a vibe. Rate it 9 sax solos out of a Tamagotchi.",
+        "title": "Since U Been Gone",
+        "by": "Kelly Clarkson",
+        "note": "Belted into every hairbrush since the CRT era.",
         "trend": "up"
       },
       {
         "rank": 4,
-        "title": "Piano Tiles",
-        "by": "Ourcade",
-        "note": "No lyrics, all rhythm. Tap the lane or perish, no AutoTune to save you.",
-        "trend": "same"
-      },
-      {
-        "rank": 5,
-        "title": "Windows XP Startup Chime",
-        "by": "Microsoft",
-        "note": "Four seconds of pure serotonin, available on our Soundboard for free-99.",
+        "title": "Bring Me To Life",
+        "by": "Evanescence",
+        "note": "Wake me up inside the LimeWire download.",
         "trend": "down"
-      }
-    ]
-  },
-  {
-    "id": "ctd-shows-binging",
-    "title": "TOP 5 SHOWS EATING OUR EVENINGS",
-    "unit": "show",
-    "blurb": "Best viewed in 1024x768 with the volume too loud.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Bear",
-        "by": "FX / Hulu",
-        "note": "Final season dropped all at once — basically a TV box-set marathon, but legal.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "House of the Dragon",
-        "by": "HBO",
-        "note": "The Battle of the Gullet looms. Everyone's doomed; nobody's smiling. Classic dragon stuff.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "The Vampire Lestat",
-        "by": "AMC",
-        "note": "A rock-star vampire glow-up. If this aired in 2003 it'd be on a flip phone wallpaper.",
-        "trend": "new"
-      },
-      {
-        "rank": 4,
-        "title": "Supergirl",
-        "by": "DC Studios",
-        "note": "Milly Alcock suits up, Jason Momoa shows up as Lobo. Saturday-morning energy, premium budget.",
-        "trend": "up"
       },
       {
         "rank": 5,
-        "title": "Snake",
-        "by": "Ourcade",
-        "note": "Not a show, but you'll stare at it for three hours straight all the same.",
-        "trend": "down"
-      }
-    ]
-  },
-  {
-    "id": "ctd-summer-movies",
-    "title": "TOP 5 MOVIES RULING THE MULTIPLEX",
-    "unit": "movie",
-    "blurb": "Sneak in a Capri Sun, it's tradition.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Super Mario Galaxy Movie",
-        "by": "Illumination / Nintendo",
-        "note": "$427 million domestic. Pixel-perfect nostalgia goldmine — basically a feature-length arcade cabinet.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "The Devil Wears Prada 2",
-        "by": "20th Century Studios",
-        "note": "Y2K fashion juggernaut. That's all, that's the runway.",
-        "trend": "up"
-      },
-      {
-        "rank": 3,
-        "title": "Supergirl",
-        "by": "DC Studios",
-        "note": "Kicks off the summer season. Cape physics still better than dial-up.",
-        "trend": "new"
-      },
-      {
-        "rank": 4,
-        "title": "GTA VI",
-        "by": "Rockstar Games",
-        "note": "Not a movie, but the trailer got opening-weekend numbers anyway.",
-        "trend": "up"
-      },
-      {
-        "rank": 5,
-        "title": "Crypt of the Hollow King",
-        "by": "Ourcade",
-        "note": "No screen, no popcorn — just route-finding and HP math. Cheaper than a ticket.",
+        "title": "How to Save a Life",
+        "by": "The Fray",
+        "note": "Played under every dramatic hospital-show montage ever made.",
         "trend": "same"
       }
     ]
   },
   {
-    "id": "ctd-memes-of-the-moment",
-    "title": "TOP 5 MEMES CLOGGING THE FEED",
+    "id": "ctd-y2k-dancefloor",
+    "title": "TOP 5 Y2K DANCEFLOOR DESTROYERS",
     "unit": "song",
-    "blurb": "The 2026 equivalent of a forwarded chain email.",
+    "blurb": "Gymnasium hits that still hold up under a disco ball.",
     "entries": [
       {
         "rank": 1,
-        "title": "Saxophone Gets Louder",
-        "by": "the internet",
-        "note": "Dramatic, universal, escalating. The 'All Your Base' of brass.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "The KitKat Heist",
-        "by": "unknown bandits",
-        "note": "400,000 stolen KitKats. Absurdity-per-byte off the charts; would've crashed a 56k modem with reaction GIFs.",
-        "trend": "new"
-      },
-      {
-        "rank": 3,
-        "title": "Nihilistic Penguin",
-        "by": "the internet",
-        "note": "Adopted by BMW and Lidl. Even the brands are sad now. Very LiveJournal mood.",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Tayvis Wedding Theories",
-        "by": "the timeline",
-        "note": "Fans cracking the June 13 lucky-number code like it's a GeoCities fan shrine.",
-        "trend": "same"
-      },
-      {
-        "rank": 5,
-        "title": "Dial-Up Handshake",
-        "by": "Ourcade Soundboard",
-        "note": "The OG meme noise. Press the pad, scare a coworker, relive 1999.",
-        "trend": "down"
-      }
-    ]
-  },
-  {
-    "id": "ctd-y2k-throwback-songs",
-    "title": "TOP 5 SONGS THAT SCREAM 'BURN ME A CD'",
-    "unit": "song",
-    "blurb": "Evergreen mixtape canon. No skips.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Mr. Brightside",
-        "by": "The Killers",
-        "note": "Legally required at every function until the heat death of the universe.",
+        "title": "Hey Ya!",
+        "by": "OutKast",
+        "note": "Still shaking it like a Polaroid picture, grandpa.",
         "trend": "same"
       },
       {
         "rank": 2,
         "title": "Yeah!",
         "by": "Usher",
-        "note": "Lil Jon's 'OKAYYY' is still the most efficient hype delivery system known to science.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "Hey Ya!",
-        "by": "OutKast",
-        "note": "Shake it like a Polaroid picture you waited 60 seconds to develop.",
+        "note": "Peace up, A-town down, retainer in.",
         "trend": "up"
       },
       {
-        "rank": 4,
-        "title": "Since U Been Gone",
-        "by": "Kelly Clarkson",
-        "note": "Peak bedroom-mirror hairbrush microphone material.",
+        "rank": 3,
+        "title": "Hollaback Girl",
+        "by": "Gwen Stefani",
+        "note": "Taught an entire generation to spell 'bananas.'",
         "trend": "same"
       },
       {
-        "rank": 5,
-        "title": "All Star",
-        "by": "Smash Mouth",
-        "note": "Predates the memes, outlives us all. The body is, in fact, a runtime.",
+        "rank": 4,
+        "title": "Crazy in Love",
+        "by": "Beyoncé",
+        "note": "The uh-oh heard round the school dance.",
         "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Toxic",
+        "by": "Britney Spears",
+        "note": "Flight-attendant cosplay, certified banger.",
+        "trend": "new"
       }
     ]
   },
   {
-    "id": "ctd-tayvis-watch",
-    "title": "TOP 5 THINGS THE INTERNET WON'T STOP TALKING ABOUT",
+    "id": "ctd-ringtone-legends",
+    "title": "TOP 5 POLYPHONIC RINGTONE LEGENDS",
     "unit": "song",
-    "blurb": "Water-cooler tier: maximum.",
+    "blurb": "The tones you paid $2.99 for and refused to apologize for.",
     "entries": [
       {
         "rank": 1,
-        "title": "The Taylor & Travis Wedding",
-        "by": "Tayvis truthers",
-        "note": "June 13 — only Saturday-the-13th of the year, her favorite number. Fans cracking it like a Neopets password.",
-        "trend": "up"
+        "title": "Axel F",
+        "by": "Crazy Frog",
+        "note": "The most annoying download you proudly funded twice.",
+        "trend": "same"
       },
       {
         "rank": 2,
-        "title": "GTA VI Release Date",
-        "by": "Rockstar Games",
-        "note": "Nov 19 circled on every calendar like a midnight-release Toys R Us trip.",
+        "title": "In Da Club",
+        "by": "50 Cent",
+        "note": "Go shorty, it's your text-message tone.",
         "trend": "up"
       },
       {
         "rank": 3,
-        "title": "The Bear Finale",
-        "by": "FX / Hulu",
-        "note": "People speed-running grief in a single Hulu sitting. Yes Chef, no sleep.",
+        "title": "Lose Yourself",
+        "by": "Eminem",
+        "note": "Mom's spaghetti, mid-class, on full volume.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Hips Don't Lie",
+        "by": "Shakira",
+        "note": "Truthful hips, untruthful 'I swear it was on silent.'",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Dragostea Din Tei",
+        "by": "O-Zone",
+        "note": "Numa Numa: the original lip-sync webcam smash.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-emo-revival",
+    "title": "TOP 5 EMO BANGERS THE ALGORITHM REVIVED",
+    "unit": "song",
+    "blurb": "2026 is the new 2016 is the new 2006, apparently.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "In the End",
+        "by": "Linkin Park",
+        "note": "Nu-metal feelings are officially cool again. Eyeliner included.",
         "trend": "new"
       },
       {
-        "rank": 4,
-        "title": "The KitKat Heist",
-        "by": "chocolate underworld",
-        "note": "Where are the 400,000 bars? The internet is on the case like a dial-up detective.",
-        "trend": "up"
-      },
-      {
-        "rank": 5,
-        "title": "Name-O-Tron 3000",
-        "by": "Ourcade",
-        "note": "Feed it 'Tayvis' and the supercomputer prints a 100% scientific verdict.",
-        "trend": "same"
-      }
-    ]
-  },
-  {
-    "id": "ctd-arcade-classics",
-    "title": "TOP 5 GAMES THAT ATE OUR LUNCH MONEY",
-    "unit": "song",
-    "blurb": "Quarters down, dreams up. Evergreen cabinet hall of fame.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Pac-Man",
-        "by": "Namco",
-        "note": "The original 'eat dots, avoid death' design doc. Still undefeated.",
-        "trend": "same"
-      },
-      {
         "rank": 2,
-        "title": "Street Fighter II",
-        "by": "Capcom",
-        "note": "Sticky joysticks and a kid two feet taller who only played Blanka.",
-        "trend": "same"
+        "title": "Welcome to the Black Parade",
+        "by": "My Chemical Romance",
+        "note": "The side-swept fringe is back, regrettably.",
+        "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Dance Dance Revolution",
-        "by": "Konami",
-        "note": "Cardio you'd actually do, in front of a mall food court audience.",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Tetris",
-        "by": "Alexey Pajitnov",
-        "note": "The block that haunts your closed eyelids. Free, eternal, devastating.",
+        "title": "Ocean Avenue",
+        "by": "Yellowcard",
+        "note": "Skate-park anthems never truly clock out.",
         "trend": "same"
       },
       {
+        "rank": 4,
+        "title": "Sk8er Boi",
+        "by": "Avril Lavigne",
+        "note": "He was a boy, she was a girl — can the algorithm make it more obvious?",
+        "trend": "down"
+      },
+      {
         "rank": 5,
-        "title": "Snake",
-        "by": "Ourcade",
-        "note": "The cabinet in your pocket. Now with a working dialer and a hidden browser.",
-        "trend": "up"
+        "title": "Misery Business",
+        "by": "Paramount",
+        "note": "Mall-bench classic, dug up and dusted off.",
+        "trend": "new"
       }
     ]
   },
   {
-    "id": "ctd-superhero-power-rankings",
-    "title": "TOP 5 CAPES WE'RE ROOTING FOR",
+    "id": "ctd-nostalgia-reboots",
+    "title": "TOP 5 REBOOTS BETTING ON YOUR CHILDHOOD",
     "unit": "movie",
-    "blurb": "Action-figure power rankings, fully unscientific.",
     "entries": [
       {
         "rank": 1,
-        "title": "Supergirl",
-        "by": "DC Studios",
-        "note": "Milly Alcock as the Girl of Steel — Saturday-morning cartoon energy, blockbuster budget.",
+        "title": "Masters of the Universe",
+        "by": "Amazon MGM Studios",
+        "note": "He-Man returns after ~40 years. By the power of nostalgia.",
         "trend": "new"
       },
       {
         "rank": 2,
-        "title": "Lobo",
-        "by": "Jason Momoa",
-        "note": "The space biker antihero who'd absolutely own a chrome flame-decal Trapper Keeper.",
+        "title": "Toy Story 5",
+        "by": "Pixar",
+        "note": "The toys' new villain is your kid's tablet. Brutally relatable.",
         "trend": "new"
       },
       {
         "rank": 3,
-        "title": "The Vampire Lestat",
-        "by": "AMC",
-        "note": "Technically a vampire, spiritually a hair-metal frontman. Counts as a hero on vibes.",
-        "trend": "up"
+        "title": "Spider-Man",
+        "by": "Columbia Pictures",
+        "note": "The reboot benchmark. Upside-down kiss included.",
+        "trend": "same"
       },
       {
         "rank": 4,
-        "title": "Mario",
-        "by": "Nintendo",
-        "note": "No cape needed — the man jumps on problems. $427 million of plumber justice.",
+        "title": "Batman Begins",
+        "by": "Warner Bros.",
+        "note": "Proved a reboot could actually be good. Bar set.",
         "trend": "up"
       },
       {
         "rank": 5,
-        "title": "Your Pits-and-Portals Hero",
-        "by": "Ourcade",
-        "note": "Zero powers, glass jaw, can only shove. The realest underdog on this list.",
-        "trend": "same"
+        "title": "King Kong",
+        "by": "Universal Pictures",
+        "note": "Three hours of Peter Jackson loving a very large ape.",
+        "trend": "down"
       }
     ]
   },
   {
-    "id": "ctd-rpg-time-sinks",
-    "title": "TOP 5 RPGS TO LOSE A WEEKEND TO",
-    "unit": "song",
-    "blurb": "Save often. Touch grass never.",
+    "id": "ctd-old-vs-new-movies",
+    "title": "TOP 5 MOVIES WHERE OLD STUFF FIGHTS NEW STUFF",
+    "unit": "movie",
+    "blurb": "Analog vs. digital: the eternal arcade-age grudge match.",
     "entries": [
       {
         "rank": 1,
-        "title": "Final Fantasy VII Rebirth",
-        "by": "Square Enix",
-        "note": "Now on Switch 2 and Xbox. Buster sword, infinite cutscenes, zero regrets.",
+        "title": "Toy Story 5",
+        "by": "Pixar",
+        "note": "Wooden cowboys vs. glowing screens. Pick a side, partner.",
         "trend": "new"
       },
       {
         "rank": 2,
-        "title": "Gothic Remake",
-        "by": "Alkimia Interactive",
-        "note": "Eurojank roleplaying romp, rebuilt. Janky in a way that builds character.",
-        "trend": "new"
-      },
-      {
-        "rank": 3,
-        "title": "Crypt of the Hollow King",
-        "by": "Ourcade",
-        "note": "Deterministic tower-crawl — no luck, just route-finding and HP arithmetic.",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Diablo II",
-        "by": "Blizzard",
-        "note": "The loot grind that taught a generation what 'just one more run' means.",
-        "trend": "same"
-      },
-      {
-        "rank": 5,
-        "title": "Pokémon (any of them)",
-        "by": "Game Freak",
-        "note": "Gotta catch 'em all, gotta link-cable trade with the one friend who had the other version.",
-        "trend": "same"
-      }
-    ]
-  },
-  {
-    "id": "ctd-brain-vs-thumbs",
-    "title": "TOP 5 WAYS OURCADE WRECKS YOUR REFLEXES",
-    "unit": "song",
-    "blurb": "On-site challenge ladder. No mercy mode.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Tap Surge",
-        "by": "Ourcade",
-        "note": "Tap the dots before they vanish. Miss three, game over, ego bruised.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "Color Panic",
-        "by": "Ourcade",
-        "note": "Tap only the target color — which keeps changing. Stroop test with a grudge.",
+        "title": "WALL-E",
+        "by": "Pixar",
+        "note": "A rusty robot out-feeling a world of touchscreens.",
         "trend": "same"
       },
       {
         "rank": 3,
-        "title": "Splitter",
-        "by": "Ourcade",
-        "note": "Pop the dots before they multiply. It's whack-a-mole that fights back.",
+        "title": "The Iron Giant",
+        "by": "Warner Bros.",
+        "note": "Souls beat circuits, every single time.",
         "trend": "up"
       },
       {
         "rank": 4,
-        "title": "Mind Flood",
-        "by": "Ourcade",
-        "note": "Six brain trainers including N-Back. Feels like a pop quiz you signed up for.",
-        "trend": "new"
-      },
-      {
-        "rank": 5,
-        "title": "Piano Tiles",
-        "by": "Ourcade",
-        "note": "Perfect beats Good beats Miss. Rhythm with consequences.",
-        "trend": "same"
-      }
-    ]
-  },
-  {
-    "id": "ctd-pop-divas-2026",
-    "title": "TOP 5 POP ALBUMS ON HEAVY ROTATION",
-    "unit": "song",
-    "blurb": "If these dropped on a Walkman, the batteries would be dead by now.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "You Seem Pretty Sad For A Girl So In Love",
-        "by": "Olivia Rodrigo",
-        "note": "Three-time Grammy winner, album #3. The diary-with-a-padlock energy is immaculate.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "Midnight Sun: Girls Trip",
-        "by": "Zara Larsson",
-        "note": "All-women remix redux riding viral buzz. The CD insert would've been holographic.",
-        "trend": "new"
-      },
-      {
-        "rank": 3,
-        "title": "Saxophone Gets Louder",
-        "by": "the internet",
-        "note": "Not an album, but it's louder than all of them by design.",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Hot Hits Compilation",
-        "by": "Various Artists",
-        "note": "Evergreen reminder that someone, somewhere, still buys the 'NOW That's What I Call' discs.",
+        "title": "Terminator 2: Judgment Day",
+        "by": "TriStar Pictures",
+        "note": "Old model protects, new model menaces. Classic.",
         "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Ourcade Soundboard",
-        "by": "Ourcade",
-        "note": "The only chart-topper featuring the Windows 98 shutdown chime.",
+        "title": "Tron",
+        "by": "Walt Disney Productions",
+        "note": "We've been arguing analog vs. digital since the arcade days.",
         "trend": "same"
       }
     ]
   },
   {
-    "id": "ctd-finale-szn-shows",
-    "title": "TOP 5 SHOWS ENDING OR ESCALATING",
+    "id": "ctd-cable-reruns",
+    "title": "TOP 5 MOVIES THAT NEVER LEFT BASIC CABLE",
+    "unit": "movie",
+    "blurb": "Aired so often they basically paid rent.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Shrek",
+        "by": "DreamWorks",
+        "note": "On so much it qualifies as a roommate.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "The Lord of the Rings: The Fellowship of the Ring",
+        "by": "New Line Cinema",
+        "note": "Always on, always 'just the next scene, I swear.'",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+        "by": "Walt Disney Pictures",
+        "note": "Made the whole school want a magic compass.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Mean Girls",
+        "by": "Paramount Pictures",
+        "note": "On Wednesdays the channel wore pink.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Finding Nemo",
+        "by": "Pixar",
+        "note": "A whole generation learned to just keep swimming.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-quotable-movies",
+    "title": "TOP 5 MOVIES YOU QUOTED INTO THE GROUND",
+    "unit": "movie",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Napoleon Dynamite",
+        "by": "Fox Searchlight",
+        "note": "Gosh. Idiot. The whole cafeteria knew the lines.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "Anchorman",
+        "by": "DreamWorks",
+        "note": "60% of the time, it worked every time.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Zoolander",
+        "by": "Paramount Pictures",
+        "note": "A whole philosophy about being really, really ridiculously good-looking.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Dodgeball",
+        "by": "20th Century Fox",
+        "note": "Dodge, duck, dip, dive, and dodge.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Old School",
+        "by": "DreamWorks",
+        "note": "We went streaking. Through the quad.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-summer-shows",
+    "title": "TOP 5 SHOWS RUNNING YOUR SUMMER",
     "unit": "show",
-    "blurb": "Tissues and theory threads, both required.",
+    "blurb": "The stacked slate eating everyone's evenings.",
     "entries": [
       {
         "rank": 1,
         "title": "The Bear",
-        "by": "FX / Hulu",
-        "note": "Fifth and final season, dropped all at once. The kitchen closes; the trauma lingers.",
-        "trend": "new"
+        "by": "FX",
+        "note": "Yes, Chef. Still yelling. Still the best thing on.",
+        "trend": "same"
       },
       {
         "rank": 2,
         "title": "House of the Dragon",
         "by": "HBO",
-        "note": "Season three, full war footing. The Battle of the Gullet says hello and goodbye.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "The Vampire Lestat",
-        "by": "AMC",
-        "note": "Season three, Lestat shoots to stardom. A vampire becomes a rock god — very 2003 of him.",
+        "note": "Dragons, betrayal, and at least one haircut you'll argue about.",
         "trend": "up"
       },
       {
-        "rank": 4,
-        "title": "Supergirl",
-        "by": "DC Studios",
-        "note": "Technically a movie, but it premiered loud enough to crash a chat room.",
+        "rank": 3,
+        "title": "Avatar: The Last Airbender",
+        "by": "Netflix",
+        "note": "Live-action round two. The cabbage merchant deserves a raise.",
         "trend": "new"
       },
       {
-        "rank": 5,
-        "title": "Snake",
-        "by": "Ourcade",
-        "note": "No season finale. It ends only when you bite yourself. Deep, honestly.",
-        "trend": "down"
-      }
-    ]
-  },
-  {
-    "id": "ctd-party-night-tools",
-    "title": "TOP 5 TOOLS FOR A CHAOTIC HANGOUT",
-    "unit": "song",
-    "blurb": "BYO snacks. The tools are free.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Wheel of Names",
-        "by": "Ourcade",
-        "note": "Drop in names, spin, remove the winner, repeat. Democracy, but spinny.",
-        "trend": "up"
-      },
-      {
-        "rank": 2,
-        "title": "Poker Night Tracker",
-        "by": "Ourcade",
-        "note": "Tracks buy-ins and tells you exactly who owes whom. Saves three friendships per session.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "Magic 8-Ball",
-        "by": "Ourcade",
-        "note": "All 20 classic replies. 'Reply hazy, try again' is still the most relatable phrase ever coded.",
-        "trend": "up"
-      },
-      {
         "rank": 4,
-        "title": "Dice & Coin",
-        "by": "Ourcade",
-        "note": "Roll d4 through d20 with modifiers. Your physical dice were lost under the couch in 2009 anyway.",
-        "trend": "same"
-      },
-      {
-        "rank": 5,
-        "title": "Name-O-Tron 3000",
-        "by": "Ourcade",
-        "note": "Scientific coolness readouts for every name at the party. Results legally non-binding.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-nostalgia-noises",
-    "title": "TOP 5 SOUNDS THAT TIME-TRAVEL YOU",
-    "unit": "song",
-    "blurb": "Press play, return to a beige computer room.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Dial-Up Handshake",
-        "by": "56k Modem",
-        "note": "The screeching anthem of patience. Nobody could pick up the phone.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "Windows XP Startup",
-        "by": "Microsoft",
-        "note": "Four notes that meant the homework machine was finally awake.",
-        "trend": "up"
-      },
-      {
-        "rank": 3,
-        "title": "AIM Door Slam",
-        "by": "AOL",
-        "note": "That creak-then-slam still triggers a fight-or-flight crush response.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Windows 98 Shutdown",
-        "by": "Microsoft",
-        "note": "The gentle sigh of a PC that survived another day of Solitaire.",
+        "title": "Lost",
+        "by": "ABC",
+        "note": "We still don't know what the island was. Beautiful disaster.",
         "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Ourcade Soundboard",
-        "by": "Ourcade",
-        "note": "All these pads in one grid. Tap to relive the noise; warn your roommates first.",
+        "title": "24",
+        "by": "Fox",
+        "note": "The original 'one more episode' real-time stress test.",
+        "trend": "same"
+      }
+    ]
+  },
+  {
+    "id": "ctd-finale-feels",
+    "title": "TOP 5 SHOWS WE'RE NOT READY TO LOSE",
+    "unit": "show",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "The Bear",
+        "by": "FX",
+        "note": "Final season. Grab tissues and a fire extinguisher.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
+        "title": "Friends",
+        "by": "NBC",
+        "note": "The one where it ended and we never recovered.",
+        "trend": "same"
+      },
+      {
+        "rank": 3,
+        "title": "Seinfeld",
+        "by": "NBC",
+        "note": "A finale about nothing, naturally.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Lost",
+        "by": "ABC",
+        "note": "Ended on faith and a lot of confused group chats.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Avatar: The Last Airbender",
+        "by": "Nickelodeon",
+        "note": "The cartoon finale that out-acted most live-action dramas.",
+        "trend": "up"
+      }
+    ]
+  },
+  {
+    "id": "ctd-fantasy-kingdoms",
+    "title": "TOP 5 FANTASY KINGDOMS WORTH DEFENDING",
+    "unit": "show",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "House of the Dragon",
+        "by": "HBO",
+        "note": "Targaryen family reunion: now with extra fire.",
+        "trend": "up"
+      },
+      {
+        "rank": 2,
+        "title": "Avatar: The Last Airbender",
+        "by": "Netflix",
+        "note": "Four nations, one CGI budget that finally showed up.",
+        "trend": "new"
+      },
+      {
+        "rank": 3,
+        "title": "Xena: Warrior Princess",
+        "by": "Universal Television",
+        "note": "Streaming-before-streaming binge, leather edition.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Charmed",
+        "by": "The WB",
+        "note": "Three sisters and one chandelier-shaking opening credits.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Hercules: The Legendary Journeys",
+        "by": "Universal Television",
+        "note": "Syndication royalty in a sensible skirt.",
+        "trend": "same"
+      }
+    ]
+  },
+  {
+    "id": "ctd-comfort-rewatch",
+    "title": "TOP 5 COMFORT REWATCHES FOR A SICK DAY",
+    "unit": "show",
+    "blurb": "Background noise for an entire generation.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "SpongeBob SquarePants",
+        "by": "Nickelodeon",
+        "note": "Still funnier than most shows aimed at grown-ups.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "The Office",
+        "by": "NBC",
+        "note": "The official soundtrack to doing the dishes.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "That '70s Show",
+        "by": "Fox",
+        "note": "Ironic that the '00s show is now the throwback.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Malcolm in the Middle",
+        "by": "Fox",
+        "note": "Chaos parenting before it had a hashtag.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Drake & Josh",
+        "by": "Nickelodeon",
+        "note": "Megan was right about everyone.",
         "trend": "new"
       }
     ]
   },
   {
-    "id": "ctd-mario-meter",
-    "title": "TOP 5 REASONS MARIO RULES THE BOX OFFICE",
-    "unit": "movie",
-    "blurb": "Rated on a strict Power Star scale.",
+    "id": "ctd-after-school-cartoons",
+    "title": "TOP 5 AFTER-SCHOOL CARTOON BLOCKS",
+    "unit": "show",
+    "blurb": "Backpack on the floor, snack in hand, TV already warm.",
     "entries": [
       {
         "rank": 1,
-        "title": "The Super Mario Galaxy Movie",
-        "by": "Illumination / Nintendo",
-        "note": "$427 million domestic, the year's #1 film. A plumber out-earned actual superheroes.",
-        "trend": "up"
+        "title": "Avatar: The Last Airbender",
+        "by": "Nickelodeon",
+        "note": "The benchmark every reboot is sweating over.",
+        "trend": "same"
       },
       {
         "rank": 2,
-        "title": "Mario's Jump",
-        "by": "Nintendo",
-        "note": "The single most reliable verb in entertainment history. 5 out of 5 Power Stars.",
+        "title": "Teen Titans",
+        "by": "Cartoon Network",
+        "note": "The theme song that was secretly two theme songs.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Kim Possible",
+        "by": "Disney Channel",
+        "note": "Beep-beep-be-beep. You felt that in your spine.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Justice League",
+        "by": "Cartoon Network",
+        "note": "Saturday mornings, but make it cinematic.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Dragon Ball Z",
+        "by": "Toonami",
+        "note": "Three episodes to charge one attack. Worth it.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-stress-shows",
+    "title": "TOP 5 SHOWS THAT RAISE YOUR BLOOD PRESSURE",
+    "unit": "show",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "The Bear",
+        "by": "FX",
+        "note": "A 22-minute panic attack with gorgeous plating.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "24",
+        "by": "Fox",
+        "note": "The ticking clock that ruined relaxation forever.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Hell's Kitchen",
+        "by": "Fox",
+        "note": "Gordon Ramsay yelling is comfort food now, somehow.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Prison Break",
+        "by": "Fox",
+        "note": "A tattoo that was also a blueprint. We bought it.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Survivor",
+        "by": "CBS",
+        "note": "Outwit, outplay, outstress your snack supply.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-live-action-adaptations",
+    "title": "TOP 5 LIVE-ACTION GLOW-UPS (OR GLOW-DOWNS)",
+    "unit": "show",
+    "blurb": "Cartoon-to-real-actors: the boss fight of TV.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Avatar: The Last Airbender",
+        "by": "Netflix",
+        "note": "The adaptation everyone's grading on a brutal curve.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
+        "title": "Sabrina the Teenage Witch",
+        "by": "ABC",
+        "note": "Comic-book magic on a talking-cat-puppet budget.",
         "trend": "same"
       },
       {
         "rank": 3,
-        "title": "That Underground Theme",
-        "by": "Koji Kondo",
-        "note": "You're humming it right now. That's the whole note.",
+        "title": "Smallville",
+        "by": "The WB",
+        "note": "Ten seasons of 'no flights, no tights.'",
         "trend": "up"
       },
       {
         "rank": 4,
-        "title": "Nostalgia Itself",
-        "by": "every millennial alive",
-        "note": "The NES that lived under the TV is now a $427M cinematic universe. Feels illegal.",
-        "trend": "up"
+        "title": "Goosebumps",
+        "by": "Fox Kids",
+        "note": "Book covers scarier than the episodes, honestly.",
+        "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Pits and Portals",
-        "by": "Ourcade",
-        "note": "Also features pits and the fear of falling in them. Spiritually a cousin.",
+        "title": "Power Rangers",
+        "by": "Fox Kids",
+        "note": "Recycled monster footage, undying hype.",
         "trend": "same"
       }
     ]

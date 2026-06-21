@@ -2,69 +2,59 @@
 // Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].
 export default [
   {
-    "id": "hon-gta-vi-vice-city",
-    "subject": "GTA VI's Vice City comeback",
-    "emoji": "🌴"
+    "id": "hon-gta-6",
+    "subject": "GTA 6 launch hype",
+    "emoji": "🚗"
   },
   {
-    "id": "hon-mario-galaxy-movie",
-    "subject": "The Super Mario Galaxy Movie",
-    "emoji": "🌟"
+    "id": "hon-star-fox-switch2",
+    "subject": "Star Fox returning on Switch 2",
+    "emoji": "🦊"
   },
   {
-    "id": "hon-ff7-rebirth-switch",
-    "subject": "Final Fantasy VII Rebirth on Switch 2",
+    "id": "hon-ff7-rebirth-switch2",
+    "subject": "FF7 Rebirth on Switch 2",
     "emoji": "⚔️"
   },
   {
-    "id": "hon-the-bear-final-season",
-    "subject": "The Bear's final season",
-    "emoji": "🐻"
-  },
-  {
-    "id": "hon-house-of-dragon-s3",
-    "subject": "House of the Dragon Season 3",
-    "emoji": "🐉"
-  },
-  {
-    "id": "hon-supergirl-movie",
-    "subject": "Supergirl with Lobo",
-    "emoji": "🦸"
-  },
-  {
     "id": "hon-dead-or-alive-30th",
-    "subject": "Dead or Alive's 30th anniversary",
+    "subject": "Dead or Alive turns 30",
     "emoji": "🥋"
   },
   {
-    "id": "hon-gothic-remake",
-    "subject": "The Gothic Remake",
-    "emoji": "🗡️"
+    "id": "hon-7th-guest-remake",
+    "subject": "The 7th Guest remake",
+    "emoji": "👻"
+  },
+  {
+    "id": "hon-the-bear-finale",
+    "subject": "The Bear final season",
+    "emoji": "🐻"
+  },
+  {
+    "id": "hon-toy-story-5",
+    "subject": "Toy Story 5",
+    "emoji": "🤠"
+  },
+  {
+    "id": "hon-masters-of-universe",
+    "subject": "Masters of the Universe movie",
+    "emoji": "⚔️"
   },
   {
     "id": "hon-olivia-rodrigo-album",
     "subject": "Olivia Rodrigo's new album",
-    "emoji": "💔"
+    "emoji": "🎤"
   },
   {
-    "id": "hon-zara-larsson-midnight-sun",
-    "subject": "Zara Larsson's Midnight Sun",
-    "emoji": "🌅"
+    "id": "hon-avatar-live-action-s2",
+    "subject": "Avatar live-action season 2",
+    "emoji": "🌊"
   },
   {
-    "id": "hon-vampire-lestat-s3",
-    "subject": "The Vampire Lestat goes rockstar",
-    "emoji": "🧛"
-  },
-  {
-    "id": "hon-saxophone-gets-louder",
-    "subject": "\"Saxophone Gets Louder\" meme",
-    "emoji": "🎷"
-  },
-  {
-    "id": "hon-kitkat-heist",
-    "subject": "The KitKat Heist",
-    "emoji": "🍫"
+    "id": "hon-house-of-dragon-s3",
+    "subject": "House of the Dragon S3",
+    "emoji": "🐉"
   },
   {
     "id": "hon-nihilistic-penguin",
@@ -72,24 +62,34 @@ export default [
     "emoji": "🐧"
   },
   {
-    "id": "hon-devil-wears-prada-2",
-    "subject": "Devil Wears Prada 2",
-    "emoji": "👠"
+    "id": "hon-du-bist-gut-genug",
+    "subject": "\"Du bist gut genug\" sound",
+    "emoji": "🎶"
   },
   {
-    "id": "hon-tayvis-wedding-buzz",
-    "subject": "The Tayvis wedding theories",
-    "emoji": "💍"
+    "id": "hon-kitkat-heist",
+    "subject": "KitKat Heist memes",
+    "emoji": "🍫"
   },
   {
-    "id": "hon-most-expensive-game-ever",
-    "subject": "Games costing a billion dollars",
-    "emoji": "💸"
+    "id": "hon-2026-is-new-2016",
+    "subject": "\"2026 is the new 2016\"",
+    "emoji": "🔁"
   },
   {
-    "id": "hon-all-at-once-binge-drop",
-    "subject": "Whole season dropping at once",
-    "emoji": "📺"
+    "id": "hon-he-man-comeback",
+    "subject": "He-Man's big return",
+    "emoji": "💪"
+  },
+  {
+    "id": "hon-cd-rom-horror",
+    "subject": "CD-ROM horror games",
+    "emoji": "💿"
+  },
+  {
+    "id": "hon-rail-shooter-revival",
+    "subject": "Rail shooter revival",
+    "emoji": "🚀"
   },
   {
     "id": "hon-flip-phones",
@@ -103,13 +103,18 @@ export default [
   },
   {
     "id": "hon-physical-media",
-    "subject": "Physical media on shelves",
-    "emoji": "💿"
+    "subject": "Owning physical media",
+    "emoji": "📀"
   },
   {
     "id": "hon-dial-up-handshake",
     "subject": "The dial-up handshake sound",
     "emoji": "📞"
+  },
+  {
+    "id": "hon-tamagotchi",
+    "subject": "Tamagotchi pets",
+    "emoji": "🥚"
   },
   {
     "id": "hon-burned-mix-cds",
@@ -123,13 +128,8 @@ export default [
   },
   {
     "id": "hon-myspace-top-8",
-    "subject": "The MySpace Top 8",
+    "subject": "MySpace Top 8",
     "emoji": "🌐"
-  },
-  {
-    "id": "hon-tamagotchi-pets",
-    "subject": "Tamagotchi pets",
-    "emoji": "🥚"
   },
   {
     "id": "hon-cargo-shorts",
@@ -137,64 +137,49 @@ export default [
     "emoji": "🩳"
   },
   {
-    "id": "hon-popup-blocker-wars",
-    "subject": "Battling endless pop-ups",
+    "id": "hon-velour-tracksuits",
+    "subject": "Velour tracksuits",
+    "emoji": "🧥"
+  },
+  {
+    "id": "hon-popup-internet-ads",
+    "subject": "Pop-up internet ads",
     "emoji": "🪟"
   },
   {
-    "id": "hon-lan-party-sleepovers",
-    "subject": "LAN party sleepovers",
+    "id": "hon-screensaver-pipes",
+    "subject": "3D Pipes screensaver",
     "emoji": "🖥️"
   },
   {
+    "id": "hon-clippy",
+    "subject": "Clippy the assistant",
+    "emoji": "📎"
+  },
+  {
     "id": "hon-blockbuster-fridays",
-    "subject": "Friday night at Blockbuster",
-    "emoji": "🎬"
+    "subject": "Friday night video rentals",
+    "emoji": "📼"
   },
   {
-    "id": "hon-gel-bracelets",
-    "subject": "Stacks of gel bracelets",
-    "emoji": "💫"
+    "id": "hon-webrings",
+    "subject": "Webrings",
+    "emoji": "💍"
   },
   {
-    "id": "hon-juicy-couture-tracksuit",
-    "subject": "Velour tracksuits",
-    "emoji": "🩷"
+    "id": "hon-under-construction-gifs",
+    "subject": "\"Under Construction\" GIFs",
+    "emoji": "🚧"
   },
   {
-    "id": "hon-screensaver-bouncing-logo",
-    "subject": "The bouncing DVD logo",
-    "emoji": "📀"
-  },
-  {
-    "id": "hon-floppy-disk-saving",
-    "subject": "Saving to a floppy disk",
-    "emoji": "💾"
-  },
-  {
-    "id": "hon-game-blowing-cartridges",
-    "subject": "Blowing on cartridges",
-    "emoji": "🎮"
-  },
-  {
-    "id": "hon-mall-arcade-tokens",
-    "subject": "Pockets full of arcade tokens",
-    "emoji": "🪙"
-  },
-  {
-    "id": "hon-winamp-skins",
-    "subject": "Custom Winamp skins",
+    "id": "hon-ringtone-shopping",
+    "subject": "Buying polyphonic ringtones",
     "emoji": "🎵"
   },
   {
-    "id": "hon-ringtone-monophonic",
-    "subject": "Monophonic ringtones",
-    "emoji": "🔔"
-  },
-  {
-    "id": "hon-clippy-assistant",
-    "subject": "Clippy the assistant",
-    "emoji": "📎"
+    "id": "hon-mall-arcades",
+    "subject": "Mall arcades",
+    "emoji": "🕹️"
   },
   {
     "id": "hon-butterfly-clips",
@@ -202,43 +187,58 @@ export default [
     "emoji": "🦋"
   },
   {
-    "id": "hon-wallet-chains",
-    "subject": "Wallet chains",
-    "emoji": "⛓️"
-  },
-  {
-    "id": "hon-glittery-webcounters",
-    "subject": "Glittery website hit counters",
-    "emoji": "🔢"
-  },
-  {
-    "id": "hon-jncos-wide-jeans",
-    "subject": "Sidewalk-wide JNCO jeans",
+    "id": "hon-jncos",
+    "subject": "JNCO jeans",
     "emoji": "👖"
   },
   {
-    "id": "hon-skip-it-toy",
-    "subject": "The Skip-It",
-    "emoji": "🦵"
+    "id": "hon-gel-bracelets",
+    "subject": "Jelly gel bracelets",
+    "emoji": "📿"
+  },
+  {
+    "id": "hon-floppy-disk-save",
+    "subject": "Floppy disk save icon",
+    "emoji": "💾"
+  },
+  {
+    "id": "hon-winamp-skins",
+    "subject": "Winamp skins",
+    "emoji": "🎧"
+  },
+  {
+    "id": "hon-comic-sans",
+    "subject": "Comic Sans",
+    "emoji": "🔤"
+  },
+  {
+    "id": "hon-lan-parties",
+    "subject": "LAN parties",
+    "emoji": "🖧"
+  },
+  {
+    "id": "hon-best-viewed-1024",
+    "subject": "\"Best viewed in 1024x768\"",
+    "emoji": "📺"
+  },
+  {
+    "id": "hon-chunky-sneakers",
+    "subject": "Chunky platform sneakers",
+    "emoji": "👟"
+  },
+  {
+    "id": "hon-glittery-lip-gloss",
+    "subject": "Glittery lip gloss",
+    "emoji": "💋"
+  },
+  {
+    "id": "hon-emo-side-bangs",
+    "subject": "Emo side bangs",
+    "emoji": "🖤"
   },
   {
     "id": "hon-disposable-cameras",
     "subject": "Disposable cameras",
     "emoji": "📷"
-  },
-  {
-    "id": "hon-marquee-scrolling-text",
-    "subject": "Scrolling marquee text",
-    "emoji": "📜"
-  },
-  {
-    "id": "hon-instant-messenger-buzz",
-    "subject": "The buzz/nudge button",
-    "emoji": "📳"
-  },
-  {
-    "id": "hon-best-viewed-1024",
-    "subject": "\"Best viewed in 1024x768\"",
-    "emoji": "🖼️"
   }
 ];

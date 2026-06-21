@@ -125,7 +125,7 @@ function OnThisDay({ dayKey: key }) {
     <div className="arcade-widget arcade-otd">
       <SectionHead
         kicker="📅 ON THIS DAY"
-        standfirst="real events from this date in history — straight from Wikipedia, with a link to read more"
+        standfirst="real events from this date in history"
       />
       <ul className="arcade-otd-events">
         {otd.events.map((e, i) => (
