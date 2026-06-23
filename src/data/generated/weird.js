@@ -2,63 +2,79 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-find-invisible-cow",
-    "title": "Hunt a cow you can only hear",
-    "blurb": "Drag your mouse around a blank screen while a voice MOOs louder the closer you get. Somehow more tense than any boss fight in Crypt of the Hollow King.",
-    "url": "https://findtheinvisiblecow.com/",
-    "foundNote": "headphones recommended, dignity optional"
+    "id": "gw-this-person-does-not-exist",
+    "title": "A site that prints a new human who has never existed every time you refresh",
+    "blurb": "Hit reload and a totally fake, AI-conjured face stares back — pleasant, plausible, and 100% made up. It's uncanny-valley speed-dating with nobody.",
+    "url": "https://thispersondoesnotexist.com"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "Strangers will send you a hug",
-    "blurb": "A loop of regular people opening their arms to the camera just for you. It's the wholesome flip-side of every comment section, and we're choosing to believe in it.",
-    "url": "https://thenicestplace.net/"
-  },
-  {
-    "id": "gw-myretrotvs",
-    "title": "Channel-surf a TV from 1987",
-    "blurb": "Flip through fuzzy old broadcasts on a glowing CRT, complete with static between channels. It's the rerun you didn't know your brain still missed.",
-    "url": "https://myretrotvs.com/",
-    "foundNote": "adjust the rabbit ears"
-  },
-  {
-    "id": "gw-this-is-sand",
-    "title": "Pour endless colored sand into a jar",
-    "blurb": "Drag to drip layer after layer of sand into hypnotic gradients. The most peaceful thing you can do with a mouse since the Windows 98 maze screensaver.",
-    "url": "https://thisissand.com/"
-  },
-  {
-    "id": "gw-click-click-click",
-    "title": "A website that narrates your every move",
-    "blurb": "It watches your clicks, scrolls, and window-resizing and comments on all of it in real time. Faintly unsettling, like a guidance counselor who really got into web design.",
-    "url": "https://clickclickclick.click/",
-    "foundNote": "it sees you fidgeting"
+    "id": "gw-find-the-invisible-cow",
+    "title": "A game where you scream-search for an invisible cow with your speakers",
+    "blurb": "Move your mouse and a voice yells louder as you get closer to a cow you cannot see. Headphones off, dignity off, MOO.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your volume up, sorry roommates"
   },
   {
     "id": "gw-pug-in-a-rug",
-    "title": "A counter that just wants to find a pug",
-    "blurb": "It keeps insisting 'no pug in a rug'... until, eventually, there is a pug in a rug. The patience-versus-payoff ratio is deeply 2009.",
-    "url": "https://puginarug.com/",
-    "foundNote": "good things come to those who wait"
+    "title": "A single pug, in a rug, and that's the whole website",
+    "blurb": "You blow into your mic (or just believe really hard) and the blanket lifts to reveal a pug. There is no level two. There doesn't need to be.",
+    "url": "https://puginarug.com"
   },
   {
-    "id": "gw-cornify",
-    "title": "Add unicorns and rainbows to literally anything",
-    "blurb": "A button that sprays glittering unicorns across whatever page you're on. Peak GeoCities-brain energy, lovingly preserved into the present day.",
-    "url": "https://www.cornify.com/",
-    "foundNote": "sparkle responsibly"
+    "id": "gw-falling-falling",
+    "title": "Hypnotic colored stripes that fall forever while a drone hums",
+    "blurb": "Endless descending bands of color and a low ambient buzz, like a screensaver that achieved enlightenment. Stare too long and time stops meaning things.",
+    "url": "https://www.fallingfalling.com"
   },
   {
-    "id": "gw-koalas",
-    "title": "Pixel dots that slowly become a koala",
-    "blurb": "Tap to keep splitting big colored squares into smaller ones until a fuzzy koala materializes out of the blur. Strangely satisfying, like defragging your hard drive.",
-    "url": "https://www.koalastothemax.com/"
+    "id": "gw-koalas-to-the-max",
+    "title": "A blurry mess that slowly resolves into a koala as you wave your mouse",
+    "blurb": "Big colored circles split into smaller ones wherever your cursor goes, and eventually — a koala. Pure dial-up-era 'wait for it' energy.",
+    "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-mynoise",
-    "title": "A studio of background-noise machines",
-    "blurb": "Mix rain, cafes, distant trains, and humming machines into your own focus soundscape with about a thousand sliders. Mind Flood pairs nicely with the 'cozy storm' setting.",
-    "url": "https://mynoise.net/",
-    "foundNote": "sliders for days"
+    "id": "gw-crouton",
+    "title": "A website that just shows you a different crouton every time",
+    "blurb": "Click for a new crouton. That is the feature. That is the site. We respect the commitment to the bit and the bread.",
+    "url": "https://crouton.net",
+    "foundNote": "online longer than some of you have been crunching"
+  },
+  {
+    "id": "gw-heyyy",
+    "title": "A dancing banana that says 'heeeeeeeey' until you give up",
+    "blurb": "It's the Peanut Butter Jelly Time banana, wiggling and greeting you forever. Newgrounds lunch-table flashbacks, fully loaded.",
+    "url": "https://heeeeeeeey.com",
+    "foundNote": "peanut butter jelly time, certified"
+  },
+  {
+    "id": "gw-mapcrunch",
+    "title": "A button that teleports you to a random street somewhere on Earth",
+    "blurb": "Smash 'go' and get dropped on an empty road in rural Mongolia, suburban Brazil, or a Finnish forest. Tourism for people who hate planning.",
+    "url": "https://www.mapcrunch.com"
+  },
+  {
+    "id": "gw-fakeupdate",
+    "title": "A fake full-screen Windows update screen to scare your coworkers",
+    "blurb": "Boot up a flawless '0% complete, do not turn off your computer' screen — XP, 98, the works. The most cursed prank from the school-lab era, weaponized.",
+    "url": "https://fakeupdate.net",
+    "foundNote": "do not actually do this to your boss"
+  },
+  {
+    "id": "gw-make-everything-ok",
+    "title": "A giant button that promises to make everything OK",
+    "blurb": "You press it, a loading bar does its thing, and it gently informs you everything is now OK. Somehow it kind of works.",
+    "url": "https://makeeverythingok.com"
+  },
+  {
+    "id": "gw-pixels-fighting",
+    "title": "Two armies of pixels at war until one color wins",
+    "blurb": "A black side and a white side spread across the screen in a slow, mesmerizing skirmish. No two battles end the same. Place your bets.",
+    "url": "https://pixelsfighting.com"
+  },
+  {
+    "id": "gw-music-lab",
+    "title": "Google's free sandbox for making weird little songs in your browser",
+    "blurb": "Shared Piano, Song Maker, Kandinsky, Oscillators — a whole rack of toys for accidentally composing a banger between meetings. No login, no skill required.",
+    "url": "https://musiclab.chromeexperiments.com"
   }
 ];
