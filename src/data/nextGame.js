@@ -15,7 +15,10 @@
 import { daySeed } from "../lib/daily.js";
 
 export const NEXT_GAME_VOTE = {
-  id: "next-game-genre",
+  // Bump this id to reset the vote: it invalidates the one-per-device local gate
+  // (everyone gets to vote again) and points at a fresh, empty shared counter doc
+  // (polls/<id>). v2 reset — added "classic" and "puzzle".
+  id: "next-game-genre-v2",
   question: "What genre should join Ourcade next?",
   options: [
     { id: "platformer", label: "🏃 Platformer" },
@@ -24,6 +27,8 @@ export const NEXT_GAME_VOTE = {
     { id: "shooter", label: "🔫 Shooter" },
     { id: "rhythm", label: "🎵 Rhythm" },
     { id: "deckbuilder", label: "🃏 Deckbuilder" },
+    { id: "classic", label: "🕹️ Classic" },
+    { id: "puzzle", label: "🧩 Puzzle" },
   ],
 };
 

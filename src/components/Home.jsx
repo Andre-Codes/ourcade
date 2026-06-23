@@ -129,8 +129,8 @@ function CardFav({ game, isFav }) {
 }
 
 function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
-  // Corner sticker comes from src/data/manual/stickers.js (dev-editable),
-  // falling back to the game's legacy `badge` field.
+  // Corner sticker comes from src/data/manual/stickers.js (dev-editable, the
+  // sole source — only games listed there get one).
   const sticker = getSticker(game);
   return (
     <Link

@@ -8,16 +8,16 @@
 
    ── How to use ─────────────────────────────────────────────────────────────
    Map a game's id (the id from src/data/games.js, e.g. "tap-surge") to a
-   sticker key below. To remove a sticker, delete the line (or set it to null).
+   sticker key below. Only games listed here get a sticker — to remove one,
+   delete its line. To add one, add a line. That's it.
 
         export const STICKERS = {
           "tap-surge": "HOT",
           "crypt-crawler": "STAR",
         };
 
-   Anything here WINS over the old per-game `badge:` field in games.js, so this
-   file is the source of truth — you don't need to touch games.js to change a
-   sticker.
+   This file is the SOLE source of sticker truth. games.js has no sticker/badge
+   field — you never touch games.js to change a sticker.
 
    ── Available stickers ─────────────────────────────────────────────────────
    These keys already have a color + label. To invent a new one, add it to
@@ -31,13 +31,15 @@
      FREE  → "FREE!"  (purple)   no account needed
    ───────────────────────────────────────────────────────────────────────── */
 
-// id (from games.js) → sticker key (from STICKER_LABELS). Edit freely.
+// id (from games.js) → sticker key (from STICKER_LABELS). Only listed games
+// get a sticker; omit a game to give it none.
 export const STICKERS = {
   "relic-run": "DAILY",
-  "quarter": "DAILY", // parked (see games.js) — harmless unused entry
-  "pits-and-portals": "NEW",
+  "pits-and-portals": "HOT",
   "crypt-crawler": "NEW",
   "tap-surge": "HOT",
+  "snake": "NEW",
+  "tetris": "NEW",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS
@@ -51,12 +53,11 @@ export const STICKER_LABELS = {
   DAILY: "DAILY",
 };
 
-// Resolve a game's sticker: this file first, then the legacy `badge` field on
-// the game entry (so nothing breaks if a game isn't listed here yet).
-// Returns { key, label } or null.
+// Resolve a game's sticker from this file (the sole source). Returns
+// { key, label } or null when the game has no sticker.
 export function getSticker(game) {
   if (!game) return null;
-  const key = STICKERS[game.id] ?? game.badge;
+  const key = STICKERS[game.id];
   if (!key) return null;
   return { key, label: STICKER_LABELS[key] || `${key}!` };
 }

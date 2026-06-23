@@ -459,7 +459,11 @@ main > section + section { margin-top: 44px; }
   display: grid;
   place-items: center;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.42rem;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  text-align: center;
+  white-space: nowrap;
   color: #1a0a00;
   transform: rotate(-12deg);
   clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
@@ -470,7 +474,8 @@ main > section + section { margin-top: 44px; }
 .arcade-burst.is-star { background: var(--neon-gold); font-size: 0.9rem; }
 .arcade-burst.is-top { background: var(--neon-aqua); }
 .arcade-burst.is-free { background: var(--neon-violet); color: #fff; }
-.arcade-burst.is-daily { background: var(--neon-gold); color: #1a1206; font-size: 0.62rem; }
+/* "DAILY" is the longest label — keep it smaller so it stays inside the burst. */
+.arcade-burst.is-daily { background: var(--neon-gold); color: #1a1206; font-size: 0.4rem; }
 
 /* ====================================================================== */
 /*  FOOTER                                                                 */

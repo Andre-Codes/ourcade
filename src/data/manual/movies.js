@@ -42,5 +42,23 @@ export const MOVIES = [
     stinger: "yes",
     credits: "Yes — a mid-credits scene about 2 min in, then another ~3 min later.",
   },
+  {
+    id: "the-death-of-robinhood-2026",
+    title: "The Death of Robinhood",
+    stinger: "no",
+    credits: "No — nothing after or during the credits.",
+  },
+  {
+    id: "toy-story-5-2026",
+    title: "Toy Story 5",
+    stinger: "yes",
+    credits: "Yes — a mid-credits scene and an end-credits scene.",
+  },
+  {
+    id: "masters-of-the-universe-2026",
+    title: "Masters of the Universe",
+    stinger: "yes",
+    credits: "Yes — multiple scenes both during and after the credits.",
+  },
 
 ];
