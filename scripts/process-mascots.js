@@ -32,39 +32,6 @@ const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 // Trim the transparent padding off a source PNG.
 const trimmed = (src) => sharp(src).trim({ threshold: 10 });
 
-// Knock a flat WHITE background out of an (animated) source into real alpha.
-// GIF alpha is 1-bit, so a hard key leaves a jagged/haloed edge — instead we
-// read raw RGBA and ramp near-white pixels to transparent (HI = fully clear,
-// LO = fully opaque), but ONLY where the pixel is near-neutral (white/grey),
-// so colored art is never touched. The soft grey contact-shadow (well below
-// LO) is kept, and against the dark site bg it reads as a natural shadow — the
-// reason we emit WebP (full alpha) here rather than another 1-bit gif.
-const WHITE_HI = 250; // min channel >= this  → alpha 0
-const WHITE_LO = 205; // min channel <= this  → alpha untouched (opaque)
-const NEUTRAL_SPREAD = 22; // max-min channel spread to still count as "neutral"
-async function whiteToAlphaWebp(src, outPath, webpOpts = {}) {
-  const img = sharp(src, { animated: true });
-  const meta = await img.metadata();
-  const { data, info } = await img.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i], g = data[i + 1], b = data[i + 2];
-    const mn = Math.min(r, g, b);
-    if (Math.max(r, g, b) - mn >= NEUTRAL_SPREAD) continue; // colored → keep
-    if (mn >= WHITE_HI) data[i + 3] = 0;
-    else if (mn > WHITE_LO) {
-      const a = Math.round((255 * (WHITE_HI - mn)) / (WHITE_HI - WHITE_LO));
-      if (a < data[i + 3]) data[i + 3] = a;
-    }
-  }
-  await sharp(Buffer.from(data), {
-    raw: { width: info.width, height: info.height, channels: 4 },
-    animated: true,
-    pageHeight: meta.pageHeight,
-  })
-    .webp({ quality: 80, effort: 5, ...webpOpts })
-    .toFile(outPath);
-}
-
 async function main() {
   await mkdir(ASSETS, { recursive: true });
   await mkdir(PUBLIC, { recursive: true });
@@ -121,17 +88,6 @@ async function main() {
       .webp({ quality: 82 })
       .toFile(join(ASSETS, "badger-officer.webp"));
     officerDone = true;
-  }
-
-  // 2d. Water-cooler animation (Water Cooler page). The source is an animated
-  // gif on a solid WHITE field with a soft grey contact-shadow; white would read
-  // as a glaring box on the dark site. Key the white to real alpha and emit an
-  // animated WebP (keeps the soft shadow, no 1-bit halo). Native size — small
-  // art, never upscale. Optional until the source lands.
-  let coolerDone = false;
-  if (existsSync(join(SRC, "water-cooler.gif"))) {
-    await whiteToAlphaWebp(join(SRC, "water-cooler.gif"), join(ASSETS, "water-cooler.webp"));
-    coolerDone = true;
   }
 
   // 3. Favicon 32x32 (transparent).
@@ -199,8 +155,6 @@ async function main() {
   for (const name of TIME_BADGERS) console.log(`  src/assets/${name}.png + .webp`);
   if (officerDone) console.log("  src/assets/badger-officer.png + .webp");
   else console.log("  (skipped badger-officer — no assets-src/badger-officer.png yet)");
-  if (coolerDone) console.log("  src/assets/water-cooler.webp (animated, white→alpha)");
-  else console.log("  (skipped water-cooler — no assets-src/water-cooler.gif yet)");
   console.log("  src/assets/golden-floppy.png");
   console.log("  src/assets/legend-locked.png");
   console.log("  src/assets/legend-rays.png");

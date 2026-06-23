@@ -143,8 +143,10 @@ UI** (a sandboxed iframe).
   the unread count, the "new arrival" ring/notify decision, and the cloud
   **actions** (`relaySend`/`relayAddContact`/`relayPing`/`clearMessages`/
   `markRead`). Texting is open (no request/accept gate). Cloud is the source of
-  truth; this state is a render cache. Number allocation is idempotent in
-  `src/lib/cloud.js` (`allocateNumber()`), backfilled on first login.
+  truth; this state is a render cache. Number allocation is idempotent and
+  RANDOM (not sequential) in `src/lib/cloud.js` (`allocateNumber()` re-rolls
+  candidates, guarded by the create-once `numbers/{display}` doc), backfilled on
+  first login.
 - **`src/components/PhonePanel.jsx`** — the Nopia itself: the emulator iframe
   (`public/games/snake.html?personal=1`) plus the **thin adapter** that bridges
   context ↔ iframe over `postMessage`. The iframe can't import Firebase, so the

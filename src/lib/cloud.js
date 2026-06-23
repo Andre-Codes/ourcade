@@ -165,23 +165,38 @@ export function listenPoll(pollId, cb) {
 }
 
 /* ─── M2: the Nopia phone — personal numbers + real cross-user texting ────────
-   Every claimed account gets a permanent Ourcade number rendered EXCH-XXXX. A
-   number is just a monotonic integer n: exchange = 555 + floor(n/10000), slot =
-   n % 10000 (zero-padded). The first 10k users get pretty 555-XXXX; past that
-   the exchange extends (556-, 557-…) and it still reads as a normal number — so
-   4 digits is never a real ceiling. Allocation runs in a transaction against a
-   global counter (meta/phoneCounter) + a create-once reverse map (numbers/{num}),
-   so numbers never collide. Texts are addressed by uid in the cloud; the UI
+   Every claimed account gets a permanent Ourcade number rendered EXCH-XXXX,
+   assigned at RANDOM (not sequentially) so numbers aren't guessable and don't
+   leak signup order. A number renders from a slot 0–9999 in some exchange:
+   exchange = 555 + block, slot zero-padded. New users get a random pretty
+   555-XXXX; once that block crowds, allocation steps to the next exchange (556-,
+   557-…) and it still reads as a normal number — so 4 digits is never a real
+   ceiling. The create-once reverse map (numbers/{num}), checked inside a
+   transaction, is the sole collision guard: a random candidate is reserved only
+   if free, otherwise we re-roll. Texts are addressed by uid in the cloud; the UI
    speaks numbers/@handles and resolves them first. */
 
 // A few slots we never want to hand out (look like real emergency/empty IDs).
 const BLOCKED_SLOTS = new Set([0, 911, 411, 611]);
 
-// n → "555-0142". exchange grows once a 10k block fills.
-function formatNumber(n) {
-  const exch = 555 + Math.floor(n / 10000);
-  const slot = String(n % 10000).padStart(4, "0");
-  return `${exch}-${slot}`;
+// How many random candidates to try in one exchange block before stepping to
+// the next (556-, 557-…). 10 keeps the tx short; with 10k slots per block we'd
+// only exhaust 10 tries once a block is ~heavily filled, at which point moving
+// on is the right call anyway.
+const TRIES_PER_BLOCK = 10;
+
+// block (exchange offset) + slot → "555-0142". block 0 = 555-, 1 = 556-, …
+function formatNumber(block, slot) {
+  return `${555 + block}-${String(slot).padStart(4, "0")}`;
+}
+
+// A random slot 0–9999 that isn't a blocked slot.
+function randomSlot() {
+  let slot;
+  do {
+    slot = Math.floor(Math.random() * 10000);
+  } while (BLOCKED_SLOTS.has(slot));
+  return slot;
 }
 
 // Normalize a user-typed number to the canonical "EXCH-XXXX" key (strip spaces,
@@ -202,9 +217,10 @@ export async function resolveNumber(raw) {
 }
 
 // Mint (or return the existing) permanent number for the current user. Idempotent:
-// if the profile already carries a number we return it without touching the
-// counter. Otherwise one transaction claims the next free slot, reserves
-// numbers/{display}, bumps the counter, and stamps profiles/{uid}.number.
+// if the profile already carries a number we return it. Otherwise one transaction
+// re-rolls random candidates until it finds a free slot, reserves numbers/{display}
+// (the collision guard), and stamps profiles/{uid}.number. No shared counter — the
+// number is random, so signup order never leaks and there's no hot doc to contend on.
 export async function allocateNumber() {
   const id = uid();
   if (!id) return null;
@@ -219,24 +235,19 @@ export async function allocateNumber() {
     const pSnap = await tx.get(pRef);
     if (pSnap.exists() && pSnap.data().number) return pSnap.data().number;
 
-    const cRef = doc(db, "meta", "phoneCounter");
-    const cSnap = await tx.get(cRef);
-    let n = (cSnap.exists() && cSnap.data().next) || 0;
-
-    // Skip blocked slots and (paranoia) any already-taken display.
-    let display = formatNumber(n);
-    while (
-      BLOCKED_SLOTS.has(n % 10000) ||
-      (await tx.get(doc(db, "numbers", display))).exists()
-    ) {
-      n += 1;
-      display = formatNumber(n);
+    // Roll random candidates; step to the next exchange block if this one is
+    // too crowded to land a free slot quickly. Unbounded blocks → never fails.
+    let block = 0;
+    for (;;) {
+      for (let i = 0; i < TRIES_PER_BLOCK; i++) {
+        const display = formatNumber(block, randomSlot());
+        if ((await tx.get(doc(db, "numbers", display))).exists()) continue;
+        tx.set(doc(db, "numbers", display), { uid: id, number: display });
+        tx.set(pRef, { number: display }, { merge: true });
+        return display;
+      }
+      block += 1;
     }
-
-    tx.set(doc(db, "numbers", display), { uid: id, number: display });
-    tx.set(cRef, { next: n + 1 }, { merge: true });
-    tx.set(pRef, { number: display }, { merge: true });
-    return display;
   });
 }
 

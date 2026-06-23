@@ -220,9 +220,9 @@ export default function AuthProvider({ children }) {
       /* no store / private mode */
     }
     await claimUsername(m, name, res.user.uid, seedFavs, seedRelics, seedTop8, seedRelicRunStreak);
-    // Mint this account's permanent Ourcade number. A SEPARATE transaction from
-    // the username claim so the hot global counter never sits on that critical
-    // path — and a failure here is fine (loadProfile backfills next load).
+    // Mint this account's permanent (random) Ourcade number. A SEPARATE
+    // transaction from the username claim, and a failure here is fine
+    // (loadProfile backfills next load).
     let number = null;
     try {
       const c = await import("./cloud.js");

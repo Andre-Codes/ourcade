@@ -1799,7 +1799,6 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 
 /* ---- masthead: a dated "edition", broadsheet structure in neon ---- */
 .arcade-watercooler-head { margin: 6px 0 0; }
-.arcade-watercooler-mascot { display: block; width: 120px; height: 120px; margin: 0 auto 4px; }
 .arcade-watercooler-masthead {
   display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center; text-align: center;
 }
