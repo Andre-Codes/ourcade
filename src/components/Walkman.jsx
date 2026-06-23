@@ -15,7 +15,8 @@ import { loadYouTubeAPI } from "../lib/youtube.js";
 export default function Walkman({ on, onStop }) {
   const wrapRef = useRef(null);
   const playerRef = useRef(null);
-  const [title, setTitle] = useState("");
+  const orderRef = useRef([]); // this session's shuffled order, so we can map index → our track metadata
+  const [now, setNow] = useState("");
 
   useEffect(() => {
     if (!on) return;
@@ -33,15 +34,23 @@ export default function Walkman({ on, onStop }) {
           playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1, rel: 0 },
           events: {
             // Argument form (array of video IDs) — the object form only takes a
-            // real playlist/search list, not an ad-hoc list of ids.
+            // real playlist/search list, not an ad-hoc list of ids. loadPlaylist
+            // both cues AND starts playback from index 0, so we do NOT also call
+            // playVideo() here: that earlier call raced the load (nothing cued
+            // yet) and got dropped, which is why the first track never started.
             onReady: (e) => {
-              e.target.loadPlaylist(shuffled().map((t) => t.id));
-              e.target.playVideo();
+              orderRef.current = shuffled();
+              e.target.loadPlaylist(orderRef.current.map((t) => t.id));
             },
             onStateChange: (e) => {
               if (e.data === YT.PlayerState.PLAYING) {
-                const d = e.target.getVideoData?.();
-                if (d?.title) setTitle(d.title);
+                // Use OUR clean metadata (Song — Artist) over YouTube's raw,
+                // often-messy video title. Map the current playlist position
+                // back to our shuffled order; fall back to the video id.
+                const idx = e.target.getPlaylistIndex?.();
+                const vid = e.target.getVideoData?.()?.video_id;
+                const t = orderRef.current[idx] || orderRef.current.find((x) => x.id === vid);
+                if (t) setNow(`${t.title} — ${t.artist}`);
               }
             },
             // Dead / region-locked / embed-disabled track — skip past it so a
@@ -69,7 +78,7 @@ export default function Walkman({ on, onStop }) {
       }
       playerRef.current = null;
       if (wrapRef.current) wrapRef.current.innerHTML = "";
-      setTitle("");
+      setNow("");
     };
   }, [on]);
 
@@ -100,7 +109,9 @@ export default function Walkman({ on, onStop }) {
             <i />
             <i />
           </span>
-          <span className="arcade-walkman-now">📻 {title || "spinning up…"}</span>
+          <span className="arcade-walkman-now">
+            📻 <span className="arcade-walkman-marquee">{now || "spinning up…"}</span>
+          </span>
           <button
             type="button"
             className="arcade-walkman-btn"

@@ -211,13 +211,36 @@ html, body, #root {
   box-shadow: 0 0 16px rgba(124,77,255,.45), var(--bevel-in);
 }
 .arcade-walkman-now {
+  flex: 1 1 auto;
+  min-width: 0; /* let this flex item actually shrink so overflow clips instead of pushing the buttons off */
   font-family: 'Press Start 2P', monospace;
   font-size: 0.6rem;
   line-height: 1.5;
   color: var(--neon-aqua);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+/* Winamp-style ticker: the inner span scrolls its full text leftward so long
+   "Song — Artist" labels stay fully readable instead of being ellipsis-cut. */
+.arcade-walkman-marquee {
+  display: inline-block;
+  padding-left: 100%; /* start fully off the right edge, then scroll in */
+  animation: arcade-walkman-marquee 12s linear infinite;
+}
+@keyframes arcade-walkman-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No scroll for reduced-motion: sit still and ellipsis-truncate instead. */
+  .arcade-walkman-marquee {
+    padding-left: 0;
+    animation: none;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
 }
 .arcade-walkman-btn {
   flex: 0 0 auto;

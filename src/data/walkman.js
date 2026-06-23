@@ -30,6 +30,12 @@ export const TRACKS = [
   { id: "sc5iTNVEOAg", title: "My Own Worst Enemy", artist: "Lit", year: 1999 },
   { id: "fC_q9KPczAg", title: "One Week", artist: "Barenaked Ladies", year: 1998 },
   { id: "wq-S8CIU7VA", title: "California", artist: "Phantom Planet", year: 2002 },
+  { id: "ruAi4VBoBSM", title: "Praise You", artist: "Fatboy Slim", year: 1998 },
+  { id: "erG5rgNYSdk", title: "Island in the Sun", artist: "Weezer", year: 2001 },
+  { id: "FVdjZYfDuLE", title: "Wonderwall", artist: "Oasis", year: 1995 },
+  { id: "1lyu1KKwC74", title: "Bitter Sweet Symphony", artist: "The Verve", year: 1997 },
+  { id: "CLGB0KYmnjE", title: "Edge of the Ocean", artist: "Ivy", year: 2000 },
+  { id: "lcEkS9tcIjg", title: "Scotty Doesn't Know", artist: "Lustra", year: 2005 },
 ];
 
 // Fisher–Yates copy so the mix order varies per session without mutating TRACKS.

@@ -74,8 +74,15 @@ export const PHONE_RELICS = [
   { id: "byte-badger-secret", text: "Byte Badger let you into the den.", rarity: "mythic", source: "phone" },
 ];
 
+// Relics granted through Badger's walkman. The first time anyone clicks the
+// hidden discman in the header mascot's hand and spins up the mix, they earn
+// this mythic. `source: "walkman"` is lore/flavor only, like the others.
+export const WALKMAN_RELICS = [
+  { id: "badger-mixtape", text: "Badger pressed play on his secret mixtape.", rarity: "mythic", source: "walkman" },
+];
+
 // Every relic in the game, from every source. Resolve any discovered id here.
-export const ALL_RELICS = [...RELICS, ...RELIC_RUN_RELICS, ...PHONE_RELICS];
+export const ALL_RELICS = [...RELICS, ...RELIC_RUN_RELICS, ...PHONE_RELICS, ...WALKMAN_RELICS];
 
 export const RELIC_COUNT = ALL_RELICS.length;
 const RELIC_BY_ID = new Map(ALL_RELICS.map((r) => [r.id, r]));

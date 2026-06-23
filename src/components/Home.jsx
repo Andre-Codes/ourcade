@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { getSticker } from "../data/manual/stickers.js";
-import { recordDeepCutsUnlocked, getFavorites, toggleFavorite } from "../lib/store.js";
+import { recordDeepCutsUnlocked, getFavorites, toggleFavorite, recordRelic } from "../lib/store.js";
+import { relicById } from "../data/relics.js";
 import { todayKey, dayPart, getHourOverride, daySeed, dayNumberFromKey, mulberry32 } from "../lib/daily.js";
 import { getDayPartGreeting } from "../data/dayparts.js";
 import { useAuth } from "../lib/AuthProvider.jsx";
@@ -10,6 +11,7 @@ import { usePhone } from "../lib/PhoneProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import Walkman from "./Walkman.jsx";
+import WalkmanCelebration from "./WalkmanCelebration.jsx";
 import NedryGag from "./NedryGag.jsx";
 import byteBadger from "../assets/byte-badger.webp";
 import arcadeBadger from "../assets/arcade-badger.webp";
@@ -181,6 +183,15 @@ export default function Home() {
 
   // ---- easter egg: click Badger's discman to spin up the walkman ----
   const [walkmanOn, setWalkmanOn] = useState(false);
+  // First-ever click awards a mythic relic; this queues its reveal overlay.
+  const [walkmanRelic, setWalkmanRelic] = useState(null); // { relic, isNew } | null
+
+  const onWalkmanClick = () => {
+    setWalkmanOn(true);
+    const { isNew } = recordRelic("badger-mixtape");
+    const relic = relicById("badger-mixtape");
+    if (relic) setWalkmanRelic({ relic, isNew });
+  };
 
   // ---- day-parts: the arcade looks/greets differently by time of day ----
   const key = useMemo(() => todayKey(), []);
@@ -301,7 +312,7 @@ export default function Home() {
           <button
             type="button"
             className="arcade-walkman-hotspot"
-            onClick={() => setWalkmanOn(true)}
+            onClick={onWalkmanClick}
             aria-label="Play Badger's walkman"
             title="▶ play"
           />
@@ -441,6 +452,14 @@ export default function Home() {
       </footer>
 
       <Walkman on={walkmanOn} onStop={() => setWalkmanOn(false)} />
+
+      {walkmanRelic && (
+        <WalkmanCelebration
+          relic={walkmanRelic.relic}
+          isNew={walkmanRelic.isNew}
+          onClose={() => setWalkmanRelic(null)}
+        />
+      )}
 
       {deepCutsToast && (
         <div className="arcade-deepcuts-toast" role="status">
