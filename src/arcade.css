@@ -1799,6 +1799,7 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 
 /* ---- masthead: a dated "edition", broadsheet structure in neon ---- */
 .arcade-watercooler-head { margin: 6px 0 0; }
+.arcade-watercooler-mascot { display: block; width: 120px; height: 120px; margin: 0 auto 4px; }
 .arcade-watercooler-masthead {
   display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center; text-align: center;
 }
@@ -1916,7 +1917,7 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 /* ====================================================================== */
 /*  CONTACT PAGE (/contact) — "email the webmaster" form                   */
 /* ====================================================================== */
-.arcade-contact { max-width: 620px; margin: 0 auto; padding: 64px 18px 56px; font-family: 'Share Tech Mono', monospace; color: #d6e0f5; }
+.arcade-contact { max-width: 1040px; margin: 0 auto; padding: 64px 18px 56px; font-family: 'Share Tech Mono', monospace; color: #d6e0f5; }
 .arcade-contact-title { font-family: 'Black Ops One', cursive; font-size: 1.8rem; color: #fff; margin: 8px 0 6px; }
 .arcade-contact-intro { font-size: 0.9rem; line-height: 1.6; color: #c4d0e6; margin: 0 0 22px; }
 .arcade-contact-form { display: flex; flex-direction: column; gap: 16px; }
@@ -1934,3 +1935,40 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
   font-family: 'Press Start 2P', monospace; font-size: 0.8rem !important; color: var(--neon-aqua);
   text-shadow: 0 0 10px rgba(63,255,208,.4);
 }
+
+/* ── /contact — two cards (Contact + Submit a Game) ───────────────────────── */
+.arcade-contact-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;
+}
+@media (max-width: 720px) { .arcade-contact-grid { grid-template-columns: 1fr; } }
+
+/* shared card shell for both panels — same look as .arcade-widget */
+.arcade-card-panel {
+  display: flex; flex-direction: column; gap: 14px; padding: 22px;
+  background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-card-panel .arcade-contact-intro { margin: 0; }
+/* the title sits flush in a card (the page-level title had extra top margin) */
+.arcade-submit-title { margin: 0; font-size: 1.5rem; }
+
+/* locked "members only" state */
+.arcade-submit-gate { align-items: center; text-align: center; gap: 12px; padding: 28px 22px; }
+.arcade-submit-officer { width: 150px; height: auto; filter: drop-shadow(0 4px 14px rgba(0,0,0,.45)); }
+.arcade-submit-gate .arcade-account-blurb { font-size: 0.9rem; color: #c4d0e6; max-width: 30ch; }
+.arcade-submit-cta { margin-top: 4px; text-align: center; }
+
+/* submission-guideline checklist above the form */
+.arcade-submit-rules {
+  margin: 0; padding: 14px 14px 14px 30px; list-style: square;
+  background: #04050b; border: 2px solid #2a2f4a; border-radius: 8px;
+  font-size: 0.8rem; line-height: 1.55; color: #b9c6e2; display: flex; flex-direction: column; gap: 6px;
+}
+.arcade-submit-rules b { color: var(--neon-aqua); }
+
+.arcade-submit-emoji { max-width: 6em; }
+.arcade-submit-check {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  font-size: 0.84rem; color: #c4d0e6;
+}
+.arcade-submit-check input { width: 16px; height: 16px; accent-color: var(--neon-aqua); cursor: pointer; }

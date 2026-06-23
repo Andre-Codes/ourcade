@@ -44,7 +44,7 @@ const FAQS = [
     id: "q5",
     q: "What are relics? (the little 💾 things)",
     a: [
-      "If you have to ask, you probably haven't found one yet. They turn up where you least expect, for people who click the things that shouldn't be clickable.",
+      "If you have to ask, you probably haven't found one yet.",
       "Find one and it's yours, saved to your profile forever — and no, we're not going to tell you where to look. That's the whole point.",
     ],
   },
