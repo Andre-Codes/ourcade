@@ -796,12 +796,12 @@ export default function Tetris() {
           <div className="tetris-stage" ref={stageRef}>
             <canvas ref={canvasRef} className="tetris-canvas" />
             <div className="tetris-hud">
-              <div className="tetris-stat"><span>SCORE</span><b>{hud.score.toLocaleString()}</b></div>
-              <div className="tetris-stat"><span>LINES</span><b>{hud.lines}</b></div>
-              <div className="tetris-stat"><span>LEVEL</span><b>{hud.level}</b></div>
               <button className="tetris-pause" {...tapButton(() => setPaused((p) => !p))}>
                 {paused ? "▶" : "❚❚"}
               </button>
+              <div className="tetris-stat"><span>SCORE</span><b>{hud.score.toLocaleString()}</b></div>
+              <div className="tetris-stat"><span>LINES</span><b>{hud.lines}</b></div>
+              <div className="tetris-stat"><span>LEVEL</span><b>{hud.level}</b></div>
             </div>
             {paused && (
               <div className="tetris-overlay">
