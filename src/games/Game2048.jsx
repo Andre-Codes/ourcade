@@ -304,6 +304,11 @@ export default function Game2048() {
       A: "left", D: "right", W: "up", S: "down",
     };
     const onKey = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        navigate("/"); // board is already auto-saved → Continue on return
+        return;
+      }
       const dir = KEYMAP[e.key];
       if (!dir) return;
       e.preventDefault();
@@ -311,7 +316,7 @@ export default function Game2048() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [screen, doMove]);
+  }, [screen, doMove, navigate]);
 
   // Swipe. A short, intentional drag past the threshold fires once per gesture.
   const touch = useRef(null);
@@ -364,6 +369,8 @@ export default function Game2048() {
           <div className="g2048-bar">
             <div className="g2048-stat"><span>SCORE</span><b>{score.toLocaleString()}</b></div>
             <div className="g2048-stat"><span>BEST</span><b>{(best != null ? Math.max(best, score) : score).toLocaleString()}</b></div>
+            {/* Board auto-saves on every move, so quitting offers Continue on return. */}
+            <button className="g2048-quit" onClick={() => navigate("/")} aria-label="Quit to Ourcade">‹ QUIT</button>
             <button className="g2048-new" onClick={startNew} aria-label="New game">↻</button>
           </div>
 
@@ -473,8 +480,15 @@ const CSS = `
 .g2048-stat b{ font-size:20px; color:#e8e8f4; }
 .g2048-stat.big{ align-items:center; margin:4px 0; }
 .g2048-stat.big b{ font-size:40px; color:#cdb24e; }
-.g2048-new{
+.g2048-quit{
   margin-left:auto; appearance:none; background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18); color:#9aa0c0; border-radius:9px;
+  height:38px; padding:0 12px; font-family:inherit; font-weight:700;
+  font-size:12px; letter-spacing:1px; cursor:pointer;
+}
+.g2048-quit:active{ background:rgba(255,255,255,.12); }
+.g2048-new{
+  appearance:none; background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.18); color:#e8e8f4; border-radius:9px;
   width:42px; height:38px; font-size:18px; cursor:pointer;
 }
@@ -483,8 +497,8 @@ const CSS = `
 /* The board is a square sized to the smaller viewport dimension. Cell metrics
    are driven by CSS vars so the tiles can position with the same math. */
 .g2048-board{
-  --pad: 3.5%;          /* gap as a fraction of the board */
-  --cell: 21.875%;      /* (100% - 5*pad) / 4 */
+  --pad: 2.5%;                              /* gap as a fraction of the board */
+  --cell: calc((100% - 5 * var(--pad)) / 4); /* derived so cells + tiles never drift */
   position:relative;
   width:min(92vw, 92svh, 460px); height:min(92vw, 92svh, 460px);
   background:#1a1a26; border-radius:12px; padding:0; box-sizing:border-box;
