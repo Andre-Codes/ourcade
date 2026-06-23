@@ -38,8 +38,9 @@ export const STICKERS = {
   "pits-and-portals": "HOT",
   "crypt-crawler": "NEW",
   "tap-surge": "HOT",
-  "snake": "NEW",
+  "snake": "HOT",
   "tetris": "NEW",
+  "game-2048": "NEW",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS
