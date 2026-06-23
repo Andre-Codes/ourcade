@@ -173,6 +173,46 @@ export function mirrorRelicRunStreak(best) {
   if (p) p.then((c) => c && c.writeProfile && c.writeProfile({ relicRunStreak: best })).catch(() => {});
 }
 
+// ---- Web Run history: a rolling per-day log of clicks vs par ----
+// Local-only (NOT a syncKey, same as relic:state/relic:streak): one entry per
+// calendar day, capped to the most recent RELIC_HISTORY_MAX so it never grows
+// unbounded. Feeds the in-cabinet "View Stats" aggregate. Each entry is the
+// minimal truth needed to recompute averages: { day, clicks, par }.
+const RELIC_HISTORY_MAX = 60;
+
+export function getRelicRunHistory() {
+  const list = readJSON("relic:history", []);
+  return Array.isArray(list) ? list.filter((e) => e && e.day) : [];
+}
+// Idempotent per day: re-recording the same day replaces that day's entry (a
+// reload of an already-finished run won't duplicate), like bumpStreak.
+export function recordRelicRun(day, clicks, par) {
+  if (!day) return getRelicRunHistory();
+  const rest = getRelicRunHistory().filter((e) => e.day !== day);
+  const next = [...rest, { day, clicks, par }]
+    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0))
+    .slice(-RELIC_HISTORY_MAX);
+  write("relic:history", JSON.stringify(next));
+  return next;
+}
+// Aggregate the history into display stats. Pure given the stored list.
+// avgClicks/avgPar rounded to one decimal; best = fewest clicks ever.
+export function getRelicRunStats() {
+  const h = getRelicRunHistory();
+  const runs = h.length;
+  if (runs === 0) return { runs: 0, avgClicks: 0, avgPar: 0, best: 0 };
+  const round1 = (n) => Math.round(n * 10) / 10;
+  const sumClicks = h.reduce((s, e) => s + (e.clicks || 0), 0);
+  const sumPar = h.reduce((s, e) => s + (e.par || 0), 0);
+  const best = h.reduce((m, e) => Math.min(m, e.clicks ?? Infinity), Infinity);
+  return {
+    runs,
+    avgClicks: round1(sumClicks / runs),
+    avgPar: round1(sumPar / runs),
+    best: Number.isFinite(best) ? best : 0,
+  };
+}
+
 // ---- magic 8-ball: per-device sound mute (default: not muted) ----
 export function getEightBallMuted() {
   return read("eightball:muted") === "1";

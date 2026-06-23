@@ -134,7 +134,7 @@ console.log("");
   const c = dailyChallenge(k);
   const txt = shareText(k, c.par, c.par);
   check("share text well-formed",
-    /Daily Relic Run #\d+/.test(txt) && txt.includes(`Par: ${c.par}`),
+    /Ourcade Web Run #\d+/.test(txt) && txt.includes(`Par: ${c.par}`),
     txt.split("\n")[0]);
 }
 

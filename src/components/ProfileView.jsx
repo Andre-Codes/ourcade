@@ -250,14 +250,14 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
   if (owner) {
     if (relicRunCurrent > 1) {
       badges.push(
-        `🔥 ${relicRunCurrent}-day Daily Run streak` +
+        `🔥 ${relicRunCurrent}-day Web Run streak` +
           (relicRunStreak > relicRunCurrent ? ` · best ${relicRunStreak}` : "")
       );
     } else if (relicRunStreak > 1) {
-      badges.push(`🔥 best ${relicRunStreak}-day Daily Run streak`);
+      badges.push(`🔥 best ${relicRunStreak}-day Web Run streak`);
     }
   } else if (relicRunStreak > 1) {
-    badges.push(`🔥 ${relicRunStreak}-day Daily Run streak`);
+    badges.push(`🔥 ${relicRunStreak}-day Web Run streak`);
   }
 
   return (

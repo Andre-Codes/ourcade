@@ -161,7 +161,7 @@ export function shareText(dayKey, clicks, par) {
   const n = runNumber(dayKey);
   const mice = "🖱️".repeat(Math.min(Math.max(clicks, 1), 12));
   return [
-    `Ourcade Daily Run #${n}`,
+    `Ourcade Web Run #${n}`,
     `Found the page in ${clicks} click${clicks === 1 ? "" : "s"}.`,
     `Par: ${par}`,
     mice,

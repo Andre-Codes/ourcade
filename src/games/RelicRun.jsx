@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
-import { lsGetJSON, lsSetJSON, recordRelic, getDiscoveredRelics, mirrorRelicRunStreak } from "../lib/store.js";
+import { lsGetJSON, lsSetJSON, recordRelic, getDiscoveredRelics, mirrorRelicRunStreak, recordRelicRun, getRelicRunStats } from "../lib/store.js";
 import { relicById } from "../data/relics.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
@@ -141,6 +141,39 @@ function Article({ article, ctx }) {
   );
 }
 
+// The "View Stats" overlay: an aggregate of every Web Run this device has
+// finished (clicks vs par over time) plus the live streak. Read lazily on open
+// so it always reflects the latest recorded run.
+function StatsOverlay({ streak, onClose }) {
+  const stats = useMemo(() => getRelicRunStats(), []);
+  return (
+    <div className="rr-statswrap" role="dialog" aria-label="Web Run stats" onClick={onClose}>
+      <div className="rr-statscard" onClick={(e) => e.stopPropagation()}>
+        <div className="rr-statshead">📊 YOUR WEB RUN STATS</div>
+        {stats.runs === 0 ? (
+          <p className="rr-statsempty">Play a few runs and your stats show up here.</p>
+        ) : (
+          <>
+            <div className="rr-statsgrid">
+              <div className="rr-stat"><b>{stats.runs}</b><span>RUNS</span></div>
+              <div className="rr-stat"><b>{stats.avgClicks}</b><span>AVG CLICKS</span></div>
+              <div className="rr-stat"><b>{stats.avgPar}</b><span>AVG PAR</span></div>
+              <div className="rr-stat"><b>{stats.best}</b><span>BEST</span></div>
+            </div>
+            {streak.streak > 0 && (
+              <div className="rr-statsstreak">
+                🔥 {streak.streak}-day streak
+                {streak.best > streak.streak ? ` · best ${streak.best}` : ""}
+              </div>
+            )}
+          </>
+        )}
+        <button className="rr-btn" onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
+
 export default function RelicRun() {
   const day = useMemo(() => todayKey(), []);
   const rNum = useMemo(() => runNumber(day), [day]);
@@ -153,6 +186,7 @@ export default function RelicRun() {
   const [state, setState] = useState(() => loadDayState(day, chal.start));
   const [streak, setStreak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
   const [milestone, setMilestone] = useState(null); // celebratory line when a streak threshold is freshly crossed
+  const [showStats, setShowStats] = useState(false); // the "View Stats" aggregate overlay
   const submittedRef = useRef(false);
 
   // Site-wide relics (easter eggs): which ones THIS device has already found, so
@@ -206,6 +240,9 @@ export default function RelicRun() {
     if (state.done && state.won && !submittedRef.current) {
       submittedRef.current = true;
       submit(state.clicks); // dir:"asc" — fewer clicks is better
+      // Log this day's result for the "View Stats" aggregate. Idempotent per day
+      // (replaces same-day entry), so a reload of a finished run won't double it.
+      recordRelicRun(state.day, state.clicks, chal.par);
       const prev = lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 };
       const next = bumpStreak(state.day);
       setStreak(next);
@@ -216,7 +253,7 @@ export default function RelicRun() {
         if (m) setMilestone(m);
       }
     }
-  }, [state.done, state.won, state.clicks, state.day, submit]);
+  }, [state.done, state.won, state.clicks, state.day, chal.par, submit]);
 
   // Only read on the win screen (where state.done is true); the timer is not
   // shown during play, so no live tick is needed.
@@ -266,7 +303,7 @@ export default function RelicRun() {
         <style>{CSS}</style>
         <div className="rr-app">
           <div className="rr-start">
-            <h1 className="rr-title">🖱️ DAILY RUN</h1>
+            <h1 className="rr-title">🖱️ WEB RUN</h1>
             <div className="rr-sub">#{rNum} · {prettyDate(day)}</div>
 
             <div className="rr-startcard">
@@ -301,8 +338,10 @@ export default function RelicRun() {
                 {streak.best > streak.streak ? ` · best ${streak.best}` : ""}
               </div>
             )}
+            <button className="rr-statslink" onClick={() => setShowStats(true)}>📊 View Stats</button>
           </div>
         </div>
+        {showStats && <StatsOverlay streak={streak} onClose={() => setShowStats(false)} />}
       </>
     );
   }
@@ -346,14 +385,16 @@ export default function RelicRun() {
             <div className="rr-actions">
               <ShareButton
                 label="Copy Result"
-                title="Ourcade — Daily Run"
+                title="Ourcade — Web Run"
                 text={share}
               />
+              <button className="rr-btn" onClick={() => setShowStats(true)}>📊 View Stats</button>
               <button className="rr-btn" onClick={playArchive}>Play Archive</button>
             </div>
             <p className="rr-next">a fresh run drops at midnight, your time.</p>
           </div>
         </div>
+        {showStats && <StatsOverlay streak={streak} onClose={() => setShowStats(false)} />}
       </>
     );
   }
@@ -529,6 +570,22 @@ const CSS = `
   padding:9px 14px;cursor:pointer;transition:border-color .12s,transform .08s}
 .rr-btn:hover{border-color:#3fffd0;transform:translateY(-1px)}
 .rr-next{margin:4px 0 0;font-size:.74rem;color:#5f7a90;font-family:'Share Tech Mono',monospace}
+
+/* start-screen "View Stats" link — quiet, sits under the streak line */
+.rr-statslink{background:none;border:0;cursor:pointer;color:#7fb6c9;font-family:'Share Tech Mono',monospace;
+  font-size:.78rem;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;padding:2px 4px;margin-top:2px}
+.rr-statslink:hover{color:#3fffd0}
+
+/* stats overlay — dimmed backdrop + a centered card with the aggregate */
+.rr-statswrap{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(4,7,14,.72);backdrop-filter:blur(2px);animation:rr-toast-in .18s ease both}
+.rr-statscard{width:100%;max-width:440px;background:#0e1726;border:2px solid #1c2c44;border-radius:14px;
+  padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;
+  box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 1px rgba(63,255,208,.06)}
+.rr-statshead{font-family:'Press Start 2P',monospace;font-size:.7rem;letter-spacing:.04em;color:#3fffd0;line-height:1.5}
+.rr-statsempty{font-size:.86rem;color:#9fb6c9;margin:4px 0;line-height:1.5}
+.rr-statsgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 26px;width:100%;max-width:300px}
+.rr-statsstreak{font-family:'Share Tech Mono',monospace;font-size:.84rem;color:#ff9a52}
 
 @media(max-width:420px){
   .rr-pagetitle{font-size:1.25rem}

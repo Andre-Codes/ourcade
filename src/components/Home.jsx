@@ -13,6 +13,21 @@ import Walkman from "./Walkman.jsx";
 import NedryGag from "./NedryGag.jsx";
 import byteBadger from "../assets/byte-badger.webp";
 import arcadeBadger from "../assets/arcade-badger.webp";
+import badgerMorning from "../assets/badger-morning.webp";
+import badgerAfternoon from "../assets/badger-afternoon.webp";
+import badgerAfterHours from "../assets/badger-after-hours.webp";
+import emailGif from "../assets/email.gif";
+import lavalampGif from "../assets/lavalamp.gif";
+
+// The greeting badger changes with the local day-part. There are 4 parts but 3
+// art variants — late-night ("night") reuses the after-hours badger. Anything
+// unmapped falls back to the default mascot.
+const GREETING_BADGER = {
+  morning: badgerMorning,
+  afternoon: badgerAfternoon,
+  evening: badgerAfterHours,
+  night: badgerAfterHours,
+};
 
 // "2:14am" — honors the ?hour= QA override so the clock matches the previewed
 // part (override has no minutes, so it reads as :00).
@@ -260,7 +275,7 @@ export default function Home() {
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <Link to="/new" className="arcade-tab arcade-tab-hot">NEW!</Link>
-        <Link to="/play/relic-run" className="arcade-tab arcade-tab-redhot">🔥 DAILY RUN</Link>
+        <Link to="/play/relic-run" className="arcade-tab arcade-tab-redhot">🔥 WEB RUN</Link>
         <Link to="/faq" className="arcade-tab">F.A.Q.</Link>
         {hasPhone && (
           <Link to="/phone" className="arcade-tab arcade-tab-account" aria-label="your phone">
@@ -308,7 +323,7 @@ export default function Home() {
 
       {/* day-part greeting: the mascot knows what time it is for you */}
       <div className="arcade-greeting">
-        <img className="arcade-greeting-face" src={byteBadger} alt="" aria-hidden="true" />
+        <img className="arcade-greeting-face" src={GREETING_BADGER[part.id] || byteBadger} alt="" aria-hidden="true" />
         <div className="arcade-greeting-body">
           <div className="arcade-greeting-head">
             <span className="arcade-greeting-clock">🕹 it&apos;s {clockLabel(now)} at the arcade</span>
@@ -409,6 +424,15 @@ export default function Home() {
           <span className="arcade-badge">Get Flash ▶</span>
           <Link to="/stumble" className="arcade-badge arcade-badge-link" title="Stumble upon something">
             Ourcade Webring ‹ random ›
+          </Link>
+        </div>
+
+        {/* classic "email me" gif → contact the webmaster, with a nostalgic
+            lava lamp burbling alongside it */}
+        <div className="arcade-footer-relics">
+          <img className="arcade-lavalamp" src={lavalampGif} alt="" aria-hidden="true" />
+          <Link to="/contact" className="arcade-emailme" title="Email the webmaster">
+            <img src={emailGif} alt="Email me" />
           </Link>
         </div>
 

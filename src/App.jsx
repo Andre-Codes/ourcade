@@ -10,6 +10,7 @@ const StumblePage = lazy(() => import("./components/StumblePage.jsx"));
 const WaterCoolerPage = lazy(() => import("./components/WaterCoolerPage.jsx"));
 const NewGamesPage = lazy(() => import("./components/NewGamesPage.jsx"));
 const FAQPage = lazy(() => import("./components/FAQPage.jsx"));
+const ContactPage = lazy(() => import("./components/ContactPage.jsx"));
 const AccountPage = lazy(() => import("./components/AccountPage.jsx"));
 const ScoresPage = lazy(() => import("./components/ScoresPage.jsx"));
 const ProfilePage = lazy(() => import("./components/ProfilePage.jsx"));
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/watercooler" element={<WaterCoolerPage />} />
           <Route path="/new" element={<NewGamesPage />} />
           <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/me" element={<AccountPage />} />
           <Route path="/phone" element={<PhonePage />} />
           <Route path="/scores/:gameId" element={<ScoresPage />} />

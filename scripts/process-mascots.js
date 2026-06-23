@@ -18,6 +18,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(root, "assets-src");
 const SRC_BYTE = join(SRC, "byte_badger.png");
 const SRC_ARCADE = join(SRC, "arcade_badger.png");
+// Time-of-day greeting variants (home page day-part box). The site has 4
+// day-parts but only 3 art variants — late-night reuses the after-hours badger
+// (wired in Home.jsx), so no separate "night" source is needed here.
+const TIME_BADGERS = ["badger-morning", "badger-afternoon", "badger-after-hours"];
 const ASSETS = join(root, "src", "assets");
 const PUBLIC = join(root, "public");
 
@@ -53,6 +57,22 @@ async function main() {
     .resize({ width: 512, withoutEnlargement: true })
     .webp({ quality: 82 })
     .toFile(join(ASSETS, "arcade-badger.webp"));
+
+  // 2b. Time-of-day badger variants — shown in the home greeting box per
+  // day-part. Same treatment as the primary mascot (trim padding, ~512px,
+  // png + webp). The homepage imports the .webp.
+  for (const name of TIME_BADGERS) {
+    const src = join(SRC, `${name}.png`);
+    if (!existsSync(src)) continue;
+    await trimmed(src)
+      .resize({ width: 512, withoutEnlargement: true })
+      .png({ compressionLevel: 9, quality: 90 })
+      .toFile(join(ASSETS, `${name}.png`));
+    await trimmed(src)
+      .resize({ width: 512, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toFile(join(ASSETS, `${name}.webp`));
+  }
 
   // 3. Favicon 32x32 (transparent).
   await trimmed(SRC_BYTE)
@@ -116,6 +136,7 @@ async function main() {
   console.log("Assets generated:");
   console.log("  src/assets/byte-badger.png + .webp");
   console.log("  src/assets/arcade-badger.png + .webp");
+  for (const name of TIME_BADGERS) console.log(`  src/assets/${name}.png + .webp`);
   console.log("  src/assets/golden-floppy.png");
   console.log("  src/assets/legend-locked.png");
   console.log("  src/assets/legend-rays.png");

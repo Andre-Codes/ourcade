@@ -1897,3 +1897,40 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 .arcade-hon-name { font-family: 'Black Ops One', cursive; font-size: 0.94rem; color: #ffe9b0; }
 .arcade-hon-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .arcade-hon-options .arcade-poll-opt { text-align: center; }
+
+/* ====================================================================== */
+/*  FOOTER RELICS — the classic "email me" gif + a burbling lava lamp      */
+/* ====================================================================== */
+.arcade-footer-relics {
+  display: flex; align-items: center; justify-content: center; gap: 18px; margin: 6px 0 2px;
+}
+.arcade-lavalamp {
+  width: 36px; height: auto; image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 114, 0.35));
+}
+.arcade-emailme { display: inline-flex; line-height: 0; border-radius: 4px; transition: filter .12s ease, transform .08s ease; }
+.arcade-emailme img { height: 28px; width: auto; image-rendering: pixelated; }
+.arcade-emailme:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.arcade-emailme:focus-visible { outline: 2px solid var(--neon-aqua); outline-offset: 3px; }
+
+/* ====================================================================== */
+/*  CONTACT PAGE (/contact) — "email the webmaster" form                   */
+/* ====================================================================== */
+.arcade-contact { max-width: 620px; margin: 0 auto; padding: 64px 18px 56px; font-family: 'Share Tech Mono', monospace; color: #d6e0f5; }
+.arcade-contact-title { font-family: 'Black Ops One', cursive; font-size: 1.8rem; color: #fff; margin: 8px 0 6px; }
+.arcade-contact-intro { font-size: 0.9rem; line-height: 1.6; color: #c4d0e6; margin: 0 0 22px; }
+.arcade-contact-form { display: flex; flex-direction: column; gap: 16px; }
+.arcade-contact-note { min-height: 130px; }
+.arcade-contact-submit { width: 100%; margin-top: 4px; text-align: center; }
+.arcade-contact-submit:disabled { opacity: .65; cursor: wait; }
+.arcade-contact-error { color: var(--neon-pink); font-size: 0.84rem; margin: 0; }
+.arcade-contact-done {
+  display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+  padding: 22px; background: linear-gradient(180deg, #14172a, var(--arcade-surface));
+  border: 2px solid var(--neon-aqua); border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-contact-done p { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #c4d0e6; }
+.arcade-contact-done-big {
+  font-family: 'Press Start 2P', monospace; font-size: 0.8rem !important; color: var(--neon-aqua);
+  text-shadow: 0 0 10px rgba(63,255,208,.4);
+}
