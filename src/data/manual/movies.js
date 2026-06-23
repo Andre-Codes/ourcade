@@ -52,7 +52,7 @@ export const MOVIES = [
     id: "toy-story-5-2026",
     title: "Toy Story 5",
     stinger: "yes",
-    credits: "Yes — a mid-credits scene and an end-credits scene.",
+    credits: "🤠 Yes — a mid-credits and end-credits scene. To infinity and beyond the credits!!!",
   },
   {
     id: "masters-of-the-universe-2026",

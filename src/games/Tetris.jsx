@@ -164,6 +164,7 @@ export default function Tetris() {
   const wrapRef = useRef(null);
   const stageRef = useRef(null);
   const canvasRef = useRef(null);
+  const padRef = useRef(null);
 
   // All mutable game state lives here so the rAF loop never triggers a render.
   const G = useRef(null);
@@ -378,19 +379,23 @@ export default function Tetris() {
     // Size the canvas to its container, DPR-aware, keeping the 10x20 field plus
     // side panel (hold + next + hud) proportions.
     function resize() {
-      // Measure the STAGE (the leftover flex region between the HUD and the
-      // on-screen controls), NOT the whole viewport — otherwise the board is
-      // sized to full height and overlaps the D-pad below it.
+      // Size the canvas against the PLAY COLUMN's height minus the controls,
+      // NOT the stage. The stage now shrink-wraps the canvas, so measuring it
+      // would be circular (stage size ← canvas size ← stage size). Measuring
+      // the column lets the stage hug the board, so the HUD sits at the board's
+      // top-right and the controls sit directly under the board.
       const stage = stageRef.current;
-      if (!stage || !canvas) return;
-      const avail = stage.getBoundingClientRect();
+      const play = stage?.parentElement; // .tetris-play
+      const pad = padRef.current;
+      if (!stage || !canvas || !play) return;
+      const playBox = play.getBoundingClientRect();
       // Field is 10 wide, flanked by a gutter on each side: HOLD on the left,
       // NEXT (single piece) on the right.
       const COLS_TOTAL = COLS + SIDE * 2;
       const ROWS_TOTAL = ROWS;
-      const padding = 6;
-      const maxW = avail.width - padding * 2;
-      const maxH = avail.height - padding * 2;
+      const padH = pad ? pad.offsetHeight : 0;
+      const maxW = playBox.width - 16; // column horizontal padding
+      const maxH = playBox.height - padH - 18; // pad + gap breathing room
       let cell = Math.min(maxW / COLS_TOTAL, maxH / ROWS_TOTAL);
       cell = Math.max(8, Math.floor(cell));
       const cssW = Math.floor(cell * COLS_TOTAL);
@@ -809,7 +814,7 @@ export default function Tetris() {
 
           {/* On-screen controls (mobile). pointerdown-based, no page scroll.
               Single row: HOLD ◀ ▼ ▶ ↻ DROP. */}
-          <div className="tetris-pad">
+          <div className="tetris-pad" ref={padRef}>
             <button className="tetris-key tetris-key-wide" {...tapButton(() => !paused && holdSwap())} aria-label="Hold">HOLD</button>
             <button className="tetris-key" {...holdButton(() => startShift(-1), endShift)} aria-label="Left">◀</button>
             <button className="tetris-key" {...holdButton(softPress, softRelease)} aria-label="Soft drop">▼</button>
@@ -893,8 +898,8 @@ const CSS = `
 /* ── Play screen layout ── */
 .tetris-play{
   position:relative; z-index:2; width:100%; height:100%;
-  display:flex; flex-direction:column; align-items:center;
-  padding:8px 8px 10px; box-sizing:border-box; gap:6px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:8px 8px 10px; box-sizing:border-box; gap:8px;
 }
 /* HUD overlays the stage, pinned top-right as a vertical stack so it never
    eats vertical space from (or clips above) the board. */
@@ -915,9 +920,9 @@ const CSS = `
 }
 
 .tetris-stage{
-  position:relative; flex:1 1 auto; min-height:0; width:100%;
+  position:relative; flex:0 0 auto; /* shrink-wrap the canvas so the HUD hugs
+    the board top-right and the controls sit directly under the board */
   display:flex; align-items:center; justify-content:center;
-  overflow:hidden; /* canvas can't inflate the stage before it's measured */
 }
 .tetris-canvas{ image-rendering:pixelated; display:block; }
 
