@@ -23,6 +23,7 @@ import { useArcadeScore } from "../lib/scores.js";
 
 const COLS = 10;
 const ROWS = 20;
+const SIDE = 3.8; // cells of gutter on each side: HOLD left, NEXT right
 const HIDDEN = 2; // spawn rows above the visible field
 const TOTAL_ROWS = ROWS + HIDDEN;
 
@@ -383,8 +384,9 @@ export default function Tetris() {
       const stage = stageRef.current;
       if (!stage || !canvas) return;
       const avail = stage.getBoundingClientRect();
-      // Field is 10 wide + ~5.5-wide side panel (hold + next previews).
-      const COLS_TOTAL = COLS + 5.5;
+      // Field is 10 wide, flanked by a gutter on each side: HOLD on the left,
+      // NEXT (single piece) on the right.
+      const COLS_TOTAL = COLS + SIDE * 2;
       const ROWS_TOTAL = ROWS;
       const padding = 6;
       const maxW = avail.width - padding * 2;
@@ -510,6 +512,12 @@ export default function Tetris() {
 
     const boardW = COLS * cell;
     const boardH = ROWS * cell;
+    const boardX = SIDE * cell; // field is offset right by the HOLD gutter
+
+    // Field is drawn in its own coordinate space starting at the left gutter,
+    // so all the per-cell math below stays board-relative (0..COLS, 0..ROWS).
+    ctx.save();
+    ctx.translate(boardX, 0);
 
     // Playfield background + grid.
     ctx.fillStyle = "#0a0a14";
@@ -567,16 +575,13 @@ export default function Tetris() {
     ctx.lineWidth = 2;
     ctx.strokeRect(1, 1, boardW - 2, boardH - 2);
 
-    // Side panel: HOLD then NEXT (3 upcoming).
-    const px = boardW + cell * 0.5;
-    const pw = cell * 4.6;
-    drawMini(ctx, "HOLD", g.hold, px, cell * 0.3, pw, cell);
-    let ny = cell * 0.3 + cell * 3.6;
-    const upcoming = previewQueue(g, 3);
-    for (let i = 0; i < upcoming.length; i++) {
-      drawMini(ctx, i === 0 ? "NEXT" : "", upcoming[i], px, ny, pw, cell);
-      ny += cell * 3.0;
-    }
+    ctx.restore();
+
+    // HOLD box in the left gutter; NEXT (single piece) in the right gutter,
+    // pushed down so it reads as sitting under the right-side HUD overlay.
+    const panelW = SIDE * cell - cell * 0.6;
+    drawMini(ctx, "HOLD", g.hold, cell * 0.3, cell * 0.3, panelW, cell);
+    drawMini(ctx, "NEXT", previewQueue(g, 1)[0], boardX + boardW + cell * 0.3, cell * 5.2, panelW, cell);
   }
 
   function previewQueue(g, n) {
@@ -783,17 +788,16 @@ export default function Tetris() {
 
       {screen === SCREEN.PLAY && (
         <div className="tetris-play">
-          <div className="tetris-hud">
-            <div className="tetris-stat"><span>SCORE</span><b>{hud.score.toLocaleString()}</b></div>
-            <div className="tetris-stat"><span>LINES</span><b>{hud.lines}</b></div>
-            <div className="tetris-stat"><span>LEVEL</span><b>{hud.level}</b></div>
-            <button className="tetris-pause" {...tapButton(() => setPaused((p) => !p))}>
-              {paused ? "▶" : "❚❚"}
-            </button>
-          </div>
-
           <div className="tetris-stage" ref={stageRef}>
             <canvas ref={canvasRef} className="tetris-canvas" />
+            <div className="tetris-hud">
+              <div className="tetris-stat"><span>SCORE</span><b>{hud.score.toLocaleString()}</b></div>
+              <div className="tetris-stat"><span>LINES</span><b>{hud.lines}</b></div>
+              <div className="tetris-stat"><span>LEVEL</span><b>{hud.level}</b></div>
+              <button className="tetris-pause" {...tapButton(() => setPaused((p) => !p))}>
+                {paused ? "▶" : "❚❚"}
+              </button>
+            </div>
             {paused && (
               <div className="tetris-overlay">
                 <div className="tetris-paused">PAUSED</div>
@@ -803,18 +807,15 @@ export default function Tetris() {
             )}
           </div>
 
-          {/* On-screen controls (mobile). pointerdown-based, no page scroll. */}
+          {/* On-screen controls (mobile). pointerdown-based, no page scroll.
+              Single row: HOLD ◀ ▼ ▶ ↻ DROP. */}
           <div className="tetris-pad">
-            <div className="tetris-dpad">
-              <button className="tetris-key" {...holdButton(() => startShift(-1), endShift)} aria-label="Left">◀</button>
-              <button className="tetris-key" {...holdButton(softPress, softRelease)} aria-label="Soft drop">▼</button>
-              <button className="tetris-key" {...holdButton(() => startShift(1), endShift)} aria-label="Right">▶</button>
-            </div>
-            <div className="tetris-actions">
-              <button className="tetris-key tetris-key-wide" {...tapButton(() => !paused && holdSwap())} aria-label="Hold">HOLD</button>
-              <button className="tetris-key tetris-key-rot" {...tapButton(() => !paused && tryRotate(1))} aria-label="Rotate">↻</button>
-              <button className="tetris-key tetris-key-drop" {...tapButton(() => !paused && hardDrop())} aria-label="Hard drop">DROP</button>
-            </div>
+            <button className="tetris-key tetris-key-wide" {...tapButton(() => !paused && holdSwap())} aria-label="Hold">HOLD</button>
+            <button className="tetris-key" {...holdButton(() => startShift(-1), endShift)} aria-label="Left">◀</button>
+            <button className="tetris-key" {...holdButton(softPress, softRelease)} aria-label="Soft drop">▼</button>
+            <button className="tetris-key" {...holdButton(() => startShift(1), endShift)} aria-label="Right">▶</button>
+            <button className="tetris-key tetris-key-rot" {...tapButton(() => !paused && tryRotate(1))} aria-label="Rotate">↻</button>
+            <button className="tetris-key tetris-key-drop" {...tapButton(() => !paused && hardDrop())} aria-label="Hard drop">DROP</button>
           </div>
         </div>
       )}
@@ -895,16 +896,20 @@ const CSS = `
   display:flex; flex-direction:column; align-items:center;
   padding:8px 8px 10px; box-sizing:border-box; gap:6px;
 }
+/* HUD overlays the stage, pinned top-right as a vertical stack so it never
+   eats vertical space from (or clips above) the board. */
 .tetris-hud{
-  width:100%; max-width:560px; display:flex; align-items:center;
-  justify-content:center; gap:18px; flex:0 0 auto;
+  position:absolute; top:8px; right:8px; z-index:2;
+  display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+  pointer-events:none; /* taps fall through to the canvas… */
 }
-.tetris-stat{ display:flex; flex-direction:column; align-items:center; line-height:1.1; }
+.tetris-hud .tetris-pause{ pointer-events:auto; } /* …except the pause button */
+.tetris-stat{ display:flex; flex-direction:column; align-items:flex-end; line-height:1.1; }
 .tetris-stat span{ font-size:10px; color:#7c81a8; letter-spacing:2px; }
 .tetris-stat b{ font-size:18px; color:#e8e8f4; }
 .tetris-stat.big b{ font-size:40px; color:#34c5ff; text-shadow:0 0 12px rgba(52,197,255,.5); }
 .tetris-pause{
-  margin-left:auto; appearance:none; background:rgba(255,255,255,.06);
+  appearance:none; background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.18); color:#e8e8f4; border-radius:8px;
   width:38px; height:34px; font-size:13px; cursor:pointer;
 }
@@ -926,11 +931,9 @@ const CSS = `
 /* ── On-screen controls ── */
 .tetris-pad{
   width:100%; max-width:560px; flex:0 0 auto;
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding-top:4px;
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:8px; padding-top:4px;
 }
-.tetris-dpad{ display:flex; gap:8px; }
-.tetris-actions{ display:flex; gap:8px; align-items:center; }
 .tetris-key{
   appearance:none; touch-action:none; user-select:none;
   background:linear-gradient(180deg, #23233a, #15152400 140%);

@@ -70,6 +70,9 @@ export default function PhoneChrome() {
   // isn't already on screen (the overlay is open, or we're on the /phone page —
   // there the emulator rings/toasts itself).
   const onPhonePage = pathname === "/phone";
+  // While a game is being played (/play/:id), keep the FAB off so it never
+  // covers the play surface. The toast is still allowed through.
+  const onGamePage = pathname.startsWith("/play/");
   const phoneVisible = open || onPhonePage;
   const incomingSeq = lastIncoming?.seq || 0;
   const pingSeq = lastPing?.seq || 0;
@@ -99,7 +102,7 @@ export default function PhoneChrome() {
 
   return (
     <>
-      {!phoneVisible && pathname !== "/" && (
+      {!phoneVisible && pathname !== "/" && !onGamePage && (
         <PhoneFab unreadCount={unreadCount} onOpen={openPhone} />
       )}
       {!phoneVisible && <PhoneToast text={toast} onOpen={openPhone} />}
