@@ -81,11 +81,15 @@ const MEM_CSS = `
   }
   .mem-tile-inner {
     position: relative; width: 100%; height: 100%;
-    transition: transform .35s cubic-bezier(.4,.1,.3,1); transform-style: preserve-3d;
+    transition: transform .35s cubic-bezier(.4,.1,.3,1);
+    transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
   }
-  .mem-tile.up .mem-tile-inner, .mem-tile.matched .mem-tile-inner { transform: rotateY(180deg); }
+  .mem-tile.up .mem-tile-inner, .mem-tile.matched .mem-tile-inner {
+    transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
+  }
   .mem-face {
-    position: absolute; inset: 0; border-radius: 11px; backface-visibility: hidden;
+    position: absolute; inset: 0; border-radius: 11px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
     display: flex; align-items: center; justify-content: center;
   }
   .mem-back-face {
@@ -94,7 +98,7 @@ const MEM_CSS = `
   }
   .mem-back-face::after { content: "?"; font-family: 'Black Ops One',sans-serif; }
   .mem-front-face {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
     background: linear-gradient(150deg,#fff,#d7f6ee);
     border: 2px solid #3fffd0; padding: 14%;
   }
@@ -103,8 +107,10 @@ const MEM_CSS = `
     border-color: #34c759; box-shadow: 0 0 16px rgba(52,199,89,.5);
     animation: mem-pulse .4s ease;
   }
-  @keyframes mem-pulse { 0% { transform: rotateY(180deg) scale(1); }
-    50% { transform: rotateY(180deg) scale(1.1); } 100% { transform: rotateY(180deg) scale(1); } }
+  @keyframes mem-pulse {
+    0% { transform: rotateY(180deg) scale(1); -webkit-transform: rotateY(180deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.1); -webkit-transform: rotateY(180deg) scale(1.1); }
+    100% { transform: rotateY(180deg) scale(1); -webkit-transform: rotateY(180deg) scale(1); } }
 
   .mem-overlay {
     position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column;
@@ -248,7 +254,7 @@ export default function MemoryMatch() {
           <button
             key={t.id}
             className={`mem-tile ${t.matched ? "matched" : t.flipped ? "up" : ""}`}
-            onPointerDown={() => flip(i)}
+            onClick={() => flip(i)}
             aria-label={t.flipped || t.matched ? t.icon : "hidden tile"}
           >
             <span className="mem-tile-inner">
