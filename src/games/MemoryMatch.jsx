@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { kImg, MEMORY_ICONS } from "../lib/kenney.js";
-import { playSfx, playSfxVariant } from "../lib/sfx.js";
+import { playSfxVariant } from "../lib/sfx.js";
 
 // ── Memory Match ──────────────────────────────────────────────────────────────
 // Concentration grid using the nostalgic Kenney object icons (floppy, CD, gamepad,
@@ -80,7 +80,7 @@ const MEM_CSS = `
     perspective: 600px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .mem-tile-inner {
-    position: relative; width: 100%; height: 100%;
+    position: relative; display: block; width: 100%; height: 100%;
     transition: transform .35s cubic-bezier(.4,.1,.3,1);
     transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
   }
@@ -179,7 +179,6 @@ export default function MemoryMatch() {
     setLocked(false);
     setSubmitted(false);
     setPhase("playing");
-    playSfx("card-shuffle");
     tickTimer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
   }
 

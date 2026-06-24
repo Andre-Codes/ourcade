@@ -4,7 +4,7 @@ import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, cardBackImg } from "../lib/kenney.js";
 import { shareImage } from "../lib/share.js";
-import { playSfx, playSfxVariant } from "../lib/sfx.js";
+import { playSfxVariant } from "../lib/sfx.js";
 import {
   deal, drawFromStock, wasteToTableau, wasteToFoundation,
   tableauToTableau, tableauToFoundation, autoToFoundation,
@@ -158,7 +158,6 @@ export default function Solitaire() {
     setSel(null);
     setSubmitted(false);
     setPhase("playing");
-    playSfx("card-shuffle");
     tick.current = setInterval(() => setSeconds((x) => x + 1), 1000);
   }
 
@@ -190,7 +189,7 @@ export default function Solitaire() {
   // ── interactions (all on pointerdown → instant, no click/dblclick delay) ──────
   function onStock() {
     const next = drawFromStock(game);
-    if (next) { setGame(next); setSel(null); setMoves((m) => m + 1); playSfxVariant("card-shove", [1, 3]); }
+    if (next) { setGame(next); setSel(null); setMoves((m) => m + 1); playSfxVariant("card-place", [1, 3]); }
   }
 
   function onWaste() {
