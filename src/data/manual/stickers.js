@@ -42,6 +42,8 @@ export const STICKERS = {
   "snake": "HOT",
   "tetris": "NEW",
   "game-2048": "NEW",
+  "solitaire": "NEW",
+  "memory-match": "NEW",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS

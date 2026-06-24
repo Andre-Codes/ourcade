@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { kImg } from "../lib/kenney.js";
+import { playSfx } from "../lib/sfx.js";
 
 // ── Dice & Coin Roller ───────────────────────────────────────────────────────
 // Self-contained party/TTRPG tool. Injects its own theme. Single screen → the
@@ -189,6 +190,7 @@ export default function DiceRoller() {
     if (rolling) return;
     setRolling(true);
     setDropped(-1);
+    playSfx("dice-shake-1");
     // adv/dis rolls 2×d20 and keeps the higher/lower; otherwise roll `count` dice.
     const n = advActive ? 2 : count;
     const finals = rollOnce(n);
@@ -225,6 +227,7 @@ export default function DiceRoller() {
     if (coinFlipping) return;
     setCoinFlipping(true);
     setCoinResult(null);
+    playSfx("dice-shake-1");
     const res = Math.random() < 0.5 ? "HEADS" : "TAILS";
     setTimeout(() => {
       setCoinResult(res);

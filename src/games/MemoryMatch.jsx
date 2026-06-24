@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { kImg, MEMORY_ICONS } from "../lib/kenney.js";
+import { playSfx, playSfxVariant } from "../lib/sfx.js";
 
 // ── Memory Match ──────────────────────────────────────────────────────────────
 // Concentration grid using the nostalgic Kenney object icons (floppy, CD, gamepad,
@@ -11,10 +12,13 @@ import { kImg, MEMORY_ICONS } from "../lib/kenney.js";
 
 const GAME_ID = "memory-match";
 
+// Always 4 columns — bigger boards add ROWS, not columns, so the grid grows
+// vertically (and scrolls) on phones rather than squeezing tiles narrower.
+const COLS = 4;
 const LEVELS = [
-  { id: "easy", label: "4 × 4", cols: 4, pairs: 8 },
-  { id: "med", label: "4 × 5", cols: 5, pairs: 10 },
-  { id: "hard", label: "4 × 6", cols: 6, pairs: 12 },
+  { id: "easy", label: "4 × 4", pairs: 8 },
+  { id: "med", label: "4 × 5", pairs: 10 },
+  { id: "hard", label: "4 × 6", pairs: 12 },
 ];
 
 const memIcon = (name) => kImg("memory", name);
@@ -40,13 +44,14 @@ function buildDeck(pairs) {
 
 const MEM_CSS = `
   .mem-root {
-    width: 100vw; height: 100svh; overflow: hidden; position: relative;
+    width: 100vw; min-height: 100svh; overflow-y: auto; overflow-x: hidden; position: relative;
     display: flex; flex-direction: column; align-items: center;
     color: #eef0ff; font-family: 'Share Tech Mono','Courier New',monospace;
     background:
       radial-gradient(ellipse 55% 40% at 18% 6%, rgba(63,255,208,.10), transparent 70%),
       radial-gradient(ellipse 50% 50% at 84% 94%, rgba(180,77,255,.09), transparent 65%),
       #08080f;
+    touch-action: manipulation;
   }
   .mem-back {
     position: absolute; top: 14px; left: 14px; z-index: 5;
@@ -66,11 +71,13 @@ const MEM_CSS = `
     font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: #6b708f; }
   .mem-stats b { color: #ffd23f; font-size: 1rem; }
 
-  .mem-grid { display: grid; gap: 10px; padding: 4px;
-    width: min(94vw, 540px); margin: 10px auto 0; flex: 0 0 auto; }
+  /* fixed 4 columns — taller boards add rows; cap width so tiles stay a comfy
+     touch size and the board grows downward (root scrolls) rather than sideways. */
+  .mem-grid { display: grid; gap: 10px; padding: 4px 4px 24px;
+    width: min(92vw, 420px); margin: 10px auto 0; flex: 0 0 auto; }
   .mem-tile {
     aspect-ratio: 1; cursor: pointer; border: none; padding: 0; background: none;
-    perspective: 600px;
+    perspective: 600px; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .mem-tile-inner {
     position: relative; width: 100%; height: 100%;
@@ -166,6 +173,7 @@ export default function MemoryMatch() {
     setLocked(false);
     setSubmitted(false);
     setPhase("playing");
+    playSfx("card-shuffle");
     tickTimer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
   }
 
@@ -177,6 +185,7 @@ export default function MemoryMatch() {
 
     const next = deck.map((t, idx) => (idx === i ? { ...t, flipped: true } : t));
     setDeck(next);
+    playSfxVariant("card-slide", [1, 3]);
     const newPicks = [...picks, i];
     setPicks(newPicks);
 
@@ -190,6 +199,7 @@ export default function MemoryMatch() {
         );
         setDeck(matched);
         setPicks([]);
+        playSfxVariant("card-place", [1, 3]);
         if (matched.every((t) => t.matched)) finish();
       } else {
         // No match — flip both back after a beat.
@@ -219,10 +229,8 @@ export default function MemoryMatch() {
 
   const isNewBest = phase === "won" && best != null && finalMoves <= best;
 
-  const gridStyle = useMemo(
-    () => ({ gridTemplateColumns: `repeat(${level.cols}, 1fr)` }),
-    [level]
-  );
+  // Fixed COLS columns — the board grows in rows as pair count rises.
+  const gridStyle = { gridTemplateColumns: `repeat(${COLS}, 1fr)` };
 
   return (
     <div className="mem-root">
@@ -240,7 +248,7 @@ export default function MemoryMatch() {
           <button
             key={t.id}
             className={`mem-tile ${t.matched ? "matched" : t.flipped ? "up" : ""}`}
-            onClick={() => flip(i)}
+            onPointerDown={() => flip(i)}
             aria-label={t.flipped || t.matched ? t.icon : "hidden tile"}
           >
             <span className="mem-tile-inner">

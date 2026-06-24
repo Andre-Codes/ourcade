@@ -4,6 +4,7 @@ import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, cardBackImg } from "../lib/kenney.js";
 import { shareImage } from "../lib/share.js";
+import { playSfx, playSfxVariant } from "../lib/sfx.js";
 import {
   deal, drawFromStock, wasteToTableau, wasteToFoundation,
   tableauToTableau, tableauToFoundation, autoToFoundation,
@@ -16,6 +17,10 @@ import {
 // when solved. Scored by FEWEST MOVES (dir:"asc"). Self-contained .sol-* CSS.
 
 const GAME_ID = "solitaire";
+
+// mm:ss elapsed-time format.
+const fmtTime = (s) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 const SOL_CSS = `
   .sol-root {
@@ -125,7 +130,16 @@ export default function Solitaire() {
 
   const tick = useRef(null);
   const autoTimer = useRef(null);
+  const lastTap = useRef({ key: null, t: 0 }); // manual double-tap detection
   useEffect(() => () => { clearInterval(tick.current); clearTimeout(autoTimer.current); }, []);
+
+  // Was this target tapped twice within the double-tap window?
+  function isDoubleTap(key) {
+    const now = Date.now();
+    const dbl = lastTap.current.key === key && now - lastTap.current.t < 280;
+    lastTap.current = { key, t: now };
+    return dbl;
+  }
 
   useEffect(() => {
     const s = document.createElement("style");
@@ -144,6 +158,7 @@ export default function Solitaire() {
     setSel(null);
     setSubmitted(false);
     setPhase("playing");
+    playSfx("card-shuffle");
     tick.current = setInterval(() => setSeconds((x) => x + 1), 1000);
   }
 
@@ -153,6 +168,7 @@ export default function Solitaire() {
     setGame(next);
     setMoves((m) => m + 1);
     setSel(null);
+    playSfxVariant("card-place", [1, 3]);
     if (isWon(next)) win();
     return true;
   }
@@ -171,19 +187,21 @@ export default function Solitaire() {
     }
   }, [phase, submitted, finalMoves, submit]);
 
-  // ── interactions ────────────────────────────────────────────────────────────
+  // ── interactions (all on pointerdown → instant, no click/dblclick delay) ──────
   function onStock() {
     const next = drawFromStock(game);
-    if (next) { setGame(next); setSel(null); setMoves((m) => m + 1); }
+    if (next) { setGame(next); setSel(null); setMoves((m) => m + 1); playSfxVariant("card-shove", [1, 3]); }
   }
 
   function onWaste() {
     if (!game.waste.length) return;
+    // Double-tap the waste top → auto to foundation.
+    if (isDoubleTap("waste") && autoUp(null)) return;
     if (sel && sel.from === "waste") { setSel(null); return; }
     setSel({ from: "waste" });
   }
 
-  // Double-tap on waste/tableau top → auto to foundation.
+  // Send a card to foundation if any accepts it. Returns true if it moved.
   function autoUp(fromCol) {
     const r = autoToFoundation(game, fromCol);
     if (r) { apply(r.state); return true; }
@@ -194,10 +212,12 @@ export default function Solitaire() {
     const pile = game.tableau[col];
     const card = pile[idx];
     if (!card.faceUp) {
-      // tapping a face-down card does nothing unless it's the top (auto-flip is
-      // handled by moves); ignore.
+      // tapping a face-down card does nothing (auto-flip happens on a move).
       return;
     }
+    const isTop = idx === pile.length - 1;
+    // Double-tap the top card → auto to foundation (before treating as src/dest).
+    if (isTop && isDoubleTap(`tab-${col}-${idx}`) && autoUp(col)) return;
     // If a source is already selected, treat this column as a destination.
     if (sel) {
       if (sel.from === "waste") { if (apply(wasteToTableau(game, col))) return; }
@@ -205,10 +225,9 @@ export default function Solitaire() {
         if (sel.col === col) { setSel(null); return; }
         if (apply(tableauToTableau(game, sel.col, sel.idx, col))) return;
       }
-      // selecting a new source instead
+      // else: fall through to (re)select this card as the new source
     }
-    // Select this card as the source (only the start of a movable run is useful;
-    // logic validates on move).
+    // Select this card as the source (logic validates the actual move).
     if (sel && sel.from === "tab" && sel.col === col && sel.idx === idx) { setSel(null); return; }
     setSel({ from: "tab", col, idx });
   }
@@ -272,7 +291,7 @@ export default function Solitaire() {
         )}
         <span className="sp" />
         <span className="sol-stat">MOVES <b>{moves}</b></span>
-        <span className="sol-stat">TIME <b>{seconds}s</b></span>
+        <span className="sol-stat">TIME <b>{fmtTime(seconds)}</b></span>
       </div>
 
       {game && (
@@ -280,7 +299,7 @@ export default function Solitaire() {
           <div className="sol-top">
             <div className="sol-stock-area">
               {/* stock */}
-              <div className="sol-hold" onClick={onStock}>
+              <div className="sol-hold" onPointerDown={onStock}>
                 {game.stock.length ? (
                   <div className="sol-card"><CardFace card={{ faceUp: false }} /></div>
                 ) : (
@@ -288,7 +307,7 @@ export default function Solitaire() {
                 )}
               </div>
               {/* waste */}
-              <div className="sol-hold" onClick={onWaste} onDoubleClick={() => autoUp(null)}>
+              <div className="sol-hold" onPointerDown={onWaste}>
                 {game.waste.length ? (
                   <div className={`sol-card ${selWaste ? "sel" : ""}`}>
                     <CardFace card={game.waste[game.waste.length - 1]} />
@@ -301,7 +320,7 @@ export default function Solitaire() {
 
             <div className="sol-found-area">
               {game.foundations.map((f, fIdx) => (
-                <div className="sol-hold" key={fIdx} onClick={() => onFoundationTap(fIdx)}>
+                <div className="sol-hold" key={fIdx} onPointerDown={() => onFoundationTap(fIdx)}>
                   {f.length ? (
                     <div className="sol-card"><CardFace card={f[f.length - 1]} /></div>
                   ) : (
@@ -320,15 +339,14 @@ export default function Solitaire() {
                 style={{ height: `calc(var(--ch) + ${Math.max(0, pile.length - 1)} * var(--fan))` }}
               >
                 {pile.length === 0 ? (
-                  <div className="sol-slot" onClick={() => onEmptyColTap(col)} />
+                  <div className="sol-slot" onPointerDown={() => onEmptyColTap(col)} />
                 ) : (
                   pile.map((card, idx) => (
                     <div
                       key={card.id + idx}
                       className={`sol-card ${selKey(col, idx) ? "sel" : ""}`}
                       style={{ top: `calc(${idx} * var(--fan))` }}
-                      onClick={() => onCardTap(col, idx)}
-                      onDoubleClick={() => idx === pile.length - 1 && card.faceUp && autoUp(col)}
+                      onPointerDown={() => onCardTap(col, idx)}
                     >
                       <CardFace card={card} />
                     </div>
@@ -359,7 +377,7 @@ export default function Solitaire() {
           <div className="sub">{rating(finalMoves)}</div>
           <div className="sol-winstats">
             <div>Moves<b>{finalMoves}</b></div>
-            <div>Time<b>{seconds}s</b></div>
+            <div>Time<b>{fmtTime(seconds)}</b></div>
           </div>
           {best != null && finalMoves <= best && <div className="sub" style={{ color: "#34c759" }}>★ new best ★</div>}
           <div className="sol-row">
@@ -393,7 +411,7 @@ async function makeResultCard(moves, seconds) {
   ctx.fillText(String(moves), S / 2, 560);
   ctx.fillStyle = "#9fdccb"; ctx.font = "700 34px 'Press Start 2P', monospace";
   ctx.fillText("MOVES", S / 2, 680);
-  ctx.fillText(`${seconds}s`, S / 2, 760);
+  ctx.fillText(fmtTime(seconds), S / 2, 760);
   ctx.fillStyle = "#6b708f"; ctx.font = "700 26px 'Press Start 2P', monospace";
   ctx.fillText("theourcade.com", S / 2, S - 90);
   return await new Promise((res) => c.toBlob((b) => res(b), "image/png"));
