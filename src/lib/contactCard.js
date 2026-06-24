@@ -3,6 +3,20 @@
    optional bio, and a link to their public profile. Mirrors src/lib/nameCard.js
    and src/lib/eightBallCard.js. Used by the "share my number" button. */
 
+import { isIconAvatar, avatarIconUrl } from "./kenney.js";
+
+// Load an image URL → HTMLImageElement (resolves null on failure so the card
+// still renders without the avatar). Kenney WebP are same-origin (served from
+// our own /public), so no CORS taint on the canvas.
+function loadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
 // Greedy word-wrap to a pixel width; returns the lines.
 function wrapLines(ctx, text, maxWidth) {
   const words = String(text).split(/\s+/);
@@ -82,8 +96,23 @@ export async function renderContactCard({ number, username, avatar, bio } = {}) 
   ctx.shadowBlur = 24;
   ctx.stroke();
   ctx.shadowBlur = 0;
-  ctx.font = "120px 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
-  ctx.fillText(avatar || "🕹️", S / 2, ay + 6);
+  // Icon avatar → draw the WebP centered in the ring; otherwise emoji as text.
+  if (isIconAvatar(avatar)) {
+    const img = await loadImage(avatarIconUrl(avatar));
+    if (img && img.width) {
+      const box = ar * 1.4; // fit inside the ring with padding
+      const scale = Math.min(box / img.width, box / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      ctx.drawImage(img, S / 2 - w / 2, ay - h / 2, w, h);
+    } else {
+      ctx.font = "120px 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+      ctx.fillText("🕹️", S / 2, ay + 6);
+    }
+  } else {
+    ctx.font = "120px 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+    ctx.fillText(avatar || "🕹️", S / 2, ay + 6);
+  }
 
   // ── handle ────────────────────────────────────────────────────────────────
   const handle = `@${(username || "player").trim()}`;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/AuthProvider.jsx";
 import { AVATARS, THEMES } from "../data/profilePresets.js";
+import { AVATAR_ICONS, renderAvatar } from "../lib/kenney.js";
 import { GAMES } from "../data/games.js";
 import { getFavorites, toggleFavorite } from "../lib/store.js";
 import ProfileView from "./ProfileView.jsx";
@@ -48,6 +49,24 @@ function ProfileEditor({ profile, updateProfile }) {
               aria-pressed={a === avatar}
             >
               {a}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="arcade-editor-row">
+        <span className="arcade-editor-label">icons</span>
+        <div className="arcade-picker">
+          {AVATAR_ICONS.map((a) => (
+            <button
+              key={a}
+              type="button"
+              className={`arcade-picker-opt${a === avatar ? " is-on" : ""}`}
+              onClick={() => updateProfile({ avatar: a })}
+              aria-label={`avatar ${a}`}
+              aria-pressed={a === avatar}
+            >
+              {renderAvatar(a, { size: 24, alt: a })}
             </button>
           ))}
         </div>

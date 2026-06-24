@@ -1,11 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import { kImg } from "../lib/kenney.js";
 
 // ── Dice & Coin Roller ───────────────────────────────────────────────────────
 // Self-contained party/TTRPG tool. Injects its own theme. Single screen → the
 // shell's "‹ BACK TO OURCADE" stays visible (no useArcadeBackButton needed).
+//
+// Dice are drawn as real Kenney die-shape sprites with the rolled value overlaid
+// (d6 uses the pipped dice_1..6 faces directly — no overlay needed). The coin uses
+// the Kenney flip_head/flip_tails sprites.
 
 const DICE = [4, 6, 8, 10, 12, 20];
 const MAX_COUNT = 12;
+
+const dieSprite = (d) => kImg("dice", `d${d}`);
+const d6Face = (v) => kImg("dice", `dice_${v}`);
+const coinSprite = (side) => kImg("dice", side === "HEADS" ? "flip_head" : "flip_tails");
 
 const style = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,19 +89,38 @@ const style = `
   .dice-roll:active:not(:disabled) { transform: translateY(2px); }
   .dice-roll:disabled { opacity: .5; cursor: not-allowed; }
 
-  .dice-results { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; min-height: 72px; margin-bottom: 16px; }
+  .dice-results { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; min-height: 78px; margin-bottom: 16px; }
   .die {
-    width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; font-weight: 700; color: #07080f;
-    background: linear-gradient(180deg, #fff, #3fffd0);
-    border-radius: 12px; border: 2px solid #0a0a12;
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.6), 0 4px 10px rgba(0,0,0,.4);
+    position: relative; width: 68px; height: 68px;
+    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
   }
-  .die.rolling { animation: die-tumble .18s linear infinite; background: linear-gradient(180deg, #fff, #ffd23f); }
+  .die img { width: 100%; height: 100%; object-fit: contain; display: block;
+    filter: drop-shadow(0 0 6px rgba(63,255,208,.35)); }
+  /* rolled value overlaid on the die-shape sprite (not needed for d6 pip faces). */
+  .die .pip {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Black Ops One', sans-serif; font-size: 1.5rem; color: #fffbe6;
+    text-shadow: 0 0 6px rgba(0,0,0,.9), 0 1px 2px rgba(0,0,0,.9); pointer-events: none;
+    padding-top: 6px;
+  }
+  .die.dimmed { opacity: .32; filter: grayscale(.6) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+  .die.rolling { animation: die-tumble .2s linear infinite; }
   @keyframes die-tumble {
-    0% { transform: rotate(0) scale(1); } 50% { transform: rotate(8deg) scale(1.06); }
-    100% { transform: rotate(-8deg) scale(1); }
+    0% { transform: rotate(0) scale(1); } 25% { transform: rotate(10deg) scale(1.06); }
+    50% { transform: rotate(0) scale(.98); } 75% { transform: rotate(-10deg) scale(1.06); }
+    100% { transform: rotate(0) scale(1); }
   }
+
+  /* advantage/disadvantage toggle (d20 only) */
+  .dice-adv { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; }
+  .dice-adv button {
+    padding: 9px 14px; cursor: pointer; border-radius: 8px;
+    font-family: 'Press Start 2P', monospace; font-size: 0.56rem; letter-spacing: 0.04em;
+    color: #9aa0c8; background: #13162a; border: 2px solid #2a2f4a; transition: all .12s ease;
+  }
+  .dice-adv button.on-adv { color: #0a0a12; background: linear-gradient(180deg,#fff,#34c759); border-color: #0a0a12; }
+  .dice-adv button.on-dis { color: #0a0a12; background: linear-gradient(180deg,#fff,#ff4d72); border-color: #0a0a12; }
 
   .dice-total { text-align: center; margin-bottom: 26px; }
   .dice-total .t-label { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: #6b708f; }
@@ -105,18 +133,21 @@ const style = `
   /* coin */
   .coin-stage { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 16px 0 28px; }
   .coin {
-    width: 140px; height: 140px; border-radius: 50%;
+    width: 150px; height: 150px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Black Ops One', sans-serif; font-size: 1.4rem; color: #2a1d00;
     background: radial-gradient(circle at 35% 30%, #ffe98a, #f2b705 60%, #b8860b);
     border: 5px solid #ffd23f;
     box-shadow: 0 0 30px rgba(255,210,63,.4), inset 0 -6px 12px rgba(0,0,0,.25);
   }
+  .coin img { width: 64%; height: 64%; object-fit: contain; }
+  .coin .coin-q { font-family: 'Black Ops One', sans-serif; font-size: 1.3rem; color: #2a1d00; }
   .coin.flipping { animation: coin-flip .9s cubic-bezier(.3,.1,.3,1); }
   @keyframes coin-flip {
     0% { transform: rotateX(0); }
     100% { transform: rotateX(2520deg); }
   }
+  .coin-result { font-family: 'Black Ops One', sans-serif; font-size: 1.4rem; letter-spacing: 0.08em;
+    color: #ffd23f; text-shadow: 0 0 18px rgba(255,210,63,.5); }
 
   .dice-hist-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: #6b708f; margin: 8px 0 8px; }
   .dice-hist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
@@ -136,7 +167,9 @@ export default function DiceRoller() {
   const [die, setDie] = useState(6);
   const [count, setCount] = useState(2);
   const [modifier, setModifier] = useState(0);
+  const [advantage, setAdvantage] = useState("none"); // none | adv | dis (d20 only)
   const [results, setResults] = useState([]);
+  const [dropped, setDropped] = useState(-1); // index of the discarded d20 (adv/dis)
   const [rolling, setRolling] = useState(false);
   const [history, setHistory] = useState([]);
 
@@ -146,12 +179,19 @@ export default function DiceRoller() {
   const timer = useRef(null);
   useEffect(() => () => clearInterval(timer.current), []);
 
+  // Advantage/disadvantage only applies to a single d20.
+  const advActive = die === 20 && count === 1 && advantage !== "none";
   const modText = modifier === 0 ? "" : modifier > 0 ? `+${modifier}` : `${modifier}`;
+
+  const rollOnce = (n) => Array.from({ length: n }, () => 1 + Math.floor(Math.random() * die));
 
   const roll = () => {
     if (rolling) return;
     setRolling(true);
-    const finals = Array.from({ length: count }, () => 1 + Math.floor(Math.random() * die));
+    setDropped(-1);
+    // adv/dis rolls 2×d20 and keeps the higher/lower; otherwise roll `count` dice.
+    const n = advActive ? 2 : count;
+    const finals = rollOnce(n);
     let ticks = 0;
     clearInterval(timer.current);
     timer.current = setInterval(() => {
@@ -159,14 +199,24 @@ export default function DiceRoller() {
       if (ticks >= 9) {
         clearInterval(timer.current);
         setResults(finals);
+        let dropIdx = -1;
+        if (advActive) {
+          const keepHigh = advantage === "adv";
+          dropIdx = (finals[0] >= finals[1]) === keepHigh ? 1 : 0;
+        }
+        setDropped(dropIdx);
         setRolling(false);
-        const total = finals.reduce((a, b) => a + b, 0) + modifier;
+        const kept = dropIdx < 0 ? finals : finals.filter((_, i) => i !== dropIdx);
+        const total = kept.reduce((a, b) => a + b, 0) + modifier;
+        const label = advActive
+          ? `d20 ${advantage === "adv" ? "adv" : "dis"}${modText}`
+          : `${count}d${die}${modText}`;
         setHistory((h) => [
-          { id: Date.now(), label: `${count}d${die}${modText}`, rolls: finals, total },
+          { id: Date.now(), label, rolls: kept, total },
           ...h,
         ].slice(0, 10));
       } else {
-        setResults(Array.from({ length: count }, () => 1 + Math.floor(Math.random() * die)));
+        setResults(rollOnce(n));
       }
     }, 55);
   };
@@ -186,7 +236,22 @@ export default function DiceRoller() {
     }, 900);
   };
 
-  const diceSum = results.reduce((a, b) => a + b, 0);
+  const kept = dropped < 0 ? results : results.filter((_, i) => i !== dropped);
+  const diceSum = kept.reduce((a, b) => a + b, 0);
+
+  // A single die: pipped face for d6, otherwise die-shape sprite + overlaid value.
+  const Die = ({ value, dimmed }) => (
+    <div className={`die ${rolling ? "rolling" : ""} ${dimmed ? "dimmed" : ""}`}>
+      {die === 6 ? (
+        <img src={d6Face(value)} alt={`${value}`} />
+      ) : (
+        <>
+          <img src={dieSprite(die)} alt={`d${die}`} />
+          <span className="pip">{value}</span>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -232,13 +297,30 @@ export default function DiceRoller() {
                 </div>
               </div>
 
+              {die === 20 && count === 1 && (
+                <div className="dice-adv">
+                  <button
+                    className={advantage === "adv" ? "on-adv" : ""}
+                    onClick={() => setAdvantage((a) => (a === "adv" ? "none" : "adv"))}
+                  >ADVANTAGE</button>
+                  <button
+                    className={advantage === "dis" ? "on-dis" : ""}
+                    onClick={() => setAdvantage((a) => (a === "dis" ? "none" : "dis"))}
+                  >DISADVANTAGE</button>
+                </div>
+              )}
+
               <button className="dice-roll" onClick={roll} disabled={rolling}>
-                {rolling ? "ROLLING…" : `ROLL ${count}d${die}${modText}`}
+                {rolling
+                  ? "ROLLING…"
+                  : advActive
+                    ? `ROLL d20 ${advantage === "adv" ? "ADV" : "DIS"}${modText}`
+                    : `ROLL ${count}d${die}${modText}`}
               </button>
 
               <div className="dice-results">
                 {results.map((v, i) => (
-                  <div key={i} className={`die ${rolling ? "rolling" : ""}`}>{v}</div>
+                  <Die key={i} value={v} dimmed={i === dropped} />
                 ))}
               </div>
 
@@ -246,9 +328,10 @@ export default function DiceRoller() {
                 <div className="dice-total">
                   <div className="t-label">Total</div>
                   <div className="t-val">{diceSum + modifier}</div>
-                  {(count > 1 || modifier !== 0) && (
+                  {(kept.length > 1 || modifier !== 0 || advActive) && (
                     <div className="t-break">
-                      {results.join(" + ")}{modText ? ` (${modText})` : ""}
+                      {kept.join(" + ")}{modText ? ` (${modText})` : ""}
+                      {advActive ? ` · ${advantage === "adv" ? "advantage" : "disadvantage"}` : ""}
                     </div>
                   )}
                 </div>
@@ -257,8 +340,13 @@ export default function DiceRoller() {
           ) : (
             <div className="coin-stage">
               <div className={`coin ${coinFlipping ? "flipping" : ""}`}>
-                {coinFlipping ? "🪙" : coinResult || "FLIP"}
+                {coinResult && !coinFlipping ? (
+                  <img src={coinSprite(coinResult)} alt={coinResult} />
+                ) : (
+                  <span className="coin-q">?</span>
+                )}
               </div>
+              {coinResult && !coinFlipping && <div className="coin-result">{coinResult}</div>}
               <button className="dice-roll" style={{ background: "linear-gradient(180deg,#fff,#ffd23f)" }} onClick={flip} disabled={coinFlipping}>
                 {coinFlipping ? "FLIPPING…" : "FLIP COIN"}
               </button>

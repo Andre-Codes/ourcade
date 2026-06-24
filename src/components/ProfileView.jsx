@@ -7,6 +7,7 @@ import { getDiscoveredRelics, getTop8, removeTop8, lsGetJSON } from "../lib/stor
 import { resolveTop8 } from "../data/content.js";
 import { renderContactCard } from "../lib/contactCard.js";
 import { shareImage } from "../lib/share.js";
+import { renderAvatar } from "../lib/kenney.js";
 
 /* ProfileView — the SHARED presentation of an arcade profile. Rendered both on
    the public /u/:username page and on the owner's own /me (PROFILE tab), so the
@@ -264,7 +265,7 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
     <>
       <div className="arcade-profile-head" style={{ borderColor: accent }}>
         <div className="arcade-profile-avatar" style={{ borderColor: accent }}>
-          {p?.avatar || "🕹️"}
+          {renderAvatar(p?.avatar, { size: 52, alt: "" })}
         </div>
         <div className="arcade-profile-id">
           <h1 className="arcade-profile-name" style={{ color: accent, textShadow: `0 0 18px ${accent}55` }}>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { getGame } from "../data/games.js";
 import { useAuth } from "../lib/AuthProvider.jsx";
 import { useArcadeScore, useLeaderboard } from "../lib/scores.js";
+import { renderAvatar } from "../lib/kenney.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
    HIGHSCOREBOARD — the ONE board UI of the Arcade Score Standard. Any game
@@ -59,7 +60,7 @@ export default function HighScoreBoard({ gameId, n = 10, compact = false }) {
               >
                 <span className="arcade-board-rank">{MEDALS[i] || i + 1}</span>
                 <span className="arcade-board-who">
-                  <span className="arcade-board-av" aria-hidden="true">{e.avatar || "🕹️"}</span>
+                  <span className="arcade-board-av" aria-hidden="true">{renderAvatar(e.avatar, { size: 20, alt: "" })}</span>
                   {e.username ? (
                     <Link className="arcade-board-name" to={`/u/${e.username}`}>
                       {e.username}
