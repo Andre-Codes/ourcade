@@ -105,7 +105,7 @@ function ProfileEditor({ profile, updateProfile }) {
       <div className="arcade-editor-row">
         <span className="arcade-editor-label">your arcade (favorites)</span>
         <div className="arcade-fave-toggle-list">
-          {GAMES.map((g) => {
+          {GAMES.filter((g) => g.category).map((g) => {
             const on = favs.includes(g.id);
             return (
               <button

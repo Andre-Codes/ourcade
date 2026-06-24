@@ -31,7 +31,10 @@ export default function GamePage() {
     return () => window.removeEventListener("message", onMsg);
   }, [id, game, submit]);
 
-  if (!game) {
+  // A real cabinet has a component (react) or a src (iframe). Score-only
+  // registry entries (e.g. the per-size memory-match boards) resolve via
+  // getGame but aren't playable — treat them as not-found here.
+  if (!game || (game.type !== "iframe" && !game.component)) {
     return (
       <div className="arcade-notfound">
         <NedryGag message="That game doesn’t exist." />

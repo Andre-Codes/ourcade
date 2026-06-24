@@ -139,8 +139,20 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/MemoryMatch.jsx")),
-    score: { label: "MOVES", dir: "asc" },
+    // No board on the cabinet itself: each grid size has its OWN fewest-moves
+    // board (raw moves aren't comparable across 8/10/12-pair grids). The three
+    // score-only entries below carry the boards; MemoryMatch submits to
+    // `memory-match-<level.id>` and links to the active one from its win screen.
   },
+  // Score-only sub-entries: a `score` config gives each its own board + #/scores
+  // page + profile-bests row, but with NO `category`/`component` they don't show
+  // on the home shelves and aren't separately playable. See MemoryMatch.jsx.
+  { id: "memory-match-easy", title: "Memory Match · 4×4", emoji: "🧠",
+    score: { label: "MOVES", dir: "asc" } },
+  { id: "memory-match-med", title: "Memory Match · 4×5", emoji: "🧠",
+    score: { label: "MOVES", dir: "asc" } },
+  { id: "memory-match-hard", title: "Memory Match · 4×6", emoji: "🧠",
+    score: { label: "MOVES", dir: "asc" } },
   {
     id: "solitaire",
     title: "Solitaire",

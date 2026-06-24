@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { kImg, MEMORY_ICONS } from "../lib/kenney.js";
-import { playSfxVariant } from "../lib/sfx.js";
+import { playSfx, playSfxVariant } from "../lib/sfx.js";
 
 // ── Memory Match ──────────────────────────────────────────────────────────────
 // Concentration grid using the nostalgic Kenney object icons (floppy, CD, gamepad,
@@ -140,10 +140,16 @@ const MEM_CSS = `
 
 export default function MemoryMatch() {
   const navigate = useNavigate();
-  const { submit, best } = useArcadeScore(GAME_ID);
 
   const [phase, setPhase] = useState("start"); // start | playing | won
   const [level, setLevel] = useState(LEVELS[0]);
+
+  // Each grid size has its OWN leaderboard — a 4×4 (8-pair) win and a 4×6
+  // (12-pair) win aren't comparable on a raw fewest-moves ladder, so scores
+  // submit under a size-specific board id (registered in src/data/games.js).
+  const boardId = `${GAME_ID}-${level.id}`;
+  const { submit, best } = useArcadeScore(boardId);
+
   const [deck, setDeck] = useState([]);
   const [moves, setMoves] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -205,6 +211,7 @@ export default function MemoryMatch() {
         setDeck(matched);
         setPicks([]);
         playSfxVariant("card-place", [1, 3]);
+        playSfx("confirmation");
         if (matched.every((t) => t.matched)) finish();
       } else {
         // No match — flip both back after a beat.
@@ -293,6 +300,9 @@ export default function MemoryMatch() {
             <button className="mem-btn" onClick={() => startGame(level)}>PLAY AGAIN</button>
             <button className="mem-btn alt" onClick={() => setPhase("start")}>CHANGE SIZE</button>
           </div>
+          <Link className="sub" to={`/scores/${boardId}`} style={{ color: "#3fffd0", textDecoration: "none" }}>
+            view {level.label} leaderboard →
+          </Link>
         </div>
       )}
     </div>
