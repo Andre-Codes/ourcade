@@ -20,7 +20,8 @@
     "check:daily": "node scripts/daily-check.js",
     "check:relic": "node scripts/relic-run-check.js",
     "assets:mascots": "node scripts/process-mascots.js",
-    "assets:featured": "node scripts/process-featured.js"
+    "assets:featured": "node scripts/process-featured.js",
+    "assets:modem": "node scripts/process-modem-assets.js"
   },
   "dependencies": {
     "firebase": "^12.14.0",

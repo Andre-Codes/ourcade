@@ -38,6 +38,7 @@ export const STICKERS = {
   "pits-and-portals": "HOT",
   "crypt-crawler": "NEW",
   "tap-surge": "HOT",
+  "modem-defender": "NEW",
   "snake": "HOT",
   "tetris": "NEW",
   "game-2048": "NEW",
