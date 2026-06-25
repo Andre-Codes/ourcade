@@ -104,6 +104,9 @@ const PADDLE_W_WIDE = 168; // Broadband
 const PADDLE_Y_FRAC = 0.8; // paddle sits here; leaves a clear gap above the item bar
 const MISS_DRAIN = 18; // connection lost when a ball falls past the paddle
 const MISSILE_DRAIN = 5; // connection lost when a missile hits the paddle
+const HEAL_AMOUNT = 10; // connection restored by an instant heal crate
+const HEAL_WEIGHT = 5; // heal's relative weight in the crate loot roll (vs items)
+const BOSS_HEAL = 50; // connection restored on beating a boss (big checkpoint heal)
 const LOOT_PER_LEVEL = [1, 3]; // min..max loot crates woven into a wall
 const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 80 };
 // Stacking: how many of each item you can hold, by level reached.
@@ -118,9 +121,12 @@ function stackCap(level) {
 function lootPool(level) {
   return ITEM_ORDER.filter((id) => level >= ITEMS[id].minLevel);
 }
+// A crate yields either an inventory item or a "heal" (instant connection patch).
+// Heal is always in the pool (you need recovery from level 1) at HEAL_WEIGHT.
 function rollLoot(level) {
   const pool = [];
   for (const id of lootPool(level)) for (let i = 0; i < ITEMS[id].weight; i++) pool.push(id);
+  for (let i = 0; i < HEAL_WEIGHT; i++) pool.push("heal");
   return pool[randI(0, pool.length - 1)] || "firewall";
 }
 
@@ -722,7 +728,15 @@ export function ModemDefender({ onExit }) {
       const id = rollLoot(level.current);
       spawnSpark(br.x, br.y, "kill");
       SFX.pop(combo.current);
-      awardItem(id, br.x, br.y);
+      if (id === "heal") {
+        const before = conn.current;
+        conn.current = clamp(conn.current + HEAL_AMOUNT, 0, 100);
+        const gained = Math.round(conn.current - before);
+        addFloat(br.x, br.y, gained > 0 ? `+${gained}% 🩹` : "100% 🩹", T.green);
+        SFX.item();
+      } else {
+        awardItem(id, br.x, br.y);
+      }
       return;
     }
     br.hp -= dmg;
@@ -772,6 +786,11 @@ export function ModemDefender({ onExit }) {
       const reward = 2000 * bo.num;
       score.current += reward;
       addFloat(bo.x, bo.y, `BOSS DOWN +${reward.toLocaleString()}`, T.yellow);
+      // big checkpoint heal for surviving the boss (clamped at 100)
+      const before = conn.current;
+      conn.current = clamp(conn.current + BOSS_HEAL, 0, 100);
+      const healed = Math.round(conn.current - before);
+      if (healed > 0) addFloat(bo.x, bo.y + 30, `+${healed}% 🩹 REPAIRED`, T.green);
       for (let i = 0; i < 14; i++) spawnSpark(bo.x + rand(-bo.w / 2, bo.w / 2), bo.y + rand(-bo.w / 2, bo.w / 2), "kill");
       SFX.bossDie();
       stopBossLoop();
