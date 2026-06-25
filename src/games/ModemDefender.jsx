@@ -101,11 +101,11 @@ const BALL_SPEED_PER_LEVEL = 16; // +px/sec each level
 const BALL_SPEED_MAX = 620;
 const PADDLE_W = 96;
 const PADDLE_W_WIDE = 168; // Broadband
-const PADDLE_Y_FRAC = 0.9;
+const PADDLE_Y_FRAC = 0.8; // paddle sits here; leaves a clear gap above the item bar
 const MISS_DRAIN = 18; // connection lost when a ball falls past the paddle
 const MISSILE_DRAIN = 5; // connection lost when a missile hits the paddle
 const LOOT_PER_LEVEL = [1, 3]; // min..max loot crates woven into a wall
-const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 44 };
+const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 80 };
 // Stacking: how many of each item you can hold, by level reached.
 const STACK_T1 = 5; // level ≥5 (after first boss) → hold 2
 const STACK_T2 = 10; // level ≥10 → hold 3
@@ -164,7 +164,7 @@ const SFX = {
   // ball hits a brick that survives
   brick: () => { playSfx("enemy_hit", { volume: 0.5 }); },
   // a non-boss brick is destroyed
-  pop: (combo = 0) => { playSfx("small_explosion", { volume: 0.5 }); tone({ freq: 420 + combo * 14, gain: 0.05, dur: 0.06, sweep: 0.6, type: "triangle" }); },
+  pop: (combo = 0) => { playSfx("impactPunch_heavy_003", { volume: 0.55 }); tone({ freq: 420 + combo * 14, gain: 0.05, dur: 0.06, sweep: 0.6, type: "triangle" }); },
   wall: () => { playSfx("paddle_hit", { volume: 0.3 }); }, // ball off a side/top wall (quiet)
   shield: () => { playSfx("forceField_002", { volume: 0.6 }); },
   item: () => [523, 784, 1047].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.09, dur: 0.1, sweep: 0.9 }), i * 55)),
@@ -358,14 +358,14 @@ export function ModemDefender({ onExit }) {
     mode.current = "wall";
     SFX.level();
     addFloat(W / 2, 100, `LEVEL ${lv}`, T.cyan);
-    // grid sizing
-    const cols = clamp(4 + Math.floor(lv / 2), 5, 9);
+    // grid sizing — bigger bricks; slight visual overlap is fine (gap can be small/neg)
+    const cols = clamp(4 + Math.floor(lv / 2), 5, 8);
     const top = 78;
-    const gap = 6;
-    const cellW = Math.min(76, (W - 24 - gap * (cols - 1)) / cols);
+    const gap = 2;
+    const cellW = Math.min(96, (W - 16 - gap * (cols - 1)) / cols);
     const rows = clamp(2 + Math.floor(lv / 2), 3, 6);
     const x0 = (W - (cellW * cols + gap * (cols - 1))) / 2 + cellW / 2;
-    const cellH = 30;
+    const cellH = 42;
     // choose loot crate cells
     const total = rows * cols;
     const lootN = clamp(randI(LOOT_PER_LEVEL[0], LOOT_PER_LEVEL[1]), 0, total);
@@ -536,6 +536,11 @@ export function ModemDefender({ onExit }) {
       b.x += b.vx * dt * sp;
       b.y += b.vy * dt * sp;
 
+      // short fast-fading trail (a few ghost dots that vanish in a fraction of a
+      // second) — replaces the iOS filter-smear with a controlled effect.
+      b.trailAt = (b.trailAt || 0) + 1;
+      if (b.trailAt % 2 === 0) spawnSpark(b.x, b.y, b.pierce ? "trailp" : "trail");
+
       // walls
       if (b.x - b.r < 0) { b.x = b.r; b.vx = Math.abs(b.vx); SFX.wall(); }
       else if (b.x + b.r > W) { b.x = W - b.r; b.vx = -Math.abs(b.vx); SFX.wall(); }
@@ -670,9 +675,10 @@ export function ModemDefender({ onExit }) {
       syncInv();
     }
 
-    // expire transient effects + refresh inventory active windows for render
+    // expire transient effects + refresh inventory active windows for render.
+    // Trails live only ~150ms (a fraction of a second); other sparks ~480ms.
     floats.current = floats.current.filter((f) => t - f.born < 850);
-    sparks.current = sparks.current.filter((s) => t - s.born < 480);
+    sparks.current = sparks.current.filter((s) => t - s.born < ((s.kind === "trail" || s.kind === "trailp") ? 150 : 480));
     refreshActive(t);
 
     if (conn.current <= 0) {
@@ -928,7 +934,18 @@ export function ModemDefender({ onExit }) {
             ) : (
               <div key={br.id} className={`md-brick${br.diver ? " md-diver" : ""}`} style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
                 {br.anim ? (
-                  <span className="md-virus" style={{ width: Math.min(br.w, br.h) + 6, height: Math.min(br.w, br.h) + 6, backgroundImage: `url(${sprite(br.art)})` }} />
+                  (() => {
+                    // square cell sized to the brick; explicit px background-size so
+                    // exactly ONE of the 4 strip frames shows (percentage sizing on a
+                    // non-square element bled parts of two cells → "double blob").
+                    const s = Math.round(Math.max(br.w, br.h) * 0.9);
+                    return (
+                      <span
+                        className="md-virus"
+                        style={{ width: s, height: s, backgroundImage: `url(${sprite(br.art)})`, backgroundSize: `${s * br.anim}px ${s}px` }}
+                      />
+                    );
+                  })()
                 ) : (
                   <img src={sprite(br.art)} alt="" draggable={false} style={{ width: br.w }} />
                 )}
@@ -1074,7 +1091,10 @@ export const MD_CSS = `
 .md-brick img{display:block;pointer-events:none;}
 .md-diver{filter:drop-shadow(0 0 8px rgba(255,45,85,0.5));}
 @keyframes mdPopIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1)}}
-.md-virus{display:block;background-repeat:no-repeat;background-size:400% 100%;animation:mdVirus 0.55s steps(4,jump-none) infinite;pointer-events:none;}
+/* 4-frame strip. background-size is set INLINE (s*4 × s) so each cell is square;
+   steps(4,jump-none) over 0%→100% snaps background-position-x to each cell edge
+   (no slide, no bleed into the next frame). */
+.md-virus{display:block;background-repeat:no-repeat;animation:mdVirus 0.55s steps(4,jump-none) infinite;pointer-events:none;}
 @keyframes mdVirus{from{background-position-x:0%}to{background-position-x:100%}}
 .md-ehp{position:absolute;left:8%;right:8%;bottom:-5px;height:3px;background:#ffffff22;border-radius:2px;overflow:hidden;}
 .md-ehp span{display:block;height:100%;background:#ff2d55;box-shadow:0 0 4px #ff2d55;}
@@ -1083,12 +1103,13 @@ export const MD_CSS = `
 .md-loot-fallback{position:absolute;font-size:20px;}
 @keyframes mdLootGlow{0%,100%{filter:drop-shadow(0 0 4px #ffd60a)}50%{filter:drop-shadow(0 0 12px #ffd60a)}}
 
-/* The sprite carries the look; the wrapper only adds a faint aura that reads fine
-   behind flat pixel art (and matches the CRT glow). A solid gradient fill is used
-   ONLY as a fallback when the sprite fails to load (md-ball-fallback, set onError). */
-.md-ball{position:absolute;transform:translate(-50%,-50%);z-index:13;border-radius:50%;filter:drop-shadow(0 0 6px rgba(63,255,208,0.6));pointer-events:none;}
+/* The sprite carries the look. No filter/box-shadow on the ball itself: a glow
+   filter on an element repositioned every frame smears into trails on iOS Safari
+   (the diagonal streaks). The fast-fading trail dots provide the motion glow
+   instead. A solid gradient fill is the fallback only when the sprite is missing. */
+.md-ball{position:absolute;transform:translate(-50%,-50%);z-index:13;border-radius:50%;pointer-events:none;}
 .md-ball-img{width:100%;height:100%;object-fit:contain;}
-.md-ball-pierce{filter:drop-shadow(0 0 8px #ff2d55) drop-shadow(0 0 3px #ffd60a) hue-rotate(-40deg);}
+.md-ball-pierce{filter:hue-rotate(-40deg) saturate(1.4);}
 .md-ball-fallback{background:radial-gradient(circle at 35% 30%,#fff,#3fffd0 55%,#0a84ff 90%);box-shadow:0 0 10px #3fffd0,0 0 4px #fff;}
 .md-ball-fallback.md-ball-pierce{background:radial-gradient(circle at 35% 30%,#fff,#ffd60a 50%,#ff2d55 90%);}
 
@@ -1109,11 +1130,15 @@ export const MD_CSS = `
 .md-spark-hit{background:radial-gradient(circle,#fff,#3fffd0 50%,transparent 70%);animation:mdSpark 0.3s ease-out forwards;}
 .md-spark-kill{background:radial-gradient(circle,#fff,#ffd60a 45%,transparent 70%);box-shadow:0 0 14px #ffd60a;animation:mdSpark 0.42s ease-out forwards;}
 .md-spark-shield{background:radial-gradient(circle,#fff,#30d158 45%,transparent 70%);box-shadow:0 0 12px #30d158;animation:mdSpark 0.36s ease-out forwards;}
+/* ball trail: small dot behind the ball that fades + shrinks within ~150ms */
+.md-spark-trail{z-index:12;width:14px;height:14px;background:radial-gradient(circle,#3fffd0 0%,rgba(63,255,208,0.35) 45%,transparent 70%);animation:mdTrail 0.15s linear forwards;}
+.md-spark-trailp{z-index:12;width:16px;height:16px;background:radial-gradient(circle,#ffd60a 0%,rgba(255,45,85,0.4) 45%,transparent 70%);animation:mdTrail 0.15s linear forwards;}
 @keyframes mdSpark{0%{transform:translate(-50%,-50%) scale(0.4);opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
+@keyframes mdTrail{0%{transform:translate(-50%,-50%) scale(1);opacity:0.7}100%{transform:translate(-50%,-50%) scale(0.3);opacity:0}}
 
 .md-launch-hint{position:absolute;left:0;right:0;bottom:90px;text-align:center;color:#ffffff77;font-size:11px;letter-spacing:2px;z-index:30;animation:mdPulse 1.1s infinite;pointer-events:none;}
 
-.md-inv{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px;z-index:70;padding:0 8px;flex-wrap:wrap;}
+.md-inv{position:absolute;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:8px;z-index:70;padding:0 8px;flex-wrap:wrap;}
 .md-slot{position:relative;background:#0d0d18cc;border:1.5px solid var(--ic);border-radius:10px;padding:5px 8px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:58px;transition:transform 0.1s,box-shadow 0.15s,opacity 0.15s;}
 .md-pop{animation:mdSlotPop 0.42s cubic-bezier(0.34,1.7,0.5,1);}
 @keyframes mdSlotPop{0%{transform:translateY(14px) scale(0.2);opacity:0}60%{transform:translateY(0) scale(1.18);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
