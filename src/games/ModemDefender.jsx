@@ -3,35 +3,35 @@ import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { lsGetJSON, lsSetJSON } from "../lib/store.js";
-import { playSfx } from "../lib/sfx.js";
+import { playSfx, playSfxLoop } from "../lib/sfx.js";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MODEM DEFENDER: NET DEFENSE — a Galaga-style lateral shooter.
+   MODEM DEFENDER — BRICKLES. Ourcade's brick-breaker, dressed as the late-90s web.
 
-   Your 56k modem is locked to the bottom lane; drag (or ←/→) to slide it, and it
-   AUTO-FIRES the active weapon upward. The early-2000s web descends in swaying
-   formations — pop-ups, banner ads, spam, viruses, a meddling assistant, toolbar
-   hijackers — each with its own ATTACK style and its own WEAKNESS. You carry up to
-   four weapons (blaster, antivirus beam, spread de-fragger, EMP) and SWAP between
-   them (tap a chip / 1-2-3-4); the right counter for what's on screen glows. Every
-   few waves a BSOD BOSS drops in: one fat HP bar that keeps SPAWNING MINIONS, so
-   you juggle nuking the boss against the adds it floods you with. Each boss has
-   more HP than the last. Enemies (and bosses) that slip past the bottom drain your
-   CONNECTION; hit 0 → NO CARRIER → game over.
+   Your 56k modem is the PADDLE at the bottom (drag, or ←/→). A glowing DATA PACKET
+   ricochets off it into a WALL of early-2000s junk — pop-ups, banner ads, spam,
+   viruses, Clippy, toolbar hijackers — that you smash brick by brick. Tougher junk
+   takes more hits; a couple of types occasionally lob a missile down at you. Some
+   blocks in the wall are LOOT CRATES: break one and you're instantly handed a random
+   consumable (no catching). Stash them in a 5-slot inventory — 🛡️ Firewall (paddle
+   force-field that ricochets missiles back into the wall), 🍴 Fork Bomb (multiball),
+   ⏳ Buffering (slow-mo), ⚡ Overclock (molten pierce ball), 📡 Broadband (wide
+   paddle) — and tap a slot to fire it. Clear the wall to advance; every 5th level a
+   lone BSOD BOSS roams the arena. Miss the ball and your CONNECTION drains; 0% =
+   NO CARRIER.
 
-   Architecture (unchanged from the original click-to-zap build): a self-contained
-   cabinet — scoped `.md-*` CSS injected once, draws its own back button, one route.
-   Rendering is absolutely-positioned DOM nodes driven by a rAF loop with refs
-   mirroring state (the Tap Surge / Color Panic family pattern). Live entities live
-   in refs; React state is only the coarse phase + a render pump. To stay smooth now
-   that there are bullets + minions (not ~15 tappable nodes), every entity pool is
-   CAPPED and pruned each frame so the DOM node count is bounded — no Canvas rewrite.
-   Scores ride the Arcade Score Standard via useArcadeScore("modem-defender").
+   Architecture: self-contained cabinet — scoped `.md-*` CSS injected once, own back
+   button, one route. Absolutely-positioned DOM nodes driven by a rAF loop with refs
+   mirroring state (the Tap Surge / Color Panic family). Live entities live in refs;
+   React state is only the coarse phase + a render pump. Entity pools are CAPPED and
+   pruned each frame so DOM node count stays bounded. Scores ride the Arcade Score
+   Standard via useArcadeScore("modem-defender").
 
-   Sound: procedural Web Audio tones (house style) are the always-present base; if
-   the matching Kenney sample exists under public/games/kenney/sfx/ it layers on top
-   via playSfx() (silent-safe no-op when the file is absent). Custom sprites live
-   under public/games/modem-defender/.
+   Audio: procedural Web-Audio tones are the always-present base; named Kenney samples
+   layer on via playSfx() (silent-safe). The boss entrance plays computerNoise once
+   and loops spaceEngine (playSfxLoop) for as long as the boss lives. Sprites live
+   under public/games/modem-defender/; new art (ball, loot, badges) falls back to
+   emoji/CSS until processed, so the game always runs.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const GAME_ID = "modem-defender";
@@ -48,6 +48,7 @@ const T = {
   yellow: "#ffd60a",
   red: "#ff2d55",
   purple: "#bf5af2",
+  blue: "#0a84ff",
   navy: "#000080",
   silver: "#c0c0c0",
 };
@@ -59,147 +60,71 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const now = () => performance.now();
 const lerp = (a, b, t) => a + (b - a) * t;
 
-/* ── Weapon catalog (data-driven; tune here) ──────────────────────────────────
-   id        : key used by enemies' `weakTo`
-   name      : HUD label
-   emoji     : HUD chip icon
-   color     : projectile + chip glow
-   cooldown  : ms between shots at level 1 (scaled down per level)
-   dmg       : damage per projectile at level 1
-   speed     : projectile px/sec (negative vy = upward; set in fire())
-   pierce    : how many enemies a shot passes through (1 = stops at first)
-   spread    : number of pellets fanned out per shot
-   beam      : true = tall fast piercing shot (antivirus)
-   charge    : ms to "charge" before it can fire (EMP) — telegraphs a heavy hit
-   levels    : multiplier table applied as the weapon upgrades (idx = level-1)
-   unlock    : 'start' or the boss number that grants it (1 = after first boss) */
-const WEAPONS = {
-  blaster: {
-    id: "blaster", name: "BLASTER", emoji: "🔫", color: T.cyan,
-    cooldown: 200, dmg: 1, speed: 720, pierce: 1, spread: 1, w: 6, h: 16,
-    unlock: "start",
-    levels: [
-      { cd: 1, dmg: 1, spread: 1, pierce: 1 },
-      { cd: 0.8, dmg: 1, spread: 1, pierce: 1 },     // faster
-      { cd: 0.72, dmg: 1, spread: 2, pierce: 1 },    // twin
-      { cd: 0.62, dmg: 2, spread: 2, pierce: 2 },    // piercing twin
-    ],
-  },
-  antivirus: {
-    id: "antivirus", name: "ANTIVIRUS", emoji: "🧪", color: T.green,
-    cooldown: 420, dmg: 2, speed: 980, pierce: 3, spread: 1, beam: true, w: 10, h: 30,
-    unlock: 1,
-    levels: [
-      { cd: 1, dmg: 2, pierce: 3, w: 1 },
-      { cd: 0.85, dmg: 3, pierce: 4, w: 1.4 },
-      { cd: 0.72, dmg: 4, pierce: 6, w: 1.8 },
-    ],
-  },
-  spread: {
-    id: "spread", name: "DE-FRAG", emoji: "🔱", color: T.yellow,
-    cooldown: 360, dmg: 1, speed: 600, pierce: 1, spread: 3, w: 7, h: 12,
-    unlock: 2,
-    levels: [
-      { cd: 1, dmg: 1, spread: 3 },
-      { cd: 0.9, dmg: 1, spread: 4 },
-      { cd: 0.82, dmg: 2, spread: 5 },
-    ],
-  },
-  emp: {
-    id: "emp", name: "EMP", emoji: "💥", color: T.purple,
-    cooldown: 900, dmg: 3, speed: 520, pierce: 99, spread: 1, charge: 380, w: 16, h: 22,
-    unlock: 3,
-    levels: [
-      { cd: 1, dmg: 3, charge: 1 },
-      { cd: 0.9, dmg: 4, charge: 0.8 },
-      { cd: 0.82, dmg: 5, charge: 0.6 },
-    ],
-  },
-};
-const WEAPON_ORDER = ["blaster", "antivirus", "spread", "emp"];
-
-/* ── Threat catalog (data-driven; tune balance here) ──────────────────────────
-   w        : on-screen width in px
-   speed    : descend px/sec (formation entry + dive speed baseline)
-   drain    : connection % removed if it reaches the bottom
-   score    : points for destroying it
-   hp       : damage to kill (default 1)
-   minWave  : first wave it can appear
-   weight   : relative spawn frequency once unlocked
-   art      : sprite file (or null for emoji-rendered)
-   weakTo   : weapon id that does FULL damage; others do reduced/zero (see DMG_RULES)
-   immuneTo : weapon ids that do ZERO damage (bounce / blocked)
-   attack   : behavioural tag the loop reads ('dive' | 'drift' | 'zigzag' | 'shield' | 'armor' | 'swarm')
-   fires    : ms cadence of return-fire (0 = never shoots back)
-   onHit    : optional side-effect when damaged but not killed ('split')
-   onReach  : optional side-effect when it reaches the bottom ('spawnPopups') */
-const THREATS = {
-  popup: {
-    w: 60, speed: 70, drain: 7, score: 100, minWave: 1, weight: 10, art: "popup.webp",
-    attack: "swarm", weakTo: null, fires: 0,
-  },
-  banner: {
-    w: 110, speed: 52, drain: 7, score: 120, hp: 3, minWave: 2, weight: 6, art: "banner.webp",
-    attack: "drift", weakTo: null, fires: 0,
-  },
-  spam: {
-    w: 56, speed: 96, drain: 6, score: 140, minWave: 2, weight: 7, art: "spam.webp",
-    attack: "dive", weakTo: null, fires: 0, onHit: "split",
-  },
-  virus: {
-    w: 58, speed: 120, drain: 14, score: 220, minWave: 3, weight: 6, art: "virus.webp", anim: 4,
-    attack: "zigzag", weakTo: "antivirus", immuneTo: ["blaster"], fires: 2600,
-  },
-  clippy: {
-    w: 70, speed: 50, drain: 10, score: 180, hp: 3, minWave: 4, weight: 4, art: "clippy.webp",
-    attack: "shield", weakTo: null, fires: 3200, onReach: "spawnPopups",
-  },
-  toolbar: {
-    w: 96, speed: 60, drain: 9, score: 200, hp: 4, minWave: 5, weight: 4, art: "toolbar.webp",
-    attack: "armor", weakTo: null, fires: 0,
-  },
+/* ── Brick catalog (data-driven; reuses the existing sprites) ──────────────────
+   w       : on-screen width in px (cell sizing derives from this)
+   hp      : hits to break
+   score   : points per break
+   drain   : connection % a brick costs YOU if it ever reaches the bottom (rare —
+             only relevant to boss-spawned divers; wall bricks don't move)
+   art     : sprite file (or null for emoji)
+   anim    : frame count if it's an animated strip (virus)
+   fires   : ms cadence to lob a missile (0 = never). Kept sparse on purpose.
+   weight  : relative frequency in the wall once unlocked
+   minLevel: first level this type appears */
+const BRICKS = {
+  popup: { w: 58, hp: 1, score: 100, drain: 6, art: "popup.webp", fires: 0, weight: 10, minLevel: 1 },
+  spam: { w: 54, hp: 1, score: 120, drain: 5, art: "spam.webp", fires: 0, weight: 7, minLevel: 1 },
+  banner: { w: 104, hp: 2, score: 150, drain: 7, art: "banner.webp", fires: 0, weight: 5, minLevel: 2 },
+  virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", anim: 4, fires: 5200, weight: 5, minLevel: 3 },
+  clippy: { w: 66, hp: 3, score: 220, drain: 9, art: "clippy.webp", fires: 6000, weight: 4, minLevel: 4 },
+  toolbar: { w: 92, hp: 4, score: 260, drain: 8, art: "toolbar.webp", fires: 0, weight: 4, minLevel: 5 },
 };
 
-/* Damage rules — how much of a weapon's damage a threat actually takes.
-   Returns a multiplier; 0 means "blocked" (shows a deflect spark, teaches by ear/eye).
-   - immuneTo weapons → 0 (e.g. blaster vs virus bounces).
-   - weakTo weapon → full + a 1.5x bonus (the intended counter).
-   - clippy is shielded until EMP strips it; toolbar is front-armored until EMP. */
-function damageMult(threat, weaponId) {
-  const def = THREATS[threat.type] || {};
-  if (def.immuneTo && def.immuneTo.includes(weaponId)) return 0;
-  // shielded clippy: only EMP gets through until shield is down
-  if (threat.shield && weaponId !== "emp") return 0;
-  // front-armored toolbar: blaster/antivirus/spread chip slowly; EMP strips full
-  if (def.attack === "armor" && !threat.stripped) {
-    if (weaponId === "emp") return 1; // EMP strips + hits
-    return 0.34; // chip away from the front
-  }
-  if (def.weakTo && def.weakTo === weaponId) return 1.5;
-  if (def.weakTo && def.weakTo !== weaponId) return 0.5; // wrong tool: half
+/* ── Inventory items (consumables looted from crates) ──────────────────────────
+   The 5 slots, in display order. `dur` is the active-effect window in ms (0 =
+   instant). `special` items have a level gate before they can drop. `badge` is the
+   processed circular-badge sprite; until it exists the chip shows `emoji`. */
+const ITEMS = {
+  firewall: { id: "firewall", name: "FIREWALL", emoji: "🛡️", color: T.green, dur: 5000, badge: "badge-firewall.webp", weight: 6, minLevel: 1 },
+  forkbomb: { id: "forkbomb", name: "FORK BOMB", emoji: "🍴", color: T.yellow, dur: 0, badge: "badge-forkbomb.webp", weight: 6, minLevel: 1 },
+  buffering: { id: "buffering", name: "BUFFERING", emoji: "⏳", color: T.cyan, dur: 6000, badge: "badge-buffering.webp", weight: 6, minLevel: 1 },
+  broadband: { id: "broadband", name: "BROADBAND", emoji: "📡", color: T.blue, dur: 9000, badge: "badge-broadband.webp", weight: 3, minLevel: 10, special: true },
+  overclock: { id: "overclock", name: "OVERCLOCK", emoji: "⚡", color: T.purple, dur: 6000, badge: "badge-overclock.webp", weight: 3, minLevel: 15, special: true },
+};
+const ITEM_ORDER = ["firewall", "forkbomb", "buffering", "broadband", "overclock"];
+
+// Pacing / tuning constants (kept together for playtest retuning).
+const LEVELS_PER_BOSS = 5;
+const BOSS_BASE_HP = 50; // boss #1 HP; × boss number thereafter
+const BALL_BASE_SPEED = 360; // px/sec at level 1
+const BALL_SPEED_PER_LEVEL = 16; // +px/sec each level
+const BALL_SPEED_MAX = 620;
+const PADDLE_W = 96;
+const PADDLE_W_WIDE = 168; // Broadband
+const PADDLE_Y_FRAC = 0.9;
+const MISS_DRAIN = 18; // connection lost when a ball falls past the paddle
+const MISSILE_DRAIN = 5; // connection lost when a missile hits the paddle
+const LOOT_PER_LEVEL = [1, 3]; // min..max loot crates woven into a wall
+const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 44 };
+// Stacking: how many of each item you can hold, by level reached.
+const STACK_T1 = 5; // level ≥5 (after first boss) → hold 2
+const STACK_T2 = 10; // level ≥10 → hold 3
+function stackCap(level) {
+  if (level >= STACK_T2) return 3;
+  if (level >= STACK_T1) return 2;
   return 1;
 }
+// Which items may drop at a given level (specials gated by minLevel).
+function lootPool(level) {
+  return ITEM_ORDER.filter((id) => level >= ITEMS[id].minLevel);
+}
+function rollLoot(level) {
+  const pool = [];
+  for (const id of lootPool(level)) for (let i = 0; i < ITEMS[id].weight; i++) pool.push(id);
+  return pool[randI(0, pool.length - 1)] || "firewall";
+}
 
-/* ── Power-ups (drifting chips) ───────────────────────────────────────────────
-   firewall  : brief invulnerability + clear all enemy bullets
-   broadband : slow-mo for a window (great for dodging)
-   upgrade   : level up / unlock a weapon — the progression driver */
-const POWERUPS = [
-  { kind: "firewall", emoji: "🛡️", label: "FIREWALL", color: T.green, dur: 4000 },
-  { kind: "broadband", emoji: "⚡", label: "BROADBAND", color: T.cyan, dur: 5000 },
-  { kind: "upgrade", emoji: "⬆️", label: "UPGRADE", color: T.yellow, dur: 0 },
-];
-
-// Formation / pacing constants.
-const WAVES_PER_BOSS = 3; // boss every Nth wave
-const BOSS_BASE_HP = 60; // boss #1 HP; scales × boss number
-const FORMATION_COLS = 6;
-const ENTITY_CAP = { bullets: 90, ebullets: 70, enemies: 40, sparks: 40 };
-const POWERUP_EVERY = [11000, 17000]; // ms range between power-up drifts
-const PLAYER_Y_FRAC = 0.86; // modem sits this far down the arena
-const PLAYER_W = 64;
-
-/* ── Sound (Web Audio procedural base; samples layer on if present) ─────────── */
+/* ── Sound (Web Audio procedural base; Kenney samples layer on if present) ───── */
 let _ctx = null;
 function ctx() {
   try {
@@ -233,56 +158,23 @@ function tone({ freq = 440, gain = 0.12, dur = 0.09, sweep = 0.7, type = "sine" 
     osc.stop(t + dur + 0.04);
   } catch {}
 }
-// noise burst (for explosions / EMP)
-function noise({ gain = 0.14, dur = 0.18, lp = 1200 } = {}) {
-  const c = ctx();
-  if (!c) return;
-  try {
-    const n = Math.floor(c.sampleRate * dur);
-    const buf = c.createBuffer(1, n, c.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
-    const src = c.createBufferSource();
-    src.buffer = buf;
-    const filt = c.createBiquadFilter();
-    filt.type = "lowpass";
-    filt.frequency.value = lp;
-    const env = c.createGain();
-    const t = c.currentTime;
-    env.gain.setValueAtTime(gain, t);
-    env.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    src.connect(filt).connect(env).connect(c.destination);
-    src.start(t);
-    src.stop(t + dur + 0.02);
-  } catch {}
-}
 const SFX = {
-  shoot: (wid = "blaster") => {
-    if (wid === "antivirus") tone({ freq: 680, gain: 0.05, dur: 0.1, sweep: 1.3, type: "sawtooth" });
-    else if (wid === "spread") tone({ freq: 380, gain: 0.05, dur: 0.06, sweep: 0.9, type: "square" });
-    else if (wid === "emp") { noise({ gain: 0.1, dur: 0.22, lp: 900 }); tone({ freq: 120, gain: 0.08, dur: 0.25, sweep: 0.4 }); }
-    else tone({ freq: 540, gain: 0.045, dur: 0.05, sweep: 0.7, type: "triangle" });
-  },
-  hit: () => tone({ freq: 300, gain: 0.07, dur: 0.05, sweep: 0.8 }),
-  blocked: () => { tone({ freq: 180, gain: 0.06, dur: 0.06, sweep: 1, type: "square" }); },
-  kill: (combo = 0) => {
-    const base = 420 + combo * 18;
-    tone({ freq: base, gain: 0.1, dur: 0.08, sweep: 0.55, type: "triangle" });
-    noise({ gain: 0.06, dur: 0.1, lp: 1600 });
-    playSfx("confirmation", { volume: 0 }); // warm cache early; real cue is on unlock
-  },
-  breach: () => {
-    tone({ freq: 150, gain: 0.13, dur: 0.16, sweep: 0.5 });
-    setTimeout(() => tone({ freq: 95, gain: 0.09, dur: 0.13, sweep: 0.5 }), 90);
-  },
+  // ball bounces off the paddle — sampled thunk + a soft tone underneath
+  paddle: () => { playSfx("paddle_hit", { volume: 0.55 }); tone({ freq: 240, gain: 0.05, dur: 0.05, sweep: 0.9 }); },
+  // ball hits a brick that survives
+  brick: () => { playSfx("enemy_hit", { volume: 0.5 }); },
+  // a non-boss brick is destroyed
+  pop: (combo = 0) => { playSfx("small_explosion", { volume: 0.5 }); tone({ freq: 420 + combo * 14, gain: 0.05, dur: 0.06, sweep: 0.6, type: "triangle" }); },
+  wall: () => { playSfx("paddle_hit", { volume: 0.3 }); }, // ball off a side/top wall (quiet)
+  shield: () => { playSfx("forceField_002", { volume: 0.6 }); },
+  item: () => [523, 784, 1047].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.09, dur: 0.1, sweep: 0.9 }), i * 55)),
+  use: (c = T.cyan) => { void c; tone({ freq: 660, gain: 0.08, dur: 0.08, sweep: 1.1, type: "square" }); },
+  miss: () => { tone({ freq: 150, gain: 0.13, dur: 0.16, sweep: 0.5 }); setTimeout(() => tone({ freq: 95, gain: 0.09, dur: 0.13, sweep: 0.5 }), 90); },
   hurt: () => tone({ freq: 220, gain: 0.1, dur: 0.12, sweep: 0.6, type: "sawtooth" }),
-  power: () => [523, 659, 880].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.1, dur: 0.1, sweep: 0.85 }), i * 55)),
-  swap: () => tone({ freq: 660, gain: 0.06, dur: 0.05, sweep: 1.1, type: "square" }),
-  unlock: () => { [523, 784, 1047].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.1, dur: 0.12, sweep: 0.9 }), i * 70)); playSfx("confirmation", { volume: 0.6 }); },
-  bossIn: () => { tone({ freq: 110, gain: 0.14, dur: 0.4, sweep: 1.4, type: "sawtooth" }); setTimeout(() => tone({ freq: 110, gain: 0.12, dur: 0.4, sweep: 1.4, type: "sawtooth" }), 260); },
-  bossHit: () => tone({ freq: 200, gain: 0.08, dur: 0.06, sweep: 0.7, type: "square" }),
-  bossDie: () => { noise({ gain: 0.18, dur: 0.6, lp: 800 }); [392, 311, 233, 175].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.12, dur: 0.18, sweep: 0.6 }), i * 110)); },
-  wave: () => [392, 523].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.08, dur: 0.12, sweep: 0.9 }), i * 70)),
+  level: () => [392, 523].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.08, dur: 0.12, sweep: 0.9 }), i * 70)),
+  bossEnter: () => { playSfx("computerNoise_001", { volume: 0.7 }); }, // the loop is started separately
+  bossHit: () => tone({ freq: 200, gain: 0.07, dur: 0.05, sweep: 0.7, type: "square" }),
+  bossDie: () => { playSfx("large_explosion", { volume: 0.7 }); [392, 311, 233, 175].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.1, dur: 0.16, sweep: 0.6 }), i * 110)); },
   count: () => tone({ freq: 440, gain: 0.1, dur: 0.07, sweep: 0.85 }),
   go: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.1, dur: 0.1, sweep: 0.8 }), i * 55)),
 };
@@ -296,16 +188,6 @@ function saveBest(score) {
   return Math.max(score, b);
 }
 
-// Weighted random threat type valid for the current wave.
-function pickThreatType(wave) {
-  const pool = [];
-  for (const [k, v] of Object.entries(THREATS)) {
-    if (wave >= v.minWave) for (let i = 0; i < v.weight; i++) pool.push(k);
-  }
-  return pool[randI(0, pool.length - 1)] || "popup";
-}
-
-// Connection-bar color by remaining %.
 function barColor(pct) {
   if (pct > 55) return T.green;
   if (pct > 25) return T.yellow;
@@ -315,44 +197,36 @@ function barColor(pct) {
 export function ModemDefender({ onExit }) {
   const [phase, setPhase] = useState("start"); // start | countdown | running | over
   const [count, setCount] = useState(3);
-  const [, force] = useState(0); // re-render pump for the rAF view
+  const [, force] = useState(0);
   const tick = useCallback(() => force((n) => (n + 1) & 0xffff), []);
 
-  // Live game state lives in refs (the rAF loop reads/writes these every frame);
-  // React state is only the coarse phase + a render pump.
-  const enemies = useRef([]); // formation + dive enemies
-  const bullets = useRef([]); // player projectiles
-  const ebullets = useRef([]); // enemy projectiles
-  const boss = useRef(null); // { hp, maxHp, x, y, num, nextMinion, nextShot, dir }
-  const floats = useRef([]); // [{ id, x, y, text, color, born }]
-  const sparks = useRef([]); // transient CSS spark/shatter bursts
-  const powerup = useRef(null); // a single drifting power-up, or null
+  // Live state in refs (rAF loop reads/writes every frame). React state = coarse only.
+  const balls = useRef([]); // [{ id, x, y, vx, vy, r, stuck, pierce }]
+  const bricks = useRef([]); // [{ id, type, x, y, w, h, hp, maxHp, art, anim, fires, nextShot, loot }]
+  const missiles = useRef([]); // [{ id, x, y, vy, vx, w, hostile }]
+  const boss = useRef(null); // { hp, maxHp, x, y, w, num, dir, nextMinion, nextShot, entering }
+  const floats = useRef([]);
+  const sparks = useRef([]);
 
-  const player = useRef({ x: 0, targetX: 0, vx: 0 });
-  const arsenal = useRef({ active: "blaster", levels: { blaster: 1 } }); // unlocked → level
-  const lastShot = useRef(0); // ts of last player shot
-  const chargeUntil = useRef(0); // EMP charge window end
+  const paddle = useRef({ x: 0, targetX: 0, w: PADDLE_W });
+  const inv = useRef({ counts: {}, seen: {}, active: {} }); // counts[id], seen[id], active[id]=expiryTs
+  const [invView, setInvView] = useState({ order: [], counts: {}, active: {}, cap: 1 }); // mirror for render
 
   const score = useRef(0);
   const combo = useRef(0);
-  const conn = useRef(100); // connection %
-  const wave = useRef(1);
-  const bossCount = useRef(0); // how many bosses cleared (drives HP scaling)
-  const waveState = useRef("formation"); // formation | clearing | boss | bossClear
-  const invUntil = useRef(0); // firewall invulnerability window
-  const slowUntil = useRef(0); // broadband slow-mo
-  const hitFlash = useRef(0); // ts of last damage-taken pulse
+  const conn = useRef(100);
+  const level = useRef(1);
+  const bossCount = useRef(0);
+  const mode = useRef("wall"); // wall | boss
+  const hitFlash = useRef(0);
+  const launchPending = useRef(false); // a ball is stuck waiting to be launched
 
-  const startedAt = useRef(0);
-  const lastSpawn = useRef(0);
-  const spawnQueue = useRef([]); // queued formation spawns for the current wave
-  const nextPower = useRef(0);
   const raf = useRef(0);
   const lastFrame = useRef(0);
   const arena = useRef(null);
   const dragging = useRef(false);
   const keys = useRef({ left: false, right: false });
-  const [hud, setHud] = useState({ active: "blaster", suggest: null }); // chips need React for layout
+  const bossLoop = useRef(null); // handle from playSfxLoop while boss alive
 
   const { submit, best } = useArcadeScore(GAME_ID);
 
@@ -375,43 +249,47 @@ export function ModemDefender({ onExit }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  function stopBossLoop() {
+    if (bossLoop.current) {
+      bossLoop.current.stop();
+      bossLoop.current = null;
+    }
+  }
+
   function reset() {
-    enemies.current = [];
-    bullets.current = [];
-    ebullets.current = [];
+    balls.current = [];
+    bricks.current = [];
+    missiles.current = [];
     boss.current = null;
     floats.current = [];
     sparks.current = [];
-    powerup.current = null;
     score.current = 0;
     combo.current = 0;
     conn.current = 100;
-    wave.current = 1;
+    level.current = 1;
     bossCount.current = 0;
-    waveState.current = "formation";
-    arsenal.current = { active: "blaster", levels: { blaster: 1 } };
-    invUntil.current = 0;
-    slowUntil.current = 0;
+    mode.current = "wall";
+    hitFlash.current = 0;
+    inv.current = { counts: {}, seen: {}, active: {} };
+    stopBossLoop();
     const box = arena.current?.getBoundingClientRect();
     const W = box?.width || 360;
-    player.current = { x: W / 2, targetX: W / 2, vx: 0 };
-    setHud({ active: "blaster", suggest: null });
+    paddle.current = { x: W / 2, targetX: W / 2, w: PADDLE_W };
+    syncInv();
   }
 
   function beginRun() {
     reset();
-    const t = now();
-    startedAt.current = t;
-    lastSpawn.current = t;
-    nextPower.current = t + rand(POWERUP_EVERY[0], POWERUP_EVERY[1]);
-    queueWave(1);
+    buildLevel(1);
     setPhase("running");
+    lastFrame.current = 0;
     raf.current = requestAnimationFrame(loop);
   }
 
   function endRun() {
     cancelAnimationFrame(raf.current);
-    SFX.breach();
+    stopBossLoop();
+    SFX.miss();
     saveBest(score.current);
     submit(score.current);
     setPhase("over");
@@ -425,156 +303,193 @@ export function ModemDefender({ onExit }) {
     sparks.current.push({ id: uid(), x, y, kind, born: now() });
   }
 
-  // ── wave / formation building ──────────────────────────────────────────────
-  // Build a queue of formation enemies for the wave; each has a grid slot it eases
-  // into, then sways and periodically peels off to dive. Boss waves queue the boss.
-  function queueWave(w) {
+  function ballSpeed() {
+    return Math.min(BALL_SPEED_MAX, BALL_BASE_SPEED + (level.current - 1) * BALL_SPEED_PER_LEVEL);
+  }
+  function paddleY() {
+    const box = arena.current?.getBoundingClientRect();
+    return (box?.height || 600) * PADDLE_Y_FRAC;
+  }
+
+  // Spawn one ball stuck to the paddle, awaiting launch.
+  function spawnBall(stuck = true) {
+    if (balls.current.length >= ENTITY_CAP.balls) return;
+    const px = paddle.current.x;
+    balls.current.push({ id: uid(), x: px, y: paddleY() - 22, vx: 0, vy: 0, r: 13, stuck, pierce: false });
+    if (stuck) launchPending.current = true;
+  }
+
+  function launchBall() {
+    let launched = false;
+    for (const b of balls.current) {
+      if (b.stuck) {
+        const ang = rand(-0.35, 0.35); // mostly up, slight angle
+        const s = ballSpeed();
+        b.vx = Math.sin(ang) * s;
+        b.vy = -Math.cos(ang) * s;
+        b.stuck = false;
+        launched = true;
+      }
+    }
+    if (launched) { launchPending.current = false; SFX.paddle(); }
+  }
+
+  // ── level / wall building ────────────────────────────────────────────────
+  function buildLevel(lv) {
     const box = arena.current?.getBoundingClientRect();
     const W = box?.width || 360;
-    const isBoss = w % WAVES_PER_BOSS === 0;
-    spawnQueue.current = [];
-    if (isBoss) {
-      waveState.current = "boss";
-      spawnBoss(w);
-      SFX.bossIn();
-      addFloat(W / 2, 90, "⚠ BSOD INCOMING ⚠", T.purple);
+    bricks.current = [];
+    missiles.current = [];
+    boss.current = null;
+    stopBossLoop();
+    // fresh ball on the paddle
+    balls.current = [];
+    spawnBall(true);
+
+    if (lv % LEVELS_PER_BOSS === 0) {
+      mode.current = "boss";
+      spawnBoss(lv);
+      SFX.bossEnter();
+      bossLoop.current = playSfxLoop("spaceEngine_000", { volume: 0.4 });
+      addFloat(W / 2, 120, "⚠ BSOD INCOMING ⚠", T.purple);
       return;
     }
-    waveState.current = "formation";
-    SFX.wave();
-    addFloat(W / 2, 80, `WAVE ${w}`, T.cyan);
-    const rows = Math.min(2 + Math.floor(w / 2), 5);
-    const cols = FORMATION_COLS;
-    const cellW = Math.min(72, (W - 40) / cols);
-    const x0 = (W - cellW * (cols - 1)) / 2;
+
+    mode.current = "wall";
+    SFX.level();
+    addFloat(W / 2, 100, `LEVEL ${lv}`, T.cyan);
+    // grid sizing
+    const cols = clamp(4 + Math.floor(lv / 2), 5, 9);
+    const top = 78;
+    const gap = 6;
+    const cellW = Math.min(76, (W - 24 - gap * (cols - 1)) / cols);
+    const rows = clamp(2 + Math.floor(lv / 2), 3, 6);
+    const x0 = (W - (cellW * cols + gap * (cols - 1))) / 2 + cellW / 2;
+    const cellH = 30;
+    // choose loot crate cells
+    const total = rows * cols;
+    const lootN = clamp(randI(LOOT_PER_LEVEL[0], LOOT_PER_LEVEL[1]), 0, total);
+    const lootCells = new Set();
+    while (lootCells.size < lootN) lootCells.add(randI(0, total - 1));
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const type = pickThreatType(w);
-        spawnQueue.current.push({ type, slotX: x0 + c * cellW, slotY: 70 + r * 56, delay: (r * cols + c) * 90 });
+        const idx = r * cols + c;
+        const isLoot = lootCells.has(idx);
+        const type = isLoot ? "loot" : pickBrickType(lv, r);
+        const def = isLoot ? null : BRICKS[type];
+        const cx = x0 + c * (cellW + gap);
+        const cy = top + r * (cellH + gap);
+        if (bricks.current.length >= ENTITY_CAP.bricks) break;
+        bricks.current.push({
+          id: uid(),
+          type: isLoot ? "loot" : type,
+          loot: isLoot,
+          x: cx,
+          y: cy,
+          w: cellW,
+          h: cellH,
+          hp: isLoot ? 1 : def.hp,
+          maxHp: isLoot ? 1 : def.hp,
+          art: isLoot ? null : def.art,
+          anim: isLoot ? 0 : def.anim || 0,
+          fires: isLoot ? 0 : def.fires || 0,
+          nextShot: now() + rand(3000, 8000),
+        });
       }
     }
   }
 
-  function spawnFormationEnemy(item) {
-    const def = THREATS[item.type];
-    if (enemies.current.length >= ENTITY_CAP.enemies) return;
-    const box = arena.current?.getBoundingClientRect();
-    const W = box?.width || 360;
-    enemies.current.push({
-      id: uid(),
-      type: item.type,
-      x: clamp(item.slotX, 30, W - 30),
-      y: -def.w,
-      slotX: item.slotX,
-      slotY: item.slotY,
-      w: def.w,
-      hp: def.hp || 1,
-      maxHp: def.hp || 1,
-      art: def.art,
-      anim: def.anim || 0,
-      score: def.score,
-      drain: def.drain,
-      speed: def.speed,
-      attack: def.attack,
-      onReach: def.onReach,
-      onHit: def.onHit,
-      fires: def.fires || 0,
-      nextShot: now() + rand(1200, 3600),
-      state: "enter", // enter → formed → diving
-      diveT: 0,
-      phase: rand(0, Math.PI * 2), // for sway / zigzag
-      shield: def.attack === "shield", // clippy starts shielded
-      shieldNext: now() + rand(2000, 4000),
-      stripped: false, // toolbar armor stripped?
-      born: now(),
-    });
+  // Harder/tougher bricks bias toward the TOP rows; easy ones toward the bottom.
+  function pickBrickType(lv, row) {
+    const pool = [];
+    for (const [k, v] of Object.entries(BRICKS)) {
+      if (lv < v.minLevel) continue;
+      let w = v.weight;
+      if (v.hp >= 3 && row > 1) w = Math.max(1, Math.floor(w / 2)); // tough bricks rarer low down
+      for (let i = 0; i < w; i++) pool.push(k);
+    }
+    return pool[randI(0, pool.length - 1)] || "popup";
   }
 
-  // A smaller spam fragment (the split). Inherits a dive state immediately.
-  // Returns the entity (the loop buffers these and appends after iterating, so we
-  // never push into enemies.current while it's being walked).
-  function makeSpamFragment(x, y) {
-    const def = THREATS.spam;
-    return {
-      id: uid(), type: "spam", x, y, slotX: x, slotY: y,
-      w: def.w * 0.62, hp: 1, maxHp: 1, art: def.art, anim: 0,
-      score: Math.round(def.score * 0.5), drain: Math.ceil(def.drain * 0.5),
-      speed: def.speed * 1.25, attack: "dive", fires: 0,
-      nextShot: Infinity, state: "diving", diveT: 0, phase: rand(0, 6.28),
-      fragment: true, born: now(),
-    };
-  }
-
-  function spawnBoss(w) {
+  function spawnBoss(lv) {
     const box = arena.current?.getBoundingClientRect();
     const W = box?.width || 360;
     const num = bossCount.current + 1;
-    const maxHp = BOSS_BASE_HP * num;
-    boss.current = {
-      x: W / 2, y: -120, w: Math.min(180, W * 0.5),
-      hp: maxHp, maxHp, num, dir: 1, t: 0,
-      nextMinion: now() + 2600,
-      nextShot: now() + 1800,
-      entering: true,
-    };
+    const maxHp = BOSS_BASE_HP * num + (lv - LEVELS_PER_BOSS) * 2;
+    boss.current = { x: W / 2, y: -120, w: Math.min(170, W * 0.46), hp: maxHp, maxHp, num, dir: 1, t: 0, nextMinion: now() + 3000, nextShot: now() + 2200, entering: true };
   }
 
-  function spawnPowerup() {
-    const box = arena.current?.getBoundingClientRect();
-    const W = box?.width || 360;
-    // Bias toward UPGRADE when the player has room to grow, else defensive chips.
-    const def = POWERUPS[randI(0, POWERUPS.length - 1)];
-    powerup.current = { id: uid(), ...def, x: rand(40, W - 40), y: -40, vy: 80, born: now() };
+  // ── inventory ──────────────────────────────────────────────────────────────
+  function syncInv() {
+    // Build the render mirror: only slots the player has ever acquired (`seen`).
+    const order = ITEM_ORDER.filter((id) => inv.current.seen[id]);
+    const counts = {};
+    const active = {};
+    const t = now();
+    for (const id of ITEM_ORDER) {
+      counts[id] = inv.current.counts[id] || 0;
+      const exp = inv.current.active[id] || 0;
+      active[id] = exp > t ? exp : 0;
+    }
+    setInvView({ order, counts, active, cap: stackCap(level.current) });
   }
 
-  // ── firing ─────────────────────────────────────────────────────────────────
-  function activeWeapon() {
-    const id = arsenal.current.active;
-    const lvl = arsenal.current.levels[id] || 1;
-    const def = WEAPONS[id];
-    const mod = def.levels[Math.min(lvl, def.levels.length) - 1];
-    return { def, lvl, mod, id };
+  function awardItem(id) {
+    const cap = stackCap(level.current);
+    const cur = inv.current.counts[id] || 0;
+    const firstSeen = !inv.current.seen[id];
+    inv.current.seen[id] = true; // slot becomes visible even if we can't add (so they know it exists)
+    if (cur >= cap) {
+      // slot full → loot skipped
+      addFloat(paddle.current.x, paddleY() - 40, `${ITEMS[id].name} FULL`, T.silver);
+      syncInv();
+      return false;
+    }
+    inv.current.counts[id] = cur + 1;
+    SFX.item();
+    addFloat(paddle.current.x, paddleY() - 40, `+${ITEMS[id].name}`, ITEMS[id].color);
+    if (firstSeen) addFloat(paddle.current.x, paddleY() - 64, "NEW ITEM!", ITEMS[id].color);
+    syncInv();
+    return true;
   }
 
-  function tryFire(t) {
-    const { def, mod, id } = activeWeapon();
-    const cd = def.cooldown * (mod.cd || 1);
-    if (t - lastShot.current < cd) return;
-    // EMP telegraph: a charge window before the heavy shot
-    if (def.charge) {
-      if (chargeUntil.current === 0) {
-        chargeUntil.current = t + def.charge * (mod.charge || 1);
-        return;
+  function useItem(id) {
+    if (phase !== "running") return;
+    if ((inv.current.counts[id] || 0) <= 0) return;
+    inv.current.counts[id] -= 1;
+    const def = ITEMS[id];
+    SFX.use(def.color);
+    const t = now();
+    if (id === "forkbomb") {
+      // split every active (non-stuck) ball into +2, capped
+      const extra = [];
+      for (const b of balls.current) {
+        if (b.stuck) continue;
+        for (let k = 0; k < 2; k++) {
+          if (balls.current.length + extra.length >= ENTITY_CAP.balls) break;
+          const ang = rand(-0.6, 0.6);
+          const s = Math.hypot(b.vx, b.vy) || ballSpeed();
+          extra.push({ id: uid(), x: b.x, y: b.y, vx: Math.sin(ang) * s, vy: -Math.abs(Math.cos(ang) * s), r: b.r, stuck: false, pierce: b.pierce });
+        }
       }
-      if (t < chargeUntil.current) return;
-      chargeUntil.current = 0;
+      balls.current = balls.current.concat(extra);
+      addFloat(paddle.current.x, paddleY() - 40, "FORK BOMB!", def.color);
+    } else if (id === "firewall") {
+      inv.current.active.firewall = t + def.dur;
+      SFX.shield();
+    } else if (id === "buffering") {
+      inv.current.active.buffering = t + def.dur;
+    } else if (id === "broadband") {
+      inv.current.active.broadband = t + def.dur;
+    } else if (id === "overclock") {
+      inv.current.active.overclock = t + def.dur;
+      for (const b of balls.current) b.pierce = true;
     }
-    lastShot.current = t;
-    const px = player.current.x;
-    const py = playerY();
-    const spread = mod.spread || def.spread || 1;
-    const dmg = (mod.dmg || def.dmg) * 1;
-    const wMul = mod.w || 1;
-    for (let i = 0; i < spread; i++) {
-      if (bullets.current.length >= ENTITY_CAP.bullets) break;
-      // fan: center the pellets
-      const angOff = spread > 1 ? (i - (spread - 1) / 2) * 0.16 : 0;
-      const vx = Math.sin(angOff) * def.speed;
-      const vy = -Math.cos(angOff) * def.speed;
-      bullets.current.push({
-        id: uid(), x: px, y: py - 18, vx, vy,
-        w: def.w * (def.beam ? wMul : 1), h: def.h * (def.beam ? wMul : 1),
-        dmg, pierce: mod.pierce || def.pierce || 1, hits: [], weapon: id, color: def.color,
-        beam: !!def.beam, emp: !!def.charge,
-      });
-    }
-    SFX.shoot(id);
+    syncInv();
   }
 
-  function playerY() {
-    const box = arena.current?.getBoundingClientRect();
-    return (box?.height || 600) * PLAYER_Y_FRAC;
-  }
+  const isActive = (id) => (inv.current.active[id] || 0) > now();
 
   // ── main loop ────────────────────────────────────────────────────────────
   const loopRef = useRef();
@@ -591,193 +506,174 @@ export function ModemDefender({ onExit }) {
     const box = arena.current?.getBoundingClientRect();
     const W = box?.width || 360;
     const H = box?.height || 600;
-    const slow = t < slowUntil.current ? 0.5 : 1;
-    const inv = t < invUntil.current;
-    const py = H * PLAYER_Y_FRAC;
+    const slow = isActive("buffering") ? 0.5 : 1;
+    const shield = isActive("firewall");
+    const wide = isActive("broadband");
+    const pierce = isActive("overclock");
+    const py = H * PADDLE_Y_FRAC;
 
-    // ── player movement (drag target + keyboard velocity) ──
-    const p = player.current;
-    if (keys.current.left) p.targetX -= 520 * dt;
-    if (keys.current.right) p.targetX += 520 * dt;
-    p.targetX = clamp(p.targetX, PLAYER_W / 2, W - PLAYER_W / 2);
-    p.x = lerp(p.x, p.targetX, Math.min(1, dt * 16));
-    p.x = clamp(p.x, PLAYER_W / 2, W - PLAYER_W / 2);
+    // paddle width (broadband) + movement
+    paddle.current.w = wide ? PADDLE_W_WIDE : PADDLE_W;
+    const pad = paddle.current;
+    if (keys.current.left) pad.targetX -= 560 * dt;
+    if (keys.current.right) pad.targetX += 560 * dt;
+    pad.targetX = clamp(pad.targetX, pad.w / 2, W - pad.w / 2);
+    pad.x = lerp(pad.x, pad.targetX, Math.min(1, dt * 18));
+    pad.x = clamp(pad.x, pad.w / 2, W - pad.w / 2);
 
-    // ── auto-fire ──
-    tryFire(t);
-
-    // ── player bullets ──
-    const liveB = [];
-    for (const b of bullets.current) {
-      b.x += b.vx * dt;
-      b.y += b.vy * dt;
-      if (b.y < -40 || b.x < -40 || b.x > W + 40) continue;
-      liveB.push(b);
-    }
-    bullets.current = liveB;
-
-    // ── enemies: movement + collisions ──
-    const formY = 56 + Math.sin(t / 700) * 10; // whole formation gentle bob offset
-    const surviving = [];
-    const spawned = []; // fragments born this frame (appended after the loop)
-    for (const a of enemies.current) {
-      // movement by state/attack
-      if (a.state === "enter") {
-        a.y = lerp(a.y, a.slotY + formY, Math.min(1, dt * 4));
-        a.x = lerp(a.x, a.slotX, Math.min(1, dt * 4));
-        if (Math.abs(a.y - (a.slotY + formY)) < 4) a.state = "formed";
-      } else if (a.state === "formed") {
-        // sway in formation; occasionally peel off into a dive
-        a.x = a.slotX + Math.sin(t / 600 + a.phase) * 16;
-        a.y = a.slotY + formY;
-        const diveChance = (a.attack === "dive" ? 0.9 : 0.25) * dt * (0.4 + wave.current * 0.05);
-        if (Math.random() < diveChance) { a.state = "diving"; a.diveX = a.x; }
-      } else {
-        // diving toward / past the player
-        a.diveT += dt;
-        const sp = a.speed * slow * (1 + wave.current * 0.04);
-        a.y += sp * dt;
-        if (a.attack === "zigzag") a.x = a.diveX + Math.sin(a.diveT * 6) * 70;
-        else a.x += Math.sin(a.diveT * 3 + a.phase) * 40 * dt * 6;
-        a.x = clamp(a.x, a.w / 2, W - a.w / 2);
-      }
-
-      // shield toggle (clippy): opens a vulnerable window periodically
-      if (a.attack === "shield" && t > a.shieldNext) {
-        a.shield = !a.shield;
-        a.shieldNext = t + (a.shield ? rand(2600, 3800) : rand(1300, 1900));
-      }
-
-      // enemy fire
-      if (a.fires && t > a.nextShot && a.y > 0 && a.y < H * 0.8) {
-        a.nextShot = t + a.fires * rand(0.8, 1.3);
-        if (ebullets.current.length < ENTITY_CAP.ebullets) {
-          const dx = p.x - a.x, dy = py - a.y;
-          const d = Math.hypot(dx, dy) || 1;
-          ebullets.current.push({ id: uid(), x: a.x, y: a.y + a.w / 2, vx: (dx / d) * 220, vy: (dy / d) * 220, w: 9 });
-        }
-      }
-
-      // bullet → enemy collisions
-      for (const b of bullets.current) {
-        if (b.dead || b.hits.includes(a.id)) continue;
-        if (Math.abs(b.x - a.x) < (a.w / 2 + b.w / 2) && Math.abs(b.y - a.y) < (a.w / 2 + b.h / 2)) {
-          const mult = damageMult(a, b.weapon);
-          if (mult <= 0) {
-            spawnSpark(b.x, b.y, "block");
-            SFX.blocked();
-            b.dead = true; // blocked shot fizzles
-            continue;
-          }
-          // EMP strips toolbar armor / clippy shield on contact
-          if (b.weapon === "emp") { a.stripped = true; a.shield = false; }
-          a.hp -= b.dmg * mult;
-          b.hits.push(a.id);
-          if (b.pierce <= b.hits.length) b.dead = true;
-          if (a.hp > 0) {
-            spawnSpark(b.x, b.y, "hit");
-            SFX.hit();
-            if (a.onHit === "split" && !a.fragment) {
-              // spam splits when damaged unless the hit comes from spread/EMP (the
-              // intended hard-counters that clean-kill it instead of multiplying it)
-              if (b.weapon !== "spread" && b.weapon !== "emp") {
-                spawned.push(makeSpamFragment(a.x - 10, a.y), makeSpamFragment(a.x + 10, a.y));
-                a.hp = 0; // original consumed into fragments
-              }
-            }
-          }
-          if (a.hp <= 0) break;
-        }
-      }
-      // prune dead bullets that pierced out
-      bullets.current = bullets.current.filter((b) => !b.dead);
-
-      if (a.hp <= 0) {
-        killEnemy(a);
+    // ── balls ──
+    const liveBalls = [];
+    for (const b of balls.current) {
+      if (b.stuck) {
+        b.x = pad.x;
+        b.y = py - 22;
+        liveBalls.push(b);
         continue;
       }
+      // overclock pierce flag tracks the active window
+      b.pierce = pierce;
+      const sp = slow;
+      b.x += b.vx * dt * sp;
+      b.y += b.vy * dt * sp;
 
-      // reached the bottom → breach
-      if (a.y - a.w / 2 > H) {
-        if (!inv) {
-          conn.current = clamp(conn.current - a.drain, 0, 100);
-          combo.current = 0;
-          hitFlash.current = t;
-          addFloat(a.x, H - 24, `-${a.drain}`, T.red);
-          SFX.breach();
-          if (a.onReach === "spawnPopups") {
-            spawnQueue.current.push({ type: "popup", slotX: a.x - 30, slotY: 70, delay: 0 });
-            spawnQueue.current.push({ type: "popup", slotX: a.x + 30, slotY: 70, delay: 120 });
+      // walls
+      if (b.x - b.r < 0) { b.x = b.r; b.vx = Math.abs(b.vx); SFX.wall(); }
+      else if (b.x + b.r > W) { b.x = W - b.r; b.vx = -Math.abs(b.vx); SFX.wall(); }
+      if (b.y - b.r < 0) { b.y = b.r; b.vy = Math.abs(b.vy); SFX.wall(); }
+
+      // paddle
+      if (b.vy > 0 && b.y + b.r >= py && b.y - b.r <= py + 16 && Math.abs(b.x - pad.x) <= pad.w / 2 + b.r) {
+        const off = clamp((b.x - pad.x) / (pad.w / 2), -1, 1); // -1..1 across paddle
+        const s = ballSpeed();
+        const ang = off * 1.05; // up to ~60°
+        b.vx = Math.sin(ang) * s;
+        b.vy = -Math.cos(ang) * s;
+        b.y = py - b.r - 1;
+        SFX.paddle();
+      }
+
+      // boss collision
+      if (boss.current && !boss.current.entering) {
+        const bo = boss.current;
+        if (Math.abs(b.x - bo.x) < bo.w / 2 + b.r && Math.abs(b.y - bo.y) < bo.w / 2 + b.r) {
+          bo.hp -= 1;
+          spawnSpark(b.x, b.y, "hit");
+          SFX.bossHit();
+          if (!b.pierce) {
+            // reflect off boss center
+            const dx = b.x - bo.x, dy = b.y - bo.y;
+            if (Math.abs(dx) > Math.abs(dy)) b.vx = Math.sign(dx) * Math.abs(b.vx);
+            else b.vy = Math.sign(dy) * Math.abs(b.vy);
           }
         }
-        continue;
       }
-      surviving.push(a);
-    }
-    // append fragments born this frame, up to the cap
-    for (const f of spawned) {
-      if (surviving.length >= ENTITY_CAP.enemies) break;
-      surviving.push(f);
-    }
-    enemies.current = surviving;
 
-    // ── enemy bullets ──
-    const liveEB = [];
-    for (const eb of ebullets.current) {
-      eb.x += eb.vx * dt * slow;
-      eb.y += eb.vy * dt * slow;
-      if (eb.y > H + 30 || eb.y < -30 || eb.x < -30 || eb.x > W + 30) continue;
-      // hit player?
-      if (!inv && Math.abs(eb.x - p.x) < PLAYER_W * 0.38 && Math.abs(eb.y - py) < PLAYER_W * 0.4) {
-        conn.current = clamp(conn.current - 4, 0, 100);
-        combo.current = 0;
-        hitFlash.current = t;
-        SFX.hurt();
-        spawnSpark(eb.x, eb.y, "hit");
-        continue;
+      // brick collisions (resolve at most one per frame for a clean bounce)
+      hitBricks(b);
+
+      // fell past the paddle?
+      if (b.y - b.r > H) {
+        if (shield) {
+          // force-field bounces it back up instead of losing it
+          b.y = py - b.r - 1;
+          b.vy = -Math.abs(b.vy);
+          spawnSpark(b.x, py, "shield");
+          SFX.shield();
+        } else {
+          continue; // lost
+        }
       }
-      liveEB.push(eb);
+      liveBalls.push(b);
     }
-    ebullets.current = liveEB;
+    balls.current = liveBalls;
+
+    // out of balls → drain connection + respawn (unless game over)
+    if (balls.current.length === 0 && phase === "running") {
+      conn.current = clamp(conn.current - MISS_DRAIN, 0, 100);
+      combo.current = 0;
+      hitFlash.current = t;
+      SFX.miss();
+      if (conn.current > 0) spawnBall(true);
+    }
+
+    // ── bricks: missile fire ──
+    if (mode.current === "wall") {
+      for (const br of bricks.current) {
+        if (br.loot || !br.fires) continue;
+        if (t > br.nextShot) {
+          br.nextShot = t + br.fires * rand(0.8, 1.4);
+          if (missiles.current.length < ENTITY_CAP.missiles) {
+            missiles.current.push({ id: uid(), x: br.x, y: br.y + br.h / 2, vx: 0, vy: 200, w: 10, hostile: true });
+          }
+        }
+      }
+    }
 
     // ── boss ──
-    if (boss.current) updateBoss(t, dt, W, H, py, slow, inv);
+    if (boss.current) updateBoss(t, dt, W, H, slow);
 
-    // ── power-up drift ──
-    if (powerup.current) {
-      powerup.current.y += powerup.current.vy * dt;
-      if (powerup.current.y > H + 40) powerup.current = null;
-      else if (Math.abs(powerup.current.x - p.x) < PLAYER_W * 0.7 && Math.abs(powerup.current.y - py) < PLAYER_W * 0.7) {
-        grabPower(powerup.current);
-        powerup.current = null;
+    // ── missiles ──
+    const liveM = [];
+    for (const m of missiles.current) {
+      m.x += m.vx * dt * slow;
+      m.y += m.vy * dt * slow;
+      if (m.y > H + 30 || m.y < -40 || m.x < -30 || m.x > W + 30) continue;
+      if (m.hostile) {
+        // shield deflect → ricochet upward as a friendly projectile that hurts bricks
+        if (shield && m.vy > 0 && m.y + m.w >= py - 6 && Math.abs(m.x - pad.x) <= pad.w / 2 + m.w) {
+          m.hostile = false;
+          m.vy = -260;
+          m.vx = rand(-120, 120);
+          spawnSpark(m.x, py, "shield");
+          SFX.shield();
+          liveM.push(m);
+          continue;
+        }
+        // hit the paddle?
+        if (Math.abs(m.x - pad.x) <= pad.w / 2 + m.w && Math.abs(m.y - py) <= 14) {
+          conn.current = clamp(conn.current - MISSILE_DRAIN, 0, 100);
+          combo.current = 0;
+          hitFlash.current = t;
+          SFX.hurt();
+          spawnSpark(m.x, m.y, "hit");
+          continue;
+        }
+      } else {
+        // ricocheted missile damages bricks / boss
+        let consumed = false;
+        for (const br of bricks.current) {
+          if (Math.abs(m.x - br.x) < br.w / 2 + m.w && Math.abs(m.y - br.y) < br.h / 2 + m.w) {
+            damageBrick(br, 1, m.x, m.y);
+            consumed = true;
+            break;
+          }
+        }
+        if (consumed) continue;
+        if (boss.current && !boss.current.entering && Math.abs(m.x - boss.current.x) < boss.current.w / 2 && Math.abs(m.y - boss.current.y) < boss.current.w / 2) {
+          boss.current.hp -= 1;
+          spawnSpark(m.x, m.y, "hit");
+          SFX.bossHit();
+          continue;
+        }
       }
+      liveM.push(m);
+    }
+    missiles.current = liveM;
+
+    // prune dead bricks now (damageBrick marks hp<=0)
+    bricks.current = bricks.current.filter((br) => br.hp > 0);
+
+    // ── level clear? ──
+    if (mode.current === "wall" && bricks.current.length === 0 && phase === "running") {
+      level.current += 1;
+      buildLevel(level.current);
+      syncInv();
     }
 
-    // ── spawning from the wave queue (paced drip so a formation streams in) ──
-    if (waveState.current === "formation") {
-      if (spawnQueue.current.length && t - lastSpawn.current > 85) {
-        lastSpawn.current = t;
-        spawnFormationEnemy(spawnQueue.current.shift());
-      }
-      // wave cleared → next wave
-      if (!spawnQueue.current.length && enemies.current.length === 0) {
-        wave.current += 1;
-        queueWave(wave.current);
-      }
-    }
-
-    // power-up timer
-    if (!powerup.current && t > nextPower.current) {
-      spawnPowerup();
-      nextPower.current = t + rand(POWERUP_EVERY[0], POWERUP_EVERY[1]);
-    }
-
-    // expire transients
+    // expire transient effects + refresh inventory active windows for render
     floats.current = floats.current.filter((f) => t - f.born < 850);
     sparks.current = sparks.current.filter((s) => t - s.born < 480);
-
-    // HUD suggestion: which weapon counters the most on-screen threats
-    syncHud();
+    refreshActive(t);
 
     if (conn.current <= 0) {
       endRun();
@@ -787,172 +683,129 @@ export function ModemDefender({ onExit }) {
     raf.current = requestAnimationFrame(loop);
   };
 
-  function killEnemy(a) {
-    combo.current += 1;
-    const mult = combo.current >= 3 ? Math.min(1 + (combo.current - 2) * 0.2, 4) : 1;
-    const pts = Math.round(a.score * mult);
-    score.current += pts;
-    addFloat(a.x, a.y, `+${pts}`, mult > 1 ? T.yellow : T.cyan);
-    spawnSpark(a.x, a.y, "kill");
-    SFX.kill(combo.current);
+  // Resolve ball↔brick collision (one brick per frame). Reflects on the shallower
+  // axis unless the ball is piercing (overclock), which plows straight through.
+  function hitBricks(b) {
+    for (const br of bricks.current) {
+      if (br.hp <= 0) continue;
+      const dx = Math.abs(b.x - br.x);
+      const dy = Math.abs(b.y - br.y);
+      if (dx < br.w / 2 + b.r && dy < br.h / 2 + b.r) {
+        const dmg = b.pierce ? 99 : 1;
+        damageBrick(br, dmg, b.x, b.y);
+        if (!b.pierce) {
+          // bounce: pick axis by overlap depth
+          const ox = br.w / 2 + b.r - dx;
+          const oy = br.h / 2 + b.r - dy;
+          if (ox < oy) b.vx = b.x < br.x ? -Math.abs(b.vx) : Math.abs(b.vx);
+          else b.vy = b.y < br.y ? -Math.abs(b.vy) : Math.abs(b.vy);
+          return; // one brick per frame for a clean bounce
+        }
+      }
+    }
   }
 
-  function updateBoss(t, dt, W, H, py, slow, inv) {
+  function damageBrick(br, dmg, x, y) {
+    if (br.hp <= 0) return;
+    if (br.loot) {
+      // crate: always pops in one hit, awards loot immediately
+      br.hp = 0;
+      const id = rollLoot(level.current);
+      spawnSpark(br.x, br.y, "kill");
+      SFX.pop(combo.current);
+      awardItem(id);
+      return;
+    }
+    br.hp -= dmg;
+    if (br.hp > 0) {
+      spawnSpark(x, y, "hit");
+      SFX.brick();
+    } else {
+      combo.current += 1;
+      const mult = combo.current >= 4 ? Math.min(1 + (combo.current - 3) * 0.15, 3) : 1;
+      const pts = Math.round((BRICKS[br.type]?.score || 100) * mult);
+      score.current += pts;
+      addFloat(br.x, br.y, `+${pts}`, mult > 1 ? T.yellow : T.cyan);
+      spawnSpark(br.x, br.y, "kill");
+      SFX.pop(combo.current);
+    }
+  }
+
+  function updateBoss(t, dt, W, H, slow) {
     const bo = boss.current;
     bo.t += dt;
     if (bo.entering) {
-      bo.y = lerp(bo.y, 96, Math.min(1, dt * 3));
-      if (bo.y > 90) bo.entering = false;
+      bo.y = lerp(bo.y, 130, Math.min(1, dt * 3));
+      if (bo.y > 124) bo.entering = false;
       return;
     }
-    // strafe side to side
-    bo.x += bo.dir * 70 * dt * slow;
-    if (bo.x < bo.w / 2 + 10) { bo.x = bo.w / 2 + 10; bo.dir = 1; }
-    if (bo.x > W - bo.w / 2 - 10) { bo.x = W - bo.w / 2 - 10; bo.dir = -1; }
+    // roam: drift horizontally + gentle vertical bob
+    bo.x += bo.dir * 90 * dt * slow;
+    if (bo.x < bo.w / 2 + 8) { bo.x = bo.w / 2 + 8; bo.dir = 1; }
+    if (bo.x > W - bo.w / 2 - 8) { bo.x = W - bo.w / 2 - 8; bo.dir = -1; }
+    bo.y = 130 + Math.sin(bo.t * 1.1) * 26;
 
-    // spawn minions — the core "juggle the adds" pressure
+    // spawn minion bricks (divers) — pressure, not a requirement
     if (t > bo.nextMinion) {
-      bo.nextMinion = t + rand(2400, 3600) - Math.min(1200, bo.num * 200);
+      bo.nextMinion = t + rand(2600, 4200) - Math.min(1400, bo.num * 220);
       const type = Math.random() < 0.5 ? "popup" : "spam";
-      const def = THREATS[type];
-      if (enemies.current.length < ENTITY_CAP.enemies) {
-        enemies.current.push({
-          id: uid(), type, x: clamp(bo.x + rand(-60, 60), 30, W - 30), y: bo.y + bo.w / 2,
-          slotX: bo.x, slotY: 90, w: def.w, hp: def.hp || 1, maxHp: def.hp || 1, art: def.art, anim: def.anim || 0,
-          score: def.score, drain: def.drain, speed: def.speed * 1.1, attack: "dive", onHit: def.onHit,
-          fires: 0, nextShot: Infinity, state: "diving", diveT: 0, phase: rand(0, 6.28), born: now(),
+      const def = BRICKS[type];
+      if (bricks.current.length < ENTITY_CAP.bricks) {
+        bricks.current.push({
+          id: uid(), type, loot: false, x: clamp(bo.x + rand(-50, 50), 30, W - 30), y: bo.y + bo.w / 2,
+          w: def.w, h: def.w, hp: 1, maxHp: 1, art: def.art, anim: def.anim || 0, fires: 0,
+          nextShot: Infinity, diver: true, vy: rand(70, 110),
         });
       }
-      addFloat(bo.x, bo.y + 30, "SPAWN", T.red);
     }
 
     // boss fan-fire
     if (t > bo.nextShot) {
-      bo.nextShot = t + rand(900, 1500);
+      bo.nextShot = t + rand(1100, 1700);
       const n = 3 + Math.min(4, bo.num);
       for (let i = 0; i < n; i++) {
-        if (ebullets.current.length >= ENTITY_CAP.ebullets) break;
-        const ang = Math.PI / 2 + (i - (n - 1) / 2) * 0.28;
-        ebullets.current.push({ id: uid(), x: bo.x, y: bo.y + bo.w / 2, vx: Math.cos(ang) * 200, vy: Math.sin(ang) * 200, w: 11, boss: true });
+        if (missiles.current.length >= ENTITY_CAP.missiles) break;
+        const ang = Math.PI / 2 + (i - (n - 1) / 2) * 0.3;
+        missiles.current.push({ id: uid(), x: bo.x, y: bo.y + bo.w / 2, vx: Math.cos(ang) * 190, vy: Math.sin(ang) * 190, w: 11, hostile: true, boss: true });
       }
     }
 
-    // player bullets → boss (weak point = EMP/antivirus do bonus, all damage works)
-    for (const b of bullets.current) {
-      if (b.dead) continue;
-      if (Math.abs(b.x - bo.x) < bo.w / 2 && b.y < bo.y + bo.w / 2 && b.y > bo.y - bo.w / 2) {
-        const bonus = b.weapon === "emp" ? 1.6 : b.weapon === "antivirus" ? 1.3 : 1;
-        bo.hp -= b.dmg * bonus;
-        b.hits.push("boss");
-        if (b.pierce <= b.hits.length) b.dead = true;
-        spawnSpark(b.x, b.y, "hit");
-        SFX.bossHit();
-      }
+    // move boss-spawned divers (they're bricks with a vy); breach drains a little
+    for (const br of bricks.current) {
+      if (!br.diver) continue;
+      br.y += (br.vy || 90) * dt * slow;
+      if (br.y - br.h / 2 > H) { br.hp = 0; conn.current = clamp(conn.current - 4, 0, 100); hitFlash.current = t; combo.current = 0; }
     }
-    bullets.current = bullets.current.filter((b) => !b.dead);
 
     if (bo.hp <= 0) {
-      // defeated
       bossCount.current += 1;
-      score.current += 1500 * bo.num;
-      addFloat(bo.x, bo.y, `BOSS DOWN +${(1500 * bo.num).toLocaleString()}`, T.yellow);
-      for (let i = 0; i < 12; i++) spawnSpark(bo.x + rand(-bo.w / 2, bo.w / 2), bo.y + rand(-bo.w / 2, bo.w / 2), "kill");
+      const reward = 2000 * bo.num;
+      score.current += reward;
+      addFloat(bo.x, bo.y, `BOSS DOWN +${reward.toLocaleString()}`, T.yellow);
+      for (let i = 0; i < 14; i++) spawnSpark(bo.x + rand(-bo.w / 2, bo.w / 2), bo.y + rand(-bo.w / 2, bo.w / 2), "kill");
       SFX.bossDie();
+      stopBossLoop();
       boss.current = null;
-      grantUpgrade(true); // reward: unlock or upgrade a weapon
-      ebullets.current = [];
-      // advance to next wave (formation)
-      wave.current += 1;
-      queueWave(wave.current);
-      return;
-    }
-
-    // boss reaching the bottom (shouldn't usually) — heavy drain
-    if (!inv && bo.y - bo.w / 2 > H) {
-      conn.current = clamp(conn.current - 30, 0, 100);
-      hitFlash.current = t;
-      boss.current = null;
-      wave.current += 1;
-      queueWave(wave.current);
+      missiles.current = [];
+      bricks.current = bricks.current.filter((br) => !br.diver);
+      level.current += 1;
+      buildLevel(level.current);
+      syncInv();
     }
   }
 
-  // ── power-ups & progression ─────────────────────────────────────────────────
-  function grabPower(pw) {
-    SFX.power();
-    addFloat(pw.x, pw.y, pw.label, pw.color);
-    if (pw.kind === "firewall") {
-      invUntil.current = now() + pw.dur;
-      ebullets.current = [];
-    } else if (pw.kind === "broadband") {
-      slowUntil.current = now() + pw.dur;
-    } else if (pw.kind === "upgrade") {
-      grantUpgrade(false);
+  // Refresh the render mirror's active timers (so chips show live countdowns) and
+  // clear the overclock pierce flag when its window ends.
+  const lastActiveSig = useRef("");
+  function refreshActive(t) {
+    let sig = "";
+    for (const id of ITEM_ORDER) {
+      const exp = inv.current.active[id] || 0;
+      sig += exp > t ? "1" : "0";
     }
-  }
-
-  // Unlock the next locked weapon (preferring the one whose `unlock` boss is met),
-  // or upgrade a random already-owned weapon. `fromBoss` lets boss kills unlock the
-  // gated weapons even before their boss-number; otherwise level something up.
-  function grantUpgrade(fromBoss) {
-    const owned = arsenal.current.levels;
-    // candidate to UNLOCK: a weapon not owned whose unlock requirement is met
-    const lockable = WEAPON_ORDER.filter((id) => !owned[id]);
-    const unlockable = lockable.filter((id) => {
-      const u = WEAPONS[id].unlock;
-      return u === "start" || (typeof u === "number" && bossCount.current >= u);
-    });
-    let target = unlockable[0];
-    // boss kills also unlock the next gated weapon regardless of order gate
-    if (fromBoss && !target && lockable.length) target = lockable[0];
-    if (target) {
-      owned[target] = 1;
-      arsenal.current.active = target; // auto-switch to the new toy
-      SFX.unlock();
-      const box = arena.current?.getBoundingClientRect();
-      addFloat((box?.width || 360) / 2, (box?.height || 600) * 0.5, `NEW WEAPON: ${WEAPONS[target].name}`, WEAPONS[target].color);
-      setHud((h) => ({ ...h, active: target }));
-      return;
-    }
-    // else upgrade an owned weapon that still has levels left
-    const upgradable = Object.keys(owned).filter((id) => owned[id] < WEAPONS[id].levels.length);
-    if (upgradable.length) {
-      const id = upgradable[randI(0, upgradable.length - 1)];
-      owned[id] += 1;
-      SFX.unlock();
-      const box = arena.current?.getBoundingClientRect();
-      addFloat((box?.width || 360) / 2, (box?.height || 600) * 0.5, `${WEAPONS[id].name} LV${owned[id]}`, WEAPONS[id].color);
-    } else {
-      // everything maxed → award points instead
-      score.current += 1000;
-    }
-  }
-
-  function selectWeapon(id) {
-    if (!arsenal.current.levels[id]) return; // not owned
-    if (arsenal.current.active === id) return;
-    arsenal.current.active = id;
-    chargeUntil.current = 0;
-    SFX.swap();
-    setHud((h) => ({ ...h, active: id }));
-  }
-
-  // Recompute the "suggested" weapon (counters the most on-screen threats). Only
-  // pokes React state when it actually changes, so it doesn't thrash renders.
-  const lastSuggest = useRef(null);
-  function syncHud() {
-    const tally = {};
-    for (const a of enemies.current) {
-      const def = THREATS[a.type];
-      if (def?.weakTo && arsenal.current.levels[def.weakTo]) tally[def.weakTo] = (tally[def.weakTo] || 0) + 1;
-      if (a.shield && arsenal.current.levels.emp) tally.emp = (tally.emp || 0) + 1;
-      if (def?.attack === "armor" && !a.stripped && arsenal.current.levels.emp) tally.emp = (tally.emp || 0) + 1;
-    }
-    let best = null, bestN = 0;
-    for (const [id, n] of Object.entries(tally)) if (n > bestN) { best = id; bestN = n; }
-    if (best !== lastSuggest.current) {
-      lastSuggest.current = best;
-      setHud((h) => ({ ...h, suggest: best }));
+    if (sig !== lastActiveSig.current) {
+      lastActiveSig.current = sig;
+      syncInv();
     }
   }
 
@@ -960,12 +813,13 @@ export function ModemDefender({ onExit }) {
   function moveToClientX(clientX) {
     const box = arena.current?.getBoundingClientRect();
     if (!box) return;
-    player.current.targetX = clamp(clientX - box.left, PLAYER_W / 2, box.width - PLAYER_W / 2);
+    paddle.current.targetX = clamp(clientX - box.left, paddle.current.w / 2, box.width - paddle.current.w / 2);
   }
   function onPointerDown(e) {
     if (phase !== "running") return;
     dragging.current = true;
     moveToClientX(e.clientX);
+    if (launchPending.current) launchBall();
   }
   function onPointerMove(e) {
     if (!dragging.current || phase !== "running") return;
@@ -981,10 +835,11 @@ export function ModemDefender({ onExit }) {
       const k = e.key.toLowerCase();
       if (k === "arrowleft" || k === "a") keys.current.left = true;
       else if (k === "arrowright" || k === "d") keys.current.right = true;
-      else if (k === "1") selectWeapon("blaster");
-      else if (k === "2") selectWeapon("antivirus");
-      else if (k === "3") selectWeapon("spread");
-      else if (k === "4") selectWeapon("emp");
+      else if (k === " " || k === "spacebar") { if (launchPending.current) launchBall(); }
+      else if (k >= "1" && k <= "5") {
+        const id = invView.order[Number(k) - 1];
+        if (id) useItem(id);
+      }
     }
     function up(e) {
       const k = e.key.toLowerCase();
@@ -998,10 +853,10 @@ export function ModemDefender({ onExit }) {
       window.removeEventListener("keyup", up);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [invView.order]);
 
   useEffect(() => {
-    return () => cancelAnimationFrame(raf.current);
+    return () => { cancelAnimationFrame(raf.current); stopBossLoop(); };
   }, []);
 
   // ── render ───────────────────────────────────────────────────────────────
@@ -1009,17 +864,18 @@ export function ModemDefender({ onExit }) {
   const bc = barColor(pct);
   const t = now();
   const hurt = t - hitFlash.current < 260;
-  const slowed = t < slowUntil.current;
-  const inv = t < invUntil.current;
+  const shieldOn = isActive("firewall");
+  const slowOn = isActive("buffering");
+  const wideOn = isActive("broadband");
+  const overOn = isActive("overclock");
   const bo = boss.current;
-  const owned = arsenal.current.levels;
 
   return (
     <div className="md-root">
       <div className="md-crt" />
       {hurt && <div className="md-breach" />}
-      {slowed && <div className="md-slow" />}
-      {inv && <div className="md-shielded" />}
+      {slowOn && <div className="md-slow" />}
+      {shieldOn && <div className="md-shielded" />}
 
       {/* ── HUD ── */}
       <div className="md-hud">
@@ -1031,8 +887,8 @@ export function ModemDefender({ onExit }) {
           </div>
         </div>
         <div className="md-hud-right">
-          {combo.current >= 3 && <span className="md-combo">×{Math.min(1 + (combo.current - 2) * 0.2, 4).toFixed(1)}</span>}
-          <span className="md-wave">WAVE {wave.current}</span>
+          {combo.current >= 4 && <span className="md-combo">×{Math.min(1 + (combo.current - 3) * 0.15, 3).toFixed(1)}</span>}
+          <span className="md-wave">LVL {level.current}</span>
           <span className="md-score">{score.current.toLocaleString()}</span>
         </div>
       </div>
@@ -1056,62 +912,47 @@ export function ModemDefender({ onExit }) {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
       >
-        {/* boss sprite */}
+        {/* boss */}
         {bo && (
-          <img
-            className="md-boss"
-            src={sprite("boss.webp")}
-            alt=""
-            draggable={false}
-            style={{ left: bo.x, top: bo.y, width: bo.w, transform: "translate(-50%,-50%)" }}
-          />
+          <img className="md-boss" src={sprite("boss.webp")} alt="" draggable={false} style={{ left: bo.x, top: bo.y, width: bo.w, transform: "translate(-50%,-50%)" }} />
         )}
 
-        {/* enemies */}
-        {(phase === "running") &&
-          enemies.current.map((a) => (
-            <div
-              key={a.id}
-              className={`md-enemy${a.shield ? " md-shield" : ""}${a.attack === "armor" && !a.stripped ? " md-armor" : ""}`}
-              style={{ left: a.x, top: a.y, width: a.w, transform: "translate(-50%,-50%)" }}
-            >
-              {a.anim ? (
-                <span className="md-virus" style={{ width: a.w, height: a.w, backgroundImage: `url(${sprite(a.art)})` }} />
-              ) : (
-                <img src={sprite(a.art)} alt="" draggable={false} style={{ width: a.w }} />
-              )}
-              {a.maxHp > 1 && a.hp < a.maxHp && (
-                <span className="md-ehp"><span style={{ width: `${(a.hp / a.maxHp) * 100}%` }} /></span>
-              )}
-            </div>
-          ))}
+        {/* bricks */}
+        {phase === "running" &&
+          bricks.current.map((br) =>
+            br.loot ? (
+              <div key={br.id} className="md-brick md-loot" style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
+                <img className="md-loot-img" src={sprite("loot.webp")} alt="" draggable={false} onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "inline"; }} />
+                <span className="md-loot-fallback" style={{ display: "none" }}>🎁</span>
+              </div>
+            ) : (
+              <div key={br.id} className={`md-brick${br.diver ? " md-diver" : ""}`} style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
+                {br.anim ? (
+                  <span className="md-virus" style={{ width: Math.min(br.w, br.h) + 6, height: Math.min(br.w, br.h) + 6, backgroundImage: `url(${sprite(br.art)})` }} />
+                ) : (
+                  <img src={sprite(br.art)} alt="" draggable={false} style={{ width: br.w }} />
+                )}
+                {br.maxHp > 1 && br.hp < br.maxHp && <span className="md-ehp"><span style={{ width: `${(br.hp / br.maxHp) * 100}%` }} /></span>}
+              </div>
+            )
+          )}
 
-        {/* player bullets */}
-        {bullets.current.map((b) => (
-          <span
-            key={b.id}
-            className={`md-bullet${b.beam ? " md-beam" : ""}${b.emp ? " md-empshot" : ""}`}
-            style={{ left: b.x, top: b.y, width: b.w, height: b.h, background: b.color, boxShadow: `0 0 8px ${b.color}` }}
-          />
+        {/* missiles */}
+        {missiles.current.map((m) => (
+          <span key={m.id} className={`md-missile${m.hostile ? "" : " md-missile-friendly"}${m.boss ? " md-missile-boss" : ""}`} style={{ left: m.x, top: m.y, width: m.w, height: m.w * 1.6 }} />
         ))}
 
-        {/* enemy bullets */}
-        {ebullets.current.map((eb) => (
-          <span key={eb.id} className={`md-ebullet${eb.boss ? " md-ebullet-boss" : ""}`} style={{ left: eb.x, top: eb.y, width: eb.w, height: eb.w }} />
+        {/* balls */}
+        {balls.current.map((b) => (
+          <span key={b.id} className={`md-ball${b.pierce ? " md-ball-pierce" : ""}`} style={{ left: b.x, top: b.y, width: b.r * 2, height: b.r * 2 }}>
+            <img className="md-ball-img" src={sprite("ball.webp")} alt="" draggable={false} onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement.classList.add("md-ball-fallback"); }} />
+          </span>
         ))}
 
-        {/* player modem */}
+        {/* paddle */}
         {(phase === "running" || phase === "countdown") && (
-          <div className={`md-player${hurt ? " md-player-hit" : ""}${inv ? " md-player-shield" : ""}`} style={{ left: player.current.x, top: `${PLAYER_Y_FRAC * 100}%` }}>
-            <img src={sprite("player.webp")} alt="" draggable={false} />
-          </div>
-        )}
-
-        {/* power-up */}
-        {phase === "running" && powerup.current && (
-          <div className="md-power" style={{ left: powerup.current.x, top: powerup.current.y, "--pc": powerup.current.color }}>
-            <span className="md-power-emoji">{powerup.current.emoji}</span>
-            <span className="md-power-label">{powerup.current.label}</span>
+          <div className={`md-paddle${hurt ? " md-paddle-hit" : ""}${shieldOn ? " md-paddle-shield" : ""}${wideOn ? " md-paddle-wide" : ""}${overOn ? " md-paddle-over" : ""}`} style={{ left: paddle.current.x, top: `${PADDLE_Y_FRAC * 100}%`, width: paddle.current.w }}>
+          <img src={sprite("player.webp")} alt="" draggable={false} />
           </div>
         )}
 
@@ -1125,24 +966,40 @@ export function ModemDefender({ onExit }) {
           <span key={s.id} className={`md-spark md-spark-${s.kind}`} style={{ left: s.x, top: s.y }} />
         ))}
 
-        {/* ── weapon chips ── */}
-        {phase === "running" && (
-          <div className="md-weapons">
-            {WEAPON_ORDER.map((id, i) =>
-              owned[id] ? (
+        {/* launch hint */}
+        {phase === "running" && launchPending.current && (
+          <div className="md-launch-hint">tap / space / drag to launch ⬆</div>
+        )}
+
+        {/* ── inventory slots (only those acquired; pop in on first award) ── */}
+        {phase === "running" && invView.order.length > 0 && (
+          <div className="md-inv">
+            {invView.order.map((id, i) => {
+              const def = ITEMS[id];
+              const active = invView.active[id] > t;
+              const remain = active ? Math.ceil((invView.active[id] - t) / 1000) : 0;
+              return (
                 <button
                   key={id}
-                  className={`md-wchip${hud.active === id ? " md-wchip-on" : ""}${hud.suggest === id && hud.active !== id ? " md-wchip-suggest" : ""}`}
-                  style={{ "--wc": WEAPONS[id].color }}
-                  onPointerDown={(e) => { e.stopPropagation(); selectWeapon(id); }}
+                  className={`md-slot md-pop${active ? " md-slot-active" : ""}${invView.counts[id] > 0 ? "" : " md-slot-empty"}`}
+                  style={{ "--ic": def.color }}
+                  onPointerDown={(e) => { e.stopPropagation(); useItem(id); }}
                 >
-                  <span className="md-wchip-key">{i + 1}</span>
-                  <span className="md-wchip-emoji">{WEAPONS[id].emoji}</span>
-                  <span className="md-wchip-name">{WEAPONS[id].name}</span>
-                  <span className="md-wchip-lv">{"●".repeat(owned[id])}{"○".repeat(WEAPONS[id].levels.length - owned[id])}</span>
+                  <span className="md-slot-key">{i + 1}</span>
+                  <span className="md-slot-badge">
+                    <img src={sprite(def.badge)} alt="" draggable={false} onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "inline"; }} />
+                    <span className="md-slot-emoji" style={{ display: "none" }}>{def.emoji}</span>
+                  </span>
+                  <span className="md-slot-name">{def.name}</span>
+                  <span className="md-slot-pips">
+                    {Array.from({ length: invView.cap }).map((_, k) => (
+                      <i key={k} className={k < (invView.counts[id] || 0) ? "on" : ""} />
+                    ))}
+                  </span>
+                  {active && <span className="md-slot-timer">{remain}s</span>}
                 </button>
-              ) : null
-            )}
+              );
+            })}
           </div>
         )}
 
@@ -1155,9 +1012,9 @@ export function ModemDefender({ onExit }) {
         {phase === "start" && (
           <div className="md-overlay md-start">
             <img className="md-logo" src={ui("logo.webp")} alt="Modem Defender" draggable={false} />
-            <p className="md-tag">Drag to fly your modem · it auto-fires · swap weapons to match each threat. Survive the waves, down the BSOD bosses, keep your signal alive.</p>
+            <p className="md-tag">Bounce the data packet with your modem, smash the web wall, grab loot from the 🎁 crates. Clear each level — survive the BSOD bosses every 5th. Drop the ball and your signal bleeds out.</p>
             <div className="md-legend">
-              <span>🔫 blaster</span><span>🧪 antivirus → 🦠</span><span>🔱 de-frag → ✉️</span><span>💥 emp → 📎🧰</span>
+              <span>🛡️ firewall</span><span>🍴 fork bomb</span><span>⏳ buffering</span><span>📡 broadband</span><span>⚡ overclock</span>
             </div>
             <button className="md-btn" onPointerDown={(e) => { e.stopPropagation(); setPhase("countdown"); }}>CONNECT ▶</button>
             <div className="md-best">BEST: {(best || loadBest() || 0).toLocaleString()}</div>
@@ -1170,7 +1027,7 @@ export function ModemDefender({ onExit }) {
             <img className="md-stamp" src={ui("no-carrier.webp")} alt="NO CARRIER" draggable={false} />
             {score.current >= (best || 0) && score.current > 0 && <div className="md-newbest">★ NEW BEST ★</div>}
             <div className="md-final">{score.current.toLocaleString()}</div>
-            <div className="md-best">BEST: {saveBest(score.current).toLocaleString()} · reached wave {wave.current}</div>
+            <div className="md-best">BEST: {saveBest(score.current).toLocaleString()} · reached level {level.current}</div>
             <div className="md-btns">
               <button className="md-btn" onPointerDown={(e) => { e.stopPropagation(); setPhase("countdown"); }}>RECONNECT</button>
               <button className="md-btn md-btn-ghost" onPointerDown={(e) => { e.stopPropagation(); onExit(); }}>MENU</button>
@@ -1190,7 +1047,7 @@ export const MD_CSS = `
 .md-crt::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,transparent 55%,rgba(0,0,0,0.55));}
 .md-breach{position:absolute;inset:0;pointer-events:none;z-index:40;animation:mdBreach 0.26s ease-out;box-shadow:inset 0 0 120px 20px rgba(255,45,85,0.5);}
 .md-slow{position:absolute;inset:0;pointer-events:none;z-index:39;box-shadow:inset 0 0 140px 30px rgba(63,255,208,0.16);}
-.md-shielded{position:absolute;inset:0;pointer-events:none;z-index:39;box-shadow:inset 0 0 120px 24px rgba(48,209,88,0.2);animation:mdPulse 0.7s infinite;}
+.md-shielded{position:absolute;inset:0;pointer-events:none;z-index:39;box-shadow:inset 0 0 120px 24px rgba(48,209,88,0.18);}
 @keyframes mdBreach{0%{opacity:1}100%{opacity:0}}
 
 .md-hud{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;gap:8px;padding:0 10px;z-index:100;background:linear-gradient(#0f0f1eee,transparent);border-bottom:1px solid #ffffff10;}
@@ -1211,54 +1068,66 @@ export const MD_CSS = `
 .md-bossbar-fill{height:100%;background:linear-gradient(90deg,#bf5af2,#ff2d55);box-shadow:0 0 10px #bf5af2;transition:width 0.12s linear;}
 
 .md-arena{position:absolute;top:54px;left:0;right:0;bottom:0;z-index:10;}
-
 .md-boss{position:absolute;z-index:7;filter:drop-shadow(0 0 16px rgba(191,90,242,0.55));pointer-events:none;}
 
-.md-enemy{position:absolute;pointer-events:none;animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1);filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5));}
-.md-enemy img{display:block;pointer-events:none;}
-@keyframes mdPopIn{0%{transform:translate(-50%,-50%) scale(0) rotate(-8deg);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1)}}
-.md-virus{display:block;background-repeat:no-repeat;background-size:400% 100%;animation:mdVirus 0.5s steps(4) infinite;pointer-events:none;}
-@keyframes mdVirus{from{background-position:0 0}to{background-position:100% 0}}
-.md-shield::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #3fffd0;box-shadow:0 0 12px #3fffd0,inset 0 0 12px #3fffd0;opacity:0.85;animation:mdPulse 0.9s infinite;}
-.md-armor::before{content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);width:80%;height:5px;background:#c0c0c0;border-radius:3px;box-shadow:0 0 6px #c0c0c0;}
-.md-ehp{position:absolute;left:8%;right:8%;bottom:-7px;height:3px;background:#ffffff22;border-radius:2px;overflow:hidden;}
+.md-brick{position:absolute;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+.md-brick img{display:block;pointer-events:none;}
+.md-diver{filter:drop-shadow(0 0 8px rgba(255,45,85,0.5));}
+@keyframes mdPopIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1)}}
+.md-virus{display:block;background-repeat:no-repeat;background-size:400% 100%;animation:mdVirus 0.55s steps(4,jump-none) infinite;pointer-events:none;}
+@keyframes mdVirus{from{background-position-x:0%}to{background-position-x:100%}}
+.md-ehp{position:absolute;left:8%;right:8%;bottom:-5px;height:3px;background:#ffffff22;border-radius:2px;overflow:hidden;}
 .md-ehp span{display:block;height:100%;background:#ff2d55;box-shadow:0 0 4px #ff2d55;}
+.md-loot{animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1),mdLootGlow 1.2s ease-in-out infinite;}
+.md-loot-img{width:100%;height:100%;object-fit:contain;}
+.md-loot-fallback{position:absolute;font-size:20px;}
+@keyframes mdLootGlow{0%,100%{filter:drop-shadow(0 0 4px #ffd60a)}50%{filter:drop-shadow(0 0 12px #ffd60a)}}
 
-.md-bullet{position:absolute;transform:translate(-50%,-50%);border-radius:3px;pointer-events:none;z-index:12;}
-.md-beam{border-radius:2px;opacity:0.92;}
-.md-empshot{border-radius:50%;animation:mdPulse 0.2s infinite;}
-.md-ebullet{position:absolute;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff,#ff2d55 60%,transparent 72%);box-shadow:0 0 8px #ff2d55;pointer-events:none;z-index:11;}
-.md-ebullet-boss{background:radial-gradient(circle,#fff,#bf5af2 60%,transparent 72%);box-shadow:0 0 9px #bf5af2;}
+/* The sprite carries the look; the wrapper only adds a faint aura that reads fine
+   behind flat pixel art (and matches the CRT glow). A solid gradient fill is used
+   ONLY as a fallback when the sprite fails to load (md-ball-fallback, set onError). */
+.md-ball{position:absolute;transform:translate(-50%,-50%);z-index:13;border-radius:50%;filter:drop-shadow(0 0 6px rgba(63,255,208,0.6));pointer-events:none;}
+.md-ball-img{width:100%;height:100%;object-fit:contain;}
+.md-ball-pierce{filter:drop-shadow(0 0 8px #ff2d55) drop-shadow(0 0 3px #ffd60a) hue-rotate(-40deg);}
+.md-ball-fallback{background:radial-gradient(circle at 35% 30%,#fff,#3fffd0 55%,#0a84ff 90%);box-shadow:0 0 10px #3fffd0,0 0 4px #fff;}
+.md-ball-fallback.md-ball-pierce{background:radial-gradient(circle at 35% 30%,#fff,#ffd60a 50%,#ff2d55 90%);}
 
-.md-player{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;will-change:left;}
-.md-player img{width:64px;height:auto;display:block;filter:drop-shadow(0 0 10px rgba(63,255,208,0.5));}
-.md-player-hit img{animation:mdShake 0.26s ease;filter:drop-shadow(0 0 12px #ff2d55) brightness(1.3);}
-.md-player-shield::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid #30d158;box-shadow:0 0 16px #30d158,inset 0 0 16px #30d15866;animation:mdPulse 0.7s infinite;}
+.md-missile{position:absolute;transform:translate(-50%,-50%);border-radius:3px;background:linear-gradient(#ff2d55,#ff8a3d);box-shadow:0 0 8px #ff2d55;pointer-events:none;z-index:11;}
+.md-missile-friendly{background:linear-gradient(#3fffd0,#0a84ff);box-shadow:0 0 8px #3fffd0;}
+.md-missile-boss{background:linear-gradient(#bf5af2,#ff2d55);box-shadow:0 0 9px #bf5af2;}
 
-.md-power{position:absolute;transform:translate(-50%,-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;animation:mdFloatY 1.4s ease-in-out infinite;z-index:13;}
-.md-power-emoji{font-size:32px;filter:drop-shadow(0 0 10px var(--pc));}
-.md-power-label{font-size:8px;letter-spacing:1px;color:var(--pc);text-shadow:0 0 6px var(--pc);white-space:nowrap;}
-@keyframes mdFloatY{0%,100%{margin-top:0}50%{margin-top:-5px}}
+.md-paddle{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;will-change:left;display:flex;align-items:center;justify-content:center;transition:width 0.18s;}
+.md-paddle img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 10px rgba(63,255,208,0.5));}
+.md-paddle-hit img{animation:mdShake 0.26s ease;filter:drop-shadow(0 0 12px #ff2d55) brightness(1.3);}
+.md-paddle-shield::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:140%;height:54px;border-radius:40px;border:2px solid #30d158;box-shadow:0 0 16px #30d158,inset 0 0 16px #30d15866;animation:mdPulse 0.7s infinite;}
+.md-paddle-wide img{filter:drop-shadow(0 0 12px #0a84ff);}
+.md-paddle-over img{filter:drop-shadow(0 0 12px #ffd60a);}
 
-.md-float{position:absolute;transform:translate(-50%,-50%);font-family:'Black Ops One';font-size:16px;pointer-events:none;z-index:60;animation:mdFloat 0.85s ease-out forwards;white-space:nowrap;}
+.md-float{position:absolute;transform:translate(-50%,-50%);font-family:'Black Ops One';font-size:15px;pointer-events:none;z-index:60;animation:mdFloat 0.85s ease-out forwards;white-space:nowrap;}
 @keyframes mdFloat{0%{transform:translate(-50%,-50%);opacity:1}100%{transform:translate(-50%,-150%);opacity:0}}
-
 .md-spark{position:absolute;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:55;}
 .md-spark-hit{background:radial-gradient(circle,#fff,#3fffd0 50%,transparent 70%);animation:mdSpark 0.3s ease-out forwards;}
 .md-spark-kill{background:radial-gradient(circle,#fff,#ffd60a 45%,transparent 70%);box-shadow:0 0 14px #ffd60a;animation:mdSpark 0.42s ease-out forwards;}
-.md-spark-block{background:radial-gradient(circle,#fff,#c0c0c0 45%,transparent 70%);box-shadow:0 0 8px #c0c0c0;animation:mdSparkBlock 0.3s ease-out forwards;}
+.md-spark-shield{background:radial-gradient(circle,#fff,#30d158 45%,transparent 70%);box-shadow:0 0 12px #30d158;animation:mdSpark 0.36s ease-out forwards;}
 @keyframes mdSpark{0%{transform:translate(-50%,-50%) scale(0.4);opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
-@keyframes mdSparkBlock{0%{transform:translate(-50%,-50%) scale(0.6);opacity:1}100%{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
 
-.md-weapons{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px;z-index:70;padding:0 8px;flex-wrap:wrap;}
-.md-wchip{position:relative;background:#0d0d18cc;border:1.5px solid var(--wc);border-radius:8px;padding:5px 9px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:54px;opacity:0.5;transition:opacity 0.15s,transform 0.1s;}
-.md-wchip-on{opacity:1;box-shadow:0 0 12px var(--wc);transform:translateY(-3px);}
-.md-wchip-suggest{opacity:0.95;animation:mdSuggest 0.7s infinite;}
-@keyframes mdSuggest{0%,100%{box-shadow:0 0 4px var(--wc)}50%{box-shadow:0 0 16px var(--wc);border-color:#fff}}
-.md-wchip-key{position:absolute;top:-7px;left:-6px;background:var(--wc);color:#08080f;font-family:'Black Ops One';font-size:9px;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.md-wchip-emoji{font-size:17px;line-height:1;}
-.md-wchip-name{font-size:7px;letter-spacing:0.5px;color:var(--wc);}
-.md-wchip-lv{font-size:7px;color:var(--wc);letter-spacing:1px;}
+.md-launch-hint{position:absolute;left:0;right:0;bottom:90px;text-align:center;color:#ffffff77;font-size:11px;letter-spacing:2px;z-index:30;animation:mdPulse 1.1s infinite;pointer-events:none;}
+
+.md-inv{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px;z-index:70;padding:0 8px;flex-wrap:wrap;}
+.md-slot{position:relative;background:#0d0d18cc;border:1.5px solid var(--ic);border-radius:10px;padding:5px 8px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:58px;transition:transform 0.1s,box-shadow 0.15s,opacity 0.15s;}
+.md-pop{animation:mdSlotPop 0.42s cubic-bezier(0.34,1.7,0.5,1);}
+@keyframes mdSlotPop{0%{transform:translateY(14px) scale(0.2);opacity:0}60%{transform:translateY(0) scale(1.18);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+.md-slot-empty{opacity:0.4;}
+.md-slot-active{box-shadow:0 0 16px var(--ic);border-color:#fff;animation:mdPulse 0.7s infinite;}
+.md-slot-key{position:absolute;top:-7px;left:-6px;background:var(--ic);color:#08080f;font-family:'Black Ops One';font-size:9px;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.md-slot-badge{width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.md-slot-badge img{width:100%;height:100%;object-fit:contain;}
+.md-slot-emoji{font-size:20px;line-height:1;}
+.md-slot-name{font-size:7px;letter-spacing:0.5px;color:var(--ic);}
+.md-slot-pips{display:flex;gap:2px;margin-top:1px;}
+.md-slot-pips i{width:6px;height:6px;border-radius:50%;background:#ffffff22;}
+.md-slot-pips i.on{background:var(--ic);box-shadow:0 0 5px var(--ic);}
+.md-slot-timer{position:absolute;top:-8px;right:-6px;background:#08080f;border:1px solid var(--ic);color:var(--ic);font-size:8px;padding:1px 3px;border-radius:6px;}
 
 .md-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:80;background:rgba(8,8,15,0.72);text-align:center;padding:20px;}
 .md-count{font-family:'Black Ops One';font-size:96px;color:#3fffd0;text-shadow:0 0 30px #3fffd0,0 0 60px #3fffd055;animation:mdCount 0.55s ease;}

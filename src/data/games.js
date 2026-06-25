@@ -116,10 +116,10 @@ export const GAMES = [
   {
     id: "modem-defender",
     title: "Modem Defender",
-    blurb: "A Galaga-style last stand for your 56k line. Fly your modem, auto-fire on the descending web — pop-ups, viruses, spam, toolbar hijackers — and swap weapons to match each threat. Down the BSOD bosses. NO CARRIER = game over.",
+    blurb: "Brick-breaker for the dial-up age. Bounce a data packet off your modem to smash a wall of pop-ups, viruses, spam and toolbars; crack loot crates for firewalls, multiball and more. Clear every level, survive the BSOD bosses. Drop the ball and it's NO CARRIER.",
     emoji: "📡",
     accent: "#3fffd0",
-    tags: ["shooter", "arcade", "old-web", "solo"],
+    tags: ["brick-breaker", "arcade", "old-web", "solo"],
     rating: 5,
     plays: 0,
     category: "game",

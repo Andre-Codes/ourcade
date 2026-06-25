@@ -43,6 +43,15 @@ const SPRITE_JOBS = [
   { src: "defender-modem.png", dir: SPRITES, name: "player", width: 320 },
   { src: "modem-defender-logo.png", dir: UI, name: "logo", width: 900 },
   { src: "no-carrier-stamp.png", dir: UI, name: "no-carrier", width: 720 },
+  // Brick-breaker additions (the game falls back to emoji/CSS until these exist):
+  { src: "data-packet.png", dir: SPRITES, name: "ball", width: 128 },
+  { src: "loot-block.png", dir: SPRITES, name: "loot", width: 360 },
+  // Circular inventory badges — one emblem each, processed identically.
+  { src: "badge-firewall.png", dir: SPRITES, name: "badge-firewall", width: 160 },
+  { src: "badge-forkbomb.png", dir: SPRITES, name: "badge-forkbomb", width: 160 },
+  { src: "badge-buffering.png", dir: SPRITES, name: "badge-buffering", width: 160 },
+  { src: "badge-broadband.png", dir: SPRITES, name: "badge-broadband", width: 160 },
+  { src: "badge-overclock.png", dir: SPRITES, name: "badge-overclock", width: 160 },
 ];
 
 const VIRUS_SRC = "virus-blob_4-frame.png";

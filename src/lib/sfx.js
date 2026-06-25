@@ -107,3 +107,45 @@ export function playSfxVariant(base, variants, opts) {
   const v = variants[Math.floor(Math.random() * variants.length)];
   playSfx(`${base}-${v}`, opts);
 }
+
+// Play a named SFX on LOOP and return a handle to stop it. Same cache + silent-
+// safe contract as playSfx, but the source keeps looping (Web Audio
+// `source.loop = true`) until you call handle.stop(). Use for sustained ambience
+// like a boss's engine hum that should run only while the boss is alive. The
+// buffer may still be decoding when called; we start the loop as soon as it's
+// ready, and stop() works whether or not playback has begun yet (idempotent).
+// Returns a no-op handle when muted / unsupported / file missing.
+export function playSfxLoop(name, { volume = 0.5 } = {}) {
+  let src = null;
+  let stopped = false;
+  const handle = {
+    stop() {
+      stopped = true;
+      if (src) {
+        try { src.stop(); } catch { /* already stopped */ }
+        src = null;
+      }
+    },
+  };
+  if (typeof window === "undefined" || muted || !name) return handle;
+  const c = ac();
+  if (!c) return handle;
+  const start = (buffer) => {
+    if (stopped || !buffer || src) return; // stopped before ready, or already running
+    try {
+      src = c.createBufferSource();
+      src.buffer = buffer;
+      src.loop = true;
+      const gain = c.createGain();
+      gain.gain.value = volume;
+      src.connect(gain).connect(c.destination);
+      src.start(0);
+    } catch {
+      src = null;
+    }
+  };
+  const cached = buffers.get(name);
+  if (cached) start(cached);
+  else load(name).then(start).catch(() => {});
+  return handle;
+}
