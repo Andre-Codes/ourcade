@@ -73,30 +73,39 @@ function load(name) {
 }
 
 // Spin up a fresh disposable source → gain (volume) → destination. The source is
-// GC'd once it ends, so overlapping taps just layer.
-function playBuffer(c, buffer, volume) {
+// GC'd once it ends, so overlapping taps just layer. When `fadeOut` (seconds) is
+// given, the gain ramps to ~silence over the LAST fadeOut seconds of the clip so
+// it tails off smoothly instead of cutting (clamped to the buffer length).
+function playBuffer(c, buffer, volume, fadeOut = 0) {
   const src = c.createBufferSource();
   src.buffer = buffer;
   const gain = c.createGain();
   gain.gain.value = volume;
   src.connect(gain).connect(c.destination);
+  const t = c.currentTime;
+  if (fadeOut > 0 && buffer.duration) {
+    const fade = Math.min(fadeOut, buffer.duration);
+    const startFade = t + buffer.duration - fade;
+    gain.gain.setValueAtTime(volume, startFade);
+    gain.gain.linearRampToValueAtTime(0.0001, t + buffer.duration);
+  }
   src.start(0);
 }
 
 // Play a named SFX (e.g. "card-place-1"). No-ops on SSR, when muted, or on any
 // load/decode/unsupported failure. Cached buffers play instantly; the first play
 // of a sound decodes once, then plays.
-export function playSfx(name, { volume = 0.6 } = {}) {
+export function playSfx(name, { volume = 0.6, fadeOut = 0 } = {}) {
   if (typeof window === "undefined" || muted || !name) return;
   const c = ac();
   if (!c) return;
   const cached = buffers.get(name);
   if (cached) {
-    playBuffer(c, cached, volume);
+    playBuffer(c, cached, volume, fadeOut);
     return;
   }
   load(name)
-    .then((buf) => buf && playBuffer(c, buf, volume))
+    .then((buf) => buf && playBuffer(c, buf, volume, fadeOut))
     .catch(() => {});
 }
 

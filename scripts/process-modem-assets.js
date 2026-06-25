@@ -7,8 +7,8 @@
 // padding, resizes each to a sane on-screen size, and writes web-ready WebP into
 // public/games/modem-defender/{sprites,ui}/ where the React game references them.
 //
-// The virus is a 4-frame horizontal sprite SHEET — it gets sliced into 4 equal
-// cells re-packed onto a uniform strip so a CSS steps(4) animation lands exactly.
+// Every sprite (including the virus, now a single static frame animated with a CSS
+// wobble in-game) is a plain single-image job — no sprite-sheet slicing.
 //
 // Same conventions as process-mascots.js / process-featured.js.
 // Run with: npm run assets:modem
@@ -37,6 +37,7 @@ const SPRITE_JOBS = [
   { src: "pop-up-window.png", dir: SPRITES, name: "popup", width: 420 },
   { src: "banner-ad.png", dir: SPRITES, name: "banner", width: 600 },
   { src: "spam-envelope.png", dir: SPRITES, name: "spam", width: 320 },
+  { src: "virus-blob.png", dir: SPRITES, name: "virus", width: 360 }, // single frame; animated via CSS wobble in-game
   { src: "parody-assistance.png", dir: SPRITES, name: "clippy", width: 360 },
   { src: "toolbar-hijacker.png", dir: SPRITES, name: "toolbar", width: 480 },
   { src: "bsod-boss.png", dir: SPRITES, name: "boss", width: 560 },
@@ -54,10 +55,6 @@ const SPRITE_JOBS = [
   { src: "badge-overclock.png", dir: SPRITES, name: "badge-overclock", width: 160 },
 ];
 
-const VIRUS_SRC = "virus-blob_4-frame.png";
-const VIRUS_FRAMES = 4;
-const VIRUS_CELL = 128; // per-frame output cell (px); 4 cells → 512px-wide strip.
-
 async function processSprite({ src, dir, name, width }) {
   const input = join(SRC, src);
   if (!existsSync(input)) {
@@ -73,57 +70,6 @@ async function processSprite({ src, dir, name, width }) {
   return true;
 }
 
-// Slice the 4-frame sheet into an even strip. Trim each frame INDEPENDENTLY (so a
-// frame with more motion doesn't shift the others), then center each onto an equal
-// VIRUS_CELL square. The result is a clean (VIRUS_FRAMES × VIRUS_CELL)-wide PNG
-// the game animates with `background-position` + steps(VIRUS_FRAMES).
-async function processVirus() {
-  const input = join(SRC, VIRUS_SRC);
-  if (!existsSync(input)) {
-    console.log(`  (skipped virus — no ${VIRUS_SRC})`);
-    return false;
-  }
-  // Trim the whole sheet first to drop the outer margin, then split by width.
-  // Read dimensions from the RENDERED buffer (not the pre-trim pipeline metadata,
-  // which still reports the original 1536-wide size and overflows the extract).
-  const buf = await sharp(input).trim(TRIM).png().toBuffer();
-  const meta = await sharp(buf).metadata();
-  const fw = Math.floor(meta.width / VIRUS_FRAMES);
-
-  const cells = [];
-  for (let i = 0; i < VIRUS_FRAMES; i++) {
-    // Extract one raw frame, trim its own padding, fit it into the square cell.
-    const left = i * fw;
-    const w = i === VIRUS_FRAMES - 1 ? meta.width - left : fw;
-    const cell = await sharp(buf)
-      .extract({ left, top: 0, width: w, height: meta.height })
-      .trim(TRIM)
-      .resize({
-        width: VIRUS_CELL,
-        height: VIRUS_CELL,
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-    cells.push({ input: cell, left: i * VIRUS_CELL, top: 0 });
-  }
-
-  await sharp({
-    create: {
-      width: VIRUS_CELL * VIRUS_FRAMES,
-      height: VIRUS_CELL,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    },
-  })
-    .composite(cells)
-    .webp(WEBP)
-    .toFile(join(SPRITES, "virus.webp"));
-  console.log(`  sprites/virus.webp (${VIRUS_FRAMES}-frame strip, ${VIRUS_CELL}px cells)`);
-  return true;
-}
-
 async function main() {
   if (!existsSync(SRC)) {
     console.log(`(nothing to do — ${SRC} doesn't exist)`);
@@ -134,7 +80,6 @@ async function main() {
 
   console.log("Modem Defender assets generated:");
   for (const job of SPRITE_JOBS) await processSprite(job);
-  await processVirus();
   console.log("Done → public/games/modem-defender/");
 }
 

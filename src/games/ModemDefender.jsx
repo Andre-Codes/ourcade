@@ -75,7 +75,7 @@ const BRICKS = {
   popup: { w: 58, hp: 1, score: 100, drain: 6, art: "popup.webp", fires: 0, weight: 10, minLevel: 1 },
   spam: { w: 54, hp: 1, score: 120, drain: 5, art: "spam.webp", fires: 0, weight: 7, minLevel: 1 },
   banner: { w: 104, hp: 2, score: 150, drain: 7, art: "banner.webp", fires: 0, weight: 5, minLevel: 2 },
-  virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", anim: 4, fires: 5200, weight: 5, minLevel: 3 },
+  virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", fires: 5200, weight: 5, minLevel: 3 },
   clippy: { w: 66, hp: 3, score: 220, drain: 9, art: "clippy.webp", fires: 6000, weight: 4, minLevel: 4 },
   toolbar: { w: 92, hp: 4, score: 260, drain: 8, art: "toolbar.webp", fires: 0, weight: 4, minLevel: 5 },
 };
@@ -172,7 +172,7 @@ const SFX = {
   miss: () => { tone({ freq: 150, gain: 0.13, dur: 0.16, sweep: 0.5 }); setTimeout(() => tone({ freq: 95, gain: 0.09, dur: 0.13, sweep: 0.5 }), 90); },
   hurt: () => tone({ freq: 220, gain: 0.1, dur: 0.12, sweep: 0.6, type: "sawtooth" }),
   level: () => [392, 523].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.08, dur: 0.12, sweep: 0.9 }), i * 70)),
-  bossEnter: () => { playSfx("computerNoise_001", { volume: 0.7 }); }, // the loop is started separately
+  bossEnter: () => { playSfx("computerNoise_001", { volume: 0.7, fadeOut: 3 }); }, // ~5s clip, fades over its last 3s; the loop is started separately
   bossHit: () => tone({ freq: 200, gain: 0.07, dur: 0.05, sweep: 0.7, type: "square" }),
   bossDie: () => { playSfx("large_explosion", { volume: 0.7 }); [392, 311, 233, 175].forEach((f, i) => setTimeout(() => tone({ freq: f, gain: 0.1, dur: 0.16, sweep: 0.6 }), i * 110)); },
   count: () => tone({ freq: 440, gain: 0.1, dur: 0.07, sweep: 0.85 }),
@@ -417,7 +417,7 @@ export function ModemDefender({ onExit }) {
     const W = box?.width || 360;
     const num = bossCount.current + 1;
     const maxHp = BOSS_BASE_HP * num + (lv - LEVELS_PER_BOSS) * 2;
-    boss.current = { x: W / 2, y: -120, w: Math.min(170, W * 0.46), hp: maxHp, maxHp, num, dir: 1, t: 0, nextMinion: now() + 3000, nextShot: now() + 2200, entering: true };
+    boss.current = { x: W / 2, y: -120, w: Math.min(170, W * 0.46), hp: maxHp, maxHp, num, dir: 1, t: 0, nextShot: now() + 2200, entering: true };
   }
 
   // ── inventory ──────────────────────────────────────────────────────────────
@@ -435,21 +435,24 @@ export function ModemDefender({ onExit }) {
     setInvView({ order, counts, active, cap: stackCap(level.current) });
   }
 
-  function awardItem(id) {
+  // x,y = where the crate was broken, so the pickup label floats up from there.
+  function awardItem(id, x, y) {
+    const fx = x ?? paddle.current.x;
+    const fy = y ?? paddleY() - 40;
     const cap = stackCap(level.current);
     const cur = inv.current.counts[id] || 0;
     const firstSeen = !inv.current.seen[id];
     inv.current.seen[id] = true; // slot becomes visible even if we can't add (so they know it exists)
     if (cur >= cap) {
       // slot full → loot skipped
-      addFloat(paddle.current.x, paddleY() - 40, `${ITEMS[id].name} FULL`, T.silver);
+      addFloat(fx, fy, `${ITEMS[id].name} FULL`, T.silver);
       syncInv();
       return false;
     }
     inv.current.counts[id] = cur + 1;
     SFX.item();
-    addFloat(paddle.current.x, paddleY() - 40, `+${ITEMS[id].name}`, ITEMS[id].color);
-    if (firstSeen) addFloat(paddle.current.x, paddleY() - 64, "NEW ITEM!", ITEMS[id].color);
+    addFloat(fx, fy, `+${ITEMS[id].name}`, ITEMS[id].color);
+    if (firstSeen) addFloat(fx, fy - 22, "NEW ITEM!", ITEMS[id].color);
     syncInv();
     return true;
   }
@@ -719,7 +722,7 @@ export function ModemDefender({ onExit }) {
       const id = rollLoot(level.current);
       spawnSpark(br.x, br.y, "kill");
       SFX.pop(combo.current);
-      awardItem(id);
+      awardItem(id, br.x, br.y);
       return;
     }
     br.hp -= dmg;
@@ -751,36 +754,17 @@ export function ModemDefender({ onExit }) {
     if (bo.x > W - bo.w / 2 - 8) { bo.x = W - bo.w / 2 - 8; bo.dir = -1; }
     bo.y = 130 + Math.sin(bo.t * 1.1) * 26;
 
-    // spawn minion bricks (divers) — pressure, not a requirement
-    if (t > bo.nextMinion) {
-      bo.nextMinion = t + rand(2600, 4200) - Math.min(1400, bo.num * 220);
-      const type = Math.random() < 0.5 ? "popup" : "spam";
-      const def = BRICKS[type];
-      if (bricks.current.length < ENTITY_CAP.bricks) {
-        bricks.current.push({
-          id: uid(), type, loot: false, x: clamp(bo.x + rand(-50, 50), 30, W - 30), y: bo.y + bo.w / 2,
-          w: def.w, h: def.w, hp: 1, maxHp: 1, art: def.art, anim: def.anim || 0, fires: 0,
-          nextShot: Infinity, diver: true, vy: rand(70, 110),
-        });
-      }
-    }
-
-    // boss fan-fire
+    // boss fan-fire — the BSOD boss fights ALONE (no minions). Keep the volley
+    // small and dodgeable: 1–3 slow shots on a long interval, scaling very gently
+    // with boss number, so an early boss is fair even without items.
     if (t > bo.nextShot) {
-      bo.nextShot = t + rand(1100, 1700);
-      const n = 3 + Math.min(4, bo.num);
+      bo.nextShot = t + rand(1800, 2600);
+      const n = Math.min(1 + Math.floor(bo.num / 2), 3); // 1 → 2 → 3 across bosses
       for (let i = 0; i < n; i++) {
         if (missiles.current.length >= ENTITY_CAP.missiles) break;
-        const ang = Math.PI / 2 + (i - (n - 1) / 2) * 0.3;
-        missiles.current.push({ id: uid(), x: bo.x, y: bo.y + bo.w / 2, vx: Math.cos(ang) * 190, vy: Math.sin(ang) * 190, w: 11, hostile: true, boss: true });
+        const ang = Math.PI / 2 + (i - (n - 1) / 2) * 0.34;
+        missiles.current.push({ id: uid(), x: bo.x, y: bo.y + bo.w / 2, vx: Math.cos(ang) * 150, vy: Math.sin(ang) * 150, w: 11, hostile: true, boss: true });
       }
-    }
-
-    // move boss-spawned divers (they're bricks with a vy); breach drains a little
-    for (const br of bricks.current) {
-      if (!br.diver) continue;
-      br.y += (br.vy || 90) * dt * slow;
-      if (br.y - br.h / 2 > H) { br.hp = 0; conn.current = clamp(conn.current - 4, 0, 100); hitFlash.current = t; combo.current = 0; }
     }
 
     if (bo.hp <= 0) {
@@ -793,9 +777,8 @@ export function ModemDefender({ onExit }) {
       stopBossLoop();
       boss.current = null;
       missiles.current = [];
-      bricks.current = bricks.current.filter((br) => !br.diver);
       level.current += 1;
-      buildLevel(level.current);
+      buildLevel(level.current); // rebuilds bricks/balls for the next level
       syncInv();
     }
   }
@@ -932,23 +915,8 @@ export function ModemDefender({ onExit }) {
                 <span className="md-loot-fallback" style={{ display: "none" }}>🎁</span>
               </div>
             ) : (
-              <div key={br.id} className={`md-brick${br.diver ? " md-diver" : ""}`} style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
-                {br.anim ? (
-                  (() => {
-                    // square cell sized to the brick; explicit px background-size so
-                    // exactly ONE of the 4 strip frames shows (percentage sizing on a
-                    // non-square element bled parts of two cells → "double blob").
-                    const s = Math.round(Math.max(br.w, br.h) * 0.9);
-                    return (
-                      <span
-                        className="md-virus"
-                        style={{ width: s, height: s, backgroundImage: `url(${sprite(br.art)})`, backgroundSize: `${s * br.anim}px ${s}px` }}
-                      />
-                    );
-                  })()
-                ) : (
-                  <img src={sprite(br.art)} alt="" draggable={false} style={{ width: br.w }} />
-                )}
+              <div key={br.id} className="md-brick" style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
+                <img className={br.type === "virus" ? "md-virus-blob" : undefined} src={sprite(br.art)} alt="" draggable={false} style={{ width: br.w }} />
                 {br.maxHp > 1 && br.hp < br.maxHp && <span className="md-ehp"><span style={{ width: `${(br.hp / br.maxHp) * 100}%` }} /></span>}
               </div>
             )
@@ -1089,13 +1057,18 @@ export const MD_CSS = `
 
 .md-brick{position:absolute;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
 .md-brick img{display:block;pointer-events:none;}
-.md-diver{filter:drop-shadow(0 0 8px rgba(255,45,85,0.5));}
 @keyframes mdPopIn{0%{transform:translate(-50%,-50%) scale(0);opacity:0}70%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1)}}
-/* 4-frame strip. background-size is set INLINE (s*4 × s) so each cell is square;
-   steps(4,jump-none) over 0%→100% snaps background-position-x to each cell edge
-   (no slide, no bleed into the next frame). */
-.md-virus{display:block;background-repeat:no-repeat;animation:mdVirus 0.55s steps(4,jump-none) infinite;pointer-events:none;}
-@keyframes mdVirus{from{background-position-x:0%}to{background-position-x:100%}}
+/* Virus = single static sprite, animated with a gentle organic wobble + squash
+   (jelly blob). Pure CSS transform on the img; transform-origin bottom-center so it
+   jiggles like it's anchored. Replaces the old 4-frame strip entirely. */
+.md-virus-blob{transform-origin:50% 90%;animation:mdWobble 1.2s ease-in-out infinite;}
+@keyframes mdWobble{
+  0%{transform:rotate(-5deg) scale(1,1)}
+  25%{transform:rotate(0deg) scale(1.08,0.92)}
+  50%{transform:rotate(5deg) scale(1,1)}
+  75%{transform:rotate(0deg) scale(0.94,1.06)}
+  100%{transform:rotate(-5deg) scale(1,1)}
+}
 .md-ehp{position:absolute;left:8%;right:8%;bottom:-5px;height:3px;background:#ffffff22;border-radius:2px;overflow:hidden;}
 .md-ehp span{display:block;height:100%;background:#ff2d55;box-shadow:0 0 4px #ff2d55;}
 .md-loot{animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1),mdLootGlow 1.2s ease-in-out infinite;}
@@ -1120,7 +1093,11 @@ export const MD_CSS = `
 .md-paddle{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;will-change:left;display:flex;align-items:center;justify-content:center;transition:width 0.18s;}
 .md-paddle img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 10px rgba(63,255,208,0.5));}
 .md-paddle-hit img{animation:mdShake 0.26s ease;filter:drop-shadow(0 0 12px #ff2d55) brightness(1.3);}
-.md-paddle-shield::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:140%;height:54px;border-radius:40px;border:2px solid #30d158;box-shadow:0 0 16px #30d158,inset 0 0 16px #30d15866;animation:mdPulse 0.7s infinite;}
+/* Shield ring wraps the modem's actual footprint. The paddle div tightly bounds
+   the sprite (width = paddle.w, height = sprite aspect), so sizing the ellipse to
+   a % of the div and centering on it hugs the modem regardless of the art's
+   internal asymmetry — and scales correctly when Broadband widens the paddle. */
+.md-paddle-shield::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:122%;height:128%;border-radius:50%;border:2px solid #30d158;box-shadow:0 0 16px #30d158,inset 0 0 14px #30d15866;animation:mdPulse 0.7s infinite;}
 .md-paddle-wide img{filter:drop-shadow(0 0 12px #0a84ff);}
 .md-paddle-over img{filter:drop-shadow(0 0 12px #ffd60a);}
 
