@@ -19,6 +19,7 @@
   --neon-violet: #b44dff;
   --neon-pink: #ff4d72;
   --neon-gold: #ffd23f;
+  --neon-casino: #2fd17a; /* casino-felt green — the cards & chips sticker */
   /* reusable 2003 "outset" bevel */
   --bevel: inset 2px 2px 0 rgba(255,255,255,.14), inset -2px -2px 0 rgba(0,0,0,.6);
   --bevel-in: inset -2px -2px 0 rgba(255,255,255,.08), inset 2px 2px 0 rgba(0,0,0,.7);
@@ -499,6 +500,8 @@ main > section + section { margin-top: 44px; }
 .arcade-burst.is-free { background: var(--neon-violet); color: #fff; }
 /* "DAILY" is the longest label — keep it smaller so it stays inside the burst. */
 .arcade-burst.is-daily { background: var(--neon-gold); color: #1a1206; font-size: 0.4rem; }
+/* "CASINO" — felt-green for the cards & chips corner; same small fit as DAILY. */
+.arcade-burst.is-casino { background: var(--neon-casino); color: #06140c; font-size: 0.38rem; }
 
 /* ====================================================================== */
 /*  FOOTER                                                                 */

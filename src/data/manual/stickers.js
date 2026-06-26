@@ -24,11 +24,13 @@
    STICKER_LABELS below AND add a matching `.arcade-burst.is-yourkey` color in
    src/arcade.css (next to .is-new / .is-hot).
 
-     NEW   → "NEW!"   (lime)     fresh on the arcade
-     HOT   → "HOT!"   (pink)     popular right now
-     STAR  → "★"      (gold)     a personal favorite / staff pick
-     TOP   → "TOP!"   (aqua)     a top-rated board
-     FREE  → "FREE!"  (purple)   no account needed
+     NEW    → "NEW!"   (lime)     fresh on the arcade
+     HOT    → "HOT!"   (pink)     popular right now
+     STAR   → "★"      (gold)     a personal favorite / staff pick
+     TOP    → "TOP!"   (aqua)     a top-rated board
+     FREE   → "FREE!"  (purple)   no account needed
+     DAILY  → "DAILY"  (gold)     a new challenge every day
+     CASINO → "CASINO" (green)    cards & chips — the casino corner
    ───────────────────────────────────────────────────────────────────────── */
 
 // id (from games.js) → sticker key (from STICKER_LABELS). Only listed games
@@ -44,6 +46,9 @@ export const STICKERS = {
   "game-2048": "NEW",
   "solitaire": "NEW",
   "memory-match": "NEW",
+  "video-poker": "CASINO",
+  "blackjack": "CASINO",
+  "chip-panic": "CASINO",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS
@@ -55,6 +60,7 @@ export const STICKER_LABELS = {
   TOP: "TOP!",
   FREE: "FREE!",
   DAILY: "DAILY",
+  CASINO: "CASINO",
 };
 
 // Resolve a game's sticker from this file (the sole source). Returns
