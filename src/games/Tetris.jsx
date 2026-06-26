@@ -649,9 +649,9 @@ export default function Tetris() {
 
     // Ghost + active piece. Ghost is suppressed when the player turns it off.
     if (g.cur && !g.flashRows.length) {
+      const color = PIECES[g.cur.type].color;
       if (g.settings?.ghost !== false) {
         const gy = ghostY();
-        const color = PIECES[g.cur.type].color;
         for (const [cx, cy] of cellsOf(g.cur)) {
           const x = g.cur.x + cx;
           const y = gy + cy - HIDDEN;
