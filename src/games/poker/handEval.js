@@ -97,6 +97,27 @@ function mk(rank, tiebreak) {
   return { rank, name: HAND_NAME[rank], tiebreak };
 }
 
+/* Best COMPLETED poker category from 1..5 cards by rank multiplicity ALONE.
+   Unlike evaluate() (which needs exactly five), this answers "does this partial
+   lane already contain a made hand?" — used for bet eligibility in High Card Bust.
+   Straights, flushes and straight flushes are never "made" before five cards (a
+   run/flush needs all five slots), so this only ever returns HIGH_CARD, PAIR,
+   TWO_PAIR, THREE, FULL_HOUSE or FOUR. Empty/undefined → HIGH_CARD. */
+export function bestMadeHand(cards) {
+  if (!cards || cards.length === 0) return HAND.HIGH_CARD;
+  const counts = new Map();
+  for (const c of cards) counts.set(c.rank, (counts.get(c.rank) || 0) + 1);
+  const sizes = [...counts.values()].sort((a, b) => b - a); // e.g. [3,2], [2,1,1]
+  const top = sizes[0];
+  const pairs = sizes.filter((n) => n >= 2).length;
+  if (top >= 4) return HAND.FOUR;
+  if (top === 3 && pairs >= 2) return HAND.FULL_HOUSE; // trips + any other pair
+  if (top === 3) return HAND.THREE;
+  if (pairs >= 2) return HAND.TWO_PAIR;
+  if (top === 2) return HAND.PAIR;
+  return HAND.HIGH_CARD;
+}
+
 // Compare two evaluate() results: >0 if a beats b, <0 if b beats a, 0 if equal.
 export function compareHands(a, b) {
   if (a.rank !== b.rank) return a.rank - b.rank;
