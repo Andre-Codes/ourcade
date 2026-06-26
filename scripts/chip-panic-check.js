@@ -8,7 +8,7 @@
    ============================================================ */
 
 import {
-  newGame, placeCard, toggleChip, columnFull, levelFor, fallIntervalMs,
+  newGame, placeCard, toggleChip, useDiscard, columnFull, levelFor, fallIntervalMs,
   HAND_POINTS, CHIP_MULTIPLIER, ROWS,
 } from "../src/games/chip-panic/logic.js";
 import { HAND } from "../src/games/poker/handEval.js";
@@ -52,13 +52,18 @@ console.log("Column clear + scoring:");
   eq("not over", state.over, false);
 }
 
-// ── un-chipped junk (high card) still clears, small points, no life lost ──────
+// ── un-chipped junk (high card) does NOT clear — the lane locks dead ───────────
+console.log("Dead lanes (High Card never clears):");
 {
   const g = newGame(() => 0);
   const { state, event } = fillCol0(g, ["AD", "JC", "8D", "5S", "2D"]); // high card
   eq("high card", event && event.hand.rank, HAND.HIGH_CARD);
-  eq("high card points", event && event.points, HAND_POINTS[HAND.HIGH_CARD]);
-  eq("lives intact", state.lives, 3);
+  eq("dead event flag", event && event.dead, true);
+  eq("zero points", event && event.points, 0);
+  eq("lane NOT cleared", state.cols[0].length, ROWS);
+  eq("lane marked dead", state.dead[0], true);
+  eq("cleared counter unchanged", state.cleared, 0);
+  eq("lives intact (un-chipped junk)", state.lives, 3);
 }
 
 // ── chipped PAYING column multiplies the score ────────────────────────────────
@@ -75,13 +80,37 @@ console.log("Chip bets:");
   eq("no life lost", state.lives, 3);
 }
 
-// ── chipped WHIFF (high card) costs a life ────────────────────────────────────
+// ── chipped WHIFF (high card) costs a life AND locks the lane dead ─────────────
 {
   const g = newGame(() => 0);
   const { state, event } = fillCol0(g, ["AD", "JC", "8D", "5S", "2D"], { chip: true }); // junk
   eq("whiff not paying", event && event.paying, false);
   eq("whiff lost life", event && event.lostLife, true);
+  eq("whiff lane dead", event && event.dead, true);
+  eq("whiff lane not cleared", state.cols[0].length, ROWS);
   eq("lives decremented", state.lives, 2);
+}
+
+// ── discard: charged at start, spent by useDiscard, recharged by a clear ───────
+console.log("Discard charge:");
+{
+  let g = newGame(() => 0);
+  eq("starts charged", g.discard, true);
+  g = useDiscard(g);
+  eq("spent → uncharged", g.discard, false);
+  eq("spending again is a no-op", useDiscard(g).discard, false);
+  // a paying clear recharges it
+  const { state } = fillCol0(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
+  eq("clear recharges discard", state.discard, true);
+}
+
+// ── a dead lane reads as full → overflow if a card targets it ─────────────────
+{
+  const g = newGame(() => 0);
+  const { state } = fillCol0(g, ["AD", "JC", "8D", "5S", "2D"]); // dead lane 0
+  eq("dead lane is full", columnFull(state.cols[0]), true);
+  const r = placeCard(state, 0, card("7C")); // no room → overflow
+  eq("drop on dead lane → over", r.state.over, true);
 }
 
 // ── overflow on a full column → game over ─────────────────────────────────────

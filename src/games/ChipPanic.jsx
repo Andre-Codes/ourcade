@@ -5,7 +5,7 @@ import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, chipImg } from "../lib/kenney.js";
 import { playSfxVariant } from "../lib/sfx.js";
 import {
-  newGame, nextCard, placeCard, toggleChip, canPlace,
+  newGame, nextCard, placeCard, toggleChip, useDiscard, canPlace,
   levelFor, fallIntervalMs, COLS, ROWS, START_LIVES,
 } from "./chip-panic/logic.js";
 
@@ -13,11 +13,13 @@ import {
    CHIP PANIC — Tetris-meets-Video-Poker, a novel Ourcade cabinet.
 
    Cards fall one at a time. Tap a column to drop the card there; a column fills
-   at 5 cards, which scores as a poker hand (shared evaluator) and clears. Drop
-   a CHIP on a column first to BET it: a paying hand pays ×3, a whiff costs a
-   life. A "panic timer" auto-drops the held card into a random open column if
-   you dawdle — and it shrinks as the level climbs. Out of lives = game over.
-   Score (higher = better) feeds the Arcade Score Standard board (`chip-panic`).
+   at 5 cards. Only a PAYING hand (pair or better) scores and clears — a column
+   that fills as a High Card LOCKS as a dead lane (dead weight). Drop a CHIP on a
+   column first to BET it: a paying hand pays ×3, a junk lane still costs a life.
+   You get ONE discard to throw away the held card; it recharges each time a lane
+   clears. A "panic timer" auto-drops the held card into the leftmost open column
+   if you dawdle — and it shrinks as the level climbs. Out of lives / overflow =
+   game over. Score feeds the Arcade Score Standard board (`chip-panic`).
 
    Real-time pacing lives in refs + a single rAF loop (the Tetris pattern); React
    state drives only the board render + HUD + screen transitions.
@@ -56,17 +58,42 @@ const CP_CSS = `
   .cp-timer { width: min(60vw, 320px); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
   .cp-timer i { display: block; height: 100%; background: linear-gradient(90deg,#3fffd0,#ffd23f,#ff6b6b); transition: width .05s linear; }
 
+  /* held-card row: card on the left, discard button on the right */
+  .cp-heldrow { display: flex; align-items: center; gap: 12px; }
+  .cp-discard {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; border-radius: 8px; padding: 7px 9px;
+    border: 2px solid #6a3f9f; background: rgba(0,0,0,.32); color: #eef0ff;
+    font-family: 'Press Start 2P',monospace;
+  }
+  .cp-discard:hover:not(:disabled) { border-color: #bf5af2; }
+  .cp-discard span { font-size: 1.1rem; line-height: 1; }
+  .cp-discard small { font-size: .42rem; letter-spacing: .08em; color: #c9b3ec; }
+  .cp-discard:disabled { opacity: .3; cursor: not-allowed; }
+
   /* The 5 columns */
   .cp-cols { display: flex; gap: min(2vw, 12px); align-items: flex-end; justify-content: center; flex: 1 1 auto; }
   .cp-col { display: flex; flex-direction: column-reverse; align-items: center; gap: 0; cursor: pointer; flex: 0 0 auto; }
   .cp-colcards {
     display: flex; flex-direction: column-reverse; gap: 2px;
+    box-sizing: border-box; align-items: center;
+    width: calc(var(--cw) + 8px); /* card + 4px padding each side — fixed so empty lanes don't shrink */
     min-height: calc(var(--ch) * 5 + 8px); justify-content: flex-end;
     padding: 4px; border-radius: 8px; border: 2px dashed rgba(255,255,255,.12);
     background: rgba(0,0,0,.18);
   }
   .cp-col.bet .cp-colcards { border-color: #ffd23f; box-shadow: 0 0 12px rgba(255,210,63,.3) inset; }
   .cp-col.full .cp-colcards { border-color: #ff6b6b; }
+  /* dead lane: junk-locked, unusable */
+  .cp-col.dead { cursor: default; }
+  .cp-col.dead .cp-colcards { border-color: #555; border-style: solid; box-shadow: none; background: rgba(0,0,0,.4); }
+  .cp-col.dead .cp-card { filter: grayscale(1) brightness(.55); }
+  .cp-col.dead .cp-colcards { position: relative; }
+  .cp-col.dead .cp-colcards::after {
+    content: "✕"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: calc(var(--cw) * .9); color: rgba(255,107,107,.7); font-family: 'Black Ops One',sans-serif;
+    pointer-events: none;
+  }
   .cp-card {
     width: var(--cw); height: var(--ch); border-radius: calc(var(--cw)*.09);
     display: block;
@@ -166,7 +193,9 @@ export default function ChipPanic() {
     playSfxVariant("card-place", [1, 3]);
 
     if (event) {
-      if (event.lostLife) {
+      if (event.dead) {
+        flashToast(`${event.hand.name} — LANE DEAD`, "bad");
+      } else if (event.lostLife) {
         flashToast(`${event.hand.name} — BAD BET`, "bad");
       } else if (event.chipped && event.paying) {
         flashToast(`${event.hand.name} ×3  +${event.points}`, "big");
@@ -192,8 +221,20 @@ export default function ChipPanic() {
   function onChip(c) {
     const g = G.current;
     if (!g || g.state.over) return;
+    if (g.state.dead[c] || canPlace(g.state, c) === false) return; // dead/full: no bet
     g.state = toggleChip(g.state, c);
     playSfxVariant("chip-lay", [1, 3]);
+    rerender();
+  }
+
+  // Throw away the held card (single use; recharges when a lane clears).
+  function onDiscard() {
+    const g = G.current;
+    if (!g || g.state.over || !g.state.discard) return;
+    g.state = useDiscard(g.state);
+    g.held = nextCard(g.state);
+    g.fallAcc = 0;
+    playSfxVariant("card-place", [1, 3]);
     rerender();
   }
 
@@ -263,28 +304,40 @@ export default function ChipPanic() {
       {screen === SCREEN.PLAY && g && (
         <div className="cp-stage">
           <div className="cp-held">
-            <span className="cp-card"><img src={cardImg(g.held.id)} alt={g.held.id} draggable="false" /></span>
+            <div className="cp-heldrow">
+              <span className="cp-card"><img src={cardImg(g.held.id)} alt={g.held.id} draggable="false" /></span>
+              <button
+                className="cp-discard"
+                disabled={!g.state.discard}
+                onPointerDown={(e) => { e.stopPropagation(); onDiscard(); }}
+                aria-label="Discard held card"
+              >
+                <span>🗑</span>
+                <small>{g.state.discard ? "DISCARD" : "USED"}</small>
+              </button>
+            </div>
             <div className="cp-timer"><i style={{ width: `${Math.round(timerPct * 100)}%` }} /></div>
           </div>
 
           <div className="cp-cols">
             {g.state.cols.map((col, c) => {
+              const dead = g.state.dead[c];
               const full = col.length >= ROWS;
               const bet = g.state.chips[c];
               return (
                 <div
                   key={c}
-                  className={`cp-col ${bet ? "bet" : ""} ${full ? "full" : ""}`}
+                  className={`cp-col ${bet ? "bet" : ""} ${full ? "full" : ""} ${dead ? "dead" : ""}`}
                 >
                   <button
                     className={`cp-chipbtn ${bet ? "on" : ""}`}
-                    disabled={full}
+                    disabled={full || dead}
                     onPointerDown={(e) => { e.stopPropagation(); onChip(c); }}
                     aria-label={`Bet column ${c + 1}`}
                   >
                     <img src={chipImg("red")} alt="" draggable="false" />
                   </button>
-                  <div className="cp-colcards" onPointerDown={() => drop(c)}>
+                  <div className="cp-colcards" onPointerDown={() => { if (!dead) drop(c); }}>
                     {col.map((card, i) => (
                       <span className="cp-card" key={card.id + i}>
                         <img src={cardImg(card.id)} alt={card.id} draggable="false" />
@@ -303,7 +356,7 @@ export default function ChipPanic() {
       {screen === SCREEN.TITLE && (
         <div className="cp-overlay">
           <h1>CHIP PANIC</h1>
-          <div className="sub">cards fall · tap a column to drop · fill 5 to score a poker hand · chip a column to bet it ×3</div>
+          <div className="sub">cards fall · tap a column to drop · fill 5 to score — only a PAIR or better clears, a HIGH CARD locks the lane dead · chip a column to bet it ×3 · one discard, recharges each hand</div>
           <button className="cp-big" onPointerDown={start}>PLAY</button>
           {best != null && <div className="sub">best · {best.toLocaleString()}</div>}
         </div>

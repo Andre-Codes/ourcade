@@ -198,7 +198,7 @@ export const GAMES = [
   {
     id: "chip-panic",
     title: "Chip Panic",
-    blurb: "Tetris meets video poker. Cards rain down — stack them five-deep in five columns to score a poker hand. Drop a chip to bet a column for triple points… if it pays off. Miss and it costs a life.",
+    blurb: "Tetris meets video poker. Cards rain down — stack them five-deep across five lanes, but only a PAIR or better clears: a lane of junk locks up dead. Chip a lane to bet it for triple points, and spend your one discard to dodge a bad card.",
     emoji: "🎴",
     accent: "#bf5af2",
     tags: ["cards", "arcade", "poker", "solo"],

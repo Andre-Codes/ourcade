@@ -44,6 +44,8 @@ export const START_LIVES = 3;
    {
      cols:  Card[][]   COLS columns, each 0..ROWS cards (index 0 = bottom)
      chips: bool[COLS] which columns are currently bet
+     dead:  bool[COLS] columns that filled as junk (locked, never clear)
+     discard: bool     is the single discard charged? (recharges per clear)
      bag:   Card[]     shuffled draw source (refilled from fresh decks)
      score, lives, cleared, over
    }
@@ -52,6 +54,8 @@ export function newGame(rng = Math.random) {
   return {
     cols: Array.from({ length: COLS }, () => []),
     chips: Array(COLS).fill(false),
+    dead: Array(COLS).fill(false),
+    discard: true, // starts charged
     bag: shuffle(freshDeck(), rng),
     rng,
     score: 0,
@@ -74,7 +78,7 @@ export function nextCard(state) {
 export const columnFull = (col) => col.length >= ROWS;
 export const canPlace = (state, c) => !columnFull(state.cols[c]);
 
-// Toggle a chip bet on a column (only if not full and not already cleared away).
+// Toggle a chip bet on a column (only if not full/dead and not already cleared).
 export function toggleChip(state, c) {
   if (columnFull(state.cols[c])) return state;
   const chips = state.chips.slice();
@@ -82,12 +86,23 @@ export function toggleChip(state, c) {
   return { ...state, chips };
 }
 
+/* Spend the single discard (throw the held card away). No-op if not charged.
+   The view owns the held card; this only tracks the charge. Recharges whenever a
+   lane clears (see placeCard). */
+export function useDiscard(state) {
+  if (!state.discard) return state;
+  return { ...state, discard: false };
+}
+
 /* Place `card` on column `c`. If that fills the column (5 cards), evaluate the
-   poker hand, score it, clear the column, and resolve the chip bet. Returns:
-     { state, event }
-   event (null if nothing cleared) =
-     { col, hand, points, chipped, paying, lostLife }
-   If the column is already full, it's an overflow → game over. */
+   poker hand:
+     - PAYING (pair+) → score, clear the column, recharge the discard.
+     - HIGH CARD      → the lane does NOT clear; it locks as a DEAD lane (dead
+                        weight crowding the board). A chipped junk lane also
+                        costs a life (a bad bet), same as before.
+   Returns { state, event }; event (null unless the lane resolved) =
+     { col, hand, points, chipped, paying, lostLife, dead }
+   If the column is already full/dead, it's an overflow → game over. */
 export function placeCard(state, c, card) {
   const cols = state.cols.map((col) => col.slice());
   if (columnFull(cols[c])) {
@@ -96,29 +111,38 @@ export function placeCard(state, c, card) {
   cols[c].push(card);
 
   let event = null;
-  let { score, lives, cleared } = state;
+  let { score, lives, cleared, discard } = state;
   const chips = state.chips.slice();
+  const dead = state.dead.slice();
 
   if (cols[c].length === ROWS) {
     const hand = evaluate(cols[c]);
     const chipped = chips[c];
     const paying = hand.rank >= PAYING_MIN;
-    let points = HAND_POINTS[hand.rank] || 0;
+    let points = 0;
     let lostLife = false;
-    if (chipped) {
-      if (paying) points *= CHIP_MULTIPLIER;
-      else { lostLife = true; lives -= 1; } // bet a column, got junk
+    let isDead = false;
+
+    if (paying) {
+      points = HAND_POINTS[hand.rank] || 0;
+      if (chipped) points *= CHIP_MULTIPLIER;
+      score += points;
+      cleared += 1;
+      cols[c] = []; // clear the column
+      discard = true; // a scored hand recharges the discard
+    } else {
+      // High card: the lane dies (locked). Chipped junk still costs a life.
+      isDead = true;
+      dead[c] = true;
+      if (chipped) { lostLife = true; lives -= 1; }
     }
-    score += points;
-    cleared += 1;
-    cols[c] = []; // clear the column
-    chips[c] = false; // spend the chip
-    event = { col: c, hand, points, chipped, paying, lostLife };
+    chips[c] = false; // spend the chip either way
+    event = { col: c, hand, points, chipped, paying, lostLife, dead: isDead };
   }
 
   const over = lives <= 0;
   return {
-    state: { ...state, cols, chips, score, lives, cleared, over },
+    state: { ...state, cols, chips, dead, score, lives, cleared, discard, over },
     event,
   };
 }
