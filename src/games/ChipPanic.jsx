@@ -5,6 +5,7 @@ import { useArcadeScore } from "../lib/scores.js";
 import { lsGet, lsSet } from "../lib/store.js";
 import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
 import { playSfxVariant } from "../lib/sfx.js";
+import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleBet, canBet, canPlace,
@@ -51,12 +52,12 @@ const HCB_CSS = `
     color: #eef0ff; background: rgba(0,0,0,.32); border: 2px solid #6a3f9f;
   }
   .hcb-btn:hover { border-color: #bf5af2; }
-  .hcb-stat { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: #c9b3ec; white-space: nowrap; }
-  .hcb-stat b { color: #ffd23f; }
-  .hcb-stat.chips b { color: #3fffd0; }
-  .hcb-stat.mode b { color: #bf5af2; }
+  .hcb-stat { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: #c9b3ec; white-space: nowrap; }
+  .hcb-stat b { color: #ffd23f; font-size: 1.15rem; vertical-align: -.06em; }
+  .hcb-stat.chips b { color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.45); }
+  .hcb-stat.mode b { color: #bf5af2; font-size: .72rem; vertical-align: 0; }
 
-  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: 4px 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
+  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(14px, 4vh, 36px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
 
   /* draw pile + tray + discard, centered up top */
   .hcb-top { display: flex; align-items: center; justify-content: center; gap: 16px; flex: 0 0 auto; }
@@ -80,14 +81,17 @@ const HCB_CSS = `
   .hcb-clock i { display: block; height: 100%; background: linear-gradient(90deg,#3fffd0,#ffd23f,#ff6b6b); }
 
   /* the five lanes */
-  .hcb-lanes { display: flex; gap: min(2.2vw, 14px); align-items: flex-start; justify-content: center; flex: 1 1 auto; min-height: 0; }
+  .hcb-lanes { display: flex; gap: min(2.2vw, 14px); align-items: flex-start; justify-content: center; flex: 1 1 auto; min-height: 0; margin-top: clamp(10px, 3vh, 28px); }
   .hcb-lane { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 0 0 auto; }
   .hcb-slots {
     --tier: #ffd23f;
     display: flex; flex-direction: column-reverse; gap: 2px; cursor: pointer;
     box-sizing: border-box; align-items: center;
     width: calc(var(--cw) + 8px);
-    min-height: calc(var(--ch) * 5 + 8px); justify-content: flex-end;
+    /* fixed height so every lane matches regardless of card count: 5 cards +
+       4 inter-card gaps (2px) + top/bottom padding (4px). Previously min-height
+       omitted the gaps, so a FULL lane (the bust/lock case) ran ~8px taller. */
+    height: calc(var(--ch) * 5 + 8px + 8px); justify-content: flex-end;
     padding: 4px; border-radius: 9px; border: 2px dashed rgba(255,255,255,.14);
     background: rgba(0,0,0,.18); position: relative;
   }
@@ -136,6 +140,52 @@ const HCB_CSS = `
   .hcb-feed.bad .hand { color: #ff6b6b; }
   .hcb-feed .why { font-size: .56rem; letter-spacing: .1em; color: #ff9b9b; text-transform: uppercase; }
 
+  /* ── juice: lane-anchored burst, flying/falling chips, coral bloom ───────────
+     The generic fx-* nodes come from the shared <FxLayer> (src/lib/fx.jsx); the
+     look lives here, scoped under .hcb-fx. z-index 70 sits above .hcb-feed (60)
+     and below .hcb-overlay (80) so title/game-over always cover in-flight bits. */
+  .hcb-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
+  .hcb-fx .fx-burst {
+    position: absolute; transform: translate(-50%,-100%); white-space: nowrap; text-align: center;
+    font-family: 'Black Ops One',sans-serif; font-size: clamp(1.4rem,7vw,2.6rem); color: #3fffd0;
+    text-shadow: 0 0 10px rgba(63,255,208,.7), 0 2px 14px rgba(0,0,0,.7);
+    animation: hcb-burst 1100ms cubic-bezier(.18,.9,.24,1) forwards;
+  }
+  .hcb-fx .fx-burst.bad { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.7), 0 2px 14px rgba(0,0,0,.7); }
+  .hcb-fx .fx-burst .pts { display: block; font-family: 'Press Start 2P',monospace; font-size: .7rem; color: #ffd23f; margin-top: 5px; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
+  @keyframes hcb-burst {
+    0%   { opacity: 0; transform: translate(-50%,-90%)  scale(.6); }
+    18%  { opacity: 1; transform: translate(-50%,-100%) scale(1.18); }
+    32%  {            transform: translate(-50%,-100%) scale(1); }
+    78%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-150%) scale(1.02); }
+  }
+
+  .hcb-fx .fx-chip { position: absolute; width: 26px; height: 26px; transform: translate(-50%,-50%); will-change: transform,opacity; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+  .hcb-fx .fx-chip img { width: 100%; height: 100%; display: block; }
+  .hcb-fx .fx-chip.fly  { animation: hcb-chipfly 720ms cubic-bezier(.4,.05,.5,1) forwards; }
+  .hcb-fx .fx-chip.fall { animation: hcb-chipfall 760ms ease-in forwards; }
+  @keyframes hcb-chipfly {
+    0%   { opacity: 0; transform: translate(-50%,-50%) translate(0,0) scale(.7); }
+    12%  { opacity: 1; transform: translate(-50%,-50%) translate(calc(var(--dx)*.12), calc(var(--dy)*.12 + var(--arc))) scale(1); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(.6); }
+  }
+  @keyframes hcb-chipfall {
+    0%   { opacity: 1; transform: translate(-50%,-50%) translateY(0) rotate(0); }
+    100% { opacity: 0; transform: translate(-50%,-50%) translateY(var(--fall)) rotate(var(--spin)); }
+  }
+
+  .hcb-fx .fx-flash { position: absolute; inset: 0; background: radial-gradient(circle at var(--fx,50%) 42%, rgba(255,107,107,.30), transparent 60%); animation: hcb-flash 400ms ease-out forwards; }
+  @keyframes hcb-flash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+
+  .hcb-stat.chips.bump b { animation: hcb-hudbump 360ms ease-out; }
+  @keyframes hcb-hudbump { 50% { transform: scale(1.28); color: #fff; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hcb-fx .fx-burst, .hcb-fx .fx-chip, .hcb-fx .fx-flash { animation-duration: 1ms !important; }
+  }
+
   .hcb-overlay {
     position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 16px; text-align: center;
@@ -175,14 +225,33 @@ export default function ChipPanic() {
   const [panicPct, setPanicPct] = useState(1);
   // transient per-lane flashes for the scored/busted burst (lane index → "scored"|"busted")
   const [flash, setFlash] = useState({});
+  const [hudBump, setHudBump] = useState(false); // pulse the CHIPS counter when winnings land
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
+
+  const { parts, spawn, clear: clearFx } = useFx();
 
   const feedTimer = useRef(null);
   const flashTimer = useRef(null);
   const panicTimer = useRef(null); // { id, raf, start }
+  const bumpTimer = useRef(null);
   const gameRef = useRef(game); // latest game for timer/handler closures
   useEffect(() => { gameRef.current = game; }, [game]);
+
+  // Coordinate origin + targets for the fx overlay. All particle coords are
+  // root-relative (the overlay is inset:0 inside .hcb-root), so this stays
+  // correct even when the cabinet is letterboxed.
+  const rootRef = useRef(null);
+  const laneRefs = useRef([]);
+  const chipHudRef = useRef(null);
+  const reduceMotion = useRef(false);
+  useEffect(() => {
+    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    reduceMotion.current = !!mq?.matches;
+    const on = (e) => { reduceMotion.current = e.matches; };
+    mq?.addEventListener?.("change", on);
+    return () => mq?.removeEventListener?.("change", on);
+  }, []);
 
   useEffect(() => {
     const s = document.createElement("style");
@@ -205,6 +274,83 @@ export default function ChipPanic() {
     feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), 1500);
   }, []);
 
+  // Root-relative geometry for a lane + the HUD chip counter, read once at resolve
+  // time. Returns null if the refs aren't mounted (defensive — fx just no-ops).
+  const fxFromLane = useCallback((lane) => {
+    const rootEl = rootRef.current;
+    const laneEl = laneRefs.current[lane];
+    if (!rootEl || !laneEl) return null;
+    const root = rootEl.getBoundingClientRect();
+    const lr = laneEl.getBoundingClientRect();
+    const hr = chipHudRef.current?.getBoundingClientRect();
+    const laneX = lr.left - root.left + lr.width / 2;
+    return {
+      laneX,
+      laneTop: lr.top - root.top,
+      laneMidY: lr.top - root.top + lr.height * 0.35,
+      hudX: hr ? hr.left - root.left + hr.width / 2 : laneX,
+      hudY: hr ? hr.top - root.top + hr.height / 2 : 0,
+      lanePct: root.width ? (laneX / root.width) * 100 : 50,
+    };
+  }, []);
+
+  // Pulse the CHIPS counter (called when flying winnings land).
+  const bumpHud = useCallback((delay = 0) => {
+    clearTimeout(bumpTimer.current);
+    bumpTimer.current = setTimeout(() => {
+      setHudBump(true);
+      setTimeout(() => setHudBump(false), 380);
+    }, delay);
+  }, []);
+
+  const spawnFallingChips = useCallback((res, laneX, laneMidY) => {
+    const color = res.bet ? BET_TIERS[res.bet.tier].color : "white";
+    const src = chipImg(color);
+    const n = Math.min(res.chipsLost || 2, 6);
+    for (let i = 0; i < n; i++) {
+      spawn({
+        kind: "chip", src, x: laneX + (Math.random() * 30 - 15), y: laneMidY,
+        fall: 90 + Math.random() * 70, spin: Math.random() * 360 - 180,
+        delay: i * 40, ttl: 760 + i * 40,
+      });
+    }
+  }, [spawn]);
+
+  // Spawn the celebratory / loss particles for a resolved lane.
+  const spawnResolveFx = useCallback((res) => {
+    if (reduceMotion.current) return;
+    const geo = fxFromLane(res.laneIndex);
+    if (!geo) return;
+    const { laneX, laneTop, laneMidY, hudX, hudY, lanePct } = geo;
+    const won = res.bet && res.bet.won;
+
+    if (res.scored) {
+      const pts = res.multiplier > 1 ? `${res.basePoints} × ${res.multiplier} = ${res.points}` : `+${res.points}`;
+      spawn({ kind: "burst", x: laneX, y: laneTop, text: res.hand.name, pts, ttl: 1150 });
+      if (won && res.chipsReturned > 0) {
+        const n = Math.min(res.chipsReturned, 8);
+        const src = chipImg(BET_TIERS[res.bet.tier].color);
+        for (let i = 0; i < n; i++) {
+          spawn({
+            kind: "chip", src, x: laneX + (Math.random() * 18 - 9), y: laneMidY,
+            dx: hudX - laneX, dy: hudY - laneMidY, arc: -40 - Math.random() * 24,
+            delay: i * 55, ttl: 720 + i * 55 + 60,
+          });
+        }
+        bumpHud((n - 1) * 55 + 360); // pulse as the last chip arrives
+      } else if (res.chipsLost > 0) {
+        // scored, but the bet whiffed: small loss treatment
+        spawn({ kind: "flash", fxPct: lanePct, ttl: 420 });
+        spawnFallingChips(res, laneX, laneMidY);
+      }
+    } else {
+      // busted + locked
+      spawn({ kind: "flash", fxPct: lanePct, ttl: 420 });
+      spawn({ kind: "burst", x: laneX, y: laneTop, text: res.hand.name, pts: "BUST", bad: true, ttl: 1150 });
+      if (res.chipsLost > 0) spawnFallingChips(res, laneX, laneMidY);
+    }
+  }, [fxFromLane, spawn, bumpHud, spawnFallingChips]);
+
   // ── apply an engine result: store new state, animate, end the run if over ──────
   const applyResult = useCallback((next, result) => {
     setGame(next);
@@ -215,19 +361,18 @@ export default function ChipPanic() {
     const res = result.resolution;
     if (res) {
       const lane = res.laneIndex;
+      // The big hand-name + points reads from the lane-anchored burst (spawnResolveFx);
+      // .hcb-feed now only carries the explanatory "why" line for a failed bet.
+      spawnResolveFx(res);
       if (res.scored) {
         const won = res.bet && res.bet.won;
-        const math = res.multiplier > 1
-          ? `${res.basePoints} × ${res.multiplier} = ${res.points}`
-          : `+${res.points}`;
-        let why = "";
-        if (res.bet && !won) why = `bet failed · needed ${HAND_NAME[BET_TIERS[res.bet.tier].min]}+`;
-        showFeed({ hand: res.hand.name, math, why, kind: won ? "win" : (res.bet ? "bad" : "") });
+        if (res.bet && !won) {
+          showFeed({ hand: "", math: "", why: `bet failed · needed ${HAND_NAME[BET_TIERS[res.bet.tier].min]}+`, kind: "bad" });
+        }
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
       } else {
-        const why = res.bet ? "high card bust · bet lost" : "high card bust";
-        showFeed({ hand: res.hand.name, math: "lane locked", why, kind: "bad" });
+        showFeed({ hand: "", math: "", why: res.bet ? "high card bust · bet lost" : "high card bust", kind: "bad" });
         setFlash((f) => ({ ...f, [lane]: "busted" }));
       }
       clearTimeout(flashTimer.current);
@@ -241,7 +386,7 @@ export default function ChipPanic() {
       submit(next.score);
       setScreen(SCREEN.OVER);
     }
-  }, [showFeed, clearPanic, submit]);
+  }, [showFeed, spawnResolveFx, clearPanic, submit]);
 
   // ── Panic placement clock: arm a fresh timer whenever the tray changes ─────────
   useEffect(() => {
@@ -270,7 +415,10 @@ export default function ChipPanic() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, mode, game && game.tray && game.tray.id, game && game.draws]);
 
-  useEffect(() => () => { clearTimeout(feedTimer.current); clearTimeout(flashTimer.current); clearPanic(); }, [clearPanic]);
+  useEffect(() => () => {
+    clearTimeout(feedTimer.current); clearTimeout(flashTimer.current);
+    clearTimeout(bumpTimer.current); clearPanic();
+  }, [clearPanic]);
 
   // ── actions ────────────────────────────────────────────────────────────────
   const start = useCallback((m) => {
@@ -281,9 +429,11 @@ export default function ChipPanic() {
     setGame(g);
     setFeed(null);
     setFlash({});
+    setHudBump(false);
+    clearFx();
     setPanicPct(1);
     setScreen(SCREEN.PLAY);
-  }, [mode]);
+  }, [mode, clearFx]);
 
   const onLane = useCallback((l) => {
     const g = gameRef.current;
@@ -314,14 +464,14 @@ export default function ChipPanic() {
   const g = game;
 
   return (
-    <div className="hcb-root" style={rootStyle}>
+    <div className="hcb-root" style={rootStyle} ref={rootRef}>
       <div className="hcb-bar">
         <button className="hcb-btn" onClick={() => (screen === SCREEN.PLAY ? (clearPanic(), submit(g?.score || 0), setScreen(SCREEN.OVER)) : navigate("/"))}>
           {screen === SCREEN.PLAY ? "QUIT" : "← EXIT"}
         </button>
         <span className="sp" />
         <span className="hcb-stat">SCORE <b>{(g?.score || 0).toLocaleString()}</b></span>
-        <span className="hcb-stat chips">CHIPS <b>{g?.chips ?? START_CHIPS}</b></span>
+        <span className={`hcb-stat chips${hudBump ? " bump" : ""}`} ref={chipHudRef}>CHIPS <b>{g?.chips ?? START_CHIPS}</b></span>
         {screen === SCREEN.PLAY && (
           <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "CLASSIC"}</b></span>
         )}
@@ -370,6 +520,7 @@ export default function ChipPanic() {
               return (
                 <div
                   key={l}
+                  ref={(el) => { laneRefs.current[l] = el; }}
                   className={`hcb-lane ${betted ? "betted" : ""} ${expiring ? "expiring" : ""} ${locked ? "locked" : ""} ${fl || ""}`}
                   style={{ "--tier": glow(tier.color) }}
                 >
@@ -405,8 +556,10 @@ export default function ChipPanic() {
         </div>
       )}
 
+      <FxLayer parts={parts} className="hcb-fx" />
+
       <div className={`hcb-feed ${feed?.kind || ""} ${feed?.on ? "show" : ""}`}>
-        {feed && <span className="hand">{feed.hand}</span>}
+        {feed?.hand && <span className="hand">{feed.hand}</span>}
         {feed?.math && <span className="math">{feed.math}</span>}
         {feed?.why && <span className="why">{feed.why}</span>}
       </div>
