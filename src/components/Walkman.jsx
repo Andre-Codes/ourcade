@@ -17,6 +17,7 @@ export default function Walkman({ on, onStop }) {
   const playerRef = useRef(null);
   const orderRef = useRef([]); // this session's shuffled order, so we can map index → our track metadata
   const [now, setNow] = useState("");
+  const [started, setStarted] = useState(false); // has playback ever begun? gates Play→Next button
 
   useEffect(() => {
     if (!on) return;
@@ -35,15 +36,19 @@ export default function Walkman({ on, onStop }) {
           events: {
             // Argument form (array of video IDs) — the object form only takes a
             // real playlist/search list, not an ad-hoc list of ids. loadPlaylist
-            // both cues AND starts playback from index 0, so we do NOT also call
-            // playVideo() here: that earlier call raced the load (nothing cued
-            // yet) and got dropped, which is why the first track never started.
+            // cues from index 0; we then explicitly playVideo() to attempt a real
+            // autostart (the discman click is a user gesture, so this usually
+            // works). If the browser's autoplay policy blocks it anyway, the
+            // transport button falls back to a ▶ Play control until the first
+            // PLAYING event (see `started` below).
             onReady: (e) => {
               orderRef.current = shuffled();
               e.target.loadPlaylist(orderRef.current.map((t) => t.id));
+              e.target.playVideo?.();
             },
             onStateChange: (e) => {
               if (e.data === YT.PlayerState.PLAYING) {
+                setStarted(true); // playback has begun → button becomes ⏭ Next
                 // Use OUR clean metadata (Song — Artist) over YouTube's raw,
                 // often-messy video title. Map the current playlist position
                 // back to our shuffled order; fall back to the video id.
@@ -79,8 +84,18 @@ export default function Walkman({ on, onStop }) {
       playerRef.current = null;
       if (wrapRef.current) wrapRef.current.innerHTML = "";
       setNow("");
+      setStarted(false);
     };
   }, [on]);
+
+  // Fallback for when autoplay was blocked: kick playback off the user's tap.
+  const play = () => {
+    try {
+      playerRef.current?.playVideo?.();
+    } catch {
+      /* ignore */
+    }
+  };
 
   const next = () => {
     try {
@@ -112,15 +127,27 @@ export default function Walkman({ on, onStop }) {
           <span className="arcade-walkman-now">
             📻 <span className="arcade-walkman-marquee">{now || "spinning up…"}</span>
           </span>
-          <button
-            type="button"
-            className="arcade-walkman-btn"
-            onClick={next}
-            aria-label="Next track"
-            title="next track"
-          >
-            ⏭
-          </button>
+          {started ? (
+            <button
+              type="button"
+              className="arcade-walkman-btn"
+              onClick={next}
+              aria-label="Next track"
+              title="next track"
+            >
+              ⏭
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="arcade-walkman-btn"
+              onClick={play}
+              aria-label="Play"
+              title="play"
+            >
+              ▶
+            </button>
+          )}
           <button
             type="button"
             className="arcade-walkman-btn"

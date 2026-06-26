@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
    TETRIS — a self-contained classic marathon cabinet for Ourcade.
@@ -135,6 +136,26 @@ const DAS = 160; // ms before auto-shift kicks in
 const ARR = 45; // ms between auto-shifts once repeating
 const SOFT_FACTOR = 20; // soft drop is this much faster than gravity
 
+// ── Difficulty settings ──────────────────────────────────────────────────────
+// Players can opt into a harder game (no ghost piece, faster start level). Both
+// raise the score multiplier so the extra challenge pays off. Persisted so the
+// choice sticks between visits (same lsGetJSON/lsSetJSON tack as other cabinets).
+const SETTINGS_KEY = "tetris:settings"; // → ourcade:tetris:settings
+const MAX_START_LEVEL = 10;
+const DEFAULT_SETTINGS = { ghost: true, startLevel: 1 };
+function loadSettings() {
+  const s = lsGetJSON(SETTINGS_KEY, DEFAULT_SETTINGS) || DEFAULT_SETTINGS;
+  return {
+    ghost: s.ghost !== false,
+    startLevel: Math.min(MAX_START_LEVEL, Math.max(1, Math.round(s.startLevel || 1))),
+  };
+}
+// Ghost OFF = +0.10×; each starting level above 1 = +0.05×. Capped at 2.0×.
+function scoreMultFor(s) {
+  const m = 1 + (s.ghost ? 0 : 0.1) + (s.startLevel - 1) * 0.05;
+  return Math.min(2, Math.round(m * 100) / 100);
+}
+
 function makeBoard() {
   return Array.from({ length: TOTAL_ROWS }, () => Array(COLS).fill(null));
 }
@@ -151,12 +172,75 @@ function shuffled() {
 
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 
+// Difficulty panel shown from the title card. Ghost on/off + starting level,
+// with a live readout of the resulting score multiplier. Pure presentational —
+// it just edits the `settings` object owned by Tetris (persisted there).
+function SettingsPanel({ settings, setSettings, onClose }) {
+  const mult = scoreMultFor(settings);
+  const setLevel = (v) =>
+    setSettings((s) => ({ ...s, startLevel: Math.min(MAX_START_LEVEL, Math.max(1, v)) }));
+  return (
+    <div className="tetris-overlay tetris-set" onPointerDown={(e) => e.stopPropagation()}>
+      <div className="tetris-set-title">SETTINGS</div>
+
+      <div className="tetris-set-row">
+        <span className="tetris-set-label">GHOST PIECE</span>
+        <button
+          className={`tetris-btn tetris-set-toggle${settings.ghost ? " is-on" : ""}`}
+          onClick={() => setSettings((s) => ({ ...s, ghost: !s.ghost }))}
+        >
+          {settings.ghost ? "ON" : "OFF"}
+        </button>
+      </div>
+
+      <div className="tetris-set-row">
+        <span className="tetris-set-label">START LEVEL</span>
+        <div className="tetris-set-stepper">
+          <button
+            className="tetris-btn tetris-set-step"
+            onClick={() => setLevel(settings.startLevel - 1)}
+            disabled={settings.startLevel <= 1}
+            aria-label="Lower start level"
+          >
+            −
+          </button>
+          <b className="tetris-set-num">{settings.startLevel}</b>
+          <button
+            className="tetris-btn tetris-set-step"
+            onClick={() => setLevel(settings.startLevel + 1)}
+            disabled={settings.startLevel >= MAX_START_LEVEL}
+            aria-label="Raise start level"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div className="tetris-set-mult">
+        SCORE&nbsp;×&nbsp;<b>{mult.toFixed(2)}</b>
+        {mult > 1 && <span className="tetris-set-bonus"> harder = more points</span>}
+      </div>
+
+      <button className="tetris-btn tetris-btn-primary" onClick={onClose}>DONE</button>
+    </div>
+  );
+}
+
 export default function Tetris() {
   const navigate = useNavigate();
   const { submit, best } = useArcadeScore("tetris");
   const [screen, setScreen] = useState(SCREEN.TITLE);
   const [hud, setHud] = useState({ score: 0, lines: 0, level: 1 });
   const [paused, setPaused] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState(loadSettings);
+  // Mirror settings in a ref so newGame (a stable []-deps callback) reads the
+  // latest without being re-created, and persist the choice across visits.
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+    lsSetJSON(SETTINGS_KEY, settings);
+  }, [settings]);
 
   // Title + game-over screens show the BACK chrome; gameplay hides it.
   useArcadeBackButton(screen !== SCREEN.PLAY);
@@ -194,6 +278,7 @@ export default function Tetris() {
   const newGame = useCallback(() => {
     const bag = shuffled();
     const queue = bag.concat(shuffled());
+    const cfg = settingsRef.current; // chosen difficulty for this run
     G.current = {
       board: makeBoard(),
       queue, // upcoming types; we keep it long, refilling as needed
@@ -202,7 +287,9 @@ export default function Tetris() {
       holdUsed: false,
       score: 0,
       lines: 0,
-      level: 1,
+      level: cfg.startLevel, // faster baseline fall speed via gravityFor()
+      settings: cfg, // read by draw() for the ghost toggle
+      scoreMult: scoreMultFor(cfg), // applied to line-clear points
       gravityAcc: 0,
       lockTimer: 0,
       grounded: false,
@@ -221,7 +308,7 @@ export default function Tetris() {
       last: 0,
     };
     spawn();
-    setHud({ score: 0, lines: 0, level: 1 });
+    setHud({ score: 0, lines: 0, level: cfg.startLevel });
   }, []);
 
   // Pull the next type, refilling the queue from fresh bags.
@@ -335,9 +422,10 @@ export default function Tetris() {
     }
     const n = full.length;
     const base = [0, 100, 300, 500, 800][n] || 0;
-    g.score += base * g.level;
+    g.score += Math.round(base * g.level * (g.scoreMult || 1));
     g.lines += n;
-    g.level = Math.floor(g.lines / 10) + 1;
+    // Never drop below the chosen starting level as clears accrue.
+    g.level = Math.max(g.settings?.startLevel || 1, Math.floor(g.lines / 10) + 1);
     g.flashRows = [];
     setHud({ score: g.score, lines: g.lines, level: g.level });
     g.cur = null;
@@ -559,14 +647,16 @@ export default function Tetris() {
       }
     }
 
-    // Ghost + active piece.
+    // Ghost + active piece. Ghost is suppressed when the player turns it off.
     if (g.cur && !g.flashRows.length) {
-      const gy = ghostY();
-      const color = PIECES[g.cur.type].color;
-      for (const [cx, cy] of cellsOf(g.cur)) {
-        const x = g.cur.x + cx;
-        const y = gy + cy - HIDDEN;
-        if (y >= 0) drawGhost(ctx, x, y, cell, color);
+      if (g.settings?.ghost !== false) {
+        const gy = ghostY();
+        const color = PIECES[g.cur.type].color;
+        for (const [cx, cy] of cellsOf(g.cur)) {
+          const x = g.cur.x + cx;
+          const y = gy + cy - HIDDEN;
+          if (y >= 0) drawGhost(ctx, x, y, cell, color);
+        }
       }
       for (const [cx, cy] of cellsOf(g.cur)) {
         const x = g.cur.x + cx;
@@ -784,11 +874,20 @@ export default function Tetris() {
           <button className="tetris-btn tetris-btn-primary" onClick={() => { newGame(); setPaused(false); setScreen(SCREEN.PLAY); }}>
             ▶ PLAY
           </button>
+          <button className="tetris-btn" onClick={() => setShowSettings(true)}>⚙ SETTINGS</button>
           <button className="tetris-btn" onClick={() => navigate("/")}>‹ BACK TO OURCADE</button>
           <p className="tetris-help">
             ← → move · ↑/X rotate · Z rotate ccw · ↓ soft · <b>Space</b> hard drop · C hold · P pause
           </p>
         </div>
+      )}
+
+      {screen === SCREEN.TITLE && showSettings && (
+        <SettingsPanel
+          settings={settings}
+          setSettings={setSettings}
+          onClose={() => setShowSettings(false)}
+        />
       )}
 
       {screen === SCREEN.PLAY && (
@@ -962,4 +1061,23 @@ const CSS = `
 @media (hover:hover) and (pointer:fine){
   .tetris-pad{ opacity:.85; }
 }
+
+/* ── Settings panel (title screen) ── */
+.tetris-set{ gap:16px; padding:24px; }
+.tetris-set-title{ font-size:22px; font-weight:900; letter-spacing:6px; color:#34c5ff; text-shadow:0 0 12px rgba(52,197,255,.5); }
+.tetris-set-row{
+  display:flex; align-items:center; justify-content:space-between;
+  width:min(280px, 80vw); gap:16px;
+}
+.tetris-set-label{ font-size:12px; letter-spacing:2px; color:#9aa0c4; }
+/* Reuse .tetris-btn but compact, since these sit inline in a row. */
+.tetris-set-toggle{ min-width:78px; padding:9px 0; text-align:center; }
+.tetris-set-toggle.is-on{ background:#34c5ff; color:#06121b; box-shadow:0 0 14px rgba(52,197,255,.45); }
+.tetris-set-stepper{ display:flex; align-items:center; gap:12px; }
+.tetris-set-step{ min-width:42px; padding:8px 0; text-align:center; font-size:20px; line-height:1; }
+.tetris-set-step:disabled{ opacity:.35; cursor:default; }
+.tetris-set-num{ font-size:22px; color:#e8e8f4; min-width:24px; text-align:center; }
+.tetris-set-mult{ font-size:13px; letter-spacing:1px; color:#9aa0c4; }
+.tetris-set-mult b{ color:#ffd23c; font-size:16px; }
+.tetris-set-bonus{ color:#ffd23c; opacity:.8; font-size:11px; }
 `;

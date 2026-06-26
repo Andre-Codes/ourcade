@@ -136,8 +136,8 @@ const CSS = `
   box-shadow: 0 0 18px #3fffd0; animation: wm-stamp .5s cubic-bezier(.2,1.8,.4,1) .4s both;
 }
 @keyframes wm-stamp { from { opacity: 0; transform: rotate(-6deg) scale(2.4); } to { opacity: 1; transform: rotate(-6deg) scale(1); } }
-.wm-seen { margin-top: 16px; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: #9a86c2; }
-.wm-dismiss { margin-top: 22px; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: #7a6f9a; }
+.wm-seen { margin-top: 16px; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: #d7c8f0; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+.wm-dismiss { margin-top: 22px; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: #b9add6; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 
 .wm-confetti { position: absolute; top: -16px; opacity: .95; animation: wm-fall linear forwards; }
 @keyframes wm-fall { to { transform: translateY(112vh) rotate(720deg); opacity: .2; } }

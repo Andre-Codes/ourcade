@@ -188,9 +188,11 @@ export default function Home() {
 
   const onWalkmanClick = () => {
     setWalkmanOn(true);
+    // recordRelic is idempotent: isNew is true only the FIRST time it's awarded.
+    // Gate the reveal on that so the celebration fires once, not on every click.
     const { isNew } = recordRelic("badger-mixtape");
     const relic = relicById("badger-mixtape");
-    if (relic) setWalkmanRelic({ relic, isNew });
+    if (relic && isNew) setWalkmanRelic({ relic, isNew });
   };
 
   // ---- day-parts: the arcade looks/greets differently by time of day ----

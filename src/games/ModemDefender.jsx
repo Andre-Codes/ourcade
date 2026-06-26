@@ -678,7 +678,10 @@ export function ModemDefender({ onExit }) {
     bricks.current = bricks.current.filter((br) => br.hp > 0);
 
     // ── level clear? ──
-    if (mode.current === "wall" && bricks.current.length === 0 && phase === "running") {
+    // Only the destroyable (enemy) bricks gate the level. Loot crates are
+    // optional, so the last NON-loot brick ends the round; any un-broken 🎁
+    // crates are simply left behind (buildLevel rebuilds the wall fresh).
+    if (mode.current === "wall" && phase === "running" && !bricks.current.some((b) => !b.loot)) {
       level.current += 1;
       buildLevel(level.current);
       syncInv();
@@ -1112,11 +1115,16 @@ export const MD_CSS = `
 .md-paddle{position:absolute;transform:translate(-50%,-50%);z-index:14;pointer-events:none;will-change:left;display:flex;align-items:center;justify-content:center;transition:width 0.18s;}
 .md-paddle img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 10px rgba(63,255,208,0.5));}
 .md-paddle-hit img{animation:mdShake 0.26s ease;filter:drop-shadow(0 0 12px #ff2d55) brightness(1.3);}
-/* Shield ring wraps the modem's actual footprint. The paddle div tightly bounds
-   the sprite (width = paddle.w, height = sprite aspect), so sizing the ellipse to
-   a % of the div and centering on it hugs the modem regardless of the art's
-   internal asymmetry — and scales correctly when Broadband widens the paddle. */
-.md-paddle-shield::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:122%;height:128%;border-radius:50%;border:2px solid #30d158;box-shadow:0 0 16px #30d158,inset 0 0 14px #30d15866;animation:mdPulse 0.7s infinite;}
+/* Firewall active = tint the modem sprite GREEN and pulse-glow it (instead of an
+   overlay ring, which never centred cleanly on the asymmetric sprite). The
+   sepia→hue-rotate→saturate chain recolours arbitrary sprite art toward green;
+   the stacked drop-shadows are the force-field glow. Centred by construction
+   (it IS the sprite) and scales with Broadband's wider paddle automatically. */
+/* Compound .md-paddle.md-paddle-shield (both classes are on the SAME div) raises
+   specificity above .md-paddle-wide/.md-paddle-over img, so the green shield tint
+   wins whenever Firewall overlaps Broadband/Overclock. */
+.md-paddle.md-paddle-shield img{filter:drop-shadow(0 0 16px #30d158) drop-shadow(0 0 7px #30d158) brightness(1.08) sepia(1) hue-rotate(72deg) saturate(2.6);animation:mdShieldPulse 0.7s ease-in-out infinite;}
+@keyframes mdShieldPulse{0%,100%{filter:drop-shadow(0 0 12px #30d158) drop-shadow(0 0 5px #30d158) brightness(1.04) sepia(1) hue-rotate(72deg) saturate(2.4)}50%{filter:drop-shadow(0 0 22px #30d158) drop-shadow(0 0 10px #30d158) brightness(1.16) sepia(1) hue-rotate(72deg) saturate(2.9)}}
 .md-paddle-wide img{filter:drop-shadow(0 0 12px #0a84ff);}
 .md-paddle-over img{filter:drop-shadow(0 0 12px #ffd60a);}
 
