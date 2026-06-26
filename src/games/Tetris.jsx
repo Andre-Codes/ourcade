@@ -137,22 +137,27 @@ const ARR = 45; // ms between auto-shifts once repeating
 const SOFT_FACTOR = 20; // soft drop is this much faster than gravity
 
 // ── Difficulty settings ──────────────────────────────────────────────────────
-// Players can opt into a harder game (no ghost piece, faster start level). Both
+// Players can opt into a harder game (no ghost piece, faster base speed). Both
 // raise the score multiplier so the extra challenge pays off. Persisted so the
 // choice sticks between visits (same lsGetJSON/lsSetJSON tack as other cabinets).
+//
+// SPEED is a difficulty dial, NOT a starting level: everyone starts on LEVEL 1
+// and levels up every 10 lines the same way. A higher speed simply offsets the
+// gravity lookup (gravityFor(level + speed-1)), so level 1 — and every level
+// after — falls faster. This keeps the level number an honest "how far you got".
 const SETTINGS_KEY = "tetris:settings"; // → ourcade:tetris:settings
-const MAX_START_LEVEL = 10;
-const DEFAULT_SETTINGS = { ghost: true, startLevel: 1 };
+const MAX_SPEED = 10;
+const DEFAULT_SETTINGS = { ghost: true, speed: 1 };
 function loadSettings() {
   const s = lsGetJSON(SETTINGS_KEY, DEFAULT_SETTINGS) || DEFAULT_SETTINGS;
   return {
     ghost: s.ghost !== false,
-    startLevel: Math.min(MAX_START_LEVEL, Math.max(1, Math.round(s.startLevel || 1))),
+    speed: Math.min(MAX_SPEED, Math.max(1, Math.round(s.speed || 1))),
   };
 }
-// Ghost OFF = +0.10×; each starting level above 1 = +0.05×. Capped at 2.0×.
+// Ghost OFF = +0.10×; each speed step above 1 = +0.05×. Capped at 2.0×.
 function scoreMultFor(s) {
-  const m = 1 + (s.ghost ? 0 : 0.1) + (s.startLevel - 1) * 0.05;
+  const m = 1 + (s.ghost ? 0 : 0.1) + (s.speed - 1) * 0.05;
   return Math.min(2, Math.round(m * 100) / 100);
 }
 
@@ -177,8 +182,8 @@ const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 // it just edits the `settings` object owned by Tetris (persisted there).
 function SettingsPanel({ settings, setSettings, onClose }) {
   const mult = scoreMultFor(settings);
-  const setLevel = (v) =>
-    setSettings((s) => ({ ...s, startLevel: Math.min(MAX_START_LEVEL, Math.max(1, v)) }));
+  const setSpeed = (v) =>
+    setSettings((s) => ({ ...s, speed: Math.min(MAX_SPEED, Math.max(1, v)) }));
   return (
     <div className="tetris-overlay tetris-set" onPointerDown={(e) => e.stopPropagation()}>
       <div className="tetris-set-title">SETTINGS</div>
@@ -194,22 +199,22 @@ function SettingsPanel({ settings, setSettings, onClose }) {
       </div>
 
       <div className="tetris-set-row">
-        <span className="tetris-set-label">START LEVEL</span>
+        <span className="tetris-set-label">SPEED</span>
         <div className="tetris-set-stepper">
           <button
             className="tetris-btn tetris-set-step"
-            onClick={() => setLevel(settings.startLevel - 1)}
-            disabled={settings.startLevel <= 1}
-            aria-label="Lower start level"
+            onClick={() => setSpeed(settings.speed - 1)}
+            disabled={settings.speed <= 1}
+            aria-label="Lower speed"
           >
             −
           </button>
-          <b className="tetris-set-num">{settings.startLevel}</b>
+          <b className="tetris-set-num">{settings.speed}</b>
           <button
             className="tetris-btn tetris-set-step"
-            onClick={() => setLevel(settings.startLevel + 1)}
-            disabled={settings.startLevel >= MAX_START_LEVEL}
-            aria-label="Raise start level"
+            onClick={() => setSpeed(settings.speed + 1)}
+            disabled={settings.speed >= MAX_SPEED}
+            aria-label="Raise speed"
           >
             +
           </button>
@@ -287,8 +292,8 @@ export default function Tetris() {
       holdUsed: false,
       score: 0,
       lines: 0,
-      level: cfg.startLevel, // faster baseline fall speed via gravityFor()
-      settings: cfg, // read by draw() for the ghost toggle
+      level: 1, // everyone starts at level 1; cfg.speed offsets gravity instead
+      settings: cfg, // read by draw() for the ghost toggle + speed offset
       scoreMult: scoreMultFor(cfg), // applied to line-clear points
       gravityAcc: 0,
       lockTimer: 0,
@@ -308,7 +313,7 @@ export default function Tetris() {
       last: 0,
     };
     spawn();
-    setHud({ score: 0, lines: 0, level: cfg.startLevel });
+    setHud({ score: 0, lines: 0, level: 1 });
   }, []);
 
   // Pull the next type, refilling the queue from fresh bags.
@@ -424,8 +429,8 @@ export default function Tetris() {
     const base = [0, 100, 300, 500, 800][n] || 0;
     g.score += Math.round(base * g.level * (g.scoreMult || 1));
     g.lines += n;
-    // Never drop below the chosen starting level as clears accrue.
-    g.level = Math.max(g.settings?.startLevel || 1, Math.floor(g.lines / 10) + 1);
+    // Level starts at 1 and climbs one per 10 lines, the same for everyone.
+    g.level = Math.floor(g.lines / 10) + 1;
     g.flashRows = [];
     setHud({ score: g.score, lines: g.lines, level: g.level });
     g.cur = null;
@@ -554,8 +559,10 @@ export default function Tetris() {
         }
       }
 
-      // Gravity (soft drop multiplies fall speed).
-      const interval = g.soft ? Math.max(gravityFor(g.level) / SOFT_FACTOR, 12) : gravityFor(g.level);
+      // Gravity (soft drop multiplies fall speed). SPEED offsets the gravity
+      // lookup so a higher difficulty falls faster at every level, level 1 up.
+      const fall = gravityFor(g.level + ((g.settings?.speed || 1) - 1));
+      const interval = g.soft ? Math.max(fall / SOFT_FACTOR, 12) : fall;
       g.gravityAcc += dt;
       while (g.gravityAcc >= interval) {
         g.gravityAcc -= interval;
@@ -676,7 +683,7 @@ export default function Tetris() {
     // pushed down so it reads as sitting under the right-side HUD overlay.
     const panelW = SIDE * cell - cell * 0.6;
     drawMini(ctx, "HOLD", g.hold, cell * 0.3, cell * 0.3, panelW, cell);
-    drawMini(ctx, "NEXT", previewQueue(g, 1)[0], boardX + boardW + cell * 0.3, cell * 5.2, panelW, cell);
+    drawMini(ctx, "NEXT", previewQueue(g, 1)[0], boardX + boardW + cell * 0.3, cell * 7, panelW, cell);
   }
 
   function previewQueue(g, n) {
@@ -1004,7 +1011,7 @@ const CSS = `
    eats vertical space from (or clips above) the board. */
 .tetris-hud{
   position:absolute; top:8px; right:8px; z-index:2;
-  display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px;
   pointer-events:none; /* taps fall through to the canvas… */
 }
 .tetris-hud .tetris-pause{ pointer-events:auto; } /* …except the pause button */
