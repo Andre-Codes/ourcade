@@ -24,6 +24,7 @@ const KENNEY = join(root, "assets-src", "kenney");
 const BOARD = join(KENNEY, "board_game_icons");
 const GENERIC = join(KENNEY, "generic_items_white", "colored");
 const CARD_SRC = join(KENNEY, "cards");
+const CHIP_SRC = join(KENNEY, "Chips");
 const OUT = join(root, "public", "games", "kenney");
 
 const TRIM = { threshold: 10 };
@@ -50,6 +51,20 @@ for (const [s, dir] of Object.entries(SUIT_DIR)) {
     CARDS.push(c(`card${dir}${label}`, `${s}${r}`));
   }
 }
+
+// --- chips/: poker chips for Video Poker / Blackjack / Chip Panic ---------------
+// Source faces are top-down chips with a white rim (the `_border` variants read as
+// classic poker chips). Output named by color so the casino cabinets pick
+// denominations (e.g. chipImg("red")). Chips keep their full round shape, so no
+// trim — same as cards.
+const ch = (from, name) => ({ from: "chip", src: from, name, trim: false });
+const CHIPS = [
+  ch("chipWhite_border", "white"),
+  ch("chipRedWhite_border", "red"),
+  ch("chipBlue_border", "blue"),
+  ch("chipGreen_border", "green"),
+  ch("chipBlackWhite_border", "black"),
+];
 
 // --- dice/: die shapes + d6 faces for the Dice Roller overhaul (§4) -------------
 const DICE = [
@@ -78,12 +93,14 @@ const ICONS = [
   g("050", "laptop"), g("086", "cursor"),
 ];
 
-const SETS = { cards: CARDS, dice: DICE, memory: MEMORY, icons: ICONS };
+const SETS = { cards: CARDS, chips: CHIPS, dice: DICE, memory: MEMORY, icons: ICONS };
 
 const CARD_WIDTH = 200; // card faces are larger + uniform (not trimmed).
+const CHIP_WIDTH = 128; // round chip tokens; features scale down further in CSS.
 
 function resolve(job) {
   if (job.from === "card") return join(CARD_SRC, `${job.src}.png`);
+  if (job.from === "chip") return join(CHIP_SRC, `${job.src}.png`);
   return job.from === "generic" ? join(GENERIC, job.src) : join(BOARD, job.src);
 }
 
@@ -94,9 +111,10 @@ async function processIcon(set, job) {
     return false;
   }
   let pipe = sharp(input);
-  if (job.trim !== false) pipe = pipe.trim(TRIM); // cards keep their full rectangle
+  if (job.trim !== false) pipe = pipe.trim(TRIM); // cards/chips keep their full shape
+  const width = job.from === "card" ? CARD_WIDTH : job.from === "chip" ? CHIP_WIDTH : WIDTH;
   await pipe
-    .resize({ width: job.from === "card" ? CARD_WIDTH : WIDTH, withoutEnlargement: true })
+    .resize({ width, withoutEnlargement: true })
     .webp(WEBP)
     .toFile(join(OUT, set, `${job.name}.webp`));
   console.log(`  ${set}/${job.name}.webp`);

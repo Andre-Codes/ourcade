@@ -1,37 +1,14 @@
 /* Klondike Solitaire — pure game logic (no React, no DOM).
    Kept view-free and unit-testable, mirroring src/games/relic-run/logic.js.
-   The component (Solitaire.jsx) renders this state and calls these helpers. */
+   The component (Solitaire.jsx) renders this state and calls these helpers.
 
-export const SUITS = ["S", "H", "D", "C"]; // spades, hearts, diamonds, clubs
-export const RED = new Set(["H", "D"]);
-export const RANKS = 13; // A=1 … K=13
+   Deck primitives (freshDeck/shuffle/card shape) now live in the shared
+   src/games/cards/deck.js so every card cabinet uses one source of truth;
+   they're re-exported here so existing Solitaire imports keep working. */
 
-export const isRed = (suit) => RED.has(suit);
-export const rankLabel = (r) =>
-  ({ 1: "A", 11: "J", 12: "Q", 13: "K" }[r] || String(r));
+import { SUITS, RANKS, isRed, freshDeck, shuffle } from "../cards/deck.js";
 
-// A card: { rank:1..13, suit:"S|H|D|C", faceUp:bool, id:"H7" }.
-function makeCard(rank, suit) {
-  return { rank, suit, faceUp: false, id: suit + rank };
-}
-
-// Full 52-card deck (ordered; caller shuffles).
-export function freshDeck() {
-  const deck = [];
-  for (const suit of SUITS) for (let r = 1; r <= RANKS; r++) deck.push(makeCard(r, suit));
-  return deck;
-}
-
-// Fisher–Yates with an optional rng (defaults to Math.random) — passing a seeded
-// rng would enable a future "Daily Deal" mode without touching this function.
-export function shuffle(deck, rng = Math.random) {
-  const a = deck.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+export { SUITS, RANKS, isRed, rankLabel, freshDeck, shuffle } from "../cards/deck.js";
 
 /* Game state shape:
    {

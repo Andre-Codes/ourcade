@@ -13,6 +13,11 @@ export const kImg = (set, name) =>
 export const cardImg = (id) => kImg("cards", id);
 export const cardBackImg = () => kImg("cards", "back");
 
+// Poker-chip URL by color (the casino cabinets: Video Poker / Blackjack / Chip
+// Panic). `color` is one of CHIP_COLORS below → .../chips/<color>.webp.
+export const CHIP_COLORS = ["white", "red", "blue", "green", "black"];
+export const chipImg = (color) => kImg("chips", color);
+
 // Memory Match pool — the curated retro/everyday objects (must exist in /memory).
 export const MEMORY_ICONS = [
   "laptop", "monitor", "mp3", "phone", "cassette", "floppy", "usb", "gamepad",
