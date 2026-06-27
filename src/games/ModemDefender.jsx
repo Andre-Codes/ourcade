@@ -130,9 +130,9 @@ const ITEM_ORDER = ["firewall", "forkbomb", "buffering", "broadband", "overclock
 // Pacing / tuning constants (kept together for playtest retuning).
 const LEVELS_PER_BOSS = 5;
 const BOSS_BASE_HP = 50; // boss #1 HP; × boss number thereafter
-const BALL_BASE_SPEED = 360; // px/sec at level 1
+const BALL_BASE_SPEED = 400; // px/sec at level 1
 const BALL_SPEED_PER_LEVEL = 16; // +px/sec each level
-const BALL_SPEED_MAX = 620;
+const BALL_SPEED_MAX = 660;
 const PADDLE_W = 96;
 const PADDLE_W_WIDE = 168; // Broadband
 const PADDLE_Y_FRAC = 0.8; // paddle sits here; leaves a clear gap above the item bar
@@ -152,7 +152,7 @@ const MAX_WALL_MISSILES = 4;
 const MAX_SWARM = 16;
 // Ball-overspeed (from hitting an `overheat` brick): a timed effect parked in the
 // same inv.active map the skills use, so it auto-expires and BUFFERING can clear it.
-const OVERSPEED_MULT = 1.5; // ball moves 50% faster while active
+const OVERSPEED_MULT = 1.7; // ball moves 50% faster while active
 const OVERSPEED_DUR = 5000; // ms
 const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 80 };
 // Stacking: how many of each item you can hold, by level reached.
@@ -569,7 +569,9 @@ export function ModemDefender({ onExit }) {
     const W = box?.width || 360;
     const H = box?.height || 600;
     const slow = isActive("buffering") ? 0.5 : 1;
-    const boost = isActive("overspeed") ? OVERSPEED_MULT : 1; // ball-only overspeed (turbo pop-up)
+    // Ball-only overspeed (turbo pop-up). A MULTIPLIER on the current velocity, so it
+    // scales with the base/per-level speed automatically: faster base ⇒ faster turbo.
+    const boost = isActive("overspeed") ? OVERSPEED_MULT : 1;
     const shield = isActive("firewall");
     const wide = isActive("broadband");
     const pierce = isActive("overclock");
