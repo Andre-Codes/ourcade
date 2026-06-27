@@ -80,7 +80,9 @@ export const HAND_POINTS = {
    indices 1+ are optional RAISES layered on top. A raise WINS if the lane resolves
    with rank >= `min`; `mult` multiplies the base points; `profit` is chips returned
    ABOVE the raise stake on a win. `extra` is the chips a raise costs beyond the ante
-   already paid. `color` is the Kenney chip art name (Gold → green; no gold art). */
+   already paid. `color` is the Kenney chip art name (Gold → green; no gold art).
+   The color sequence here (blue, red, green, black) is the canonical CHIP_ORDER
+   (src/lib/kenney.js) that Blackjack and Video Poker also follow. */
 export const TIERS = [
   { key: "ante",  label: "Ante",  color: "blue",  extra: 0, min: SCORE_MIN,      mult: 1, profit: 0, reqLabel: "TWO PAIR+" },
   { key: "red",   label: "Red",   color: "red",   extra: 1, min: HAND.THREE,     mult: 3, profit: 1, reqLabel: "TRIPS+" },

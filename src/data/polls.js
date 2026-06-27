@@ -33,6 +33,12 @@ export function getTodaysPoll(key) {
   return rotateDaily(POLLS, key, SALT);
 }
 
+// An exact poll by id — lets a shared deep-link render THAT poll in the daily
+// slot regardless of the day's rotation. undefined if the id is unknown.
+export function getPoll(id) {
+  return POLLS.find((p) => p.id === id);
+}
+
 // A tiny per-option vanity seed so a brand-new poll never renders as all-zeros.
 // Small (3..12) and deterministic, so REAL votes quickly dominate — the bars
 // move as actual people vote. `counts` is the live Firestore tally map.

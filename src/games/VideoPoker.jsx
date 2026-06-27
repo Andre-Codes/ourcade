@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
-import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
+import { cardImg, cardBackImg, chipImg, CHIP_ORDER } from "../lib/kenney.js";
 import { playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND, HAND_NAME } from "./poker/handEval.js";
@@ -296,7 +296,7 @@ export default function VideoPoker() {
     const sy = sb.top - rb.top + sb.height / 2;
     const dx = (tb.left + tb.width / 2) - (sb.left + sb.width / 2);
     const dy = (tb.top + tb.height / 2) - (sb.top + sb.height / 2);
-    const colors = ["red", "blue", "green", "black", "red"];
+    const colors = [...CHIP_ORDER, CHIP_ORDER[0]]; // blue, red, green, black, blue
     for (let i = 0; i < 5; i++) {
       spawn({
         kind: "chip", x: sx + (i - 2) * 24, y: sy, src: chipImg(colors[i]),
@@ -329,6 +329,12 @@ export default function VideoPoker() {
   function rowPay(rank) {
     if (rank === HAND.ROYAL_FLUSH && bet >= MAX_BET) return 4000;
     return (JACKS_OR_BETTER_PAYTABLE[rank] || 0) * bet;
+  }
+  // Bet-chip color by tier, through the canonical CHIP_ORDER (blue, red, green,
+  // black) so it matches Blackjack / High Card Bust: 1→blue, 2→red, 3-4→green, 5→black.
+  function betChipColor(b) {
+    const tier = b >= 5 ? 3 : b >= 3 ? 2 : b >= 2 ? 1 : 0;
+    return CHIP_ORDER[tier];
   }
   // Which paytable row is lit by the current shown hand (settled phase only).
   const settled = phase === "settled" && hand ? payout(hand, bet) : null;
@@ -386,7 +392,7 @@ export default function VideoPoker() {
         {phase === "bet" && (
           <div className="vp-controls">
             <button className="vp-betbtn" onPointerDown={() => changeBet(-1)}>− BET</button>
-            <img className="vp-chip" src={chipImg(bet >= 5 ? "black" : bet >= 3 ? "green" : bet >= 2 ? "blue" : "red")} alt="" draggable="false" />
+            <img className="vp-chip" src={chipImg(betChipColor(bet))} alt="" draggable="false" />
             <button className="vp-betbtn" onPointerDown={() => changeBet(1)}>BET +</button>
             <button className="vp-betbtn" onPointerDown={() => setBet(Math.min(MAX_BET, credits))}>MAX</button>
             <button className="vp-big" onPointerDown={onDeal} disabled={credits < bet}>DEAL</button>

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { getSticker } from "../data/manual/stickers.js";
 import { recordDeepCutsUnlocked, getFavorites, toggleFavorite, recordRelic } from "../lib/store.js";
@@ -9,6 +9,7 @@ import { getDayPartGreeting } from "../data/dayparts.js";
 import { useAuth } from "../lib/AuthProvider.jsx";
 import { usePhone } from "../lib/PhoneProvider.jsx";
 import DailyBand from "./DailyBand.jsx";
+import { parseFocus, focusElementId } from "../lib/focus.js";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import Walkman from "./Walkman.jsx";
 import WalkmanCelebration from "./WalkmanCelebration.jsx";
@@ -195,6 +196,46 @@ export default function Home() {
     if (relic && isNew) setWalkmanRelic({ relic, isNew });
   };
 
+  // ---- deep-link focus: `#/?focus=<type>:<id>` scrolls to a home widget ----
+  const [searchParams] = useSearchParams();
+  const focus = useMemo(() => parseFocus(searchParams.get("focus")), [searchParams]);
+  const focusPollId = focus?.type === "poll" ? focus.id : null;
+  const focusDoneRef = useRef(null); // last token handled (idempotent under StrictMode)
+  useEffect(() => {
+    if (!focus) return;
+    const token = `${focus.type}:${focus.id}`;
+    if (focusDoneRef.current === token) return;
+    const elId = focusElementId(focus.type, focus.id);
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    let tries = 0;
+    let removeTimer = 0;
+    // The widget can settle a frame or two after first paint (images/reflow), so
+    // retry by id via rAF up to ~1s rather than guessing a fixed delay.
+    const tick = () => {
+      const el = document.getElementById(elId);
+      if (el) {
+        focusDoneRef.current = token;
+        el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+        el.classList.add("is-focus-target");
+        removeTimer = window.setTimeout(() => el.classList.remove("is-focus-target"), 2400);
+        return;
+      }
+      if (tries++ < 60) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        // Stale/unknown id (e.g. a poll that's since rotated out and didn't pin):
+        // at least land on the daily band so the link isn't a no-op.
+        document.getElementById("arcade-today")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(removeTimer);
+    };
+  }, [focus]);
+
   // ---- day-parts: the arcade looks/greets differently by time of day ----
   const key = useMemo(() => todayKey(), []);
   const [part, setPart] = useState(() => dayPart());
@@ -351,7 +392,7 @@ export default function Home() {
         </div>
       </div>
 
-      <DailyBand dayPart={part} />
+      <DailyBand dayPart={part} focusPollId={focusPollId} />
 
       <div className="arcade-search" id="arcade-search">
         <input

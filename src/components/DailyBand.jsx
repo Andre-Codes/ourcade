@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
 import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
-import { getTodaysPoll, realTally } from "../data/polls.js";
+import { getTodaysPoll, getPoll, realTally } from "../data/polls.js";
 import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import { getTodaysFact } from "../data/facts.js";
@@ -20,6 +20,7 @@ import {
 import { usePollCounts, castVote } from "../lib/votes.js";
 import FlashTheater from "./FlashTheater.jsx";
 import ShareButton from "./ShareButton.jsx";
+import { focusElementId, focusUrl } from "../lib/focus.js";
 import Top8HeartButton from "./Top8HeartButton.jsx";
 import { factId } from "../data/content.js";
 import byteBadger from "../assets/byte-badger.webp";
@@ -76,8 +77,9 @@ function GameOfTheDay({ dayKey: key }) {
 }
 
 // ── Daily poll ────────────────────────────────────────────────────────────
-function DailyPoll({ dayKey: key }) {
-  const poll = getTodaysPoll(key);
+function DailyPoll({ dayKey: key, focusPollId }) {
+  // A deep-link (?focus=poll:<id>) pins THAT poll; otherwise the daily rotation.
+  const poll = (focusPollId && getPoll(focusPollId)) || getTodaysPoll(key);
   const [vote, setVote] = useState(() => (poll ? getPollVote(poll.id) : null));
   const counts = usePollCounts(poll?.id);
   if (!poll) return null;
@@ -92,7 +94,7 @@ function DailyPoll({ dayKey: key }) {
   const results = vote ? realTally(poll, counts) : null;
 
   return (
-    <div className="arcade-widget arcade-poll">
+    <div className="arcade-widget arcade-poll" id={focusElementId("poll", poll.id)}>
       <span className="arcade-widget-kicker">📊 TODAY&apos;S POLL</span>
       <p className="arcade-poll-q">{poll.question}</p>
       {!vote ? (
@@ -129,6 +131,7 @@ function DailyPoll({ dayKey: key }) {
             label="Share this poll"
             title="Ourcade — Today's Poll"
             text={`Today's Ourcade poll: ${poll.question}`}
+            url={focusUrl("poll", poll.id)}
           />
         </div>
       )}
@@ -148,7 +151,7 @@ function QuizTeaser({ dayKey: key }) {
           const priorId = getQuizResult(quiz.id);
           const prior = priorId ? quiz.results.find((r) => r.id === priorId) : null;
           return (
-            <li key={quiz.id}>
+            <li key={quiz.id} id={focusElementId("quiz", quiz.id)}>
               <Link to={`/quiz/${quiz.id}`} className="arcade-quizteaser-item">
                 <span className="arcade-quizteaser-title">{quiz.title}</span>
                 {prior ? (
@@ -424,7 +427,7 @@ function SiteNews({ dayKey: key }) {
   );
 }
 
-export default function DailyBand({ dayPart }) {
+export default function DailyBand({ dayPart, focusPollId }) {
   // one "today" for the whole band (respects the ?day= dev override)
   const key = useMemo(() => todayKey(), []);
   const [streak, setStreak] = useState(1);
@@ -442,7 +445,7 @@ export default function DailyBand({ dayPart }) {
       <div className="arcade-daily-grid">
         <GameOfTheDay dayKey={key} />
         <div className="arcade-daily-side">
-          <DailyPoll dayKey={key} />
+          <DailyPoll dayKey={key} focusPollId={focusPollId} />
           <QuizTeaser dayKey={key} />
           <GameFact dayKey={key} />
         </div>

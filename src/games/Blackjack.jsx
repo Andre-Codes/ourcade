@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
-import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
+import { cardImg, cardBackImg, chipImg, CHIP_ORDER } from "../lib/kenney.js";
 import { playSfx, playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
 import {
@@ -20,10 +20,11 @@ const START_CHIPS = 100;
 const MAX_BET = 50;
 const FEED_MS = 2400;          // result-panel visible duration
 const DEALER_STEP_MS = 460;    // pause between each dealer card reveal
-const CHIP_DENOMS = [
-  { v: 25, color: "black" }, { v: 10, color: "blue" },
-  { v: 5, color: "green" }, { v: 1, color: "red" },
-];
+// Denominations low → high paired with the canonical CHIP_ORDER (blue, red, green,
+// black) so chips read the same across every cabinet. Displayed high → low below.
+const CHIP_DENOMS = [1, 5, 10, 25]
+  .map((v, i) => ({ v, color: CHIP_ORDER[i] }))
+  .reverse();
 
 const BJ_CSS = `
   .bj-root {

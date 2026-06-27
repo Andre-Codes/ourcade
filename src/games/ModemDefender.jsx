@@ -75,8 +75,8 @@ const BRICKS = {
   popup: { w: 58, hp: 1, score: 100, drain: 6, art: "popup.webp", fires: 0, weight: 10, minLevel: 1 },
   spam: { w: 54, hp: 1, score: 120, drain: 5, art: "spam.webp", fires: 0, weight: 7, minLevel: 1 },
   banner: { w: 104, hp: 2, score: 150, drain: 7, art: "banner.webp", fires: 0, weight: 5, minLevel: 2 },
-  virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", fires: 5200, weight: 5, minLevel: 3 },
-  clippy: { w: 66, hp: 3, score: 220, drain: 9, art: "clippy.webp", fires: 6000, weight: 4, minLevel: 4 },
+  virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", fires: 8500, weight: 5, minLevel: 3 },
+  clippy: { w: 66, hp: 3, score: 220, drain: 9, art: "clippy.webp", fires: 10000, weight: 4, minLevel: 4 },
   toolbar: { w: 92, hp: 4, score: 260, drain: 8, art: "toolbar.webp", fires: 0, weight: 4, minLevel: 5 },
 };
 
@@ -108,6 +108,11 @@ const HEAL_AMOUNT = 10; // connection restored by an instant heal crate
 const HEAL_WEIGHT = 5; // heal's relative weight in the crate loot roll (vs items)
 const BOSS_HEAL = 50; // connection restored on beating a boss (big checkpoint heal)
 const LOOT_PER_LEVEL = [1, 3]; // min..max loot crates woven into a wall
+// Cap on hostile missiles ALIVE at once from the wall. Independent of
+// ENTITY_CAP.missiles (an array bound) — this keeps on-screen pressure constant
+// no matter how many shooters a level rolls, so a 1-shooter and a 3-shooter
+// level feel comparable instead of the latter being a barrage.
+const MAX_WALL_MISSILES = 4;
 const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 80 };
 // Stacking: how many of each item you can hold, by level reached.
 const STACK_T1 = 5; // level ≥5 (after first boss) → hold 2
@@ -612,12 +617,16 @@ export function ModemDefender({ onExit }) {
 
     // ── bricks: missile fire ──
     if (mode.current === "wall") {
+      // Throttle by how many hostile missiles are already airborne, so the
+      // barrage is bounded regardless of shooter count (see MAX_WALL_MISSILES).
+      let liveHostile = missiles.current.reduce((n, m) => n + (m.hostile ? 1 : 0), 0);
       for (const br of bricks.current) {
         if (br.loot || !br.fires) continue;
         if (t > br.nextShot) {
           br.nextShot = t + br.fires * rand(0.8, 1.4);
-          if (missiles.current.length < ENTITY_CAP.missiles) {
+          if (liveHostile < MAX_WALL_MISSILES && missiles.current.length < ENTITY_CAP.missiles) {
             missiles.current.push({ id: uid(), x: br.x, y: br.y + br.h / 2, vx: 0, vy: 200, w: 10, hostile: true });
+            liveHostile++;
           }
         }
       }

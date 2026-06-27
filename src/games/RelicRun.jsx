@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
 import { lsGetJSON, lsSetJSON, recordRelic, getDiscoveredRelics, mirrorRelicRunStreak, recordRelicRun, getRelicRunStats } from "../lib/store.js";
 import { relicById } from "../data/relics.js";
@@ -146,7 +147,10 @@ function Article({ article, ctx }) {
 // so it always reflects the latest recorded run.
 function StatsOverlay({ streak, onClose }) {
   const stats = useMemo(() => getRelicRunStats(), []);
-  return (
+  // Portal to <body> so the position:fixed backdrop is viewport-relative — the
+  // game lives inside .arcade-stage (position:relative), which would otherwise
+  // become its containing block and clip the overlay at the left edge.
+  const overlay = (
     <div className="rr-statswrap" role="dialog" aria-label="Web Run stats" onClick={onClose}>
       <div className="rr-statscard" onClick={(e) => e.stopPropagation()}>
         <div className="rr-statshead">📊 YOUR WEB RUN STATS</div>
@@ -172,6 +176,8 @@ function StatsOverlay({ streak, onClose }) {
       </div>
     </div>
   );
+  if (typeof document === "undefined") return overlay;
+  return createPortal(overlay, document.body);
 }
 
 export default function RelicRun() {

@@ -16,6 +16,10 @@ export const cardBackImg = () => kImg("cards", "back");
 // Poker-chip URL by color (the casino cabinets: Video Poker / Blackjack / Chip
 // Panic). `color` is one of CHIP_COLORS below → .../chips/<color>.webp.
 export const CHIP_COLORS = ["white", "red", "blue", "green", "black"];
+// Canonical bet-chip color order, low → high denomination. Every casino cabinet
+// (Blackjack / Video Poker / High Card Bust) maps its denominations to colors by
+// ascending value through this list so the chips read consistently across games.
+export const CHIP_ORDER = ["blue", "red", "green", "black"];
 export const chipImg = (color) => kImg("chips", color);
 
 // Memory Match pool — the curated retro/everyday objects (must exist in /memory).

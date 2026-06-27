@@ -47,6 +47,13 @@ export default function QuizPage() {
   const game = result && getGame(result.gameId);
   const playLabel = game?.category === "tool" ? "TRY THIS ▶" : "PLAY THIS ▶";
 
+  // Canonical permalink to THIS quiz, independent of how the page was reached
+  // (SPA nav can leave the URL at `…/#/` rather than `…/#/quiz/<id>`).
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.href.split("#")[0]}#/quiz/${quiz.id}`
+      : undefined;
+
   return (
     <div className="arcade-stage arcade-quiz-stage">
       <BackBar />
@@ -96,6 +103,7 @@ export default function QuizPage() {
                 label="Share result"
                 title={`Ourcade Quiz — ${quiz.title}`}
                 text={`${result.emoji} I got "${result.title}" on the Ourcade quiz "${quiz.title}"! What do you get?`}
+                url={shareUrl}
               />
               <Link to="/" className="arcade-quiz-home">
                 ← back to arcade

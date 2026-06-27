@@ -1097,6 +1097,16 @@ main > section + section { margin-top: 44px; }
 .arcade-quizteaser-cta, .arcade-quizteaser-prior { display: block; font-size: 0.8rem; color: #b8bcd8; margin: 0; line-height: 1.5; }
 .arcade-quizteaser-cta b, .arcade-quizteaser-prior b { color: var(--neon-aqua); }
 
+/* ---- deep-link focus flash (poll / quiz teaser landed on via #/?focus=...) ---- */
+.is-focus-target { animation: arcade-focus-flash 2.4s ease-out; border-radius: 12px; }
+@keyframes arcade-focus-flash {
+  0%, 12% { box-shadow: 0 0 0 3px var(--neon-violet), 0 0 28px rgba(180,77,255,.55); }
+  100%    { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-focus-target { animation: none; outline: 3px solid var(--neon-violet); outline-offset: 2px; }
+}
+
 /* ---- stumble button ---- */
 .arcade-stumble {
   font-family: 'Press Start 2P', monospace; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.03em;
