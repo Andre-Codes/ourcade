@@ -22,17 +22,48 @@ function Field({ label, ...props }) {
   );
 }
 
-// Profile editor shown to a named user on /me: avatar, theme, bio, and a
-// favorites toggle list. Writes through AuthProvider.updateProfile (public
-// profile doc) and store.toggleFavorite (which also syncs favorites up).
+// Favorites picker shown on /me's ⭐ tab: a toggle list of the categorized games.
+// store.toggleFavorite writes localStorage AND syncs the array up to the public
+// profile; it fires ourcade:storechange, so the PROFILE tab's ProfileView updates
+// live without a reload.
+function FavoritesEditor() {
+  const [favs, setFavs] = useState(() => getFavorites());
+  const onToggleFav = (id) => setFavs(toggleFavorite(id));
+
+  return (
+    <div className="arcade-editor">
+      <div className="arcade-editor-row">
+        <span className="arcade-editor-label">your arcade (favorites)</span>
+        <div className="arcade-fave-toggle-list">
+          {GAMES.filter((g) => g.category).map((g) => {
+            const on = favs.includes(g.id);
+            return (
+              <button
+                key={g.id}
+                type="button"
+                className={`arcade-fave-toggle${on ? " is-on" : ""}`}
+                onClick={() => onToggleFav(g.id)}
+                aria-pressed={on}
+              >
+                <span className="arcade-fave-toggle-star">{on ? "⭐" : "☆"}</span>
+                <span>{g.emoji} {g.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Profile editor shown to a named user on /me: avatar, theme, and bio. Writes
+// through AuthProvider.updateProfile (public profile doc). Favorites live on
+// their own ⭐ tab (FavoritesEditor).
 function ProfileEditor({ profile, updateProfile }) {
   const avatar = profile?.avatar || AVATARS[0];
   const theme = profile?.theme || THEMES[0].id;
   const [bio, setBio] = useState(profile?.bio || "");
   const [bioSaved, setBioSaved] = useState(false);
-  const [favs, setFavs] = useState(() => getFavorites());
-
-  const onToggleFav = (id) => setFavs(toggleFavorite(id));
 
   return (
     <div className="arcade-editor">
@@ -101,27 +132,6 @@ function ProfileEditor({ profile, updateProfile }) {
         />
         {bioSaved && <p className="arcade-account-notice">bio saved ✦</p>}
       </div>
-
-      <div className="arcade-editor-row">
-        <span className="arcade-editor-label">your arcade (favorites)</span>
-        <div className="arcade-fave-toggle-list">
-          {GAMES.filter((g) => g.category).map((g) => {
-            const on = favs.includes(g.id);
-            return (
-              <button
-                key={g.id}
-                type="button"
-                className={`arcade-fave-toggle${on ? " is-on" : ""}`}
-                onClick={() => onToggleFav(g.id)}
-                aria-pressed={on}
-              >
-                <span className="arcade-fave-toggle-star">{on ? "⭐" : "☆"}</span>
-                <span>{g.emoji} {g.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }
@@ -166,13 +176,14 @@ export default function AccountPage() {
   // ACCOUNT tab (email + reset + logout). Defaults to PROFILE so /me opens on
   // "your arcade", not a config form.
   if (user && !isAnonymous) {
-    const meTab = ["profile", "edit", "account"].includes(tab) ? tab : "profile";
+    const meTab = ["profile", "edit", "favorites", "account"].includes(tab) ? tab : "profile";
     return Shell(
       <div className="arcade-account-card">
         <div className="arcade-account-tabs">
           {[
             ["profile", "PROFILE"],
             ["edit", "EDIT"],
+            ["favorites", "⭐"],
             ["account", "ACCOUNT"],
           ].map(([id, label]) => (
             <button
@@ -204,6 +215,14 @@ export default function AccountPage() {
             <ProfileEditor profile={profile} updateProfile={updateProfile} />
           ) : (
             <p className="arcade-account-blurb">no username yet — nothing to edit.</p>
+          )
+        )}
+
+        {meTab === "favorites" && (
+          username ? (
+            <FavoritesEditor />
+          ) : (
+            <p className="arcade-account-blurb">no username yet — nothing to favorite.</p>
           )
         )}
 

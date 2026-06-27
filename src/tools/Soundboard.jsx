@@ -25,8 +25,10 @@ const SOUNDS = [
   { id: "win98-shutdown", label: "WIN 98 SHUTDOWN", emoji: "💤", file: "sounds/windows-98-shutdown.mp3" },
   { id: "winxp-startup", label: "WIN XP STARTUP", emoji: "🟢", file: "sounds/windows-xp-startup.mp3" },
   { id: "winxp-shutdown", label: "WIN XP SHUTDOWN", emoji: "🔴", file: "sounds/windows-xp-shutdown.mp3" },
+  { id: "aol-mail", label: "YOU'VE GOT MAIL", emoji: "📬", file: "sounds/aol-you-ve-got-mail.mp3" },
+  { id: "skype", label: "SKYPE CALL", emoji: "📲", file: "sounds/skype-call.mp3" },
+  { id: "killing-spree", label: "KILLING SPREE", emoji: "💀", file: "sounds/halo-killing-spree.mp3" },
   // ── forward-declared: drop the file in public/sounds/ and the pad appears ───
-  { id: "aol-mail", label: "YOU'VE GOT MAIL", emoji: "📬", file: "sounds/aol-mail.mp3" },
   { id: "aol-welcome", label: "WELCOME", emoji: "👋", file: "sounds/aol-welcome.mp3" },
   { id: "aol-goodbye", label: "GOODBYE", emoji: "🚪", file: "sounds/aol-goodbye.mp3" },
   { id: "aol-im", label: "IM DOOR", emoji: "💬", file: "sounds/aol-im.mp3" },

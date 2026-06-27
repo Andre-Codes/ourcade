@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { GAMES, getGame } from "../data/games.js";
 import { themeColor } from "../data/profilePresets.js";
 import { ALL_RELICS, relicIcon } from "../data/relics.js";
-import { getDiscoveredRelics, getTop8, removeTop8, lsGetJSON } from "../lib/store.js";
+import { getDiscoveredRelics, getFavorites, getTop8, removeTop8, lsGetJSON } from "../lib/store.js";
 import { resolveTop8 } from "../data/content.js";
 import { renderContactCard } from "../lib/contactCard.js";
 import { shareImage } from "../lib/share.js";
@@ -199,6 +199,19 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
     return () => window.removeEventListener("ourcade:storechange", sync);
   }, [owner]);
 
+  // Favorites: same split as Top 8 — the owner reads live local truth (so a pad
+  // just toggled on the ⭐ tab shows here at once, without waiting for a reload to
+  // re-fetch the profile doc), staying in sync via the shared store event; a
+  // public viewer reads the mirrored profile array.
+  const [ownerFavs, setOwnerFavs] = useState(() => (owner ? getFavorites() : []));
+  useEffect(() => {
+    if (!owner) return;
+    const sync = () => setOwnerFavs(getFavorites());
+    sync();
+    window.addEventListener("ourcade:storechange", sync);
+    return () => window.removeEventListener("ourcade:storechange", sync);
+  }, [owner]);
+
   useEffect(() => {
     if (!uid) return;
     let alive = true;
@@ -221,7 +234,8 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
 
   const name = p?.username || username;
   const accent = themeColor(p?.theme);
-  const favGames = (Array.isArray(p?.favorites) ? p.favorites : []).map(getGame).filter(Boolean);
+  const favIds = owner ? ownerFavs : Array.isArray(p?.favorites) ? p.favorites : [];
+  const favGames = favIds.map(getGame).filter(Boolean);
   const join = joinLabel(p);
 
   // relic count: owner reads live local truth; public reads the mirrored count.
@@ -295,21 +309,25 @@ export default function ProfileView({ profile: p, uid, username, owner = false }
         ))}
       </div>
 
-      <section className="arcade-profile-section">
-        <h2 className="arcade-profile-section-title">⭐ {name}&apos;s arcade</h2>
-        {favGames.length ? (
-          <div className="arcade-profile-faves">
-            {favGames.map((g) => (
-              <Link key={g.id} to={`/play/${g.id}`} className="arcade-profile-fave">
-                <span className="arcade-profile-fave-emoji">{g.emoji}</span>
-                <span>{g.title}</span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="arcade-profile-empty">no favorites yet.</p>
-        )}
-      </section>
+      {/* Favorites list is owner-only — public viewers see just the "⭐ N
+          favorites" badge above, not the list itself. */}
+      {owner && (
+        <section className="arcade-profile-section">
+          <h2 className="arcade-profile-section-title">⭐ {name}&apos;s arcade</h2>
+          {favGames.length ? (
+            <div className="arcade-profile-faves">
+              {favGames.map((g) => (
+                <Link key={g.id} to={`/play/${g.id}`} className="arcade-profile-fave">
+                  <span className="arcade-profile-fave-emoji">{g.emoji}</span>
+                  <span>{g.title}</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="arcade-profile-empty">no favorites yet.</p>
+          )}
+        </section>
+      )}
 
       {/* ── Top 8 — a MySpace-style showcase of anything in the arcade (flash,
            curiosity, fact, weird thing, game). Visible to every viewer; the owner
