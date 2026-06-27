@@ -30,6 +30,9 @@ import {
    ───────────────────────────────────────────────────────────────────────── */
 
 const GAME_ID = "chip-panic";
+// Custom "wanted" badge (replaces the cowboy emoji). Game-local asset; falls back
+// to the emoji until the file is added. Resolved off BASE_URL like other assets.
+const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 // Modes: HIGH_STAKES is the full ante/Wanted ruleset (the current game). CLASSIC
 // (a simpler ruleset) and PANIC (Classic + a placement timer) are planned — only
@@ -60,18 +63,23 @@ const HCB_CSS = `
   .hcb-stat.chips b { color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.45); }
   .hcb-stat.mode b { color: #bf5af2; font-size: .72rem; vertical-align: 0; }
 
-  /* WANTED banner — the rotating objective */
+  /* WANTED banner — the rotating objective. Fixed width so the hand name never
+     resizes the box; a custom badge stands in for the word "WANTED". */
   .hcb-wanted {
     display: flex; align-items: center; gap: 10px; flex: 0 0 auto;
+    width: min(92vw, 420px); box-sizing: border-box;
     margin: 2px 8px 0; padding: 6px 14px; border-radius: 999px;
     border: 2px solid #ffd23f; background: linear-gradient(180deg, rgba(255,210,63,.12), rgba(0,0,0,.3));
     box-shadow: 0 0 14px rgba(255,210,63,.2);
   }
-  .hcb-wanted .star { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(255,210,63,.8)); }
-  .hcb-wanted .lbl { font-family: 'Black Ops One',sans-serif; letter-spacing: .08em; color: #ffd23f; font-size: .95rem; }
-  .hcb-wanted .rew { font-size: .56rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; }
+  .hcb-wanted .badge { width: 26px; height: 26px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+  .hcb-wanted .badge img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 6px rgba(255,210,63,.7)); }
+  .hcb-wanted .badge .fallback { font-size: 1.1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(255,210,63,.8)); }
+  /* hand name takes the flexible middle and never overflows the fixed box */
+  .hcb-wanted .lbl { flex: 1 1 auto; min-width: 0; font-family: 'Black Ops One',sans-serif; letter-spacing: .06em; color: #ffd23f; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hcb-wanted .rew { flex: 0 0 auto; font-size: .56rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; white-space: nowrap; }
   .hcb-wanted .rew b { color: #3fffd0; }
-  .hcb-wanted .streak { margin-left: 6px; font-size: .58rem; letter-spacing: .08em; color: #c9b3ec; text-transform: uppercase; }
+  .hcb-wanted .streak { flex: 0 0 auto; margin-left: 4px; font-size: .58rem; letter-spacing: .08em; color: #c9b3ec; text-transform: uppercase; white-space: nowrap; }
   .hcb-wanted .streak b { color: #ff9f43; font-family: 'Press Start 2P',monospace; font-size: .62rem; }
   .hcb-wanted.claim { animation: hcb-wanted-claim 700ms ease-out; }
   @keyframes hcb-wanted-claim { 0%{ transform: scale(1); } 30%{ transform: scale(1.06); box-shadow: 0 0 28px rgba(63,255,208,.7); border-color: #3fffd0; } 100%{ transform: scale(1); } }
@@ -153,37 +161,36 @@ const HCB_CSS = `
   .hcb-chip .cd.warn { background: #ffd23f; }
   .hcb-req { font-size: .42rem; letter-spacing: .04em; color: #c9b3ec; text-transform: uppercase; min-height: .7em; text-align: center; }
 
+  /* Unified centered RESULT panel — the single home for every resolution message
+     (hand + points, save/bust reason, and the Wanted claim). Always centered so
+     edge lanes never clip; a translucent backdrop keeps the text readable over the
+     board. Replaces the old lane-anchored bursts + separate claim splash. */
   .hcb-feed {
-    position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    pointer-events: none; opacity: 0; transition: opacity .18s; text-align: center; white-space: nowrap; z-index: 60;
+    position: absolute; top: 34%; left: 50%; transform: translate(-50%,-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    pointer-events: none; opacity: 0; transition: opacity .2s ease; text-align: center;
+    z-index: 72; max-width: min(90vw, 460px);
+    padding: 14px 22px; border-radius: 16px;
+    background: rgba(12, 7, 25, .72); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.10); box-shadow: 0 8px 30px rgba(0,0,0,.45);
   }
   .hcb-feed.show { opacity: 1; }
-  .hcb-feed .hand { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.1rem,4.6vw,1.9rem); color: #ffd23f; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
-  .hcb-feed .math { font-size: .7rem; letter-spacing: .12em; color: #eef0ff; }
-  .hcb-feed.win .hand { color: #3fffd0; }
-  .hcb-feed.bad .hand { color: #ff6b6b; }
-  .hcb-feed.save .hand { color: #ffb454; }
-  .hcb-feed .why { font-size: .56rem; letter-spacing: .1em; color: #ff9b9b; text-transform: uppercase; }
+  .hcb-feed .hand { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.3rem,6vw,2.4rem); line-height: 1.05; color: #ffd23f; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .hcb-feed .math { font-family: 'Press Start 2P',monospace; font-size: .72rem; letter-spacing: .04em; color: #eef0ff; }
+  .hcb-feed.win .hand { color: #3fffd0; text-shadow: 0 0 12px rgba(63,255,208,.6), 0 2px 10px rgba(0,0,0,.6); }
+  .hcb-feed.bad .hand { color: #ff6b6b; text-shadow: 0 0 12px rgba(255,107,107,.5), 0 2px 10px rgba(0,0,0,.6); }
+  .hcb-feed.save .hand { color: #ffb454; text-shadow: 0 0 12px rgba(255,180,84,.5), 0 2px 10px rgba(0,0,0,.6); }
+  .hcb-feed .why { font-size: .58rem; letter-spacing: .1em; color: #ffb0b0; text-transform: uppercase; }
+  /* Wanted-claim section appended to the same panel when the hand completes the target */
+  .hcb-feed .claimrow { margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,210,63,.25); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .hcb-feed .claimrow .tag { font-family:'Press Start 2P',monospace; font-size:.56rem; letter-spacing:.08em; color:#ffd23f; text-shadow:0 0 8px rgba(255,210,63,.7); }
+  .hcb-feed .claimrow .rew { font-family:'Press Start 2P',monospace; font-size:.6rem; color:#9be7d8; }
+  .hcb-feed .claimrow .rew b { color:#3fffd0; }
+  .hcb-feed.claimed { border-color: rgba(63,255,208,.45); box-shadow: 0 0 28px rgba(63,255,208,.3), 0 8px 30px rgba(0,0,0,.45); }
 
-  /* ── fx layer: lane-anchored burst, flying/falling chips, coral bloom, wanted claim ── */
+  /* ── fx layer: flying/falling chips + coral bloom (the resolution TEXT now lives
+        in the centered .hcb-feed panel, not over the lane) ── */
   .hcb-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
-  .hcb-fx .fx-burst {
-    position: absolute; transform: translate(-50%,-100%); white-space: nowrap; text-align: center;
-    font-family: 'Black Ops One',sans-serif; font-size: clamp(1.4rem,7vw,2.6rem); color: #3fffd0;
-    text-shadow: 0 0 10px rgba(63,255,208,.7), 0 2px 14px rgba(0,0,0,.7);
-    animation: hcb-burst 1100ms cubic-bezier(.18,.9,.24,1) forwards;
-  }
-  .hcb-fx .fx-burst.bad { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.7), 0 2px 14px rgba(0,0,0,.7); }
-  .hcb-fx .fx-burst.save { color: #ffb454; text-shadow: 0 0 10px rgba(255,180,84,.6), 0 2px 14px rgba(0,0,0,.7); }
-  .hcb-fx .fx-burst .pts { display: block; font-family: 'Press Start 2P',monospace; font-size: .7rem; color: #ffd23f; margin-top: 5px; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
-  @keyframes hcb-burst {
-    0%   { opacity: 0; transform: translate(-50%,-90%)  scale(.6); }
-    18%  { opacity: 1; transform: translate(-50%,-100%) scale(1.18); }
-    32%  {            transform: translate(-50%,-100%) scale(1); }
-    78%  { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%,-150%) scale(1.02); }
-  }
   .hcb-fx .fx-chip { position: absolute; width: 26px; height: 26px; transform: translate(-50%,-50%); will-change: transform,opacity; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
   .hcb-fx .fx-chip img { width: 100%; height: 100%; display: block; }
   .hcb-fx .fx-chip.fly  { animation: hcb-chipfly 720ms cubic-bezier(.4,.05,.5,1) forwards; }
@@ -204,21 +211,8 @@ const HCB_CSS = `
   .hcb-stat.chips.bump b { animation: hcb-hudbump 360ms ease-out; }
   @keyframes hcb-hudbump { 50% { transform: scale(1.28); color: #fff; } }
 
-  /* WANTED CLAIMED splash */
-  .hcb-claim {
-    position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 75;
-    pointer-events: none; text-align: center; opacity: 0;
-  }
-  .hcb-claim.show { animation: hcb-claim 1500ms ease-out forwards; }
-  @keyframes hcb-claim { 0%{opacity:0; transform:translate(-50%,8px) scale(.9);} 12%{opacity:1; transform:translate(-50%,0) scale(1.05);} 22%{transform:translate(-50%,0) scale(1);} 80%{opacity:1;} 100%{opacity:0; transform:translate(-50%,-14px) scale(1);} }
-  .hcb-claim .tag { font-family:'Press Start 2P',monospace; font-size:.6rem; letter-spacing:.1em; color:#ffd23f; text-shadow:0 0 8px rgba(255,210,63,.7); }
-  .hcb-claim .hand { font-family:'Black Ops One',sans-serif; font-size: clamp(1.3rem,6vw,2.2rem); color:#3fffd0; text-shadow:0 0 12px rgba(63,255,208,.7),0 2px 10px rgba(0,0,0,.7); }
-  .hcb-claim .rew { font-family:'Press Start 2P',monospace; font-size:.56rem; color:#9be7d8; }
-  .hcb-claim .rew b { color:#3fffd0; }
-
   @media (prefers-reduced-motion: reduce) {
-    .hcb-fx .fx-burst, .hcb-fx .fx-chip, .hcb-fx .fx-flash, .hcb-claim.show, .hcb-wanted.claim { animation-duration: 1ms !important; }
+    .hcb-fx .fx-chip, .hcb-fx .fx-flash, .hcb-feed, .hcb-wanted.claim { animation-duration: 1ms !important; transition: none !important; }
   }
 
   .hcb-overlay {
@@ -262,11 +256,11 @@ export default function ChipPanic() {
   });
   const [game, setGame] = useState(null);
   const [feed, setFeed] = useState(null);
-  const [claim, setClaim] = useState(null); // { hand, pts, chips, streak, on } — WANTED CLAIMED splash
   const [panicPct, setPanicPct] = useState(1);
   const [flash, setFlash] = useState({}); // lane index → "scored"|"saved"|"busted"
   const [hudBump, setHudBump] = useState(false);
   const [bannerClaim, setBannerClaim] = useState(false); // pulse the WANTED banner
+  const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
 
@@ -276,7 +270,6 @@ export default function ChipPanic() {
   const flashTimer = useRef(null);
   const panicTimer = useRef(null);
   const bumpTimer = useRef(null);
-  const claimTimer = useRef(null);
   const bannerTimer = useRef(null);
   const gameRef = useRef(game);
   useEffect(() => { gameRef.current = game; }, [game]);
@@ -308,10 +301,11 @@ export default function ChipPanic() {
     panicTimer.current = null;
   }, []);
 
+  const FEED_MS = 2200; // how long the centered result panel stays up
   const showFeed = useCallback((f) => {
     clearTimeout(feedTimer.current);
     setFeed({ ...f, on: true });
-    feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), 1500);
+    feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), FEED_MS);
   }, []);
 
   const bumpHud = useCallback((delay = 0) => {
@@ -373,49 +367,46 @@ export default function ChipPanic() {
     else if (result.burned) playSfxVariant("card-place", [1, 3]);
 
     const res = result.resolution;
+    // The Wanted-claim section rides ON the same centered panel as the hand result.
+    const claimSection = result.wanted && result.wanted.hit
+      ? { pts: result.wanted.totalPts, chips: result.wanted.totalChips, streak: result.wanted.streak }
+      : null;
+
     if (res) {
       const lane = res.laneIndex;
       const geo = reduceMotion.current ? null : fxFromLane(lane);
 
       if (res.scored) {
-        const pts = res.multiplier > 1 ? `${res.basePoints} × ${res.multiplier} = ${res.points}` : `+${res.points}`;
-        if (geo) spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts, ttl: 1150 });
+        const math = res.multiplier > 1 ? `${res.basePoints} × ${res.multiplier} = ${res.points}` : `+${res.points}`;
+        const why = res.raise && !res.raise.won ? `raise failed · needed ${TIERS[res.raise.tier].reqLabel}` : "";
+        showFeed({ hand: res.hand.name, math, why, kind: "win", claim: claimSection });
         if (geo && res.chipsReturned > 0) {
           const color = res.raise && res.raise.won ? TIERS[res.raise.tier].color : TIERS[ANTE_TIER].color;
           spawnChipsTo(color, res.chipsReturned, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
         }
-        if (res.raise && !res.raise.won) {
-          showFeed({ hand: "", math: "", why: `raise failed · needed ${TIERS[res.raise.tier].reqLabel}`, kind: "bad" });
-        }
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
       } else if (res.saved) {
-        if (geo) spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts: "SAVE · no score", save: true, ttl: 1150 });
+        showFeed({ hand: res.hand.name, math: "", why: "pair only — saved, ante lost", kind: "save", claim: null });
         if (geo && res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
-        showFeed({ hand: "", math: "", why: "pair only — ante lost", kind: "save" });
         setFlash((f) => ({ ...f, [lane]: "saved" }));
       } else {
         // bust
+        showFeed({ hand: res.hand.name, math: "BUST", why: result.streakReset ? "high card · streak lost" : "high card · lane locked", kind: "bad", claim: null });
         if (geo) {
           spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 420 });
-          spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts: "BUST", bad: true, ttl: 1150 });
           if (res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
         }
-        showFeed({ hand: "", math: "", why: result.streakReset ? "high card bust · streak lost" : "high card bust", kind: "bad" });
         setFlash((f) => ({ ...f, [lane]: "busted" }));
       }
       clearTimeout(flashTimer.current);
       flashTimer.current = setTimeout(() => setFlash({}), 700);
     } else if (result.expired && result.expired.length) {
-      showFeed({ hand: "RAISE EXPIRED", math: "", why: "ran out of draws", kind: "bad" });
+      showFeed({ hand: "RAISE EXPIRED", math: "", why: "ran out of draws", kind: "bad", claim: null });
     }
 
-    // WANTED CLAIMED splash (stacks on top of the score burst)
-    if (result.wanted && result.wanted.hit) {
-      const w = result.wanted;
-      clearTimeout(claimTimer.current);
-      setClaim({ hand: HAND_NAME[w.hand], pts: w.totalPts, chips: w.totalChips, streak: w.streak, on: true });
-      claimTimer.current = setTimeout(() => setClaim((c) => (c ? { ...c, on: false } : c)), 1500);
+    // A Wanted claim pulses the banner + chimes (the reward text shows in the panel).
+    if (claimSection) {
       clearTimeout(bannerTimer.current);
       setBannerClaim(true);
       bannerTimer.current = setTimeout(() => setBannerClaim(false), 720);
@@ -456,7 +447,7 @@ export default function ChipPanic() {
 
   useEffect(() => () => {
     clearTimeout(feedTimer.current); clearTimeout(flashTimer.current);
-    clearTimeout(bumpTimer.current); clearTimeout(claimTimer.current);
+    clearTimeout(bumpTimer.current);
     clearTimeout(bannerTimer.current); clearPanic();
   }, [clearPanic]);
 
@@ -467,7 +458,6 @@ export default function ChipPanic() {
     lsSet("chip-panic:mode", chosen);
     setGame(newGame());
     setFeed(null);
-    setClaim(null);
     setFlash({});
     setHudBump(false);
     setBannerClaim(false);
@@ -521,8 +511,12 @@ export default function ChipPanic() {
 
       {screen === SCREEN.PLAY && g && w && (
         <div className={`hcb-wanted${bannerClaim ? " claim" : ""}`}>
-          <span className="star">🤠</span>
-          <span className="lbl">WANTED: {HAND_NAME[w.hand]?.toUpperCase()}</span>
+          <span className="badge" aria-label="Wanted">
+            {badgeOk
+              ? <img src={WANTED_BADGE} alt="Wanted" draggable="false" onError={() => setBadgeOk(false)} />
+              : <span className="fallback">🤠</span>}
+          </span>
+          <span className="lbl">{HAND_NAME[w.hand]?.toUpperCase()}</span>
           <span className="rew"><b>+{w.bonusPts}</b> / <b>+{w.bonusChips}</b> chips</span>
           <span className="streak">streak <b>{g.streak}</b></span>
         </div>
@@ -622,18 +616,16 @@ export default function ChipPanic() {
 
       <FxLayer parts={parts} className="hcb-fx" />
 
-      <div className={`hcb-feed ${feed?.kind || ""} ${feed?.on ? "show" : ""}`}>
+      <div className={`hcb-feed ${feed?.kind || ""} ${feed?.claim ? "claimed" : ""} ${feed?.on ? "show" : ""}`}>
         {feed?.hand && <span className="hand">{feed.hand}</span>}
         {feed?.math && <span className="math">{feed.math}</span>}
         {feed?.why && <span className="why">{feed.why}</span>}
-      </div>
-
-      <div className={`hcb-claim ${claim?.on ? "show" : ""}`}>
-        {claim && <>
-          <span className="tag">★ WANTED CLAIMED ★</span>
-          <span className="hand">{claim.hand}</span>
-          <span className="rew"><b>+{claim.pts}</b> pts · <b>+{claim.chips}</b> chips · streak ×{claim.streak}</span>
-        </>}
+        {feed?.claim && (
+          <span className="claimrow">
+            <span className="tag">★ WANTED CLAIMED ★</span>
+            <span className="rew"><b>+{feed.claim.pts}</b> pts · <b>+{feed.claim.chips}</b> chips · streak ×{feed.claim.streak}</span>
+          </span>
+        )}
       </div>
 
       {screen === SCREEN.TITLE && (
