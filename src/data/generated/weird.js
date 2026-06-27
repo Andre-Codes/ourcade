@@ -2,70 +2,72 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-quiet-place-project",
-    "title": "A website whose only job is to make you stop and breathe",
-    "blurb": "The Quiet Place Project walks you through a few calm, fullscreen seconds away from the firehose. It's the opposite of a pop-up ad, which means it would've been illegal on the 2003 internet.",
-    "url": "https://thequietplaceproject.com"
+    "id": "gw-presidential-ham",
+    "title": "Every U.S. president, solemnly holding a ham",
+    "blurb": "A painted gallery of commanders-in-chief cradling a ham for reasons no one will explain. It's history, it's deli meat, it's exactly the kind of thing the early web was built for.",
+    "url": "https://presidentialham.com",
+    "foundNote": "history meets the cold cuts"
   },
   {
-    "id": "gw-this-is-sand",
-    "title": "Pour endless colored sand onto your screen forever",
-    "blurb": "This Is Sand lets you dribble layer after layer of virtual sand into little striped landscapes. Hypnotic in the exact way a screensaver was supposed to be.",
-    "url": "https://thisissand.com"
+    "id": "gw-cube-rule",
+    "title": "The Cube Rule finally settles 'is a hot dog a sandwich'",
+    "blurb": "One unifying theory of food, based entirely on where the structural starch sits. Bring it to your next argument and watch friendships dissolve like a Pop-Tart in milk.",
+    "url": "https://cuberule.com"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "A wall of strangers giving you a hug on video",
-    "blurb": "The Nicest Place on the Internet is just real people opening their arms to the camera, no catch. Pure dial-up-era sincerity before everyone got cynical.",
-    "url": "https://thenicestplace.net"
+    "id": "gw-true-size",
+    "title": "Drag any country across the globe to see how big it REALLY is",
+    "blurb": "Turns out the maps in your 4th-grade classroom were lying to you about Greenland. Yank it down to the equator and gasp.",
+    "url": "https://thetruesize.com",
+    "foundNote": "map projections, exposed"
   },
   {
     "id": "gw-invisible-cow",
-    "title": "Find the cow you cannot see by listening for screaming",
-    "blurb": "Move your mouse around a blank screen while a voice yells 'COW' louder as you get warmer. It is exactly as deranged and delightful as it sounds.",
-    "url": "https://findtheinvisiblecow.com"
+    "title": "A game where you hunt a cow you cannot see",
+    "blurb": "Your only clue is a voice screaming 'COW' louder as your cursor gets warmer. Peak hot-and-cold, peak nonsense, peak afternoon-killer.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your sound on"
   },
   {
-    "id": "gw-scream-into-void",
-    "title": "Type a scream, hit enter, watch it vanish forever",
-    "blurb": "Scream Into The Void is a single-button catharsis machine — no likes, no replies, no algorithm. Just you and the abyss, like a guestbook nobody reads.",
-    "url": "https://screamintothevoid.com"
+    "id": "gw-infinite-craft",
+    "title": "Combine 'water' + 'fire' and eventually invent 'Obama's Pizza Planet'",
+    "blurb": "Neal Agarwal's alchemy toy lets you smush concepts together forever until reality stops making sense. Like Tap Surge for your brain, minus the dots.",
+    "url": "https://neal.fun/infinite-craft",
+    "foundNote": "no two runs alike"
   },
   {
-    "id": "gw-im-google",
-    "title": "Thousands of Google images arranged by vibe alone",
-    "blurb": "Dina Kelberman's 'I'm Google' is an endless grid where each photo melts into the next by color and shape. Scroll long enough and you forget what you came in looking for.",
-    "url": "https://dinakelberman.com/imgoogle.html",
-    "foundNote": "a net-art project, not actually Google"
+    "id": "gw-password-game",
+    "title": "A password field that turns into a boss fight",
+    "blurb": "It demands a Roman numeral that multiplies to 35, a chess move, and the current phase of the moon. We rate the despair a solid dial-up handshake out of ten.",
+    "url": "https://neal.fun/password-game",
+    "foundNote": "good luck, soldier"
   },
   {
-    "id": "gw-pixel-thoughts",
-    "title": "Put a worry on a star and shrink it to nothing",
-    "blurb": "Pixel Thoughts is a 60-second meditation that floats your anxiety into a tiny dot in space. Cheaper than therapy, less effective, still nice.",
-    "url": "https://pixelthoughts.co"
-  },
-  {
-    "id": "gw-this-person",
-    "title": "A new human face that has never existed, on demand",
-    "blurb": "Refresh and the machine invents a stranger from scratch, freckles and all. Equal parts impressive and the reason your parents don't trust photos anymore.",
-    "url": "https://thispersondoesnotexist.com"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "title": "Teleport to a random spot on Earth via street view",
-    "blurb": "MapCrunch drops you somewhere on the planet — a Mongolian highway, a Welsh parking lot — and dares you to figure out where. Geography class but you skipped the textbook.",
-    "url": "https://www.mapcrunch.com"
-  },
-  {
-    "id": "gw-fakeupdate",
-    "title": "Fullscreen fake system updates to scare your coworkers",
-    "blurb": "FakeUpdate.net mimics the dreaded 'Installing update 1 of 384, do not turn off your computer' screen for every OS. Hit F11 and watch a friend's soul leave their body.",
-    "url": "https://fakeupdate.net"
+    "id": "gw-pug-in-a-rug",
+    "title": "Is there a pug in a rug? Click to find out",
+    "blurb": "You lift the rug. There is, in fact, a pug. The site delivers on its single promise more reliably than most of the modern internet.",
+    "url": "https://puginarug.com",
+    "foundNote": "100% pug uptime"
   },
   {
     "id": "gw-koalas",
-    "title": "One giant pixel that splits into a tiny koala",
-    "blurb": "Koalas to the Max keeps subdividing color blobs as you move, slowly revealing a tiny koala hidden in the noise. Strangely soothing, like bubble wrap for your eyes.",
-    "url": "https://koalastothemax.com"
+    "title": "Click to reveal a hidden koala, one pixel-block at a time",
+    "blurb": "A weirdly soothing color puzzle that slowly resolves into a koala face. Lower-stim than Color Panic, somehow just as sticky.",
+    "url": "https://koalastothemax.com",
+    "foundNote": "online since the Flash days"
+  },
+  {
+    "id": "gw-person-not-exist",
+    "title": "A new human face that has never existed, every refresh",
+    "blurb": "An AI dreams up a totally fake person each time you reload. Stare too long and you'll start apologizing to people who aren't real.",
+    "url": "https://thispersondoesnotexist.com",
+    "foundNote": "refresh for a stranger"
+  },
+  {
+    "id": "gw-heyyey",
+    "title": "The 'What Is Love' dancing-head guy, on infinite loop",
+    "blurb": "One bobbing animated head, one eternal beat. It's the SNL sketch energy distilled into a single tab you'll forget to close.",
+    "url": "https://heeeeeeeey.com",
+    "foundNote": "sound recommended"
   }
 ];
