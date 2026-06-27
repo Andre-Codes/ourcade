@@ -15,8 +15,9 @@
 
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace, isGameOver,
-  pickWanted, streakBonus, completesWanted,
-  HAND_POINTS, TIERS, START_CHIPS, ANTE_COST, ANTE_PROFIT, BET_EXPIRY_DRAWS, NO_RAISE, LANES,
+  pickWanted, streakBonus, completesWanted, anteFor, currentAnte,
+  HAND_POINTS, TIERS, START_CHIPS, BASE_ANTE, ANTE_PROFIT, SCORE_HANDS_PER_ANTE,
+  WANTED_HITS_PER_ANTE, BET_EXPIRY_DRAWS, NO_RAISE, LANES,
 } from "../src/games/chip-panic/logic.js";
 import { HAND } from "../src/games/poker/handEval.js";
 
@@ -62,11 +63,11 @@ console.log("Ante / opening lanes:");
   const g = noWanted(newGame());
   eq("starts with START_CHIPS", g.chips, START_CHIPS);
   const r1 = play(g, "2C", 0); // opens lane 0
-  eq("ante deducted on first card", r1.state.chips, START_CHIPS - ANTE_COST);
+  eq("ante deducted on first card", r1.state.chips, START_CHIPS - BASE_ANTE);
   eq("lane marked anted", r1.state.anted[0], true);
   eq("antePaid flag", r1.result.antePaid, true);
   const r2 = play(r1.state, "7D", 0); // second card, already anted
-  eq("no further ante on 2nd card", r2.state.chips, START_CHIPS - ANTE_COST);
+  eq("no further ante on 2nd card", r2.state.chips, START_CHIPS - BASE_ANTE);
   eq("2nd card not flagged ante", r2.result.antePaid, false);
 }
 {
@@ -89,7 +90,7 @@ console.log("Resolution — bust / save / score:");
   eq("no points", result.resolution.points, 0);
   eq("score unchanged", state.score, 0);
   eq("lane NOT cleared", state.lanes[0].length, 5);
-  eq("ante lost (down 1)", state.chips, START_CHIPS - ANTE_COST);
+  eq("ante lost (down 1)", state.chips, START_CHIPS - BASE_ANTE);
 }
 {
   // Any pair → SAVE: clears the lane, 0 points, ante lost, NO discard refresh.
@@ -102,7 +103,7 @@ console.log("Resolution — bust / save / score:");
   eq("save: lane cleared", state.lanes[0].length, 0);
   eq("save: not locked", state.locked[0], false);
   eq("save: discard NOT refreshed", state.discard, false);
-  eq("save: ante lost", state.chips, START_CHIPS - ANTE_COST);
+  eq("save: ante lost", state.chips, START_CHIPS - BASE_ANTE);
 }
 {
   // Two pair → SCORE: base points, lane clears, discard refreshes, ante returns+profit.
@@ -132,9 +133,9 @@ console.log("Raises:");
   g = play(g, "2C", 0).state; // open lane 0 (anted, 1 card, no made hand)
   g = cycleRaise(g, 0);
   eq("preview is Red", g.raiseSel[0], TIER.red);
-  eq("no extra chips reserved yet", g.chips, START_CHIPS - ANTE_COST);
+  eq("no extra chips reserved yet", g.chips, START_CHIPS - BASE_ANTE);
   const r = play(g, "9H", 0); // draw commits the raise
-  eq("raise extra deducted on commit", r.state.chips, START_CHIPS - ANTE_COST - TIERS[TIER.red].extra);
+  eq("raise extra deducted on commit", r.state.chips, START_CHIPS - BASE_ANTE - TIERS[TIER.red].extra);
   eq("raise committed", r.state.raise[0] != null, true);
   eq("full expiry window", r.state.raise[0].draws, BET_EXPIRY_DRAWS);
 }
@@ -267,6 +268,60 @@ eq("streakBonus 5 → unlock", streakBonus(5).unlockLane, true);
   let sawPair = false;
   for (let s = 0; s <= 6; s++) for (let k = 0; k < 12; k++) if (pickWanted(s, Math.random).hand === HAND.PAIR) sawPair = true;
   eq("wanted is never a pair", sawPair, false);
+}
+
+// ── rising ante (poker-blinds pressure) ───────────────────────────────────────
+console.log("Rising ante:");
+{
+  // anteFor formula: base + floor(scoreHands/5) + floor(wantedHits/2), additive.
+  eq("ante at start", anteFor(0, 0), BASE_ANTE);
+  eq("ante after 5 scores", anteFor(5, 0), BASE_ANTE + 1);
+  eq("ante after 10 scores", anteFor(10, 0), BASE_ANTE + 2);
+  eq("ante after 2 wanted", anteFor(0, 2), BASE_ANTE + 1);
+  eq("score + wanted stack additively", anteFor(5, 2), BASE_ANTE + 2);
+  eq("partial thresholds floor", anteFor(4, 1), BASE_ANTE);
+}
+{
+  // A true score increments scoreHands; ante rises after SCORE_HANDS_PER_ANTE of them.
+  let g = noWanted(newGame());
+  const before = g.scoreHands;
+  g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]).state; // two pair → a true score
+  eq("score increments scoreHands", g.scoreHands, before + 1);
+  // a SAVE (pair) does NOT count toward the ante
+  let g2 = noWanted(newGame());
+  g2 = fillLane(g2, ["KS", "KH", "9D", "5S", "2D"]).state; // pair → save
+  eq("save does not count toward ante", g2.scoreHands, 0);
+  // a BUST does not count
+  let g3 = noWanted(newGame());
+  g3 = fillLane(g3, ["AD", "JC", "8D", "5S", "2D"]).state; // high card → bust
+  eq("bust does not count toward ante", g3.scoreHands, 0);
+}
+{
+  // A Wanted completion increments wantedHits (and scoreHands, since it's a score).
+  let g = newGame();
+  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]).state; // two pair = the wanted
+  eq("wanted increments wantedHits", g.wantedHits, 1);
+  eq("wanted also counts as a score", g.scoreHands, 1);
+}
+{
+  // The ante actually charged rises after enough scores, and the refund matches
+  // what was PAID (not the current ante).
+  let g = noWanted({ ...newGame(), scoreHands: 5 }); // ante is now 2
+  eq("currentAnte reflects progress", currentAnte(g), BASE_ANTE + 1);
+  const chipsBefore = g.chips;
+  const open = play(g, "2C", 0); // open a lane at the raised ante
+  eq("charged the raised ante", open.state.chips, chipsBefore - (BASE_ANTE + 1));
+  eq("stamped the paid ante", open.state.anteAmt[0], BASE_ANTE + 1);
+}
+{
+  // Refund = exact ante paid + flat ANTE_PROFIT, even though the ante later rises.
+  let g = noWanted({ ...newGame(), scoreHands: 5 }); // ante 2
+  const start = g.chips;
+  // open + complete a clean two pair (2s and 7s) in lane 0
+  const { state } = fillLane(g, ["2C", "2D", "7S", "7H", "9C"], 0);
+  // chips: -2 ante on open, +2 (paid ante) +1 profit on score = net +1
+  eq("refund = paid ante + flat profit", state.chips, start + ANTE_PROFIT);
 }
 
 // ── game over ─────────────────────────────────────────────────────────────────

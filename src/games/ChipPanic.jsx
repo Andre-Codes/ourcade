@@ -9,7 +9,7 @@ import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
-  TIERS, ANTE_TIER, ANTE_COST, NO_RAISE, START_CHIPS,
+  TIERS, ANTE_TIER, currentAnte, NO_RAISE, START_CHIPS,
 } from "./chip-panic/logic.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -503,6 +503,7 @@ export default function ChipPanic() {
   const rootStyle = { "--cw": "min(15vw, 66px)", "--ch": "calc(var(--cw) * 1.357)" };
   const g = game;
   const w = g?.wanted;
+  const ante = g ? currentAnte(g) : 1; // current cost to open a lane (rises over the run)
 
   return (
     <div className="hcb-root" style={rootStyle} ref={rootRef}>
@@ -562,7 +563,7 @@ export default function ChipPanic() {
               const tierIdx = committed ? committed.tier : sel;
               const tier = TIERS[tierIdx] || TIERS[0];
               const empty = lane.length === 0 && !anted;
-              const canOpen = empty && (g.chips >= ANTE_COST);
+              const canOpen = empty && (g.chips >= ante);
               const cant = empty && !canOpen && !locked;
               const betted = !!committed || sel !== NO_RAISE;
               const expiring = committed && committed.draws <= 1;
@@ -586,7 +587,7 @@ export default function ChipPanic() {
                     {empty && !locked && (
                       <span className="hcb-open">
                         <img src={chipImg("blue")} alt="" draggable="false" />
-                        <small>{canOpen ? "ANTE 1" : "NEED 1"}</small>
+                        <small>{canOpen ? `ANTE ${ante}` : `NEED ${ante}`}</small>
                       </span>
                     )}
                   </div>

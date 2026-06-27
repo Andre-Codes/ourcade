@@ -5,8 +5,10 @@
    into a tray, then places it into a lane (or spends a discard to throw it away).
 
    ECONOMY — chips are survival:
-     * Opening an empty lane costs a Blue ANTE (ANTE_COST chips), paid on the first
-       card placed there. An "anted" lane is active until it resolves.
+     * Opening an empty lane costs a Blue ANTE, paid on the first card placed there.
+       An "anted" lane is active until it resolves. The ante RISES over the run
+       (poker-blinds pressure): every few scoring hands / Wanted completions it
+       climbs by 1 and never drops, so late lanes cost more to open.
      * You only need chips to OPEN a new lane or RAISE; an already-anted lane is
        always playable, even at 0 chips. The run ends only when all five lanes are
        locked, or no legal placement exists for the current tray.
@@ -44,8 +46,20 @@ export const BET_EXPIRY_DRAWS = 5; // a committed raise must land within this ma
 export const RAISE_MAX_CARDS = 3; // a lane can only be newly raised at <= this many cards
 
 export const ANTE_TIER = 1; // index into TIERS — Blue is the ante baseline
-export const ANTE_COST = 1; // chips to open (ante) a lane
-export const ANTE_PROFIT = 1; // chips returned ABOVE the ante on a true score
+export const BASE_ANTE = 1; // chips to open a lane at the start of a run
+export const ANTE_PROFIT = 1; // FLAT chips returned ABOVE the (paid) ante on a true score
+// Rising ante (poker-blinds pressure): the cost to open a lane climbs as the run
+// goes. Every SCORE_HANDS_PER_ANTE scoring hands AND every WANTED_HITS_PER_ANTE
+// Wanted completions each add 1, stacking additively. It never goes back down.
+export const SCORE_HANDS_PER_ANTE = 5;
+export const WANTED_HITS_PER_ANTE = 2;
+
+// Current cost to open a lane, derived purely from cumulative progress.
+export function anteFor(scoreHands, wantedHits) {
+  return BASE_ANTE
+    + Math.floor(scoreHands / SCORE_HANDS_PER_ANTE)
+    + Math.floor(wantedHits / WANTED_HITS_PER_ANTE);
+}
 export const SCORE_MIN = HAND.TWO_PAIR; // two pair or better truly scores
 export const SAVE_HAND = HAND.PAIR; // any pair is a defensive save (clears, no score)
 
@@ -139,6 +153,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     lanes: Array.from({ length: LANES }, () => []),
     locked: Array(LANES).fill(false),
     anted: Array(LANES).fill(false), // lane has paid its ante (is open/active)
+    anteAmt: Array(LANES).fill(0), // chips actually paid to open each lane (for refund)
     raise: Array(LANES).fill(null), // committed raise { tier, draws } | null
     raiseSel: Array(LANES).fill(NO_RAISE), // previewed raise tier (cycles among affordable)
     tray: null,
@@ -149,6 +164,8 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     discard: true, // starts charged
     score: 0,
     streak: 0,
+    scoreHands: 0, // cumulative true scores (drives the rising ante)
+    wantedHits: 0, // cumulative Wanted completions (drives the rising ante)
     draws: 0,
     over: false,
     wanted: null,
@@ -161,6 +178,9 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
 
 export const laneFull = (lane) => lane.length >= LANE_CAP;
 
+// The current cost to open a new lane (rises with progress).
+export const currentAnte = (state) => anteFor(state.scoreHands, state.wantedHits);
+
 // Can the current tray be placed into lane `l`? An empty lane requires either an
 // ante already paid or enough chips to pay it now; a non-empty anted lane is always
 // playable. Locked/full/no-tray block.
@@ -168,7 +188,7 @@ export function canPlace(state, l) {
   if (state.over || state.locked[l] || state.tray == null) return false;
   if (laneFull(state.lanes[l])) return false;
   if (state.lanes[l].length === 0 && !state.anted[l]) {
-    return state.chips >= ANTE_COST; // need to afford the ante to open it
+    return state.chips >= currentAnte(state); // need to afford the ante to open it
   }
   return true;
 }
@@ -241,15 +261,19 @@ export function placeCard(state, l) {
   const lanes = state.lanes.map((lane) => lane.slice());
   const locked = state.locked.slice();
   const anted = state.anted.slice();
+  const anteAmt = state.anteAmt.slice();
   const raise = state.raise.slice();
   const raiseSel = state.raiseSel.slice();
-  let { chips, score, discard, streak, wanted } = state;
+  let { chips, score, discard, streak, wanted, scoreHands, wantedHits } = state;
 
-  // Opening an empty lane pays the Blue ante.
+  // Opening an empty lane pays the current (rising) ante; remember what was paid so
+  // it can be refunded on a true score / forfeited on a loss.
   let antePaid = false;
   if (lanes[l].length === 0 && !anted[l]) {
-    chips -= ANTE_COST;
+    const ante = currentAnte(state);
+    chips -= ante;
     anted[l] = true;
+    anteAmt[l] = ante;
     antePaid = true;
   }
 
@@ -258,7 +282,7 @@ export function placeCard(state, l) {
   let resolution = null;
   let wantedClaim = null;
   if (lanes[l].length === LANE_CAP) {
-    const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], anted: anted[l], wanted, streak, l, rng: state.rng });
+    const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], antePaidAmt: anteAmt[l], wanted, streak, l });
     resolution = r;
     score += r.points;
     chips += r.chipsReturned;
@@ -270,8 +294,9 @@ export function placeCard(state, l) {
       // SAVE or SCORE both clear the lane.
       lanes[l] = [];
       anted[l] = false;
-      if (r.scored) discard = true; // only a true score refreshes the discard
+      if (r.scored) { discard = true; scoreHands += 1; } // a true score refreshes discard + counts toward the rising ante
     }
+    anteAmt[l] = 0;
 
     // Apply a completed Wanted (only on a true score; resolveLane decided it).
     if (r.wanted && r.wanted.hit) {
@@ -279,9 +304,10 @@ export function placeCard(state, l) {
       score += r.wanted.totalPts;
       chips += r.wanted.totalChips;
       streak = r.wanted.streak;
+      wantedHits += 1; // Wanted completions also raise the ante
       if (r.wanted.unlockLane) {
         const u = firstLocked(locked);
-        if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; }
+        if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; anteAmt[u] = 0; }
       }
       wanted = pickWanted(streak, state.rng);
     }
@@ -290,7 +316,7 @@ export function placeCard(state, l) {
     raiseSel[l] = NO_RAISE;
   }
 
-  let next = { ...state, lanes, locked, anted, raise, raiseSel, chips, score, discard, streak, wanted };
+  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits };
   const expired = [];
   drawInto(next, expired);
   next.over = isGameOver(next);
@@ -356,11 +382,12 @@ const firstLocked = (locked) => locked.findIndex(Boolean);
      (when the hand completes the current target) =
      { hit, hand, bonusPts, bonusChips, totalPts, totalChips, streak, unlockLane }.
    Chips were spent at ante/commit time; chipsReturned is what comes BACK. */
-function resolveLane({ lane, committedRaise, anted, wanted, streak, l }) {
+function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
   const hand = evaluate(lane);
   const bust = hand.rank === HAND.HIGH_CARD;
   const saved = hand.rank === SAVE_HAND; // any pair
   const scored = hand.rank >= SCORE_MIN; // two pair or better
+  const anted = antePaidAmt > 0;
 
   let multiplier = 1;
   let chipsReturned = 0;
@@ -370,8 +397,10 @@ function resolveLane({ lane, committedRaise, anted, wanted, streak, l }) {
 
   if (scored) {
     base = HAND_POINTS[hand.rank] || 0;
-    // The ante comes back with a small profit on a true score.
-    if (anted) chipsReturned += ANTE_COST + ANTE_PROFIT;
+    // Refund exactly what was paid to open the lane, plus a FLAT profit (the ante
+    // rises over the run but the profit stays fixed — Wanted hands are the real
+    // way to get ahead).
+    if (anted) chipsReturned += antePaidAmt + ANTE_PROFIT;
     if (committedRaise) {
       const tier = TIERS[committedRaise.tier];
       const won = hand.rank >= tier.min;
@@ -384,8 +413,8 @@ function resolveLane({ lane, committedRaise, anted, wanted, streak, l }) {
       }
     }
   } else {
-    // BUST or SAVE: ante + any raise stake are forfeited (already spent).
-    if (anted) chipsLost += ANTE_COST;
+    // BUST or SAVE: the ante actually paid + any raise stake are forfeited.
+    if (anted) chipsLost += antePaidAmt;
     if (committedRaise) {
       chipsLost += TIERS[committedRaise.tier].extra;
       raiseInfo = { tier: committedRaise.tier, won: false };
