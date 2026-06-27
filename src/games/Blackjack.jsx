@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
-import { playSfxVariant } from "../lib/sfx.js";
+import { playSfx, playSfxVariant } from "../lib/sfx.js";
+import { useFx, FxLayer } from "../lib/fx.jsx";
 import {
   freshShoe, deal, drawCard, dealerPlay, settle, handValue,
   isBust, isBlackjack, RESHUFFLE_AT,
@@ -17,6 +18,8 @@ import {
 const GAME_ID = "blackjack";
 const START_CHIPS = 100;
 const MAX_BET = 50;
+const FEED_MS = 2400;          // result-panel visible duration
+const DEALER_STEP_MS = 460;    // pause between each dealer card reveal
 const CHIP_DENOMS = [
   { v: 25, color: "black" }, { v: 10, color: "blue" },
   { v: 5, color: "green" }, { v: 1, color: "red" },
@@ -40,12 +43,12 @@ const BJ_CSS = `
     color: #eef0ff; background: rgba(0,0,0,.32); border: 2px solid #2f6f48;
   }
   .bj-btn:hover { border-color: #3fffd0; }
-  .bj-stat { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: #9fdcb4; }
+  .bj-stat { font-size: .84rem; letter-spacing: .14em; text-transform: uppercase; color: #9fdcb4; }
   .bj-stat b { color: #ffd23f; }
 
-  .bj-felt { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 10px 12px; gap: 8px; min-height: 0; }
+  .bj-felt { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px 12px; gap: 14px; min-height: 0; }
   .bj-side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .bj-label { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: #9fdcb4; }
+  .bj-label { font-size: .82rem; letter-spacing: .2em; text-transform: uppercase; color: #9fdcb4; }
   .bj-label b { color: #fff; }
   .bj-cards { display: flex; gap: 6px; min-height: calc(min(15vw,92px) * 1.357); }
   .bj-card {
@@ -55,10 +58,6 @@ const BJ_CSS = `
   .bj-card img { width: 100%; height: 100%; display: block; border-radius: inherit; }
 
   .bj-mid { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .bj-result { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.3rem,5vw,2.2rem); text-align: center; min-height: 1.2em; }
-  .bj-result.win { color: #34c759; }
-  .bj-result.lose { color: #ff6b6b; }
-  .bj-result.push { color: #ffd23f; }
 
   .bj-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
   .bj-big {
@@ -75,7 +74,57 @@ const BJ_CSS = `
   .bj-chip { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .bj-chip img { width: 44px; height: 44px; }
   .bj-chip span { font-family: 'Press Start 2P',monospace; font-size: .5rem; color: #9fdcb4; }
-  .bj-betpile { font-size: .8rem; letter-spacing: .14em; color: #ffd23f; }
+
+  /* Visible bet stack — the chips you've wagered, piled. Also the fly-animation
+     landing target during the bet phase. */
+  .bj-pile { position: relative; height: 56px; display: flex; align-items: flex-end; justify-content: center; }
+  .bj-pile .pchip { position: absolute; width: 40px; height: 40px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+  .bj-pile .ptotal { font-family: 'Press Start 2P',monospace; font-size: .6rem; color: #ffd23f; }
+  .bj-betlabel { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: #9fdcb4; }
+
+  /* Chip-stack bank under the player hand — derived from the bankroll, so it grows
+     and shrinks with it; bumps on change. */
+  .bj-bank { display: flex; align-items: center; gap: 10px; }
+  .bj-bank .bpile { position: relative; width: 132px; height: 30px; }
+  .bj-bank .bchip { position: absolute; bottom: 0; width: 28px; height: 28px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+  .bj-bank .btotal { font-family: 'Press Start 2P',monospace; font-size: .64rem; color: #ffd23f; }
+  .bj-bank.bump .btotal { animation: bj-bankbump 360ms ease-out; }
+  @keyframes bj-bankbump { 50% { transform: scale(1.28); color: #fff; } }
+
+  /* Centered result panel — single home for the outcome + chips won/lost, cloned
+     from High Card Bust's .hcb-feed, re-themed to the green felt. */
+  .bj-feed {
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    pointer-events: none; opacity: 0; transition: opacity .2s ease; text-align: center;
+    z-index: 72; max-width: min(90vw, 460px);
+    padding: 14px 24px; border-radius: 16px;
+    background: rgba(7, 33, 15, .72); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.10); box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  .bj-feed.show { opacity: 1; }
+  .bj-feed .hand { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.3rem,6vw,2.4rem); line-height: 1.05; color: #ffd23f; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .bj-feed .math { font-family: 'Press Start 2P',monospace; font-size: .8rem; letter-spacing: .04em; color: #eef0ff; }
+  .bj-feed.win .hand { color: #3fffd0; text-shadow: 0 0 12px rgba(63,255,208,.6), 0 2px 10px rgba(0,0,0,.6); }
+  .bj-feed.lose .hand { color: #ff6b6b; text-shadow: 0 0 12px rgba(255,107,107,.5), 0 2px 10px rgba(0,0,0,.6); }
+  .bj-feed.push .hand { color: #ffd23f; text-shadow: 0 0 12px rgba(255,210,63,.5), 0 2px 10px rgba(0,0,0,.6); }
+  .bj-feed.win .math { color: #3fffd0; }
+  .bj-feed.lose .math { color: #ff6b6b; }
+
+  /* fx layer: flying chips (bet → stack, payout → bank) */
+  .bj-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
+  .bj-fx .fx-chip { position: absolute; width: 30px; height: 30px; transform: translate(-50%,-50%); will-change: transform,opacity; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+  .bj-fx .fx-chip img { width: 100%; height: 100%; display: block; }
+  .bj-fx .fx-chip.fly { animation: bj-chipfly 640ms cubic-bezier(.4,.05,.5,1) forwards; }
+  @keyframes bj-chipfly {
+    0%   { opacity: 0; transform: translate(-50%,-50%) translate(0,0) scale(.7); }
+    12%  { opacity: 1; transform: translate(-50%,-50%) translate(calc(var(--dx)*.12), calc(var(--dy)*.12 + var(--arc))) scale(1); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(.7); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bj-fx .fx-chip, .bj-feed { animation-duration: 1ms !important; transition: none !important; }
+  }
 
   .bj-overlay {
     position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column;
@@ -112,9 +161,18 @@ export default function Blackjack() {
   const [bet, setBet] = useState(0);
   const [player, setPlayer] = useState([]);
   const [dealer, setDealer] = useState([]);
-  const [result, setResult] = useState(null); // { text, kind } | null
   const [doubled, setDoubled] = useState(false);
+  const [feed, setFeed] = useState(null); // { hand, math, kind, on } | null
+  const [bankBump, setBankBump] = useState(false);
   const shoe = useRef([]);
+  const rootRef = useRef(null);
+  const pileRef = useRef(null);
+  const bankRef = useRef(null);
+  const feedTimer = useRef(null);
+  const dealerTimer = useRef(null);
+  const bumpTimer = useRef(null);
+
+  const { parts, spawn, clear: clearFx } = useFx();
 
   useArcadeBackButton(false);
 
@@ -129,21 +187,69 @@ export default function Blackjack() {
     if (chips > bestBankroll) setBestBankroll(chips);
   }, [chips, bestBankroll]);
 
+  // Bump the bank pile whenever the bankroll changes (skip the initial mount).
+  const prevChips = useRef(chips);
+  useEffect(() => {
+    if (prevChips.current !== chips) {
+      prevChips.current = chips;
+      setBankBump(true);
+      clearTimeout(bumpTimer.current);
+      bumpTimer.current = setTimeout(() => setBankBump(false), 380);
+    }
+  }, [chips]);
+
+  // Clear any in-flight timers on unmount.
+  useEffect(() => () => {
+    clearTimeout(feedTimer.current);
+    clearTimeout(dealerTimer.current);
+    clearTimeout(bumpTimer.current);
+  }, []);
+
+  // Centered result panel, auto-fading after FEED_MS (mirrors HCB's showFeed).
+  function showFeed(f) {
+    clearTimeout(feedTimer.current);
+    setFeed({ ...f, on: true });
+    feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), FEED_MS);
+  }
+
   function newSession() {
     shoe.current = freshShoe();
+    clearTimeout(dealerTimer.current);
+    clearFx();
     setChips(START_CHIPS);
     setBestBankroll(START_CHIPS);
     setBet(0);
     setPlayer([]);
     setDealer([]);
-    setResult(null);
+    setFeed(null);
     setPhase("bet");
   }
 
-  function addBet(v) {
+  // Fly a chip from a tapped source rect up into the bet pile (coords relative to
+  // the position:relative root). Falls back to no animation if refs aren't ready.
+  function flyChipTo(targetRef, srcRect, color) {
+    const root = rootRef.current;
+    const tgt = targetRef.current;
+    if (!root || !tgt || !srcRect) return;
+    const rb = root.getBoundingClientRect();
+    const tb = tgt.getBoundingClientRect();
+    const x = srcRect.left - rb.left + srcRect.width / 2;
+    const y = srcRect.top - rb.top + srcRect.height / 2;
+    const dx = (tb.left + tb.width / 2) - (srcRect.left + srcRect.width / 2);
+    const dy = (tb.top + tb.height / 2) - (srcRect.top + srcRect.height / 2);
+    spawn({ kind: "chip", x, y, src: chipImg(color), dx, dy, arc: -50, ttl: 660 });
+  }
+
+  function addBet(v, color, e) {
     if (phase !== "bet") return;
-    setBet((b) => Math.min(MAX_BET, chips, b + v));
-    playSfxVariant("chip-lay", [1, 3]);
+    const next = Math.min(MAX_BET, chips, bet + v);
+    if (next === bet) return; // capped out — no chip added
+    // First chip of the round → chip-lay-3, subsequent → chip-lay-1.
+    playSfx(bet === 0 ? "chip-lay-3" : "chip-lay-1");
+    if (e?.currentTarget) {
+      flyChipTo(pileRef, e.currentTarget.getBoundingClientRect(), color);
+    }
+    setBet(next);
   }
   function clearBet() { setBet(0); }
 
@@ -155,7 +261,7 @@ export default function Blackjack() {
     setPlayer(d.player);
     setDealer(d.dealer);
     setDoubled(false);
-    setResult(null);
+    setFeed(null);
     playSfxVariant("card-place", [1, 3]);
     // Natural blackjack (either side) ends the hand immediately.
     if (isBlackjack(d.player) || isBlackjack(d.dealer)) {
@@ -187,22 +293,49 @@ export default function Blackjack() {
     else runDealer(next, true);
   }
 
-  // Dealer reveals + plays out, then settle.
+  // Dealer reveals the hole card, then deals each extra card on a timer so the
+  // turn plays out one card at a time, then settles.
   function runDealer(playerHand, dbl) {
     setPhase("dealer");
-    const finalDealer = dealerPlay(dealer, shoe.current);
-    setDealer(finalDealer);
-    finish(playerHand, finalDealer, dbl);
+    const finalDealer = dealerPlay(dealer, shoe.current).map((c) => ({ ...c, faceUp: true }));
+    // Reveal the two starting cards immediately (hole card flips up).
+    let shown = 2;
+    setDealer(finalDealer.slice(0, shown));
+    playSfxVariant("card-place", [1, 3]);
+
+    const step = () => {
+      if (shown >= finalDealer.length) {
+        finish(playerHand, finalDealer, dbl);
+        return;
+      }
+      shown += 1;
+      setDealer(finalDealer.slice(0, shown));
+      playSfxVariant("card-place", [1, 3]);
+      dealerTimer.current = setTimeout(step, DEALER_STEP_MS);
+    };
+    // Brief beat before drawing the first extra card (or settling on a 2-card stand).
+    dealerTimer.current = setTimeout(step, DEALER_STEP_MS);
   }
 
-  // Settle the round: apply chip delta, show the outcome.
+  // Settle the round: apply chip delta, show the outcome panel.
   function finish(playerHand, dealerHand, dbl) {
     const revealed = dealerHand.map((c) => ({ ...c, faceUp: true }));
     setDealer(revealed);
     const { outcome, delta } = settle(playerHand, revealed, bet, dbl);
     setChips((c) => c + delta);
-    setResult({ text: RESULT_TEXT[outcome], kind: KIND[outcome] });
-    if (delta > 0) playSfxVariant("chips-stack", [1, 3]);
+    const math = delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : "PUSH";
+    showFeed({ hand: RESULT_TEXT[outcome], math, kind: KIND[outcome] });
+    if (delta > 0) {
+      playSfxVariant("chips-stack", [1, 3]);
+      // Payout flourish: a few chips fly from the bet pile up to the bank.
+      const root = rootRef.current, pile = pileRef.current;
+      if (root && pile && bankRef.current) {
+        const pr = pile.getBoundingClientRect();
+        for (let i = 0; i < 4; i++) {
+          flyChipTo(bankRef, { left: pr.left + i * 6, top: pr.top, width: pr.width, height: pr.height }, CHIP_DENOMS[i % CHIP_DENOMS.length].color);
+        }
+      }
+    }
     setPhase("settled");
   }
 
@@ -212,16 +345,27 @@ export default function Blackjack() {
       setPhase("over");
       return;
     }
+    clearFx();
     setBet((b) => Math.min(b, chips));
     setPlayer([]);
     setDealer([]);
-    setResult(null);
+    setFeed(null);
     setPhase("bet");
   }
 
   function cashOut() {
     submit(bestBankroll);
     setPhase("over");
+  }
+
+  // Decompose an amount into chip colors, largest denom first, for piling.
+  function chipsFor(amount, cap = 10) {
+    const out = [];
+    let rem = amount;
+    for (const d of CHIP_DENOMS) {
+      while (rem >= d.v && out.length < cap) { out.push(d.color); rem -= d.v; }
+    }
+    return out;
   }
 
   // ── render ───────────────────────────────────────────────────────────────────
@@ -231,7 +375,7 @@ export default function Blackjack() {
   const fmtVal = (v) => (v.soft && v.total <= 21 ? `${v.total - 10}/${v.total}` : v.total);
 
   return (
-    <div className="bj-root">
+    <div className="bj-root" ref={rootRef}>
       <div className="bj-bar">
         <button className="bj-btn" onClick={() => navigate("/")}>← EXIT</button>
         {phase !== "start" && <button className="bj-btn" onClick={cashOut}>CASH OUT</button>}
@@ -247,13 +391,20 @@ export default function Blackjack() {
         </div>
 
         <div className="bj-mid">
-          {result && <div className={`bj-result ${result.kind}`}>{result.text}</div>}
-
           {phase === "bet" && (
             <>
+              <div className="bj-betlabel">YOUR BET</div>
+              <div className="bj-pile" ref={pileRef}>
+                {bet > 0
+                  ? chipsFor(bet).map((color, i) => (
+                      <img className="pchip" key={i} src={chipImg(color)} alt=""
+                        style={{ bottom: `${i * 5}px`, zIndex: i }} draggable="false" />
+                    ))
+                  : <span className="ptotal">—</span>}
+              </div>
               <div className="bj-betrow">
                 {CHIP_DENOMS.map((d) => (
-                  <div className="bj-chip" key={d.v} onPointerDown={() => addBet(d.v)}>
+                  <div className="bj-chip" key={d.v} onPointerDown={(e) => addBet(d.v, d.color, e)}>
                     <img src={chipImg(d.color)} alt="" draggable="false" />
                     <span>{d.v}</span>
                   </div>
@@ -288,8 +439,28 @@ export default function Blackjack() {
         <div className="bj-side">
           <Hand cards={player} />
           <div className="bj-label">YOU {pv && <b>· {fmtVal(pv)}</b>}</div>
+          {phase !== "start" && (
+            <div className={`bj-bank ${bankBump ? "bump" : ""}`}>
+              <div className="bpile" ref={bankRef}>
+                {chipsFor(chips, 12).map((color, i) => (
+                  <img className="bchip" key={i} src={chipImg(color)} alt=""
+                    style={{ left: `${i * 9}px`, zIndex: i }} draggable="false" />
+                ))}
+              </div>
+              <span className="btotal">{chips}</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {feed && (
+        <div className={`bj-feed ${feed.kind || ""} ${feed.on ? "show" : ""}`}>
+          <span className="hand">{feed.hand}</span>
+          {feed.math && <span className="math">{feed.math}</span>}
+        </div>
+      )}
+
+      <FxLayer parts={parts} className="bj-fx" />
 
       {phase === "start" && (
         <div className="bj-overlay">

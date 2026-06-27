@@ -40,15 +40,15 @@ export const STICKERS = {
   "pits-and-portals": "HOT",
   "crypt-crawler": "NEW",
   "tap-surge": "HOT",
-  "modem-defender": "NEW",
-  "snake": "HOT",
+  "modem-defender": "HOT",
+  "snake": "TOP",
   "tetris": "NEW",
   "game-2048": "NEW",
   "solitaire": "NEW",
-  "memory-match": "NEW",
-  "video-poker": "CASINO",
-  "blackjack": "CASINO",
-  "chip-panic": "CASINO",
+  "memory-match": "HOT",
+  "video-poker": "NEW",
+  "blackjack": "NEW",
+  "chip-panic": "NEW",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS

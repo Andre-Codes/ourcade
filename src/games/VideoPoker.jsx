@@ -4,6 +4,7 @@ import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
 import { playSfxVariant } from "../lib/sfx.js";
+import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND, HAND_NAME } from "./poker/handEval.js";
 import {
   deal, draw, payout, JACKS_OR_BETTER_PAYTABLE, MAX_BET,
@@ -17,6 +18,7 @@ import {
 
 const GAME_ID = "video-poker";
 const START_CREDITS = 100;
+const FEED_MS = 2200; // result-panel visible duration
 
 // Paytable rows shown on the machine, best → worst (skip High Card; it pays 0).
 const PAY_ROWS = [
@@ -48,10 +50,36 @@ const VP_CSS = `
 
   .vp-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 8px 12px; min-height: 0; }
 
+  /* Centered credits / bet readout above the screen — the prominent numbers. */
+  .vp-readout { display: flex; gap: 22px; align-items: baseline; justify-content: center; }
+  .vp-readout .ro { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: #9fc4ec; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .vp-readout .ro b { font-family: 'Press Start 2P',monospace; font-size: 1.1rem; color: #ffd23f; letter-spacing: 0; }
+
+  /* CSS-only CRT "video poker screen" — recessed bezel, inner glow, scanlines,
+     vignette. Wraps the paytable + hand; the FX layer and feed panel sit on top. */
+  .vp-screen {
+    position: relative; width: min(580px, 95vw);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    padding: 16px 14px; border-radius: 16px;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 45%, rgba(63,191,255,.10), transparent 72%),
+      linear-gradient(180deg, #071427, #04101f);
+    border: 3px solid #16243c;
+    box-shadow:
+      0 0 0 6px #0a1422, 0 10px 28px rgba(0,0,0,.55),
+      inset 0 0 28px rgba(0,0,0,.7), inset 0 0 60px rgba(63,191,255,.06);
+  }
+  .vp-screen::after {
+    content: ""; position: absolute; inset: 0; border-radius: 13px; pointer-events: none;
+    background: repeating-linear-gradient(rgba(255,255,255,.045) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay; z-index: 2;
+  }
+
   /* Paytable */
   .vp-pay {
-    width: min(560px, 94vw); border: 2px solid #355a8f; border-radius: 10px;
-    background: rgba(0,0,0,.34); padding: 6px 10px; font-size: .62rem;
+    width: 100%; max-width: 540px; border: 2px solid #355a8f; border-radius: 10px;
+    background: rgba(0,0,0,.34); padding: 8px 12px; font-size: .8rem;
+    position: relative; z-index: 1;
   }
   .vp-pay table { width: 100%; border-collapse: collapse; }
   .vp-pay td { padding: 2px 4px; white-space: nowrap; }
@@ -62,7 +90,7 @@ const VP_CSS = `
   .vp-pay .betcol.on { color: #ffd23f; font-weight: bold; }
 
   /* Hand */
-  .vp-hand { display: flex; gap: min(2.2vw, 14px); justify-content: center; }
+  .vp-hand { display: flex; gap: min(2.2vw, 14px); justify-content: center; position: relative; z-index: 1; }
   .vp-cardwrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .vp-card {
     width: min(15.5vw, 96px); aspect-ratio: 200 / 271.4;
@@ -95,9 +123,38 @@ const VP_CSS = `
     font-family: 'Press Start 2P',monospace; font-size: .58rem;
     color: #9fc4ec; background: #0e2240; border: 2px solid #355a8f;
   }
-  .vp-result { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.2rem,4.5vw,2rem); text-align: center; min-height: 1.4em; }
-  .vp-result.win { color: #34c759; }
-  .vp-result.lose { color: #9fc4ec; }
+  /* Centered result panel — cloned from High Card Bust's .hcb-feed, re-themed to
+     the blue/gold cabinet palette. Auto-fades after FEED_MS. */
+  .vp-feed {
+    position: absolute; top: 42%; left: 50%; transform: translate(-50%,-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    pointer-events: none; opacity: 0; transition: opacity .2s ease; text-align: center;
+    z-index: 72; max-width: min(90vw, 460px);
+    padding: 14px 24px; border-radius: 16px;
+    background: rgba(6, 15, 31, .74); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.10); box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  .vp-feed.show { opacity: 1; }
+  .vp-feed .hand { font-family: 'Black Ops One',sans-serif; font-size: clamp(1.3rem,6vw,2.4rem); line-height: 1.05; color: #ffd23f; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .vp-feed .math { font-family: 'Press Start 2P',monospace; font-size: .8rem; letter-spacing: .04em; color: #eef0ff; }
+  .vp-feed.win .hand { color: #34c759; text-shadow: 0 0 12px rgba(52,199,89,.55), 0 2px 10px rgba(0,0,0,.6); }
+  .vp-feed.win .math { color: #3fffd0; }
+  .vp-feed.lose .hand { color: #9fc4ec; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+
+  /* fx layer: chips flying from the hand up to the credits readout on a win */
+  .vp-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
+  .vp-fx .fx-chip { position: absolute; width: 28px; height: 28px; transform: translate(-50%,-50%); will-change: transform,opacity; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+  .vp-fx .fx-chip img { width: 100%; height: 100%; display: block; }
+  .vp-fx .fx-chip.fly { animation: vp-chipfly 700ms cubic-bezier(.4,.05,.5,1) forwards; }
+  @keyframes vp-chipfly {
+    0%   { opacity: 0; transform: translate(-50%,-50%) translate(0,0) scale(.7); }
+    12%  { opacity: 1; transform: translate(-50%,-50%) translate(calc(var(--dx)*.12), calc(var(--dy)*.12 + var(--arc))) scale(1); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(.6); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vp-fx .fx-chip, .vp-feed { animation-duration: 1ms !important; transition: none !important; }
+  }
 
   .vp-overlay {
     position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column;
@@ -122,8 +179,14 @@ export default function VideoPoker() {
   const [hand, setHand] = useState(null); // Card[5] | null
   const [held, setHeld] = useState([false, false, false, false, false]);
   const [deck, setDeck] = useState([]);
-  const [result, setResult] = useState(null); // { text, win } | null
+  const [feed, setFeed] = useState(null); // { hand, math, kind, on } | null
   const [bestBankroll, setBestBankroll] = useState(START_CREDITS);
+
+  const rootRef = useRef(null);
+  const handRef = useRef(null);
+  const readoutRef = useRef(null);
+  const feedTimer = useRef(null);
+  const { parts, spawn, clear: clearFx } = useFx();
 
   useArcadeBackButton(false);
 
@@ -140,12 +203,22 @@ export default function VideoPoker() {
     if (credits > bestBankroll) setBestBankroll(credits);
   }, [credits, bestBankroll]);
 
+  useEffect(() => () => clearTimeout(feedTimer.current), []);
+
+  // Centered result panel, auto-fading after FEED_MS (mirrors HCB's showFeed).
+  function showFeed(f) {
+    clearTimeout(feedTimer.current);
+    setFeed({ ...f, on: true });
+    feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), FEED_MS);
+  }
+
   function newSession() {
+    clearFx();
     setCredits(START_CREDITS);
     setBestBankroll(START_CREDITS);
     setBet(1);
     setHand(null);
-    setResult(null);
+    setFeed(null);
     setPhase("bet");
   }
 
@@ -161,7 +234,7 @@ export default function VideoPoker() {
     setHand(st.hand);
     setDeck(st.deck);
     setHeld([false, false, false, false, false]);
-    setResult(null);
+    setFeed(null);
     setPhase("draw");
     playSfxVariant("card-place", [1, 3]);
   }
@@ -180,13 +253,38 @@ export default function VideoPoker() {
     const pay = payout(d.hand, bet);
     if (pay.payout > 0) {
       setCredits((c) => c + pay.payout);
-      setResult({ text: `${pay.hand.name} · +${pay.payout}`, win: true });
+      // Royal at max bet is the flat 4000 jackpot; everything else is base × bet.
+      const isJackpot = pay.hand.rank === HAND.ROYAL_FLUSH && bet >= MAX_BET;
+      const base = JACKS_OR_BETTER_PAYTABLE[pay.hand.rank] || 0;
+      const math = isJackpot ? `JACKPOT +${pay.payout}` : `${base} × ${bet} = ${pay.payout}`;
+      showFeed({ hand: pay.hand.name, math, kind: "win" });
       playSfxVariant("chips-stack", [1, 3]);
+      flyPayoutChips();
     } else {
-      setResult({ text: "No win", win: false });
+      showFeed({ hand: "No Win", math: "", kind: "lose" });
     }
     // Settle: ready for the next hand, or game over if broke.
     setPhase("settled");
+  }
+
+  // Payout flourish: chips fly from the hand up to the centered CREDITS readout.
+  function flyPayoutChips() {
+    const root = rootRef.current, src = handRef.current, tgt = readoutRef.current;
+    if (!root || !src || !tgt) return;
+    const rb = root.getBoundingClientRect();
+    const sb = src.getBoundingClientRect();
+    const tb = tgt.getBoundingClientRect();
+    const sx = sb.left - rb.left + sb.width / 2;
+    const sy = sb.top - rb.top + sb.height / 2;
+    const dx = (tb.left + tb.width / 2) - (sb.left + sb.width / 2);
+    const dy = (tb.top + tb.height / 2) - (sb.top + sb.height / 2);
+    const colors = ["red", "blue", "green", "black", "red"];
+    for (let i = 0; i < 5; i++) {
+      spawn({
+        kind: "chip", x: sx + (i - 2) * 24, y: sy, src: chipImg(colors[i]),
+        dx, dy, arc: -55, delay: i * 60, ttl: 760,
+      });
+    }
   }
 
   // After a settled hand: continue to the next bet, or end the session if broke.
@@ -196,9 +294,10 @@ export default function VideoPoker() {
       setPhase("over");
       return;
     }
+    clearFx();
     setBet((b) => Math.min(b, credits, MAX_BET));
     setHand(null);
-    setResult(null);
+    setFeed(null);
     setPhase("bet");
   }
 
@@ -218,48 +317,53 @@ export default function VideoPoker() {
   const litRank = settled && settled.paying ? settled.hand.rank : null;
 
   return (
-    <div className="vp-root">
+    <div className="vp-root" ref={rootRef}>
       <div className="vp-bar">
         <button className="vp-btn" onClick={() => navigate("/")}>← EXIT</button>
         {phase !== "start" && <button className="vp-btn" onClick={cashOut}>CASH OUT</button>}
         <span className="sp" />
-        <span className="vp-stat">CREDITS <b>{credits}</b></span>
-        <span className="vp-stat">BET <b>{bet}</b></span>
       </div>
 
       <div className="vp-stage">
         {phase !== "start" && (
-          <div className="vp-pay">
-            <table>
-              <tbody>
-                {PAY_ROWS.map((rank) => (
-                  <tr key={rank} className={litRank === rank ? "lit" : ""}>
-                    <td>{PAY_LABEL[rank]}</td>
-                    <td className="n">{rowPay(rank)}</td>
-                  </tr>
+          <div className="vp-readout" ref={readoutRef}>
+            <span className="ro">CREDITS<b>{credits}</b></span>
+            <span className="ro">BET<b>{bet}</b></span>
+          </div>
+        )}
+
+        {phase !== "start" && (
+          <div className="vp-screen">
+            <div className="vp-pay">
+              <table>
+                <tbody>
+                  {PAY_ROWS.map((rank) => (
+                    <tr key={rank} className={litRank === rank ? "lit" : ""}>
+                      <td>{PAY_LABEL[rank]}</td>
+                      <td className="n">{rowPay(rank)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {hand && (
+              <div className="vp-hand" ref={handRef}>
+                {hand.map((card, i) => (
+                  <div className="vp-cardwrap" key={i}>
+                    <div className="vp-holdslot" />
+                    <div
+                      className={`vp-card ${held[i] ? "held" : ""}`}
+                      onPointerDown={() => toggleHold(i)}
+                    >
+                      <img src={card.faceUp ? cardImg(card.id) : cardBackImg()} alt={card.id} draggable="false" />
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {hand && (
-          <div className="vp-hand">
-            {hand.map((card, i) => (
-              <div className="vp-cardwrap" key={i}>
-                <div className="vp-holdslot" />
-                <div
-                  className={`vp-card ${held[i] ? "held" : ""}`}
-                  onPointerDown={() => toggleHold(i)}
-                >
-                  <img src={card.faceUp ? cardImg(card.id) : cardBackImg()} alt={card.id} draggable="false" />
-                </div>
               </div>
-            ))}
+            )}
           </div>
         )}
-
-        {result && <div className={`vp-result ${result.win ? "win" : "lose"}`}>{result.text}</div>}
 
         {phase === "bet" && (
           <div className="vp-controls">
@@ -286,6 +390,15 @@ export default function VideoPoker() {
           </div>
         )}
       </div>
+
+      {feed && (
+        <div className={`vp-feed ${feed.kind || ""} ${feed.on ? "show" : ""}`}>
+          <span className="hand">{feed.hand}</span>
+          {feed.math && <span className="math">{feed.math}</span>}
+        </div>
+      )}
+
+      <FxLayer parts={parts} className="vp-fx" />
 
       {phase === "start" && (
         <div className="vp-overlay">
