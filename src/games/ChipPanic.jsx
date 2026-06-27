@@ -4,7 +4,7 @@ import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { lsGet, lsSet } from "../lib/store.js";
 import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
-import { playSfxVariant } from "../lib/sfx.js";
+import { playSfx, playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
@@ -515,7 +515,7 @@ export default function ChipPanic() {
     const gg = gameRef.current;
     if (!gg || gg.over) return;
     const next = cycleRaise(gg, l);
-    if (next !== gg) playSfxVariant("chip-lay", [1, 3]);
+    if (next !== gg) playSfx("chip-lay-1"); // always the same chip-lay click on a bet tap
     setGame(next);
   }, []);
 
