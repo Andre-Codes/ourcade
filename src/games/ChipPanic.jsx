@@ -31,7 +31,10 @@ import {
 
 const GAME_ID = "chip-panic";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
-const MODE = { CLASSIC: "classic", PANIC: "panic" };
+// Modes: HIGH_STAKES is the full ante/Wanted ruleset (the current game). CLASSIC
+// (a simpler ruleset) and PANIC (Classic + a placement timer) are planned — only
+// HIGH_STAKES is selectable for now; the Panic timer machinery below is kept ready.
+const MODE = { CLASSIC: "classic", HIGH_STAKES: "high-stakes", PANIC: "panic" };
 const PANIC_MS = 5000;
 
 const HCB_CSS = `
@@ -251,7 +254,12 @@ export default function ChipPanic() {
   const { submit, best } = useArcadeScore(GAME_ID);
 
   const [screen, setScreen] = useState(SCREEN.TITLE);
-  const [mode, setMode] = useState(() => lsGet("chip-panic:mode", MODE.CLASSIC));
+  // Only HIGH_STAKES is selectable today; an older stored "classic"/"panic" (both
+  // of which ran this ruleset) migrates to it so returning players aren't stranded.
+  const [mode, setMode] = useState(() => {
+    const saved = lsGet("chip-panic:mode", MODE.HIGH_STAKES);
+    return saved === MODE.HIGH_STAKES || saved === MODE.PANIC ? saved : MODE.HIGH_STAKES;
+  });
   const [game, setGame] = useState(null);
   const [feed, setFeed] = useState(null);
   const [claim, setClaim] = useState(null); // { hand, pts, chips, streak, on } — WANTED CLAIMED splash
@@ -506,7 +514,7 @@ export default function ChipPanic() {
         <span className="hcb-stat">SCORE <b>{(g?.score || 0).toLocaleString()}</b></span>
         <span className={`hcb-stat chips${hudBump ? " bump" : ""}`} ref={chipHudRef}>CHIPS <b>{g?.chips ?? START_CHIPS}</b></span>
         {screen === SCREEN.PLAY && (
-          <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "CLASSIC"}</b></span>
+          <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "HIGH STAKES"}</b></span>
         )}
       </div>
 
@@ -631,15 +639,13 @@ export default function ChipPanic() {
         <div className="hcb-overlay">
           <h1>HIGH CARD BUST</h1>
           <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the WANTED hand for bonus chips & points · all five locked ends the run</div>
+          {/* Only High Stakes is available for now. Classic + Panic land later. */}
           <div className="hcb-modes">
-            <button className={`hcb-mode ${mode === MODE.CLASSIC ? "on" : ""}`} onPointerDown={() => { setMode(MODE.CLASSIC); lsSet("chip-panic:mode", MODE.CLASSIC); }}>
-              CLASSIC<small>no timer · pure strategy</small>
-            </button>
-            <button className={`hcb-mode ${mode === MODE.PANIC ? "on" : ""}`} onPointerDown={() => { setMode(MODE.PANIC); lsSet("chip-panic:mode", MODE.PANIC); }}>
-              PANIC<small>5s per card · burns if slow</small>
+            <button className="hcb-mode on" onPointerDown={() => { setMode(MODE.HIGH_STAKES); lsSet("chip-panic:mode", MODE.HIGH_STAKES); }}>
+              HIGH STAKES<small>ante · raises · wanted hands</small>
             </button>
           </div>
-          <button className="hcb-big" onPointerDown={() => start()}>PLAY</button>
+          <button className="hcb-big" onPointerDown={() => start(MODE.HIGH_STAKES)}>PLAY</button>
           {best != null && <div className="sub">best · {best.toLocaleString()}</div>}
         </div>
       )}
