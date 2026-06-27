@@ -198,7 +198,7 @@ export const GAMES = [
   {
     id: "chip-panic",
     title: "High Card Bust",
-    blurb: "Poker solitaire, push-your-luck. Draw one card at a time and drop it into one of five lanes — fill a lane to five and a PAIR or better scores and clears it, but a HIGH CARD locks it for good. When all five lock, you're done. Chip a lane to bet a multiplier that must land in five draws, and bank your one discard for the card you can't place.",
+    blurb: "Poker solitaire, push-your-luck. Open a lane with a chip ante, then fill it to five: TWO PAIR or better truly scores, any pair only saves the lane (no points, ante gone), and a HIGH CARD locks it for good. Raise for a multiplier, chase the rotating WANTED hand for bonus chips and points, and build a streak — all five lanes locked ends the run.",
     emoji: "🎴",
     accent: "#bf5af2",
     tags: ["cards", "poker", "casino", "solo"],

@@ -1,23 +1,24 @@
 /* ============================================================
    CHIP-PANIC-CHECK — headless verifier for High Card Bust logic
    (src/games/chip-panic/logic.js). Drives the real reducer with
-   crafted cards to confirm the doc's rules: a full lane scores +
-   clears on pair+, busts + locks on high card, the run ends when
-   all five lanes are locked, the discard refreshes on a score (not
-   a bust), and the tiered chip bets commit on the next draw, win/
-   fail/expire correctly, and respect eligibility.
+   crafted cards to confirm the ante economy, the three-way lane
+   resolution (high card busts+locks; any pair is a 0-point SAVE
+   that clears the lane and burns the ante; two pair+ truly scores),
+   optional raises, and the Wanted Hands + streak system.
 
-   The drawn `tray` card is engine-owned and random, so each test
-   STUBS `state.tray = card(...)` right before a placeCard — plain
-   state objects make that safe and keeps placements deterministic.
+   The drawn `tray` is engine-owned and random, so each test STUBS
+   `state.tray = card(...)` before a placeCard; `wanted` is stubbed
+   where a deterministic objective is needed. Plain state objects make
+   that safe and keep placements deterministic.
    Run:  node scripts/chip-panic-check.js
    ============================================================ */
 
 import {
-  newGame, placeCard, useDiscard, burnCard, cycleBet, canBet, canPlace, isGameOver,
-  HAND_POINTS, BET_TIERS, START_CHIPS, BET_EXPIRY_DRAWS, NO_BET, LANES,
+  newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace, isGameOver,
+  pickWanted, streakBonus, completesWanted,
+  HAND_POINTS, TIERS, START_CHIPS, ANTE_COST, ANTE_PROFIT, BET_EXPIRY_DRAWS, NO_RAISE, LANES,
 } from "../src/games/chip-panic/logic.js";
-import { HAND, bestMadeHand } from "../src/games/poker/handEval.js";
+import { HAND } from "../src/games/poker/handEval.js";
 
 const R = { A: 1, T: 10, J: 11, Q: 12, K: 13 };
 const card = (s) => {
@@ -34,15 +35,14 @@ function eq(label, got, want) {
   else { fail++; console.error(`  ✗ ${label}: got ${got}, want ${want}`); }
 }
 
-const TIER = Object.fromEntries(BET_TIERS.map((t, i) => [t.key, i]));
+const TIER = Object.fromEntries(TIERS.map((t, i) => [t.key, i]));
 
-// Stub the tray then place into lane `l`. Returns { state, result }.
+// Place a stubbed card into lane `l`. Returns { state, result }.
 function play(state, cstr, l) {
-  const s = { ...state, tray: card(cstr) };
-  return placeCard(s, l);
+  return placeCard({ ...state, tray: card(cstr) }, l);
 }
-// Fill lane `l` with a sequence of cards (stubbing the tray each time) and return
-// the final { state, result-of-the-resolving-placement }.
+// Fill lane `l` with a sequence (stubbing the tray each time). Returns the final
+// { state, result } where result is the resolving placement's result.
 function fillLane(state, seq, l = 0) {
   let s = state;
   let result = null;
@@ -53,207 +53,244 @@ function fillLane(state, seq, l = 0) {
   }
   return { state: s, result };
 }
+// Disable the wanted objective so resolution tests aren't perturbed by a chance hit.
+const noWanted = (g) => ({ ...g, wanted: { hand: -1, name: "", bonusPts: 0, bonusChips: 0 } });
 
-// ── bestMadeHand (the bet-eligibility helper) ─────────────────────────────────
-console.log("bestMadeHand:");
-eq("empty → high card", bestMadeHand([]), HAND.HIGH_CARD);
-eq("single → high card", bestMadeHand(cards("7C")), HAND.HIGH_CARD);
-eq("pair", bestMadeHand(cards("7C", "7D")), HAND.PAIR);
-eq("pair + kicker", bestMadeHand(cards("9C", "9D", "KS")), HAND.PAIR);
-eq("trips", bestMadeHand(cards("5C", "5D", "5H")), HAND.THREE);
-eq("draw is not a made hand", bestMadeHand(cards("8C", "9C", "TC")), HAND.HIGH_CARD);
-eq("three singles → high card", bestMadeHand(cards("2S", "6H", "QD")), HAND.HIGH_CARD);
-eq("quads", bestMadeHand(cards("7C", "7D", "7H", "7S")), HAND.FOUR);
-eq("full house", bestMadeHand(cards("KC", "KD", "KH", "2S", "2D")), HAND.FULL_HOUSE);
-
-// ── a full lane that makes a flush scores + clears ────────────────────────────
-console.log("Lane clear + scoring:");
+// ── ante: opening a lane costs a chip; an open lane is then free to fill ───────
+console.log("Ante / opening lanes:");
 {
-  const g = newGame();
-  const { state, result } = fillLane(g, ["AD", "JD", "8D", "5D", "2D"]);
-  eq("flush detected", result.resolution.hand.rank, HAND.FLUSH);
-  eq("flush points", result.resolution.points, HAND_POINTS[HAND.FLUSH]);
-  eq("score updated", state.score, HAND_POINTS[HAND.FLUSH]);
-  eq("lane cleared", state.lanes[0].length, 0);
-  eq("lane not locked", state.locked[0], false);
+  const g = noWanted(newGame());
+  eq("starts with START_CHIPS", g.chips, START_CHIPS);
+  const r1 = play(g, "2C", 0); // opens lane 0
+  eq("ante deducted on first card", r1.state.chips, START_CHIPS - ANTE_COST);
+  eq("lane marked anted", r1.state.anted[0], true);
+  eq("antePaid flag", r1.result.antePaid, true);
+  const r2 = play(r1.state, "7D", 0); // second card, already anted
+  eq("no further ante on 2nd card", r2.state.chips, START_CHIPS - ANTE_COST);
+  eq("2nd card not flagged ante", r2.result.antePaid, false);
 }
 {
-  const g = newGame();
-  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
-  eq("pair scores base", result.resolution.points, HAND_POINTS[HAND.PAIR]);
-  eq("pair clears lane", state.lanes[0].length, 0);
-  eq("no lives field exists", "lives" in state, false);
+  // 0 chips: empty lane not placeable, but an already-anted lane is.
+  let g = noWanted(newGame());
+  g = play(g, "2C", 0).state; // open lane 0 (now anted, 1 card)
+  g = { ...g, chips: 0 };
+  eq("0 chips: anted lane still placeable", canPlace({ ...g, tray: card("3C") }, 0), true);
+  eq("0 chips: empty lane NOT placeable", canPlace({ ...g, tray: card("3C") }, 1), false);
 }
 
-// ── a full lane of junk busts + locks (no clear, no score) ────────────────────
-console.log("High Card bust + lock:");
+// ── three-way resolution ──────────────────────────────────────────────────────
+console.log("Resolution — bust / save / score:");
 {
-  const g = newGame();
-  const { state, result } = fillLane(g, ["AD", "JC", "8D", "5S", "2D"]); // high card
-  eq("high card", result.resolution.hand.rank, HAND.HIGH_CARD);
-  eq("busted flag", result.resolution.busted, true);
-  eq("zero points", result.resolution.points, 0);
+  // High card → bust + lock, no score, ante lost.
+  const g = noWanted(newGame());
+  const { state, result } = fillLane(g, ["AD", "JC", "8D", "5S", "2D"]);
+  eq("high card busts", result.resolution.bust, true);
+  eq("locked", state.locked[0], true);
+  eq("no points", result.resolution.points, 0);
   eq("score unchanged", state.score, 0);
   eq("lane NOT cleared", state.lanes[0].length, 5);
-  eq("lane locked", state.locked[0], true);
+  eq("ante lost (down 1)", state.chips, START_CHIPS - ANTE_COST);
+}
+{
+  // Any pair → SAVE: clears the lane, 0 points, ante lost, NO discard refresh.
+  let g = noWanted(newGame());
+  g = { ...g, discard: false }; // pre-spent, to prove a save does NOT refresh
+  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair of kings
+  eq("pair is a save", result.resolution.saved, true);
+  eq("pair does NOT score", result.resolution.scored, false);
+  eq("save: 0 points", result.resolution.points, 0);
+  eq("save: lane cleared", state.lanes[0].length, 0);
+  eq("save: not locked", state.locked[0], false);
+  eq("save: discard NOT refreshed", state.discard, false);
+  eq("save: ante lost", state.chips, START_CHIPS - ANTE_COST);
+}
+{
+  // Two pair → SCORE: base points, lane clears, discard refreshes, ante returns+profit.
+  let g = noWanted(newGame());
+  g = { ...g, discard: false };
+  const { state, result } = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]); // two pair
+  eq("two pair scores", result.resolution.scored, true);
+  eq("two pair base points", result.resolution.points, HAND_POINTS[HAND.TWO_PAIR]);
+  eq("score updated", state.score, HAND_POINTS[HAND.TWO_PAIR]);
+  eq("lane cleared", state.lanes[0].length, 0);
+  eq("discard refreshed on score", state.discard, true);
+  // chips: -ante on open, +ante+profit on score → net +profit
+  eq("ante returned with profit", state.chips, START_CHIPS + ANTE_PROFIT);
+}
+{
+  // Flush scores its base too.
+  const g = noWanted(newGame());
+  const { result } = fillLane(g, ["AD", "JD", "8D", "5D", "2D"]);
+  eq("flush scores base", result.resolution.points, HAND_POINTS[HAND.FLUSH]);
 }
 
-// ── the run ends when all five lanes are locked ───────────────────────────────
-console.log("Game over when all locked:");
+// ── raises ────────────────────────────────────────────────────────────────────
+console.log("Raises:");
 {
-  let g = newGame();
-  for (let l = 0; l < LANES; l++) {
-    const r = fillLane(g, ["AD", "JC", "8D", "5S", "2D"], l); // junk → lock lane l
-    g = r.state;
-  }
-  eq("all five locked", g.locked.every(Boolean), true);
-  eq("isGameOver true", isGameOver(g), true);
-  eq("state.over set", g.over, true);
-}
-
-// ── discard: charged at start, spent, refreshed by a score (not a bust) ───────
-console.log("Discard:");
-{
-  let g = newGame();
-  eq("starts charged", g.discard, true);
-  const d = useDiscard(g);
-  eq("spent → uncharged", d.state.discard, false);
-  eq("discard drew a fresh tray", d.state.tray != null, true);
-  eq("spending again is a no-op", useDiscard(d.state).state.discard, false);
-  // a scoring hand recharges it…
-  const scored = fillLane(d.state, ["KS", "KH", "8D", "5S", "2D"]); // pair
-  eq("score refreshes discard", scored.state.discard, true);
-  // …but a bust does not.
-  let g2 = useDiscard(newGame()).state;
-  const busted = fillLane(g2, ["AD", "JC", "8D", "5S", "2D"]); // high card
-  eq("bust does NOT refresh discard", busted.state.discard, false);
-}
-
-// ── bet commitment timing (preview is free; commit on the next draw) ──────────
-console.log("Bet commit timing:");
-{
-  let g = newGame();
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("2C", "7D") : l)) }; // eligible
-  g = cycleBet(g, 0);
-  eq("preview is Blue", g.betSel[0], TIER.blue);
-  eq("no chips reserved yet", g.chips, START_CHIPS);
-  eq("not committed yet", g.bet[0], null);
-  // any draw commits it — place an unrelated card into lane 0
-  const r = play(g, "9H", 0);
-  eq("chips spent on commit", r.state.chips, START_CHIPS - BET_TIERS[TIER.blue].cost);
-  eq("bet committed", r.state.bet[0] != null, true);
-  eq("full expiry window", r.state.bet[0].draws, BET_EXPIRY_DRAWS);
-}
-
-// ── successful bet: multiply score + return stake + profit ────────────────────
-console.log("Bet win / fail-low / fail-bust:");
-{
-  let g = newGame();
-  // Seed a NO-hand draw (so it's bettable), bet Blue, then complete it to a pair.
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("KS", "8D") : l)) };
-  g = cycleBet(g, 0); // Blue (pair+)
-  const { state, result } = fillLane(g, ["KH", "5S", "2D"]); // → pair of kings
-  const tier = BET_TIERS[TIER.blue];
-  eq("bet won", result.resolution.bet.won, true);
-  eq("score multiplied", result.resolution.points, HAND_POINTS[HAND.PAIR] * tier.mult);
-  eq("chips back = stake+profit", result.resolution.chipsReturned, tier.cost + tier.profit);
-  // net chip change across the run: -cost at commit, +cost+profit on win = +profit
-  eq("net chips = +profit", state.chips, START_CHIPS + tier.profit);
-  eq("lane cleared on win", state.lanes[0].length, 0);
-  eq("discard refreshed on win", state.discard, true);
+  // Open + preview a Red raise; it commits on the next draw (extra chips deducted).
+  let g = noWanted(newGame());
+  g = play(g, "2C", 0).state; // open lane 0 (anted, 1 card, no made hand)
+  g = cycleRaise(g, 0);
+  eq("preview is Red", g.raiseSel[0], TIER.red);
+  eq("no extra chips reserved yet", g.chips, START_CHIPS - ANTE_COST);
+  const r = play(g, "9H", 0); // draw commits the raise
+  eq("raise extra deducted on commit", r.state.chips, START_CHIPS - ANTE_COST - TIERS[TIER.red].extra);
+  eq("raise committed", r.state.raise[0] != null, true);
+  eq("full expiry window", r.state.raise[0].draws, BET_EXPIRY_DRAWS);
 }
 {
-  // Gold needs Straight+; resolving as a mere pair fails the bet but still scores.
-  let g = newGame();
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("KS", "8D") : l)) };
-  // cycle up to Gold
-  while (g.betSel[0] !== TIER.gold) g = cycleBet(g, 0);
-  eq("previewing Gold", g.betSel[0], TIER.gold);
-  const { state, result } = fillLane(g, ["KH", "5S", "2D"]); // pair, below Straight
-  const tier = BET_TIERS[TIER.gold];
-  eq("bet failed-low", result.resolution.bet.won, false);
-  eq("still scores base (no mult)", result.resolution.points, HAND_POINTS[HAND.PAIR]);
-  eq("stake forfeited", result.resolution.chipsLost, tier.cost);
-  eq("net chips = -cost", state.chips, START_CHIPS - tier.cost);
-  eq("lane cleared (still made a hand)", state.lanes[0].length, 0);
-  eq("discard refreshed (scored)", state.discard, true);
+  // Red raise (needs trips+) that lands as trips → wins: mult applied, stake+profit back.
+  let g = noWanted(newGame());
+  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("KS", "8D") : l)), anted: g.anted.map((a, i) => i === 0 ? true : a) };
+  g = cycleRaise(g, 0); // Red
+  const { state, result } = fillLane(g, ["KH", "KD", "2C"]); // → trips of kings
+  const tier = TIERS[TIER.red];
+  eq("raise won", result.resolution.raise.won, true);
+  eq("score multiplied", result.resolution.points, HAND_POINTS[HAND.THREE] * tier.mult);
 }
 {
-  // Blue bet that busts as high card: no score, lane locks, stake lost, no refresh.
-  let g = newGame();
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("AD", "JC") : l)) };
-  g = cycleBet(g, 0); // Blue
-  const { state, result } = fillLane(g, ["8D", "5S", "2D"]); // high card
-  eq("bet failed on bust", result.resolution.bet.won, false);
-  eq("no points", result.resolution.points, 0);
-  eq("stake lost", result.resolution.chipsLost, BET_TIERS[TIER.blue].cost);
-  eq("lane locked", state.locked[0], true);
-  eq("net chips = -1", state.chips, START_CHIPS - 1);
-  // (discard-not-refreshed-on-bust is asserted in the Discard section above)
+  // Red raise that only makes two pair → fails the raise but still SCORES base.
+  let g = noWanted(newGame());
+  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("KS", "8D") : l)), anted: g.anted.map((a, i) => i === 0 ? true : a) };
+  g = cycleRaise(g, 0); // Red needs trips+
+  const { state, result } = fillLane(g, ["KH", "8S", "2C"]); // two pair (K,8)
+  eq("raise failed-low", result.resolution.raise.won, false);
+  eq("still scores base (no mult)", result.resolution.points, HAND_POINTS[HAND.TWO_PAIR]);
+  eq("lane cleared", state.lanes[0].length, 0);
 }
-
-// ── bet expiry: must land within BET_EXPIRY_DRAWS draws ───────────────────────
-console.log("Bet expiry:");
 {
-  let g = newGame();
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("2C", "7D") : l)) };
-  g = cycleBet(g, 0); // Blue
-  // draw #1 commits it (window = BET_EXPIRY_DRAWS); then we need BET_EXPIRY_DRAWS
-  // MORE draws without resolving lane 0 to expire it. Place into other lanes.
+  // Raise expiry: commit, then BET_EXPIRY_DRAWS more draws without resolving → expires.
+  let g = noWanted(newGame());
+  g = play(g, "2C", 0).state; // open lane 0
+  g = cycleRaise(g, 0); // Red
   let expiredHit = null;
   for (let i = 0; i < BET_EXPIRY_DRAWS + 1; i++) {
-    const lane = 1 + (i % 4); // never lane 0
+    // place into OTHER lanes (open them first as needed) to advance draws
+    const lane = 1 + (i % 4);
     const r = play(g, "3" + "SHDC"[i % 4], lane);
     g = r.state;
     if (r.result.expired && r.result.expired.length) expiredHit = r.result.expired[0];
   }
-  eq("bet expired", expiredHit && expiredHit.laneIndex, 0);
-  eq("bet cleared after expiry", g.bet[0], null);
-  eq("no refund on expiry", g.chips, START_CHIPS - BET_TIERS[TIER.blue].cost);
+  eq("raise expired on lane 0", expiredHit && expiredHit.laneIndex, 0);
+  eq("raise cleared after expiry", g.raise[0], null);
 }
+
+// ── discard ─────────────────────────────────────────────────────────────────
+console.log("Discard:");
 {
-  // A bet keeps its FULL window: it is not decremented by the draw that commits it.
+  let g = noWanted(newGame());
+  eq("starts charged", g.discard, true);
+  const d = useDiscard(g);
+  eq("spent → uncharged", d.state.discard, false);
+  eq("discard drew a fresh tray", d.state.tray != null, true);
+  // a true score recharges; (save not refreshing is covered above)
+  const scored = fillLane(d.state, ["KS", "KH", "8D", "8S", "2D"]); // two pair
+  eq("score refreshes discard", scored.state.discard, true);
+}
+
+// ── Wanted Hands ──────────────────────────────────────────────────────────────
+console.log("Wanted Hands:");
+{
+  // Exact match completes; bonus pts+chips added; streak +1.
   let g = newGame();
-  g = { ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards("2C", "7D") : l)) };
-  g = cycleBet(g, 0);
-  const r = play(g, "9H", 1); // this draw commits
-  eq("committed at full window", r.state.bet[0].draws, BET_EXPIRY_DRAWS);
+  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  const { state, result } = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]); // two pair
+  eq("wanted hit", result.wanted && result.wanted.hit, true);
+  eq("bonus points added", result.wanted.totalPts, 50);
+  eq("score = base + bonus", state.score, HAND_POINTS[HAND.TWO_PAIR] + 50);
+  eq("streak advanced", state.streak, 1);
+  // chips: -ante +ante+profit (score) +bonusChips
+  eq("bonus chips added", state.chips, START_CHIPS + ANTE_PROFIT + 1);
 }
-
-// ── canBet eligibility + cycleBet affordability skipping ──────────────────────
-console.log("Eligibility:");
 {
-  const g = newGame();
-  const withLane = (cs) => ({ ...g, lanes: g.lanes.map((l, i) => (i === 0 ? cards(...cs) : l)) });
-  eq("empty lane: no blind bet", canBet(withLane([]), 0, TIER.blue), false);
-  eq("1-card lane: bettable", canBet(withLane(["2C"]), 0, TIER.blue), true);
-  eq("draw lane: bettable", canBet(withLane(["8C", "9C", "TC"]), 0, TIER.blue), true);
-  eq("4-card lane: too many", canBet(withLane(["2C", "3D", "4H", "5S"]), 0, TIER.blue), false);
-  eq("made-hand lane: not bettable", canBet(withLane(["7C", "7D"]), 0, TIER.blue), false);
-  // locked lane
-  const locked = { ...g, locked: g.locked.map((v, i) => i === 0) };
-  eq("locked lane: not bettable", canBet({ ...locked, lanes: locked.lanes.map((l, i) => (i === 0 ? cards("2C") : l)) }, 0, TIER.blue), false);
-  // poor player
-  const poor = { ...withLane(["2C"]), chips: 1 };
-  eq("can afford Blue (cost 1)", canBet(poor, 0, TIER.blue), true);
-  eq("cannot afford Red (cost 2)", canBet(poor, 0, TIER.red), false);
-  // cycleBet skips unaffordable tiers: chips=1 → none → Blue → none
-  let p = cycleBet(poor, 0);
-  eq("cycle to Blue", p.betSel[0], TIER.blue);
-  p = cycleBet(p, 0);
-  eq("cycle skips to No Bet (can't afford Red+)", p.betSel[0], NO_BET);
+  // Exact-only: a higher hand does NOT complete a lower wanted.
+  let g = newGame();
+  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  const { state, result } = fillLane(g, ["KS", "KH", "KD", "8S", "2D"]); // trips, not two pair
+  eq("higher hand does NOT complete lower wanted", !!(result.wanted && result.wanted.hit), false);
+  eq("streak not advanced", state.streak, 0);
+}
+{
+  // Royal completes a Straight-Flush wanted (special case).
+  eq("royal completes straight-flush wanted", completesWanted(HAND.ROYAL_FLUSH, HAND.STRAIGHT_FLUSH), true);
+  eq("straight flush does NOT complete royal wanted", completesWanted(HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH), false);
+}
+{
+  // A pair save does NOT complete or advance a wanted, and does not reset streak.
+  let g = newGame();
+  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 2 };
+  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
+  eq("pair does not hit wanted", !!(result.wanted && result.wanted.hit), false);
+  eq("pair save keeps streak", state.streak, 2);
+}
+{
+  // A bust resets the streak.
+  let g = newGame();
+  g = { ...g, wanted: { hand: HAND.FLUSH, name: "Flush", bonusPts: 175, bonusChips: 3 }, streak: 3 };
+  const { state, result } = fillLane(g, ["AD", "JC", "8D", "5S", "2D"]); // high card
+  eq("bust resets streak", state.streak, 0);
+  eq("streakReset flag", result.streakReset, true);
+}
+{
+  // Milestone at streak 5 unlocks a locked lane.
+  let g = newGame();
+  g = {
+    ...g,
+    wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 },
+    streak: 4, // completion makes it 5
+    locked: [false, false, false, false, true], // lane 4 is locked
+  };
+  const { state } = fillLane(g, ["KS", "KH", "8D", "8S", "2D"], 0); // two pair → streak 5
+  eq("streak reached 5", state.streak, 5);
+  eq("a locked lane was unlocked", state.locked[4], false);
+}
+// streakBonus unit checks
+eq("streakBonus 2 → +25% pts", streakBonus(2).ptsMult, 1.25);
+eq("streakBonus 3 → +1 chip", streakBonus(3).chipAdd, 1);
+eq("streakBonus 4 → +50% pts", streakBonus(4).ptsMult, 1.5);
+eq("streakBonus 5 → unlock", streakBonus(5).unlockLane, true);
+// pickWanted draws from the streak-appropriate pool. Use rng=0.5 so the jackpot
+// roll (rng < 0.08) never fires and the pool index lands mid-pool deterministically.
+{
+  const mid = () => 0.5;
+  const early = [HAND.TWO_PAIR, HAND.THREE];
+  const midPool = [HAND.STRAIGHT, HAND.FLUSH, HAND.FULL_HOUSE];
+  const latePool = [HAND.FULL_HOUSE, HAND.FOUR];
+  eq("streak 0 → early pool", early.includes(pickWanted(0, mid).hand), true);
+  eq("streak 1 → early pool", early.includes(pickWanted(1, mid).hand), true);
+  eq("streak 2 → mid pool", midPool.includes(pickWanted(2, mid).hand), true);
+  eq("streak 4 → late pool", latePool.includes(pickWanted(4, mid).hand), true);
+  // jackpot CAN appear past the early game (rng below the chance)
+  const jack = () => 0.0; // forces jackpot branch at streak >= 2
+  eq("streak 5 jackpot possible", [HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH].includes(pickWanted(5, jack).hand), true);
+  // never a pair, across the pools
+  let sawPair = false;
+  for (let s = 0; s <= 6; s++) for (let k = 0; k < 12; k++) if (pickWanted(s, Math.random).hand === HAND.PAIR) sawPair = true;
+  eq("wanted is never a pair", sawPair, false);
 }
 
-// ── One-Deck mode ends on deck exhaustion ─────────────────────────────────────
+// ── game over ─────────────────────────────────────────────────────────────────
+console.log("Game over:");
+{
+  // All lanes locked → over.
+  let g = noWanted(newGame());
+  for (let l = 0; l < LANES; l++) g = fillLane(g, ["AD", "JC", "8D", "5S", "2D"], l).state;
+  eq("all locked → over", g.over, true);
+  eq("isGameOver agrees", isGameOver(g), true);
+}
+{
+  // 0 chips with only empty unaffordable lanes and no anted lane → stuck → over.
+  let g = noWanted(newGame());
+  g = { ...g, chips: 0, tray: card("7C") }; // no lane opened, can't afford any ante
+  eq("stuck at 0 chips → game over", isGameOver(g), true);
+}
+
+// ── One-Deck mode ends on exhaustion ──────────────────────────────────────────
 console.log("One-Deck exhaustion:");
 {
-  let g = newGame({ oneDeck: true });
-  eq("one-deck flag set", g.oneDeck, true);
-  // Drain the real deck (no tray stubbing): place into the first lane that can
-  // take a card; if every lane is locked/full, burn the tray to keep drawing.
-  // Either path eventually empties the 52-card deck and ends the run.
+  let g = noWanted(newGame({ oneDeck: true }));
   let guard = 0;
-  while (!g.over && guard < 200) {
+  while (!g.over && guard < 300) {
     let placed = false;
     for (let l = 0; l < LANES; l++) {
       if (canPlace(g, l)) { g = placeCard(g, l).state; placed = true; break; }
@@ -262,7 +299,6 @@ console.log("One-Deck exhaustion:");
     guard++;
   }
   eq("one-deck run ends", g.over, true);
-  eq("isGameOver agrees", isGameOver(g), true);
 }
 
 console.log(`\n${pass} passed, ${fail} failed.`);

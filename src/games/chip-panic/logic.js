@@ -1,38 +1,57 @@
 /* High Card Bust — pure game logic (no React, no DOM).
-   A turn-based poker solitaire. Five lanes, each holding up to five cards. The
-   player draws ONE card at a time into a tray, then places it into an unlocked
-   lane (or spends a discard to throw it away). When a lane reaches five cards it
-   RESOLVES:
-     - Pair or better → SCORES and CLEARS (the lane empties, ready to reuse).
-     - High Card only → BUSTS and LOCKS permanently (dead weight on the board).
-   There is no life counter — locked lanes are the lives. The run ends when all
-   five lanes are locked (or, in One-Deck mode, when the deck is exhausted).
+   A turn-based poker solitaire with a chip economy and rotating objectives.
 
-   Push-your-luck betting: tap a lane's chip to PREVIEW a wager tier (Blue/Red/
-   Gold/Black). The bet COMMITS — reserving chips and starting a countdown — when
-   the next card is drawn. A committed bet must succeed within BET_EXPIRY_DRAWS
-   draws or it fails. Winning a bet multiplies the lane's score and returns the
-   stake plus profit; any failure forfeits the stake.
+   Five lanes, each holding up to five cards. The player draws ONE card at a time
+   into a tray, then places it into a lane (or spends a discard to throw it away).
 
-   Kept view-free and unit-testable: every function returns NEW state and the
-   view holds it. The drawn `tray` card lives in engine state (not the view) so
-   that bet commitment + expiry happen in a single deterministic draw transition.
-   Shares deck.js / handEval.js with the other card cabinets. */
+   ECONOMY — chips are survival:
+     * Opening an empty lane costs a Blue ANTE (ANTE_COST chips), paid on the first
+       card placed there. An "anted" lane is active until it resolves.
+     * You only need chips to OPEN a new lane or RAISE; an already-anted lane is
+       always playable, even at 0 chips. The run ends only when all five lanes are
+       locked, or no legal placement exists for the current tray.
+
+   RESOLUTION — a full (5-card) lane resolves three ways:
+     * HIGH CARD      → BUST + LOCK (permanent). Ante + any raise lost; streak resets.
+     * ANY PAIR       → a defensive SAVE: the lane CLEARS (slot freed) but scores 0,
+                        the ante is lost, no chips returned, the discard does NOT
+                        refresh, and the streak is unchanged.
+     * TWO PAIR or +  → a true SCORE: base points, ante returned (+profit), any
+                        winning raise multiplies the score and pays profit, the
+                        discard refreshes, and a matching WANTED hand pays its bonus.
+
+   RAISES — optional, on an already-anted lane: cycle Red/Gold/Black to wager more
+   for a bigger multiplier. A raise commits on the next draw and must land within
+   BET_EXPIRY_DRAWS draws or it's forfeited.
+
+   WANTED HANDS — one rotating target. A lane resolving as EXACTLY the wanted hand
+   (Royal also satisfies a Straight-Flush wanted) pays bonus points + chips and
+   advances the Wanted Streak (milestones at 2/3/4/5). The streak resets when a lane
+   busts. Difficulty pool escalates with the streak.
+
+   Kept view-free + unit-testable: every function returns NEW state and the view
+   holds it. The drawn `tray` lives in engine state so ante/raise commitment and
+   expiry happen in a single deterministic draw transition. Shares deck.js /
+   handEval.js with the other card cabinets. */
 
 import { freshDeck, shuffle } from "../cards/deck.js";
-import { evaluate, bestMadeHand, HAND } from "../poker/handEval.js";
+import { evaluate, bestMadeHand, HAND, HAND_NAME } from "../poker/handEval.js";
 
 export const LANES = 5;
 export const LANE_CAP = 5; // a full lane = 5 cards = one poker hand
-export const START_CHIPS = 10;
-export const BET_EXPIRY_DRAWS = 5; // a committed bet must land within this many draws
-export const BET_MAX_CARDS = 3; // a lane can only be newly bet at <= this many cards
-export const NO_BET = 0;
-export const PAYING_MIN = HAND.PAIR; // pair or better scores
+export const START_CHIPS = 12;
+export const BET_EXPIRY_DRAWS = 5; // a committed raise must land within this many draws
+export const RAISE_MAX_CARDS = 3; // a lane can only be newly raised at <= this many cards
 
-// Base points per hand category when a lane scores (design doc §6).
+export const ANTE_TIER = 1; // index into TIERS — Blue is the ante baseline
+export const ANTE_COST = 1; // chips to open (ante) a lane
+export const ANTE_PROFIT = 1; // chips returned ABOVE the ante on a true score
+export const SCORE_MIN = HAND.TWO_PAIR; // two pair or better truly scores
+export const SAVE_HAND = HAND.PAIR; // any pair is a defensive save (clears, no score)
+
+// Base points per hand category on a true score. (A pair never scores — it's only
+// a save — so HAND.PAIR is intentionally absent.)
 export const HAND_POINTS = {
-  [HAND.PAIR]: 10,
   [HAND.TWO_PAIR]: 25,
   [HAND.THREE]: 40,
   [HAND.STRAIGHT]: 60,
@@ -43,38 +62,85 @@ export const HAND_POINTS = {
   [HAND.ROYAL_FLUSH]: 1000,
 };
 
-/* Wager tiers, in tap-cycle order (index 0 = No Bet). A tier wins if the lane
-   resolves with a hand of rank >= `min`. `mult` multiplies the base points;
-   `profit` is the chips returned ABOVE the stake on a win (doc §9 + §12).
-   `color` is the Kenney chip art name — Gold maps to the green chip (no gold art
-   exists; matches VideoPoker's chip mapping). */
-export const BET_TIERS = [
-  { key: "none", label: "No Bet", color: null, cost: 0, min: PAYING_MIN, mult: 1, profit: 0 },
-  { key: "blue", label: "Blue", color: "blue", cost: 1, min: HAND.PAIR, mult: 2, profit: 1 },
-  { key: "red", label: "Red", color: "red", cost: 2, min: HAND.TWO_PAIR, mult: 3, profit: 1 },
-  { key: "gold", label: "Gold", color: "green", cost: 3, min: HAND.STRAIGHT, mult: 5, profit: 2 },
-  { key: "black", label: "Black", color: "black", cost: 5, min: HAND.FULL_HOUSE, mult: 8, profit: 3 },
+/* Chip tiers. Index 0 ("ante") is the mandatory Blue ante every active lane pays;
+   indices 1+ are optional RAISES layered on top. A raise WINS if the lane resolves
+   with rank >= `min`; `mult` multiplies the base points; `profit` is chips returned
+   ABOVE the raise stake on a win. `extra` is the chips a raise costs beyond the ante
+   already paid. `color` is the Kenney chip art name (Gold → green; no gold art). */
+export const TIERS = [
+  { key: "ante",  label: "Ante",  color: "blue",  extra: 0, min: SCORE_MIN,      mult: 1, profit: 0, reqLabel: "TWO PAIR+" },
+  { key: "red",   label: "Red",   color: "red",   extra: 1, min: HAND.THREE,     mult: 3, profit: 1, reqLabel: "TRIPS+" },
+  { key: "gold",  label: "Gold",  color: "green", extra: 2, min: HAND.STRAIGHT,  mult: 5, profit: 2, reqLabel: "STRAIGHT+" },
+  { key: "black", label: "Black", color: "black", extra: 4, min: HAND.FULL_HOUSE, mult: 8, profit: 3, reqLabel: "FULL HOUSE+" },
 ];
+export const NO_RAISE = 0; // raiseSel value meaning "ante only, no raise"
 
-/* Fresh game state.
-   {
-     lanes:   Card[][]          LANES lanes, each 0..LANE_CAP cards (push order)
-     locked:  bool[LANES]       lanes that busted as High Card (permanent)
-     betSel:  int[LANES]        currently-previewed tier index (free to cycle)
-     bet:     (Bet|null)[LANES] committed bet { tier, draws } | null
-     tray:    Card|null         the drawn card awaiting placement/discard
-     bag:     Card[]            draw source
-     oneDeck: bool              false = infinite reshuffle (default)
-     rng:     () => number
-     chips, discard, score, draws, over
-   }
-   Bet: { tier:int (index into BET_TIERS), draws:int (draws remaining) } */
+/* Wanted Hands — flat bonus rewards (separate from the bet multiplier). Pairs are
+   never wanted (they don't score). */
+export const WANTED_REWARDS = {
+  [HAND.TWO_PAIR]: { pts: 50, chips: 1 },
+  [HAND.THREE]: { pts: 100, chips: 2 },
+  [HAND.STRAIGHT]: { pts: 150, chips: 3 },
+  [HAND.FLUSH]: { pts: 175, chips: 3 },
+  [HAND.FULL_HOUSE]: { pts: 250, chips: 4 },
+  [HAND.FOUR]: { pts: 500, chips: 6 },
+  [HAND.STRAIGHT_FLUSH]: { pts: 1000, chips: 8 },
+  [HAND.ROYAL_FLUSH]: { pts: 2500, chips: 10 },
+};
+
+// Difficulty pools, chosen by current streak. Pairs excluded.
+const WANTED_POOLS = {
+  early: [HAND.TWO_PAIR, HAND.THREE],
+  mid: [HAND.STRAIGHT, HAND.FLUSH, HAND.FULL_HOUSE],
+  late: [HAND.FULL_HOUSE, HAND.FOUR],
+  jackpot: [HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH],
+};
+const JACKPOT_CHANCE = 0.08; // small chance to roll a jackpot target at higher streaks
+
+// Pick a wanted target appropriate to the streak. 0–1 early, 2–3 mid, 4+ late, with
+// a small jackpot chance once past the early game.
+export function pickWanted(streak, rng = Math.random) {
+  let pool;
+  if (streak >= 2 && rng() < JACKPOT_CHANCE) pool = WANTED_POOLS.jackpot;
+  else if (streak <= 1) pool = WANTED_POOLS.early;
+  else if (streak <= 3) pool = WANTED_POOLS.mid;
+  else pool = WANTED_POOLS.late;
+  const hand = pool[Math.floor(rng() * pool.length)];
+  const r = WANTED_REWARDS[hand];
+  return { hand, name: HAND_NAME[hand], bonusPts: r.pts, bonusChips: r.chips };
+}
+
+/* Streak-milestone modifiers applied to a Wanted bonus at completion, keyed by the
+   streak the completion PRODUCES (1-indexed):
+     2 → +25% pts, 3 → +1 chip, 4 → +50% pts, 5 → unlock one locked lane.
+   Returns { ptsMult, chipAdd, unlockLane }. */
+export function streakBonus(newStreak) {
+  let ptsMult = 1;
+  let chipAdd = 0;
+  let unlockLane = false;
+  if (newStreak === 2) ptsMult = 1.25;
+  else if (newStreak === 3) chipAdd = 1;
+  else if (newStreak === 4) ptsMult = 1.5;
+  else if (newStreak >= 5) unlockLane = true;
+  return { ptsMult, chipAdd, unlockLane };
+}
+
+// Does a resolved hand complete the wanted target? Exact match, except a Royal
+// Flush also satisfies a Straight-Flush wanted (it's a special straight flush).
+export function completesWanted(handRank, wantedHand) {
+  if (handRank === wantedHand) return true;
+  if (wantedHand === HAND.STRAIGHT_FLUSH && handRank === HAND.ROYAL_FLUSH) return true;
+  return false;
+}
+
+/* Fresh game state. */
 export function newGame({ oneDeck = false, rng = Math.random } = {}) {
   const state = {
     lanes: Array.from({ length: LANES }, () => []),
     locked: Array(LANES).fill(false),
-    betSel: Array(LANES).fill(NO_BET),
-    bet: Array(LANES).fill(null),
+    anted: Array(LANES).fill(false), // lane has paid its ante (is open/active)
+    raise: Array(LANES).fill(null), // committed raise { tier, draws } | null
+    raiseSel: Array(LANES).fill(NO_RAISE), // previewed raise tier (cycles among affordable)
     tray: null,
     bag: shuffle(freshDeck(), rng),
     oneDeck,
@@ -82,126 +148,174 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     chips: START_CHIPS,
     discard: true, // starts charged
     score: 0,
+    streak: 0,
     draws: 0,
     over: false,
+    wanted: null,
   };
-  // Deal the opening card so PLAY always has something in the tray. No bets can
-  // be pending yet, so this draw never commits or ticks anything.
+  state.wanted = pickWanted(0, rng);
+  // Deal the opening card so PLAY always has something in the tray.
   drawInto(state, null);
   return state;
 }
 
 export const laneFull = (lane) => lane.length >= LANE_CAP;
-export const canPlace = (state, l) =>
-  !state.over && !state.locked[l] && !laneFull(state.lanes[l]) && state.tray != null;
 
-// All five lanes locked → main end condition. One-Deck also ends when the deck
-// is spent (no tray left to place).
-export function isGameOver(state) {
-  if (state.locked.every(Boolean)) return true;
-  if (state.oneDeck && state.bag.length === 0 && state.tray == null) return true;
-  return false;
-}
-
-/* Can lane `l` be newly bet at tier `tierIndex`? (doc §8)
-   No Bet is always selectable; a real tier needs the lane unlocked, not full,
-   holding 1..BET_MAX_CARDS cards with NO made hand yet, and enough chips. The
-   `>= 1` rules out blind bets on empty lanes. */
-export function canBet(state, l, tierIndex) {
-  if (state.over || state.locked[l]) return false;
-  if (tierIndex === NO_BET) return true;
-  const tier = BET_TIERS[tierIndex];
-  if (!tier) return false;
-  const lane = state.lanes[l];
-  if (lane.length < 1 || lane.length > BET_MAX_CARDS) return false;
-  if (bestMadeHand(lane) !== HAND.HIGH_CARD) return false;
-  if (state.chips < tier.cost) return false;
+// Can the current tray be placed into lane `l`? An empty lane requires either an
+// ante already paid or enough chips to pay it now; a non-empty anted lane is always
+// playable. Locked/full/no-tray block.
+export function canPlace(state, l) {
+  if (state.over || state.locked[l] || state.tray == null) return false;
+  if (laneFull(state.lanes[l])) return false;
+  if (state.lanes[l].length === 0 && !state.anted[l]) {
+    return state.chips >= ANTE_COST; // need to afford the ante to open it
+  }
   return true;
 }
 
-/* Cycle the previewed tier on lane `l` to the next affordable+eligible one,
-   wrapping back to No Bet (doc §9, §10). Reserves NO chips — commitment happens
-   on the next draw. No-op if the lane can't take any real bet. */
-export function cycleBet(state, l) {
-  if (!canBet(state, l, BET_TIERS.length - 1) && !affordsAnyTier(state, l)) {
-    // Lane is ineligible for every real tier (locked/full/made-hand/too many
-    // cards) — only No Bet is valid, so there's nothing to cycle.
-    if (state.betSel[l] === NO_BET) return state;
-    const betSel = state.betSel.slice();
-    betSel[l] = NO_BET;
-    return { ...state, betSel };
-  }
-  const betSel = state.betSel.slice();
-  let next = betSel[l];
-  for (let step = 0; step < BET_TIERS.length; step++) {
-    next = (next + 1) % BET_TIERS.length;
-    if (next === NO_BET || canBet(state, l, next)) break;
-  }
-  betSel[l] = next;
-  return { ...state, betSel };
-}
-
-function affordsAnyTier(state, l) {
-  for (let t = 1; t < BET_TIERS.length; t++) if (canBet(state, l, t)) return true;
+// Is there ANY lane the current tray can legally go into?
+export function anyPlacement(state) {
+  if (state.tray == null) return false;
+  for (let l = 0; l < LANES; l++) if (canPlace(state, l)) return true;
   return false;
 }
 
-/* Place the tray card into lane `l`. If the lane fills to LANE_CAP it resolves
-   (scores+clears, or busts+locks). Then the draw transition runs (commits
-   pending bets, ticks expiry, deals the next tray). Returns { state, result }.
-   Invalid placement (locked/full/no tray) returns the state unchanged with
-   result.type === "invalid". */
+// The run ends when every lane is locked, the One-Deck bag is spent, or the player
+// is stuck — a tray with nowhere legal to place it (e.g. 0 chips and only empty,
+// unaffordable lanes left).
+export function isGameOver(state) {
+  if (state.locked.every(Boolean)) return true;
+  if (state.oneDeck && state.bag.length === 0 && state.tray == null) return true;
+  if (state.tray != null && !anyPlacement(state)) return true;
+  return false;
+}
+
+/* Can lane `l` take a new RAISE at tier `tierIndex`? A raise needs the lane already
+   anted (open), unlocked, holding 1..RAISE_MAX_CARDS cards with no made hand yet,
+   and enough chips for the extra cost. Tier 0 (ante) is not a raise. */
+export function canRaise(state, l, tierIndex) {
+  if (state.over || state.locked[l]) return false;
+  if (tierIndex === NO_RAISE) return true;
+  const tier = TIERS[tierIndex];
+  if (!tier) return false;
+  if (!state.anted[l]) return false; // must open the lane (ante) before raising
+  const lane = state.lanes[l];
+  if (lane.length < 1 || lane.length > RAISE_MAX_CARDS) return false;
+  if (bestMadeHand(lane) !== HAND.HIGH_CARD) return false;
+  if (state.chips < tier.extra) return false;
+  return true;
+}
+
+// Cycle the previewed raise on lane `l` to the next affordable+eligible tier,
+// wrapping back to NO_RAISE. Reserves no chips (commit happens on the next draw).
+export function cycleRaise(state, l) {
+  if (!affordsAnyRaise(state, l)) {
+    if (state.raiseSel[l] === NO_RAISE) return state;
+    const raiseSel = state.raiseSel.slice();
+    raiseSel[l] = NO_RAISE;
+    return { ...state, raiseSel };
+  }
+  const raiseSel = state.raiseSel.slice();
+  let next = raiseSel[l];
+  for (let step = 0; step < TIERS.length; step++) {
+    next = (next + 1) % TIERS.length;
+    if (next === NO_RAISE || canRaise(state, l, next)) break;
+  }
+  raiseSel[l] = next;
+  return { ...state, raiseSel };
+}
+
+function affordsAnyRaise(state, l) {
+  for (let t = 1; t < TIERS.length; t++) if (canRaise(state, l, t)) return true;
+  return false;
+}
+
+/* Place the tray card into lane `l`. Opening an empty lane pays the ante. If the
+   lane fills to LANE_CAP it resolves (three-way). Then the draw transition runs
+   (commits pending raises, ticks expiry, deals the next tray). Returns
+   { state, result }. Invalid placement returns the state unchanged. */
 export function placeCard(state, l) {
   if (!canPlace(state, l)) {
     return { state, result: { type: "invalid", laneIndex: l } };
   }
   const lanes = state.lanes.map((lane) => lane.slice());
   const locked = state.locked.slice();
-  const bet = state.bet.slice();
-  const betSel = state.betSel.slice();
-  let { chips, score, discard } = state;
+  const anted = state.anted.slice();
+  const raise = state.raise.slice();
+  const raiseSel = state.raiseSel.slice();
+  let { chips, score, discard, streak, wanted } = state;
+
+  // Opening an empty lane pays the Blue ante.
+  let antePaid = false;
+  if (lanes[l].length === 0 && !anted[l]) {
+    chips -= ANTE_COST;
+    anted[l] = true;
+    antePaid = true;
+  }
 
   lanes[l].push(state.tray);
 
   let resolution = null;
+  let wantedClaim = null;
   if (lanes[l].length === LANE_CAP) {
-    resolution = resolveLane({ lane: lanes[l], committed: bet[l], l });
-    score += resolution.points;
-    chips += resolution.chipsReturned;
-    if (resolution.scored) {
-      lanes[l] = []; // clear
-      discard = true; // any scoring hand refreshes the discard (§5/§13)
+    const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], anted: anted[l], wanted, streak, l, rng: state.rng });
+    resolution = r;
+    score += r.points;
+    chips += r.chipsReturned;
+
+    if (r.bust) {
+      locked[l] = true; // keep cards for the cracked visual
+      streak = 0; // a bust resets the wanted streak
     } else {
-      locked[l] = true; // bust: lane locks; keep the cards for the cracked visual
+      // SAVE or SCORE both clear the lane.
+      lanes[l] = [];
+      anted[l] = false;
+      if (r.scored) discard = true; // only a true score refreshes the discard
     }
-    bet[l] = null;
-    betSel[l] = NO_BET;
+
+    // Apply a completed Wanted (only on a true score; resolveLane decided it).
+    if (r.wanted && r.wanted.hit) {
+      wantedClaim = r.wanted;
+      score += r.wanted.totalPts;
+      chips += r.wanted.totalChips;
+      streak = r.wanted.streak;
+      if (r.wanted.unlockLane) {
+        const u = firstLocked(locked);
+        if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; }
+      }
+      wanted = pickWanted(streak, state.rng);
+    }
+
+    raise[l] = null;
+    raiseSel[l] = NO_RAISE;
   }
 
-  let next = { ...state, lanes, locked, bet, betSel, chips, score, discard };
+  let next = { ...state, lanes, locked, anted, raise, raiseSel, chips, score, discard, streak, wanted };
   const expired = [];
   drawInto(next, expired);
   next.over = isGameOver(next);
 
-  const chipsDelta = next.chips - state.chips;
   return {
     state: next,
     result: {
       type: "place",
       laneIndex: l,
+      antePaid,
       resolution,
+      wanted: wantedClaim,
       expired,
       discarded: false,
       burned: false,
-      chipsDelta,
+      chipsDelta: next.chips - state.chips,
       discardRefreshed: !state.discard && next.discard,
+      streakReset: resolution && resolution.bust && state.streak > 0,
     },
   };
 }
 
-/* Spend the single discard to throw the tray card away (doc §5). Requires the
-   discard to be charged; does NOT place the card or resolve a lane, but the
-   draw it triggers can still commit/expire bets. No-op if uncharged. */
+/* Spend the single discard to throw the tray card away. Requires the discard to be
+   charged; does NOT place a card or resolve a lane, but the draw it triggers can
+   still commit/expire raises. No-op if uncharged. */
 export function useDiscard(state) {
   if (state.over || !state.discard || state.tray == null) {
     return { state, result: { type: "invalid", laneIndex: -1 } };
@@ -212,22 +326,12 @@ export function useDiscard(state) {
   next.over = isGameOver(next);
   return {
     state: next,
-    result: {
-      type: "discard",
-      laneIndex: -1,
-      resolution: null,
-      expired,
-      discarded: true,
-      burned: false,
-      chipsDelta: 0,
-      discardRefreshed: false,
-    },
+    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, discarded: true, burned: false, chipsDelta: 0, discardRefreshed: false },
   };
 }
 
-/* Panic-mode timeout: burn the tray card (doc §14). Like useDiscard but never
-   touches the discard charge — the card is simply lost and a new one is drawn
-   (which can still tick bets). */
+/* Panic-mode timeout: burn the tray card. Like useDiscard but never touches the
+   discard charge — the card is lost and a new one is drawn. */
 export function burnCard(state) {
   if (state.over || state.tray == null) {
     return { state, result: { type: "invalid", laneIndex: -1 } };
@@ -238,120 +342,138 @@ export function burnCard(state) {
   next.over = isGameOver(next);
   return {
     state: next,
-    result: {
-      type: "discard",
-      laneIndex: -1,
-      resolution: null,
-      expired,
-      discarded: false,
-      burned: true,
-      chipsDelta: 0,
-      discardRefreshed: false,
-    },
+    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, discarded: false, burned: true, chipsDelta: 0, discardRefreshed: false },
   };
 }
 
 /* ── internals ─────────────────────────────────────────────────────────────── */
 
-/* Resolve a full (5-card) lane. Returns a rich result the view can animate:
-   { laneIndex, hand, scored, busted, basePoints, bet:{tier,won}|null,
-     multiplier, points, chipsReturned, chipsLost, cleared }.
-   Chips were already spent at commit time, so chipsReturned is what comes BACK
-   (stake + profit on a win; 0 otherwise) and chipsLost is the forfeited stake. */
-function resolveLane({ lane, committed, l }) {
+const firstLocked = (locked) => locked.findIndex(Boolean);
+
+/* Resolve a full (5-card) lane three ways. Returns a rich result for the view:
+   { laneIndex, hand, bust, saved, scored, basePoints, raise:{tier,won}|null,
+     multiplier, points, chipsReturned, chipsLost, cleared, wanted } where wanted
+     (when the hand completes the current target) =
+     { hit, hand, bonusPts, bonusChips, totalPts, totalChips, streak, unlockLane }.
+   Chips were spent at ante/commit time; chipsReturned is what comes BACK. */
+function resolveLane({ lane, committedRaise, anted, wanted, streak, l }) {
   const hand = evaluate(lane);
-  const scored = hand.rank >= PAYING_MIN;
-  const base = scored ? HAND_POINTS[hand.rank] || 0 : 0;
+  const bust = hand.rank === HAND.HIGH_CARD;
+  const saved = hand.rank === SAVE_HAND; // any pair
+  const scored = hand.rank >= SCORE_MIN; // two pair or better
 
   let multiplier = 1;
   let chipsReturned = 0;
   let chipsLost = 0;
-  let betInfo = null;
+  let raiseInfo = null;
+  let base = 0;
 
-  if (committed) {
-    const tier = BET_TIERS[committed.tier];
-    const won = scored && hand.rank >= tier.min;
-    betInfo = { tier: committed.tier, won };
-    if (won) {
-      multiplier = tier.mult;
-      chipsReturned = tier.cost + tier.profit; // get the stake back plus profit
-    } else {
-      chipsLost = tier.cost; // already spent at commit; nothing comes back
+  if (scored) {
+    base = HAND_POINTS[hand.rank] || 0;
+    // The ante comes back with a small profit on a true score.
+    if (anted) chipsReturned += ANTE_COST + ANTE_PROFIT;
+    if (committedRaise) {
+      const tier = TIERS[committedRaise.tier];
+      const won = hand.rank >= tier.min;
+      raiseInfo = { tier: committedRaise.tier, won };
+      if (won) {
+        multiplier = tier.mult;
+        chipsReturned += tier.extra + tier.profit; // raise stake back + profit
+      } else {
+        chipsLost += tier.extra; // raise stake forfeited
+      }
     }
+  } else {
+    // BUST or SAVE: ante + any raise stake are forfeited (already spent).
+    if (anted) chipsLost += ANTE_COST;
+    if (committedRaise) {
+      chipsLost += TIERS[committedRaise.tier].extra;
+      raiseInfo = { tier: committedRaise.tier, won: false };
+    }
+  }
+
+  const points = base * multiplier;
+
+  // Wanted completion only on a true score (pairs/high-card can't complete; pairs
+  // aren't in the pool anyway).
+  let wantedResult = null;
+  if (scored && wanted && completesWanted(hand.rank, wanted.hand)) {
+    const newStreak = streak + 1;
+    const sb = streakBonus(newStreak);
+    const totalPts = Math.round(wanted.bonusPts * sb.ptsMult);
+    const totalChips = wanted.bonusChips + sb.chipAdd;
+    wantedResult = {
+      hit: true,
+      hand: wanted.hand,
+      bonusPts: wanted.bonusPts,
+      bonusChips: wanted.bonusChips,
+      totalPts,
+      totalChips,
+      streak: newStreak,
+      unlockLane: sb.unlockLane,
+    };
   }
 
   return {
     laneIndex: l,
     hand,
+    bust,
+    saved,
     scored,
-    busted: !scored,
     basePoints: base,
-    bet: betInfo,
+    raise: raiseInfo,
     multiplier,
-    points: base * multiplier,
+    points,
     chipsReturned,
     chipsLost,
-    cleared: scored,
+    cleared: scored || saved,
+    wanted: wantedResult,
   };
 }
 
-/* The draw transition — the single place where bets commit and expiry ticks.
+/* The draw transition — the single place where raises commit and expiry ticks.
    Mutates `state` in place (the caller already cloned what it needs). Pushes any
-   bets that expire on this draw into `expired` (when provided).
-   Order matters:
-     1. refill / exhaust the bag
-     2. COMMIT pending previews (reserve chips, start their countdown)
-     3. DECREMENT pre-existing committed bets (NOT the ones just committed) and
-        fail any that hit 0
-     4. deal the next tray
-   Skipping step-2 lanes in step 3 makes "expires after N draws" mean N
-   SUBSEQUENT draws — a bet is never decremented by the draw that created it. */
+   raises that expire on this draw into `expired`. Order: refill/exhaust bag →
+   COMMIT previews → DECREMENT older committed raises → deal the next tray. A raise
+   is never decremented by the draw that created it (N subsequent draws). */
 function drawInto(state, expired) {
   // 1. bag
   if (state.bag.length === 0) {
-    if (state.oneDeck) {
-      state.tray = null; // deck exhausted — One-Deck run ends
-      return;
-    }
+    if (state.oneDeck) { state.tray = null; return; }
     state.bag = shuffle(freshDeck(), state.rng);
   }
 
-  // 2. commit previews. The preview was already validated against the §8 rules
-  // when it was selected (cycleBet); commitment only re-checks that the wager is
-  // still affordable and the lane is still alive. We deliberately do NOT re-apply
-  // the made-hand / card-count rules here — the lane legitimately gains a card as
-  // part of this very transition, so a bet placed on a no-hand lane must survive
-  // the card that (say) pairs it.
+  // 2. commit previewed raises (only on still-anted, still-alive, affordable lanes)
   const justCommitted = new Set();
-  const bet = state.bet.slice();
-  const betSel = state.betSel.slice();
+  const raise = state.raise.slice();
+  const raiseSel = state.raiseSel.slice();
   for (let l = 0; l < LANES; l++) {
-    if (betSel[l] === NO_BET || bet[l] != null) continue;
-    const tier = BET_TIERS[betSel[l]];
-    if (!state.locked[l] && state.chips >= tier.cost) {
-      state.chips -= tier.cost;
-      bet[l] = { tier: betSel[l], draws: BET_EXPIRY_DRAWS };
+    if (raiseSel[l] === NO_RAISE || raise[l] != null) continue;
+    const tier = TIERS[raiseSel[l]];
+    if (!state.locked[l] && state.anted[l] && state.chips >= tier.extra) {
+      state.chips -= tier.extra;
+      raise[l] = { tier: raiseSel[l], draws: BET_EXPIRY_DRAWS };
       justCommitted.add(l);
     } else {
-      betSel[l] = NO_BET; // can no longer afford it / lane died — drop the preview
+      raiseSel[l] = NO_RAISE; // can no longer afford / lane closed — drop the preview
     }
   }
 
-  // 3. tick expiry on older committed bets
+  // 3. tick expiry on older committed raises
   for (let l = 0; l < LANES; l++) {
-    if (bet[l] == null || justCommitted.has(l)) continue;
-    const draws = bet[l].draws - 1;
+    if (raise[l] == null || justCommitted.has(l)) continue;
+    const draws = raise[l].draws - 1;
     if (draws <= 0) {
-      if (expired) expired.push({ laneIndex: l, tier: bet[l].tier });
-      bet[l] = null; // stake already lost at commit; lane stays playable
-      betSel[l] = NO_BET;
+      if (expired) expired.push({ laneIndex: l, tier: raise[l].tier });
+      raise[l] = null; // stake already lost at commit; lane stays playable
+      raiseSel[l] = NO_RAISE;
     } else {
-      bet[l] = { ...bet[l], draws };
+      raise[l] = { ...raise[l], draws };
     }
   }
 
-  state.bet = bet;
-  state.betSel = betSel;
+  state.raise = raise;
+  state.raiseSel = raiseSel;
 
   // 4. deal
   state.tray = { ...state.bag[0], faceUp: true };

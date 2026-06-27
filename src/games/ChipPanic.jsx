@@ -8,31 +8,31 @@ import { playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
-  newGame, placeCard, useDiscard, burnCard, cycleBet, canBet, canPlace,
-  BET_TIERS, NO_BET, START_CHIPS,
+  newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
+  TIERS, ANTE_TIER, ANTE_COST, NO_RAISE, START_CHIPS,
 } from "./chip-panic/logic.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   HIGH CARD BUST — poker solitaire for the Ourcade cabinet `chip-panic`.
+   HIGH CARD BUST — poker solitaire with a chip economy + rotating objectives.
 
-   Draw ONE card into the tray, then tap a lane to drop it there (or spend your
-   discard to throw it away). A lane fills at five cards: a PAIR or better SCORES
-   and CLEARS it; a HIGH CARD BUSTS and LOCKS it forever. No lives — the run ends
-   when all five lanes are locked. Tap a lane's chip to PREVIEW a wager tier
-   (Blue/Red/Gold/Black); it COMMITS on your next draw and must land within five
-   draws. Winning a bet multiplies the lane's score and pays profit; any failure
-   forfeits the stake. Classic mode is untimed; Panic mode puts a clock on each
-   card and BURNS it if you dawdle. Score feeds the Arcade Score Standard board.
+   Draw ONE card into the tray, then tap a lane to drop it (or spend your discard).
+   Opening an empty lane costs a Blue ANTE (1 chip). A lane fills at five cards and
+   resolves three ways: a HIGH CARD busts + locks it (ante lost), ANY PAIR is a
+   defensive SAVE (clears the lane but scores 0 and burns the ante), and TWO PAIR or
+   better truly SCORES (points, chips back, refreshes the discard). Raise above the
+   ante (Red/Gold/Black) for a multiplier — raises need stronger hands and expire.
+   Chase the WANTED hand up top for bonus points + chips and build a streak (resets
+   when a lane busts). The run ends when all five lanes lock — or you're out of
+   chips with nowhere legal to place. Score feeds the Arcade Score Standard board.
 
-   The game is turn-based, so the engine state lives in plain React state and is
-   reassigned on each action — no rAF game loop. The only timer is Panic mode's
-   per-card placement clock (a setTimeout + a CSS-driven bar).
+   Turn-based: engine state lives in plain React state. The only timer is Panic
+   mode's per-card placement clock.
    ───────────────────────────────────────────────────────────────────────── */
 
 const GAME_ID = "chip-panic";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 const MODE = { CLASSIC: "classic", PANIC: "panic" };
-const PANIC_MS = 5000; // fixed placement clock in Panic mode (doc §17)
+const PANIC_MS = 5000;
 
 const HCB_CSS = `
   .hcb-root {
@@ -57,9 +57,24 @@ const HCB_CSS = `
   .hcb-stat.chips b { color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.45); }
   .hcb-stat.mode b { color: #bf5af2; font-size: .72rem; vertical-align: 0; }
 
-  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(14px, 4vh, 36px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
+  /* WANTED banner — the rotating objective */
+  .hcb-wanted {
+    display: flex; align-items: center; gap: 10px; flex: 0 0 auto;
+    margin: 2px 8px 0; padding: 6px 14px; border-radius: 999px;
+    border: 2px solid #ffd23f; background: linear-gradient(180deg, rgba(255,210,63,.12), rgba(0,0,0,.3));
+    box-shadow: 0 0 14px rgba(255,210,63,.2);
+  }
+  .hcb-wanted .star { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(255,210,63,.8)); }
+  .hcb-wanted .lbl { font-family: 'Black Ops One',sans-serif; letter-spacing: .08em; color: #ffd23f; font-size: .95rem; }
+  .hcb-wanted .rew { font-size: .56rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; }
+  .hcb-wanted .rew b { color: #3fffd0; }
+  .hcb-wanted .streak { margin-left: 6px; font-size: .58rem; letter-spacing: .08em; color: #c9b3ec; text-transform: uppercase; }
+  .hcb-wanted .streak b { color: #ff9f43; font-family: 'Press Start 2P',monospace; font-size: .62rem; }
+  .hcb-wanted.claim { animation: hcb-wanted-claim 700ms ease-out; }
+  @keyframes hcb-wanted-claim { 0%{ transform: scale(1); } 30%{ transform: scale(1.06); box-shadow: 0 0 28px rgba(63,255,208,.7); border-color: #3fffd0; } 100%{ transform: scale(1); } }
 
-  /* draw pile + tray + discard, centered up top */
+  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(12px, 3.5vh, 30px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
+
   .hcb-top { display: flex; align-items: center; justify-content: center; gap: 16px; flex: 0 0 auto; }
   .hcb-pile { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .hcb-pile small, .hcb-tray small, .hcb-discard small { font-size: .42rem; letter-spacing: .1em; color: #9b86c4; text-transform: uppercase; }
@@ -76,40 +91,47 @@ const HCB_CSS = `
   .hcb-discard.ready { border-color: #3fffd0; box-shadow: 0 0 12px rgba(63,255,208,.35); }
   .hcb-discard:disabled { opacity: .35; cursor: not-allowed; }
 
-  /* panic placement clock under the tray */
   .hcb-clock { width: min(58vw, 300px); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
   .hcb-clock i { display: block; height: 100%; background: linear-gradient(90deg,#3fffd0,#ffd23f,#ff6b6b); }
 
-  /* the five lanes */
-  .hcb-lanes { display: flex; gap: min(2.2vw, 14px); align-items: flex-start; justify-content: center; flex: 1 1 auto; min-height: 0; margin-top: clamp(10px, 3vh, 28px); }
+  .hcb-lanes { display: flex; gap: min(2.2vw, 14px); align-items: flex-start; justify-content: center; flex: 1 1 auto; min-height: 0; margin-top: clamp(8px, 2.5vh, 24px); }
   .hcb-lane { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 0 0 auto; }
   .hcb-slots {
     --tier: #ffd23f;
     display: flex; flex-direction: column-reverse; gap: 2px; cursor: pointer;
     box-sizing: border-box; align-items: center;
     width: calc(var(--cw) + 8px);
-    /* fixed height so every lane matches regardless of card count: 5 cards +
-       4 inter-card gaps (2px) + top/bottom padding (4px). Previously min-height
-       omitted the gaps, so a FULL lane (the bust/lock case) ran ~8px taller. */
     height: calc(var(--ch) * 5 + 8px + 8px); justify-content: flex-end;
     padding: 4px; border-radius: 9px; border: 2px dashed rgba(255,255,255,.14);
     background: rgba(0,0,0,.18); position: relative;
   }
+  .hcb-lane.anted .hcb-slots { border-style: solid; border-color: rgba(58,160,255,.5); }
   .hcb-lane.betted .hcb-slots { border-style: dotted; border-color: var(--tier); box-shadow: 0 0 14px color-mix(in srgb, var(--tier) 45%, transparent) inset; }
   .hcb-lane.expiring .hcb-slots { animation: hcb-pulse .7s ease-in-out infinite; }
   @keyframes hcb-pulse { 0%,100% { box-shadow: 0 0 6px var(--tier) inset; } 50% { box-shadow: 0 0 20px var(--tier) inset, 0 0 12px var(--tier); } }
   .hcb-lane.scored .hcb-slots { border-color: #3fffd0; border-style: solid; box-shadow: 0 0 22px rgba(63,255,208,.55); }
+  .hcb-lane.saved .hcb-slots { border-color: #ffb454; border-style: solid; box-shadow: 0 0 16px rgba(255,180,84,.4); }
   .hcb-lane.busted .hcb-slots, .hcb-lane.locked .hcb-slots { border-color: #555; border-style: solid; background: rgba(0,0,0,.42); cursor: default; box-shadow: none; }
   .hcb-lane.locked .hcb-card { filter: grayscale(1) brightness(.5); }
   .hcb-lane.locked .hcb-slots::after {
     content: "✕"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     font-size: calc(var(--cw) * .95); color: rgba(255,107,107,.7); font-family: 'Black Ops One',sans-serif; pointer-events: none;
   }
+  /* "open this lane" hint on an empty, affordable lane */
+  .hcb-slots .hcb-open {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    color: #7fb6ff; pointer-events: none; opacity: .8;
+  }
+  .hcb-slots .hcb-open img { width: 30px; height: 30px; opacity: .7; }
+  .hcb-slots .hcb-open small { font-family: 'Press Start 2P',monospace; font-size: .42rem; letter-spacing: .04em; color: #7fb6ff; }
+  .hcb-lane.cant .hcb-slots { opacity: .5; cursor: not-allowed; }
+  .hcb-lane.cant .hcb-open { color: #ff8a8a; }
+  .hcb-lane.cant .hcb-open small { color: #ff8a8a; }
+
   .hcb-card { width: var(--cw); height: var(--ch); border-radius: calc(var(--cw)*.09); display: block; }
   .hcb-card img { width: 100%; height: 100%; display: block; border-radius: inherit; }
   .hcb-card.back img { opacity: .9; }
 
-  /* per-lane chip + bet readout */
   .hcb-betbox { display: flex; flex-direction: column; align-items: center; gap: 2px; height: 58px; justify-content: flex-start; }
   .hcb-chip {
     width: 38px; height: 38px; cursor: pointer; padding: 0;
@@ -117,9 +139,9 @@ const HCB_CSS = `
     background: rgba(0,0,0,.3); display: flex; align-items: center; justify-content: center; position: relative;
   }
   .hcb-chip img { width: 32px; height: 32px; display: block; }
-  .hcb-chip.empty { font-family:'Press Start 2P',monospace; font-size:.5rem; color:#9b86c4; }
+  .hcb-chip.empty { font-family:'Press Start 2P',monospace; font-size:.46rem; color:#9b86c4; }
   .hcb-chip:hover:not(:disabled) { border-color: #bf5af2; }
-  .hcb-chip:disabled { opacity: .35; cursor: not-allowed; }
+  .hcb-chip:disabled { opacity: .4; cursor: default; }
   .hcb-chip .cd {
     position: absolute; right: -6px; top: -6px; min-width: 17px; height: 17px; padding: 0 3px;
     border-radius: 9px; background: #ff6b6b; color: #1a0a0a; font-family:'Press Start 2P',monospace;
@@ -129,7 +151,7 @@ const HCB_CSS = `
   .hcb-req { font-size: .42rem; letter-spacing: .04em; color: #c9b3ec; text-transform: uppercase; min-height: .7em; text-align: center; }
 
   .hcb-feed {
-    position: absolute; top: 16%; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     pointer-events: none; opacity: 0; transition: opacity .18s; text-align: center; white-space: nowrap; z-index: 60;
   }
@@ -138,12 +160,10 @@ const HCB_CSS = `
   .hcb-feed .math { font-size: .7rem; letter-spacing: .12em; color: #eef0ff; }
   .hcb-feed.win .hand { color: #3fffd0; }
   .hcb-feed.bad .hand { color: #ff6b6b; }
+  .hcb-feed.save .hand { color: #ffb454; }
   .hcb-feed .why { font-size: .56rem; letter-spacing: .1em; color: #ff9b9b; text-transform: uppercase; }
 
-  /* ── juice: lane-anchored burst, flying/falling chips, coral bloom ───────────
-     The generic fx-* nodes come from the shared <FxLayer> (src/lib/fx.jsx); the
-     look lives here, scoped under .hcb-fx. z-index 70 sits above .hcb-feed (60)
-     and below .hcb-overlay (80) so title/game-over always cover in-flight bits. */
+  /* ── fx layer: lane-anchored burst, flying/falling chips, coral bloom, wanted claim ── */
   .hcb-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 70; }
   .hcb-fx .fx-burst {
     position: absolute; transform: translate(-50%,-100%); white-space: nowrap; text-align: center;
@@ -152,6 +172,7 @@ const HCB_CSS = `
     animation: hcb-burst 1100ms cubic-bezier(.18,.9,.24,1) forwards;
   }
   .hcb-fx .fx-burst.bad { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.7), 0 2px 14px rgba(0,0,0,.7); }
+  .hcb-fx .fx-burst.save { color: #ffb454; text-shadow: 0 0 10px rgba(255,180,84,.6), 0 2px 14px rgba(0,0,0,.7); }
   .hcb-fx .fx-burst .pts { display: block; font-family: 'Press Start 2P',monospace; font-size: .7rem; color: #ffd23f; margin-top: 5px; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
   @keyframes hcb-burst {
     0%   { opacity: 0; transform: translate(-50%,-90%)  scale(.6); }
@@ -160,7 +181,6 @@ const HCB_CSS = `
     78%  { opacity: 1; }
     100% { opacity: 0; transform: translate(-50%,-150%) scale(1.02); }
   }
-
   .hcb-fx .fx-chip { position: absolute; width: 26px; height: 26px; transform: translate(-50%,-50%); will-change: transform,opacity; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
   .hcb-fx .fx-chip img { width: 100%; height: 100%; display: block; }
   .hcb-fx .fx-chip.fly  { animation: hcb-chipfly 720ms cubic-bezier(.4,.05,.5,1) forwards; }
@@ -175,15 +195,27 @@ const HCB_CSS = `
     0%   { opacity: 1; transform: translate(-50%,-50%) translateY(0) rotate(0); }
     100% { opacity: 0; transform: translate(-50%,-50%) translateY(var(--fall)) rotate(var(--spin)); }
   }
-
   .hcb-fx .fx-flash { position: absolute; inset: 0; background: radial-gradient(circle at var(--fx,50%) 42%, rgba(255,107,107,.30), transparent 60%); animation: hcb-flash 400ms ease-out forwards; }
   @keyframes hcb-flash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
 
   .hcb-stat.chips.bump b { animation: hcb-hudbump 360ms ease-out; }
   @keyframes hcb-hudbump { 50% { transform: scale(1.28); color: #fff; } }
 
+  /* WANTED CLAIMED splash */
+  .hcb-claim {
+    position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 75;
+    pointer-events: none; text-align: center; opacity: 0;
+  }
+  .hcb-claim.show { animation: hcb-claim 1500ms ease-out forwards; }
+  @keyframes hcb-claim { 0%{opacity:0; transform:translate(-50%,8px) scale(.9);} 12%{opacity:1; transform:translate(-50%,0) scale(1.05);} 22%{transform:translate(-50%,0) scale(1);} 80%{opacity:1;} 100%{opacity:0; transform:translate(-50%,-14px) scale(1);} }
+  .hcb-claim .tag { font-family:'Press Start 2P',monospace; font-size:.6rem; letter-spacing:.1em; color:#ffd23f; text-shadow:0 0 8px rgba(255,210,63,.7); }
+  .hcb-claim .hand { font-family:'Black Ops One',sans-serif; font-size: clamp(1.3rem,6vw,2.2rem); color:#3fffd0; text-shadow:0 0 12px rgba(63,255,208,.7),0 2px 10px rgba(0,0,0,.7); }
+  .hcb-claim .rew { font-family:'Press Start 2P',monospace; font-size:.56rem; color:#9be7d8; }
+  .hcb-claim .rew b { color:#3fffd0; }
+
   @media (prefers-reduced-motion: reduce) {
-    .hcb-fx .fx-burst, .hcb-fx .fx-chip, .hcb-fx .fx-flash { animation-duration: 1ms !important; }
+    .hcb-fx .fx-burst, .hcb-fx .fx-chip, .hcb-fx .fx-flash, .hcb-claim.show, .hcb-wanted.claim { animation-duration: 1ms !important; }
   }
 
   .hcb-overlay {
@@ -196,7 +228,7 @@ const HCB_CSS = `
     background: linear-gradient(180deg,#fffbe6,#bf5af2 55%,#3fffd0);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .hcb-overlay .sub { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: #c9b3ec; max-width: 34ch; line-height: 1.7; }
+  .hcb-overlay .sub { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: #c9b3ec; max-width: 36ch; line-height: 1.7; }
   .hcb-modes { display: flex; gap: 10px; }
   .hcb-mode {
     cursor: pointer; border-radius: 9px; padding: 10px 14px; min-width: 96px;
@@ -221,11 +253,12 @@ export default function ChipPanic() {
   const [screen, setScreen] = useState(SCREEN.TITLE);
   const [mode, setMode] = useState(() => lsGet("chip-panic:mode", MODE.CLASSIC));
   const [game, setGame] = useState(null);
-  const [feed, setFeed] = useState(null); // { hand, math, why, kind, on }
+  const [feed, setFeed] = useState(null);
+  const [claim, setClaim] = useState(null); // { hand, pts, chips, streak, on } — WANTED CLAIMED splash
   const [panicPct, setPanicPct] = useState(1);
-  // transient per-lane flashes for the scored/busted burst (lane index → "scored"|"busted")
-  const [flash, setFlash] = useState({});
-  const [hudBump, setHudBump] = useState(false); // pulse the CHIPS counter when winnings land
+  const [flash, setFlash] = useState({}); // lane index → "scored"|"saved"|"busted"
+  const [hudBump, setHudBump] = useState(false);
+  const [bannerClaim, setBannerClaim] = useState(false); // pulse the WANTED banner
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
 
@@ -233,14 +266,13 @@ export default function ChipPanic() {
 
   const feedTimer = useRef(null);
   const flashTimer = useRef(null);
-  const panicTimer = useRef(null); // { id, raf, start }
+  const panicTimer = useRef(null);
   const bumpTimer = useRef(null);
-  const gameRef = useRef(game); // latest game for timer/handler closures
+  const claimTimer = useRef(null);
+  const bannerTimer = useRef(null);
+  const gameRef = useRef(game);
   useEffect(() => { gameRef.current = game; }, [game]);
 
-  // Coordinate origin + targets for the fx overlay. All particle coords are
-  // root-relative (the overlay is inset:0 inside .hcb-root), so this stays
-  // correct even when the cabinet is letterboxed.
   const rootRef = useRef(null);
   const laneRefs = useRef([]);
   const chipHudRef = useRef(null);
@@ -274,8 +306,14 @@ export default function ChipPanic() {
     feedTimer.current = setTimeout(() => setFeed((x) => (x ? { ...x, on: false } : x)), 1500);
   }, []);
 
-  // Root-relative geometry for a lane + the HUD chip counter, read once at resolve
-  // time. Returns null if the refs aren't mounted (defensive — fx just no-ops).
+  const bumpHud = useCallback((delay = 0) => {
+    clearTimeout(bumpTimer.current);
+    bumpTimer.current = setTimeout(() => {
+      setHudBump(true);
+      setTimeout(() => setHudBump(false), 380);
+    }, delay);
+  }, []);
+
   const fxFromLane = useCallback((lane) => {
     const rootEl = rootRef.current;
     const laneEl = laneRefs.current[lane];
@@ -294,20 +332,23 @@ export default function ChipPanic() {
     };
   }, []);
 
-  // Pulse the CHIPS counter (called when flying winnings land).
-  const bumpHud = useCallback((delay = 0) => {
-    clearTimeout(bumpTimer.current);
-    bumpTimer.current = setTimeout(() => {
-      setHudBump(true);
-      setTimeout(() => setHudBump(false), 380);
-    }, delay);
-  }, []);
-
-  const spawnFallingChips = useCallback((res, laneX, laneMidY) => {
-    const color = res.bet ? BET_TIERS[res.bet.tier].color : "white";
+  const spawnChipsTo = useCallback((color, n, laneX, laneMidY, hudX, hudY) => {
     const src = chipImg(color);
-    const n = Math.min(res.chipsLost || 2, 6);
-    for (let i = 0; i < n; i++) {
+    const count = Math.min(n, 8);
+    for (let i = 0; i < count; i++) {
+      spawn({
+        kind: "chip", src, x: laneX + (Math.random() * 18 - 9), y: laneMidY,
+        dx: hudX - laneX, dy: hudY - laneMidY, arc: -40 - Math.random() * 24,
+        delay: i * 55, ttl: 720 + i * 55 + 60,
+      });
+    }
+    bumpHud((count - 1) * 55 + 360);
+  }, [spawn, bumpHud]);
+
+  const spawnFallingChips = useCallback((color, n, laneX, laneMidY) => {
+    const src = chipImg(color);
+    const count = Math.min(n, 6);
+    for (let i = 0; i < count; i++) {
       spawn({
         kind: "chip", src, x: laneX + (Math.random() * 30 - 15), y: laneMidY,
         fall: 90 + Math.random() * 70, spin: Math.random() * 360 - 180,
@@ -315,41 +356,6 @@ export default function ChipPanic() {
       });
     }
   }, [spawn]);
-
-  // Spawn the celebratory / loss particles for a resolved lane.
-  const spawnResolveFx = useCallback((res) => {
-    if (reduceMotion.current) return;
-    const geo = fxFromLane(res.laneIndex);
-    if (!geo) return;
-    const { laneX, laneTop, laneMidY, hudX, hudY, lanePct } = geo;
-    const won = res.bet && res.bet.won;
-
-    if (res.scored) {
-      const pts = res.multiplier > 1 ? `${res.basePoints} × ${res.multiplier} = ${res.points}` : `+${res.points}`;
-      spawn({ kind: "burst", x: laneX, y: laneTop, text: res.hand.name, pts, ttl: 1150 });
-      if (won && res.chipsReturned > 0) {
-        const n = Math.min(res.chipsReturned, 8);
-        const src = chipImg(BET_TIERS[res.bet.tier].color);
-        for (let i = 0; i < n; i++) {
-          spawn({
-            kind: "chip", src, x: laneX + (Math.random() * 18 - 9), y: laneMidY,
-            dx: hudX - laneX, dy: hudY - laneMidY, arc: -40 - Math.random() * 24,
-            delay: i * 55, ttl: 720 + i * 55 + 60,
-          });
-        }
-        bumpHud((n - 1) * 55 + 360); // pulse as the last chip arrives
-      } else if (res.chipsLost > 0) {
-        // scored, but the bet whiffed: small loss treatment
-        spawn({ kind: "flash", fxPct: lanePct, ttl: 420 });
-        spawnFallingChips(res, laneX, laneMidY);
-      }
-    } else {
-      // busted + locked
-      spawn({ kind: "flash", fxPct: lanePct, ttl: 420 });
-      spawn({ kind: "burst", x: laneX, y: laneTop, text: res.hand.name, pts: "BUST", bad: true, ttl: 1150 });
-      if (res.chipsLost > 0) spawnFallingChips(res, laneX, laneMidY);
-    }
-  }, [fxFromLane, spawn, bumpHud, spawnFallingChips]);
 
   // ── apply an engine result: store new state, animate, end the run if over ──────
   const applyResult = useCallback((next, result) => {
@@ -361,24 +367,51 @@ export default function ChipPanic() {
     const res = result.resolution;
     if (res) {
       const lane = res.laneIndex;
-      // The big hand-name + points reads from the lane-anchored burst (spawnResolveFx);
-      // .hcb-feed now only carries the explanatory "why" line for a failed bet.
-      spawnResolveFx(res);
+      const geo = reduceMotion.current ? null : fxFromLane(lane);
+
       if (res.scored) {
-        const won = res.bet && res.bet.won;
-        if (res.bet && !won) {
-          showFeed({ hand: "", math: "", why: `bet failed · needed ${HAND_NAME[BET_TIERS[res.bet.tier].min]}+`, kind: "bad" });
+        const pts = res.multiplier > 1 ? `${res.basePoints} × ${res.multiplier} = ${res.points}` : `+${res.points}`;
+        if (geo) spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts, ttl: 1150 });
+        if (geo && res.chipsReturned > 0) {
+          const color = res.raise && res.raise.won ? TIERS[res.raise.tier].color : TIERS[ANTE_TIER].color;
+          spawnChipsTo(color, res.chipsReturned, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
+        }
+        if (res.raise && !res.raise.won) {
+          showFeed({ hand: "", math: "", why: `raise failed · needed ${TIERS[res.raise.tier].reqLabel}`, kind: "bad" });
         }
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
+      } else if (res.saved) {
+        if (geo) spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts: "SAVE · no score", save: true, ttl: 1150 });
+        if (geo && res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
+        showFeed({ hand: "", math: "", why: "pair only — ante lost", kind: "save" });
+        setFlash((f) => ({ ...f, [lane]: "saved" }));
       } else {
-        showFeed({ hand: "", math: "", why: res.bet ? "high card bust · bet lost" : "high card bust", kind: "bad" });
+        // bust
+        if (geo) {
+          spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 420 });
+          spawn({ kind: "burst", x: geo.laneX, y: geo.laneTop, text: res.hand.name, pts: "BUST", bad: true, ttl: 1150 });
+          if (res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
+        }
+        showFeed({ hand: "", math: "", why: result.streakReset ? "high card bust · streak lost" : "high card bust", kind: "bad" });
         setFlash((f) => ({ ...f, [lane]: "busted" }));
       }
       clearTimeout(flashTimer.current);
-      flashTimer.current = setTimeout(() => setFlash({}), 650);
+      flashTimer.current = setTimeout(() => setFlash({}), 700);
     } else if (result.expired && result.expired.length) {
-      showFeed({ hand: "BET EXPIRED", math: "", why: "ran out of draws", kind: "bad" });
+      showFeed({ hand: "RAISE EXPIRED", math: "", why: "ran out of draws", kind: "bad" });
+    }
+
+    // WANTED CLAIMED splash (stacks on top of the score burst)
+    if (result.wanted && result.wanted.hit) {
+      const w = result.wanted;
+      clearTimeout(claimTimer.current);
+      setClaim({ hand: HAND_NAME[w.hand], pts: w.totalPts, chips: w.totalChips, streak: w.streak, on: true });
+      claimTimer.current = setTimeout(() => setClaim((c) => (c ? { ...c, on: false } : c)), 1500);
+      clearTimeout(bannerTimer.current);
+      setBannerClaim(true);
+      bannerTimer.current = setTimeout(() => setBannerClaim(false), 720);
+      playSfxVariant("chips-stack", [1, 3]);
     }
 
     if (next.over) {
@@ -386,9 +419,9 @@ export default function ChipPanic() {
       submit(next.score);
       setScreen(SCREEN.OVER);
     }
-  }, [showFeed, spawnResolveFx, clearPanic, submit]);
+  }, [showFeed, fxFromLane, spawn, spawnChipsTo, spawnFallingChips, clearPanic, submit]);
 
-  // ── Panic placement clock: arm a fresh timer whenever the tray changes ─────────
+  // ── Panic placement clock ──────────────────────────────────────────────────
   useEffect(() => {
     if (screen !== SCREEN.PLAY || mode !== MODE.PANIC) return undefined;
     if (!game || game.over || game.tray == null) return undefined;
@@ -402,22 +435,21 @@ export default function ChipPanic() {
       if (pct > 0) panicTimer.current.raf = requestAnimationFrame(tick);
     };
     const id = setTimeout(() => {
-      // time's up: burn the tray card (never auto-place — doc §14)
-      const g = gameRef.current;
-      if (!g || g.over || g.tray == null) return;
-      const { state, result } = burnCard(g);
+      const gg = gameRef.current;
+      if (!gg || gg.over || gg.tray == null) return;
+      const { state, result } = burnCard(gg);
       showFeed({ hand: "BURNED", math: "", why: "out of time", kind: "bad" });
       applyResult(state, result);
     }, PANIC_MS);
     panicTimer.current = { id, raf: requestAnimationFrame(tick), start };
     return clearPanic;
-    // re-arm when the tray identity changes (a new card was drawn) or mode/screen flips
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, mode, game && game.tray && game.tray.id, game && game.draws]);
 
   useEffect(() => () => {
     clearTimeout(feedTimer.current); clearTimeout(flashTimer.current);
-    clearTimeout(bumpTimer.current); clearPanic();
+    clearTimeout(bumpTimer.current); clearTimeout(claimTimer.current);
+    clearTimeout(bannerTimer.current); clearPanic();
   }, [clearPanic]);
 
   // ── actions ────────────────────────────────────────────────────────────────
@@ -425,36 +457,36 @@ export default function ChipPanic() {
     const chosen = m || mode;
     setMode(chosen);
     lsSet("chip-panic:mode", chosen);
-    const g = newGame();
-    setGame(g);
+    setGame(newGame());
     setFeed(null);
+    setClaim(null);
     setFlash({});
     setHudBump(false);
+    setBannerClaim(false);
     clearFx();
     setPanicPct(1);
     setScreen(SCREEN.PLAY);
   }, [mode, clearFx]);
 
   const onLane = useCallback((l) => {
-    const g = gameRef.current;
-    if (!g || g.over) return;
-    if (!canPlace(g, l)) return;
-    const { state, result } = placeCard(g, l);
+    const gg = gameRef.current;
+    if (!gg || gg.over || !canPlace(gg, l)) return;
+    const { state, result } = placeCard(gg, l);
     applyResult(state, result);
   }, [applyResult]);
 
   const onChip = useCallback((l) => {
-    const g = gameRef.current;
-    if (!g || g.over) return;
-    const next = cycleBet(g, l);
-    if (next !== g) playSfxVariant("chip-lay", [1, 3]);
+    const gg = gameRef.current;
+    if (!gg || gg.over) return;
+    const next = cycleRaise(gg, l);
+    if (next !== gg) playSfxVariant("chip-lay", [1, 3]);
     setGame(next);
   }, []);
 
   const onDiscard = useCallback(() => {
-    const g = gameRef.current;
-    if (!g || g.over || !g.discard) return;
-    const { state, result } = useDiscard(g);
+    const gg = gameRef.current;
+    if (!gg || gg.over || !gg.discard) return;
+    const { state, result } = useDiscard(gg);
     playSfxVariant("card-place", [1, 3]);
     applyResult(state, result);
   }, [applyResult]);
@@ -462,6 +494,7 @@ export default function ChipPanic() {
   // ── render ───────────────────────────────────────────────────────────────────
   const rootStyle = { "--cw": "min(15vw, 66px)", "--ch": "calc(var(--cw) * 1.357)" };
   const g = game;
+  const w = g?.wanted;
 
   return (
     <div className="hcb-root" style={rootStyle} ref={rootRef}>
@@ -476,6 +509,15 @@ export default function ChipPanic() {
           <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "CLASSIC"}</b></span>
         )}
       </div>
+
+      {screen === SCREEN.PLAY && g && w && (
+        <div className={`hcb-wanted${bannerClaim ? " claim" : ""}`}>
+          <span className="star">🤠</span>
+          <span className="lbl">WANTED: {HAND_NAME[w.hand]?.toUpperCase()}</span>
+          <span className="rew"><b>+{w.bonusPts}</b> / <b>+{w.bonusChips}</b> chips</span>
+          <span className="streak">streak <b>{g.streak}</b></span>
+        </div>
+      )}
 
       {screen === SCREEN.PLAY && g && (
         <div className="hcb-stage">
@@ -506,22 +548,25 @@ export default function ChipPanic() {
           <div className="hcb-lanes">
             {g.lanes.map((lane, l) => {
               const locked = g.locked[l];
-              const sel = g.betSel[l];
-              const committed = g.bet[l];
+              const anted = g.anted[l];
+              const sel = g.raiseSel[l];
+              const committed = g.raise[l];
               const tierIdx = committed ? committed.tier : sel;
-              const tier = BET_TIERS[tierIdx] || BET_TIERS[0];
-              const betted = !!committed || sel !== NO_BET;
+              const tier = TIERS[tierIdx] || TIERS[0];
+              const empty = lane.length === 0 && !anted;
+              const canOpen = empty && (g.chips >= ANTE_COST);
+              const cant = empty && !canOpen && !locked;
+              const betted = !!committed || sel !== NO_RAISE;
               const expiring = committed && committed.draws <= 1;
               const fl = flash[l];
-              // chip is tappable when no bet is committed yet and there's something
-              // to cycle: a real tier you can afford, or a preview to clear.
-              const canCycle = sel !== NO_BET ||
-                BET_TIERS.some((_, t) => t !== NO_BET && canBet(g, l, t));
+              // raise chip is tappable only on an anted lane with something to cycle
+              const canCycle = anted && !locked && !committed &&
+                (sel !== NO_RAISE || TIERS.some((_, t) => t !== NO_RAISE && canRaise(g, l, t)));
               return (
                 <div
                   key={l}
                   ref={(el) => { laneRefs.current[l] = el; }}
-                  className={`hcb-lane ${betted ? "betted" : ""} ${expiring ? "expiring" : ""} ${locked ? "locked" : ""} ${fl || ""}`}
+                  className={`hcb-lane ${anted ? "anted" : ""} ${betted ? "betted" : ""} ${expiring ? "expiring" : ""} ${locked ? "locked" : ""} ${cant ? "cant" : ""} ${fl || ""}`}
                   style={{ "--tier": glow(tier.color) }}
                 >
                   <div className="hcb-slots" onPointerDown={() => onLane(l)}>
@@ -530,23 +575,33 @@ export default function ChipPanic() {
                         <img src={cardImg(card.id)} alt={card.id} draggable="false" />
                       </span>
                     ))}
+                    {empty && !locked && (
+                      <span className="hcb-open">
+                        <img src={chipImg("blue")} alt="" draggable="false" />
+                        <small>{canOpen ? "ANTE 1" : "NEED 1"}</small>
+                      </span>
+                    )}
                   </div>
                   <div className="hcb-betbox">
                     <button
-                      className={`hcb-chip ${sel === NO_BET && !committed ? "empty" : ""}`}
-                      disabled={locked || !!committed || !canCycle}
+                      className={`hcb-chip ${!anted || (sel === NO_RAISE && !committed) ? "empty" : ""}`}
+                      disabled={!canCycle}
                       onPointerDown={(e) => { e.stopPropagation(); onChip(l); }}
-                      aria-label={`Cycle bet on lane ${l + 1}`}
+                      aria-label={`Raise lane ${l + 1}`}
                     >
-                      {tier.color
-                        ? <img src={chipImg(tier.color)} alt={tier.label} draggable="false" />
-                        : "BET"}
+                      {committed
+                        ? <img src={chipImg(TIERS[committed.tier].color)} alt={TIERS[committed.tier].label} draggable="false" />
+                        : sel !== NO_RAISE
+                          ? <img src={chipImg(TIERS[sel].color)} alt={TIERS[sel].label} draggable="false" />
+                          : anted
+                            ? <img src={chipImg(TIERS[ANTE_TIER].color)} alt="ante" draggable="false" />
+                            : "—"}
                       {committed && (
                         <span className={`cd ${committed.draws <= 1 ? "" : "warn"}`}>{committed.draws}</span>
                       )}
                     </button>
                     <span className="hcb-req">
-                      {tierIdx !== NO_BET ? `${HAND_NAME[tier.min]}+` : ""}
+                      {tierIdx !== NO_RAISE ? tier.reqLabel : (anted ? "RAISE?" : "")}
                     </span>
                   </div>
                 </div>
@@ -564,10 +619,18 @@ export default function ChipPanic() {
         {feed?.why && <span className="why">{feed.why}</span>}
       </div>
 
+      <div className={`hcb-claim ${claim?.on ? "show" : ""}`}>
+        {claim && <>
+          <span className="tag">★ WANTED CLAIMED ★</span>
+          <span className="hand">{claim.hand}</span>
+          <span className="rew"><b>+{claim.pts}</b> pts · <b>+{claim.chips}</b> chips · streak ×{claim.streak}</span>
+        </>}
+      </div>
+
       {screen === SCREEN.TITLE && (
         <div className="hcb-overlay">
           <h1>HIGH CARD BUST</h1>
-          <div className="sub">draw a card · drop it in a lane · fill five to score — a PAIR+ clears the lane, a HIGH CARD locks it for good · all five locked ends the run · chip a lane to bet a multiplier (it must land in 5 draws)</div>
+          <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the WANTED hand for bonus chips & points · all five locked ends the run</div>
           <div className="hcb-modes">
             <button className={`hcb-mode ${mode === MODE.CLASSIC ? "on" : ""}`} onPointerDown={() => { setMode(MODE.CLASSIC); lsSet("chip-panic:mode", MODE.CLASSIC); }}>
               CLASSIC<small>no timer · pure strategy</small>
