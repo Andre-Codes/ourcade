@@ -29,6 +29,7 @@ async function main() {
   const jobs = [
     { src: "wanted-badge.png", out: "wanted-badge.webp", size: 128 }, // banner badge (~26px)
     { src: "ante-up.png", out: "ante-up.webp", size: 256 },           // "ANTE UP" popup icon (larger)
+    { src: "discard.png", out: "discard.webp", size: 128 },           // discard-button icon (~26px)
   ];
 
   for (const j of jobs) {

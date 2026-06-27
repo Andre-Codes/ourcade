@@ -34,6 +34,7 @@ const GAME_ID = "chip-panic";
 // to the emoji until the file is added. Resolved off BASE_URL like other assets.
 const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
 const ANTE_UP_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/ante-up.webp";
+const DISCARD_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/discard.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 // Modes: HIGH_STAKES is the full ante/Wanted ruleset (the current game). CLASSIC
 // (a simpler ruleset) and PANIC (Classic + a placement timer) are planned — only
@@ -69,7 +70,7 @@ const HCB_CSS = `
   .hcb-wanted {
     display: flex; align-items: center; gap: 10px; flex: 0 0 auto;
     width: min(92vw, 420px); box-sizing: border-box;
-    margin: 2px 8px 0; padding: 6px 14px; border-radius: 999px;
+    margin: clamp(14px, 4vh, 40px) 8px 0; padding: 6px 14px; border-radius: 999px;
     border: 2px solid #ffd23f; background: linear-gradient(180deg, rgba(255,210,63,.12), rgba(0,0,0,.3));
     box-shadow: 0 0 14px rgba(255,210,63,.2);
   }
@@ -106,9 +107,16 @@ const HCB_CSS = `
   }
   .hcb-anteup .amt { font-family: 'Press Start 2P',monospace; font-size: .58rem; letter-spacing: .06em; color: #ffd23f; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
 
-  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(12px, 3.5vh, 30px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
+  .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(20px, 5vh, 44px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
 
-  .hcb-top { display: flex; align-items: center; justify-content: center; gap: 16px; flex: 0 0 auto; }
+  /* Row spans the banner's width and is position:relative so the discard can be
+     pinned to the right edge (under the banner's right edge), well clear of the
+     deck+tray — prevents accidental discard taps. The deck+tray center inside
+     .hcb-topmain, which reserves room on the right for the discard so they never
+     overlap, even on narrow phones. */
+  .hcb-top { position: relative; display: flex; align-items: center; flex: 0 0 auto; width: min(92vw, 420px); }
+  .hcb-topmain { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 16px; padding-right: 84px; box-sizing: border-box; }
+  .hcb-top .hcb-discard { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
   .hcb-pile { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .hcb-pile small, .hcb-tray small, .hcb-discard small { font-size: .42rem; letter-spacing: .1em; color: #9b86c4; text-transform: uppercase; }
   .hcb-tray { display: flex; flex-direction: column; align-items: center; gap: 3px; }
@@ -121,8 +129,10 @@ const HCB_CSS = `
     font-family: 'Press Start 2P',monospace;
   }
   .hcb-discard:hover:not(:disabled) { border-color: #bf5af2; }
-  .hcb-discard .ic { font-size: 1.2rem; line-height: 1; }
+  .hcb-discard span.ic { font-size: 1.2rem; line-height: 1; }
+  .hcb-discard img.ic { width: 26px; height: 26px; display: block; }
   .hcb-discard.ready { border-color: #3fffd0; box-shadow: 0 0 12px rgba(63,255,208,.35); }
+  .hcb-discard.ready img.ic { filter: drop-shadow(0 0 6px rgba(63,255,208,.6)); }
   .hcb-discard:disabled { opacity: .35; cursor: not-allowed; }
 
   .hcb-clock { width: min(58vw, 300px); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
@@ -286,6 +296,7 @@ export default function ChipPanic() {
   const [bannerClaim, setBannerClaim] = useState(false); // pulse the WANTED banner
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
   const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
+  const [discardImgOk, setDiscardImgOk] = useState(true); // false once the discard icon fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
@@ -572,17 +583,19 @@ export default function ChipPanic() {
       {screen === SCREEN.PLAY && g && (
         <div className="hcb-stage">
           <div className="hcb-top">
-            <div className="hcb-pile">
-              <span className="hcb-card back"><img src={cardBackImg()} alt="deck" draggable="false" /></span>
-              <small>DECK</small>
-            </div>
-            <div className="hcb-tray">
-              <span className="hcb-card">
-                {g.tray && <img src={cardImg(g.tray.id)} alt={g.tray.id} draggable="false" />}
-              </span>
-              {mode === MODE.PANIC
-                ? <div className="hcb-clock"><i style={{ width: `${Math.round(panicPct * 100)}%` }} /></div>
-                : <small>YOUR CARD</small>}
+            <div className="hcb-topmain">
+              <div className="hcb-pile">
+                <span className="hcb-card back"><img src={cardBackImg()} alt="deck" draggable="false" /></span>
+                <small>DECK</small>
+              </div>
+              <div className="hcb-tray">
+                <span className="hcb-card">
+                  {g.tray && <img src={cardImg(g.tray.id)} alt={g.tray.id} draggable="false" />}
+                </span>
+                {mode === MODE.PANIC
+                  ? <div className="hcb-clock"><i style={{ width: `${Math.round(panicPct * 100)}%` }} /></div>
+                  : <small>YOUR CARD</small>}
+              </div>
             </div>
             <button
               className={`hcb-discard ${g.discard ? "ready" : ""}`}
@@ -590,7 +603,9 @@ export default function ChipPanic() {
               onPointerDown={(e) => { e.stopPropagation(); onDiscard(); }}
               aria-label="Discard the drawn card"
             >
-              <span className="ic">🗑</span>
+              {discardImgOk
+                ? <img className="ic" src={DISCARD_IMG} alt="" draggable="false" onError={() => setDiscardImgOk(false)} />
+                : <span className="ic">🗑</span>}
               <small>{g.discard ? "DISCARD" : "SPENT"}</small>
             </button>
           </div>
