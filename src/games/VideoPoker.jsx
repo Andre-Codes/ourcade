@@ -55,30 +55,48 @@ const VP_CSS = `
   .vp-readout .ro { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: #9fc4ec; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .vp-readout .ro b { font-family: 'Press Start 2P',monospace; font-size: 1.1rem; color: #ffd23f; letter-spacing: 0; }
 
-  /* CSS-only CRT "video poker screen" — recessed bezel, inner glow, scanlines,
-     vignette. Wraps the paytable + hand; the FX layer and feed panel sit on top. */
+  /* CSS-only CRT "video poker screen" — a chunky dark cabinet bezel framing a
+     glowing recessed glass panel with scanlines + a curved vignette. Wraps the
+     paytable + hand; the FX layer and feed panel sit on top.
+     box-sizing:border-box so padding/border stay inside the declared width — the
+     content (paytable + 5 cards) never spills past the bezel. */
   .vp-screen {
-    position: relative; width: min(580px, 95vw);
+    box-sizing: border-box;
+    position: relative; width: min(620px, 96vw); max-width: 100%;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
-    padding: 16px 14px; border-radius: 16px;
-    background:
-      radial-gradient(ellipse 80% 70% at 50% 45%, rgba(63,191,255,.10), transparent 72%),
-      linear-gradient(180deg, #071427, #04101f);
-    border: 3px solid #16243c;
+    padding: 20px 18px; border-radius: 20px;
+    /* the cabinet bezel */
+    background: linear-gradient(160deg, #1a2740, #0c1322 60%, #060c16);
+    border: 2px solid #2c3e60;
     box-shadow:
-      0 0 0 6px #0a1422, 0 10px 28px rgba(0,0,0,.55),
-      inset 0 0 28px rgba(0,0,0,.7), inset 0 0 60px rgba(63,191,255,.06);
+      0 12px 34px rgba(0,0,0,.6),
+      inset 0 1px 0 rgba(120,160,220,.18),
+      inset 0 -2px 6px rgba(0,0,0,.6);
   }
+  /* the recessed glass panel (the actual "screen"), behind the content */
+  .vp-screen::before {
+    content: ""; position: absolute; inset: 10px; border-radius: 12px; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 75% 60% at 50% 38%, rgba(63,191,255,.16), transparent 70%),
+      radial-gradient(ellipse 120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%),
+      linear-gradient(180deg, #0a1a30, #050f1f);
+    box-shadow:
+      inset 0 0 26px rgba(0,0,0,.85),
+      inset 0 0 70px rgba(63,191,255,.10),
+      0 0 14px rgba(63,191,255,.10);
+  }
+  /* visible scanlines layered over the glass */
   .vp-screen::after {
-    content: ""; position: absolute; inset: 0; border-radius: 13px; pointer-events: none;
-    background: repeating-linear-gradient(rgba(255,255,255,.045) 0 1px, transparent 1px 3px);
-    mix-blend-mode: overlay; z-index: 2;
+    content: ""; position: absolute; inset: 10px; border-radius: 12px; pointer-events: none; z-index: 3;
+    background: repeating-linear-gradient(rgba(0,0,0,.28) 0 1px, transparent 1px 3px);
+    opacity: .55;
   }
 
   /* Paytable */
   .vp-pay {
-    width: 100%; max-width: 540px; border: 2px solid #355a8f; border-radius: 10px;
-    background: rgba(0,0,0,.34); padding: 8px 12px; font-size: .8rem;
+    box-sizing: border-box;
+    width: 100%; border: 2px solid #355a8f; border-radius: 10px;
+    background: rgba(2,10,22,.55); padding: 8px 12px; font-size: .8rem;
     position: relative; z-index: 1;
   }
   .vp-pay table { width: 100%; border-collapse: collapse; }
