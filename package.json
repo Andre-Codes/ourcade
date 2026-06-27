@@ -23,6 +23,7 @@
     "assets:featured": "node scripts/process-featured.js",
     "assets:modem": "node scripts/process-modem-assets.js",
     "assets:kenney": "node scripts/process-kenney.js",
+    "assets:hcb": "node scripts/process-hcb-assets.js",
     "assets:sfx": "node scripts/process-sfx.js"
   },
   "dependencies": {
