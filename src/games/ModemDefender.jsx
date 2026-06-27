@@ -69,15 +69,49 @@ const lerp = (a, b, t) => a + (b - a) * t;
    art     : sprite file (or null for emoji)
    anim    : frame count if it's an animated strip (virus)
    fires   : ms cadence to lob a missile (0 = never). Kept sparse on purpose.
-   weight  : relative frequency in the wall once unlocked
-   minLevel: first level this type appears */
+   weight  : relative frequency in the wall once unlocked (0 = never rolls into a
+             wall; spawned only at runtime, e.g. split children)
+   minLevel: first level this type appears
+   split   : { perKill, childType } → on death, spawn `perKill` copies of
+             `childType` carrying gen-1. A wall-spawned splitter starts at gen 1
+             (→ children → grandchildren at gen 0, which spawn nothing). Bounded.
+   overheat: true → ANY hit on this brick speeds the ball up for a few seconds
+             (the BUFFERING skill counters/clears it)
+   hit     : optional collision-box override for sprites whose SOLID body doesn't
+             fill the cell — e.g. art with a faint "ghost" duplicate or motion
+             trails that shouldn't register a hit. Fractions of the cell (br.w×br.h):
+               ox,oy = center offset (−left/up … +right/down), fw,fh = box size.
+             Default (no `hit`) = full centered cell. The sprite still RENDERS full;
+             only the collision math shrinks/shifts to the real body. */
 const BRICKS = {
   popup: { w: 58, hp: 1, score: 100, drain: 6, art: "popup.webp", fires: 0, weight: 10, minLevel: 1 },
-  spam: { w: 54, hp: 1, score: 120, drain: 5, art: "spam.webp", fires: 0, weight: 7, minLevel: 1 },
+  // Envelope flies in with faint speed-lines; trim keeps the body ~full-frame (the
+  // trails are low-alpha and mostly trimmed away). Small inset skips the soft glow +
+  // the thin trail wisp on the right so collision stays on the solid letter.
+  spam: { w: 54, hp: 1, score: 120, drain: 5, art: "spam.webp", fires: 0, weight: 7, minLevel: 1, hit: { ox: -0.02, oy: 0, fw: 0.9, fh: 0.86 } },
   banner: { w: 104, hp: 2, score: 150, drain: 7, art: "banner.webp", fires: 0, weight: 5, minLevel: 2 },
   virus: { w: 56, hp: 2, score: 200, drain: 10, art: "virus.webp", fires: 8500, weight: 5, minLevel: 3 },
   clippy: { w: 66, hp: 3, score: 220, drain: 9, art: "clippy.webp", fires: 10000, weight: 4, minLevel: 4 },
-  toolbar: { w: 92, hp: 4, score: 260, drain: 8, art: "toolbar.webp", fires: 0, weight: 4, minLevel: 5 },
+  toolbar: { w: 92, hp: 4, score: 260, drain: 8, art: "toolbar.webp", fires: 0, weight: 4, minLevel: 4 },
+  // Turbo pop-up ("DOWNLOAD 100× FASTER!!!") — appears after the 1st boss. Hitting
+  // it ramps the ball speed. A pop-up, not hardware, so it doesn't clash with the
+  // player's own modem mascot. Window fills the frame (flames are contained inside
+  // it); a small centered inset just trims the soft outer glow from the hit area.
+  overheat: { w: 70, hp: 2, score: 240, drain: 9, art: "turbo-popup.webp", fires: 0, weight: 4, minLevel: 1, overheat: true, hit: { ox: 0, oy: 0, fw: 0.9, fh: 0.9 } },
+  // Spam swarm — appears after the 2nd boss. A pop-up that multiplies on death.
+  // Children (spamspawn) never roll into a wall (weight 0); they only come from
+  // a split. gen on the live instance terminates the hydra (1 → 2 → 4 max=7).
+  // ART: solid "FREE!!! YOU'VE WON!" window is UPPER-LEFT; faint ghost copies cascade
+  // to the lower-right. Hitbox shifts up-left + shrinks so only the solid window is
+  // hittable, never the ghosts.
+  spamswarm: { w: 56, hp: 1, score: 130, drain: 6, art: "spam-swarm.webp", fires: 0, weight: 6, minLevel: 1, split: { perKill: 2, childType: "spamspawn" }, hit: { ox: -0.07, oy: -0.1, fw: 0.8, fh: 0.72 } },
+  spamspawn: { w: 40, hp: 1, score: 60, drain: 4, art: "spam-swarm.webp", fires: 0, weight: 0, minLevel: 99, split: { perKill: 1, childType: "spamspawn" }, hit: { ox: -0.07, oy: -0.1, fw: 0.8, fh: 0.72 } },
+};
+// Emoji shown if a brick's sprite WebP is missing (keeps the game playable before
+// the art is generated; the <img> onError swaps to this).
+const BRICK_EMOJI = {
+  popup: "🪟", spam: "✉️", banner: "📢", virus: "🦠", clippy: "📎", toolbar: "🧰",
+  overheat: "⚡", spamswarm: "💬", spamspawn: "💬",
 };
 
 /* ── Inventory items (consumables looted from crates) ──────────────────────────
@@ -113,6 +147,13 @@ const LOOT_PER_LEVEL = [1, 3]; // min..max loot crates woven into a wall
 // no matter how many shooters a level rolls, so a 1-shooter and a 3-shooter
 // level feel comparable instead of the latter being a barrage.
 const MAX_WALL_MISSILES = 4;
+// Hard cap on spam-swarm bricks (parents + children) alive at once. When at cap,
+// a death simply doesn't split — keeps the hydra from flooding the arena.
+const MAX_SWARM = 16;
+// Ball-overspeed (from hitting an `overheat` brick): a timed effect parked in the
+// same inv.active map the skills use, so it auto-expires and BUFFERING can clear it.
+const OVERSPEED_MULT = 1.5; // ball moves 50% faster while active
+const OVERSPEED_DUR = 5000; // ms
 const ENTITY_CAP = { balls: 12, missiles: 40, bricks: 80, sparks: 80 };
 // Stacking: how many of each item you can hold, by level reached.
 const STACK_T1 = 5; // level ≥5 (after first boss) → hold 2
@@ -416,6 +457,7 @@ export function ModemDefender({ onExit }) {
     const pool = [];
     for (const [k, v] of Object.entries(BRICKS)) {
       if (lv < v.minLevel) continue;
+      if (v.weight <= 0) continue; // runtime-only types (split children) never roll into a wall
       let w = v.weight;
       if (v.hp >= 3 && row > 1) w = Math.max(1, Math.floor(w / 2)); // tough bricks rarer low down
       for (let i = 0; i < w; i++) pool.push(k);
@@ -494,6 +536,12 @@ export function ModemDefender({ onExit }) {
       SFX.shield();
     } else if (id === "buffering") {
       inv.current.active.buffering = t + def.dur;
+      // Second use for BUFFERING: cancel any active overheat overspeed — a true
+      // "reset the pace" tool, not just a live slow.
+      if (isActive("overspeed")) {
+        inv.current.active.overspeed = 0;
+        addFloat(paddle.current.x, paddleY() - 40, "PACE RESET", def.color);
+      }
     } else if (id === "broadband") {
       inv.current.active.broadband = t + def.dur;
     } else if (id === "overclock") {
@@ -521,6 +569,7 @@ export function ModemDefender({ onExit }) {
     const W = box?.width || 360;
     const H = box?.height || 600;
     const slow = isActive("buffering") ? 0.5 : 1;
+    const boost = isActive("overspeed") ? OVERSPEED_MULT : 1; // ball-only overspeed (turbo pop-up)
     const shield = isActive("firewall");
     const wide = isActive("broadband");
     const pierce = isActive("overclock");
@@ -546,7 +595,9 @@ export function ModemDefender({ onExit }) {
       }
       // overclock pierce flag tracks the active window
       b.pierce = pierce;
-      const sp = slow;
+      // ball-only time scale: buffering slows, overheat speeds up (they compose, so
+      // buffering tames an overspeed even before its timer is cleared).
+      const sp = slow * boost;
       b.x += b.vx * dt * sp;
       b.y += b.vy * dt * sp;
 
@@ -665,7 +716,8 @@ export function ModemDefender({ onExit }) {
         // ricocheted missile damages bricks / boss
         let consumed = false;
         for (const br of bricks.current) {
-          if (Math.abs(m.x - br.x) < br.w / 2 + m.w && Math.abs(m.y - br.y) < br.h / 2 + m.w) {
+          const hb = brickHitbox(br);
+          if (Math.abs(m.x - hb.cx) < hb.hw + m.w && Math.abs(m.y - hb.cy) < hb.hh + m.w) {
             damageBrick(br, 1, m.x, m.y);
             consumed = true;
             break;
@@ -710,22 +762,62 @@ export function ModemDefender({ onExit }) {
     raf.current = requestAnimationFrame(loop);
   };
 
+  // Spawn a brick mid-game (split children). Mirrors the push shape in buildLevel;
+  // `gen` is the remaining split generations carried on THIS instance. Respects the
+  // global brick cap so we never exceed the array bound.
+  function spawnBrick(type, x, y, gen) {
+    if (bricks.current.length >= ENTITY_CAP.bricks) return;
+    const def = BRICKS[type];
+    if (!def) return;
+    bricks.current.push({
+      id: uid(),
+      type,
+      loot: false,
+      x,
+      y,
+      w: def.w,
+      h: 36,
+      hp: def.hp,
+      maxHp: def.hp,
+      art: def.art,
+      anim: def.anim || 0,
+      fires: def.fires || 0,
+      nextShot: now() + rand(3000, 8000),
+      gen,
+    });
+  }
+
+  // Effective collision box for a brick: center (cx,cy) + half-extents (hw,hh).
+  // Honors an optional per-type `hit` override (see BRICKS) so collision lands on a
+  // sprite's SOLID body and ignores decoration (ghost windows, motion trails).
+  function brickHitbox(br) {
+    const h = BRICKS[br.type]?.hit;
+    if (!h) return { cx: br.x, cy: br.y, hw: br.w / 2, hh: br.h / 2 };
+    return {
+      cx: br.x + (h.ox || 0) * br.w,
+      cy: br.y + (h.oy || 0) * br.h,
+      hw: (br.w * (h.fw ?? 1)) / 2,
+      hh: (br.h * (h.fh ?? 1)) / 2,
+    };
+  }
+
   // Resolve ball↔brick collision (one brick per frame). Reflects on the shallower
   // axis unless the ball is piercing (overclock), which plows straight through.
   function hitBricks(b) {
     for (const br of bricks.current) {
       if (br.hp <= 0) continue;
-      const dx = Math.abs(b.x - br.x);
-      const dy = Math.abs(b.y - br.y);
-      if (dx < br.w / 2 + b.r && dy < br.h / 2 + b.r) {
+      const hb = brickHitbox(br);
+      const dx = Math.abs(b.x - hb.cx);
+      const dy = Math.abs(b.y - hb.cy);
+      if (dx < hb.hw + b.r && dy < hb.hh + b.r) {
         const dmg = b.pierce ? 99 : 1;
         damageBrick(br, dmg, b.x, b.y);
         if (!b.pierce) {
           // bounce: pick axis by overlap depth
-          const ox = br.w / 2 + b.r - dx;
-          const oy = br.h / 2 + b.r - dy;
-          if (ox < oy) b.vx = b.x < br.x ? -Math.abs(b.vx) : Math.abs(b.vx);
-          else b.vy = b.y < br.y ? -Math.abs(b.vy) : Math.abs(b.vy);
+          const ox = hb.hw + b.r - dx;
+          const oy = hb.hh + b.r - dy;
+          if (ox < oy) b.vx = b.x < hb.cx ? -Math.abs(b.vx) : Math.abs(b.vx);
+          else b.vy = b.y < hb.cy ? -Math.abs(b.vy) : Math.abs(b.vy);
           return; // one brick per frame for a clean bounce
         }
       }
@@ -751,6 +843,17 @@ export function ModemDefender({ onExit }) {
       }
       return;
     }
+    // Turbo pop-up: ANY hit (even a non-killing one) ramps the ball up. Refreshes
+    // the window on each hit. BUFFERING clears it (see useItem). Only announce when
+    // it's a fresh activation so repeated taps don't spam floats.
+    if (BRICKS[br.type]?.overheat) {
+      const wasActive = isActive("overspeed");
+      inv.current.active.overspeed = now() + OVERSPEED_DUR;
+      if (!wasActive) {
+        addFloat(br.x, br.y - 18, "⚡ TURBO — SPEED UP!", T.red);
+        SFX.hurt();
+      }
+    }
     br.hp -= dmg;
     if (br.hp > 0) {
       spawnSpark(x, y, "hit");
@@ -763,6 +866,20 @@ export function ModemDefender({ onExit }) {
       addFloat(br.x, br.y, `+${pts}`, mult > 1 ? T.yellow : T.cyan);
       spawnSpark(br.x, br.y, "kill");
       SFX.pop(combo.current);
+      // Spam swarm: multiplies on death. gen carried per-instance terminates the
+      // hydra; wall-spawned splitters start at gen 2 (→ children → grandchildren).
+      const sp = BRICKS[br.type]?.split;
+      const gen = br.gen ?? (sp ? 2 : 0);
+      if (sp && gen > 0) {
+        const live = bricks.current.reduce((n, b) => n + (b.type === "spamswarm" || b.type === "spamspawn" ? 1 : 0), 0);
+        let budget = Math.max(0, MAX_SWARM - live);
+        let made = 0;
+        for (let i = 0; i < sp.perKill && budget > 0; i++, budget--, made++) {
+          const dir = i % 2 === 0 ? -1 : 1;
+          spawnBrick(sp.childType, br.x + dir * 26, br.y + rand(-6, 12), gen - 1);
+        }
+        if (made > 0) addFloat(br.x, br.y - 16, "MULTIPLYING!", T.red);
+      }
     }
   }
 
@@ -888,6 +1005,7 @@ export function ModemDefender({ onExit }) {
   const slowOn = isActive("buffering");
   const wideOn = isActive("broadband");
   const overOn = isActive("overclock");
+  const overspeedOn = isActive("overspeed"); // overheat-enemy ball speed-up
   const bo = boss.current;
 
   return (
@@ -895,6 +1013,7 @@ export function ModemDefender({ onExit }) {
       <div className="md-crt" />
       {hurt && <div className="md-breach" />}
       {slowOn && <div className="md-slow" />}
+      {overspeedOn && <div className="md-overspeed" />}
       {shieldOn && <div className="md-shielded" />}
 
       {/* ── HUD ── */}
@@ -946,8 +1065,16 @@ export function ModemDefender({ onExit }) {
                 <span className="md-loot-fallback" style={{ display: "none" }}>🎁</span>
               </div>
             ) : (
-              <div key={br.id} className="md-brick" style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
-                <img className={br.type === "virus" ? "md-virus-blob" : undefined} src={sprite(br.art)} alt="" draggable={false} style={{ width: br.w }} />
+              <div key={br.id} className={`md-brick${br.type === "overheat" ? " md-overheat" : ""}`} style={{ left: br.x, top: br.y, width: br.w, height: br.h, transform: "translate(-50%,-50%)" }}>
+                <img
+                  className={br.type === "virus" ? "md-virus-blob" : undefined}
+                  src={sprite(br.art)}
+                  alt=""
+                  draggable={false}
+                  style={{ width: br.w }}
+                  onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "flex"; }}
+                />
+                <span className="md-brick-fallback" style={{ display: "none", width: br.w, height: br.h }}>{BRICK_EMOJI[br.type] || "🟪"}</span>
                 {br.maxHp > 1 && br.hp < br.maxHp && <span className="md-ehp"><span style={{ width: `${(br.hp / br.maxHp) * 100}%` }} /></span>}
               </div>
             )
@@ -1063,6 +1190,11 @@ export const MD_CSS = `
 .md-crt::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,transparent 55%,rgba(0,0,0,0.55));}
 .md-breach{position:absolute;inset:0;pointer-events:none;z-index:40;animation:mdBreach 0.26s ease-out;box-shadow:inset 0 0 120px 20px rgba(255,45,85,0.5);}
 .md-slow{position:absolute;inset:0;pointer-events:none;z-index:39;box-shadow:inset 0 0 140px 30px rgba(63,255,208,0.16);}
+/* Turbo ball-overspeed: pulsing red-hot vignette (distinct from buffering's cyan)
+   so the "ball is faster" danger reads at a glance. Static overlay — no glow on the
+   moving ball itself (that smears into trails on iOS Safari). */
+.md-overspeed{position:absolute;inset:0;pointer-events:none;z-index:39;animation:mdOverspeed 0.7s ease-in-out infinite;}
+@keyframes mdOverspeed{0%,100%{box-shadow:inset 0 0 120px 22px rgba(255,45,85,0.12)}50%{box-shadow:inset 0 0 150px 34px rgba(255,138,61,0.22)}}
 .md-shielded{position:absolute;inset:0;pointer-events:none;z-index:39;box-shadow:inset 0 0 120px 24px rgba(48,209,88,0.18);}
 @keyframes mdBreach{0%{opacity:1}100%{opacity:0}}
 
@@ -1102,6 +1234,11 @@ export const MD_CSS = `
 }
 .md-ehp{position:absolute;left:8%;right:8%;bottom:-5px;height:3px;background:#ffffff22;border-radius:2px;overflow:hidden;}
 .md-ehp span{display:block;height:100%;background:#ff2d55;box-shadow:0 0 4px #ff2d55;}
+/* Emoji shown when a brick sprite WebP is missing (img onError swaps to this). */
+.md-brick-fallback{align-items:center;justify-content:center;font-size:30px;line-height:1;}
+/* Turbo pop-up: pulsing red/orange danger glow so it reads as the "speed" hazard. */
+.md-overheat{animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1),mdOverheat 0.8s ease-in-out infinite;}
+@keyframes mdOverheat{0%,100%{filter:drop-shadow(0 0 4px #ff8a3d) drop-shadow(0 1px 3px rgba(0,0,0,0.5))}50%{filter:drop-shadow(0 0 14px #ff2d55) drop-shadow(0 0 6px #ffd60a)}}
 .md-loot{animation:mdPopIn 0.2s cubic-bezier(0.34,1.56,0.64,1),mdLootGlow 1.2s ease-in-out infinite;}
 .md-loot-img{width:100%;height:100%;object-fit:contain;}
 .md-loot-fallback{position:absolute;font-size:20px;}

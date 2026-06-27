@@ -40,6 +40,8 @@ const SPRITE_JOBS = [
   { src: "virus-blob.png", dir: SPRITES, name: "virus", width: 360 }, // single frame; animated via CSS wobble in-game
   { src: "parody-assistance.png", dir: SPRITES, name: "clippy", width: 360 },
   { src: "toolbar-hijacker.png", dir: SPRITES, name: "toolbar", width: 480 },
+  { src: "turbo-popup.png", dir: SPRITES, name: "turbo-popup", width: 480 }, // "download faster!" pop-up → ball speed-up
+  { src: "spam-swarm.png", dir: SPRITES, name: "spam-swarm", width: 420 }, // pop-up that multiplies on death
   { src: "bsod-boss.png", dir: SPRITES, name: "boss", width: 560 },
   { src: "defender-modem.png", dir: SPRITES, name: "player", width: 320 },
   { src: "modem-defender-logo.png", dir: UI, name: "logo", width: 900 },
