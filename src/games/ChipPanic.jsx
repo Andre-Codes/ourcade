@@ -33,6 +33,7 @@ const GAME_ID = "chip-panic";
 // Custom "wanted" badge (replaces the cowboy emoji). Game-local asset; falls back
 // to the emoji until the file is added. Resolved off BASE_URL like other assets.
 const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
+const ANTE_UP_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/ante-up.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 // Modes: HIGH_STAKES is the full ante/Wanted ruleset (the current game). CLASSIC
 // (a simpler ruleset) and PANIC (Classic + a placement timer) are planned — only
@@ -98,6 +99,7 @@ const HCB_CSS = `
     80%  { opacity: 1; }
     100% { opacity: 0; transform: translate(-50%,-72%) scale(1); }
   }
+  .hcb-anteup .icon { width: clamp(56px, 18vw, 92px); height: auto; display: block; filter: drop-shadow(0 0 12px rgba(255,159,67,.6)); margin-bottom: 2px; }
   .hcb-anteup .big {
     font-family: 'Black Ops One',sans-serif; font-size: clamp(1.5rem,7.5vw,2.8rem); letter-spacing: .04em;
     color: #ff9f43; text-shadow: 0 0 14px rgba(255,159,67,.7), 0 2px 12px rgba(0,0,0,.7);
@@ -283,6 +285,7 @@ export default function ChipPanic() {
   const [hudBump, setHudBump] = useState(false);
   const [bannerClaim, setBannerClaim] = useState(false); // pulse the WANTED banner
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
+  const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
@@ -559,6 +562,7 @@ export default function ChipPanic() {
 
       <div className={`hcb-anteup ${anteUp?.on ? "show" : ""}`} aria-hidden="true">
         {anteUp && <>
+          {anteImgOk && <img className="icon" src={ANTE_UP_IMG} alt="" draggable="false" onError={() => setAnteImgOk(false)} />}
           <span className="big">ANTE UP</span>
           <span className="amt">lanes now cost {anteUp.amount}</span>
         </>}

@@ -23,17 +23,22 @@ const trimmed = (src) => sharp(src).trim({ threshold: 10 });
 async function main() {
   await mkdir(OUT, { recursive: true });
 
-  // Wanted badge — shown in the objective banner (renders ~26px; 128px master
-  // gives crisp retina headroom at a tiny file size). Transparent.
-  const badge = join(SRC, "wanted-badge.png");
-  if (existsSync(badge)) {
-    await trimmed(badge)
-      .resize({ width: 128, height: 128, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
+
+  // Each entry: source PNG → public WebP, at a display-appropriate master size.
+  const jobs = [
+    { src: "wanted-badge.png", out: "wanted-badge.webp", size: 128 }, // banner badge (~26px)
+    { src: "ante-up.png", out: "ante-up.webp", size: 256 },           // "ANTE UP" popup icon (larger)
+  ];
+
+  for (const j of jobs) {
+    const src = join(SRC, j.src);
+    if (!existsSync(src)) { console.log(`  (skipped ${j.out} — no assets-src/high_card_bust/${j.src})`); continue; }
+    await trimmed(src)
+      .resize({ width: j.size, height: j.size, fit: "contain", background: TRANSPARENT })
       .webp({ quality: 88 })
-      .toFile(join(OUT, "wanted-badge.webp"));
-    console.log("  public/games/chip-panic/wanted-badge.webp");
-  } else {
-    console.log("  (skipped wanted-badge — no assets-src/high_card_bust/wanted-badge.png)");
+      .toFile(join(OUT, j.out));
+    console.log(`  public/games/chip-panic/${j.out}`);
   }
 }
 
