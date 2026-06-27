@@ -421,6 +421,7 @@ export default function ChipPanic() {
           const color = res.raise && res.raise.won ? TIERS[res.raise.tier].color : TIERS[ANTE_TIER].color;
           spawnChipsTo(color, res.chipsReturned, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
         }
+        playSfx("card-fan-1"); // the lane's cards fan out as it clears on a successful hand
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
       } else if (res.saved) {
