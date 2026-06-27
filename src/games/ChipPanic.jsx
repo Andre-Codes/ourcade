@@ -84,6 +84,26 @@ const HCB_CSS = `
   .hcb-wanted.claim { animation: hcb-wanted-claim 700ms ease-out; }
   @keyframes hcb-wanted-claim { 0%{ transform: scale(1); } 30%{ transform: scale(1.06); box-shadow: 0 0 28px rgba(63,255,208,.7); border-color: #3fffd0; } 100%{ transform: scale(1); } }
 
+  /* "ANTE UP" — fires when the rising ante crosses to a higher value */
+  .hcb-anteup {
+    position: absolute; top: 19%; left: 50%; transform: translate(-50%,-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    pointer-events: none; opacity: 0; z-index: 74; text-align: center; white-space: nowrap;
+  }
+  .hcb-anteup.show { animation: hcb-anteup 1800ms ease-out forwards; }
+  @keyframes hcb-anteup {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(.7); }
+    14%  { opacity: 1; transform: translate(-50%,-50%) scale(1.12); }
+    26%  {             transform: translate(-50%,-50%) scale(1); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-72%) scale(1); }
+  }
+  .hcb-anteup .big {
+    font-family: 'Black Ops One',sans-serif; font-size: clamp(1.5rem,7.5vw,2.8rem); letter-spacing: .04em;
+    color: #ff9f43; text-shadow: 0 0 14px rgba(255,159,67,.7), 0 2px 12px rgba(0,0,0,.7);
+  }
+  .hcb-anteup .amt { font-family: 'Press Start 2P',monospace; font-size: .58rem; letter-spacing: .06em; color: #ffd23f; text-shadow: 0 2px 6px rgba(0,0,0,.7); }
+
   .hcb-stage { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: clamp(12px, 3.5vh, 30px) 8px 12px; min-height: 0; width: 100%; box-sizing: border-box; }
 
   .hcb-top { display: flex; align-items: center; justify-content: center; gap: 16px; flex: 0 0 auto; }
@@ -92,8 +112,9 @@ const HCB_CSS = `
   .hcb-tray { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .hcb-tray .hcb-card { box-shadow: 0 0 0 2px #bf5af2, 0 4px 16px rgba(191,90,242,.55); }
   .hcb-discard {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    cursor: pointer; border-radius: 9px; padding: 8px 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    cursor: pointer; border-radius: 9px; padding: 8px 6px;
+    width: 76px; box-sizing: border-box; /* fixed so DISCARD↔SPENT doesn't resize + shift the row */
     border: 2px solid #6a3f9f; background: rgba(0,0,0,.32); color: #eef0ff;
     font-family: 'Press Start 2P',monospace;
   }
@@ -213,6 +234,7 @@ const HCB_CSS = `
 
   @media (prefers-reduced-motion: reduce) {
     .hcb-fx .fx-chip, .hcb-fx .fx-flash, .hcb-feed, .hcb-wanted.claim { animation-duration: 1ms !important; transition: none !important; }
+    .hcb-anteup.show { animation: none !important; opacity: 1; } /* show statically, no bounce */
   }
 
   .hcb-overlay {
@@ -261,6 +283,7 @@ export default function ChipPanic() {
   const [hudBump, setHudBump] = useState(false);
   const [bannerClaim, setBannerClaim] = useState(false); // pulse the WANTED banner
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
+  const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
 
@@ -271,6 +294,7 @@ export default function ChipPanic() {
   const panicTimer = useRef(null);
   const bumpTimer = useRef(null);
   const bannerTimer = useRef(null);
+  const anteUpTimer = useRef(null);
   const gameRef = useRef(game);
   useEffect(() => { gameRef.current = game; }, [game]);
 
@@ -361,6 +385,16 @@ export default function ChipPanic() {
 
   // ── apply an engine result: store new state, animate, end the run if over ──────
   const applyResult = useCallback((next, result) => {
+    // Did the rising ante just cross to a higher value? (prev state is still in
+    // gameRef here — setGame(next) hasn't flushed.) Announce "ANTE UP".
+    const prev = gameRef.current;
+    if (prev && currentAnte(next) > currentAnte(prev)) {
+      clearTimeout(anteUpTimer.current);
+      setAnteUp({ amount: currentAnte(next), on: true });
+      anteUpTimer.current = setTimeout(() => setAnteUp((a) => (a ? { ...a, on: false } : a)), 1800);
+      playSfxVariant("chip-lay", [1, 3]);
+    }
+
     setGame(next);
 
     if (result.type === "place") playSfxVariant("card-place", [1, 3]);
@@ -447,7 +481,7 @@ export default function ChipPanic() {
 
   useEffect(() => () => {
     clearTimeout(feedTimer.current); clearTimeout(flashTimer.current);
-    clearTimeout(bumpTimer.current);
+    clearTimeout(bumpTimer.current); clearTimeout(anteUpTimer.current);
     clearTimeout(bannerTimer.current); clearPanic();
   }, [clearPanic]);
 
@@ -461,6 +495,7 @@ export default function ChipPanic() {
     setFlash({});
     setHudBump(false);
     setBannerClaim(false);
+    setAnteUp(null);
     clearFx();
     setPanicPct(1);
     setScreen(SCREEN.PLAY);
@@ -521,6 +556,13 @@ export default function ChipPanic() {
           <span className="streak">streak <b>{g.streak}</b></span>
         </div>
       )}
+
+      <div className={`hcb-anteup ${anteUp?.on ? "show" : ""}`} aria-hidden="true">
+        {anteUp && <>
+          <span className="big">ANTE UP</span>
+          <span className="amt">lanes now cost {anteUp.amount}</span>
+        </>}
+      </div>
 
       {screen === SCREEN.PLAY && g && (
         <div className="hcb-stage">
