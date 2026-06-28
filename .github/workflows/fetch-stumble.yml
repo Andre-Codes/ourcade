@@ -1,0 +1,72 @@
+name: Fetch Stumble pool
+
+# Refreshes the 🎲 Stumble button's AI-curated artifact pool
+# (src/data/generated/stumble.js). Unlike the Weird Thing, Stumble is NOT part
+# of generate-content.js — it's its own two-pass script (stable knowledge + a
+# live web search for what's delightful online RIGHT NOW). ~40% of a stumble
+# draw is the "current" bucket, so the topical half goes stale without a refresh;
+# monthly keeps it at most ~a month old (same rationale as generate-content).
+#
+# Runs an hour AFTER generate-content's monthly job (which also pushes to main +
+# triggers deploy) so the two don't race for the branch. Failure is safe:
+# validation writes nothing if too few artifacts survive the URL liveness gate,
+# so the previous pool keeps serving. fetch-stumble also archives each surviving
+# artifact to Firestore (archive/stumble/items/*) — so scheduling this is what
+# finally gets the Stumble pool into the permanent archive in CI.
+on:
+  schedule:
+    - cron: "0 10 1 * *" # 1st of each month, 10:00 UTC (1h after generate-content)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write # needed for `gh workflow run deploy.yml` (trigger Pages deploy)
+
+concurrency:
+  group: fetch-stumble
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch Stumble artifacts with Claude (URL liveness-gated)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: npm run fetch:stumble
+
+      - name: Verify rotations still hold
+        run: npm run check:daily
+
+      - name: Commit refreshed pool (only if changed)
+        id: commit
+        run: |
+          git config user.name "ourcade-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data/generated/stumble.js src/data/generated/_stumble.md
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No pool changes — nothing to commit."
+          else
+            git commit -m "chore: refresh Stumble pool (AI-generated, liveness-checked)"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Commits pushed with the default GITHUB_TOKEN do NOT trigger other
+      # workflows, so deploy.yml won't auto-run — kick it off explicitly.
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml
