@@ -20,6 +20,7 @@ import { COUNTDOWNS, getTodaysCountdown } from "../src/data/countdowns.js";
 import { BUZZ, getTodaysBuzz } from "../src/data/buzz.js";
 import { HOT_OR_NOT, getTodaysHotOrNot } from "../src/data/hotornot.js";
 import { ON_THIS_DAY_ALL, getOnThisDay } from "../src/data/onthisday.js";
+import { CREATIVES_POOL, timeBucketOf, TIME_BUCKETS, getCreativeOfTheDay, getCreative, isGuide } from "../src/data/creatives.js";
 import { urlKey } from "./lib/validate-urls.js";
 
 // A day-part object for a given local hour (date is arbitrary — only the hour
@@ -265,6 +266,67 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   );
   check("on-this-day entries well-formed (events + sources)", bad.length === 0,
     bad.length ? `bad: ${bad.map((e) => e.id || "?").join(", ")}` : `${ON_THIS_DAY_ALL.length} dates`);
+}
+
+// ---- Creatives (/creatives) ----
+// Hand-curated "make this" pool. Every item needs a lane, a next action, and a
+// known time bucket; ids unique. Each item is EITHER an on-site guide (steps[])
+// OR an external link (url) — so the url requirement is relaxed for guides and
+// covered by a dedicated guide/external pair of checks below. Validates data
+// shape only; the bundled-image globs live in the React-only creativeArt.js.
+{
+  const LANES = new Set(["print", "draw", "build", "remix", "study"]);
+  const DIFFS = new Set(["beginner", "intermediate", "advanced"]);
+  const COSTS = new Set(["free", "paid"]);
+  const BUCKETS = new Set(TIME_BUCKETS);
+  const isUrl = (u) => /^https?:\/\//i.test(String(u || ""));
+  // A plain slug — no path separators or dots (the pipeline adds folder + .webp).
+  const isSlug = (s) => typeof s === "string" && s.length > 0 && !/[\\/.]/.test(s);
+
+  const bad = CREATIVES_POOL.filter(
+    (c) =>
+      !c.id || !c.title || !c.blurb || !c.action ||
+      (!c.guide && !isUrl(c.url)) || // external items still need a url; guides don't
+      !LANES.has(c.lane) || !DIFFS.has(c.difficulty) || !COSTS.has(c.cost) ||
+      !BUCKETS.has(timeBucketOf(c))
+  );
+  check("creatives well-formed (lane, action, time bucket)", bad.length === 0,
+    bad.length ? `bad: ${bad.map((c) => c.id || "?").join(", ")}` : `${CREATIVES_POOL.length} items`);
+  check("creative ids unique", new Set(CREATIVES_POOL.map((c) => c.id)).size === CREATIVES_POOL.length);
+  check("creative-of-the-day deterministic", getCreativeOfTheDay(k0)?.id === getCreativeOfTheDay(k0)?.id);
+
+  const guides = CREATIVES_POOL.filter((c) => c.guide);
+  const externals = CREATIVES_POOL.filter((c) => !c.guide);
+
+  // Guides: non-empty steps[], every step has a caption, and any step.image is a
+  // plain slug. (No url required — they render on-site.)
+  const badGuides = guides.filter(
+    (c) =>
+      !Array.isArray(c.steps) || c.steps.length === 0 ||
+      c.steps.some((s) => !s || typeof s.caption !== "string" || !s.caption.trim()) ||
+      c.steps.some((s) => s.image && !isSlug(s.image))
+  );
+  check("creative guides have well-formed steps (each with a caption)", badGuides.length === 0,
+    badGuides.length ? `bad: ${badGuides.map((c) => c.id).join(", ")}` : `${guides.length} guides`);
+
+  // isGuide() must agree with the flag (guards against guide:true but no steps).
+  check("isGuide() matches flagged guides", guides.every((c) => isGuide(c)),
+    guides.filter((c) => !isGuide(c)).map((c) => c.id).join(", ") || "all guides resolve");
+
+  // getCreative round-trips every id (the /creatives/:id lookup).
+  check("getCreative resolves every id",
+    CREATIVES_POOL.every((c) => getCreative(c.id)?.id === c.id));
+
+  // External (non-guide) items still need a valid url.
+  check("external creatives have a valid url", externals.every((c) => isUrl(c.url)),
+    externals.filter((c) => !isUrl(c.url)).map((c) => c.id).join(", ") || `${externals.length} external`);
+
+  // image/imageUrl optional; if present, imageUrl must be http(s), image a slug.
+  const badArt = CREATIVES_POOL.filter(
+    (c) => (c.imageUrl && !isUrl(c.imageUrl)) || (c.image && !isSlug(c.image))
+  );
+  check("creative image fields well-formed (imageUrl http, image is a slug)", badArt.length === 0,
+    badArt.length ? `bad: ${badArt.map((c) => c.id).join(", ")}` : "image fields ok");
 }
 
 // ---- dev schedule window logic ----

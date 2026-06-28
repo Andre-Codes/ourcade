@@ -9,6 +9,8 @@ const FlashPage = lazy(() => import("./components/FlashPage.jsx"));
 const StumblePage = lazy(() => import("./components/StumblePage.jsx"));
 const WaterCoolerPage = lazy(() => import("./components/WaterCoolerPage.jsx"));
 const VaultPage = lazy(() => import("./components/VaultPage.jsx"));
+const CreativesPage = lazy(() => import("./components/CreativesPage.jsx"));
+const CreativeGuidePage = lazy(() => import("./components/CreativeGuidePage.jsx"));
 const NewGamesPage = lazy(() => import("./components/NewGamesPage.jsx"));
 const FAQPage = lazy(() => import("./components/FAQPage.jsx"));
 const ContactPage = lazy(() => import("./components/ContactPage.jsx"));
@@ -36,6 +38,8 @@ export default function App() {
           <Route path="/stumble" element={<StumblePage />} />
           <Route path="/watercooler" element={<WaterCoolerPage />} />
           <Route path="/vault" element={<VaultPage />} />
+          <Route path="/creatives" element={<CreativesPage />} />
+          <Route path="/creatives/:id" element={<CreativeGuidePage />} />
           <Route path="/new" element={<NewGamesPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />

@@ -7,6 +7,7 @@ place to add or tweak content without it getting clobbered.
 | File          | What it holds                                                                 |
 | ------------- | ----------------------------------------------------------------------------- |
 | `content.js`  | Polls, quizzes, facts, news, tips, curiosities, weird things, stumble artifacts. Manual entries join the daily rotation alongside the generated pools. |
+| `creatives.js`| The `/creatives` page — small "make this" missions (3D-print files, how-to-draw sheets) with a next action, time, difficulty, and cost. Hand-curated; this is the sole source for now. |
 | `schedule.js` | Pin/pool a specific News / Curiosity / Weird item to a date window.           |
 | `movies.js`   | Movies currently in theaters + their post-credits verdict (the homepage "STAY FOR THE CREDITS?" card). |
 | `featured.js` | Real-world games to spotlight in the homepage "FEATURED GAME" card (shows the first entry, newest-first). Drop art in `assets-src/featured/<slug>.(png\|jpg)` and run `npm run assets:featured` to make the optimized `src/assets/featured/<slug>.webp`. |

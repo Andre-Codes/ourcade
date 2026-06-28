@@ -1581,6 +1581,114 @@ main > section + section { margin-top: 44px; }
   .arcade-vault-title { font-size: 1.4rem; }
 }
 
+/* ---- creatives ("things to make today") — reuses the vault shell + cards ---- */
+.arcade-creatives-time-chips { justify-content: center; }
+.arcade-creatives-grid { align-items: stretch; }
+/* Card is a column so the next-action line and portal button anchor at the
+   bottom however tall the blurb runs, keeping a tidy grid. */
+.arcade-creative-card { display: flex; flex-direction: column; }
+.arcade-creative-card .arcade-stumble-blurb { flex: 1 0 auto; }
+.arcade-creative-badges {
+  display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0;
+}
+.arcade-creative-badge {
+  padding: 4px 9px;
+  background: #150f26;
+  border: 1px solid #3a2a5a;
+  border-radius: 999px;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 0.03em;
+  color: #cbb8f0; white-space: nowrap;
+}
+.arcade-creative-badge.is-paid { border-color: var(--neon-gold); color: var(--neon-gold); }
+/* The next move — the whole point of a creative card, so it reads loud. */
+.arcade-creative-action {
+  display: flex; align-items: baseline; gap: 8px; margin: 14px 0 0;
+  padding: 9px 12px;
+  background: rgba(159, 212, 0, 0.08);
+  border-left: 3px solid var(--neon-lime);
+  border-radius: 0 6px 6px 0;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; line-height: 1.4;
+  color: #eaf6c8;
+}
+.arcade-creative-action-arrow { color: var(--neon-lime); font-weight: bold; }
+.arcade-creative-open { align-self: flex-start; }
+
+/* Card featured image — fixed crop so the grid stays tidy whatever the source
+   art's shape. Overrides the inherited .arcade-stumble-image top margin (image
+   sits at the very top of the card). */
+.arcade-creative-image {
+  width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
+  margin: 0 0 12px; border-radius: 9px;
+}
+/* No-image fallback: a lane-emoji tile so every card reads as "art-first". */
+.arcade-creative-image-fallback {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1a1230, #241a40);
+  border: 2px solid #3a2a5a; box-sizing: border-box;
+}
+.arcade-creative-fallback-emoji {
+  font-size: 2.6rem; opacity: 0.85;
+  filter: drop-shadow(0 0 10px rgba(232, 255, 71, 0.25));
+}
+
+/* ---- creative guide page (/creatives/:id) — a step-by-step walkthrough ---- */
+.arcade-guide { max-width: 760px; margin: 0 auto; }
+.arcade-guide-head { margin-bottom: 8px; }
+.arcade-guide-title {
+  font-family: 'Black Ops One', cursive; font-size: 1.7rem;
+  color: var(--arcade-text); margin: 8px 0 0;
+}
+.arcade-guide-blurb {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; line-height: 1.55;
+  color: #d6e6ff; margin: 10px 0 0;
+}
+.arcade-guide-meta { margin-top: 14px; }
+.arcade-guide-hero {
+  width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+  margin-top: 16px; border-radius: 10px;
+}
+.arcade-guide-section { margin-top: 26px; }
+.arcade-guide-subhead {
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem; letter-spacing: 0.06em;
+  color: var(--neon-gold); text-shadow: 0 0 8px rgba(255, 210, 63, 0.35);
+  margin: 0 0 12px;
+}
+.arcade-guide-list {
+  list-style: none; padding: 0; margin: 0;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; line-height: 1.5;
+  color: #d6e6ff;
+}
+.arcade-guide-list li { padding: 3px 0 3px 20px; position: relative; }
+.arcade-guide-list li::before {
+  content: "▪"; position: absolute; left: 2px; color: var(--neon-lime);
+}
+/* The steps — a vertical stack you scroll top-to-bottom. */
+.arcade-guide-steps {
+  list-style: none; padding: 0; margin: 26px 0 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+.arcade-guide-step {
+  padding: 16px; background: #14172a;
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+.arcade-guide-step-num {
+  font-family: 'Press Start 2P', monospace; font-size: 0.55rem; letter-spacing: 0.06em;
+  color: var(--neon-lime); margin-bottom: 12px;
+}
+/* `contain` (not cover) so user art is never cropped — the whole step shows. */
+.arcade-guide-step-img {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: contain;
+  background: #0c0916; border-radius: 8px; margin: 0;
+}
+.arcade-guide-step-caption {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; line-height: 1.55;
+  color: #d6e6ff; margin: 12px 0 0;
+}
+.arcade-guide-cta {
+  margin-top: 28px; padding-top: 18px; border-top: 1px solid #2a2f4a;
+}
+.arcade-guide-cta .arcade-back-link { margin-top: 14px; display: inline-block; }
+
 /* ---- daily band responsive ---- */
 @media (max-width: 760px) {
   .arcade-daily-grid { grid-template-columns: 1fr; }

@@ -22,6 +22,7 @@
     "check:relic": "node scripts/relic-run-check.js",
     "assets:mascots": "node scripts/process-mascots.js",
     "assets:featured": "node scripts/process-featured.js",
+    "assets:creatives": "node scripts/process-creatives.js",
     "assets:page-icons": "node scripts/process-page-icons.js",
     "assets:modem": "node scripts/process-modem-assets.js",
     "assets:kenney": "node scripts/process-kenney.js",
