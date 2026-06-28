@@ -16,6 +16,10 @@ place to add or tweak content without it getting clobbered.
 Each file has a header comment documenting its entry shape. After editing,
 run `node scripts/daily-check.js` to sanity-check the rotation.
 
+> Adding a **drawing guide with step images** (user provides images + title)?
+> Follow [`docs/adding-creative-guides.md`](../../../docs/adding-creative-guides.md)
+> — the end-to-end procedure for placing/optimizing art and writing the `creatives.js` entry.
+
 > Note: the **games registry** lives next door in `src/data/games.js` (not in
 > here) because it's imported all over the app — it's also hand-edited, just
 > kept in place to avoid a wide refactor.

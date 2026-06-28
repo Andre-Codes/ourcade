@@ -27,14 +27,16 @@
          guide:  true
          steps:  [{ image, caption }, …] in order — a step-by-step walkthrough
                  rendered at /creatives/<id>. `caption` is plain text; `image`
-                 is a plain slug (no path/extension) resolved to
-                 src/assets/creatives/steps/<id>/<image>.webp.
+                 is a plain slug (no path/extension) — art lives under the LANE
+                 folder at assets-src/creatives/<lane>/steps/<id>/<image>.png
+                 (draw→drawings, print→prints, … per LANE_DIR in
+                 ../../components/creativeArt.js).
        (A guide needs no url/source. Use this instead of linking to a bare
         Google/YouTube search — host the steps here.)
 
    Card / header art (optional — precedence: image → imageUrl → fallback tile):
-     image:    bundled slug → src/assets/creatives/<slug>.webp (run
-               `npm run assets:creatives` after dropping art in assets-src/).
+     image:    bundled slug → optimized from assets-src/creatives/<lane>/<slug>.png
+               (run `npm run assets:creatives` after dropping art there).
      imageUrl: a remote thumbnail URL (used only when `image` is absent).
      (With neither, the card shows a styled lane-emoji tile, never a broken img.)
 
@@ -45,6 +47,10 @@
    - Keep every `id` unique. Run `node scripts/daily-check.js` after editing.
    - Leave the array empty ([]) to add nothing; the FALLBACK keeps the page
      from ever rendering blank.
+
+   AGENTS: when the user hands you images + a title for a drawing guide, follow
+   docs/adding-creative-guides.md — it's the full procedure for placing/optimizing
+   step art and authoring the entry (the user only supplies raw material).
    ───────────────────────────────────────────────────────────────────────── */
 
 export const MANUAL_CREATIVES = [

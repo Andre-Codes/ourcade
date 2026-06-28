@@ -42,11 +42,11 @@ function PlateSteps({ steps }) {
 }
 
 // Per-step steps: an image (or fallback tile) plus a caption per step.
-function ImageSteps({ id, steps, laneEmoji }) {
+function ImageSteps({ lane, id, steps, laneEmoji }) {
   return (
     <ol className="arcade-guide-steps">
       {steps.map((s, i) => {
-        const img = stepArt(id, s.image);
+        const img = stepArt(lane, id, s.image);
         return (
           <li key={i} className="arcade-guide-step">
             <div className="arcade-guide-step-num">step {i + 1}</div>
@@ -96,7 +96,7 @@ export default function CreativeGuidePage() {
 
   // Whole-plate guide: the big plate IS the hero (with a credit line) and steps
   // are text-only. Otherwise: a normal card/header image and per-step images.
-  const plate = item.plate ? plateArt(item.plate) : null;
+  const plate = item.plate ? plateArt(item.lane, item.plate) : null;
   const isPlateGuide = !!item.plate;
   const heroArt = isPlateGuide ? plate : creativeArt(item);
 
@@ -156,7 +156,7 @@ export default function CreativeGuidePage() {
             <PlateSteps steps={item.steps} />
           </section>
         ) : (
-          <ImageSteps id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
+          <ImageSteps lane={item.lane} id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
         )}
 
         {Array.isArray(item.tips) && item.tips.length > 0 && (

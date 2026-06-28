@@ -37,7 +37,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
 const OUT_FILE = "draw-guides.js";
 const PROOF_FILE = "_draw-guides.md";
-const PLATES_DIR = path.join(ROOT, "src", "assets", "creatives", "plates");
+// Draw-lane plates live under the "drawings" lane subfolder (see creativeArt.js
+// LANE_DIR: draw → drawings). Output: src/assets/creatives/drawings/plates/<slug>.webp.
+const PLATES_DIR = path.join(ROOT, "src", "assets", "creatives", "drawings", "plates");
 
 // Gutenberg #74518 plate images live here (verified reachable). `plate` is the
 // image basename in the book, e.g. i_016 → .../images/i_016.jpg.
