@@ -36,6 +36,7 @@ const GAME_ID = "chip-panic";
 const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
 const ANTE_UP_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/ante-up.webp";
 const DISCARD_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/discard.webp";
+const JACKPOT_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/jackpot-badge.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
 // Modes: HIGH_STAKES is the full ante/Wanted ruleset (the current game). CLASSIC
 // (a simpler ruleset) and PANIC (Classic + a placement timer) are planned — only
@@ -96,7 +97,9 @@ const HCB_CSS = `
     border: 1px solid rgba(63,255,208,.5);
     background: linear-gradient(180deg, rgba(63,255,208,.08), rgba(0,0,0,.25));
   }
-  .hcb-jackbanner .ic { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
+  .hcb-jackbanner .ic { width: 22px; height: 22px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+  .hcb-jackbanner .ic img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
+  .hcb-jackbanner .ic .fallback { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
   .hcb-jackbanner .lbl { flex: 1 1 auto; min-width: 0; font-family: 'Black Ops One',sans-serif; letter-spacing: .06em; color: #cfeee6; font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hcb-jackbanner .rew { flex: 0 0 auto; font-size: .5rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; white-space: nowrap; }
   .hcb-jackbanner .rew b { color: #3fffd0; }
@@ -119,6 +122,12 @@ const HCB_CSS = `
     animation: hcb-jackpot-spin 6s linear infinite; opacity: .7;
   }
   @keyframes hcb-jackpot-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+  .hcb-jackpot .gem {
+    position: relative; width: clamp(72px, 22vw, 150px); height: auto; display: block;
+    filter: drop-shadow(0 0 22px rgba(63,255,208,.7)) drop-shadow(0 0 12px rgba(255,210,63,.6));
+    animation: hcb-gem-pop 700ms cubic-bezier(.2,1.4,.4,1) both;
+  }
+  @keyframes hcb-gem-pop { 0% { transform: scale(.3) rotate(-12deg); opacity: 0; } 60% { transform: scale(1.15) rotate(4deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
   .hcb-jackpot .big {
     position: relative; font-family: 'Black Ops One',sans-serif; font-size: clamp(2.6rem,13vw,5.5rem); letter-spacing: .04em;
     background: linear-gradient(180deg,#fffbe6,#ffd23f 45%,#3fffd0);
@@ -292,7 +301,7 @@ const HCB_CSS = `
     .hcb-anteup.show { animation: none !important; opacity: 1; } /* show statically, no bounce */
     .hcb-jackpot.show { animation: hcb-jackpot-in 2600ms steps(1) forwards; } /* hold visible, no motion */
     .hcb-jackpot .rays { animation: none !important; }
-    .hcb-jackpot .big { animation: none !important; }
+    .hcb-jackpot .big, .hcb-jackpot .gem { animation: none !important; opacity: 1; }
   }
 
   .hcb-overlay {
@@ -343,6 +352,7 @@ export default function ChipPanic() {
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
   const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
   const [discardImgOk, setDiscardImgOk] = useState(true); // false once the discard icon fails to load
+  const [jackBadgeOk, setJackBadgeOk] = useState(true); // false once the jackpot badge fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
   const [jackpot, setJackpot] = useState(null); // { hand, pts, chips, on } — JACKPOT celebration
 
@@ -666,7 +676,11 @@ export default function ChipPanic() {
           anytime for the huge reward + celebration. Static, so it stays terse. */}
       {screen === SCREEN.PLAY && g && (
         <div className="hcb-jackbanner" aria-label="Jackpot goal">
-          <span className="ic">💎</span>
+          <span className="ic">
+            {jackBadgeOk
+              ? <img src={JACKPOT_BADGE} alt="Jackpot" draggable="false" onError={() => setJackBadgeOk(false)} />
+              : <span className="fallback">💎</span>}
+          </span>
           <span className="lbl">STR. FLUSH / ROYAL</span>
           <span className="rew">JACKPOT · <b>+1000</b> / <b>+2500</b></span>
         </div>
@@ -684,6 +698,7 @@ export default function ChipPanic() {
       <div className={`hcb-jackpot ${jackpot?.on ? "show" : ""}`} aria-hidden="true">
         {jackpot && <>
           <span className="rays" />
+          {jackBadgeOk && <img className="gem" src={JACKPOT_BADGE} alt="" draggable="false" onError={() => setJackBadgeOk(false)} />}
           <span className="big">JACKPOT!</span>
           <span className="hand">{jackpot.hand?.toUpperCase()}</span>
           <span className="amt">+{jackpot.pts.toLocaleString()} pts · +{jackpot.chips} chips</span>
