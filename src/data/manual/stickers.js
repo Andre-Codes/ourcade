@@ -38,7 +38,6 @@
 export const STICKERS = {
   "relic-run": "DAILY",
   "pits-and-portals": "HOT",
-  "crypt-crawler": "NEW",
   "tap-surge": "HOT",
   "modem-defender": "HOT",
   "snake": "TOP",

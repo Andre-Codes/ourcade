@@ -76,9 +76,11 @@ const HCB_CSS = `
     border: 2px solid #ffd23f; background: linear-gradient(180deg, rgba(255,210,63,.12), rgba(0,0,0,.3));
     box-shadow: 0 0 14px rgba(255,210,63,.2);
   }
-  .hcb-wanted .badge { width: 26px; height: 26px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-  .hcb-wanted .badge img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 6px rgba(255,210,63,.7)); }
-  .hcb-wanted .badge .fallback { font-size: 1.1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(255,210,63,.8)); }
+  /* glow on the .badge wrapper, not the <img>: on the raw image it casts
+     Chromium's drop-shadow ghost rectangle until the bitmap decodes. */
+  .hcb-wanted .badge { width: 26px; height: 26px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px rgba(255,210,63,.7)); }
+  .hcb-wanted .badge img { width: 100%; height: 100%; object-fit: contain; }
+  .hcb-wanted .badge .fallback { font-size: 1.1rem; line-height: 1; }
   /* hand name takes the flexible middle and never overflows the fixed box */
   .hcb-wanted .lbl { flex: 1 1 auto; min-width: 0; font-family: 'Black Ops One',sans-serif; letter-spacing: .06em; color: #ffd23f; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hcb-wanted .rew { flex: 0 0 auto; font-size: .56rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; white-space: nowrap; }
@@ -97,9 +99,10 @@ const HCB_CSS = `
     border: 1px solid rgba(63,255,208,.5);
     background: linear-gradient(180deg, rgba(63,255,208,.08), rgba(0,0,0,.25));
   }
-  .hcb-jackbanner .ic { width: 22px; height: 22px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-  .hcb-jackbanner .ic img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
-  .hcb-jackbanner .ic .fallback { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
+  /* glow on the .ic wrapper, not the <img> (see .hcb-wanted .badge above). */
+  .hcb-jackbanner .ic { width: 22px; height: 22px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
+  .hcb-jackbanner .ic img { width: 100%; height: 100%; object-fit: contain; }
+  .hcb-jackbanner .ic .fallback { font-size: 1rem; line-height: 1; }
   .hcb-jackbanner .lbl { flex: 1 1 auto; min-width: 0; font-family: 'Black Ops One',sans-serif; letter-spacing: .06em; color: #cfeee6; font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hcb-jackbanner .rew { flex: 0 0 auto; font-size: .5rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; white-space: nowrap; }
   .hcb-jackbanner .rew b { color: #3fffd0; }
@@ -182,9 +185,12 @@ const HCB_CSS = `
     font-family: 'Press Start 2P',monospace;
   }
   .hcb-discard span.ic { font-size: 1.9rem; line-height: 1; }
-  .hcb-discard img.ic { width: 44px; height: 44px; display: block; transition: filter .2s ease, transform .2s ease; }
+  .hcb-discard img.ic { width: 44px; height: 44px; display: block; transition: transform .2s ease; }
   .hcb-discard:hover:not(:disabled) img.ic { transform: scale(1.06); }
-  .hcb-discard.ready img.ic { filter: drop-shadow(0 0 8px rgba(63,255,208,.7)); }
+  /* ready glow on the button wrapper, not the <img> (see .hcb-wanted .badge):
+     keeps the fade transition while dodging the first-paint ghost rectangle. */
+  .hcb-discard { transition: filter .2s ease; }
+  .hcb-discard.ready { filter: drop-shadow(0 0 8px rgba(63,255,208,.7)); }
   .hcb-discard:disabled { opacity: .35; cursor: not-allowed; }
 
   .hcb-clock { width: min(58vw, 300px); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }

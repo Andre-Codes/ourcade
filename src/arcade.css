@@ -145,12 +145,15 @@ html, body, #root {
   display: inline-block;
   margin: 0 auto 4px;
   animation: arcade-mascot-bob 3.2s ease-in-out infinite;
+  /* glow lives on the wrapper, not the <img>: applied to the raw image it
+     triggers Chromium's drop-shadow "ghost rectangle" on first paint (the
+     shadow is cast from the element box before the bitmap decodes). */
+  filter: drop-shadow(0 0 14px rgba(63,255,208,.45));
 }
 .arcade-logo-mascot {
   display: block;
   width: clamp(84px, 15vw, 140px);
   height: auto;
-  filter: drop-shadow(0 0 14px rgba(63,255,208,.45));
 }
 @keyframes arcade-mascot-bob {
   0%, 100% { transform: translateY(0); }
@@ -334,6 +337,10 @@ html, body, #root {
 .arcade-greeting-face {
   width: 52px; height: auto; flex: 0 0 auto;
   filter: drop-shadow(0 0 10px rgba(63,255,208,.5));
+  /* own composite layer so the glow rasterizes against the decoded bitmap,
+     not the element box (avoids the first-paint ghost square). The filter
+     can't move to the shared .arcade-greeting row — it would glow the text. */
+  transform: translateZ(0);
 }
 .arcade-greeting-body { flex: 1; min-width: 0; }
 .arcade-greeting-head {
@@ -376,6 +383,9 @@ html, body, #root {
 .arcade-heading-badger {
   width: 56px; height: auto; flex: 0 0 auto;
   filter: drop-shadow(0 0 10px rgba(63,255,208,.4));
+  /* see .arcade-greeting-face: own layer dodges the first-paint ghost square;
+     filter can't move to the shared .arcade-section-title (would glow text). */
+  transform: translateZ(0);
 }
 main > section + section { margin-top: 44px; }
 
