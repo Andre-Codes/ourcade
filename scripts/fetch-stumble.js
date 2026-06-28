@@ -129,7 +129,7 @@ async function main() {
 - "patent": real, oft-cited absurd patents. url = the patents.google.com page (e.g. https://patents.google.com/patent/US.../en).
 - "mystery": documented unsolved internet/broadcast/historical mysteries with a Wikipedia article. url = that article.
 - "site": legendary long-lived websites that are still online at the same address.
-- "game": landmark weird/cult games with a Wikipedia article.
+- "game": landmark weird/cult games. url = the page where you can actually PLAY or get the game when you're confident it's still live at that exact address (e.g. QWOP at http://www.foddy.net/Athletics.html, a browser game's own site, the official itch.io / dev page) — that's the whole point of a stumble. ONLY fall back to the English Wikipedia article when there's no stable playable/official home (e.g. a console-only game like Seaman).
 
 Mix eras: roughly half "timeless", half "nostalgic" (a few may be "current" if truly evergreen-ongoing). kebab-case ids prefixed "g:" (e.g. "g:wiki-boring-nevada"). year = the relevant year as a string, or "". Blurbs: 1-2 sentences that make someone NEED to click. ${dontReuse}`
   );

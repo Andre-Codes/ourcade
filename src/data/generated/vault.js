@@ -2,6 +2,17 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "g:game-qwop",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "QWOP",
+    "blurb": "A 'simple' running game where each key controls a single leg muscle. You will not run. You will collapse, spectacularly, every single time. The original rage game.",
+    "year": "2008",
+    "url": "https://www.foddy.net/Athletics.html",
+    "source": "stumble",
+    "archivedAt": "2026-06-28T16:44:55.012Z"
+  },
+  {
     "id": "g:coral-city-camera",
     "kind": "site",
     "era": "current",
@@ -71,17 +82,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Desert_Bus",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:10.086Z"
-  },
-  {
-    "id": "g:game-qwop",
-    "kind": "game",
-    "era": "nostalgic",
-    "title": "QWOP",
-    "blurb": "A 'simple' running game where each key controls a single leg muscle. You will not run. You will collapse, spectacularly, every single time. The original rage game.",
-    "year": "2008",
-    "url": "https://en.wikipedia.org/wiki/QWOP",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:09.982Z"
   },
   {
     "id": "g:game-katamari",

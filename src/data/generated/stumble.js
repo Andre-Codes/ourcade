@@ -216,7 +216,7 @@ export default [
     "title": "QWOP",
     "blurb": "A 'simple' running game where each key controls a single leg muscle. You will not run. You will collapse, spectacularly, every single time. The original rage game.",
     "year": "2008",
-    "url": "https://en.wikipedia.org/wiki/QWOP"
+    "url": "https://www.foddy.net/Athletics.html"
   },
   {
     "id": "g:game-desert-bus",
