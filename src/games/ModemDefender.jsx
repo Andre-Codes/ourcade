@@ -97,14 +97,14 @@ const BRICKS = {
   // it ramps the ball speed. A pop-up, not hardware, so it doesn't clash with the
   // player's own modem mascot. Window fills the frame (flames are contained inside
   // it); a small centered inset just trims the soft outer glow from the hit area.
-  overheat: { w: 70, hp: 2, score: 240, drain: 9, art: "turbo-popup.webp", fires: 0, weight: 4, minLevel: 1, overheat: true, hit: { ox: 0, oy: 0, fw: 0.9, fh: 0.9 } },
+  overheat: { w: 70, hp: 2, score: 240, drain: 9, art: "turbo-popup.webp", fires: 0, weight: 4, minLevel: 6, overheat: true, hit: { ox: 0, oy: 0, fw: 0.9, fh: 0.9 } },
   // Spam swarm — appears after the 2nd boss. A pop-up that multiplies on death.
   // Children (spamspawn) never roll into a wall (weight 0); they only come from
   // a split. gen on the live instance terminates the hydra (1 → 2 → 4 max=7).
   // ART: solid "FREE!!! YOU'VE WON!" window is UPPER-LEFT; faint ghost copies cascade
   // to the lower-right. Hitbox shifts up-left + shrinks so only the solid window is
   // hittable, never the ghosts.
-  spamswarm: { w: 56, hp: 1, score: 130, drain: 6, art: "spam-swarm.webp", fires: 0, weight: 6, minLevel: 1, split: { perKill: 2, childType: "spamspawn" }, hit: { ox: -0.07, oy: -0.1, fw: 0.8, fh: 0.72 } },
+  spamswarm: { w: 56, hp: 1, score: 130, drain: 6, art: "spam-swarm.webp", fires: 0, weight: 6, minLevel: 11, split: { perKill: 2, childType: "spamspawn" }, hit: { ox: -0.07, oy: -0.1, fw: 0.8, fh: 0.72 } },
   spamspawn: { w: 40, hp: 1, score: 60, drain: 4, art: "spam-swarm.webp", fires: 0, weight: 0, minLevel: 99, split: { perKill: 1, childType: "spamspawn" }, hit: { ox: -0.07, oy: -0.1, fw: 0.8, fh: 0.72 } },
 };
 // Emoji shown if a brick's sprite WebP is missing (keeps the game playable before

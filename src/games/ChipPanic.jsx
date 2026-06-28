@@ -10,6 +10,7 @@ import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
   TIERS, ANTE_TIER, currentAnte, NO_RAISE, START_CHIPS,
+  devStackBag, DEV_STRAIGHT_FLUSH, DEV_ROYAL_FLUSH,
 } from "./chip-panic/logic.js";
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -86,6 +87,48 @@ const HCB_CSS = `
   .hcb-wanted.claim { animation: hcb-wanted-claim 700ms ease-out; }
   @keyframes hcb-wanted-claim { 0%{ transform: scale(1); } 30%{ transform: scale(1.06); box-shadow: 0 0 28px rgba(63,255,208,.7); border-color: #3fffd0; } 100%{ transform: scale(1); } }
 
+  /* Always-present JACKPOT side-goal banner — terse, gold/cyan accent so it reads as
+     separate from the rotating WANTED above it. */
+  .hcb-jackbanner {
+    display: flex; align-items: center; gap: 8px; flex: 0 0 auto;
+    width: min(92vw, 420px); box-sizing: border-box;
+    margin: 8px 8px 0; padding: 4px 14px; border-radius: 999px;
+    border: 1px solid rgba(63,255,208,.5);
+    background: linear-gradient(180deg, rgba(63,255,208,.08), rgba(0,0,0,.25));
+  }
+  .hcb-jackbanner .ic { font-size: 1rem; line-height: 1; filter: drop-shadow(0 0 6px rgba(63,255,208,.7)); }
+  .hcb-jackbanner .lbl { flex: 1 1 auto; min-width: 0; font-family: 'Black Ops One',sans-serif; letter-spacing: .06em; color: #cfeee6; font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hcb-jackbanner .rew { flex: 0 0 auto; font-size: .5rem; letter-spacing: .06em; color: #9be7d8; text-transform: uppercase; white-space: nowrap; }
+  .hcb-jackbanner .rew b { color: #3fffd0; }
+
+  /* JACKPOT celebration — full-screen burst above the normal feed. */
+  .hcb-jackpot {
+    position: absolute; inset: 0; z-index: 78; pointer-events: none; opacity: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+  }
+  .hcb-jackpot.show { animation: hcb-jackpot-in 2600ms ease-out forwards; }
+  @keyframes hcb-jackpot-in {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .hcb-jackpot .rays {
+    position: absolute; width: 160vmax; height: 160vmax; left: 50%; top: 42%; transform: translate(-50%,-50%);
+    background: repeating-conic-gradient(from 0deg, rgba(63,255,208,.16) 0deg 8deg, transparent 8deg 16deg);
+    animation: hcb-jackpot-spin 6s linear infinite; opacity: .7;
+  }
+  @keyframes hcb-jackpot-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+  .hcb-jackpot .big {
+    position: relative; font-family: 'Black Ops One',sans-serif; font-size: clamp(2.6rem,13vw,5.5rem); letter-spacing: .04em;
+    background: linear-gradient(180deg,#fffbe6,#ffd23f 45%,#3fffd0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 30px rgba(255,210,63,.5); animation: hcb-jackpot-pop 700ms cubic-bezier(.2,1.4,.4,1) both;
+  }
+  @keyframes hcb-jackpot-pop { 0% { transform: scale(.4); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .hcb-jackpot .hand { position: relative; font-family: 'Black Ops One',sans-serif; font-size: clamp(1.1rem,5vw,2rem); color: #ffd23f; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .hcb-jackpot .amt { position: relative; font-family: 'Press Start 2P',monospace; font-size: .72rem; letter-spacing: .04em; color: #3fffd0; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+
   /* "ANTE UP" — fires when the rising ante crosses to a higher value */
   .hcb-anteup {
     position: absolute; top: 19%; left: 50%; transform: translate(-50%,-50%);
@@ -121,18 +164,18 @@ const HCB_CSS = `
   .hcb-pile small, .hcb-tray small, .hcb-discard small { font-size: .42rem; letter-spacing: .1em; color: #9b86c4; text-transform: uppercase; }
   .hcb-tray { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .hcb-tray .hcb-card { box-shadow: 0 0 0 2px #bf5af2, 0 4px 16px rgba(191,90,242,.55); }
+  /* Discard is a boxless physical-feeling token: just the art + a label, no border or
+     background. Fixed width still keeps DISCARD↔SPENT from reflowing the top row. */
   .hcb-discard {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    cursor: pointer; border-radius: 9px; padding: 8px 6px;
-    width: 76px; box-sizing: border-box; /* fixed so DISCARD↔SPENT doesn't resize + shift the row */
-    border: 2px solid #6a3f9f; background: rgba(0,0,0,.32); color: #eef0ff;
+    cursor: pointer; padding: 0; width: 76px; box-sizing: border-box;
+    border: none; background: none; color: #eef0ff;
     font-family: 'Press Start 2P',monospace;
   }
-  .hcb-discard:hover:not(:disabled) { border-color: #bf5af2; }
-  .hcb-discard span.ic { font-size: 1.2rem; line-height: 1; }
-  .hcb-discard img.ic { width: 26px; height: 26px; display: block; }
-  .hcb-discard.ready { border-color: #3fffd0; box-shadow: 0 0 12px rgba(63,255,208,.35); }
-  .hcb-discard.ready img.ic { filter: drop-shadow(0 0 6px rgba(63,255,208,.6)); }
+  .hcb-discard span.ic { font-size: 1.9rem; line-height: 1; }
+  .hcb-discard img.ic { width: 44px; height: 44px; display: block; transition: filter .2s ease, transform .2s ease; }
+  .hcb-discard:hover:not(:disabled) img.ic { transform: scale(1.06); }
+  .hcb-discard.ready img.ic { filter: drop-shadow(0 0 8px rgba(63,255,208,.7)); }
   .hcb-discard:disabled { opacity: .35; cursor: not-allowed; }
 
   .hcb-clock { width: min(58vw, 300px); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
@@ -247,6 +290,9 @@ const HCB_CSS = `
   @media (prefers-reduced-motion: reduce) {
     .hcb-fx .fx-chip, .hcb-fx .fx-flash, .hcb-feed, .hcb-wanted.claim { animation-duration: 1ms !important; transition: none !important; }
     .hcb-anteup.show { animation: none !important; opacity: 1; } /* show statically, no bounce */
+    .hcb-jackpot.show { animation: hcb-jackpot-in 2600ms steps(1) forwards; } /* hold visible, no motion */
+    .hcb-jackpot .rays { animation: none !important; }
+    .hcb-jackpot .big { animation: none !important; }
   }
 
   .hcb-overlay {
@@ -298,6 +344,7 @@ export default function ChipPanic() {
   const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
   const [discardImgOk, setDiscardImgOk] = useState(true); // false once the discard icon fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
+  const [jackpot, setJackpot] = useState(null); // { hand, pts, chips, on } — JACKPOT celebration
 
   useArcadeBackButton(screen !== SCREEN.PLAY);
 
@@ -309,6 +356,7 @@ export default function ChipPanic() {
   const bumpTimer = useRef(null);
   const bannerTimer = useRef(null);
   const anteUpTimer = useRef(null);
+  const jackpotTimer = useRef(null);
   const gameRef = useRef(game);
   useEffect(() => { gameRef.current = game; }, [game]);
 
@@ -462,6 +510,26 @@ export default function ChipPanic() {
       playSfxVariant("chips-stack", [1, 3]);
     }
 
+    // A JACKPOT (Straight Flush / Royal Flush) fires the big celebration: full-screen
+    // burst, intensified chip shower from the lane, screen flash, stacked chime.
+    if (result.jackpot && result.jackpot.hit) {
+      const jp = result.jackpot;
+      clearTimeout(jackpotTimer.current);
+      setJackpot({ hand: HAND_NAME[jp.hand], pts: jp.totalPts, chips: jp.totalChips, on: true });
+      jackpotTimer.current = setTimeout(() => setJackpot((j) => (j ? { ...j, on: false } : j)), 2600);
+      if (res && !reduceMotion.current) {
+        const geo = fxFromLane(res.laneIndex);
+        if (geo) {
+          spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 700 });
+          spawnChipsTo("green", jp.chips + 8, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
+          spawnChipsTo("black", 6, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
+        }
+      }
+      playSfx("card-fan-1");
+      playSfxVariant("chips-stack", [1, 3]);
+      playSfxVariant("chips-stack", [1, 3]);
+    }
+
     if (next.over) {
       clearPanic();
       submit(next.score);
@@ -497,8 +565,29 @@ export default function ChipPanic() {
   useEffect(() => () => {
     clearTimeout(feedTimer.current); clearTimeout(flashTimer.current);
     clearTimeout(bumpTimer.current); clearTimeout(anteUpTimer.current);
-    clearTimeout(bannerTimer.current); clearPanic();
+    clearTimeout(bannerTimer.current); clearTimeout(jackpotTimer.current); clearPanic();
   }, [clearPanic]);
+
+  // ── DEV cheat (dev builds only): stack the deck so the current tray + next draws
+  //    are a straight flush / royal flush. Press J (straight flush) or K (royal)
+  //    during play, then drop the five queued cards into one EMPTY lane to fire the
+  //    jackpot. Stripped from production by the import.meta.env.DEV guard. ──────────
+  useEffect(() => {
+    if (!import.meta.env.DEV || screen !== SCREEN.PLAY) return undefined;
+    const onKey = (e) => {
+      const gg = gameRef.current;
+      if (!gg || gg.over) return;
+      let ids = null;
+      if (e.key === "j" || e.key === "J") ids = DEV_STRAIGHT_FLUSH;
+      else if (e.key === "k" || e.key === "K") ids = DEV_ROYAL_FLUSH;
+      if (!ids) return;
+      e.preventDefault();
+      setGame(devStackBag(gg, ids));
+      showFeed({ hand: "DEV", math: "", why: `deck stacked · drop 5 in one lane`, kind: "win", claim: null });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [screen, showFeed]);
 
   // ── actions ────────────────────────────────────────────────────────────────
   const start = useCallback((m) => {
@@ -511,6 +600,7 @@ export default function ChipPanic() {
     setHudBump(false);
     setBannerClaim(false);
     setAnteUp(null);
+    setJackpot(null);
     clearFx();
     setPanicPct(1);
     setScreen(SCREEN.PLAY);
@@ -566,9 +656,19 @@ export default function ChipPanic() {
               ? <img src={WANTED_BADGE} alt="Wanted" draggable="false" onError={() => setBadgeOk(false)} />
               : <span className="fallback">🤠</span>}
           </span>
-          <span className="lbl">{HAND_NAME[w.hand]?.toUpperCase()}</span>
+          <span className="lbl">{(w.name || HAND_NAME[w.hand])?.toUpperCase()}</span>
           <span className="rew"><b>+{w.bonusPts}</b> / <b>+{w.bonusChips}</b> chips</span>
           <span className="streak">streak <b>{g.streak}</b></span>
+        </div>
+      )}
+
+      {/* Always-present JACKPOT side goal — land a Straight Flush / Royal Flush
+          anytime for the huge reward + celebration. Static, so it stays terse. */}
+      {screen === SCREEN.PLAY && g && (
+        <div className="hcb-jackbanner" aria-label="Jackpot goal">
+          <span className="ic">💎</span>
+          <span className="lbl">STR. FLUSH / ROYAL</span>
+          <span className="rew">JACKPOT · <b>+1000</b> / <b>+2500</b></span>
         </div>
       )}
 
@@ -577,6 +677,16 @@ export default function ChipPanic() {
           {anteImgOk && <img className="icon" src={ANTE_UP_IMG} alt="" draggable="false" onError={() => setAnteImgOk(false)} />}
           <span className="big">ANTE UP</span>
           <span className="amt">lanes now cost {anteUp.amount}</span>
+        </>}
+      </div>
+
+      {/* JACKPOT celebration — fires when a lane resolves as Straight Flush / Royal. */}
+      <div className={`hcb-jackpot ${jackpot?.on ? "show" : ""}`} aria-hidden="true">
+        {jackpot && <>
+          <span className="rays" />
+          <span className="big">JACKPOT!</span>
+          <span className="hand">{jackpot.hand?.toUpperCase()}</span>
+          <span className="amt">+{jackpot.pts.toLocaleString()} pts · +{jackpot.chips} chips</span>
         </>}
       </div>
 
@@ -693,7 +803,7 @@ export default function ChipPanic() {
       {screen === SCREEN.TITLE && (
         <div className="hcb-overlay">
           <h1>HIGH CARD BUST</h1>
-          <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the WANTED hand for bonus chips & points · all five locked ends the run</div>
+          <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the rotating WANTED (a hand or a condition like ALL RED / BLACKJACK 21) for bonus chips & points · land a STRAIGHT FLUSH or ROYAL for the JACKPOT · all five locked ends the run</div>
           {/* Only High Stakes is available for now. Classic + Panic land later. */}
           <div className="hcb-modes">
             <button className="hcb-mode on" onPointerDown={() => { setMode(MODE.HIGH_STAKES); lsSet("chip-panic:mode", MODE.HIGH_STAKES); }}>

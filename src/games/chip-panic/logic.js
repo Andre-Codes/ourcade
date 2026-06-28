@@ -26,17 +26,22 @@
    for a bigger multiplier. A raise commits on the next draw and must land within
    BET_EXPIRY_DRAWS draws or it's forfeited.
 
-   WANTED HANDS — one rotating target. A lane resolving as EXACTLY the wanted hand
-   (Royal also satisfies a Straight-Flush wanted) pays bonus points + chips and
-   advances the Wanted Streak (milestones at 2/3/4/5). The streak resets when a lane
-   busts. Difficulty pool escalates with the streak.
+   WANTED — one rotating target, either a HAND (resolve as exactly that category,
+   capped at Four of a Kind) or a CONDITION (a predicate over the 5 cards — All Red,
+   No Faces, Blackjack 21, … — that still requires a true Two-Pair+ score). Completing
+   it pays bonus points + chips and advances the Wanted Streak (milestones at 2/3/4/5,
+   which resets when a lane busts). Difficulty pool escalates with the streak.
+
+   JACKPOT — an always-on side goal: resolving ANY lane as a Straight Flush or Royal
+   Flush (regardless of the current wanted) pays a huge reward and advances the streak
+   like a wanted. SF/Royal are no longer wanted targets.
 
    Kept view-free + unit-testable: every function returns NEW state and the view
    holds it. The drawn `tray` lives in engine state so ante/raise commitment and
    expiry happen in a single deterministic draw transition. Shares deck.js /
    handEval.js with the other card cabinets. */
 
-import { freshDeck, shuffle } from "../cards/deck.js";
+import { freshDeck, shuffle, isRed } from "../cards/deck.js";
 import { evaluate, bestMadeHand, HAND, HAND_NAME } from "../poker/handEval.js";
 
 export const LANES = 5;
@@ -92,7 +97,9 @@ export const TIERS = [
 export const NO_RAISE = 0; // raiseSel value meaning "ante only, no raise"
 
 /* Wanted Hands — flat bonus rewards (separate from the bet multiplier). Pairs are
-   never wanted (they don't score). */
+   never wanted (they don't score). Straight Flush / Royal Flush are NOT wanted
+   targets anymore — they're the always-present JACKPOT side goal (see below) — but
+   their rewards stay defined here for reference / parity. */
 export const WANTED_REWARDS = {
   [HAND.TWO_PAIR]: { pts: 50, chips: 1 },
   [HAND.THREE]: { pts: 100, chips: 2 },
@@ -100,30 +107,99 @@ export const WANTED_REWARDS = {
   [HAND.FLUSH]: { pts: 175, chips: 3 },
   [HAND.FULL_HOUSE]: { pts: 250, chips: 4 },
   [HAND.FOUR]: { pts: 500, chips: 6 },
+};
+
+/* Wanted Conditions — predicate objectives over the 5 resolved cards. A condition
+   wanted is claimed when the lane truly SCORES (Two Pair+, the same floor as a hand
+   wanted — enforced by the caller) AND its `test` passes. Pure, view-free; faces are
+   ranks 11/12/13 and the Ace is rank 1. */
+const FACE = (r) => r === 11 || r === 12 || r === 13;
+
+// Best blackjack total of the 5 cards: J/Q/K = 10, Ace = 11 (demoted to 1 while the
+// total busts and an 11-ace remains), others face value.
+export function blackjackTotal(cards) {
+  let total = 0;
+  let aces = 0;
+  for (const c of cards) {
+    if (c.rank === 1) { total += 11; aces++; }
+    else if (FACE(c.rank)) total += 10;
+    else total += c.rank;
+  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total;
+}
+
+const suitCounts = (cards) => {
+  const m = {};
+  for (const c of cards) m[c.suit] = (m[c.suit] || 0) + 1;
+  return m;
+};
+
+export const WANTED_CONDS = {
+  allRed:   { key: "allRed",   name: "All Red",       test: (cs) => cs.every((c) => isRed(c.suit)) },
+  allBlack: { key: "allBlack", name: "All Black",     test: (cs) => cs.every((c) => !isRed(c.suit)) },
+  noFaces:  { key: "noFaces",  name: "No Faces",      test: (cs) => cs.every((c) => !FACE(c.rank)) },
+  faceParty:{ key: "faceParty",name: "Face Party",    test: (cs) => cs.filter((c) => FACE(c.rank)).length >= 3 },
+  ace:      { key: "ace",      name: "Ace Wanted",    test: (cs) => cs.some((c) => c.rank === 1) },
+  lucky7:   { key: "lucky7",   name: "Lucky 7",       test: (cs) => cs.some((c) => c.rank === 7) },
+  rainbow:  { key: "rainbow",  name: "Rainbow Lane",  test: (cs) => Object.keys(suitCounts(cs)).length === 4 },
+  suitMaj:  { key: "suitMaj",  name: "Suit Majority", test: (cs) => Object.values(suitCounts(cs)).some((n) => n >= 3) },
+  noOdds:   { key: "noOdds",   name: "No Odds",       test: (cs) => cs.every((c) => c.rank !== 1 && c.rank % 2 === 0) },
+  bj21:     { key: "bj21",     name: "Blackjack 21",  test: (cs) => blackjackTotal(cs) === 21 },
+};
+
+export const WANTED_COND_REWARDS = {
+  allRed:    { pts: 75,  chips: 2 },
+  allBlack:  { pts: 75,  chips: 2 },
+  noFaces:   { pts: 100, chips: 2 },
+  faceParty: { pts: 125, chips: 3 },
+  ace:       { pts: 60,  chips: 2 },
+  lucky7:    { pts: 60,  chips: 2 },
+  rainbow:   { pts: 175, chips: 3 },
+  suitMaj:   { pts: 100, chips: 2 },
+  noOdds:    { pts: 175, chips: 3 },
+  bj21:      { pts: 200, chips: 4 },
+};
+
+/* The always-present JACKPOT side goal: resolving ANY lane as a Straight Flush or
+   Royal Flush — regardless of the current wanted — pays a huge reward + celebration.
+   (Base points still come from HAND_POINTS; this is the bonus on top.) */
+export const JACKPOT_HANDS = new Set([HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH]);
+export const JACKPOT_REWARDS = {
   [HAND.STRAIGHT_FLUSH]: { pts: 1000, chips: 8 },
   [HAND.ROYAL_FLUSH]: { pts: 2500, chips: 10 },
 };
 
-// Difficulty pools, chosen by current streak. Pairs excluded.
+// Difficulty pools, chosen by current streak. Each entry is a tagged candidate:
+// { kind:"hand", hand } or { kind:"cond", cond }. Pairs excluded; jackpot hands
+// (SF/Royal) are NOT here — they're the always-on side goal. Pools mix hands +
+// conditions and cap hand targets at Four of a Kind.
+const H = (hand) => ({ kind: "hand", hand });
+const C = (cond) => ({ kind: "cond", cond });
 const WANTED_POOLS = {
-  early: [HAND.TWO_PAIR, HAND.THREE],
-  mid: [HAND.STRAIGHT, HAND.FLUSH, HAND.FULL_HOUSE],
-  late: [HAND.FULL_HOUSE, HAND.FOUR],
-  jackpot: [HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH],
+  early: [H(HAND.TWO_PAIR), H(HAND.THREE), C("ace"), C("lucky7"), C("allRed"), C("allBlack")],
+  mid: [H(HAND.STRAIGHT), H(HAND.FLUSH), H(HAND.FULL_HOUSE), C("noFaces"), C("faceParty"), C("suitMaj"), C("rainbow")],
+  late: [H(HAND.FULL_HOUSE), H(HAND.FOUR), C("bj21"), C("noOdds"), C("faceParty")],
 };
-const JACKPOT_CHANCE = 0.08; // small chance to roll a jackpot target at higher streaks
 
-// Pick a wanted target appropriate to the streak. 0–1 early, 2–3 mid, 4+ late, with
-// a small jackpot chance once past the early game.
+// Resolve a tagged candidate into a full wanted object with name + reward.
+function buildWanted(candidate) {
+  if (candidate.kind === "cond") {
+    const def = WANTED_CONDS[candidate.cond];
+    const r = WANTED_COND_REWARDS[candidate.cond];
+    return { kind: "cond", cond: candidate.cond, name: def.name, bonusPts: r.pts, bonusChips: r.chips };
+  }
+  const r = WANTED_REWARDS[candidate.hand];
+  return { kind: "hand", hand: candidate.hand, name: HAND_NAME[candidate.hand], bonusPts: r.pts, bonusChips: r.chips };
+}
+
+// Pick a wanted target appropriate to the streak. 0–1 early, 2–3 mid, 4+ late.
 export function pickWanted(streak, rng = Math.random) {
   let pool;
-  if (streak >= 2 && rng() < JACKPOT_CHANCE) pool = WANTED_POOLS.jackpot;
-  else if (streak <= 1) pool = WANTED_POOLS.early;
+  if (streak <= 1) pool = WANTED_POOLS.early;
   else if (streak <= 3) pool = WANTED_POOLS.mid;
   else pool = WANTED_POOLS.late;
-  const hand = pool[Math.floor(rng() * pool.length)];
-  const r = WANTED_REWARDS[hand];
-  return { hand, name: HAND_NAME[hand], bonusPts: r.pts, bonusChips: r.chips };
+  return buildWanted(pool[Math.floor(rng() * pool.length)]);
 }
 
 /* Streak-milestone modifiers applied to a Wanted bonus at completion, keyed by the
@@ -141,12 +217,18 @@ export function streakBonus(newStreak) {
   return { ptsMult, chipAdd, unlockLane };
 }
 
-// Does a resolved hand complete the wanted target? Exact match, except a Royal
-// Flush also satisfies a Straight-Flush wanted (it's a special straight flush).
-export function completesWanted(handRank, wantedHand) {
-  if (handRank === wantedHand) return true;
-  if (wantedHand === HAND.STRAIGHT_FLUSH && handRank === HAND.ROYAL_FLUSH) return true;
-  return false;
+// Does a resolved lane complete the wanted target? Only ever called once the lane
+// has truly SCORED (Two Pair+), so conditions get their "must still score" floor for
+// free. A hand wanted is an exact category match; a condition wanted runs its
+// predicate over the resolved cards. `wanted` lacking a `kind` is treated as a hand
+// target (back-compat for older/stubbed objects).
+export function completesWanted(handRank, wanted, cards) {
+  if (!wanted) return false;
+  if (wanted.kind === "cond") {
+    const def = WANTED_CONDS[wanted.cond];
+    return !!def && def.test(cards);
+  }
+  return handRank === wanted.hand;
 }
 
 /* Fresh game state. */
@@ -283,6 +365,7 @@ export function placeCard(state, l) {
 
   let resolution = null;
   let wantedClaim = null;
+  let jackpotClaim = null;
   if (lanes[l].length === LANE_CAP) {
     const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], antePaidAmt: anteAmt[l], wanted, streak, l });
     resolution = r;
@@ -300,19 +383,35 @@ export function placeCard(state, l) {
     }
     anteAmt[l] = 0;
 
-    // Apply a completed Wanted (only on a true score; resolveLane decided it).
+    // Apply a JACKPOT (SF/Royal) — the always-on side goal. Pays its reward, advances
+    // the same streak a wanted would, counts toward the rising ante, and a milestone
+    // unlock fires here. resolveLane shares one streak number between jackpot + wanted.
+    const unlockOne = () => {
+      const u = firstLocked(locked);
+      if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; anteAmt[u] = 0; }
+    };
+    if (r.jackpot && r.jackpot.hit) {
+      jackpotClaim = r.jackpot;
+      score += r.jackpot.totalPts;
+      chips += r.jackpot.totalChips;
+      streak = r.jackpot.streak;
+      wantedHits += 1; // a jackpot also raises the ante (a triumphant score)
+      if (r.jackpot.unlockLane) unlockOne();
+    }
+
+    // Apply a completed Wanted (hand or condition; only on a true score). Can co-occur
+    // with a jackpot when a condition wanted also matches the SF/Royal lane.
     if (r.wanted && r.wanted.hit) {
       wantedClaim = r.wanted;
       score += r.wanted.totalPts;
       chips += r.wanted.totalChips;
       streak = r.wanted.streak;
       wantedHits += 1; // Wanted completions also raise the ante
-      if (r.wanted.unlockLane) {
-        const u = firstLocked(locked);
-        if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; anteAmt[u] = 0; }
-      }
-      wanted = pickWanted(streak, state.rng);
+      if (r.wanted.unlockLane) unlockOne();
     }
+
+    // Roll a fresh wanted whenever the streak advanced (jackpot and/or wanted).
+    if (jackpotClaim || wantedClaim) wanted = pickWanted(streak, state.rng);
 
     raise[l] = null;
     raiseSel[l] = NO_RAISE;
@@ -331,6 +430,7 @@ export function placeCard(state, l) {
       antePaid,
       resolution,
       wanted: wantedClaim,
+      jackpot: jackpotClaim,
       expired,
       discarded: false,
       burned: false,
@@ -374,15 +474,39 @@ export function burnCard(state) {
   };
 }
 
+/* ── dev / testing ─────────────────────────────────────────────────────────────
+   Stack the deck so the CURRENT tray + the next draws are exactly `ids` (canonical
+   "<suit><rank>" strings, e.g. "S6","S7","S8","S9","S10"). Returns a NEW state with
+   the tray set to ids[0] and ids[1..] queued at the front of the bag — so placing
+   that run into one lane resolves it deterministically. View-only convenience for
+   manually verifying jackpots/wanted; never called by normal play. */
+export function devStackBag(state, ids) {
+  if (!ids || ids.length === 0) return state;
+  const toCard = (id) => {
+    const suit = id[0];
+    const rank = Number(id.slice(1));
+    return { rank, suit, faceUp: true, id: suit + rank };
+  };
+  const cards = ids.map(toCard);
+  return { ...state, tray: cards[0], bag: [...cards.slice(1), ...state.bag] };
+}
+
+// A ready-made straight flush in spades (6-7-8-9-10) for the jackpot celebration.
+export const DEV_STRAIGHT_FLUSH = ["S6", "S7", "S8", "S9", "S10"];
+// A ready-made royal flush in hearts.
+export const DEV_ROYAL_FLUSH = ["H10", "H11", "H12", "H13", "H1"];
+
 /* ── internals ─────────────────────────────────────────────────────────────── */
 
 const firstLocked = (locked) => locked.findIndex(Boolean);
 
 /* Resolve a full (5-card) lane three ways. Returns a rich result for the view:
    { laneIndex, hand, bust, saved, scored, basePoints, raise:{tier,won}|null,
-     multiplier, points, chipsReturned, chipsLost, cleared, wanted } where wanted
-     (when the hand completes the current target) =
+     multiplier, points, chipsReturned, chipsLost, cleared, wanted, jackpot } where
+     `wanted` (when the lane completes the current target) and `jackpot` (when the
+     lane is a Straight Flush / Royal Flush — the always-on side goal) each =
      { hit, hand, bonusPts, bonusChips, totalPts, totalChips, streak, unlockLane }.
+     Both share one advanced streak number; jackpot + a condition wanted can co-occur.
    Chips were spent at ante/commit time; chipsReturned is what comes BACK. */
 function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
   const hand = evaluate(lane);
@@ -425,24 +549,50 @@ function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
 
   const points = base * multiplier;
 
-  // Wanted completion only on a true score (pairs/high-card can't complete; pairs
-  // aren't in the pool anyway).
+  // A jackpot (Straight Flush / Royal Flush) is an always-on side goal: it pays its
+  // own huge reward independently of the current wanted. A wanted (hand or condition)
+  // completes only on a true score; SF/Royal never match a wanted target (they're not
+  // in the pool), but a CONDITION wanted can co-occur with a jackpot (e.g. a Royal
+  // that's also All Red). Both advance the SAME streak — count it once.
+  const jackpotHit = scored && JACKPOT_HANDS.has(hand.rank);
+  const wantedHit = scored && completesWanted(hand.rank, wanted, lane);
+
+  let jackpotResult = null;
   let wantedResult = null;
-  if (scored && wanted && completesWanted(hand.rank, wanted.hand)) {
+  if (jackpotHit || wantedHit) {
     const newStreak = streak + 1;
     const sb = streakBonus(newStreak);
-    const totalPts = Math.round(wanted.bonusPts * sb.ptsMult);
-    const totalChips = wanted.bonusChips + sb.chipAdd;
-    wantedResult = {
-      hit: true,
-      hand: wanted.hand,
-      bonusPts: wanted.bonusPts,
-      bonusChips: wanted.bonusChips,
-      totalPts,
-      totalChips,
-      streak: newStreak,
-      unlockLane: sb.unlockLane,
-    };
+    if (jackpotHit) {
+      const jr = JACKPOT_REWARDS[hand.rank];
+      jackpotResult = {
+        hit: true,
+        hand: hand.rank,
+        bonusPts: jr.pts,
+        bonusChips: jr.chips,
+        totalPts: Math.round(jr.pts * sb.ptsMult),
+        totalChips: jr.chips + sb.chipAdd,
+        streak: newStreak,
+        unlockLane: sb.unlockLane,
+      };
+    }
+    if (wantedHit) {
+      // If a jackpot already consumed the streak's milestone bonus this turn, don't
+      // apply it twice — the wanted rides the same streak number but takes no extra
+      // milestone (the jackpot is the headline). Otherwise the wanted gets it.
+      const wsb = jackpotHit ? { ptsMult: 1, chipAdd: 0, unlockLane: false } : sb;
+      wantedResult = {
+        hit: true,
+        hand: wanted.hand,
+        kind: wanted.kind || "hand",
+        name: wanted.name,
+        bonusPts: wanted.bonusPts,
+        bonusChips: wanted.bonusChips,
+        totalPts: Math.round(wanted.bonusPts * wsb.ptsMult),
+        totalChips: wanted.bonusChips + wsb.chipAdd,
+        streak: newStreak,
+        unlockLane: wsb.unlockLane,
+      };
+    }
   }
 
   return {
@@ -459,6 +609,7 @@ function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
     chipsLost,
     cleared: scored || saved,
     wanted: wantedResult,
+    jackpot: jackpotResult,
   };
 }
 

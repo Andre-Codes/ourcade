@@ -15,9 +15,10 @@
 
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace, isGameOver,
-  pickWanted, streakBonus, completesWanted, anteFor, currentAnte,
+  pickWanted, streakBonus, completesWanted, anteFor, currentAnte, blackjackTotal,
   HAND_POINTS, TIERS, START_CHIPS, BASE_ANTE, ANTE_PROFIT, SCORE_HANDS_PER_ANTE,
   WANTED_HITS_PER_ANTE, BET_EXPIRY_DRAWS, NO_RAISE, LANES,
+  WANTED_CONDS, WANTED_COND_REWARDS, JACKPOT_HANDS, JACKPOT_REWARDS,
 } from "../src/games/chip-panic/logic.js";
 import { HAND } from "../src/games/poker/handEval.js";
 
@@ -55,7 +56,14 @@ function fillLane(state, seq, l = 0) {
   return { state: s, result };
 }
 // Disable the wanted objective so resolution tests aren't perturbed by a chance hit.
-const noWanted = (g) => ({ ...g, wanted: { hand: -1, name: "", bonusPts: 0, bonusChips: 0 } });
+const noWanted = (g) => ({ ...g, wanted: { kind: "hand", hand: -1, name: "", bonusPts: 0, bonusChips: 0 } });
+// A hand-wanted stub.
+const wantHand = (hand, bonusPts = 50, bonusChips = 1) => ({ kind: "hand", hand, name: "", bonusPts, bonusChips });
+// A condition-wanted stub.
+const wantCond = (cond) => ({
+  kind: "cond", cond, name: WANTED_CONDS[cond].name,
+  bonusPts: WANTED_COND_REWARDS[cond].pts, bonusChips: WANTED_COND_REWARDS[cond].chips,
+});
 
 // ── ante: opening a lane costs a chip; an open lane is then free to fill ───────
 console.log("Ante / opening lanes:");
@@ -194,7 +202,7 @@ console.log("Wanted Hands:");
 {
   // Exact match completes; bonus pts+chips added; streak +1.
   let g = newGame();
-  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 0 };
   const { state, result } = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]); // two pair
   eq("wanted hit", result.wanted && result.wanted.hit, true);
   eq("bonus points added", result.wanted.totalPts, 50);
@@ -206,20 +214,20 @@ console.log("Wanted Hands:");
 {
   // Exact-only: a higher hand does NOT complete a lower wanted.
   let g = newGame();
-  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 0 };
   const { state, result } = fillLane(g, ["KS", "KH", "KD", "8S", "2D"]); // trips, not two pair
   eq("higher hand does NOT complete lower wanted", !!(result.wanted && result.wanted.hit), false);
   eq("streak not advanced", state.streak, 0);
 }
 {
-  // Royal completes a Straight-Flush wanted (special case).
-  eq("royal completes straight-flush wanted", completesWanted(HAND.ROYAL_FLUSH, HAND.STRAIGHT_FLUSH), true);
-  eq("straight flush does NOT complete royal wanted", completesWanted(HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH), false);
+  // completesWanted: hand target = exact category match (cards arg unused for hands).
+  eq("hand wanted exact match", completesWanted(HAND.TWO_PAIR, wantHand(HAND.TWO_PAIR), []), true);
+  eq("hand wanted non-match", completesWanted(HAND.THREE, wantHand(HAND.TWO_PAIR), []), false);
 }
 {
   // A pair save does NOT complete or advance a wanted, and does not reset streak.
   let g = newGame();
-  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 2 };
+  g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 2 };
   const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
   eq("pair does not hit wanted", !!(result.wanted && result.wanted.hit), false);
   eq("pair save keeps streak", state.streak, 2);
@@ -227,7 +235,7 @@ console.log("Wanted Hands:");
 {
   // A bust resets the streak.
   let g = newGame();
-  g = { ...g, wanted: { hand: HAND.FLUSH, name: "Flush", bonusPts: 175, bonusChips: 3 }, streak: 3 };
+  g = { ...g, wanted: wantHand(HAND.FLUSH, 175, 3), streak: 3 };
   const { state, result } = fillLane(g, ["AD", "JC", "8D", "5S", "2D"]); // high card
   eq("bust resets streak", state.streak, 0);
   eq("streakReset flag", result.streakReset, true);
@@ -237,7 +245,7 @@ console.log("Wanted Hands:");
   let g = newGame();
   g = {
     ...g,
-    wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 },
+    wanted: wantHand(HAND.TWO_PAIR),
     streak: 4, // completion makes it 5
     locked: [false, false, false, false, true], // lane 4 is locked
   };
@@ -250,24 +258,125 @@ eq("streakBonus 2 → +25% pts", streakBonus(2).ptsMult, 1.25);
 eq("streakBonus 3 → +1 chip", streakBonus(3).chipAdd, 1);
 eq("streakBonus 4 → +50% pts", streakBonus(4).ptsMult, 1.5);
 eq("streakBonus 5 → unlock", streakBonus(5).unlockLane, true);
-// pickWanted draws from the streak-appropriate pool. Use rng=0.5 so the jackpot
-// roll (rng < 0.08) never fires and the pool index lands mid-pool deterministically.
+// pickWanted draws a tagged hand-or-condition from the streak-appropriate pool.
 {
-  const mid = () => 0.5;
-  const early = [HAND.TWO_PAIR, HAND.THREE];
-  const midPool = [HAND.STRAIGHT, HAND.FLUSH, HAND.FULL_HOUSE];
-  const latePool = [HAND.FULL_HOUSE, HAND.FOUR];
-  eq("streak 0 → early pool", early.includes(pickWanted(0, mid).hand), true);
-  eq("streak 1 → early pool", early.includes(pickWanted(1, mid).hand), true);
-  eq("streak 2 → mid pool", midPool.includes(pickWanted(2, mid).hand), true);
-  eq("streak 4 → late pool", latePool.includes(pickWanted(4, mid).hand), true);
-  // jackpot CAN appear past the early game (rng below the chance)
-  const jack = () => 0.0; // forces jackpot branch at streak >= 2
-  eq("streak 5 jackpot possible", [HAND.STRAIGHT_FLUSH, HAND.ROYAL_FLUSH].includes(pickWanted(5, jack).hand), true);
-  // never a pair, across the pools
-  let sawPair = false;
-  for (let s = 0; s <= 6; s++) for (let k = 0; k < 12; k++) if (pickWanted(s, Math.random).hand === HAND.PAIR) sawPair = true;
-  eq("wanted is never a pair", sawPair, false);
+  // Every result is well-formed (kind + name + rewards), regardless of streak.
+  let badShape = false;
+  for (let s = 0; s <= 6; s++) for (let k = 0; k < 40; k++) {
+    const w = pickWanted(s, Math.random);
+    const okKind = w.kind === "hand" || w.kind === "cond";
+    const okTarget = w.kind === "hand" ? typeof w.hand === "number" : !!WANTED_CONDS[w.cond];
+    if (!okKind || !okTarget || typeof w.bonusPts !== "number" || typeof w.bonusChips !== "number") badShape = true;
+  }
+  eq("pickWanted always returns a tagged, rewarded target", badShape, false);
+
+  // A hand target is never a pair AND never a jackpot hand (SF/Royal left the pool).
+  let sawPair = false, sawJackpot = false, sawCond = false, sawFour = false;
+  for (let s = 0; s <= 6; s++) for (let k = 0; k < 60; k++) {
+    const w = pickWanted(s, Math.random);
+    if (w.kind === "cond") { sawCond = true; continue; }
+    if (w.hand === HAND.PAIR) sawPair = true;
+    if (JACKPOT_HANDS.has(w.hand)) sawJackpot = true;
+    if (w.hand === HAND.FOUR) sawFour = true;
+  }
+  eq("wanted hand is never a pair", sawPair, false);
+  eq("wanted hand never a jackpot (SF/Royal)", sawJackpot, false);
+  eq("conditions do appear in the rotation", sawCond, true);
+  eq("hand targets cap reaches Four of a Kind", sawFour, true);
+}
+
+// ── Wanted Conditions ─────────────────────────────────────────────────────────
+console.log("Wanted Conditions:");
+{
+  // blackjackTotal helper: A=11 (demoted to 1 to dodge a bust), JQK=10.
+  eq("bj A+K = 21", blackjackTotal(cards("AH", "KS")), 21);
+  eq("bj A+A+9 = 21 (one ace low)", blackjackTotal(cards("AH", "AS", "9C")), 21);
+  eq("bj K+Q = 20", blackjackTotal(cards("KH", "QS")), 20);
+  eq("bj A+5+5 = 21", blackjackTotal(cards("AH", "5S", "5C")), 21);
+  eq("bj K+Q+J = 30 (no aces to demote)", blackjackTotal(cards("KH", "QS", "JC")), 30);
+
+  // Direct predicate checks over 5-card lanes.
+  eq("allRed true", WANTED_CONDS.allRed.test(cards("AH", "KH", "8D", "5D", "2H")), true);
+  eq("allRed false (a spade)", WANTED_CONDS.allRed.test(cards("AH", "KH", "8D", "5D", "2S")), false);
+  eq("allBlack true", WANTED_CONDS.allBlack.test(cards("AS", "KC", "8S", "5C", "2S")), true);
+  eq("noFaces true", WANTED_CONDS.noFaces.test(cards("2S", "9C", "8S", "5C", "TS")), true);
+  eq("noFaces false (a king)", WANTED_CONDS.noFaces.test(cards("2S", "9C", "KS", "5C", "TS")), false);
+  eq("faceParty true (3 faces)", WANTED_CONDS.faceParty.test(cards("JS", "QC", "KS", "5C", "2S")), true);
+  eq("faceParty false (2 faces)", WANTED_CONDS.faceParty.test(cards("JS", "QC", "9S", "5C", "2S")), false);
+  eq("ace true", WANTED_CONDS.ace.test(cards("AS", "9C", "8S", "5C", "2S")), true);
+  eq("ace false", WANTED_CONDS.ace.test(cards("KS", "9C", "8S", "5C", "2S")), false);
+  eq("lucky7 true", WANTED_CONDS.lucky7.test(cards("7S", "9C", "8S", "5C", "2S")), true);
+  eq("lucky7 false", WANTED_CONDS.lucky7.test(cards("KS", "9C", "8S", "5C", "2S")), false);
+  eq("rainbow true (4 suits)", WANTED_CONDS.rainbow.test(cards("2S", "3H", "4D", "5C", "9S")), true);
+  eq("rainbow false (3 suits)", WANTED_CONDS.rainbow.test(cards("2S", "3H", "4D", "5H", "9S")), false);
+  eq("suitMaj true (3 spades)", WANTED_CONDS.suitMaj.test(cards("2S", "3S", "4S", "5H", "9C")), true);
+  eq("suitMaj false (2 max)", WANTED_CONDS.suitMaj.test(cards("2S", "3S", "4H", "5H", "9C")), false);
+  eq("noOdds true (all even)", WANTED_CONDS.noOdds.test(cards("2S", "4S", "6H", "8H", "QC")), true);
+  eq("noOdds false (an ace)", WANTED_CONDS.noOdds.test(cards("2S", "4S", "6H", "8H", "AC")), false);
+  eq("noOdds false (a king)", WANTED_CONDS.noOdds.test(cards("2S", "4S", "6H", "8H", "KC")), false);
+  eq("bj21 cond true", WANTED_CONDS.bj21.test(cards("AH", "KS", "5C", "3D", "2S")), true);  // 11+10... let total reach 21? compute below
+}
+{
+  // A condition wanted is claimed only when the lane TRULY SCORES (Two Pair+) AND the
+  // predicate passes. All-red two pair → hit. A different (non-red) two pair → miss.
+  let g = newGame();
+  g = { ...g, wanted: wantCond("allRed"), streak: 0 };
+  const { state, result } = fillLane(g, ["KH", "KD", "8H", "8D", "2H"]); // all red, two pair
+  eq("condition + score → wanted hit", !!(result.wanted && result.wanted.hit), true);
+  eq("condition reward = its table value", result.wanted.bonusPts, WANTED_COND_REWARDS.allRed.pts);
+  eq("condition advances streak", state.streak, 1);
+  eq("condition counts toward wantedHits", state.wantedHits, 1);
+}
+{
+  // Condition met but only a PAIR (a save, not a score) → no hit (gated by scored).
+  let g = newGame();
+  g = { ...g, wanted: wantCond("allRed"), streak: 2 };
+  const { state, result } = fillLane(g, ["KH", "KD", "8H", "5D", "2H"]); // all red, but only a pair
+  eq("condition without a score does NOT hit", !!(result.wanted && result.wanted.hit), false);
+  eq("a pair save keeps the streak", state.streak, 2);
+}
+{
+  // Condition not met though the lane scores → no hit.
+  let g = newGame();
+  g = { ...g, wanted: wantCond("allRed"), streak: 0 };
+  const { result } = fillLane(g, ["KH", "KD", "8S", "8C", "2H"]); // two pair, but has black cards
+  eq("score without the condition does NOT hit", !!(result.wanted && result.wanted.hit), false);
+}
+{
+  // No Faces condition with a scoring low hand.
+  let g = newGame();
+  g = { ...g, wanted: wantCond("noFaces"), streak: 0 };
+  const { result } = fillLane(g, ["9H", "9D", "8S", "8C", "2H"]); // two pair, no faces
+  eq("noFaces + score → hit", !!(result.wanted && result.wanted.hit), true);
+}
+
+// ── Jackpot hands (always-on side goal) ───────────────────────────────────────
+console.log("Jackpot hands:");
+{
+  // A Straight Flush lane fires the jackpot regardless of the current wanted, pays
+  // the reward, and advances the streak + wantedHits.
+  let g = newGame();
+  g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 0 };
+  const before = g.score;
+  const { state, result } = fillLane(g, ["6S", "7S", "8S", "9S", "TS"]); // straight flush
+  eq("jackpot hit on straight flush", !!(result.jackpot && result.jackpot.hit), true);
+  eq("jackpot pays its reward pts", result.jackpot.bonusPts, JACKPOT_REWARDS[HAND.STRAIGHT_FLUSH].pts);
+  eq("SF does not match the Two-Pair wanted", !!(result.wanted && result.wanted.hit), false);
+  eq("jackpot advances streak", state.streak, 1);
+  eq("jackpot counts toward wantedHits", state.wantedHits, 1);
+  // score = base SF points + jackpot bonus
+  eq("score includes base + jackpot", state.score, before + HAND_POINTS[HAND.STRAIGHT_FLUSH] + result.jackpot.totalPts);
+}
+{
+  // A Royal Flush jackpot, with a condition wanted that ALSO matches (all spades is
+  // not a defined cond, but Face Party isn't it either — use suitMaj which a royal
+  // satisfies). Both fire; streak advances ONCE.
+  let g = newGame();
+  g = { ...g, wanted: wantCond("suitMaj"), streak: 0 };
+  const { state, result } = fillLane(g, ["TS", "JS", "QS", "KS", "AS"]); // royal flush (all spades → suitMaj)
+  eq("royal fires jackpot", !!(result.jackpot && result.jackpot.hit), true);
+  eq("co-occurring condition wanted also hits", !!(result.wanted && result.wanted.hit), true);
+  eq("streak advances exactly once", state.streak, 1);
 }
 
 // ── rising ante (poker-blinds pressure) ───────────────────────────────────────
@@ -299,7 +408,7 @@ console.log("Rising ante:");
 {
   // A Wanted completion increments wantedHits (and scoreHands, since it's a score).
   let g = newGame();
-  g = { ...g, wanted: { hand: HAND.TWO_PAIR, name: "Two Pair", bonusPts: 50, bonusChips: 1 }, streak: 0 };
+  g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 0 };
   g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]).state; // two pair = the wanted
   eq("wanted increments wantedHits", g.wantedHits, 1);
   eq("wanted also counts as a score", g.scoreHands, 1);
