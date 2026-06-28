@@ -3,6 +3,7 @@ import { loadVault, VAULT_INDEX, searchVault } from "../data/vault.js";
 import ArtifactCard, { KIND_LABEL } from "./ArtifactCard.jsx";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
+import vaultIcon from "../assets/page-icons/vault.webp";
 
 /* /vault — THE VAULT. The whole back catalogue of the arcade's timeless internet
    finds (stumble + weird + curiosities, ever). The daily site only ever shows you
@@ -76,8 +77,11 @@ export default function VaultPage() {
       <section className="arcade-vault">
         <header className="arcade-vault-head">
           <div className="arcade-vault-masthead">
-            <h1 className="arcade-vault-title">🗄️ THE VAULT</h1>
-            <span className="arcade-vault-standing">the whole back catalogue of weird-web finds</span>
+            <img className="arcade-page-icon" src={vaultIcon} alt="" aria-hidden="true" />
+            <div className="arcade-masthead-text">
+              <h1 className="arcade-vault-title">THE VAULT</h1>
+              <span className="arcade-vault-standing">the whole back catalogue of weird-web finds</span>
+            </div>
           </div>
           <div className="arcade-vault-stat">
             <span className="arcade-vault-stat-num">{total.toLocaleString()}</span>

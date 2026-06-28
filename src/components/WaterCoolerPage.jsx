@@ -9,6 +9,7 @@ import { usePollCounts, castVote } from "../lib/votes.js";
 import { getPollVote, setPollVote } from "../lib/store.js";
 import BackBar from "./BackBar.jsx";
 import ShareButton from "./ShareButton.jsx";
+import waterCoolerIcon from "../assets/page-icons/water-cooler.webp";
 
 /* /watercooler — THE WATER COOLER. The arcade's daily briefing: a dated "edition"
    that tells you what the internet moved on today. Same e-zine wink as before, but
@@ -229,8 +230,11 @@ export default function WaterCoolerPage() {
       <section className="arcade-watercooler">
         <header className="arcade-watercooler-head">
           <div className="arcade-watercooler-masthead">
-            <h1 className="arcade-watercooler-title">💧 THE WATER COOLER</h1>
-            <span className="arcade-watercooler-standing">the arcade's daily briefing</span>
+            <img className="arcade-page-icon" src={waterCoolerIcon} alt="" aria-hidden="true" />
+            <div className="arcade-masthead-text">
+              <h1 className="arcade-watercooler-title">THE WATER COOLER</h1>
+              <span className="arcade-watercooler-standing">the arcade's daily briefing</span>
+            </div>
           </div>
           <div className="arcade-watercooler-edition">
             <span className="arcade-watercooler-edition-label">EDITION</span>

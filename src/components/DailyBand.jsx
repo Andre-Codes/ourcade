@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { GAMES } from "../data/games.js";
-import { todayKey, prettyDate, rotateDaily } from "../lib/daily.js";
+import { todayKey, prettyDate, rotateDaily, rotateEvery } from "../lib/daily.js";
 import { getTodaysPoll, getPoll, realTally } from "../data/polls.js";
 import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
@@ -342,9 +342,12 @@ function MascotTip({ dayKey: key, streak }) {
 // worth sitting through the credits? Hand-curated in data/manual/movies.js;
 // the card simply lists everything currently in that file (no rotation).
 // ── Featured Game (a real, external game worth a look) ────────────────────
-function FeaturedGame() {
+function FeaturedGame({ dayKey: key }) {
   if (!FEATURED.length) return null;
-  const game = FEATURED[0];
+  // Cycle one featured game per week, no repeats until the whole pool is
+  // exhausted. salt=2 keeps this independent of Game of the Day (0) so the two
+  // hero cards don't move in lockstep. A single-entry pool simply never changes.
+  const game = rotateEvery(FEATURED, key, 7, 2);
   const art = game.image
     ? FEATURED_IMAGES[`../assets/featured/${game.image}.webp`]
     : null;
@@ -466,7 +469,7 @@ export default function DailyBand({ dayPart, focusPollId }) {
 
       <FlashTheater dayKey={key} compact browseTo="/flash" />
 
-      <FeaturedGame />
+      <FeaturedGame dayKey={key} />
 
       <NowInTheaters />
 

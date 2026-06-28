@@ -1524,8 +1524,19 @@ main > section + section { margin-top: 44px; }
 /* ====================================================================== */
 .arcade-vault { max-width: 1040px; margin: 0 auto; padding: 4px 2px 28px; display: flex; flex-direction: column; gap: 16px; }
 .arcade-vault-head { text-align: center; }
+/* Cheesy GeoCities-style masthead icon that stands to the left of the title,
+   where the page emoji used to sit. */
+.arcade-page-icon {
+  flex: none; width: 72px; height: 72px; object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.45));
+  image-rendering: -webkit-optimize-contrast;
+}
+.arcade-masthead-text {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left;
+}
+@media (max-width: 760px) { .arcade-page-icon { width: 56px; height: 56px; } }
 .arcade-vault-masthead {
-  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
 }
 .arcade-vault-title {
   font-family: 'Black Ops One', cursive; font-size: 1.8rem; letter-spacing: 0.02em; margin: 0;
@@ -1908,7 +1919,7 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 /* ---- masthead: a dated "edition", broadsheet structure in neon ---- */
 .arcade-watercooler-head { margin: 6px 0 0; }
 .arcade-watercooler-masthead {
-  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center; text-align: center;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; text-align: center;
 }
 .arcade-watercooler-title {
   font-family: 'Black Ops One', cursive; font-size: 1.8rem; letter-spacing: 0.02em; margin: 0;

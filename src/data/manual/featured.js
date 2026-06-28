@@ -6,27 +6,12 @@
    Outer Wilds, an upcoming release you're excited about). This is distinct
    from the Ourcade Game of the Day, which surfaces a *playable* Ourcade game.
 
-   The card shows the FIRST entry in this array. To change what's featured,
-   move an entry to the top (newest-first is the convention).
-
-   ── Switching to daily rotation later ──────────────────────────────────────
-   When this pool is big enough to be a self-sustaining staple (like Game of
-   the Day), make the card pick one game per day instead of always FEATURED[0].
-   In src/components/DailyBand.jsx, inside the FeaturedGame() component, replace:
-
-        const game = FEATURED[0];
-   with:
-        const game = rotateDaily(FEATURED, todayKey(), 2);
-
-   rotateDaily + todayKey are ALREADY imported at the top of that file (they
-   drive Game of the Day), so no new imports are needed. rotateDaily
-   deterministically shuffles the pool and steps one per day with no repeats
-   until it cycles. The third arg is a "salt" — use a value not already taken:
-   Game of the Day uses 0, so pass 1, 2, … here so the two cards don't move in
-   lockstep.
-
-   No data changes are needed — every entry already has the fields rotateDaily
-   needs. Until then, FEATURED[0] is shown and array order is the control.
+   The card cycles ONE entry per week, no repeats until the whole pool is
+   exhausted (rotateEvery(FEATURED, key, 7, 2) in DailyBand.jsx's FeaturedGame).
+   On-screen order is deterministic but shuffled, so array order here is NOT the
+   on-screen order — add new entries anywhere. With a single entry the card just
+   shows that one game until you add more. Weeks roll on a local-calendar
+   boundary shared across all devices (Wordle-style), same as Game of the Day.
 
    Each entry:
      id       — unique slug (kebab-case), e.g. "caves-of-qud". Also the React key.
@@ -71,5 +56,19 @@ export const FEATURED = [
     image: "caves-of-qud",
     accent: "#116749",
   },
+
+  {
+  id: "librarian-tidy-up-the-arcane-library",
+  title: "Librarian: Tidy Up the Arcane Library!",
+  blurb:
+    "A cozy-but-obsessive organization sim where a chaotic magical library " +
+    "has dumped thousands of books everywhere — and your only escape is " +
+    "shelving all 3,072 of them correctly.",
+  tagline: "organization sim · cozy magic",
+  year: "2026",
+  url: "https://store.steampowered.com/app/4197610/Librarian_Tidy_Up_the_Arcane_Library/",
+  image: "librarian-tidy-arcane-library",
+  accent: "#6B4BB8",
+},
 
 ];
