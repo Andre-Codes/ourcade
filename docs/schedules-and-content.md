@@ -163,8 +163,11 @@ AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is
 |---|---|---|---|
 | [generate-content.yml](../.github/workflows/generate-content.yml) | **Monthly** — `0 9 1 * *` (1st @ 09:00 UTC) | polls, quizzes, tips, news, 💧 Water Cooler (countdowns + buzz + hot-or-not) (+ curiosities, soft-fail) | `npm run generate` |
 | [refresh-weird.yml](../.github/workflows/refresh-weird.yml) | **Every other day** — `0 6 */2 * *` (06:00 UTC) | the 🔍 Weird Thing pool only (URL-liveness gated) | `npm run generate:weird` |
+| [fetch-stumble.yml](../.github/workflows/fetch-stumble.yml) | **Monthly** — `0 10 1 * *` (1st @ 10:00 UTC, 1h after the content job to avoid a branch race) | the 🎲 Stumble artifact pool only (URL-liveness gated) | `npm run fetch:stumble` |
 
-Both also run on-demand via **`workflow_dispatch`**.
+All three also run on-demand via **`workflow_dispatch`**.
+
+> **Why Stumble has its own workflow** (not folded into `generate-content`): the Stumble pool is produced by a *separate* script ([fetch-stumble.js](../scripts/fetch-stumble.js)), not `generate-content.js`, with its own two-pass shape (stable knowledge — wiki / patents / mysteries / games — plus a live web search for *current* finds). ~40% of a Stumble draw is the "current" bucket, so the topical half goes stale without a refresh; monthly keeps it at most ~a month old, matching the other topical pools. It dedupes against the Weird pools (and vice-versa), so the two never surface the same URL — see [The Stumble button](#-the-stumble-button-srcdatastumblejs).
 
 **Cadence rationale:** topical references (movies/memes/news) stay relevant for months, so a monthly refresh keeps them at most ~a month old. The Weird Thing pool is cheap (one small research + one structured call, cents/run) and runs more often to stay genuinely current — but every other day is plenty: one run yields ~14 fresh items and the card cycles the whole pool (no repeats) before it turns over, so a faster refresh would replace the pool before a visitor could even see it. Bump the cron up if you want fresher topical finds.
 
@@ -185,6 +188,33 @@ Both also run on-demand via **`workflow_dispatch`**.
 - `npm run check:daily` — headless validation of every rotation/window
 
 The `generated/_*.md` files (`_research.md`, `_weird.md`, `_stumble.md`, `_flash.md`) are human-readable audit logs — queries, source URLs, and `page_age` dates proving the content is genuinely fresh.
+
+---
+
+## 🗄️ The permanent archive (Firestore)
+
+Every generator also appends what it just wrote to a permanent Firestore store, so we keep an **"everything ever generated"** corpus separate from the committed `src/data/generated/*` the live site reads. (The committed files are the *current* serving pool; each regeneration overwrites them. The archive is the cumulative history.)
+
+- **Where:** `archive/{type}/items/{id}` — e.g. `archive/weird/items/gw-…`, `archive/stumble/items/g:wiki-…`. The parent doc (`archive/weird`) is never written to directly, so the Firestore console shows it in *italics* with "this document does not exist" — that's expected; the data lives one level down in `items`.
+- **How:** [scripts/lib/firebase-admin.js](../scripts/lib/firebase-admin.js) `archiveAll()` → `archiveItem()`, called at the end of each generator (e.g. [generate-content.js](../scripts/generate-content.js) `archivePool(...)`, [fetch-stumble.js](../scripts/fetch-stumble.js) `archiveAll("stumble", …)`). Writes use `set({…}, { merge: true })` + a server-stamped `runAt`, so re-runs update rather than wipe.
+- **When:** as a side-effect of each scheduled run — so a type's archive fills on **that type's cadence**: monthly types monthly, `weird` every other day, `stumble` monthly (since [fetch-stumble.yml](../.github/workflows/fetch-stumble.yml) was added — before that the Stumble pool was archived only on a manual local run).
+- **Soft-fail by design:** uses the Firebase Admin SDK (bypasses security rules; needs no `allow` rule) via the `FIREBASE_SERVICE_ACCOUNT` secret (set in each workflow's `env`). If that secret is missing or any write throws, it logs a warning and returns — archiving must **never** block a content commit. So if the secret isn't set, archiving silently no-ops while the site still ships.
+
+> Note: the `*.js` generated files are committed to git, so git history is *also* a de-facto archive. The Firestore copy's payoff is being **queryable** as one corpus (e.g. for a future "browse everything we've ever made" view or programmatic dedupe), which git history is poor at.
+
+---
+
+## 🎲 The Stumble button ([src/data/stumble.js](../src/data/stumble.js))
+
+The one **deliberately non-deterministic** feature (everything else is date-seeded). A click draws a random artifact from a weighted mix — it does **not** pull from the Weird / Curiosity pools; it has its own pool:
+
+- `MANUAL_ARTIFACTS` (✋ hand-picked seeds) + `generated/stumble.js` (🤖 the AI batch from [fetch-stumble.js](../scripts/fetch-stumble.js)) + the ~3000-entry **archive.org Flash** pool (adapted on the fly) + `MANUAL_DEEP_CUTS` (✋ Konami-locked extras).
+- **Weighting** — the invisible 40/40/20: 20% flash · 20% nostalgic · 40% current · 20% timeless (+ a small deep-cuts bucket once unlocked), then uniform-random within the chosen bucket, skipping what you've seen this session.
+
+**Stumble vs. Weird** — related but aimed at different targets, and kept distinct by mutual URL-dedupe:
+- **Weird** = a narrow slice — mostly *current, living websites* — for a card that turns over several times a day.
+- **Stumble** = a wide net across `kind` (wiki / site / patent / game / video / image / mystery) **and** era (nostalgic / current / timeless), for an endless dice button.
+- The only overlap zone is the "current living site" category, and that's exactly where the dedupe is pointed: Weird skips Stumble URLs ([generate-content.js](../scripts/generate-content.js)) and Stumble skips Weird URLs ([fetch-stumble.js](../scripts/fetch-stumble.js)).
 
 ---
 

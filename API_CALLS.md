@@ -15,11 +15,13 @@ fetcher — see the bottom).
 | When | Trigger | What runs | Claude calls |
 |---|---|---|---|
 | **1st of month, 09:00 UTC** | `.github/workflows/generate-content.yml` (cron `0 9 1 * *`) | `npm run generate` **+** `npm run generate:curiosities` | **8** (incl. 1 web-search) |
+| **1st of month, 10:00 UTC** | `.github/workflows/fetch-stumble.yml` (cron `0 10 1 * *`) | `npm run fetch:stumble` | **2** (incl. 1 web-search) |
 | **Every other day, 06:00 UTC** | `.github/workflows/refresh-weird.yml` (cron `0 6 */2 * *`) | `npm run generate:weird` | **2** (incl. 1 web-search) |
-| On demand only | you, manually | the `--only=*` modes, badger, flash/stumble fetchers | varies (below) |
+| On demand only | you, manually | the `--only=*` modes, badger, flash fetcher | varies (below) |
 
-So the **only scheduled spend** is: ~8 calls/month + ~2 calls every other day
-(~15 weird-refresh runs/month). Everything else is manual.
+So the **only scheduled spend** is: ~8 + ~2 calls/month (content + stumble, both
+on the 1st) + ~2 calls every other day (~15 weird-refresh runs/month). Everything
+else is manual.
 
 ---
 
@@ -60,6 +62,14 @@ Wikipedia-backed facts). 30 "Timeless Curiosity" items; URLs liveness-checked.
 `--only=weird`: **2 calls** — 1 web-search (its own "weird corners of the internet"
 research) + 1 structured (14 items). URLs liveness-checked; cheap by design.
 
+### Monthly — `npm run fetch:stumble` (the 🎲 Stumble pool)
+[scripts/fetch-stumble.js](scripts/fetch-stumble.js) — a *separate* script from
+`generate-content.js`. Runs an hour after the content job (cron `0 10 1 * *`).
+**2 calls** — 1 structured (stable knowledge: wiki / patents / mysteries / games)
++ 1 web-search pass turned into "current"-era artifacts. URLs liveness-checked;
+writes nothing if too few survive. The "current" half goes stale without a
+refresh, so monthly keeps it ~a month fresh.
+
 ---
 
 ## Manual-only modes (not scheduled — you run them)
@@ -69,9 +79,9 @@ research) + 1 structured (14 items). URLs liveness-checked; cheap by design.
 | `npm run generate:watercooler` | **4** | 1 | research + countdowns + buzz + hotornot. Use to refresh the Water Cooler *now* without waiting for the 1st. |
 | `npm run generate:curiosities` | 1 | no | (also part of the monthly job) |
 | `npm run generate:weird` | 2 | 1 | (also the every-other-day job) |
+| `npm run fetch:stumble` | 2 | 1 | (also the monthly job — run it to refresh the 🎲 Stumble pool *now*) |
 | `npm run generate:badger` | 1 | no | [scripts/generate-badger.js](scripts/generate-badger.js) — the phone NPC's reply tree. One-off / rare. |
 | `npm run fetch:flash` | ~1 | no | [scripts/fetch-flash.js](scripts/fetch-flash.js) — Flash catalog enrichment. Rare. |
-| `npm run fetch:stumble` | ~1 | 1 | [scripts/fetch-stumble.js](scripts/fetch-stumble.js) — Stumble artifacts. Rare. |
 | `npm run research` | 1 | 1 | [scripts/research-topics.js](scripts/research-topics.js) — standalone "prove the search is live" tool. Diagnostic. |
 
 ---
@@ -94,6 +104,7 @@ re-run only to refresh/expand curation. It is **not** wired into any cron or int
 - The monthly **quizzes** call dominates output tokens (large `max_tokens`); the
   rest are small.
 - **Web-search calls** (research, weird, stumble) bill the search tool separately
-  from tokens — count: 1/run for monthly `generate`, 1/run for each `generate:weird`.
+  from tokens — count: 1/run for monthly `generate`, 1/run for monthly
+  `fetch:stumble`, 1/run for each `generate:weird`.
 - Caching: within a single `generate*` run the structured calls reuse a cached
   system block, so only the first pays full input cost.

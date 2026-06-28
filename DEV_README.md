@@ -111,10 +111,15 @@ npm run check:daily
 
 - **Deploy:** just push to `main`. GitHub Actions builds and publishes
   automatically.
-- **AI content refresh:** runs on a schedule (monthly batch + a more frequent
-  "weird thing" refresh). You can also run `npm run generate` locally if you
-  have an API key, but you rarely need to — the generated layer maintains
-  itself.
+- **AI content refresh:** runs on a schedule — a monthly batch, a monthly
+  🎲 Stumble-pool refresh, and a more frequent "weird thing" refresh. You can
+  also run `npm run generate` (or `npm run fetch:stumble`) locally if you have an
+  API key, but you rarely need to — the generated layer maintains itself.
+- **Archiving:** every refresh also appends what it generated to a permanent
+  Firestore store (`archive/{type}/items/*`) so we keep an "everything ever
+  generated" corpus. It's soft-fail (never blocks a deploy) and needs no manual
+  step. Full details in
+  [`docs/schedules-and-content.md`](docs/schedules-and-content.md).
 
 ---
 
