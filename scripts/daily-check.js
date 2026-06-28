@@ -299,12 +299,15 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   const externals = CREATIVES_POOL.filter((c) => !c.guide);
 
   // Guides: non-empty steps[], every step has a caption, and any step.image is a
-  // plain slug. (No url required — they render on-site.)
+  // plain slug. (No url required — they render on-site.) Two flavors both pass:
+  // per-step-image guides carry s.image; whole-plate guides carry a `plate` slug
+  // and text-only steps (no s.image) — handled by the "if present" slug check.
   const badGuides = guides.filter(
     (c) =>
       !Array.isArray(c.steps) || c.steps.length === 0 ||
       c.steps.some((s) => !s || typeof s.caption !== "string" || !s.caption.trim()) ||
-      c.steps.some((s) => s.image && !isSlug(s.image))
+      c.steps.some((s) => s.image && !isSlug(s.image)) ||
+      (c.plate && !isSlug(c.plate))
   );
   check("creative guides have well-formed steps (each with a caption)", badGuides.length === 0,
     badGuides.length ? `bad: ${badGuides.map((c) => c.id).join(", ")}` : `${guides.length} guides`);
@@ -321,11 +324,15 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   check("external creatives have a valid url", externals.every((c) => isUrl(c.url)),
     externals.filter((c) => !isUrl(c.url)).map((c) => c.id).join(", ") || `${externals.length} external`);
 
-  // image/imageUrl optional; if present, imageUrl must be http(s), image a slug.
+  // image/imageUrl/plate optional; if present, imageUrl must be http(s) and
+  // image/plate must be plain slugs.
   const badArt = CREATIVES_POOL.filter(
-    (c) => (c.imageUrl && !isUrl(c.imageUrl)) || (c.image && !isSlug(c.image))
+    (c) =>
+      (c.imageUrl && !isUrl(c.imageUrl)) ||
+      (c.image && !isSlug(c.image)) ||
+      (c.plate && !isSlug(c.plate))
   );
-  check("creative image fields well-formed (imageUrl http, image is a slug)", badArt.length === 0,
+  check("creative image fields well-formed (imageUrl http, image/plate are slugs)", badArt.length === 0,
     badArt.length ? `bad: ${badArt.map((c) => c.id).join(", ")}` : "image fields ok");
 }
 

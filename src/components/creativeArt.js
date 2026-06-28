@@ -22,13 +22,30 @@ const STEP_IMAGES = import.meta.glob("../assets/creatives/steps/**/*.webp", {
   import: "default",
 });
 
+// Whole-plate guide images: src/assets/creatives/plates/<slug>.webp (one big
+// reference per guide, e.g. a Lutz public-domain plate). Separate glob because
+// the flat CARD_IMAGES pattern above doesn't descend into plates/.
+const PLATE_IMAGES = import.meta.glob("../assets/creatives/plates/*.webp", {
+  eager: true,
+  import: "default",
+});
+
+// The whole-plate reference image for a plate-style guide, or null.
+export function plateArt(slug) {
+  if (!slug) return null;
+  return PLATE_IMAGES[`../assets/creatives/plates/${slug}.webp`] || null;
+}
+
 // Card / header art for an item, in precedence order:
-//   bundled `image` slug → remote `imageUrl` → null (caller draws the tile).
+//   bundled `image` slug → its `plate` art (plate guides) → remote `imageUrl`
+//   → null (caller draws the tile).
 export function creativeArt(item) {
   if (item?.image) {
     const hit = CARD_IMAGES[`../assets/creatives/${item.image}.webp`];
     if (hit) return hit;
   }
+  const plate = plateArt(item?.plate);
+  if (plate) return plate;
   return item?.imageUrl || null;
 }
 

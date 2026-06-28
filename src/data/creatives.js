@@ -8,12 +8,17 @@
 
 import { rotateDaily } from "../lib/daily.js";
 import { MANUAL_CREATIVES, FALLBACK_CREATIVES } from "./manual/creatives.js";
-// Future AI lane — drop in a generated pool and uncomment, like curiosities.js:
+// Generated on-site "how to draw" guides built from public-domain plates
+// (scripts/fetch-draw-guides.js). Plain data — safe to import under node.
+// Empty array until the generator runs.
+import drawGuides from "./generated/draw-guides.js";
+// Future AI lane for the rest of the pool — same pattern when it lands:
 // import generated from "./generated/creatives.js";
 
-// Manual entries first, then the generated supplement when it exists.
+// Manual entries first, then the generated supplements when they exist.
 export const CREATIVES = [
   ...MANUAL_CREATIVES,
+  ...(Array.isArray(drawGuides) ? drawGuides : []),
   // ...(Array.isArray(generated) && generated.length ? generated : []),
 ];
 

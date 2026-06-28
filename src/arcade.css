@@ -1684,6 +1684,33 @@ main > section + section { margin-top: 44px; }
   font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; line-height: 1.55;
   color: #d6e6ff; margin: 12px 0 0;
 }
+
+/* Whole-plate guide — the big public-domain reference plate + its credit. */
+.arcade-guide-figure { margin: 16px 0 0; }
+.arcade-guide-plate {
+  /* `contain` on a light card: these are ink-on-paper scans, so a paper-ish
+     backing reads better than the dark frame the step images use. */
+  width: 100%; aspect-ratio: auto; object-fit: contain; max-height: 70vh;
+  background: #f4efe2; padding: 10px; box-sizing: border-box;
+}
+.arcade-guide-plate-credit {
+  margin: 8px 0 0; font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem; color: var(--arcade-muted); letter-spacing: 0.02em;
+}
+/* Text-only steps (the plate carries the visuals) — a tidy numbered list. */
+.arcade-guide-steps-text { gap: 12px; margin-top: 14px; }
+.arcade-guide-step-text {
+  display: flex; gap: 12px; align-items: baseline;
+  padding: 10px 12px; background: #14172a;
+  border: 1px solid #2a2f4a; border-radius: 8px;
+}
+.arcade-guide-step-n {
+  flex: none; width: 1.6em; height: 1.6em; display: grid; place-items: center;
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+  color: #0a0a12; background: var(--neon-lime); border-radius: 50%;
+}
+.arcade-guide-step-text .arcade-guide-step-caption { margin: 0; }
+
 .arcade-guide-cta {
   margin-top: 28px; padding-top: 18px; border-top: 1px solid #2a2f4a;
 }

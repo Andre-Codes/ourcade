@@ -1,16 +1,17 @@
 import { useParams, Link } from "react-router-dom";
 import { getCreative, isGuide } from "../data/creatives.js";
-import { creativeArt, stepArt } from "./creativeArt.js";
+import { creativeArt, stepArt, plateArt } from "./creativeArt.js";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
 /* /creatives/:id — an on-site step-by-step guide (the alternative to linking
-   out to a bare Google/YouTube search). A guide is just an ordered list of
-   { image, caption } steps the author hosts here, with optional materials +
-   tips. Presented as a single vertical scroll — drawing tutorials are read
-   top-to-bottom, each step leans on the ones above it, and that's the natural
-   mobile reading mode (no step-index state machine). Non-guide ids (or unknown
-   ones) fall through to a not-found gag — never a blank page. */
+   out to a bare Google/YouTube search). Two flavors, both a single vertical
+   scroll (tutorials are read top-to-bottom; no step-index state machine):
+   - PER-STEP: an ordered list of { image, caption } the author hosts here.
+   - WHOLE-PLATE (`item.plate`): one big public-domain reference plate up top
+     (e.g. a Lutz drawing plate where steps 1→finished are all on one image),
+     then a numbered text-only caption list. Simpler, and how the book reads.
+   Non-guide ids (or unknown ones) fall through to a not-found gag. */
 
 const LANE_LABEL = {
   print: "🖨 3D print",
@@ -25,6 +26,52 @@ const DIFFICULTY_LABEL = {
   intermediate: "🟡 intermediate",
   advanced: "🔴 advanced",
 };
+
+// Whole-plate steps: a numbered text list (the plate image carries the visuals).
+function PlateSteps({ steps }) {
+  return (
+    <ol className="arcade-guide-steps arcade-guide-steps-text">
+      {steps.map((s, i) => (
+        <li key={i} className="arcade-guide-step-text">
+          <span className="arcade-guide-step-n">{i + 1}</span>
+          <span className="arcade-guide-step-caption">{s.caption}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+// Per-step steps: an image (or fallback tile) plus a caption per step.
+function ImageSteps({ id, steps, laneEmoji }) {
+  return (
+    <ol className="arcade-guide-steps">
+      {steps.map((s, i) => {
+        const img = stepArt(id, s.image);
+        return (
+          <li key={i} className="arcade-guide-step">
+            <div className="arcade-guide-step-num">step {i + 1}</div>
+            {img ? (
+              <img
+                className="arcade-stumble-image arcade-guide-step-img"
+                src={img}
+                alt={`Step ${i + 1}`}
+                loading="lazy"
+              />
+            ) : (
+              <div
+                className="arcade-guide-step-img arcade-creative-image-fallback"
+                aria-hidden="true"
+              >
+                <span className="arcade-creative-fallback-emoji">{laneEmoji}</span>
+              </div>
+            )}
+            {s.caption && <p className="arcade-guide-step-caption">{s.caption}</p>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function CreativeGuidePage() {
   const { id } = useParams();
@@ -43,10 +90,15 @@ export default function CreativeGuidePage() {
     );
   }
 
-  const art = creativeArt(item);
   const paid = item.cost === "paid";
   const laneLabel = LANE_LABEL[item.lane] || item.lane;
   const laneEmoji = laneLabel.split(" ")[0];
+
+  // Whole-plate guide: the big plate IS the hero (with a credit line) and steps
+  // are text-only. Otherwise: a normal card/header image and per-step images.
+  const plate = item.plate ? plateArt(item.plate) : null;
+  const isPlateGuide = !!item.plate;
+  const heroArt = isPlateGuide ? plate : creativeArt(item);
 
   return (
     <div className="arcade-stage">
@@ -70,13 +122,20 @@ export default function CreativeGuidePage() {
             </span>
           </div>
 
-          {art && (
-            <img
-              className="arcade-stumble-image arcade-guide-hero"
-              src={art}
-              alt={item.title}
-              loading="lazy"
-            />
+          {heroArt && (
+            <figure className="arcade-guide-figure">
+              <img
+                className={`arcade-stumble-image arcade-guide-hero${
+                  isPlateGuide ? " arcade-guide-plate" : ""
+                }`}
+                src={heroArt}
+                alt={item.title}
+                loading="lazy"
+              />
+              {isPlateGuide && item.plateCredit && (
+                <figcaption className="arcade-guide-plate-credit">{item.plateCredit}</figcaption>
+              )}
+            </figure>
           )}
         </header>
 
@@ -91,32 +150,14 @@ export default function CreativeGuidePage() {
           </section>
         )}
 
-        <ol className="arcade-guide-steps">
-          {item.steps.map((s, i) => {
-            const img = stepArt(item.id, s.image);
-            return (
-              <li key={i} className="arcade-guide-step">
-                <div className="arcade-guide-step-num">step {i + 1}</div>
-                {img ? (
-                  <img
-                    className="arcade-stumble-image arcade-guide-step-img"
-                    src={img}
-                    alt={`Step ${i + 1}`}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div
-                    className="arcade-guide-step-img arcade-creative-image-fallback"
-                    aria-hidden="true"
-                  >
-                    <span className="arcade-creative-fallback-emoji">{laneEmoji}</span>
-                  </div>
-                )}
-                {s.caption && <p className="arcade-guide-step-caption">{s.caption}</p>}
-              </li>
-            );
-          })}
-        </ol>
+        {isPlateGuide ? (
+          <section className="arcade-guide-section">
+            <h2 className="arcade-guide-subhead">✏️ step by step</h2>
+            <PlateSteps steps={item.steps} />
+          </section>
+        ) : (
+          <ImageSteps id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
+        )}
 
         {Array.isArray(item.tips) && item.tips.length > 0 && (
           <section className="arcade-guide-section">
