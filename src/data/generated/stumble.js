@@ -3,55 +3,21 @@
 // (only the flash adapter embeds); urls liveness-checked at generation time.
 export default [
   {
-    "id": "g:wiki-voynich-manuscript",
+    "id": "g:wiki-lake-peigneur",
     "kind": "wiki",
     "era": "timeless",
-    "title": "The Voynich Manuscript",
-    "blurb": "A 600-year-old book written in a language no one has ever decoded, illustrated with plants that don't exist and naked women in plumbing. Cryptographers have been losing this fight for a century.",
-    "url": "https://en.wikipedia.org/wiki/Voynich_manuscript"
-  },
-  {
-    "id": "g:wiki-dyatlov-pass",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "The Dyatlov Pass Incident",
-    "blurb": "Nine experienced hikers cut their way out of their tent from the inside and fled barefoot into a Siberian blizzard, where they died of injuries no one can fully explain. The theories range from avalanche to infrasound to much weirder.",
-    "year": "1959",
-    "url": "https://en.wikipedia.org/wiki/Dyatlov_Pass_incident"
-  },
-  {
-    "id": "g:wiki-somerton-man",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "The Somerton Man",
-    "blurb": "An unidentified man found dead on an Australian beach with a scrap of paper sewn into his pocket reading \"Tamám Shud.\" Seventy years of code-cracking and DNA work and we're only now getting close.",
-    "year": "1948",
-    "url": "https://en.wikipedia.org/wiki/Somerton_Man"
-  },
-  {
-    "id": "g:wiki-mary-celeste",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "The Mary Celeste",
-    "blurb": "A merchant ship found drifting in perfect order — meals half-eaten, cargo intact, lifeboat gone, crew vanished without a trace. The original ghost-ship mystery that every other one is measured against.",
-    "year": "1872",
-    "url": "https://en.wikipedia.org/wiki/Mary_Celeste"
-  },
-  {
-    "id": "g:wiki-toynbee-tiles",
-    "kind": "mystery",
-    "era": "nostalgic",
-    "title": "The Toynbee Tiles",
-    "blurb": "Hundreds of cryptic tiles embedded in city streets across two continents, all variations on resurrecting the dead on Jupiter. Nobody knows for sure who laid them or how.",
-    "year": "1980s",
-    "url": "https://en.wikipedia.org/wiki/Toynbee_tiles"
+    "title": "Lake Peigneur",
+    "blurb": "In 1980 a drilling rig poked a hole into a salt mine beneath a Louisiana lake — and the entire lake drained into the earth, swallowing barges and reversing a waterfall. Physics, but unhinged.",
+    "year": "1980",
+    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur"
   },
   {
     "id": "g:wiki-tarrare",
     "kind": "wiki",
     "era": "timeless",
-    "title": "Tarrare, the Insatiable",
-    "blurb": "An 18th-century Frenchman with a bottomless appetite who ate live cats, corks, and stones, and was briefly employed as a military courier who swallowed messages. It only gets stranger from there.",
+    "title": "Tarrare",
+    "blurb": "An 18th-century French showman with a bottomless appetite who ate corks, live animals, and reportedly an entire meal for fifteen. Doctors were baffled, and the details only get stranger.",
+    "year": "1772",
     "url": "https://en.wikipedia.org/wiki/Tarrare"
   },
   {
@@ -59,241 +25,254 @@ export default [
     "kind": "wiki",
     "era": "timeless",
     "title": "Mike the Headless Chicken",
-    "blurb": "A rooster who lived 18 months after a botched beheading, touring the country while his owner fed him with an eyedropper. There is a festival. There is a statue.",
+    "blurb": "A rooster who lived 18 months after losing his head, fed via eyedropper and toured as a sideshow. There is an annual festival. Yes, really.",
     "year": "1945",
     "url": "https://en.wikipedia.org/wiki/Mike_the_Headless_Chicken"
-  },
-  {
-    "id": "g:wiki-lake-peigneur",
-    "kind": "wiki",
-    "era": "nostalgic",
-    "title": "Lake Peigneur Disaster",
-    "blurb": "A drilling rig punched a hole into a salt mine beneath a freshwater lake, and the entire lake drained into the earth — pulling barges, trees, and 65 acres of land down a man-made whirlpool. The water briefly ran backwards.",
-    "year": "1980",
-    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur"
   },
   {
     "id": "g:wiki-centralia",
     "kind": "wiki",
     "era": "timeless",
     "title": "Centralia, Pennsylvania",
-    "blurb": "A coal-mine fire has been burning beneath this town since 1962 and could keep going for another 250 years. Almost everyone left; a stubborn handful stayed in the smoking ghost town.",
+    "blurb": "A town sitting atop a coal mine fire that's been burning since 1962 and may keep going for centuries. Smoke still rises from cracks in the abandoned streets.",
     "year": "1962",
     "url": "https://en.wikipedia.org/wiki/Centralia,_Pennsylvania"
   },
   {
-    "id": "g:wiki-kentucky-meat-shower",
+    "id": "g:wiki-kola-borehole",
     "kind": "wiki",
     "era": "timeless",
-    "title": "The Kentucky Meat Shower",
-    "blurb": "For several minutes in 1876, chunks of red meat fell from a clear sky onto a Kentucky farm. Two men reportedly tasted it. The leading explanation involves vultures, and it's worse than you think.",
-    "year": "1876",
-    "url": "https://en.wikipedia.org/wiki/Kentucky_meat_shower"
+    "title": "Kola Superdeep Borehole",
+    "blurb": "The Soviets drilled the deepest hole humans have ever made — over 12 kilometers — and found water and microscopic fossils where there shouldn't be any. Then they just... stopped.",
+    "year": "1989",
+    "url": "https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole"
   },
   {
-    "id": "g:wiki-codex-seraphinianus",
+    "id": "g:wiki-pitch-drop",
+    "kind": "wiki",
+    "era": "current",
+    "title": "Pitch drop experiment",
+    "blurb": "The world's longest-running lab experiment: a blob of tar so viscous it has dripped just nine times since 1927. Nobody has ever witnessed a drop fall live.",
+    "year": "1927",
+    "url": "https://en.wikipedia.org/wiki/Pitch_drop_experiment"
+  },
+  {
+    "id": "g:wiki-sealand",
     "kind": "wiki",
     "era": "timeless",
-    "title": "Codex Seraphinianus",
-    "blurb": "An illustrated encyclopedia of an imaginary world, written in an invented alphabet that even its creator says means nothing. Couples melting into crocodiles, machines that grow rainbows — a whole universe with no instructions.",
-    "year": "1981",
-    "url": "https://en.wikipedia.org/wiki/Codex_Seraphinianus"
+    "title": "Principality of Sealand",
+    "blurb": "A self-declared nation on a WWII sea fort off England, complete with royalty, passports, and a 1978 coup involving a helicopter and a hostage. You can buy a noble title online.",
+    "year": "1967",
+    "url": "https://en.wikipedia.org/wiki/Principality_of_Sealand"
   },
   {
-    "id": "g:wiki-year-without-summer",
+    "id": "g:wiki-yamaguchi",
     "kind": "wiki",
     "era": "timeless",
-    "title": "The Year Without a Summer",
-    "blurb": "A volcanic eruption darkened the sky so badly that 1816 had snow in June, failed harvests worldwide, and a rainy Swiss vacation that bored Mary Shelley into writing Frankenstein.",
-    "year": "1816",
-    "url": "https://en.wikipedia.org/wiki/Year_Without_a_Summer"
+    "title": "Tsutomu Yamaguchi",
+    "blurb": "He survived the atomic bombing of Hiroshima, then traveled home to Nagasaki just in time for the second one — and lived to 93. The only person officially recognized as surviving both.",
+    "year": "1945",
+    "url": "https://en.wikipedia.org/wiki/Tsutomu_Yamaguchi"
   },
   {
-    "id": "g:patent-birthing-centrifuge",
-    "kind": "patent",
+    "id": "g:mystery-voynich",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Voynich Manuscript",
+    "blurb": "A 15th-century book written in an unknown alphabet, illustrated with plants that don't exist and bathing women in green pipes. No code-breaker has ever cracked a single word.",
+    "year": "1404",
+    "url": "https://en.wikipedia.org/wiki/Voynich_manuscript"
+  },
+  {
+    "id": "g:mystery-somerton-man",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Tamám Shud (the Somerton Man)",
+    "blurb": "A well-dressed body on an Australian beach, no ID, a hidden coded note torn from a book of Persian poetry. Decades of theories, and the case still isn't fully closed.",
+    "year": "1948",
+    "url": "https://en.wikipedia.org/wiki/Tamam_Shud_case"
+  },
+  {
+    "id": "g:mystery-mary-celeste",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Mary Celeste",
+    "blurb": "A ship found drifting in perfect order — meals on the table, cargo intact — but every soul aboard gone without a trace. The original abandoned-ship enigma.",
+    "year": "1872",
+    "url": "https://en.wikipedia.org/wiki/Mary_Celeste"
+  },
+  {
+    "id": "g:mystery-db-cooper",
+    "kind": "mystery",
     "era": "nostalgic",
+    "title": "D. B. Cooper",
+    "blurb": "A man hijacked a plane, took $200,000, and parachuted into the night over the Pacific Northwest — never to be identified. The FBI's only unsolved skyjacking.",
+    "year": "1971",
+    "url": "https://en.wikipedia.org/wiki/D._B._Cooper"
+  },
+  {
+    "id": "g:mystery-most-mysterious-song",
+    "kind": "mystery",
+    "era": "current",
+    "title": "The Most Mysterious Song on the Internet",
+    "blurb": "A catchy new-wave track taped off German radio in the '80s — and for decades nobody could identify the band or song. The internet became obsessed with finding it.",
+    "year": "2007",
+    "url": "https://en.wikipedia.org/wiki/The_Most_Mysterious_Song_on_the_Internet"
+  },
+  {
+    "id": "g:patent-centrifugal-birth",
+    "kind": "patent",
+    "era": "timeless",
     "title": "Apparatus for Facilitating Childbirth by Centrifugal Force",
-    "blurb": "A real patent for strapping a laboring mother to a spinning table to fling the baby out. The diagram is exactly as alarming as it sounds.",
+    "blurb": "A 1965 patent for a spinning table that flings the baby out using physics. Filed in earnest. Approved by the US Patent Office.",
     "year": "1965",
     "url": "https://patents.google.com/patent/US3216423A/en"
   },
   {
-    "id": "g:patent-comb-over",
-    "kind": "patent",
-    "era": "nostalgic",
-    "title": "Method of Concealing Partial Baldness",
-    "blurb": "A father-and-son team patented the comb-over — yes, the precise three-section folding technique has government documentation. They later won an Ig Nobel Prize for it.",
-    "year": "1977",
-    "url": "https://patents.google.com/patent/US4022227A/en"
-  },
-  {
-    "id": "g:patent-banana-case",
+    "id": "g:patent-kick-buttocks",
     "kind": "patent",
     "era": "timeless",
-    "title": "Apparatus for Protecting a Banana During Transport",
-    "blurb": "A custom-molded protective case for one (1) banana, complete with ridges to cushion it from bruising. The fact that bananas come in their own packaging did not deter the inventor.",
+    "title": "Amusement Device for Kicking the User's Buttocks",
+    "blurb": "A real, granted patent for a motorized wheel of boots that rotate to kick you in the rear — described straight-faced as a form of entertainment.",
+    "year": "2001",
+    "url": "https://patents.google.com/patent/US6293874B1/en"
+  },
+  {
+    "id": "g:patent-beerbrella",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "The Beerbrella",
+    "blurb": "A tiny umbrella that clips onto your beer bottle to keep your drink shaded on the beach. The patent illustrations are works of art.",
     "year": "2003",
-    "url": "https://patents.google.com/patent/US6612440B1/en"
+    "url": "https://patents.google.com/patent/US6637447B2/en"
   },
   {
-    "id": "g:patent-santa-detector",
+    "id": "g:patent-motorized-ice-cream",
     "kind": "patent",
-    "era": "nostalgic",
-    "title": "Santa Claus Detector",
-    "blurb": "A stocking that lights up when Santa arrives, designed so a child can sleep soundly knowing the system is armed. Filed in total sincerity and granted by the U.S. Patent Office.",
-    "year": "1994",
-    "url": "https://patents.google.com/patent/US5523741A/en"
+    "era": "timeless",
+    "title": "Motorized Ice Cream Cone",
+    "blurb": "A cone that spins the ice cream against your tongue so you don't have to do the licking yourself. The future is now and it's exhausting.",
+    "year": "1999",
+    "url": "https://patents.google.com/patent/US5971829A/en"
   },
   {
-    "id": "g:patent-pat-on-back",
+    "id": "g:patent-anti-eating-mask",
     "kind": "patent",
-    "era": "nostalgic",
-    "title": "Apparatus for Patting Oneself on the Back",
-    "blurb": "A simulated hand on a spring-loaded arm so you can literally pat yourself on the back. For those days when you've earned it and nobody else will.",
-    "year": "1985",
-    "url": "https://patents.google.com/patent/US4608967A/en"
-  },
-  {
-    "id": "g:site-arngren",
-    "kind": "site",
     "era": "timeless",
-    "title": "Arngren.net",
-    "blurb": "A Norwegian gadget store whose homepage is a chaotic wall of overlapping flying-car photos, mini-helicopters, and unlabeled mystery products. It has looked like this for years and it is glorious.",
-    "url": "https://www.arngren.net/"
+    "title": "Anti-Eating Face Mask",
+    "blurb": "A cage-like mask that covers the mouth to prevent the wearer from eating — patented in 1982 as a serious dieting aid. The drawings are genuinely unsettling.",
+    "year": "1982",
+    "url": "https://patents.google.com/patent/US4344424A/en"
   },
   {
-    "id": "g:site-lingscars",
-    "kind": "site",
-    "era": "timeless",
-    "title": "Ling's Cars",
-    "blurb": "A real UK car-leasing business run from a website that assaults you with flashing GIFs, pandas, and Ling herself. Somehow it's a wildly successful company and a deliberate work of art.",
-    "url": "https://www.lingscars.com/"
-  },
-  {
-    "id": "g:site-heavens-gate",
+    "id": "g:site-heavensgate",
     "kind": "site",
     "era": "nostalgic",
     "title": "Heaven's Gate",
-    "blurb": "The website of the UFO cult, preserved exactly as it was left in 1997, run forever by surviving believers. A genuinely eerie time capsule of late-90s web design and end-of-the-world certainty.",
+    "blurb": "The website the cult built in 1997 is still online, untouched, glowing green and purple. A genuine artifact of the early web preserved in amber.",
     "year": "1997",
     "url": "https://www.heavensgate.com/"
   },
   {
-    "id": "g:site-hadron-collider",
+    "id": "g:site-info-cern",
     "kind": "site",
-    "era": "current",
-    "title": "Has the Large Hadron Collider Destroyed the World Yet?",
-    "blurb": "A single-purpose website that answers the only question that matters. Spoiler: the answer has been 'nope' since 2008, and it updates the moment that changes.",
-    "year": "2008",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com/"
+    "era": "timeless",
+    "title": "The First Website Ever",
+    "blurb": "Tim Berners-Lee's original page explaining what this 'World Wide Web' thing is — restored to its original URL at CERN. The web, before everything.",
+    "year": "1991",
+    "url": "https://info.cern.ch/hypertext/WWW/TheProject.html"
   },
   {
-    "id": "g:game-lsd-dream-emulator",
-    "kind": "game",
-    "era": "nostalgic",
-    "title": "LSD: Dream Emulator",
-    "blurb": "A surreal 1998 PlayStation 'game' where you wander through the recorded dream diary of a real person, bumping into things to teleport somewhere stranger. There is no goal — only the dream.",
-    "year": "1998",
-    "url": "https://en.wikipedia.org/wiki/LSD:_Dream_Emulator"
+    "id": "g:site-lingscars",
+    "kind": "site",
+    "era": "current",
+    "title": "Ling's Cars",
+    "blurb": "A UK car-leasing site that looks like a fever dream exploded — flashing GIFs, ninjas, a singing fish — and it's been wildly successful for 20+ years. Intentionally, gloriously chaotic.",
+    "year": "2000",
+    "url": "https://www.lingscars.com/"
   },
   {
     "id": "g:game-seaman",
     "kind": "game",
     "era": "nostalgic",
     "title": "Seaman",
-    "blurb": "A Dreamcast pet sim where you raise a fish with a human face that talks back through a microphone, narrated by Leonard Nimoy. It remembers things you said and judges you.",
+    "blurb": "A Dreamcast 'pet' game where you raise a fish with a human face that talks to you through a microphone, narrated by Leonard Nimoy. It's rude, philosophical, and unforgettable.",
     "year": "1999",
     "url": "https://en.wikipedia.org/wiki/Seaman_(video_game)"
   },
   {
-    "id": "g:game-desert-bus",
+    "id": "g:game-katamari",
     "kind": "game",
     "era": "nostalgic",
-    "title": "Desert Bus",
-    "blurb": "The famously unreleased minigame where you drive a bus from Tucson to Las Vegas in real time — eight hours, no traffic, no passengers, a slight constant drift. It became a beloved charity-marathon legend.",
-    "year": "1995",
-    "url": "https://en.wikipedia.org/wiki/Desert_Bus"
-  },
-  {
-    "id": "g:game-progress-quest",
-    "kind": "game",
-    "era": "nostalgic",
-    "title": "Progress Quest",
-    "blurb": "A parody RPG that plays itself. You make a character, then watch bars fill as it slays monsters and collects loot entirely without you. The original idle game, born as a joke about MMOs.",
-    "year": "2002",
-    "url": "https://en.wikipedia.org/wiki/Progress_Quest"
+    "title": "Katamari Damacy",
+    "blurb": "You roll a magic ball that sticks to everything — paperclips, then cats, then buildings — to rebuild the stars your drunk space-king father knocked out of the sky. Pure joy.",
+    "year": "2004",
+    "url": "https://en.wikipedia.org/wiki/Katamari_Damacy"
   },
   {
     "id": "g:game-qwop",
     "kind": "game",
     "era": "nostalgic",
     "title": "QWOP",
-    "blurb": "You control an Olympic sprinter using four keys, each tied to a single thigh or calf muscle. The result is a hilarious, infuriating ragdoll faceplant the moment you press anything.",
+    "blurb": "A 'simple' running game where each key controls a single leg muscle. You will not run. You will collapse, spectacularly, every single time. The original rage game.",
     "year": "2008",
     "url": "https://en.wikipedia.org/wiki/QWOP"
   },
   {
-    "id": "g:one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One Million Checkboxes",
-    "blurb": "A shared grid of a million live checkboxes — check one and it checks for everyone. Teens famously hid secret binary messages and even encoded moving GIFs of Jake Gyllenhaal in here. Collective chaos, one box at a time.",
-    "url": "https://onemillioncheckboxes.com/"
-  },
-  {
-    "id": "g:one-million-chessboards",
+    "id": "g:game-desert-bus",
     "kind": "game",
-    "era": "current",
-    "title": "One Million Chessboards",
-    "blurb": "A 1,000×1,000 grid of chessboards where moving a piece moves it for every other player. No turns, no rules, just free-roaming pieces drifting across a vast shared battlefield. Anarchy, but elegant.",
-    "url": "https://onemillionchessboards.com/"
+    "era": "nostalgic",
+    "title": "Desert Bus",
+    "blurb": "The most boring game ever made: drive a bus from Tucson to Las Vegas in real time at 45 mph, eight straight hours, no pausing, slightly veering right. It became a beloved charity marathon.",
+    "year": "1995",
+    "url": "https://en.wikipedia.org/wiki/Desert_Bus"
   },
   {
-    "id": "g:internet-roadtrip",
-    "kind": "game",
-    "era": "current",
-    "title": "Internet Roadtrip",
-    "blurb": "Thousands of strangers steer one virtual car through Google Street View, voting in real time on where to turn, when to honk, and which local radio station to tune. Democracy has never been this slow or this fun.",
-    "url": "https://neal.fun/internet-roadtrip/"
-  },
-  {
-    "id": "g:sandboxels",
-    "kind": "game",
-    "era": "current",
-    "title": "Sandboxels",
-    "blurb": "A falling-sand playground with over 500 materials, heat, electricity, and chemistry. Build a tiny world, then set it on fire. Hours vanish here and you won't notice.",
-    "url": "https://sandboxels.r74n.com/"
-  },
-  {
-    "id": "g:neal-fun",
+    "id": "g:the-quiet-place-project",
     "kind": "site",
     "era": "current",
-    "title": "neal.fun",
-    "blurb": "The home base for The Password Game, Infinite Craft, and Draw a Perfect Circle — a whole arcade of clever interactive experiments that trick you into learning something. Bring a snack.",
-    "url": "https://neal.fun/"
+    "title": "The Quiet Place Project",
+    "blurb": "A click-through pause button for your brain. It walks you, line by line, away from the chaos and asks for nothing but a few breaths. Annoyingly effective.",
+    "url": "https://thequietplaceproject.com"
   },
   {
-    "id": "g:ubuweb",
+    "id": "g:cloudhiker",
     "kind": "site",
     "era": "current",
-    "title": "UbuWeb",
-    "blurb": "A sprawling, beautifully chaotic archive of the avant-garde — sound art, concrete poetry, experimental film, and a 1986 interview with Andy Warhol about his Amiga. The kind of place you fall into and lose an afternoon.",
-    "url": "https://www.ubu.com/"
+    "title": "Cloudhiker",
+    "blurb": "A one-button discovery engine that flings you toward the weird, the lovely, and the gloriously pointless corners of the web. The spiritual heir to clicking 'Stumble.'",
+    "url": "https://cloudhiker.net"
   },
   {
-    "id": "g:long-doge-challenge",
+    "id": "g:ico-shrine",
     "kind": "site",
     "era": "current",
-    "title": "The Long Doge Challenge",
-    "blurb": "An infinite-scrolling shrine to the Doge meme that just keeps going. Scroll deep enough and you can print your very own page-count certificate. Such patience. Very wow.",
-    "url": "https://longdogechallenge.com/"
+    "title": "The ICO Shrine",
+    "blurb": "An obsessively maintained fan archive decoding the invented language from the game ICO, still being updated long after most people forgot the cartridge existed. Devotion as a lifestyle.",
+    "url": "https://icoshrine.neocities.org"
   },
   {
-    "id": "g:the-internet-map",
+    "id": "g:archive-of-the-odd",
     "kind": "site",
     "era": "current",
-    "title": "The Internet Map",
-    "blurb": "Every website rendered as a star in a navigable galaxy, sized by traffic and clustered by who links to whom. Drift through the cosmos and watch the whole web sprawl out like constellations.",
-    "url": "https://internet-map.net/"
+    "title": "Archive of the Odd",
+    "blurb": "A horror zine that tells its stories as fake product support pages, defunct forum threads, and stray letters. The format is the scare. You'll forget you're reading fiction.",
+    "url": "https://archiveoftheodd.com"
+  },
+  {
+    "id": "g:slop-evader",
+    "kind": "site",
+    "era": "current",
+    "title": "Slop Evader",
+    "blurb": "Artist Tega Brain's browser extension that filters your search results down to things published before ChatGPT existed — a small, stubborn act of resistance against the AI-flavored gray goo.",
+    "url": "https://slopevader.com"
+  },
+  {
+    "id": "g:coral-city-camera",
+    "kind": "site",
+    "era": "current",
+    "title": "Coral City Camera",
+    "blurb": "A 24/7 live stream of a wild urban reef off Miami, run by the art-science crew Coral Morphologic. Fish drift by, you forget your inbox exists, everyone wins.",
+    "url": "https://www.coralcitycamera.com"
   }
 ];
