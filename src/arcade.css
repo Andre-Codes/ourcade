@@ -1469,6 +1469,12 @@ main > section + section { margin-top: 44px; }
   color: var(--neon-pink); border: 1px solid var(--neon-pink); border-radius: 4px;
   text-shadow: 0 0 8px rgba(255,77,114,.5); box-shadow: 0 0 10px rgba(255,77,114,.25);
 }
+.arcade-stumble-vault {
+  margin-left: 12px; padding: 3px 7px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.06em;
+  color: var(--neon-gold); border: 1px solid var(--neon-gold); border-radius: 4px;
+  text-shadow: 0 0 8px rgba(255,210,63,.4); box-shadow: 0 0 10px rgba(255,210,63,.2);
+}
 
 /* konami unlock toast (Home) */
 .arcade-deepcuts-toast {
@@ -1511,6 +1517,57 @@ main > section + section { margin-top: 44px; }
 .arcade-stumble-foot {
   margin: 14px 2px 0; text-align: center; font-size: 0.62rem; letter-spacing: 0.14em;
   color: var(--arcade-muted); text-transform: uppercase;
+}
+
+/* ====================================================================== */
+/*  THE VAULT (/vault) — the back catalogue of weird-web finds            */
+/* ====================================================================== */
+.arcade-vault { max-width: 1040px; margin: 0 auto; padding: 4px 2px 28px; display: flex; flex-direction: column; gap: 16px; }
+.arcade-vault-head { text-align: center; }
+.arcade-vault-masthead {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.arcade-vault-title {
+  font-family: 'Black Ops One', cursive; font-size: 1.8rem; letter-spacing: 0.02em; margin: 0;
+  color: var(--neon-gold); text-shadow: 0 0 14px rgba(255,210,63,.45);
+}
+.arcade-vault-standing {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: #cbb8f0; letter-spacing: 0.04em;
+}
+.arcade-vault-stat {
+  display: flex; align-items: baseline; justify-content: center; gap: 8px; flex-wrap: wrap;
+  margin: 10px 0 0; padding: 7px 0; border-top: 1px solid #2a2f4a; border-bottom: 1px solid #2a2f4a;
+}
+.arcade-vault-stat-num {
+  font-family: 'Press Start 2P', monospace; font-size: 0.9rem; color: var(--neon-gold);
+  text-shadow: 0 0 10px rgba(255,210,63,.4);
+}
+.arcade-vault-stat-label {
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.08em;
+  color: var(--arcade-muted); text-transform: uppercase;
+}
+.arcade-vault-lede {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.84rem; color: #d6e6ff; line-height: 1.6;
+  text-align: center; max-width: 640px; margin: 11px auto 0;
+}
+.arcade-vault-controls { display: flex; flex-direction: column; gap: 10px; }
+.arcade-vault-search { width: 100%; }
+.arcade-vault-chips { justify-content: center; }
+.arcade-vault-sort { border-color: #3a3050; color: var(--neon-gold); }
+.arcade-vault-grid { max-width: 100%; margin: 0; }
+.arcade-vault-grid .arcade-stumble-card { height: 100%; }
+.arcade-vault-loading {
+  text-align: center; font-family: 'Share Tech Mono', monospace; color: var(--arcade-muted);
+  letter-spacing: 0.06em; padding: 28px 0;
+}
+.arcade-vault-more { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 4px 0 0; }
+.arcade-vault-count { font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--arcade-muted); }
+.arcade-vault-foot {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--arcade-muted);
+  text-align: center; letter-spacing: 0.03em; margin: 6px 0 0;
+}
+@media (max-width: 760px) {
+  .arcade-vault-title { font-size: 1.4rem; }
 }
 
 /* ---- daily band responsive ---- */

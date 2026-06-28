@@ -1,36 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { drawArtifact, findArtifact } from "../data/stumble.js";
 import { renderStumbleCard } from "../lib/stumbleCard.js";
 import { shareImage } from "../lib/share.js";
 import ShareButton from "./ShareButton.jsx";
 import BackBar from "./BackBar.jsx";
+import ArtifactCard from "./ArtifactCard.jsx";
 
 /* /stumble — the discovery portal. One artifact at a time, a giant STUMBLE
-   AGAIN button, and no way to filter. Embeds only archive.org iframes and
-   plain images inline (trusted origins); every other artifact renders as a
-   "portal card" that opens in a new tab — most sites refuse to be framed
-   (X-Frame-Options) and we don't want arbitrary third-party frames anyway. */
-
-// Flavor chip per artifact kind — revealed AFTER the draw, never a chooser.
-const KIND_LABEL = {
-  wiki: "📖 wiki wormhole",
-  site: "🌐 living website",
-  patent: "📜 a real patent",
-  game: "🕹️ a game",
-  video: "📺 video",
-  image: "🖼️ image",
-  flash: "📼 from the flash archive",
-  mystery: "❓ unsolved mystery",
-};
-
-function hostnameOf(url) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
-  }
-}
+   AGAIN button, and no way to filter. The card itself lives in ArtifactCard.jsx
+   (shared with the Vault). */
 
 // Stable share deep-link regardless of how the page was reached (HashRouter).
 function shareUrlFor(artifact) {
@@ -75,70 +54,6 @@ function CardButton({ artifact }) {
     <button type="button" className="arcade-share" onClick={onClick} disabled={status === "busy"}>
       {label}
     </button>
-  );
-}
-
-function ArtifactCard({ artifact }) {
-  const kindChip = KIND_LABEL[artifact.kind];
-  const host = hostnameOf(artifact.url);
-  const embed = artifact.embed;
-  // Flash plays inline here; keep people on Ourcade — link to our own Flash
-  // Theater (/flash?play=<id>), never out to archive.org.
-  const isFlash = artifact.kind === "flash" && embed?.type === "archive";
-
-  return (
-    <div className="arcade-stumble-card">
-      {kindChip && <span className="arcade-stumble-kind">{kindChip}</span>}
-      {artifact.deepCut && <span className="arcade-stumble-deepcut">🩻 DEEP CUT</span>}
-      <h2 className="arcade-stumble-title">
-        {artifact.title}
-        {artifact.year && <span className="arcade-stumble-year"> ({artifact.year})</span>}
-      </h2>
-
-      {embed && embed.type === "archive" && (
-        <div
-          className="arcade-flash-screen arcade-stumble-screen"
-          style={embed.aspect ? { "--flash-aspect": embed.aspect } : undefined}
-        >
-          <iframe
-            key={artifact.id}
-            className="arcade-flash-frame"
-            src={`https://archive.org/embed/${embed.id}`}
-            title={artifact.title}
-            allowFullScreen
-            loading="lazy"
-          />
-        </div>
-      )}
-      {embed && embed.type === "image" && (
-        <img className="arcade-stumble-image" src={embed.src} alt={artifact.title} />
-      )}
-
-      <p className="arcade-stumble-blurb">{artifact.blurb}</p>
-      {artifact.credit && (
-        <p className="arcade-stumble-credit">by {artifact.credit}</p>
-      )}
-
-      {isFlash ? (
-        <Link
-          className="arcade-stumble-open"
-          to={`/flash?play=${encodeURIComponent(embed.id)}`}
-        >
-          📺 watch on the Flash Channel →
-        </Link>
-      ) : (
-        artifact.url && (
-          <a
-            className="arcade-stumble-open"
-            href={artifact.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {embed ? `view on ${host} ↗` : `OPEN ${host} ↗`}
-          </a>
-        )
-      )}
-    </div>
   );
 }
 

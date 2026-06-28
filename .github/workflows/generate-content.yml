@@ -45,6 +45,15 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: npm run generate:curiosities
 
+      # Mirror the freshly-archived finds into the committed Vault snapshot the
+      # browser reads (finds-only: stumble + weird + curiosities). Soft-fails
+      # without clobbering if the secret is missing. The git add below already
+      # stages the whole generated dir, so vault*.js is covered.
+      - name: Snapshot the archive → Vault
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: npm run snapshot:archive
+
       - name: Verify date-seeded rotation still holds
         run: npm run check:daily
 

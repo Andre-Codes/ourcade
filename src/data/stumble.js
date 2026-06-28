@@ -17,6 +17,7 @@
       own seen-list and keeps going. */
 
 import { loadPool } from "./animations.js";
+import { loadVault } from "./vault.js";
 import generated from "./generated/stumble.js";
 import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual/content.js";
 import {
@@ -62,15 +63,44 @@ function loadFlashArtifacts() {
   return flashArtifactsPromise;
 }
 
+// Deep Stumble: the vault (every find ever archived) as a low-weight bucket, so
+// the dice are quietly bottomless. We only KEEP what isn't already in the curated
+// STATIC pool — the live pool stays the front, the vault is the deep tail. (NOT
+// the Konami-gated DEEP_CUTS; that's a separate, secret bucket — see below.)
+function hostKey(url) {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return String(url || "").toLowerCase();
+  }
+}
+let vaultArtifactsPromise = null;
+function loadVaultArtifacts() {
+  if (!vaultArtifactsPromise) {
+    vaultArtifactsPromise = loadVault()
+      .then((items) => {
+        const knownIds = new Set(STATIC.map((a) => a.id));
+        const knownHosts = new Set(STATIC.filter((a) => a.url).map((a) => hostKey(a.url)));
+        return items
+          .filter((a) => !knownIds.has(a.id) && !knownHosts.has(hostKey(a.url)))
+          .map((a) => ({ ...a, fromVault: true })); // chip flag on the card
+      })
+      .catch(() => []);
+  }
+  return vaultArtifactsPromise;
+}
+
 // The invisible 40/40/20: nostalgic splits between flash and everything else.
-// Deep cuts (when unlocked) get their own small bucket on top — the overall
-// mix barely shifts, but the dice now occasionally roll strange.
-function buildBuckets(flashArtifacts) {
+// Deep Stumble (the vault) rides on top as a small always-on bucket — the curated
+// weights still dominate, but every roll CAN reach into the whole archive. Deep
+// Cuts (Konami-unlocked) are a separate small bucket on top of that.
+function buildBuckets(flashArtifacts, vaultArtifacts) {
   return [
     { weight: 0.2, items: flashArtifacts },
     { weight: 0.2, items: STATIC.filter((a) => a.era === "nostalgic") },
     { weight: 0.4, items: STATIC.filter((a) => a.era === "current") },
     { weight: 0.2, items: STATIC.filter((a) => a.era === "timeless") },
+    { weight: 0.15, items: vaultArtifacts }, // 🗄️ Deep Stumble — the deep tail
     ...(getDeepCutsUnlocked() ? [{ weight: 0.12, items: DEEP_CUTS }] : []),
   ].filter((b) => b.items.length > 0);
 }
@@ -88,7 +118,11 @@ function weightedBucket(buckets) {
 // One stumble: returns a fresh artifact and records it as seen.
 // `excludeId` keeps a double-click from landing on the artifact on screen.
 export async function drawArtifact(excludeId) {
-  const buckets = buildBuckets(await loadFlashArtifacts());
+  const [flashArtifacts, vaultArtifacts] = await Promise.all([
+    loadFlashArtifacts(),
+    loadVaultArtifacts(),
+  ]);
+  const buckets = buildBuckets(flashArtifacts, vaultArtifacts);
   if (!buckets.length) return null;
   const bucket = weightedBucket(buckets);
 
@@ -121,7 +155,9 @@ export async function findArtifact(id) {
     const anim = pool.find((a) => a.id === raw);
     if (anim) return flashToArtifact(anim);
   }
-  return null;
+  // Deep Stumble: a shared link to a vault-only find still opens for the friend.
+  const fromVault = (await loadVaultArtifacts()).find((a) => a.id === id);
+  return fromVault || null;
 }
 
 // For scripts/daily-check.js: audit the static pools (deep cuts included)

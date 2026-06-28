@@ -326,6 +326,7 @@ export default function Home() {
         <a href="#top" className="arcade-tab is-active">HOME</a>
         <a href="#arcade-today" className="arcade-tab arcade-tab-hot">TODAY!</a>
         <Link to="/watercooler" className="arcade-tab arcade-tab-cool">💧 WATER COOLER</Link>
+        <Link to="/vault" className="arcade-tab arcade-tab-cool">🗄️ THE VAULT</Link>
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <Link to="/new" className="arcade-tab arcade-tab-hot">NEW!</Link>

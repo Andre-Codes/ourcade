@@ -120,6 +120,12 @@ npm run check:daily
   generated" corpus. It's soft-fail (never blocks a deploy) and needs no manual
   step. Full details in
   [`docs/schedules-and-content.md`](docs/schedules-and-content.md).
+- **🗄️ The Vault (`/vault`):** a page that lets visitors wander the *whole back
+  catalogue* of timeless internet finds (every `stumble` / `weird` / `curiosities`
+  item ever made). It reads a build-time **snapshot** of the archive
+  (`npm run snapshot:archive`, run automatically in the content workflows) into
+  `src/data/generated/vault.js`. The 🎲 Stumble button also draws from this corpus
+  (a low-weight "Deep Stumble" bucket), so the dice are effectively bottomless.
 
 ---
 

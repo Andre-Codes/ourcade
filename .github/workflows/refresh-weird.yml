@@ -50,6 +50,13 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: npm run generate:weird
 
+      # Mirror the freshly-archived finds into the committed Vault snapshot the
+      # browser reads (soft-fails without clobbering if the secret is missing).
+      - name: Snapshot the archive → Vault
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: npm run snapshot:archive
+
       - name: Verify rotations still hold
         run: npm run check:daily
 
@@ -58,7 +65,7 @@ jobs:
         run: |
           git config user.name "ourcade-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add src/data/generated/weird.js src/data/generated/_weird.md
+          git add src/data/generated/weird.js src/data/generated/_weird.md src/data/generated/vault.js src/data/generated/vault-index.js
           if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No pool changes — nothing to commit."

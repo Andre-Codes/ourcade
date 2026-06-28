@@ -200,7 +200,17 @@ Every generator also appends what it just wrote to a permanent Firestore store, 
 - **When:** as a side-effect of each scheduled run — so a type's archive fills on **that type's cadence**: monthly types monthly, `weird` every other day, `stumble` monthly (since [fetch-stumble.yml](../.github/workflows/fetch-stumble.yml) was added — before that the Stumble pool was archived only on a manual local run).
 - **Soft-fail by design:** uses the Firebase Admin SDK (bypasses security rules; needs no `allow` rule) via the `FIREBASE_SERVICE_ACCOUNT` secret (set in each workflow's `env`). If that secret is missing or any write throws, it logs a warning and returns — archiving must **never** block a content commit. So if the secret isn't set, archiving silently no-ops while the site still ships.
 
-> Note: the `*.js` generated files are committed to git, so git history is *also* a de-facto archive. The Firestore copy's payoff is being **queryable** as one corpus (e.g. for a future "browse everything we've ever made" view or programmatic dedupe), which git history is poor at.
+> Note: the `*.js` generated files are committed to git, so git history is *also* a de-facto archive. The Firestore copy's payoff is being the **complete corpus** — which is exactly what 🗄️ The Vault reads (see below).
+
+### The Vault snapshot (browser's view of the archive)
+
+The browser still never reads Firestore directly (`archive/*` stays admin-only). Instead a build-time script mirrors the archive into committed static JSON:
+
+- **Script:** [scripts/snapshot-archive.js](../scripts/snapshot-archive.js) (`npm run snapshot:archive`). Reuses the same soft-fail `getDb()`; **no Anthropic calls.**
+- **Finds-only:** it snapshots just the three *discovery* types — `stumble`, `weird`, `curiosities` — the timeless, stumble-worthy finds. The "in-the-moment" types (polls/quizzes/buzz/countdowns/hotornot/news/tips/almanac) stay in Firestore but are **not** snapshotted; they belong to "today," not a back catalogue.
+- **Output:** `src/data/generated/vault.js` (full corpus, lazy-imported) + `vault-index.js` (tiny summary, eager). Each find is normalized to the Stumble artifact shape and **de-duped by URL** across types.
+- **Soft-fail, no-clobber:** if the secret is missing or the read returns nothing, it writes nothing — the previously committed snapshot keeps serving.
+- **When:** runs as a step in all three content workflows *after* their archive writes (so the snapshot reflects the run that just happened), and the vault files are committed alongside the rest.
 
 ---
 
@@ -208,8 +218,14 @@ Every generator also appends what it just wrote to a permanent Firestore store, 
 
 The one **deliberately non-deterministic** feature (everything else is date-seeded). A click draws a random artifact from a weighted mix — it does **not** pull from the Weird / Curiosity pools; it has its own pool:
 
-- `MANUAL_ARTIFACTS` (✋ hand-picked seeds) + `generated/stumble.js` (🤖 the AI batch from [fetch-stumble.js](../scripts/fetch-stumble.js)) + the ~3000-entry **archive.org Flash** pool (adapted on the fly) + `MANUAL_DEEP_CUTS` (✋ Konami-locked extras).
-- **Weighting** — the invisible 40/40/20: 20% flash · 20% nostalgic · 40% current · 20% timeless (+ a small deep-cuts bucket once unlocked), then uniform-random within the chosen bucket, skipping what you've seen this session.
+- `MANUAL_ARTIFACTS` (✋ hand-picked seeds) + `generated/stumble.js` (🤖 the AI batch from [fetch-stumble.js](../scripts/fetch-stumble.js)) + the ~3000-entry **archive.org Flash** pool (adapted on the fly) + `MANUAL_DEEP_CUTS` (✋ Konami-locked extras) + 🗄️ **Deep Stumble** (the whole Vault corpus — see below).
+- **Weighting** — the invisible mix: 20% flash · 20% nostalgic · 40% current · 20% timeless · **15% Deep Stumble (the vault)** (+ a small deep-cuts bucket once unlocked), then uniform-random within the chosen bucket, skipping what you've seen this session.
+
+**🗄️ Deep Stumble** — the dice also reach into the *entire archived finds corpus* (the Vault snapshot), as a low-weight always-on bucket. The curated current pool still dominates, but every roll *can* surface something from deep history. Vault-only finds get a "🗄️ from the vault" chip, and items already in the curated pool are deduped out so the vault only adds the deep tail. **Not** to be confused with **Deep Cuts** — that's the separate, *secret*, Konami-unlocked 🩻 bucket, unchanged.
+
+### 🗄️ The Vault ([/vault](../src/components/VaultPage.jsx))
+
+A destination page (top nav, next to the Water Cooler) to **wander the whole back catalogue** of timeless internet finds — everything ever archived under `stumble` / `weird` / `curiosities`. The daily site only shows "today"; the Vault is the depth. Finite and anti-algorithm: a search box, a `kind` filter (wiki/site/patent/game/mystery…), newest/oldest sort, and load-more — no feed. Reads the build-time **Vault snapshot** (above), lazy-loaded as its own chunk, and renders every find through the same `ArtifactCard` the Stumble page uses.
 
 **Stumble vs. Weird** — related but aimed at different targets, and kept distinct by mutual URL-dedupe:
 - **Weird** = a narrow slice — mostly *current, living websites* — for a card that turns over several times a day.
