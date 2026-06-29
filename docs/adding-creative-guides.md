@@ -9,10 +9,10 @@
 ## What the user provides
 
 - **Image(s).** Either:
-  - **Per-step images** — one image per step (`step 1.png`, `step 2.png`, …). This is the main case. The user may give them as files in the chat, a folder path, or attachments.
-  - **One whole-plate image** — a single image that already shows all the numbered steps. (Less common for user-supplied; this is how the generated Lutz guides work.)
+  - **One plate-only image** — a single drawing sheet that already shows all the numbered steps. **This is the default for drawings now**: the image IS the guide, no step text. The generated Lutz plates (`npm run fetch:draw-guides`) all use this shape.
+  - **Per-step images** — one image per step (`step 1.png`, `step 2.png`, …). Use this only when the user actually wants captioned steps.
 - **A title** — e.g. "Draw a wizard cat". You derive the `id`, lane, and slugs from it.
-- **(Optional) captions** — one line per step. If the user doesn't give captions, **you write them** by looking at each image (you have vision — open the image and describe what to add at that step, in the house voice). If you write them, say so and let the user correct.
+- **(Optional) captions** — one line per step, **only for per-step guides**. Plate-only guides have no captions at all. If the user wants a per-step guide and doesn't give captions, you can write them from the images, but prefer the simpler plate-only shape unless they ask for steps.
 - **(Optional) a card thumbnail** — if not given, reuse step 1 (or the plate) as the card image, or let it fall back to the lane tile.
 
 If the user gives you images but the **title or captions are ambiguous**, ask one quick clarifying question — don't guess a title that ends up in a URL.
@@ -82,7 +82,23 @@ This walks each lane folder and converts `assets-src/creatives/<lane>/**` → `s
 
 ### 3. Add the entry to `src/data/manual/creatives.js`
 
-Append to the `MANUAL_CREATIVES` array. **Per-step drawing guide** template:
+Append to the `MANUAL_CREATIVES` array. **Plate-only guide** (the default for drawings — just an image + title, no steps):
+
+```js
+{
+  id: "cr-draw-snail", lane: "draw", guide: true,
+  plate: "snail",                    // image at .../drawings/plates/snail.webp
+  plateCredit: "<author / source — license note>",  // optional credit line
+  title: "How to draw a snail",
+  blurb: "A public-domain drawing plate — follow the numbered steps with a pencil.",
+  image: "snail",                    // card thumb reuses the plate slug
+  time: "10 min", difficulty: "beginner", cost: "free",
+  action: "Grab a pencil and copy it line for line",
+  // NO steps, NO materials, NO tips — the plate carries everything
+}
+```
+
+**Per-step drawing guide** template (only when the user wants captioned steps):
 
 ```js
 {
@@ -106,7 +122,7 @@ Append to the `MANUAL_CREATIVES` array. **Per-step drawing guide** template:
 }
 ```
 
-**Whole-plate guide** (one image, text-only steps — no `step.image`):
+**Whole-plate guide WITH captions** (one plate image + text-only steps — no `step.image`):
 ```js
 {
   id: "cr-draw-snail", lane: "draw", guide: true,
@@ -129,9 +145,9 @@ Append to the `MANUAL_CREATIVES` array. **Per-step drawing guide** template:
 
 ### 4. Field rules (or `check:daily` fails)
 
-- `id` unique; it's also the steps folder name.
-- A guide needs `guide: true` **and** non-empty `steps`, and **every step needs a `caption`**.
-- An item is **either** a guide (has `steps`) **or** external (has `url` + `source`). Guides need no `url`.
+- `id` unique; for per-step guides it's also the steps folder name.
+- A guide needs `guide: true` **and** something to show: a `plate` slug (plate-only) **or** non-empty `steps` (and then **every step needs a `caption`**).
+- An item is **either** a guide (has a `plate` or `steps`) **or** external (has `url` + `source`). Guides need no `url`.
 - `image`, `plate`, and `step.image` are **plain slugs** — no `/`, no `.`, no extension.
 - `imageUrl` (if used) must be `http(s)`.
 - Plain strings only — no markdown/HTML in captions, blurb, tips.
@@ -157,7 +173,7 @@ Optionally `npm run dev` and open `/creatives/<id>` to eyeball the rendered guid
 | Concept | Where |
 |---|---|
 | Hand-edited content | `src/data/manual/creatives.js` → `MANUAL_CREATIVES` (never auto-overwritten) |
-| Generated Lutz guides | `src/data/generated/draw-guides.js` (do NOT hand-edit; `npm run fetch:draw-guides` rewrites it) |
+| Generated Lutz plates | `src/data/generated/draw-guides.js` — plate-only guides (do NOT hand-edit; `npm run fetch:draw-guides` scrapes ~40 public-domain plates, no vision, and rewrites it) |
 | Source art (you place) | `assets-src/creatives/<lane>/<slug>.png`, `…/<lane>/steps/<id>/<step>.png`, `…/<lane>/plates/<plate>.png` (lane = `drawings`/`prints`/`builds`/…) |
 | Optimized art (committed) | `src/assets/creatives/<lane>/**.webp` ← `npm run assets:creatives` |
 | Lane → folder map | `LANE_DIR` in `src/components/creativeArt.js` |

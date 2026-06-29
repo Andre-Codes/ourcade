@@ -1,5 +1,5 @@
 /* ============================================================
-   FETCH-DRAW-GUIDES — builds on-site "how to draw" guides from
+   FETCH-DRAW-GUIDES — builds PLATE-ONLY "how to draw" guides from
    PUBLIC-DOMAIN plates and writes them to src/data/generated/.
 
    Source: E.G. Lutz, "What to Draw and How to Draw It" (1913),
@@ -7,31 +7,36 @@
    book is literally designed as numbered step-by-step plates
    (one image: diagram 1 → 2 → … → finished drawing).
 
-   Per subject this script:
-     1. downloads the plate JPEG from Gutenberg over plain HTTPS,
-     2. optimizes it to src/assets/creatives/plates/<slug>.webp (sharp),
-     3. shows the plate to Claude (VISION) and asks it to read the
-        numbered diagrams and write the blurb + materials + per-step
-        captions + tips in the house voice — Claude does NOT invent
-        the art, only describes the real public-domain steps,
-     4. assembles a "whole-plate" guide object (the page shows the
-        plate once + a numbered caption list).
+   New, simpler model (no Claude, no vision, no captions):
+   THE PLATE IMAGE IS THE GUIDE. The page just shows the big plate
+   + a title + a public-domain credit. The numbered steps are drawn
+   right on the plate, so there's nothing to caption.
 
-   Soft-fail like fetch-stumble.js: if a plate won't download or a
-   guide is malformed, it's dropped with a warning; if 0 survive,
-   NOTHING is written and the committed file keeps serving.
+   This script:
+     1. fetches the book's HTML and pairs each plate image
+        (images/i_0NN.jpg) with its figure caption / alt text,
+     2. keeps the ones that read as a single drawable subject
+        (skips geometry/oval/compass instructional figures),
+     3. downloads + optimizes each plate to
+        src/assets/creatives/drawings/plates/<slug>.webp (sharp),
+     4. writes a plate-only guide object per plate. Titles come
+        from the book caption; the user can correct them by hand
+        later in a manual entry — these generated titles are a
+        best-effort starting point.
+
+   Soft-fail like fetch-stumble.js: if the HTML won't parse or a
+   plate won't download, that item is dropped with a warning; if 0
+   survive, NOTHING is written and the committed file keeps serving.
    Provenance → src/data/generated/_draw-guides.md.
 
-   Run:  npm run fetch:draw-guides    (needs ANTHROPIC_API_KEY)
-   Reusable: edit SUBJECTS below and re-run for more subjects.
+   Run:  npm run fetch:draw-guides    (no API key needed)
+   Tweak: edit CURATED below to force titles / add or drop subjects.
    ============================================================ */
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import Anthropic from "@anthropic-ai/sdk";
-import { loadEnv } from "./lib/research.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
@@ -41,66 +46,192 @@ const PROOF_FILE = "_draw-guides.md";
 // LANE_DIR: draw → drawings). Output: src/assets/creatives/drawings/plates/<slug>.webp.
 const PLATES_DIR = path.join(ROOT, "src", "assets", "creatives", "drawings", "plates");
 
-// Gutenberg #74518 plate images live here (verified reachable). `plate` is the
-// image basename in the book, e.g. i_016 → .../images/i_016.jpg.
-const GUTENBERG_BASE = "https://www.gutenberg.org/cache/epub/74518/images";
+// Gutenberg #74518 lives here. The HTML lists every plate <img> with a caption;
+// plate images are images/i_0NN.jpg under the same epub cache folder.
+const GUTENBERG_EPUB = "https://www.gutenberg.org/cache/epub/74518";
+const GUTENBERG_IMAGES = `${GUTENBERG_EPUB}/images`;
+// Candidate HTML paths (Gutenberg has used a few naming schemes); tried in order.
+const HTML_CANDIDATES = [
+  `${GUTENBERG_EPUB}/pg74518-images.html`,
+  `${GUTENBERG_EPUB}/74518-images.html`,
+  `${GUTENBERG_EPUB}/74518-h.htm`,
+  "https://www.gutenberg.org/files/74518/74518-h/74518-h.htm",
+];
 const PLATE_CREDIT =
   "E.G. Lutz, “What to Draw and How to Draw It” (1913) — public domain";
 const PLATE_WIDTH = 1000; // viewed large on the guide page
 
-// Curated quick beginner subjects, each a confirmed numbered-step plate.
-// slug = our id/file slug; plate = the Gutenberg image basename.
-const SUBJECTS = [
-  { slug: "cat", plate: "i_016", subject: "a cat" },
-  { slug: "mouse", plate: "i_017", subject: "a mouse" },
-  { slug: "fish", plate: "i_019", subject: "a fish" },
-  { slug: "rabbit", plate: "i_023", subject: "a rabbit" },
-  { slug: "swan", plate: "i_026", subject: "a swan" },
-  { slug: "duck", plate: "i_027", subject: "a duck" },
-  { slug: "bulldog", plate: "i_030", subject: "a bulldog" },
-  { slug: "owl", plate: "i_038", subject: "an owl" },
-];
+// How many plate-only guides to keep (the lane is meant to be deep now).
+const TARGET = 40;
 
-loadEnv(ROOT);
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error("Missing ANTHROPIC_API_KEY — set it in a local .env or as a CI secret.");
-  process.exit(1);
+// Curated forced titles + an explicit skip-list, by plate basename. The HTML
+// captions in this book are terse and sometimes shared across a spread, so we
+// pin the clearest single-subject plates here. Anything in SKIP is an
+// instructional/geometry figure (circles, ovals, compasses) — not a drawing to
+// copy. Plates not listed here still come through if HTML parsing finds a usable
+// caption; this is a quality nudge, not the whole source of truth.
+const CURATED = {
+  i_016: "How to draw a cat",
+  i_017: "How to draw a mouse",
+  i_019: "How to draw a fish",
+  i_023: "How to draw a rabbit",
+  i_026: "How to draw a swan",
+  i_027: "How to draw a duck",
+  i_030: "How to draw a bulldog",
+  i_038: "How to draw an owl",
+};
+// Plate basenames to never include (front matter, geometry primers, decorative).
+const SKIP = new Set(["i_001", "i_002", "i_003", "i_004", "i_005"]);
+
+// Turn a raw plate caption into a friendly "How to draw …" title, or return ""
+// to DROP the plate when the caption is too noisy to title cleanly. Best-effort:
+// the user refines kept titles by hand. The book's alt text is terse and messy —
+// ALL-CAPS, bracket cruft, leaked construction notes ("FIRST DRAW A TRIANGLE…"),
+// and multi-figure spreads ("CURIOUS FISHES 1 … 2 …") — so we normalize what we
+// can and reject the rest rather than ship garbage.
+function titleFromCaption(raw) {
+  let s = String(raw || "")
+    .replace(/\s+/g, " ")
+    .replace(/[\[\]{}()]/g, " ") // drop bracket cruft like [Rooster]
+    .replace(/^(fig(?:ure)?\.?\s*\d+\.?\s*)/i, "")
+    .replace(/[.\s]+$/g, "")
+    .trim();
+  if (!s) return "";
+
+  // Reject: leaked construction instructions, or a numbered multi-figure spread.
+  if (/\bfirst draw|with sides|rhomboid|triangle|oval|circle|compass\b/i.test(s)) return "";
+  if (/\b\d\b/.test(s)) return ""; // "Fish 1 … 2 …" style multi-subject plates
+  // ALL-CAPS captions → normalize to lowercase so "FISHES" → "fishes".
+  if (s === s.toUpperCase()) s = s.toLowerCase();
+  // Keep it a short single subject (1–4 words); longer = a multi-thing caption.
+  const words = s.split(" ").filter(Boolean);
+  if (words.length > 4) return "";
+
+  s = s.toLowerCase().replace(/^how to draw\s+/i, "").trim();
+  if (!s) return "";
+  return `How to draw ${s}`;
 }
 
-const client = new Anthropic();
+const slugify = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
-const SYSTEM = `You write tiny, low-stakes "how to draw" guides for OURCADE — a cozy retro arcade site. Voice: warm, dry, encouraging, never precious; the whole point is "grab a pencil and make a little guy." You are shown a single PUBLIC-DOMAIN drawing plate that already contains the numbered steps (diagram 1, 2, 3 … ending in the finished drawing). Your job is ONLY to read what those numbered diagrams actually show and put it into words. NEVER invent a step the plate doesn't show, and never claim a different number of steps than the plate has. Count the numbered diagrams; write exactly one caption per numbered step, in order, each a single friendly sentence describing what to add or do at that step. You MUST return data matching the given JSON schema. No commentary.`;
+// The file/image slug for a subject: drop the "how to draw" lead-in and any
+// leading article so "How to draw a mouse" → "mouse", "An owl" → "owl".
+const slugFromTitle = (title) =>
+  slugify(
+    String(title || "")
+      .replace(/^how to draw\s+/i, "")
+      .replace(/^(a|an|the)\s+/i, "")
+  );
 
-const guideSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    blurb: { type: "string" }, // one inviting line on why this is a fun quick draw
-    materials: { type: "array", items: { type: "string" } },
-    steps: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: { caption: { type: "string" } },
-        required: ["caption"],
-      },
-    },
-    tips: { type: "array", items: { type: "string" } },
-  },
-  required: ["blurb", "materials", "steps", "tips"],
-};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// fetch() with retries + backoff. Gutenberg throttles bursts (connection resets
+// and transient "fetch failed"), so a couple of patient retries turn a flaky run
+// into a complete one. Returns the Response, or null after exhausting tries.
+async function fetchRetry(url, tries = 4) {
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res;
+      // 4xx other than 429 won't fix itself — stop early.
+      if (res.status !== 429 && res.status < 500) return res;
+    } catch {
+      /* network blip — fall through to backoff */
+    }
+    if (i < tries - 1) await sleep(600 * (i + 1)); // 0.6s, 1.2s, 1.8s
+  }
+  return null;
+}
+
+// Fetch the first HTML candidate that returns OK. Returns the HTML string or null.
+async function fetchBookHtml() {
+  for (const url of HTML_CANDIDATES) {
+    const res = await fetchRetry(url);
+    if (res?.ok) {
+      console.log(`  book HTML: ${url}`);
+      return await res.text();
+    }
+    console.warn(`  (skip ${url} — ${res ? `HTTP ${res.status}` : "unreachable"})`);
+  }
+  return null;
+}
+
+// Parse the book HTML into { plate, caption } pairs for every images/i_0NN.jpg.
+// Caption preference: an enclosing <figcaption>, else the img's alt text. Regex
+// (not a DOM) on purpose — this runs under plain Node and the markup is simple.
+function parsePlates(html) {
+  const out = [];
+  const seen = new Set();
+  // Match each <img ... src="images/i_0NN.jpg" ... alt="..."> plus any text that
+  // follows up to a closing </figure> or the next <img (for a figcaption sweep).
+  const imgRe =
+    /<img\b[^>]*\bsrc=["'][^"']*\/?(i_\d+)\.jpe?g["'][^>]*>([\s\S]*?)(?=<img\b|<\/figure>|<\/div>|$)/gi;
+  let m;
+  while ((m = imgRe.exec(html))) {
+    const plate = m[1];
+    if (seen.has(plate)) continue;
+    seen.add(plate);
+    const imgTag = m[0].slice(0, m[0].indexOf(">") + 1);
+    const trailing = m[2] || "";
+    const altMatch = imgTag.match(/\balt=["']([^"']*)["']/i);
+    const capMatch = trailing.match(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i);
+    const caption = stripTags(capMatch ? capMatch[1] : altMatch ? altMatch[1] : "");
+    out.push({ plate, caption });
+  }
+  return out;
+}
+
+const stripTags = (s) =>
+  String(s || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#?\w+;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Build the final ordered list of { plate, title } to fetch. Starts from parsed
+// HTML pairs, applies SKIP + CURATED overrides, fills titles, drops the
+// caption-less / instructional ones, and caps at TARGET. Falls back to CURATED
+// alone if HTML parsing produced too little (Gutenberg markup drift).
+function buildSubjects(parsed) {
+  const subjects = [];
+  const used = new Set();
+  for (const { plate, caption } of parsed) {
+    if (SKIP.has(plate)) continue;
+    const forced = CURATED[plate];
+    const title = forced || titleFromCaption(caption);
+    if (!title) continue; // no caption + not curated → can't title it, skip
+    const slug = slugFromTitle(title) || plate;
+    if (used.has(slug)) continue;
+    used.add(slug);
+    subjects.push({ plate, slug, title });
+    if (subjects.length >= TARGET) break;
+  }
+  if (subjects.length >= 2) return subjects;
+
+  // Fallback: just the curated plates (always reachable image basenames).
+  console.warn("  HTML yielded too few plates — falling back to the curated list.");
+  return Object.entries(CURATED).map(([plate, title]) => ({
+    plate,
+    slug: slugFromTitle(title) || plate,
+    title,
+  }));
+}
 
 // Download a plate JPEG to a Buffer. Returns null (with a warning) on any failure
 // so one bad plate never aborts the batch.
 async function downloadPlate(plate) {
-  const url = `${GUTENBERG_BASE}/${plate}.jpg`;
+  const url = `${GUTENBERG_IMAGES}/${plate}.jpg`;
+  const res = await fetchRetry(url);
+  if (!res?.ok) {
+    console.warn(`  DROP ${plate} — ${res ? `HTTP ${res.status}` : "unreachable"} (${url})`);
+    return null;
+  }
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.warn(`  DROP ${plate} — HTTP ${res.status} (${url})`);
-      return null;
-    }
     const buf = Buffer.from(await res.arrayBuffer());
     if (buf.length < 1000) {
       console.warn(`  DROP ${plate} — suspiciously small (${buf.length}B)`);
@@ -108,53 +239,26 @@ async function downloadPlate(plate) {
     }
     return buf;
   } catch (e) {
-    console.warn(`  DROP ${plate} — download failed: ${e.message}`);
+    console.warn(`  DROP ${plate} — read failed: ${e.message}`);
     return null;
   }
 }
 
-// Ask Claude (vision) to read the plate's numbered steps and write the copy.
-async function describePlate(jpeg, subject) {
-  const base64 = jpeg.toString("base64"); // no newlines — toString never wraps
-  const stream = client.messages.stream({
-    model: "claude-opus-4-8",
-    max_tokens: 4000,
-    thinking: { type: "adaptive" },
-    output_config: { effort: "high", format: { type: "json_schema", schema: guideSchema } },
-    system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
-          {
-            type: "text",
-            text: `This public-domain plate shows how to draw ${subject} in numbered steps. Read the numbered diagrams (1, 2, 3 …) and return: a one-sentence inviting blurb; a short materials list (usually just a pencil and paper); one caption per numbered step, in order, describing what to add at that step; and 1–3 short tips. Describe ONLY the steps actually drawn on the plate.`,
-          },
-        ],
-      },
-    ],
-  });
-  const msg = await stream.finalMessage();
-  const text = msg.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-  console.log(`  ${subject}: ${msg.usage?.output_tokens ?? "?"} out tok`);
-  return JSON.parse(text);
-}
-
-function cleanStrings(arr) {
-  return (Array.isArray(arr) ? arr : [])
-    .map((s) => String(s || "").trim())
-    .filter(Boolean);
-}
-
 async function main() {
-  console.log("Building public-domain draw guides with Claude (vision)…\n");
+  console.log("Building plate-only public-domain draw guides (no vision)…\n");
   fs.mkdirSync(PLATES_DIR, { recursive: true });
+
+  const html = await fetchBookHtml();
+  const parsed = html ? parsePlates(html) : [];
+  console.log(`  parsed ${parsed.length} plate <img> tags from the book HTML`);
+  const subjects = buildSubjects(parsed);
+  console.log(`  building ${subjects.length} plate-only guides…\n`);
 
   const guides = [];
   const proof = [];
 
-  for (const { slug, plate, subject } of SUBJECTS) {
+  for (const { plate, slug, title } of subjects) {
+    await sleep(150); // be polite — Gutenberg throttles rapid bursts
     const jpeg = await downloadPlate(plate);
     if (!jpeg) {
       proof.push(`- ${slug} (${plate}): DROPPED — download failed`);
@@ -171,48 +275,23 @@ async function main() {
       continue;
     }
 
-    // Ask Claude to read the plate and write the copy.
-    let data;
-    try {
-      data = await describePlate(jpeg, subject);
-    } catch (e) {
-      console.warn(`  DROP ${slug} — model/JSON failed: ${e.message}`);
-      proof.push(`- ${slug} (${plate}): DROPPED — ${e.message}`);
-      continue;
-    }
-
-    const steps = (Array.isArray(data.steps) ? data.steps : [])
-      .map((s) => ({ caption: String(s?.caption || "").trim() }))
-      .filter((s) => s.caption);
-    const blurb = String(data.blurb || "").trim();
-    const materials = cleanStrings(data.materials);
-    const tips = cleanStrings(data.tips);
-
-    if (!blurb || steps.length < 2) {
-      console.warn(`  DROP ${slug} — too little content (blurb? ${!!blurb}, steps ${steps.length})`);
-      proof.push(`- ${slug} (${plate}): DROPPED — thin content`);
-      continue;
-    }
-
     guides.push({
       id: `cr-draw-${slug}`,
       lane: "draw",
       guide: true,
       plate: slug,
       plateCredit: PLATE_CREDIT,
-      title: `How to draw ${subject}`, // subject already includes the article ("a cat", "an owl")
-      blurb,
+      title, // best-effort from the book caption; hand-correct later
+      // no blurb — the plate speaks for itself (the card/guide skip it when absent)
       image: slug, // card thumb reuses the plate art (creativeArt falls back to it)
       time: "10 min",
       difficulty: "beginner",
       cost: "free",
-      action: "Follow the steps, then give it a personality",
-      materials: materials.length ? materials : ["A pencil", "Paper"],
-      steps,
-      tips,
+      action: "Grab a pencil and copy it line for line",
+      // plate-only: no steps, no materials, no tips
     });
-    console.log(`  ✓ ${slug} — ${steps.length} steps → src/assets/creatives/plates/${slug}.webp`);
-    proof.push(`- ${slug} (${plate}): ${steps.length} steps, ${tips.length} tips`);
+    console.log(`  ✓ ${slug} — "${title}" → src/assets/creatives/drawings/plates/${slug}.webp`);
+    proof.push(`- ${slug} (${plate}): "${title}"`);
   }
 
   // Soft-fail: only overwrite the committed file if we actually built something.
@@ -225,9 +304,10 @@ async function main() {
 
   const banner =
     `// AUTO-GENERATED by scripts/fetch-draw-guides.js — do not edit by hand.\n` +
-    `// On-site "how to draw" guides from public-domain plates (E.G. Lutz, 1913;\n` +
-    `// Project Gutenberg #74518). "Whole-plate" shape: one reference image at\n` +
-    `// src/assets/creatives/plates/<plate>.webp + a numbered text-step list.\n`;
+    `// Plate-only "how to draw" guides from public-domain plates (E.G. Lutz, 1913;\n` +
+    `// Project Gutenberg #74518). Each guide is one reference plate at\n` +
+    `// src/assets/creatives/drawings/plates/<plate>.webp + a title — no step text.\n` +
+    `// Titles are a best-effort starting point; refine them in a manual entry.\n`;
   fs.writeFileSync(
     path.join(OUT_DIR, OUT_FILE),
     `${banner}export default ${JSON.stringify(guides, null, 2)};\n`
@@ -235,13 +315,14 @@ async function main() {
   fs.writeFileSync(path.join(OUT_DIR, PROOF_FILE), proofMarkdown(proof));
 
   console.log(`\n  wrote src/data/generated/${OUT_FILE} (${guides.length} guides)`);
-  console.log("\n✓ done — run `node scripts/daily-check.js` to audit the combined pool");
+  console.log("\n✓ done — run `npm run check:daily` to audit the combined pool");
 }
 
 function proofMarkdown(lines) {
   return (
     `# Draw guides — generation log\n\n` +
     `Source: E.G. Lutz, "What to Draw and How to Draw It" (1913), Project Gutenberg #74518 (public domain).\n\n` +
+    `Plate-only model: the plate image is the guide (no captions/vision). Titles are best-effort from the book.\n\n` +
     `Built ${new Date().toISOString()} by scripts/fetch-draw-guides.js.\n\n` +
     lines.join("\n") +
     "\n"

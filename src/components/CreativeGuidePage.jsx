@@ -8,9 +8,11 @@ import NedryGag from "./NedryGag.jsx";
    out to a bare Google/YouTube search). Two flavors, both a single vertical
    scroll (tutorials are read top-to-bottom; no step-index state machine):
    - PER-STEP: an ordered list of { image, caption } the author hosts here.
-   - WHOLE-PLATE (`item.plate`): one big public-domain reference plate up top
-     (e.g. a Lutz drawing plate where steps 1→finished are all on one image),
+   - WHOLE-PLATE (`item.plate` + steps): one big public-domain reference plate up
+     top (e.g. a Lutz drawing plate where steps 1→finished are all on one image),
      then a numbered text-only caption list. Simpler, and how the book reads.
+   - PLATE-ONLY (`item.plate`, no steps): just the big plate + title + credit. The
+     plate already shows the numbered steps, so there's nothing to caption.
    Non-guide ids (or unknown ones) fall through to a not-found gag. */
 
 const LANE_LABEL = {
@@ -117,9 +119,11 @@ export default function CreativeGuidePage() {
                 {DIFFICULTY_LABEL[item.difficulty] || item.difficulty}
               </span>
             )}
-            <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
-              {paid ? "💲 paid" : "🆓 free"}
-            </span>
+            {item.lane !== "draw" && (
+              <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
+                {paid ? "💲 paid" : "🆓 free"}
+              </span>
+            )}
           </div>
 
           {heroArt && (
@@ -150,14 +154,18 @@ export default function CreativeGuidePage() {
           </section>
         )}
 
-        {isPlateGuide ? (
-          <section className="arcade-guide-section">
-            <h2 className="arcade-guide-subhead">✏️ step by step</h2>
-            <PlateSteps steps={item.steps} />
-          </section>
-        ) : (
-          <ImageSteps lane={item.lane} id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
-        )}
+        {/* Steps are optional. Plate-only guides (a public-domain plate with no
+            step text) skip this entirely — the plate hero above IS the guide. */}
+        {item.steps?.length ? (
+          isPlateGuide ? (
+            <section className="arcade-guide-section">
+              <h2 className="arcade-guide-subhead">✏️ step by step</h2>
+              <PlateSteps steps={item.steps} />
+            </section>
+          ) : (
+            <ImageSteps lane={item.lane} id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
+          )
+        ) : null}
 
         {Array.isArray(item.tips) && item.tips.length > 0 && (
           <section className="arcade-guide-section">

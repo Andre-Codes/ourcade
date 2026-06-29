@@ -285,7 +285,8 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
 
   const bad = CREATIVES_POOL.filter(
     (c) =>
-      !c.id || !c.title || !c.blurb || !c.action ||
+      !c.id || !c.title || !c.action ||
+      (!c.guide && !c.blurb) || // external items still need a blurb; guides may skip it
       (!c.guide && !isUrl(c.url)) || // external items still need a url; guides don't
       !LANES.has(c.lane) || !DIFFS.has(c.difficulty) || !COSTS.has(c.cost) ||
       !BUCKETS.has(timeBucketOf(c))
@@ -298,18 +299,23 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   const guides = CREATIVES_POOL.filter((c) => c.guide);
   const externals = CREATIVES_POOL.filter((c) => !c.guide);
 
-  // Guides: non-empty steps[], every step has a caption, and any step.image is a
-  // plain slug. (No url required — they render on-site.) Two flavors both pass:
-  // per-step-image guides carry s.image; whole-plate guides carry a `plate` slug
-  // and text-only steps (no s.image) — handled by the "if present" slug check.
-  const badGuides = guides.filter(
-    (c) =>
-      !Array.isArray(c.steps) || c.steps.length === 0 ||
+  // Guides render on-site (no url required) in three flavors, all valid here:
+  //   • PLATE-ONLY: a `plate` slug and NO steps — the public-domain plate is the
+  //     whole guide. Just needs a valid plate slug.
+  //   • WHOLE-PLATE: a `plate` slug PLUS text-only captioned steps (no s.image).
+  //   • PER-STEP: captioned steps that each carry an image slug.
+  // A guide with steps must have every step captioned, and any step.image / plate
+  // must be a plain slug. A guide with neither steps nor a plate is malformed.
+  const badGuides = guides.filter((c) => {
+    if (c.plate && !isSlug(c.plate)) return true;
+    const hasSteps = Array.isArray(c.steps) && c.steps.length > 0;
+    if (!hasSteps) return !c.plate; // plate-only is fine; nothing-to-show is not
+    return (
       c.steps.some((s) => !s || typeof s.caption !== "string" || !s.caption.trim()) ||
-      c.steps.some((s) => s.image && !isSlug(s.image)) ||
-      (c.plate && !isSlug(c.plate))
-  );
-  check("creative guides have well-formed steps (each with a caption)", badGuides.length === 0,
+      c.steps.some((s) => s.image && !isSlug(s.image))
+    );
+  });
+  check("creative guides well-formed (plate-only, whole-plate, or captioned steps)", badGuides.length === 0,
     badGuides.length ? `bad: ${badGuides.map((c) => c.id).join(", ")}` : `${guides.length} guides`);
 
   // isGuide() must agree with the flag (guards against guide:true but no steps).

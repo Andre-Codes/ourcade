@@ -23,7 +23,14 @@
      • EXTERNAL (default): set
          url:    where the visitor goes (the STL file, the source page)
          source: short label for that link (shown on the portal button)
-     • ON-SITE GUIDE: set
+     • PLATE-ONLY GUIDE (simplest — the image IS the guide): set
+         guide:  true
+         plate:  a plain slug. The reference image lives at
+                 assets-src/creatives/<lane>/plates/<plate>.png and is shown
+                 big at /creatives/<id> with the title — no step text. Great for
+                 a self-explanatory how-to-draw sheet. Optional `plateCredit`
+                 string for a source line under the image.
+     • ON-SITE STEP GUIDE: set
          guide:  true
          steps:  [{ image, caption }, …] in order — a step-by-step walkthrough
                  rendered at /creatives/<id>. `caption` is plain text; `image`
@@ -31,8 +38,8 @@
                  folder at assets-src/creatives/<lane>/steps/<id>/<image>.png
                  (draw→drawings, print→prints, … per LANE_DIR in
                  ../../components/creativeArt.js).
-       (A guide needs no url/source. Use this instead of linking to a bare
-        Google/YouTube search — host the steps here.)
+       (A guide needs no url/source. Run `npm run assets:creatives` after
+        dropping plate/step art to optimize it into src/assets.)
 
    Card / header art (optional — precedence: image → imageUrl → fallback tile):
      image:    bundled slug → optimized from assets-src/creatives/<lane>/<slug>.png
@@ -140,163 +147,11 @@ export const MANUAL_CREATIVES = [
     action: "Print something, then finish it properly",
   },
 
-  // ── DRAW — low-stakes sketch prompts and how-to-draw sheets ──────────────
-  {
-    id: "cr-draw-cartoon-hand",
-    lane: "draw",
-    guide: true,
-    title: "Draw a cartoon hand (without crying)",
-    blurb:
-      "Hands are everyone's nemesis. This breaks them into a mitten plus sausages — suddenly they're easy little guys.",
-    image: "cartoon-hand",
-    time: "15 min",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Sketch one, then a few from your own hand",
-    materials: [
-      "A pencil",
-      "Paper",
-      "Your own non-drawing hand, to copy from",
-    ],
-    steps: [
-      {
-        image: "step-1",
-        caption:
-          "Draw a rounded square for the palm. Don't overthink it — a hand is mostly just this block plus fingers.",
-      },
-      {
-        image: "step-2",
-        caption:
-          "Add a 'mitten' shape: the thumb as a bump on one side, and a soft curve across the top where the fingers will sprout.",
-      },
-      {
-        image: "step-3",
-        caption:
-          "Draw four sausages for the fingers off that top curve. The middle one is longest; the others step down on either side.",
-      },
-      {
-        image: "step-4",
-        caption:
-          "Add a short sausage for the thumb. Mark a couple of knuckle creases on each finger so they look like they can bend.",
-      },
-      {
-        image: "step-5",
-        caption:
-          "Clean up the outline into one smooth shape, erase the guides, and you've got a cartoon hand. Now try it in a fist or a wave.",
-      },
-    ],
-    tips: [
-      "Glance at your own hand constantly — it's the best reference you own.",
-      "Sausage fingers first, details later. The knuckle creases are what sell the bend.",
-      "Cartoon hands often have just three fingers + a thumb. Try it; it reads cleaner.",
-    ],
-  },
-  {
-    id: "cr-draw-dragon",
-    lane: "draw",
-    title: "How to draw a dragon in 6 steps",
-    blurb:
-      "Big shapes first, scales last. A friendly step-by-step that gets you a respectable dragon before you overthink it.",
-    image: "dragon",
-    url: "https://www.artforkidshub.com/how-to-draw-a-dragon/",
-    source: "Art for Kids Hub",
-    time: "15 min",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Follow the steps, then give it a personality",
-  },
-  {
-    id: "cr-draw-wizard-cat",
-    lane: "draw",
-    guide: true,
-    title: "Draw a wizard cat",
-    blurb:
-      "A cat. A little hat. A tiny staff. Pure low-stakes fun — the whole point is to make one weird guy and stop.",
-    image: "wizard-cat",
-    time: "10 min",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Sketch it, then remix it (cyberpunk wizard cat?)",
-    materials: [
-      "Any pencil (a softer one, like a 2B, erases cleaner)",
-      "Paper — printer paper is totally fine",
-      "A fineliner or pen for the final lines (optional)",
-    ],
-    steps: [
-      {
-        image: "step-1",
-        caption:
-          "Lightly draw a circle for the head and a rounded egg below it for the body. Keep it loose — these are just guides you'll erase later.",
-      },
-      {
-        image: "step-2",
-        caption:
-          "Add two triangle ears on top, then a tall, slightly floppy cone hat sitting between them. The hat is what makes him read 'wizard,' so make it big.",
-      },
-      {
-        image: "step-3",
-        caption:
-          "Give him two big round eyes, a tiny triangle nose, and a few whisker dots. A small curved mouth makes him look pleased with himself.",
-      },
-      {
-        image: "step-4",
-        caption:
-          "Sketch a little cloak sweeping off one shoulder and a thin staff in one paw. Top the staff with a star or a small orb.",
-      },
-      {
-        image: "step-5",
-        caption:
-          "Ink the lines you like with a pen, erase the rough pencil guides, and scatter a few stars around him. Done — one weird little guy.",
-      },
-    ],
-    tips: [
-      "Keep the early shapes light; you're going to erase most of them.",
-      "If the face feels off, it's almost always the eyes — try moving them closer together.",
-      "Once you've got him, remix it: a cyberpunk wizard cat, a tiny apprentice, a grumpy one.",
-    ],
-  },
-  {
-    id: "cr-draw-90s-anime-eye",
-    lane: "draw",
-    title: "Draw a 90s anime eye",
-    blurb:
-      "Those tall, glossy eyes with the big highlight. Nail the proportions and any character instantly reads retro-anime.",
-    image: "anime-eye",
-    url: "https://www.gvaat.com/blog/how-to-draw-anime-eyes-step-by-step-tutorial/",
-    source: "Gvaat's Workshop",
-    time: "15 min",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Draw a pair, then build a face around them",
-  },
-  {
-    id: "cr-draw-loomis-heads",
-    lane: "draw",
-    title: "Andrew Loomis: 'Fun with a Pencil'",
-    blurb:
-      "The classic public-domain drawing book. The 'blook head' method makes turning a face in 3D feel almost mechanical.",
-    image: "loomis-heads",
-    url: "https://archive.org/details/funwithpencil00loom",
-    source: "archive.org",
-    time: "a weekend",
-    difficulty: "intermediate",
-    cost: "free",
-    action: "Work through the head chapter with a pencil",
-  },
-  {
-    id: "cr-draw-gesture-quickposes",
-    lane: "draw",
-    title: "30-second gesture drawing",
-    blurb:
-      "A free timed-pose generator. Fast, loose figures train your eye more in ten minutes than an hour of careful lines.",
-    image: "gesture-quickposes",
-    url: "https://quickposes.com/en/gestures/timed",
-    source: "QuickPoses",
-    time: "10 min",
-    difficulty: "intermediate",
-    cost: "free",
-    action: "Run a 30-second set, no erasing allowed",
-  },
+  // ── DRAW — the lane is plate-only by default now: ~40 public-domain drawing
+  //    plates come from scripts/fetch-draw-guides.js (src/data/generated). Add
+  //    your OWN draw items here when you want — a plate-only guide (just an image
+  //    + title; see template above) or a full per-step guide. Nothing required
+  //    here; leave it empty and the generated plates carry the lane.
 ];
 
 // Minimal safety net (one per lane) if MANUAL_CREATIVES is ever emptied, so the
@@ -316,16 +171,19 @@ export const FALLBACK_CREATIVES = [
     action: "Print it, then read the surface for flaws",
   },
   {
-    id: "fallback-draw-dragon",
+    // Plate-only guide pointing at a public-domain plate the fetcher writes
+    // (src/assets/creatives/drawings/plates/cat.webp). If that image isn't built
+    // yet, the page still renders the title + credit (never blank).
+    id: "fallback-draw-cat",
     lane: "draw",
-    title: "How to draw a dragon in 6 steps",
-    blurb:
-      "Big shapes first, scales last — a friendly step-by-step that gets you a respectable dragon before you overthink it.",
-    url: "https://www.artforkidshub.com/how-to-draw-a-dragon/",
-    source: "Art for Kids Hub",
-    time: "15 min",
+    guide: true,
+    plate: "cat",
+    plateCredit: "E.G. Lutz, “What to Draw and How to Draw It” (1913) — public domain",
+    title: "How to draw a cat",
+    image: "cat",
+    time: "10 min",
     difficulty: "beginner",
     cost: "free",
-    action: "Follow the steps, then give it a personality",
+    action: "Grab a pencil and copy it line for line",
   },
 ];

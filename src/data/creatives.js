@@ -63,7 +63,7 @@ export function searchCreatives(items, query, lane, bucket) {
     if (!q) return true;
     return (
       c.title.toLowerCase().includes(q) ||
-      c.blurb.toLowerCase().includes(q)
+      (c.blurb || "").toLowerCase().includes(q)
     );
   });
 }
@@ -84,10 +84,14 @@ export function getCreative(id) {
   return CREATIVES_POOL.find((c) => c.id === id) || null;
 }
 
-// Is this an on-site step guide (renders at /creatives/:id) rather than an
-// external link? A guide is flagged AND actually carries steps — so a half-built
-// item (guide:true but no steps yet) is treated as a plain link, never a blank
-// walkthrough. The card link branch and the guide page both gate on this.
+// Is this an on-site guide (renders at /creatives/:id) rather than an external
+// link? A guide is flagged AND carries something to show — EITHER captioned
+// steps (a walkthrough) OR a `plate` slug (a plate-only guide: the public-domain
+// drawing plate IS the guide, no step text). A half-built item (guide:true but
+// neither steps nor a plate) is treated as a plain link, never a blank page.
+// The card link branch and the guide page both gate on this.
 export function isGuide(item) {
-  return !!(item && item.guide && Array.isArray(item.steps) && item.steps.length);
+  if (!item || !item.guide) return false;
+  if (Array.isArray(item.steps) && item.steps.length) return true;
+  return typeof item.plate === "string" && item.plate.length > 0;
 }

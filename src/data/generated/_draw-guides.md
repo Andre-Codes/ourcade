@@ -2,13 +2,47 @@
 
 Source: E.G. Lutz, "What to Draw and How to Draw It" (1913), Project Gutenberg #74518 (public domain).
 
-Built 2026-06-28T21:46:48.074Z by scripts/fetch-draw-guides.js.
+Plate-only model: the plate image is the guide (no captions/vision). Titles are best-effort from the book.
 
-- cat (i_016): 5 steps, 3 tips
-- mouse (i_017): 4 steps, 2 tips
-- fish (i_019): 4 steps, 2 tips
-- rabbit (i_023): 19 steps, 3 tips
-- swan (i_026): 6 steps, 2 tips
-- duck (i_027): 6 steps, 2 tips
-- bulldog (i_030): 8 steps, 3 tips
-- owl (i_038): 6 steps, 2 tips
+Built 2026-06-29T00:43:08.244Z by scripts/fetch-draw-guides.js.
+
+- owl (i_007): "How to draw owl"
+- pagoda-lighthouse-chateau (i_009): "How to draw pagoda lighthouse chateau"
+- tent (i_010): "How to draw tent"
+- cube-house-barn (i_011): "How to draw cube house barn"
+- toy-horse (i_012): "How to draw toy horse"
+- toys (i_013): "How to draw toys"
+- crested-crane (i_014): "How to draw crested crane"
+- cranes (i_015): "How to draw cranes"
+- cat (i_016): "How to draw a cat"
+- mouse (i_017): "How to draw a mouse"
+- fish (i_019): "How to draw a fish"
+- cattail-plant (i_020): "How to draw cattail plant"
+- water-lily-dragon-fly-frogs-tadpoles (i_021): "How to draw water-lily dragon-fly frogs tadpoles"
+- rabbit (i_023): "How to draw a rabbit"
+- rooster (i_024): "How to draw rooster"
+- hen-and-chicks (i_025): "How to draw hen and chicks"
+- swan (i_026): "How to draw a swan"
+- duck (i_027): "How to draw a duck"
+- cow (i_028): "How to draw cow"
+- pig-goat (i_029): "How to draw pig goat"
+- bulldog (i_030): "How to draw a bulldog"
+- dogs (i_031): "How to draw dogs"
+- turkey-fantail-pigeon (i_033): "How to draw turkey fantail pigeon"
+- humming-birds (i_034): "How to draw humming-birds"
+- various-birds (i_035): "How to draw various birds"
+- swallows (i_036): "How to draw swallows"
+- flying-birds (i_037): "How to draw flying birds"
+- owls (i_039): "How to draw owls"
+- crested-bird (i_040): "How to draw crested bird"
+- parrakeet-and-parrot (i_041): "How to draw parrakeet and parrot"
+- squirrels (i_042): "How to draw squirrels"
+- bears-raccoon (i_043): "How to draw bears raccoon"
+- baby-elephant-circus-elephant (i_044): "How to draw baby elephant circus elephant"
+- monkey-elephant (i_045): "How to draw monkey elephant"
+- kangaroo (i_048): "How to draw kangaroo"
+- man (i_050): "How to draw man"
+- faces-easily-drawn (i_051): "How to draw faces—easily drawn"
+- figures-men-drawn-with-straight-lines (i_053): "How to draw figures—men—drawn with straight lines"
+- faces-straight-lines (i_055): "How to draw faces— straight lines—"
+- clown-s-droll-face (i_056): "How to draw the clown’s droll face"

@@ -71,7 +71,7 @@ function CreativeCard({ item }) {
 
       <span className="arcade-stumble-kind">{laneLabel}</span>
       <h2 className="arcade-stumble-title">{item.title}</h2>
-      <p className="arcade-stumble-blurb">{item.blurb}</p>
+      {item.blurb && <p className="arcade-stumble-blurb">{item.blurb}</p>}
 
       <div className="arcade-creative-badges">
         {item.time && <span className="arcade-creative-badge">⏱ {item.time}</span>}
@@ -80,9 +80,12 @@ function CreativeCard({ item }) {
             {DIFFICULTY_LABEL[item.difficulty] || item.difficulty}
           </span>
         )}
-        <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
-          {paid ? "💲 paid" : "🆓 free"}
-        </span>
+        {/* Draw plates are all free public-domain sheets — the cost badge is noise. */}
+        {item.lane !== "draw" && (
+          <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
+            {paid ? "💲 paid" : "🆓 free"}
+          </span>
+        )}
       </div>
 
       {item.action && (
