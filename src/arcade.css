@@ -1716,6 +1716,160 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-guide-cta .arcade-back-link { margin-top: 14px; display: inline-block; }
 
+/* ====================================================================== */
+/*  SOLVE THIS (/creatives/:id puzzles) — the cereal-box brain-teaser lane */
+/* ====================================================================== */
+.arcade-solve { display: flex; flex-direction: column; gap: 16px; }
+.arcade-solve-prompt {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; line-height: 1.55;
+  color: #d6e6ff; margin: 0;
+}
+.arcade-solve-body {
+  padding: 18px; background: #14172a;
+  border: 2px solid #2a2f4a; border-radius: 12px; box-shadow: var(--bevel);
+}
+
+/* control row — hint / reveal / check / clear, shared by all puzzle kinds */
+.arcade-solve-controls { display: flex; flex-wrap: wrap; gap: 10px; }
+.arcade-solve-btn {
+  font-family: 'Press Start 2P', monospace; font-size: 0.56rem; letter-spacing: 0.04em;
+  padding: 11px 14px; border-radius: 8px; cursor: pointer;
+  border: 2px solid #04050b; box-shadow: var(--bevel);
+  transition: filter .12s ease, transform .08s ease;
+  color: #0a0a12;
+}
+.arcade-solve-btn:hover { filter: brightness(1.1); }
+.arcade-solve-btn:active { transform: translateY(1px); }
+.arcade-solve-btn:disabled { opacity: .5; cursor: default; filter: none; transform: none; }
+.arcade-solve-reveal-btn { background: linear-gradient(180deg, var(--neon-gold), #d9a400); }
+.arcade-solve-check-btn { background: linear-gradient(180deg, var(--neon-lime), #9fd400); }
+.arcade-solve-hint-btn,
+.arcade-solve-clear-btn {
+  background: #1c2035; color: #d6e6ff; border-color: #2a2f4a; box-shadow: var(--bevel-in);
+}
+
+.arcade-solve-hint {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.86rem; line-height: 1.5;
+  color: var(--neon-aqua); margin: 0; padding: 10px 12px;
+  background: rgba(63, 255, 208, 0.07); border-left: 3px solid var(--neon-aqua); border-radius: 4px;
+}
+
+/* the revealed answer block (text puzzles) */
+.arcade-solve-answer {
+  padding: 16px; background: rgba(255, 210, 63, 0.08);
+  border: 2px solid var(--neon-gold); border-radius: 12px;
+}
+.arcade-solve-answer-label {
+  display: block; font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+  letter-spacing: 0.08em; color: var(--neon-gold); text-transform: uppercase; margin-bottom: 10px;
+}
+.arcade-solve-plain {
+  font-family: 'Share Tech Mono', monospace; font-size: 1.05rem; line-height: 1.5;
+  color: #eef0ff; margin: 0;
+}
+.arcade-solve-why {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; line-height: 1.5;
+  color: var(--arcade-muted); margin: 10px 0 0;
+}
+
+/* status line under interactive grids */
+.arcade-solve-status {
+  font-family: 'Press Start 2P', monospace; font-size: 0.58rem; letter-spacing: 0.03em;
+  margin: 0;
+}
+.arcade-solve-status.is-right { color: var(--neon-casino); }
+.arcade-solve-status.is-wrong { color: var(--neon-pink); }
+.arcade-solve-status.is-reveal { color: var(--neon-gold); }
+
+/* monospace puzzle text (cipher, plain answers) */
+.arcade-solve-mono {
+  font-family: 'Share Tech Mono', monospace; letter-spacing: 0.12em; margin: 0;
+  word-break: break-word;
+}
+.arcade-solve-cipher { font-size: 1.2rem; color: var(--neon-aqua); line-height: 1.5; }
+
+/* word ladder — a stack of rungs, blanks called out */
+.arcade-solve-ladder {
+  list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;
+  font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; letter-spacing: 0.3em;
+  text-align: center; color: #eef0ff;
+}
+.arcade-solve-ladder li {
+  padding: 8px; background: #0c0916; border: 1px solid #2a2f4a; border-radius: 6px;
+}
+.arcade-solve-ladder li.is-blank { border-style: dashed; border-color: #3a3f5e; }
+.arcade-solve-blank { color: var(--neon-pink); letter-spacing: 0.2em; }
+.arcade-solve-ladder-answer li { border-color: var(--neon-gold); color: var(--neon-gold); }
+
+/* rebus — preformatted picture text, centered */
+.arcade-solve-rebus {
+  font-family: 'Share Tech Mono', monospace; font-size: 1.15rem; line-height: 1.45;
+  text-align: center; color: #eef0ff; margin: 0; white-space: pre-wrap;
+}
+
+/* odd-one-out — a row of choice chips */
+.arcade-solve-options {
+  list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center;
+}
+.arcade-solve-option {
+  font-family: 'Share Tech Mono', monospace; font-size: 1rem; letter-spacing: 0.06em;
+  padding: 12px 16px; background: #0c0916; color: #eef0ff;
+  border: 1px solid #2a2f4a; border-radius: 8px;
+}
+
+/* minute mystery — the case + the question */
+.arcade-solve-story {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.98rem; line-height: 1.6;
+  color: #d6e6ff; margin: 0;
+}
+.arcade-solve-question {
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem; letter-spacing: 0.03em;
+  color: var(--neon-gold); margin: 14px 0 0; line-height: 1.6;
+}
+
+/* ---- nonogram grid (clue gutters + clickable cells) ---- */
+.arcade-nono {
+  display: grid; gap: 3px; margin: 0 auto; max-width: 420px;
+  background: #2a2f4a; padding: 3px; border-radius: 8px; width: fit-content;
+}
+.arcade-nono-corner { background: transparent; }
+.arcade-nono-clue {
+  display: flex; gap: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+  color: var(--neon-aqua); background: #0c0916; padding: 4px;
+}
+.arcade-nono-clue-col { flex-direction: column; align-items: center; justify-content: flex-end; }
+.arcade-nono-clue-row { flex-direction: row; align-items: center; justify-content: flex-end; }
+.arcade-nono-cell {
+  width: 44px; height: 44px; padding: 0; cursor: pointer;
+  background: #11131f; border: 1px solid #2a2f4a; border-radius: 3px;
+  color: var(--arcade-muted); font-size: 1rem; line-height: 1;
+  transition: background .08s ease;
+}
+.arcade-nono-cell:hover { background: #191c2e; }
+.arcade-nono-cell.is-filled { background: var(--neon-lime); border-color: #9fd400; }
+.arcade-nono-cell.is-x { color: var(--neon-pink); }
+
+/* ---- 4×4 number grid (sudoku / latin square) ---- */
+.arcade-numgrid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
+  margin: 0 auto; width: fit-content;
+  background: #2a2f4a; padding: 3px; border-radius: 8px;
+}
+.arcade-numgrid-cell {
+  width: 52px; height: 52px; text-align: center;
+  font-family: 'Share Tech Mono', monospace; font-size: 1.5rem;
+  color: var(--neon-lime); background: #11131f;
+  border: 1px solid #2a2f4a; border-radius: 3px; caret-color: var(--neon-lime);
+}
+.arcade-numgrid-cell:focus { outline: 2px solid var(--neon-aqua); outline-offset: -2px; }
+.arcade-numgrid-cell.is-locked {
+  color: #eef0ff; background: #1c2035; font-weight: bold; cursor: default;
+}
+/* sudoku: thicker borders between the four 2×2 boxes */
+.arcade-numgrid.has-boxes > .arcade-numgrid-cell:nth-child(4n+2) { border-left-width: 3px; }
+.arcade-numgrid.has-boxes > .arcade-numgrid-cell:nth-child(n+9):nth-child(-n+12) { border-top-width: 3px; }
+
 /* ---- daily band responsive ---- */
 @media (max-width: 760px) {
   .arcade-daily-grid { grid-template-columns: 1fr; }

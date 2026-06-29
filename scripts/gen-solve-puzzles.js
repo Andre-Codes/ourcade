@@ -1,0 +1,680 @@
+/* ============================================================
+   GEN-SOLVE-PUZZLES — builds the "Solve This" puzzle pool for the
+   /creatives page and writes it to src/data/generated/solve-puzzles.js.
+
+   The cereal-box / old-web brain-teaser lane: small puzzles a visitor
+   solves in 1–5 minutes, then reveals/checks the answer. Two families:
+     TEXT  (reveal toggle): word ladder, cipher, rebus, odd-one-out, mystery
+     GRID  (interactive):   5×5 nonogram, 4×4 sudoku, 4×4 Latin square
+
+   Like fetch-draw-guides.js, this is a BUILD-TIME emitter: it computes
+   finished, vetted puzzles and writes plain data. The browser never does
+   BFS or uniqueness-checking — it just renders. Output shape matches the
+   creatives item contract (lane/title/blurb/time/difficulty/cost/action)
+   so scripts/daily-check.js validates it like any other creative.
+
+   Determinism: a seeded RNG (mulberry32) drives every random choice, so
+   re-running produces the same pool (same spirit as the date-seeded daily
+   layer). Bump SEED to reshuffle.
+
+   Word source: the committed ENABLE/Words-With-Friends lists in
+   assets-src/wordlists/<n>.txt (sorted by length: 3.txt = 3-letter words…).
+   Word ladders are the one format the big list truly powers (BFS over the
+   one-letter-change graph). Ciphers/rebuses/odd-one-out/mysteries are
+   curated from small banks below — they're combinatorially trivial and read
+   better hand-written.
+
+   Run:  npm run gen:solve     (no network, no API key)
+   ============================================================ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const WORDLIST_DIR = path.join(ROOT, "assets-src", "wordlists");
+const OUT_DIR = path.join(ROOT, "src", "data", "generated");
+const OUT_FILE = "solve-puzzles.js";
+
+const SEED = 2026; // bump to reshuffle the whole pool
+
+// ── seeded RNG (mulberry32) ───────────────────────────────────────────────
+function mulberry32(a) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rng = mulberry32(SEED);
+const randInt = (n) => Math.floor(rng() * n);
+const pick = (arr) => arr[randInt(arr.length)];
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── word list loading ─────────────────────────────────────────────────────
+// Read assets-src/wordlists/<len>.txt → a Set of uppercased words of that length.
+function loadWords(len) {
+  const file = path.join(WORDLIST_DIR, `${len}.txt`);
+  if (!fs.existsSync(file)) {
+    console.warn(`  ⚠ word list ${len}.txt not found — skipping that length`);
+    return new Set();
+  }
+  const words = fs
+    .readFileSync(file, "utf8")
+    .split(/\r?\n/)
+    .map((w) => w.trim().toUpperCase())
+    .filter((w) => w.length === len && /^[A-Z]+$/.test(w));
+  return new Set(words);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORD LADDER — BFS over the one-letter-change graph between two real words.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Shortest ladder from `start` to `end` (inclusive), or null if none within
+// maxLen. Standard BFS: neighbors = words differing by exactly one letter.
+function wordLadder(start, end, dict, maxLen) {
+  start = start.toUpperCase();
+  end = end.toUpperCase();
+  if (start.length !== end.length || !dict.has(start) || !dict.has(end)) return null;
+  if (start === end) return null;
+
+  const queue = [[start]];
+  const seen = new Set([start]);
+  while (queue.length) {
+    const pathArr = queue.shift();
+    if (pathArr.length > maxLen) return null; // BFS → first hit is shortest
+    const last = pathArr[pathArr.length - 1];
+    for (let i = 0; i < last.length; i++) {
+      for (let c = 65; c <= 90; c++) {
+        const ch = String.fromCharCode(c);
+        if (ch === last[i]) continue;
+        const next = last.slice(0, i) + ch + last.slice(i + 1);
+        if (!dict.has(next) || seen.has(next)) continue;
+        if (next === end) return [...pathArr, next];
+        seen.add(next);
+        queue.push([...pathArr, next]);
+      }
+    }
+  }
+  return null;
+}
+
+// A few hand-picked, on-brand endpoint pairs (nostalgic / arcade flavored). We
+// try each; only those that actually resolve to a clean 4–6 rung ladder ship.
+const LADDER_PAIRS = [
+  ["GAME", "CODE", "Old-school: change one letter at a time."],
+  ["PLAY", "QUIT", "From the title screen to the exit."],
+  ["BYTE", "BITE", "A snack-sized hop."],
+  ["WORD", "GAME", "Two of our favorite things."],
+  ["COLD", "WARM", "Warm it up, one letter at a time."],
+  ["HEAD", "TAIL", "Flip it, gradually."],
+  ["LOSE", "WINS", "Turn a loss into a win."],
+  ["DARK", "LAMP", "Light the room, one step at a time."],
+  ["FIRE", "WIND", "Two of the four elements."],
+  ["LOAD", "SAVE", "Don't lose your progress."],
+  ["FROG", "TOAD", "Almost the same creature."],
+  ["MOON", "STAR", "Across the night sky."],
+  ["CAVE", "GOLD", "Dig for treasure."],
+  ["BOOK", "WORD", "Inside every book."],
+  ["SHIP", "PORT", "Bring it home to harbor."],
+];
+
+function buildWordLadders(dict4, dict5, want) {
+  const out = [];
+  for (const [start, end, hint] of shuffle(LADDER_PAIRS)) {
+    if (out.length >= want) break;
+    const dict = start.length === 5 ? dict5 : dict4;
+    const sol = wordLadder(start, end, dict, 7);
+    // Want a satisfying length: 4–6 words total (2–4 changes). Skip trivial/huge.
+    if (!sol || sol.length < 4 || sol.length > 6) continue;
+    const rungs = sol.map((w, i) => (i === 0 || i === sol.length - 1 ? w : "____"));
+    out.push({
+      kind: "word_ladder",
+      prompt:
+        "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      rungs,
+      answer: sol,
+      hint,
+    });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CIPHER — Caesar shift on a nostalgic phrase.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CIPHER_PHRASES = [
+  "YOU FOUND THE SECRET PAGE",
+  "UNDER CONSTRUCTION",
+  "PRESS START TO BEGIN",
+  "GAME OVER INSERT COIN",
+  "WELCOME TO THE ARCADE",
+  "THE CAKE IS A LIE",
+  "ALL YOUR BASE ARE BELONG TO US",
+  "BEST VIEWED IN NETSCAPE",
+  "THANK YOU MARIO BUT OUR PRINCESS IS IN ANOTHER CASTLE",
+  "DO A BARREL ROLL",
+];
+
+function caesar(text, shift) {
+  return text.replace(/[A-Z]/g, (ch) => {
+    const code = ((ch.charCodeAt(0) - 65 + shift) % 26 + 26) % 26;
+    return String.fromCharCode(65 + code);
+  });
+}
+
+function buildCiphers(want) {
+  const out = [];
+  for (const phrase of shuffle(CIPHER_PHRASES)) {
+    if (out.length >= want) break;
+    // Encoding shift is +s; the solver reverses it (shift back by s).
+    const s = 1 + randInt(25);
+    out.push({
+      kind: "cipher",
+      prompt: "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
+      ciphertext: caesar(phrase, s),
+      shift: s, // amount the message was shifted FORWARD when encoding
+      answer: phrase,
+      hint: `Shift every letter back by ${s}. (A becomes ${caesar("A", -s)}.)`,
+    });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REBUS — visual word puzzles. Curated (these don't benefit from a word list).
+//   display: lines rendered in a monospace box; answer: the phrase.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const REBUSES = [
+  { display: ["CYCLE", "CYCLE", "CYCLE"], answer: "tricycle", hint: "Three of them." },
+  { display: ["STAND", "—————", "  I  "], answer: "I understand", hint: "I, under stand." },
+  { display: ["TIMING TIM ING"], answer: "split-second timing", hint: "The timing got split." },
+  { display: ["    r", "    o", "ECABC", "    e"], answer: "race against the clock", hint: "Read the down word." },
+  { display: ["ME ME ME ME ME", "(once)"], answer: "all about me", hint: "Nothing but me." },
+  { display: ["O_ER_T_O_", "fill: P A I N"], answer: "painless operation", hint: "Operation with no PAIN in it." },
+  { display: ["KNEE", "LIGHT"], answer: "neon light", hint: "Knee-on light." },
+  { display: ["GAME GAME", "(in a)"], answer: "two-player game", hint: "Two games." },
+  { display: ["DICE DICE", "(paradise)"], answer: "paradise", hint: "Pair of dice." },
+  { display: ["LO  VE", "(falling)"], answer: "falling in love", hint: "Love, falling apart." },
+];
+
+function buildRebuses(want) {
+  return shuffle(REBUSES)
+    .slice(0, want)
+    .map((r) => ({
+      kind: "rebus",
+      prompt: "Read the picture. What word or phrase does it spell?",
+      ...r,
+    }));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ODD ONE OUT — spot the item that breaks the pattern. Curated.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const ODD_ONE_OUT = [
+  {
+    items: ["A1", "C3", "E5", "G8"],
+    answer: "G8",
+    why: "Letters skip one (A, C, E, G) and numbers should match (1, 3, 5, 7) — so it should be G7, not G8.",
+  },
+  {
+    items: ["2", "3", "5", "7", "9"],
+    answer: "9",
+    why: "All the others are prime numbers. 9 = 3 × 3 is not prime.",
+  },
+  {
+    items: ["MARIO", "LINK", "SAMUS", "SONIC"],
+    answer: "SONIC",
+    why: "The other three are Nintendo characters. Sonic is from Sega.",
+  },
+  {
+    items: ["CIRCLE", "SQUARE", "TRIANGLE", "CUBE"],
+    answer: "CUBE",
+    why: "The others are 2-D shapes. A cube is 3-D.",
+  },
+  {
+    items: ["RED", "ORANGE", "GREEN", "PURPLE"],
+    answer: "PURPLE",
+    why: "Red, orange and green appear on a traffic light. Purple does not.",
+  },
+  {
+    items: ["64", "16", "4", "1", "9"],
+    answer: "9",
+    why: "The others are powers of four (4⁰,4¹,4²,4³). 9 is not.",
+  },
+  {
+    items: ["MODEM", "FLOPPY", "CD-ROM", "WI-FI"],
+    answer: "WI-FI",
+    why: "The others are 90s computer hardware you could hold. Wi-Fi is wireless and modern.",
+  },
+];
+
+function buildOddOneOut(want) {
+  return shuffle(ODD_ONE_OUT)
+    .slice(0, want)
+    .map((o) => ({
+      kind: "odd_one_out",
+      prompt: "Four of a kind — except one. Which one does NOT belong?",
+      ...o,
+    }));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MINUTE MYSTERY — one paragraph, one contradiction. Curated, retro-computer.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MYSTERIES = [
+  {
+    story:
+      "The gamer swore he'd been online all night chasing a high score. But the moment Detective Byte stepped into the den, she knew he was lying.",
+    question: "What gave him away?",
+    answer:
+      "The modem was unplugged — its cable coiled on the desk. You can't be online all night with no connection.",
+    hint: "Look at the hardware, not the screen.",
+  },
+  {
+    story:
+      "“I just finished the game — beat the final boss five minutes ago!” the kid grinned. The detective glanced at the cartridge slot and shook her head.",
+    question: "Why didn't she believe him?",
+    answer:
+      "The console was powered off and cold to the touch. A machine that ran a boss fight five minutes ago would still be warm.",
+    hint: "Heat takes time to fade.",
+  },
+  {
+    story:
+      "The suspect claimed he'd been typing a letter on his computer when the lights went out at 9 p.m. and never left his chair. But the screen told a different story.",
+    question: "What was wrong?",
+    answer:
+      "With the power out, the monitor would be dark — yet he described reading his half-finished letter on it. No power, no glowing screen.",
+    hint: "What needs electricity to be seen?",
+  },
+  {
+    story:
+      "She said she'd printed the report that morning, straight off the new printer. The detective picked up the page, then quietly asked her to come downtown.",
+    question: "How did he know she was lying?",
+    answer:
+      "The printer's ink cartridge was still sealed in its wrapper inside the box. Nothing had been printed on that machine yet.",
+    hint: "Check whether the tool was ever actually used.",
+  },
+];
+
+function buildMysteries(want) {
+  return shuffle(MYSTERIES)
+    .slice(0, want)
+    .map((m) => ({ kind: "mystery", prompt: "Read the case. Spot the contradiction.", ...m }));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NONOGRAM — 5×5 pixel-icon reveal. Clues derived from a fixed icon template.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// 5×5 templates (1 = filled). Kept simple/recognizable.
+const NONO_ICONS = {
+  heart: [
+    [0, 1, 0, 1, 0],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+  ],
+  "a smiley face": [
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  "a tiny house": [
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1],
+  ],
+  "a space invader": [
+    [1, 0, 1, 0, 1],
+    [0, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [0, 1, 0, 1, 0],
+  ],
+  "a coffee cup": [
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 0],
+  ],
+  "a mushroom": [
+    [0, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 1, 0],
+  ],
+};
+
+// Run-length clues for one line (e.g. [1,1,1] for 1·0·1·0·1; [] for an empty line).
+function lineClues(line) {
+  const runs = [];
+  let n = 0;
+  for (const v of line) {
+    if (v) n++;
+    else if (n) {
+      runs.push(n);
+      n = 0;
+    }
+  }
+  if (n) runs.push(n);
+  return runs.length ? runs : [0];
+}
+
+function buildNonograms(want) {
+  const names = shuffle(Object.keys(NONO_ICONS)).slice(0, want);
+  return names.map((name) => {
+    const sol = NONO_ICONS[name];
+    const rows = sol.map(lineClues);
+    const cols = sol[0].map((_, c) => lineClues(sol.map((r) => r[c])));
+    return {
+      kind: "nonogram",
+      prompt:
+        "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
+      size: 5,
+      rows,
+      cols,
+      solution: sol,
+      reveal: name,
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUDOKU4 / LATIN4 — 4×4 grids with a UNIQUE solution.
+//   Latin square: rows & cols each contain 1–4 once.
+//   Sudoku: also each 2×2 box contains 1–4 once.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SUDOKU_BOX = (r, c) => Math.floor(r / 2) * 2 + Math.floor(c / 2); // 0..3
+
+// Generate a full valid grid (backtracking) for the given variant.
+function fullGrid(variant) {
+  const g = Array.from({ length: 4 }, () => Array(4).fill(0));
+  const boxes = variant === "sudoku4";
+  function ok(r, c, v) {
+    for (let i = 0; i < 4; i++) {
+      if (g[r][i] === v || g[i][c] === v) return false;
+    }
+    if (boxes) {
+      const b = SUDOKU_BOX(r, c);
+      for (let rr = 0; rr < 4; rr++)
+        for (let cc = 0; cc < 4; cc++)
+          if (SUDOKU_BOX(rr, cc) === b && g[rr][cc] === v) return false;
+    }
+    return true;
+  }
+  function fill(pos) {
+    if (pos === 16) return true;
+    const r = Math.floor(pos / 4);
+    const c = pos % 4;
+    for (const v of shuffle([1, 2, 3, 4])) {
+      if (ok(r, c, v)) {
+        g[r][c] = v;
+        if (fill(pos + 1)) return true;
+        g[r][c] = 0;
+      }
+    }
+    return false;
+  }
+  fill(0);
+  return g;
+}
+
+// Count solutions of a puzzle (capped at `cap`) — used to guarantee uniqueness.
+function countSolutions(puz, variant, cap = 2) {
+  const g = puz.map((row) => row.slice());
+  const boxes = variant === "sudoku4";
+  let count = 0;
+  function ok(r, c, v) {
+    for (let i = 0; i < 4; i++) if (g[r][i] === v || g[i][c] === v) return false;
+    if (boxes) {
+      const b = SUDOKU_BOX(r, c);
+      for (let rr = 0; rr < 4; rr++)
+        for (let cc = 0; cc < 4; cc++)
+          if (SUDOKU_BOX(rr, cc) === b && g[rr][cc] === v) return false;
+    }
+    return true;
+  }
+  function solve(pos) {
+    if (count >= cap) return;
+    if (pos === 16) {
+      count++;
+      return;
+    }
+    const r = Math.floor(pos / 4);
+    const c = pos % 4;
+    if (g[r][c] !== 0) {
+      solve(pos + 1);
+      return;
+    }
+    for (let v = 1; v <= 4; v++) {
+      if (ok(r, c, v)) {
+        g[r][c] = v;
+        solve(pos + 1);
+        g[r][c] = 0;
+      }
+    }
+  }
+  solve(0);
+  return count;
+}
+
+// Dig holes from a full grid while the puzzle stays uniquely solvable.
+function makePuzzle(variant) {
+  const sol = fullGrid(variant);
+  const puz = sol.map((row) => row.slice());
+  // Remove cells in random order; keep a removal only if uniqueness survives.
+  const cells = shuffle(Array.from({ length: 16 }, (_, i) => i));
+  for (const idx of cells) {
+    const r = Math.floor(idx / 4);
+    const c = idx % 4;
+    const saved = puz[r][c];
+    puz[r][c] = 0;
+    if (countSolutions(puz, variant, 2) !== 1) puz[r][c] = saved; // revert
+  }
+  return { given: puz, solution: sol };
+}
+
+function buildGridNumbers(variant, want) {
+  const out = [];
+  const seen = new Set();
+  let guard = 0;
+  while (out.length < want && guard++ < want * 40) {
+    const { given, solution } = makePuzzle(variant);
+    const key = given.flat().join("");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      kind: variant,
+      prompt:
+        variant === "sudoku4"
+          ? "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4."
+          : "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      size: 4,
+      given,
+      solution,
+    });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ASSEMBLE — wrap each puzzle in the creatives item contract.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const slugify = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+// Per-kind presentation metadata for the card (title/blurb/time/difficulty/action).
+const KIND_META = {
+  word_ladder: {
+    label: "Word Ladder",
+    time: "3 min",
+    difficulty: "beginner",
+    action: "Climb the ladder, then reveal the path",
+  },
+  cipher: {
+    label: "Decode the Message",
+    time: "5 min",
+    difficulty: "beginner",
+    action: "Crack the code, then reveal it",
+  },
+  rebus: {
+    label: "Rebus",
+    time: "2 min",
+    difficulty: "beginner",
+    action: "Read the picture, then reveal the phrase",
+  },
+  odd_one_out: {
+    label: "Odd One Out",
+    time: "2 min",
+    difficulty: "beginner",
+    action: "Spot the misfit, then reveal why",
+  },
+  mystery: {
+    label: "Minute Mystery",
+    time: "3 min",
+    difficulty: "intermediate",
+    action: "Crack the case, then reveal the answer",
+  },
+  nonogram: {
+    label: "Pixel Nonogram",
+    time: "10 min",
+    difficulty: "intermediate",
+    action: "Fill the grid to reveal the picture",
+  },
+  sudoku4: {
+    label: "Mini Sudoku",
+    time: "5 min",
+    difficulty: "intermediate",
+    action: "Fill the grid, then check it",
+  },
+  latin4: {
+    label: "Latin Square",
+    time: "5 min",
+    difficulty: "beginner",
+    action: "Fill the grid, then check it",
+  },
+};
+
+// Build a human title per puzzle (the card headline).
+function titleFor(p) {
+  switch (p.kind) {
+    case "word_ladder":
+      return `Word ladder: ${p.answer[0]} → ${p.answer[p.answer.length - 1]}`;
+    case "cipher":
+      return "Decode the secret message";
+    case "rebus":
+      return "What does this rebus say?";
+    case "odd_one_out":
+      return "Which one doesn't belong?";
+    case "mystery":
+      return "Minute mystery: spot the lie";
+    case "nonogram":
+      return "Pixel nonogram — reveal the picture";
+    case "sudoku4":
+      return "Mini 4×4 Sudoku";
+    case "latin4":
+      return "4×4 Latin square";
+    default:
+      return "Solve this";
+  }
+}
+
+const BLURBS = {
+  word_ladder: "Change one letter at a time until you climb from the first word to the last.",
+  cipher: "A secret phrase, scrambled by a Caesar shift. Slide the letters back to read it.",
+  rebus: "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+  odd_one_out: "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+  mystery: "A one-paragraph case with a single fatal contradiction. Out-detective the suspect.",
+  nonogram: "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
+  sudoku4: "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+  latin4: "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+};
+
+function toItem(p, n) {
+  const meta = KIND_META[p.kind];
+  const idBase = `cr-solve-${slugify(p.kind)}`;
+  return {
+    id: `${idBase}-${String(n).padStart(3, "0")}`,
+    lane: "solve",
+    guide: true,
+    title: titleFor(p),
+    blurb: BLURBS[p.kind],
+    time: meta.time,
+    difficulty: meta.difficulty,
+    cost: "free",
+    action: meta.action,
+    puzzle: p,
+  };
+}
+
+// ── run ───────────────────────────────────────────────────────────────────
+console.log("\nGEN-SOLVE-PUZZLES — building the Solve This pool\n");
+
+const dict4 = loadWords(4);
+const dict5 = loadWords(5);
+console.log(`  loaded ${dict4.size} four-letter and ${dict5.size} five-letter words`);
+
+const puzzles = [
+  ...buildWordLadders(dict4, dict5, 8),
+  ...buildCiphers(6),
+  ...buildRebuses(6),
+  ...buildOddOneOut(6),
+  ...buildMysteries(4),
+  ...buildNonograms(5),
+  ...buildGridNumbers("sudoku4", 6),
+  ...buildGridNumbers("latin4", 6),
+];
+
+// Stamp a stable per-kind index into each id.
+const counters = {};
+const items = puzzles.map((p) => {
+  counters[p.kind] = (counters[p.kind] || 0) + 1;
+  return toItem(p, counters[p.kind]);
+});
+
+// Report what we built, per kind.
+for (const kind of Object.keys(KIND_META)) {
+  const c = items.filter((i) => i.puzzle.kind === kind).length;
+  console.log(`  ${kind.padEnd(12)} ${c}`);
+}
+console.log(`  ${"TOTAL".padEnd(12)} ${items.length}`);
+
+const banner =
+  "// AUTO-GENERATED by scripts/gen-solve-puzzles.js — do not edit by hand.\n" +
+  "// \"Solve this\" puzzles for the /creatives page. Run `npm run gen:solve` to\n" +
+  "// regenerate from the committed word lists in assets-src/wordlists/.\n";
+
+fs.mkdirSync(OUT_DIR, { recursive: true });
+fs.writeFileSync(
+  path.join(OUT_DIR, OUT_FILE),
+  `${banner}export default ${JSON.stringify(items, null, 2)};\n`
+);
+
+console.log(`\n✓ wrote ${items.length} puzzles → src/data/generated/${OUT_FILE}\n`);

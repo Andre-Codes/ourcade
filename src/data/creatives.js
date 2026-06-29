@@ -12,6 +12,10 @@ import { MANUAL_CREATIVES, FALLBACK_CREATIVES } from "./manual/creatives.js";
 // (scripts/fetch-draw-guides.js). Plain data — safe to import under node.
 // Empty array until the generator runs.
 import drawGuides from "./generated/draw-guides.js";
+// Generated "solve this" puzzles (scripts/gen-solve-puzzles.js) — word ladders,
+// ciphers, rebuses, grids, etc. Plain data; safe under node. Empty until the
+// generator runs. These are on-site puzzles (a `puzzle` object), not links.
+import solvePuzzles from "./generated/solve-puzzles.js";
 // Future AI lane for the rest of the pool — same pattern when it lands:
 // import generated from "./generated/creatives.js";
 
@@ -19,6 +23,7 @@ import drawGuides from "./generated/draw-guides.js";
 export const CREATIVES = [
   ...MANUAL_CREATIVES,
   ...(Array.isArray(drawGuides) ? drawGuides : []),
+  ...(Array.isArray(solvePuzzles) ? solvePuzzles : []),
   // ...(Array.isArray(generated) && generated.length ? generated : []),
 ];
 
@@ -84,14 +89,24 @@ export function getCreative(id) {
   return CREATIVES_POOL.find((c) => c.id === id) || null;
 }
 
-// Is this an on-site guide (renders at /creatives/:id) rather than an external
-// link? A guide is flagged AND carries something to show — EITHER captioned
-// steps (a walkthrough) OR a `plate` slug (a plate-only guide: the public-domain
-// drawing plate IS the guide, no step text). A half-built item (guide:true but
-// neither steps nor a plate) is treated as a plain link, never a blank page.
-// The card link branch and the guide page both gate on this.
+// Is this an on-site item (renders at /creatives/:id) rather than an external
+// link? It's flagged `guide:true` AND carries something to show — one of:
+//   • captioned steps (a walkthrough),
+//   • a `plate` slug (a plate-only guide: the public-domain drawing plate IS the
+//     guide, no step text),
+//   • a `puzzle` object (a "solve this" puzzle rendered interactively).
+// A half-built item (guide:true but none of the above) is treated as a plain
+// link, never a blank page. The card link branch and the guide page gate on this.
 export function isGuide(item) {
   if (!item || !item.guide) return false;
   if (Array.isArray(item.steps) && item.steps.length) return true;
+  if (item.puzzle && typeof item.puzzle.kind === "string") return true;
   return typeof item.plate === "string" && item.plate.length > 0;
+}
+
+// Narrower check: is this specifically a "solve this" puzzle item? The guide page
+// branches on this to render the interactive puzzle instead of the steps/plate
+// layout. (isGuide() above already routes it on-site.)
+export function isSolve(item) {
+  return !!(item && item.puzzle && typeof item.puzzle.kind === "string");
 }

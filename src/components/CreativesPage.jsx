@@ -7,6 +7,7 @@ import {
   TIME_BUCKETS,
   TIME_BUCKET_LABEL,
   isGuide,
+  isSolve,
 } from "../data/creatives.js";
 import { hostnameOf } from "./ArtifactCard.jsx";
 import { creativeArt } from "./creativeArt.js";
@@ -27,7 +28,8 @@ const PAGE = 24; // reveal window; free headroom for when the pool grows
 const LANE_LABEL = {
   print: "🖨 3D print",
   draw: "✏️ draw",
-  build: "🧩 build",
+  solve: "🧩 solve",
+  build: "🛠 build",
   remix: "🎛 remix",
   study: "📚 study",
 };
@@ -100,7 +102,7 @@ function CreativeCard({ item }) {
           className="arcade-stumble-open arcade-creative-open"
           to={`/creatives/${item.id}`}
         >
-          open the guide →
+          {isSolve(item) ? "solve it →" : "open the guide →"}
         </Link>
       ) : (
         item.url && (
@@ -168,7 +170,7 @@ export default function CreativesPage() {
           <p className="arcade-vault-lede">
             Not inspiration to scroll past — a small creative mission you can
             actually finish. Find something, then make something: print this,
-            draw this. Every item gives you a next move.
+            draw this, solve this. Every item gives you a next move.
           </p>
         </header>
 

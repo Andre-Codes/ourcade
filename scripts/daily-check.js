@@ -275,7 +275,7 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
 // covered by a dedicated guide/external pair of checks below. Validates data
 // shape only; the bundled-image globs live in the React-only creativeArt.js.
 {
-  const LANES = new Set(["print", "draw", "build", "remix", "study"]);
+  const LANES = new Set(["print", "draw", "solve", "build", "remix", "study"]);
   const DIFFS = new Set(["beginner", "intermediate", "advanced"]);
   const COSTS = new Set(["free", "paid"]);
   const BUCKETS = new Set(TIME_BUCKETS);
@@ -299,14 +299,17 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
   const guides = CREATIVES_POOL.filter((c) => c.guide);
   const externals = CREATIVES_POOL.filter((c) => !c.guide);
 
-  // Guides render on-site (no url required) in three flavors, all valid here:
+  // Guides render on-site (no url required) in these flavors, all valid here:
   //   • PLATE-ONLY: a `plate` slug and NO steps — the public-domain plate is the
   //     whole guide. Just needs a valid plate slug.
   //   • WHOLE-PLATE: a `plate` slug PLUS text-only captioned steps (no s.image).
   //   • PER-STEP: captioned steps that each carry an image slug.
+  //   • PUZZLE: a `puzzle` object with a kind (a "solve this" item) — rendered
+  //     interactively, so it needs neither steps nor a plate.
   // A guide with steps must have every step captioned, and any step.image / plate
-  // must be a plain slug. A guide with neither steps nor a plate is malformed.
+  // must be a plain slug. A guide with none of steps/plate/puzzle is malformed.
   const badGuides = guides.filter((c) => {
+    if (c.puzzle && typeof c.puzzle.kind === "string") return false; // puzzles are self-contained
     if (c.plate && !isSlug(c.plate)) return true;
     const hasSteps = Array.isArray(c.steps) && c.steps.length > 0;
     if (!hasSteps) return !c.plate; // plate-only is fine; nothing-to-show is not
@@ -315,7 +318,7 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
       c.steps.some((s) => s.image && !isSlug(s.image))
     );
   });
-  check("creative guides well-formed (plate-only, whole-plate, or captioned steps)", badGuides.length === 0,
+  check("creative guides well-formed (plate-only, whole-plate, captioned steps, or puzzle)", badGuides.length === 0,
     badGuides.length ? `bad: ${badGuides.map((c) => c.id).join(", ")}` : `${guides.length} guides`);
 
   // isGuide() must agree with the flag (guards against guide:true but no steps).

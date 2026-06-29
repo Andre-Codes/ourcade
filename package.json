@@ -15,6 +15,7 @@
     "fetch:flash": "node scripts/fetch-flash.js",
     "fetch:stumble": "node scripts/fetch-stumble.js",
     "fetch:draw-guides": "node scripts/fetch-draw-guides.js",
+    "gen:solve": "node scripts/gen-solve-puzzles.js",
     "fetch:onthisday": "node scripts/fetch-onthisday.js",
     "snapshot:archive": "node scripts/snapshot-archive.js",
     "quarter:text": "node scripts/quarter-text.js",

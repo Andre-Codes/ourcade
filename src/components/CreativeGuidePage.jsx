@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
-import { getCreative, isGuide } from "../data/creatives.js";
+import { getCreative, isGuide, isSolve } from "../data/creatives.js";
 import { creativeArt, stepArt, plateArt } from "./creativeArt.js";
+import SolvePuzzle from "./SolvePuzzle.jsx";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
@@ -18,7 +19,8 @@ import NedryGag from "./NedryGag.jsx";
 const LANE_LABEL = {
   print: "🖨 3D print",
   draw: "✏️ draw",
-  build: "🧩 build",
+  solve: "🧩 solve",
+  build: "🛠 build",
   remix: "🎛 remix",
   study: "📚 study",
 };
@@ -96,11 +98,16 @@ export default function CreativeGuidePage() {
   const laneLabel = LANE_LABEL[item.lane] || item.lane;
   const laneEmoji = laneLabel.split(" ")[0];
 
+  // A "solve this" puzzle: the shared header (chip/title/blurb/badges) is reused,
+  // but the body is the interactive puzzle instead of plate/steps — and there's
+  // no hero image to show.
+  const solve = isSolve(item);
+
   // Whole-plate guide: the big plate IS the hero (with a credit line) and steps
   // are text-only. Otherwise: a normal card/header image and per-step images.
   const plate = item.plate ? plateArt(item.lane, item.plate) : null;
   const isPlateGuide = !!item.plate;
-  const heroArt = isPlateGuide ? plate : creativeArt(item);
+  const heroArt = solve ? null : isPlateGuide ? plate : creativeArt(item);
 
   return (
     <div className="arcade-stage">
@@ -143,39 +150,49 @@ export default function CreativeGuidePage() {
           )}
         </header>
 
-        {Array.isArray(item.materials) && item.materials.length > 0 && (
+        {/* A puzzle renders its interactive body; every other guide renders the
+            materials / steps / tips walkthrough. */}
+        {solve ? (
           <section className="arcade-guide-section">
-            <h2 className="arcade-guide-subhead">🧰 what you'll need</h2>
-            <ul className="arcade-guide-list">
-              {item.materials.map((m, i) => (
-                <li key={i}>{m}</li>
-              ))}
-            </ul>
+            <SolvePuzzle puzzle={item.puzzle} />
           </section>
-        )}
+        ) : (
+          <>
+            {Array.isArray(item.materials) && item.materials.length > 0 && (
+              <section className="arcade-guide-section">
+                <h2 className="arcade-guide-subhead">🧰 what you'll need</h2>
+                <ul className="arcade-guide-list">
+                  {item.materials.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
-        {/* Steps are optional. Plate-only guides (a public-domain plate with no
-            step text) skip this entirely — the plate hero above IS the guide. */}
-        {item.steps?.length ? (
-          isPlateGuide ? (
-            <section className="arcade-guide-section">
-              <h2 className="arcade-guide-subhead">✏️ step by step</h2>
-              <PlateSteps steps={item.steps} />
-            </section>
-          ) : (
-            <ImageSteps lane={item.lane} id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
-          )
-        ) : null}
+            {/* Steps are optional. Plate-only guides (a public-domain plate with
+                no step text) skip this entirely — the plate hero IS the guide. */}
+            {item.steps?.length ? (
+              isPlateGuide ? (
+                <section className="arcade-guide-section">
+                  <h2 className="arcade-guide-subhead">✏️ step by step</h2>
+                  <PlateSteps steps={item.steps} />
+                </section>
+              ) : (
+                <ImageSteps lane={item.lane} id={item.id} steps={item.steps} laneEmoji={laneEmoji} />
+              )
+            ) : null}
 
-        {Array.isArray(item.tips) && item.tips.length > 0 && (
-          <section className="arcade-guide-section">
-            <h2 className="arcade-guide-subhead">💡 tips</h2>
-            <ul className="arcade-guide-list">
-              {item.tips.map((t, i) => (
-                <li key={i}>{t}</li>
-              ))}
-            </ul>
-          </section>
+            {Array.isArray(item.tips) && item.tips.length > 0 && (
+              <section className="arcade-guide-section">
+                <h2 className="arcade-guide-subhead">💡 tips</h2>
+                <ul className="arcade-guide-list">
+                  {item.tips.map((t, i) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
         )}
 
         <div className="arcade-guide-cta">
