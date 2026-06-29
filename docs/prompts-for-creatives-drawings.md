@@ -129,146 +129,73 @@ Write captions as very short action phrases, usually 2 to 10 words.
 
 ---
 
-# MODERN
+# MODERN 
 
 Create a clean illustrated “how to draw” progression plate for:
 
 
-
-[SUBJECT]
-
+[SUBJECT] 
 
 
 Create a polished advanced-artist drawing tutorial plate with the same overall spirit as a modernized vintage field-guide / beginner art-manual page, but do not include a title, heading, tips box, time/materials info, goal labels, or any large instructional header.
 
-
-
 The plate should feel like a refined hand-drawn art lesson: charming, organized, slightly whimsical, and visually rich without becoming cluttered.
 
-
-
 Style:
-
 - Warm cream/off-white paper background with subtle paper texture
-
 - Clean black ink line art with visible light pencil construction lines where useful
-
 - Handwritten-style numbered step markers and short captions are allowed
-
 - Modernized vintage tutorial-sheet aesthetic
-
 - Friendly, polished, storybook-meets-field-guide look
-
 - Slightly more detailed than a basic beginner guide
-
-- Soft spot color only in the finished example and remix ideas
-
+- Soft spot color only in the finished example 
 - Main progression steps should remain mostly black-and-white line art
-
 - Cute, readable, approachable subject design
-
 - No photorealism, no heavy rendering, no digital UI look
 
-
-
 Layout:
-
 - Use 8 to 10 numbered drawing steps
-
 - Arrange the steps in a clean grid across the left and center of the page
-
 - Each step should be clearly separated with generous spacing
-
 - Each step should include a small numbered circle
-
 - Each step may include a concise handwritten caption beneath it
-
 - Progress from simple construction shapes to a finished ink drawing
-
 - Keep the drawings crop-friendly and visually consistent
 
-
-
 Required sections:
-
 1. Step-by-step drawing progression
-
    - Show the subject evolving from basic shapes
-
    - Include construction lines, overlap guides, and gradually added details
-
    - End with a clean inked version of the subject
 
-
-
 2. Complete colored example
-
    - Include one larger fully finished colored version near the upper-right or right-center
-
    - Use soft watercolor/gouache-style coloring
-
    - Keep it charming, detailed, and polished
-
    - This should look like the “finished” inspiration version, but without a big label
 
-
-
 3. Anatomy / structure notes section
-
    - Include a small annotated line-art version of the subject
-
    - Use subtle dashed callout lines
-
    - Add concise handwritten notes pointing out important structure, proportions, gesture, silhouette, or design logic
-
    - Make this useful for more advanced artists, not just beginners
 
 
 
-4. Remix ideas column
-
-   - Include a vertical side panel with 2 to 3 small colored variation thumbnails
-
-   - Each variation should reinterpret the same subject with a different theme, costume, personality, environment, or prop
-
-   - Add short handwritten labels under each remix thumbnail
-
-   - Keep the remix panel tidy and separated from the main steps
-
-
-
 Do not include:
-
 - No title
-
 - No main heading
-
 - No “how to draw” text
-
 - No tips box
-
 - No time estimate
-
 - No materials list
-
 - No goal box
-
 - No large “finished!” label
-
-- No decorative sidebar text beyond the remix labels
-
 - No brand names
-
 - No excessive explanation
-
 - No cluttered borders
 
-
-
 Composition:
-
 - Landscape orientation
-
-- Balanced page with progression steps on the left/middle, colored final example on the right, anatomy notes below or near the final, remix ideas in a narrow far-right column
-
+- Balanced page with progression steps on the left/middle, colored final example on far the right, anatomy notes below or near the final 
 - Make the whole plate feel intentional, collectible, and useful for artists who want to study the design

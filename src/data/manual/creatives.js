@@ -61,6 +61,32 @@
 
 export const MANUAL_CREATIVES = [
   {
+    id: "cr-draw-cute-alien",
+    lane: "draw",
+    guide: true,
+    plate: "cute-alien",
+    title: "How to draw a cute alien",
+    blurb:
+      "Eight easy steps turn two simple shapes into a wide-eyed little alien with antennae. A friendly first character to draw.",
+    image: "cute-alien",
+    time: "15 min",
+    difficulty: "beginner",
+    action: "Grab a pencil and follow the eight steps",
+  },
+  {
+    id: "cr-draw-kangaroo-running",
+    lane: "draw",
+    guide: true,
+    plate: "kangaroo-running",
+    title: "How to draw a running kangaroo",
+    blurb:
+      "Six steps build a kangaroo mid-bound — capturing the leaping pose and motion lines is the fun challenge here.",
+    image: "kangaroo-running",
+    time: "15 min",
+    difficulty: "intermediate",
+    action: "Grab a pencil and follow the six steps",
+  },
+  {
     id: "cr-draw-fantasy-wizard-beginner",
     lane: "draw",
     guide: true,
