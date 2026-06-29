@@ -2,6 +2,106 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug wrapped in a tiny blanket, available 24/7",
+    "blurb": "That's it. That's the site. A pug, in a rug, asking nothing of you. Best viewed when the rest of the internet has worn you down.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:04.233Z"
+  },
+  {
+    "id": "gw-lhc-destroyed-world",
+    "kind": "site",
+    "era": "current",
+    "title": "A site that confirms the Large Hadron Collider hasn't ended the world yet",
+    "blurb": "One enormous word answers the question: NOPE. Check back daily for the most reassuring single-page report on the internet.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:04.109Z"
+  },
+  {
+    "id": "gw-sandspiel-studio",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand toy where you build tiny physics worlds",
+    "blurb": "Pour sand, light fires, flood it all, then share the little pixel ecosystem you cooked up. The kind of time-sink that ate entire study halls in the Flash era.",
+    "url": "https://studio.sandspiel.club",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:03.808Z"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "kind": "site",
+    "era": "current",
+    "title": "The deep archive of every weird single-purpose website",
+    "blurb": "A curated vault of the strange little one-trick sites the random button forgot. It's a webring for things that should not exist, and we mean that with love.",
+    "url": "https://theuselesswebindex.com",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:03.593Z"
+  },
+  {
+    "id": "gw-one-million-chessboards",
+    "kind": "site",
+    "era": "current",
+    "title": "A million chessboards where moving a piece moves it for everyone",
+    "blurb": "No turns, no rules you'd recognize, just a thousand-by-thousand grid of boards and total cooperative anarchy. Bobby Fischer would have unplugged the modem.",
+    "url": "https://onemillionchessboards.com",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:03.448Z"
+  },
+  {
+    "id": "gw-infinite-craft",
+    "kind": "site",
+    "era": "current",
+    "title": "Combine elements forever until you accidentally make 'Obama's Pizza Planet'",
+    "blurb": "Start with water, fire, earth, and wind, then keep smashing things together until the AI hands you something gloriously cursed. Alchemy for people who skipped chemistry.",
+    "url": "https://neal.fun/infinite-craft/",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:03.309Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A wall of strangers offering you a video hug",
+    "blurb": "People around the world smile, wave, and reach out for a virtual embrace. It's the opposite of the comments section and we will not be taking questions.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:03.129Z"
+  },
+  {
+    "id": "gw-wplace",
+    "kind": "site",
+    "era": "current",
+    "title": "A pixel canvas painted onto the whole planet that never resets",
+    "blurb": "Four trillion pixels stretched over a world map, where everyone paints together and nothing ever wipes clean. Like the Million Dollar Homepage, except the size of Earth and slightly out of control.",
+    "url": "https://wplace.live",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:02.691Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "One million checkboxes everyone shares at the same time",
+    "blurb": "Check a box and somewhere a stranger unchecks it two seconds later. Teens started smuggling secret binary messages through the grid, which is exactly the kind of nonsense the old web was built for.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:02.489Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A road trip where the entire internet drives one car by committee",
+    "blurb": "Thousands of strangers vote on every turn, honk, and radio station for a single shared car crawling down real roads. It's the most chaotic carpool since your friend's mom drove six kids to the arcade.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-06-29T07:58:02.297Z"
+  },
+  {
     "id": "g:game-qwop",
     "kind": "game",
     "era": "nostalgic",
@@ -367,16 +467,6 @@ export default [
     "archivedAt": "2026-06-27T07:15:05.246Z"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "Is there a pug in a rug? Click to find out",
-    "blurb": "You lift the rug. There is, in fact, a pug. The site delivers on its single promise more reliably than most of the modern internet.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:05.134Z"
-  },
-  {
     "id": "gw-password-game",
     "kind": "site",
     "era": "current",
@@ -385,16 +475,6 @@ export default [
     "url": "https://neal.fun/password-game",
     "source": "weird",
     "archivedAt": "2026-06-27T07:15:05.021Z"
-  },
-  {
-    "id": "gw-infinite-craft",
-    "kind": "site",
-    "era": "current",
-    "title": "Combine 'water' + 'fire' and eventually invent 'Obama's Pizza Planet'",
-    "blurb": "Neal Agarwal's alchemy toy lets you smush concepts together forever until reality stops making sense. Like Tap Surge for your brain, minus the dots.",
-    "url": "https://neal.fun/infinite-craft",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:04.955Z"
   },
   {
     "id": "gw-true-size",
@@ -475,16 +555,6 @@ export default [
     "url": "https://screamintothevoid.com",
     "source": "weird",
     "archivedAt": "2026-06-25T07:22:57.159Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A wall of strangers giving you a hug on video",
-    "blurb": "The Nicest Place on the Internet is just real people opening their arms to the camera, no catch. Pure dial-up-era sincerity before everyone got cynical.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-06-25T07:22:56.713Z"
   },
   {
     "id": "gw-this-is-sand",
@@ -635,16 +705,6 @@ export default [
     "url": "https://pudding.cool",
     "source": "weird",
     "archivedAt": "2026-06-19T08:04:35.979Z"
-  },
-  {
-    "id": "gw-wplace",
-    "kind": "site",
-    "era": "current",
-    "title": "A whole-Earth map you can deface, one pixel at a time",
-    "blurb": "It's r/place but stretched over the actual globe — thousands of strangers fighting tile-by-tile to draw flags, frogs, and unspeakable doodles on the planet. Pure 2003 webring chaos with GPS coordinates.",
-    "url": "https://wplace.live",
-    "source": "weird",
-    "archivedAt": "2026-06-19T08:04:35.825Z"
   },
   {
     "id": "gw-isit-christmas",
