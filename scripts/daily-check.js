@@ -275,9 +275,8 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
 // covered by a dedicated guide/external pair of checks below. Validates data
 // shape only; the bundled-image globs live in the React-only creativeArt.js.
 {
-  const LANES = new Set(["print", "draw", "solve", "build", "remix", "study"]);
+  const LANES = new Set(["draw", "solve", "build", "remix", "study"]);
   const DIFFS = new Set(["beginner", "intermediate", "advanced"]);
-  const COSTS = new Set(["free", "paid"]);
   const BUCKETS = new Set(TIME_BUCKETS);
   const isUrl = (u) => /^https?:\/\//i.test(String(u || ""));
   // A plain slug — no path separators or dots (the pipeline adds folder + .webp).
@@ -288,7 +287,7 @@ check("on-this-day deterministic", getOnThisDay(k0)?.id === getOnThisDay(k0)?.id
       !c.id || !c.title || !c.action ||
       (!c.guide && !c.blurb) || // external items still need a blurb; guides may skip it
       (!c.guide && !isUrl(c.url)) || // external items still need a url; guides don't
-      !LANES.has(c.lane) || !DIFFS.has(c.difficulty) || !COSTS.has(c.cost) ||
+      !LANES.has(c.lane) || !DIFFS.has(c.difficulty) ||
       !BUCKETS.has(timeBucketOf(c))
   );
   check("creatives well-formed (lane, action, time bucket)", bad.length === 0,

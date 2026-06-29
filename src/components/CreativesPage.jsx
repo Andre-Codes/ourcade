@@ -11,14 +11,15 @@ import {
 } from "../data/creatives.js";
 import { hostnameOf } from "./ArtifactCard.jsx";
 import { creativeArt } from "./creativeArt.js";
+import { seededShuffle } from "../lib/daily.js";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 
 /* /creatives — CREATIVES. The actionable sibling to the arcade's "finds": where
    Stumble/Vault are about looking at weird things, every item here gives you a
-   NEXT MOVE — print this, draw this, make this. Same anti-feed shape as the
+   NEXT MOVE — draw this, solve this, make this. Same anti-feed shape as the
    Vault: a finite, hand-curated library you wander with search + filter chips,
-   not an infinite scroll. Starts with two lanes (Print, Draw) on scaffolding
+   not an infinite scroll. Starts with the Draw + Solve lanes on scaffolding
    that scales to more. Content is hand-edited in src/data/manual/creatives.js. */
 
 const PAGE = 24; // reveal window; free headroom for when the pool grows
@@ -26,7 +27,6 @@ const PAGE = 24; // reveal window; free headroom for when the pool grows
 // Lane chip label — the at-a-glance category on each card and the filter chips.
 // Add a lane here + in the data and a chip appears automatically (present-only).
 const LANE_LABEL = {
-  print: "🖨 3D print",
   draw: "✏️ draw",
   solve: "🧩 solve",
   build: "🛠 build",
@@ -46,10 +46,9 @@ const DIFFICULTY_LABEL = {
 const laneEmoji = (lane) => (LANE_LABEL[lane] || "🎨").split(" ")[0];
 
 // A single "make this" card — its own shape (image / lane / time / difficulty /
-// cost / next action), so unlike the Vault it does NOT reuse ArtifactCard.
+// next action), so unlike the Vault it does NOT reuse ArtifactCard.
 function CreativeCard({ item }) {
   const host = hostnameOf(item.url);
-  const paid = item.cost === "paid";
   const art = creativeArt(item); // bundled slug → remote url → null
   const guide = isGuide(item);
   const laneLabel = LANE_LABEL[item.lane] || item.lane;
@@ -80,12 +79,6 @@ function CreativeCard({ item }) {
         {item.difficulty && (
           <span className="arcade-creative-badge">
             {DIFFICULTY_LABEL[item.difficulty] || item.difficulty}
-          </span>
-        )}
-        {/* Draw plates are all free public-domain sheets — the cost badge is noise. */}
-        {item.lane !== "draw" && (
-          <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
-            {paid ? "💲 paid" : "🆓 free"}
           </span>
         )}
       </div>
@@ -125,6 +118,10 @@ export default function CreativesPage() {
   const [lane, setLane] = useState("all");
   const [bucket, setBucket] = useState("all");
   const [shown, setShown] = useState(PAGE);
+  // A fresh random seed per visit — so the "All" view is shuffled differently
+  // each time you land on the page, but stays put while you search / filter /
+  // load more within this visit (re-mounts reshuffle; re-renders don't).
+  const [shuffleSeed] = useState(() => (Math.random() * 0xffffffff) >>> 0);
 
   // Only show lane chips for lanes actually in the pool, in LANE_ORDER — so a
   // new lane needs zero chip wiring (mirrors the Vault's kind chips).
@@ -139,10 +136,13 @@ export default function CreativesPage() {
     return TIME_BUCKETS.filter((b) => present.has(b));
   }, []);
 
-  const filtered = useMemo(
-    () => searchCreatives(CREATIVES_POOL, query, lane, bucket),
-    [query, lane, bucket]
-  );
+  const filtered = useMemo(() => {
+    const matches = searchCreatives(CREATIVES_POOL, query, lane, bucket);
+    // In the "All" view (no lane selected), randomize the order so the page
+    // feels like a fresh grab-bag each visit. Picking a single lane keeps the
+    // pool's natural order so that lane reads coherently.
+    return lane === "all" ? seededShuffle(matches, shuffleSeed) : matches;
+  }, [query, lane, bucket, shuffleSeed]);
 
   // Reset the reveal window whenever the result set changes.
   useEffect(() => {
@@ -169,8 +169,8 @@ export default function CreativesPage() {
           </div>
           <p className="arcade-vault-lede">
             Not inspiration to scroll past — a small creative mission you can
-            actually finish. Find something, then make something: print this,
-            draw this, solve this. Every item gives you a next move.
+            actually finish. Find something, then make something: draw this,
+            solve this. Every item gives you a next move.
           </p>
         </header>
 

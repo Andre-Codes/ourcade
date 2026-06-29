@@ -9,15 +9,14 @@
 
    Item shape:
      id:         unique kebab-case string (prefix "cr-")
-     lane:       "print" | "draw"   (extensible later: build/remix/study)
+     lane:       "draw"   (extensible later: build/remix/study)
      title:      short headline
      blurb:      one line on why it's worth doing ("why it's cool")
      time:       free text, e.g. "10 min", "1-3 hours", "a weekend".
                  Bucketed for the time filter — see timeBucketOf() in
                  ../creatives.js. Keep wording loose; the bucket is derived.
      difficulty: "beginner" | "intermediate" | "advanced"
-     cost:       "free" | "paid"   (most finds are free; flag the rare paid one)
-     action:     the explicit next move, imperative ("Download, slice, print")
+     action:     the explicit next move, imperative ("Grab a pencil and copy it")
 
    Where the card sends the visitor — pick ONE:
      • EXTERNAL (default): set
@@ -61,90 +60,57 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 export const MANUAL_CREATIVES = [
-  // ── PRINT — free STL files, printables, and 3D-printing guides ───────────
   {
-    id: "cr-articulated-slug",
-    lane: "print",
-    title: "Print-in-place articulated slug",
+    id: "cr-draw-fantasy-wizard-beginner",
+    lane: "draw",
+    guide: true,
+    plate: "fantasy-wizard-beginner",
+    title: "How to draw a cute wizard",
     blurb:
-      "A wiggly slug that prints fully assembled — no supports, no glue. A perfect first test of your printer's tolerances.",
-    image: "articulated-slug",
-    url: "https://www.printables.com/model/120043-articulated-slug",
-    source: "Printables",
-    time: "1-3 hours",
+      "A friendly nine-step wizard built from simple shapes — pointy hat, big beard, and a staff. The easy way into the fantasy wizard.",
+    image: "fantasy-wizard-beginner",
+    time: "20 min",
     difficulty: "beginner",
-    cost: "free",
-    action: "Download, slice, print",
+    action: "Grab a pencil and follow the nine steps",
   },
   {
-    id: "cr-benchy",
-    lane: "print",
-    title: "#3DBenchy — the torture-test boat",
+    id: "cr-draw-fantasy-wizard",
+    lane: "draw",
+    guide: true,
+    plate: "fantasy-wizard",
+    title: "How to draw a fantasy wizard",
     blurb:
-      "The little tugboat the whole hobby uses to benchmark a printer. Overhangs, bridges, fine detail — all in one ~1 hour print.",
-    image: "benchy",
-    url: "https://www.thingiverse.com/thing:763622",
-    source: "Thingiverse",
-    time: "~1 hour",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Print it, then read the surface for flaws",
+      "Nine steps build a robed, staff-wielding wizard from guidelines up — with a finished color reference and proportion notes. A real character study.",
+    image: "fantasy-wizard",
+    time: "1-2 hours",
+    difficulty: "advanced",
+    action: "Grab a pencil and work through the nine steps",
   },
   {
-    id: "cr-gridfinity",
-    lane: "print",
-    title: "Gridfinity — modular desk organizers",
+    id: "cr-draw-cute-baby-bunny",
+    lane: "draw",
+    guide: true,
+    plate: "cute-baby-bunny",
+    title: "How to draw a cute baby bunny",
     blurb:
-      "An open standard of snap-together bins and baseplates. Print exactly the drawer organizer your junk demands.",
-    image: "gridfinity",
-    url: "https://gridfinity.xyz/",
-    source: "gridfinity.xyz",
-    time: "a weekend",
-    difficulty: "intermediate",
-    cost: "free",
-    action: "Plan your grid, then print bins to fit",
-  },
-  {
-    id: "cr-spiral-vase",
-    lane: "print",
-    title: "Spiralized 'vase mode' planter",
-    blurb:
-      "One continuous wall, no infill, no seams — the fastest, prettiest way to learn vase mode in your slicer.",
-    image: "spiral-vase",
-    url: "https://www.printables.com/model/40361-twisted-6-sided-vase-basic",
-    source: "Printables",
-    time: "~1 hour",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Enable vase mode in your slicer, then print",
-  },
-  {
-    id: "cr-print-supports-guide",
-    lane: "print",
-    title: "How to actually use supports",
-    blurb:
-      "When you need them, where they go, and how to peel them off clean. The guide that fixes most beginner print fails.",
-    image: "print-supports",
-    url: "https://all3dp.com/2/3d-printing-support-structures/",
-    source: "All3DP",
+      "Ten gentle steps grow an oval into a fuzzy, big-eared bunny. A perfect first character to draw.",
+    image: "cute-baby-bunny",
     time: "15 min",
     difficulty: "beginner",
-    cost: "free",
-    action: "Read it before your next overhang",
+    action: "Grab a pencil and follow the ten steps",
   },
   {
-    id: "cr-print-finishing",
-    lane: "print",
-    title: "Sand, prime & paint a 3D print",
+    id: "cr-draw-chibi-dragon",
+    lane: "draw",
+    guide: true,
+    plate: "chibi-dragon",
+    title: "How to draw a chibi dragon",
     blurb:
-      "Turn a ridged plastic blob into something that looks made. Filler primer, wet-sanding, and a rattle-can finish.",
-    image: "print-finishing",
-    url: "https://all3dp.com/2/3d-print-smoothing-pla-how-to-smooth-pla-prints/",
-    source: "All3DP",
-    time: "a weekend",
+      "Eight friendly steps take a plain egg shape all the way to a winged little dragon. Copy it panel by panel.",
+    image: "chibi-dragon",
+    time: "15 min",
     difficulty: "intermediate",
-    cost: "free",
-    action: "Print something, then finish it properly",
+    action: "Grab a pencil and follow the eight steps",
   },
 
   // ── DRAW — the lane is plate-only by default now: ~40 public-domain drawing
@@ -158,19 +124,6 @@ export const MANUAL_CREATIVES = [
 // page never renders blank. Same idea as FALLBACK in ../curiosities.js.
 export const FALLBACK_CREATIVES = [
   {
-    id: "fallback-print-benchy",
-    lane: "print",
-    title: "#3DBenchy — the torture-test boat",
-    blurb:
-      "The little tugboat the whole hobby uses to benchmark a printer — overhangs, bridges, and fine detail in one print.",
-    url: "https://www.thingiverse.com/thing:763622",
-    source: "Thingiverse",
-    time: "~1 hour",
-    difficulty: "beginner",
-    cost: "free",
-    action: "Print it, then read the surface for flaws",
-  },
-  {
     // Plate-only guide pointing at a public-domain plate the fetcher writes
     // (src/assets/creatives/drawings/plates/cat.webp). If that image isn't built
     // yet, the page still renders the title + credit (never blank).
@@ -183,7 +136,6 @@ export const FALLBACK_CREATIVES = [
     image: "cat",
     time: "10 min",
     difficulty: "beginner",
-    cost: "free",
     action: "Grab a pencil and copy it line for line",
   },
 ];

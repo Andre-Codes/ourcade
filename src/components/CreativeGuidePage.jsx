@@ -17,7 +17,6 @@ import NedryGag from "./NedryGag.jsx";
    Non-guide ids (or unknown ones) fall through to a not-found gag. */
 
 const LANE_LABEL = {
-  print: "🖨 3D print",
   draw: "✏️ draw",
   solve: "🧩 solve",
   build: "🛠 build",
@@ -94,7 +93,6 @@ export default function CreativeGuidePage() {
     );
   }
 
-  const paid = item.cost === "paid";
   const laneLabel = LANE_LABEL[item.lane] || item.lane;
   const laneEmoji = laneLabel.split(" ")[0];
 
@@ -124,11 +122,6 @@ export default function CreativeGuidePage() {
             {item.difficulty && (
               <span className="arcade-creative-badge">
                 {DIFFICULTY_LABEL[item.difficulty] || item.difficulty}
-              </span>
-            )}
-            {item.lane !== "draw" && (
-              <span className={`arcade-creative-badge${paid ? " is-paid" : ""}`}>
-                {paid ? "💲 paid" : "🆓 free"}
               </span>
             )}
           </div>

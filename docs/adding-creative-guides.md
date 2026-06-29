@@ -24,7 +24,7 @@ If the user gives you images but the **title or captions are ambiguous**, ask on
 ### 0. Decide the identifiers
 
 - `id`: `cr-draw-<slug>` (kebab-case from the title, e.g. "Draw a wizard cat" → `cr-draw-wizard-cat`). Must be unique in the pool — grep `src/data/manual/creatives.js` and `src/data/generated/draw-guides.js` for collisions.
-- `lane`: usually `"draw"`. (Other lanes: `print`, `build`, `remix`, `study`.)
+- `lane`: usually `"draw"`. (Other scaffolded lanes: `solve`, `build`, `remix`, `study`.)
 - step slugs: `step-1`, `step-2`, … (or any plain slug; just keep them consistent between the data and the filenames).
 
 ### 1. Place the source images (under the LANE subfolder)
@@ -36,7 +36,6 @@ directory. Everything for a lane lives under `assets-src/creatives/<lane>/`, whe
 | item `lane` | asset folder |
 |---|---|
 | `draw` | `drawings` |
-| `print` | `prints` |
 | `build` | `builds` |
 | `remix` | `remixes` |
 | `study` | `study` |
@@ -66,9 +65,9 @@ assets-src/creatives/drawings/steps/cr-draw-wizard-cat/step-2.png
 assets-src/creatives/drawings/plates/<plate>.png
 ```
 
-**Other lanes** (e.g. a 3D-print card thumbnail) — just the card art under that lane:
+**Other lanes** (e.g. a `build` card thumbnail) — just the card art under that lane:
 ```
-assets-src/creatives/prints/<slug>.png
+assets-src/creatives/builds/<slug>.png
 ```
 
 > If the user's filenames are messy ("IMG_4821.jpg", "step one.png"), **rename on copy** to the clean slug form above. The slug in the data must match the file basename exactly (no spaces, no extension, no path). The `lane` field on the data item is what tells the app which subfolder to look in — the slugs themselves stay bare.
@@ -92,7 +91,7 @@ Append to the `MANUAL_CREATIVES` array. **Plate-only guide** (the default for dr
   title: "How to draw a snail",
   blurb: "A public-domain drawing plate — follow the numbered steps with a pencil.",
   image: "snail",                    // card thumb reuses the plate slug
-  time: "10 min", difficulty: "beginner", cost: "free",
+  time: "10 min", difficulty: "beginner",
   action: "Grab a pencil and copy it line for line",
   // NO steps, NO materials, NO tips — the plate carries everything
 }
@@ -110,7 +109,6 @@ Append to the `MANUAL_CREATIVES` array. **Plate-only guide** (the default for dr
   image: "wizard-cat",               // card thumbnail slug (the .webp you made)
   time: "10 min",                    // free text; bucketed for the time filter
   difficulty: "beginner",            // beginner | intermediate | advanced
-  cost: "free",                      // free | paid
   action: "Sketch it, then remix it",
   materials: ["A pencil", "Paper"],  // optional
   steps: [
@@ -130,7 +128,7 @@ Append to the `MANUAL_CREATIVES` array. **Plate-only guide** (the default for dr
   plateCredit: "<author / source — license note>",
   title: "How to draw a snail",
   blurb: "<…>", image: "snail",
-  time: "10 min", difficulty: "beginner", cost: "free",
+  time: "10 min", difficulty: "beginner",
   action: "Follow the steps, then give it a personality",
   materials: ["A pencil", "Paper"],
   steps: [
@@ -141,7 +139,7 @@ Append to the `MANUAL_CREATIVES` array. **Plate-only guide** (the default for dr
 }
 ```
 
-**External link item** (NOT a guide — e.g. a 3D-print STL): omit `guide`/`steps`, set `url` + `source` instead. Thumbnail via `image` (bundled) or `imageUrl` (remote).
+**External link item** (NOT a guide — e.g. a link out to a tutorial or downloadable file): omit `guide`/`steps`, set `url` + `source` instead. Thumbnail via `image` (bundled) or `imageUrl` (remote).
 
 ### 4. Field rules (or `check:daily` fails)
 

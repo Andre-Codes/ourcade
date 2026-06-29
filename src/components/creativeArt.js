@@ -18,7 +18,7 @@
 // Lane → asset subfolder. Add a lane here when you add one to the data.
 const LANE_DIR = {
   draw: "drawings",
-  print: "prints",
+  solve: "solve",
   build: "builds",
   remix: "remixes",
   study: "study",
@@ -39,8 +39,8 @@ const IMAGES = import.meta.glob("../assets/creatives/**/*.webp", {
 const at = (path) => IMAGES[`../assets/creatives/${path}.webp`] || null;
 
 // Card / header art for an item, in precedence order:
-//   bundled `image` slug → its `plate` art (plate guides) → remote `imageUrl`
-//   → null (caller draws the tile). Lane-scoped.
+//   bundled `image` slug → its `plate` art (plate guides) → per-kind solve art
+//   → remote `imageUrl` → null (caller draws the tile). Lane-scoped.
 export function creativeArt(item) {
   const dir = laneDir(item?.lane);
   if (item?.image) {
@@ -49,6 +49,14 @@ export function creativeArt(item) {
   }
   const plate = plateArt(item?.lane, item?.plate);
   if (plate) return plate;
+  // "Solve this" puzzles carry no per-card art; they share ONE image per puzzle
+  // kind (src/assets/creatives/solve/<kind>.webp). This keeps the cards visual
+  // without touching the auto-generated solve data (survives `npm run gen:solve`).
+  const kind = item?.puzzle?.kind;
+  if (item?.lane === "solve" && kind) {
+    const byKind = at(`solve/${kind}`);
+    if (byKind) return byKind;
+  }
   return item?.imageUrl || null;
 }
 
