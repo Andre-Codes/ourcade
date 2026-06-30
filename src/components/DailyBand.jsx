@@ -7,6 +7,8 @@ import { getTodaysQuizzes } from "../data/quizzes.js";
 import { getTodaysTip, getTodaysNews } from "../data/flavor.js";
 import { getTodaysFact } from "../data/facts.js";
 import { getTodaysCuriosity } from "../data/curiosities.js";
+import { getCreativeOfTheDay, isGuide, isSolve } from "../data/creatives.js";
+import { creativeArt } from "./creativeArt.js";
 import { getCurrentWeirdThing } from "../data/weird.js";
 import { MOVIES } from "../data/manual/movies.js";
 import { FEATURED } from "../data/manual/featured.js";
@@ -73,6 +75,72 @@ function GameOfTheDay({ dayKey: key }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+// ── "X this" — one creative mission for the day ───────────────────────────
+// Lane → hero title verb ("Draw this", "Solve this"). Add a lane here when one
+// is added to the creatives data; falls back to a capitalized lane + "this" so a
+// brand-new lane still renders something sensible before it's given a custom verb.
+const LANE_DO = {
+  draw: "Draw this",
+  solve: "Solve this",
+  build: "Build this",
+  remix: "Remix this",
+  study: "Learn this",
+};
+const laneDo = (lane) =>
+  LANE_DO[lane] ||
+  `${(lane || "Make").charAt(0).toUpperCase()}${(lane || "ake").slice(1)} this`;
+
+function CreativeOfTheDay({ dayKey: key }) {
+  const item = getCreativeOfTheDay(key);
+  if (!item) return null;
+  const art = creativeArt(item);
+  const guide = isGuide(item);
+  const title = laneDo(item.lane); // "Draw this" / "Solve this" / ...
+  const cta = guide ? (isSolve(item) ? "SOLVE IT ▶" : "OPEN THE GUIDE ▶") : "MAKE IT ↗";
+
+  const inner = (
+    <>
+      <div className="arcade-hero-glow" />
+      <span className="arcade-hero-kicker">✦ {title.toUpperCase()} ✦</span>
+      <div className="arcade-hero-body">
+        <div className="arcade-hero-screen">
+          {art ? (
+            <img className="arcade-featured-art" src={art} alt={item.title} loading="lazy" />
+          ) : (
+            <span className="arcade-hero-emoji">🎨</span>
+          )}
+        </div>
+        <div className="arcade-hero-info">
+          <h3 className="arcade-hero-title">{item.title}</h3>
+          <p className="arcade-hero-blurb">{item.blurb}</p>
+          <span className="arcade-hero-play">{cta}</span>
+        </div>
+      </div>
+    </>
+  );
+
+  // Guides/puzzles open on-site; external items link out — mirrors CreativeCard.
+  return guide ? (
+    <Link
+      to={`/creatives/${item.id}`}
+      className="arcade-hero arcade-creative-hero"
+      style={{ "--accent": "var(--neon-aqua)" }}
+    >
+      {inner}
+    </Link>
+  ) : (
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="arcade-hero arcade-creative-hero"
+      style={{ "--accent": "var(--neon-aqua)" }}
+    >
+      {inner}
+    </a>
   );
 }
 
@@ -453,6 +521,8 @@ export default function DailyBand({ dayPart, focusPollId }) {
           <GameFact dayKey={key} />
         </div>
       </div>
+
+      <CreativeOfTheDay dayKey={key} />
 
       <div className="arcade-daily-duo">
         <TimelessCuriosity dayKey={key} />

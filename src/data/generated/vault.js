@@ -587,16 +587,6 @@ export default [
     "archivedAt": "2026-06-23T07:25:55.483Z"
   },
   {
-    "id": "gw-make-everything-ok",
-    "kind": "site",
-    "era": "current",
-    "title": "A giant button that promises to make everything OK",
-    "blurb": "You press it, a loading bar does its thing, and it gently informs you everything is now OK. Somehow it kind of works.",
-    "url": "https://makeeverythingok.com",
-    "source": "weird",
-    "archivedAt": "2026-06-23T07:25:55.398Z"
-  },
-  {
     "id": "gw-crouton",
     "kind": "site",
     "era": "current",

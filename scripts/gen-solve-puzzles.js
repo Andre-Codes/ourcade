@@ -348,8 +348,8 @@ const REBUSES = [
   { display: ["O_ER_T_O_", "fill: P A I N"], answer: "painless operation", hint: "Operation with no PAIN in it." },
   { display: ["KNEE", "LIGHT"], answer: "neon light", hint: "Knee-on light." },
   { display: ["GAME GAME", "(in a)"], answer: "two-player game", hint: "Two games." },
-  { display: ["DICE DICE", "(paradise)"], answer: "paradise", hint: "Pair of dice." },
-  { display: ["LO  VE", "(falling)"], answer: "falling in love", hint: "Love, falling apart." },
+  { display: ["DICE DICE"], answer: "paradise", hint: "Say a pair of these out loud." },
+  { display: ["L", " O", "  V", "   E"], answer: "falling in love", hint: "Read what the letters spell, then watch what they're doing." },
 ];
 
 function buildRebuses(want) {

@@ -285,7 +285,7 @@ export const MANUAL_WEIRD = [
 // eerier, after-dark stuff that day-folk never see. Rotates a fresh one each
 // night. Keep these genuinely good — night owls earned them.
 export const MANUAL_WEIRD_NIGHT = [
-  { id: "weirdnt-sleep", title: "A 10-hour recording of a 1989 Casio keyboard demo, slowed 800%", blurb: "Someone stretched a cheesy keyboard demo into a vast, drifting ambient cathedral. It should not be beautiful. It is. Headphones, lights off.", url: "https://www.youtube.com/watch?v=YzeRWNkpY9w", foundNote: "best after midnight" },
+  { id: "weirdnt-loficafe", title: "An all-night lo-fi café that never closes", blurb: "A quiet, endless stream of lo-fi beats and warm static — like the café down the street that somehow stays open at 3am just for you. Headphones, lights off.", url: "https://loficafe.net/", foundNote: "open all night" },
   { id: "weirdnt-driftloop", title: "drift — an endless generative night drive", blurb: "A car, an empty highway, rain on the windshield, and a synth that never resolves. It just keeps going. So can you.", url: "https://driveandlisten.herokuapp.com" },
   { id: "weirdnt-hi", title: "hi.", blurb: "A single page that just... talks to you, gently, like a friend who's also up too late. People keep it open and cry a little. That's allowed.", url: "https://heyhi.lol" },
   { id: "weirdnt-stars", title: "Sit under a sky of 9,096 real stars", blurb: "An interactive planetarium of every star visible to the naked eye, from anywhere on Earth, at any date. Find the sky from the night you were born.", url: "https://stuffin.space" },

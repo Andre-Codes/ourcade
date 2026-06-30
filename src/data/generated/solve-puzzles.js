@@ -1056,11 +1056,10 @@ export default [
       "kind": "rebus",
       "prompt": "Read the picture. What word or phrase does it spell?",
       "display": [
-        "DICE DICE",
-        "(paradise)"
+        "DICE DICE"
       ],
       "answer": "paradise",
-      "hint": "Pair of dice."
+      "hint": "Say a pair of these out loud."
     }
   },
   {

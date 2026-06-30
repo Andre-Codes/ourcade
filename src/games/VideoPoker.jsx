@@ -117,6 +117,13 @@ const VP_CSS = `
     cursor: pointer; position: relative; transition: transform .08s ease;
   }
   .vp-card img { width: 100%; height: 100%; display: block; border-radius: inherit; }
+  /* Empty slot during betting — same footprint as a card so the cabinet never
+     resizes between phases; just a faint inset outline, not interactive. */
+  .vp-card.empty {
+    cursor: default; box-shadow: none;
+    border: 2px dashed rgba(120,160,220,.22);
+    background: rgba(0,0,0,.22);
+  }
   .vp-card.held { transform: translateY(-8px); }
   .vp-card.held::after {
     content: "HELD"; position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
@@ -378,21 +385,26 @@ export default function VideoPoker() {
               </table>
             </div>
 
-            {hand && (
-              <div className="vp-hand" ref={handRef}>
-                {hand.map((card, i) => (
-                  <div className="vp-cardwrap" key={i}>
-                    <div className="vp-holdslot" />
+            {/* Always render the 5-card row so the cabinet stays the exact same
+                size across phases. During betting (hand == null) the slots show
+                as faint empty placeholders instead of shrinking the screen. */}
+            <div className="vp-hand" ref={handRef}>
+              {(hand ?? Array(5).fill(null)).map((card, i) => (
+                <div className="vp-cardwrap" key={i}>
+                  <div className="vp-holdslot" />
+                  {card ? (
                     <div
                       className={`vp-card ${held[i] ? "held" : ""}`}
                       onPointerDown={() => toggleHold(i)}
                     >
                       <img src={card.faceUp ? cardImg(card.id) : cardBackImg()} alt={card.id} draggable="false" />
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ) : (
+                    <div className="vp-card empty" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

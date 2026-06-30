@@ -972,6 +972,10 @@ main > section + section { margin-top: 44px; }
 .arcade-daily-side { display: flex; flex-direction: column; gap: 16px; }
 .arcade-daily-row { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: stretch; margin-top: 18px; }
 
+/* "X this" creative-of-the-day hero — sits outside the grid, so it spaces itself
+   like the daily-duo/row blocks below it. */
+.arcade-creative-hero { margin-top: 18px; }
+
 /* ---- Game of the Day hero ---- */
 .arcade-hero {
   position: relative;
@@ -1508,6 +1512,9 @@ main > section + section { margin-top: 44px; }
   color: #0a0a12; background: linear-gradient(180deg, var(--neon-lime), #9fd400);
   border: 2px solid #04050b; border-radius: 8px; text-decoration: none;
   box-shadow: var(--bevel); transition: filter .12s ease, transform .08s ease;
+  /* Long single-token hostnames (e.g. hasthelargehadroncollider…com) must wrap
+     inside the card rather than stretch the button/grid. */
+  max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; text-align: center;
 }
 .arcade-stumble-open:hover { filter: brightness(1.1); }
 .arcade-stumble-open:active { transform: translateY(1px); }

@@ -2,7 +2,7 @@
 
 ## Working Concept
 
-A digital arcade poker-solitaire game where the player manages **five active poker lanes**, trying to build scoring hands while avoiding dead lanes. The game combines:
+A digital arcade poker-solitaire game where the player manages **four active poker lanes**, trying to build scoring hands while avoiding dead lanes. The game combines:
 
 * Poker hand recognition
 * Solitaire-style placement
@@ -35,7 +35,7 @@ The best moments should feel like:
 
 ## Board
 
-* The game has **5 lanes**.
+* The game has **4 lanes**.
 * Each lane can hold up to **5 cards**.
 * Lanes begin empty and unlocked.
 * A locked lane can no longer receive cards.
@@ -73,7 +73,7 @@ Important clarification:
 4. Scoring hands clear the lane.
 5. High-card lanes bust and lock.
 6. Bets create optional risk/reward.
-7. The run ends when all 5 lanes are locked.
+7. The run ends when all 4 lanes are locked.
 
 ---
 
@@ -83,7 +83,7 @@ Important clarification:
 
 The game ends when:
 
-> **All 5 lanes are locked.**
+> **All 4 lanes are locked.**
 
 The player’s final score is the total score earned during the run.
 
@@ -574,7 +574,7 @@ Since all lanes locked ends the game, locked lanes should create visible tension
 
 For the first playable version, use:
 
-* 5 lanes
+* 4 lanes
 * 5 cards per lane
 * Infinite reshuffling deck
 * Pair or better scores
@@ -586,7 +586,7 @@ For the first playable version, use:
 * Bets expire after 5 draws
 * Successful bets multiply score and return chip profit
 * Failed bets lose wagered chips
-* Game ends when all 5 lanes are locked
+* Game ends when all 4 lanes are locked
 * Classic Mode has no placement timer
 * Panic Mode adds a timer and burns cards on timeout
 

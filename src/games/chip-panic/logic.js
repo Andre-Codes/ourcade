@@ -1,7 +1,7 @@
 /* High Card Bust — pure game logic (no React, no DOM).
    A turn-based poker solitaire with a chip economy and rotating objectives.
 
-   Five lanes, each holding up to five cards. The player draws ONE card at a time
+   Four lanes, each holding up to five cards. The player draws ONE card at a time
    into a tray, then places it into a lane (or spends a discard to throw it away).
 
    ECONOMY — chips are survival:
@@ -10,7 +10,7 @@
        (poker-blinds pressure): every few scoring hands / Wanted completions it
        climbs by 1 and never drops, so late lanes cost more to open.
      * You only need chips to OPEN a new lane or RAISE; an already-anted lane is
-       always playable, even at 0 chips. The run ends only when all five lanes are
+       always playable, even at 0 chips. The run ends only when all four lanes are
        locked, or no legal placement exists for the current tray.
 
    RESOLUTION — a full (5-card) lane resolves three ways:
@@ -44,7 +44,7 @@
 import { freshDeck, shuffle, isRed } from "../cards/deck.js";
 import { evaluate, bestMadeHand, HAND, HAND_NAME } from "../poker/handEval.js";
 
-export const LANES = 5;
+export const LANES = 4;
 export const LANE_CAP = 5; // a full lane = 5 cards = one poker hand
 export const START_CHIPS = 12;
 export const BET_EXPIRY_DRAWS = 5; // a committed raise must land within this many draws
@@ -54,16 +54,19 @@ export const ANTE_TIER = 1; // index into TIERS — Blue is the ante baseline
 export const BASE_ANTE = 1; // chips to open a lane at the start of a run
 export const ANTE_PROFIT = 1; // FLAT chips returned ABOVE the (paid) ante on a true score
 // Rising ante (poker-blinds pressure): the cost to open a lane climbs as the run
-// goes. Every SCORE_HANDS_PER_ANTE scoring hands AND every WANTED_HITS_PER_ANTE
-// Wanted completions each add 1, stacking additively. It never goes back down.
+// goes. Every SCORE_HANDS_PER_ANTE scoring hands, every WANTED_HITS_PER_ANTE
+// Wanted completions, AND every DRAWS_PER_ANTE cards drawn each add 1, stacking
+// additively. It never goes back down.
 export const SCORE_HANDS_PER_ANTE = 5;
 export const WANTED_HITS_PER_ANTE = 2;
+export const DRAWS_PER_ANTE = 20; // every 20 cards drawn, ante +1
 
 // Current cost to open a lane, derived purely from cumulative progress.
-export function anteFor(scoreHands, wantedHits) {
+export function anteFor(scoreHands, wantedHits, draws = 0) {
   return BASE_ANTE
     + Math.floor(scoreHands / SCORE_HANDS_PER_ANTE)
-    + Math.floor(wantedHits / WANTED_HITS_PER_ANTE);
+    + Math.floor(wantedHits / WANTED_HITS_PER_ANTE)
+    + Math.floor(draws / DRAWS_PER_ANTE);
 }
 export const SCORE_MIN = HAND.TWO_PAIR; // two pair or better truly scores
 export const SAVE_HAND = HAND.PAIR; // any pair is a defensive save (clears, no score)
@@ -295,7 +298,7 @@ export function hydrateGame(saved) {
 export const laneFull = (lane) => lane.length >= LANE_CAP;
 
 // The current cost to open a new lane (rises with progress).
-export const currentAnte = (state) => anteFor(state.scoreHands, state.wantedHits);
+export const currentAnte = (state) => anteFor(state.scoreHands, state.wantedHits, state.draws);
 
 // Can the current tray be placed into lane `l`? An empty lane requires either an
 // ante already paid or enough chips to pay it now; a non-empty anted lane is always

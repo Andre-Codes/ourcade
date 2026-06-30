@@ -175,7 +175,7 @@ console.log("Raises:");
   let expiredHit = null;
   for (let i = 0; i < BET_EXPIRY_DRAWS + 1; i++) {
     // place into OTHER lanes (open them first as needed) to advance draws
-    const lane = 1 + (i % 4);
+    const lane = 1 + (i % (LANES - 1));
     const r = play(g, "3" + "SHDC"[i % 4], lane);
     g = r.state;
     if (r.result.expired && r.result.expired.length) expiredHit = r.result.expired[0];
@@ -247,11 +247,11 @@ console.log("Wanted Hands:");
     ...g,
     wanted: wantHand(HAND.TWO_PAIR),
     streak: 4, // completion makes it 5
-    locked: [false, false, false, false, true], // lane 4 is locked
+    locked: Array.from({ length: LANES }, (_, i) => i === LANES - 1), // last lane is locked
   };
   const { state } = fillLane(g, ["KS", "KH", "8D", "8S", "2D"], 0); // two pair → streak 5
   eq("streak reached 5", state.streak, 5);
-  eq("a locked lane was unlocked", state.locked[4], false);
+  eq("a locked lane was unlocked", state.locked[LANES - 1], false);
 }
 // streakBonus unit checks
 eq("streakBonus 2 → +25% pts", streakBonus(2).ptsMult, 1.25);

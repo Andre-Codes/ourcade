@@ -27,7 +27,7 @@ const SAVE_KEY = "chip-panic:save"; // ourcade:-prefixed by store.js
    better truly SCORES (points, chips back, refreshes the discard). Raise above the
    ante (Red/Gold/Black) for a multiplier — raises need stronger hands and expire.
    Chase the WANTED hand up top for bonus points + chips and build a streak (resets
-   when a lane busts). The run ends when all five lanes lock — or you're out of
+   when a lane busts). The run ends when all four lanes lock — or you're out of
    chips with nowhere legal to place. Score feeds the Arcade Score Standard board.
 
    Turn-based: engine state lives in plain React state. The only timer is Panic
@@ -921,7 +921,7 @@ export default function ChipPanic() {
       {screen === SCREEN.TITLE && (
         <div className="hcb-overlay">
           <h1>HIGH CARD BUST</h1>
-          <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the rotating WANTED (a hand or a condition like ALL RED / BLACKJACK 21) for bonus chips & points · land a STRAIGHT FLUSH or ROYAL for the JACKPOT · all five locked ends the run</div>
+          <div className="sub">open a lane for 1 chip · fill five — TWO PAIR+ scores, any PAIR only saves the lane (no score, ante lost), a HIGH CARD locks it · raise for a multiplier · chase the rotating WANTED (a hand or a condition like ALL RED / BLACKJACK 21) for bonus chips & points · land a STRAIGHT FLUSH or ROYAL for the JACKPOT · all four locked ends the run</div>
           {/* Only High Stakes is available for now. Classic + Panic land later. */}
           <div className="hcb-modes">
             <button className="hcb-mode on" onPointerDown={() => { setMode(MODE.HIGH_STAKES); lsSet("chip-panic:mode", MODE.HIGH_STAKES); }}>
