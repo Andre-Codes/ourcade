@@ -1788,6 +1788,26 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-solve-cipher { font-size: 1.2rem; color: var(--neon-aqua); line-height: 1.5; }
 
+/* typed-answer inputs (word-ladder rungs, cipher decode) — retro mono fields */
+.arcade-solve-input {
+  font-family: 'Share Tech Mono', monospace; color: var(--neon-lime);
+  background: #0c0916; border: 1px solid #2a2f4a; border-radius: 6px;
+  caret-color: var(--neon-lime); text-transform: uppercase;
+}
+.arcade-solve-input:focus { outline: 2px solid var(--neon-aqua); outline-offset: -2px; }
+.arcade-solve-input:read-only { color: var(--neon-gold); cursor: default; }
+/* one rung: sits inside the ladder li, centered, sized to the word length (inline style) */
+.arcade-solve-ladder-input {
+  font-size: 1.3rem; letter-spacing: 0.3em; text-align: center;
+  padding: 2px 4px; background: transparent; border: none; border-radius: 0;
+}
+.arcade-solve-ladder-input:focus { outline: none; }
+.arcade-solve-ladder li.is-blank:focus-within { border-color: var(--neon-aqua); border-style: solid; }
+/* the decode field: full-width line under the ciphertext */
+.arcade-solve-cipher-input {
+  width: 100%; font-size: 1.05rem; letter-spacing: 0.08em; padding: 11px 12px;
+}
+
 /* word ladder — a stack of rungs, blanks called out */
 .arcade-solve-ladder {
   list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;
@@ -1815,8 +1835,13 @@ main > section + section { margin-top: 44px; }
 .arcade-solve-option {
   font-family: 'Share Tech Mono', monospace; font-size: 1rem; letter-spacing: 0.06em;
   padding: 12px 16px; background: #0c0916; color: #eef0ff;
-  border: 1px solid #2a2f4a; border-radius: 8px;
+  border: 1px solid #2a2f4a; border-radius: 8px; cursor: pointer;
+  transition: border-color .1s ease, background .1s ease;
 }
+.arcade-solve-option:hover { background: #191c2e; }
+.arcade-solve-option:disabled { cursor: default; }
+.arcade-solve-option.is-selected { border-color: var(--neon-aqua); background: rgba(63, 255, 208, 0.1); }
+.arcade-solve-option.is-answer { border-color: var(--neon-gold); color: var(--neon-gold); background: rgba(255, 210, 63, 0.1); }
 
 /* minute mystery — the case + the question */
 .arcade-solve-story {
@@ -1857,12 +1882,14 @@ main > section + section { margin-top: 44px; }
   background: #2a2f4a; padding: 3px; border-radius: 8px;
 }
 .arcade-numgrid-cell {
-  width: 52px; height: 52px; text-align: center;
+  width: 52px; height: 52px; text-align: center; padding: 0; line-height: 1; cursor: pointer;
   font-family: 'Share Tech Mono', monospace; font-size: 1.5rem;
   color: var(--neon-lime); background: #11131f;
-  border: 1px solid #2a2f4a; border-radius: 3px; caret-color: var(--neon-lime);
+  border: 1px solid #2a2f4a; border-radius: 3px;
+  transition: background .08s ease;
 }
-.arcade-numgrid-cell:focus { outline: 2px solid var(--neon-aqua); outline-offset: -2px; }
+.arcade-numgrid-cell:hover:not(:disabled) { background: #191c2e; }
+.arcade-numgrid-cell:focus-visible { outline: 2px solid var(--neon-aqua); outline-offset: -2px; }
 .arcade-numgrid-cell.is-locked {
   color: #eef0ff; background: #1c2035; font-weight: bold; cursor: default;
 }

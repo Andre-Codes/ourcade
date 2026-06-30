@@ -1,20 +1,21 @@
 import { useState } from "react";
 
 /* SolvePuzzle — renders one "Solve This" puzzle inside the /creatives/:id guide
-   page (CreativeGuidePage branches here when an item carries a `puzzle`). Two
-   families:
-     TEXT  (word_ladder, cipher, rebus, odd_one_out, mystery): show the puzzle,
-           an optional hint disclosure, and a Reveal Answer toggle.
-     GRID  (nonogram, sudoku4, latin4): an interactive fill-in grid with
-           Check / Reveal / Clear.
+   page (CreativeGuidePage branches here when an item carries a `puzzle`). Most
+   puzzles are now a "try it → check" loop sharing the GridControls bar
+   (Check / Reveal / Clear + a right/wrong status line):
+     INTERACTIVE (check): word_ladder (type the blanks), cipher (type the decoded
+           phrase), odd_one_out (click the misfit), nonogram, sudoku4, latin4.
+     REVEAL-ONLY (TextPuzzle): rebus + mystery — their answers are free-form
+           phrases, so they keep the hint + Reveal Answer disclosure only.
    Self-contained: all the puzzle UI/state lives here so the guide page stays a
    simple branch. Data shape is produced by scripts/gen-solve-puzzles.js. */
 
 // ── shared bits ────────────────────────────────────────────────────────────
 
-// Hint disclosure + Reveal button + revealed answer block, shared by every
-// text-family puzzle. `children` is the (always-visible) puzzle body; `answer`
-// is rendered only after Reveal.
+// Hint disclosure + Reveal button + revealed answer block, used by the
+// reveal-only puzzles (rebus, mystery). `children` is the (always-visible)
+// puzzle body; `answer` is rendered only after Reveal.
 function TextPuzzle({ prompt, hint, children, answer }) {
   const [showHint, setShowHint] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -54,44 +55,159 @@ function TextPuzzle({ prompt, hint, children, answer }) {
   );
 }
 
-// ── text family ──────────────────────────────────────────────────────────--
-
-function WordLadder({ puzzle }) {
+// A standalone hint disclosure (the "💡 hint" toggle + revealed text), for the
+// interactive puzzles that drive their own check/reveal via GridControls and so
+// don't use TextPuzzle's built-in hint. No-op when there's no hint.
+function HintToggle({ hint }) {
+  const [show, setShow] = useState(false);
+  if (!hint) return null;
   return (
-    <TextPuzzle
-      prompt={puzzle.prompt}
-      hint={puzzle.hint}
-      answer={
-        <ol className="arcade-solve-ladder arcade-solve-ladder-answer">
-          {puzzle.answer.map((w, i) => (
-            <li key={i}>{w}</li>
-          ))}
-        </ol>
-      }
-    >
-      <ol className="arcade-solve-ladder">
-        {puzzle.rungs.map((w, i) => {
-          const blank = w === "____";
-          return (
-            <li key={i} className={blank ? "is-blank" : ""}>
-              {blank ? <span className="arcade-solve-blank">????</span> : w}
-            </li>
-          );
-        })}
-      </ol>
-    </TextPuzzle>
+    <>
+      <button
+        type="button"
+        className="arcade-solve-btn arcade-solve-hint-btn"
+        onClick={() => setShow((v) => !v)}
+      >
+        {show ? "hide hint" : "💡 hint"}
+      </button>
+      {show && <p className="arcade-solve-hint">{hint}</p>}
+    </>
   );
 }
 
-function Cipher({ puzzle }) {
+// Normalize a free-typed answer for comparison: uppercase, letters/digits only
+// (so spacing and punctuation never matter — "DO A BARREL ROLL" === "doabarrelroll").
+const normalizeAnswer = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+// ── text family ──────────────────────────────────────────────────────────--
+
+// Word ladder: type the missing rungs, then check. A blank is right when it
+// matches the canonical answer at that position (case-insensitive); first/last
+// rungs are given. Reveal fills every rung; clear empties the typed blanks.
+function WordLadder({ puzzle }) {
+  const blanks = puzzle.rungs
+    .map((w, i) => (w === "____" ? i : -1))
+    .filter((i) => i >= 0);
+  const blankInit = () => Object.fromEntries(blanks.map((i) => [i, ""]));
+  const [vals, setVals] = useState(blankInit);
+  const [status, setStatus] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const setRung = (i, raw) => {
+    if (revealed) return;
+    setStatus(null);
+    // letters only, capped at the rung's length, uppercased
+    const v = raw.toUpperCase().replace(/[^A-Z]/g, "").slice(0, puzzle.answer[i].length);
+    setVals((prev) => ({ ...prev, [i]: v }));
+  };
+
+  const check = () => {
+    const ok = blanks.every((i) => vals[i] === puzzle.answer[i].toUpperCase());
+    setStatus(ok ? "right" : "wrong");
+  };
+  const doReveal = () => {
+    setRevealed(true);
+    setStatus(null);
+    setVals(Object.fromEntries(blanks.map((i) => [i, puzzle.answer[i].toUpperCase()])));
+  };
+  const reset = () => {
+    setRevealed(false);
+    setStatus(null);
+    setVals(blankInit());
+  };
+
+  const wordLen = puzzle.answer[0]?.length || 4;
+
   return (
-    <TextPuzzle
-      prompt={puzzle.prompt}
-      hint={puzzle.hint}
-      answer={<p className="arcade-solve-mono arcade-solve-plain">{puzzle.answer}</p>}
-    >
+    <div className="arcade-solve">
+      {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
+
+      <ol className="arcade-solve-ladder">
+        {puzzle.rungs.map((w, i) =>
+          w === "____" ? (
+            <li key={i} className="is-blank">
+              <input
+                className="arcade-solve-input arcade-solve-ladder-input"
+                type="text"
+                value={vals[i] ?? ""}
+                maxLength={puzzle.answer[i].length}
+                readOnly={revealed}
+                onChange={(e) => setRung(i, e.target.value)}
+                style={{ width: `${wordLen + 1}ch` }}
+                aria-label={`rung ${i + 1}`}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+              />
+            </li>
+          ) : (
+            <li key={i}>{w}</li>
+          )
+        )}
+      </ol>
+
+      <HintToggle hint={puzzle.hint} />
+      <GridControls
+        onCheck={check}
+        onReveal={doReveal}
+        onClear={reset}
+        revealed={revealed}
+        status={status}
+      />
+    </div>
+  );
+}
+
+// Cipher: type the decoded phrase, then check. Spacing/punctuation are ignored
+// in the comparison. Reveal shows the plaintext; clear empties the input.
+function Cipher({ puzzle }) {
+  const [guess, setGuess] = useState("");
+  const [status, setStatus] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const check = () =>
+    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+  const doReveal = () => {
+    setRevealed(true);
+    setStatus(null);
+    setGuess(puzzle.answer);
+  };
+  const reset = () => {
+    setRevealed(false);
+    setStatus(null);
+    setGuess("");
+  };
+
+  return (
+    <div className="arcade-solve">
+      {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
       <p className="arcade-solve-mono arcade-solve-cipher">{puzzle.ciphertext}</p>
-    </TextPuzzle>
+
+      <input
+        className="arcade-solve-input arcade-solve-cipher-input"
+        type="text"
+        value={guess}
+        readOnly={revealed}
+        onChange={(e) => {
+          setStatus(null);
+          setGuess(e.target.value);
+        }}
+        placeholder="type the decoded message…"
+        aria-label="your decoded message"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+      />
+
+      <HintToggle hint={puzzle.hint} />
+      <GridControls
+        onCheck={check}
+        onReveal={doReveal}
+        onClear={reset}
+        revealed={revealed}
+        status={status}
+      />
+    </div>
   );
 }
 
@@ -107,26 +223,67 @@ function Rebus({ puzzle }) {
   );
 }
 
+// Odd one out: click the item you think breaks the pattern, then check — no
+// typing. Reveal highlights the real answer and explains why; clear deselects.
 function OddOneOut({ puzzle }) {
+  const [chosen, setChosen] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const choose = (it) => {
+    if (revealed) return;
+    setStatus(null);
+    setChosen(it);
+  };
+  const check = () => {
+    if (chosen == null) return;
+    setStatus(chosen === puzzle.answer ? "right" : "wrong");
+  };
+  const doReveal = () => {
+    setRevealed(true);
+    setStatus(null);
+    setChosen(puzzle.answer);
+  };
+  const reset = () => {
+    setRevealed(false);
+    setStatus(null);
+    setChosen(null);
+  };
+
   return (
-    <TextPuzzle
-      prompt={puzzle.prompt}
-      hint={null}
-      answer={
-        <div>
-          <p className="arcade-solve-plain">{puzzle.answer}</p>
-          {puzzle.why && <p className="arcade-solve-why">{puzzle.why}</p>}
-        </div>
-      }
-    >
+    <div className="arcade-solve">
+      {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
+
       <ul className="arcade-solve-options">
-        {puzzle.items.map((it, i) => (
-          <li key={i} className="arcade-solve-option">
-            {it}
-          </li>
-        ))}
+        {puzzle.items.map((it, i) => {
+          const selected = chosen === it;
+          const isAnswer = revealed && it === puzzle.answer;
+          return (
+            <li key={i}>
+              <button
+                type="button"
+                className={`arcade-solve-option${selected ? " is-selected" : ""}${
+                  isAnswer ? " is-answer" : ""
+                }`}
+                onClick={() => choose(it)}
+                aria-pressed={selected}
+              >
+                {it}
+              </button>
+            </li>
+          );
+        })}
       </ul>
-    </TextPuzzle>
+
+      <GridControls
+        onCheck={check}
+        onReveal={doReveal}
+        onClear={reset}
+        revealed={revealed}
+        status={status}
+      />
+      {revealed && puzzle.why && <p className="arcade-solve-why">{puzzle.why}</p>}
+    </div>
   );
 }
 
@@ -251,7 +408,8 @@ function RowFragment({ children }) {
 }
 
 // Shared 4×4 number grid for sudoku4 + latin4. `given` cells are locked; the
-// player types 1–4 into the rest.
+// player TAPS a blank cell to cycle its value empty→1→2→…→size→empty (the same
+// click-to-cycle idiom as the nonogram — touch-friendly, no keyboard).
 function NumberGrid({ puzzle }) {
   const { size, given, solution } = puzzle;
   const init = () => given.map((row) => row.slice());
@@ -261,13 +419,14 @@ function NumberGrid({ puzzle }) {
 
   const locked = (r, c) => given[r][c] !== 0;
 
-  const setCell = (r, c, raw) => {
+  // Tap cycles: 0 (empty) → 1 → 2 → … → size → 0. (v % size) + 1 walks 1..size,
+  // and tapping at `size` lands back on 0.
+  const cycle = (r, c) => {
     if (locked(r, c) || revealed) return;
     setStatus(null);
-    const v = raw.replace(/[^1-4]/g, "").slice(-1); // last typed 1–4 digit, or ""
     setCells((prev) => {
       const next = prev.map((row) => row.slice());
-      next[r][c] = v ? Number(v) : 0;
+      next[r][c] = next[r][c] >= size ? 0 : next[r][c] + 1;
       return next;
     });
   };
@@ -301,17 +460,19 @@ function NumberGrid({ puzzle }) {
       >
         {cells.map((row, r) =>
           row.map((v, c) => (
-            <input
+            <button
               key={`${r}-${c}`}
+              type="button"
               className={`arcade-numgrid-cell${locked(r, c) ? " is-locked" : ""}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={v === 0 ? "" : String(v)}
-              readOnly={locked(r, c) || revealed}
-              onChange={(e) => setCell(r, c, e.target.value)}
-              aria-label={`cell ${r + 1},${c + 1}`}
-            />
+              onClick={() => cycle(r, c)}
+              // Locked givens are truly disabled; after Reveal the cells stay
+              // visually filled (the cycle() guard already blocks edits), so we
+              // don't gray the solved grid out.
+              disabled={locked(r, c)}
+              aria-label={`cell ${r + 1},${c + 1}${v ? `: ${v}` : ", empty"}`}
+            >
+              {v === 0 ? "" : String(v)}
+            </button>
           ))
         )}
       </div>

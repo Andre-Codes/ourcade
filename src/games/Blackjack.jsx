@@ -241,15 +241,13 @@ export default function Blackjack() {
     spawn({ kind: "chip", x, y, src: chipImg(color), dx, dy, arc: -50, ttl: 660 });
   }
 
-  function addBet(v, color, e) {
+  function addBet(v) {
     if (phase !== "bet") return;
     const next = Math.min(MAX_BET, chips, bet + v);
     if (next === bet) return; // capped out — no chip added
     // First chip of the round → chip-lay-3, subsequent → chip-lay-1.
     playSfx(bet === 0 ? "chip-lay-3" : "chip-lay-1");
-    if (e?.currentTarget) {
-      flyChipTo(pileRef, e.currentTarget.getBoundingClientRect(), color);
-    }
+    // The wagered chip simply appears in the bet stack — no fly-to-stack animation.
     setBet(next);
   }
   function clearBet() { setBet(0); }
@@ -405,7 +403,7 @@ export default function Blackjack() {
               </div>
               <div className="bj-betrow">
                 {CHIP_DENOMS.map((d) => (
-                  <div className="bj-chip" key={d.v} onPointerDown={(e) => addBet(d.v, d.color, e)}>
+                  <div className="bj-chip" key={d.v} onPointerDown={() => addBet(d.v)}>
                     <img src={chipImg(d.color)} alt="" draggable="false" />
                     <span>{d.v}</span>
                   </div>

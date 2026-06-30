@@ -530,19 +530,21 @@ const slugify = (s) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-// Per-kind presentation metadata for the card (title/blurb/time/difficulty/action).
+// Per-kind presentation metadata for the card. `label` is the title noun — the
+// card headline is `<label> #<n>` (see titleFor), so keep these as clean nouns
+// that read well numbered ("Word Ladder #3", "Cipher #2").
 const KIND_META = {
   word_ladder: {
     label: "Word Ladder",
     time: "3 min",
     difficulty: "beginner",
-    action: "Climb the ladder, then reveal the path",
+    action: "Climb the ladder, then check it",
   },
   cipher: {
-    label: "Decode the Message",
+    label: "Cipher",
     time: "5 min",
     difficulty: "beginner",
-    action: "Crack the code, then reveal it",
+    action: "Crack the code, then check it",
   },
   rebus: {
     label: "Rebus",
@@ -554,7 +556,7 @@ const KIND_META = {
     label: "Odd One Out",
     time: "2 min",
     difficulty: "beginner",
-    action: "Spot the misfit, then reveal why",
+    action: "Spot the misfit, then check it",
   },
   mystery: {
     label: "Minute Mystery",
@@ -582,28 +584,13 @@ const KIND_META = {
   },
 };
 
-// Build a human title per puzzle (the card headline).
-function titleFor(p) {
-  switch (p.kind) {
-    case "word_ladder":
-      return `Word ladder: ${p.answer[0]} → ${p.answer[p.answer.length - 1]}`;
-    case "cipher":
-      return "Decode the secret message";
-    case "rebus":
-      return "What does this rebus say?";
-    case "odd_one_out":
-      return "Which one doesn't belong?";
-    case "mystery":
-      return "Minute mystery: spot the lie";
-    case "nonogram":
-      return "Pixel nonogram — reveal the picture";
-    case "sudoku4":
-      return "Mini 4×4 Sudoku";
-    case "latin4":
-      return "4×4 Latin square";
-    default:
-      return "Solve this";
-  }
+// The card headline: a simple, scalable "<Kind> #n" (e.g. "Word Ladder #3").
+// `n` is the per-kind index (the same number stamped into the id), so titles
+// stay uniform as the pool grows — no per-puzzle headline authoring. The blurb
+// (BLURBS below) carries the descriptive line.
+function titleFor(p, n) {
+  const label = KIND_META[p.kind]?.label || "Solve This";
+  return `${label} #${n}`;
 }
 
 const BLURBS = {
@@ -624,7 +611,7 @@ function toItem(p, n) {
     id: `${idBase}-${String(n).padStart(3, "0")}`,
     lane: "solve",
     guide: true,
-    title: titleFor(p),
+    title: titleFor(p, n),
     blurb: BLURBS[p.kind],
     time: meta.time,
     difficulty: meta.difficulty,

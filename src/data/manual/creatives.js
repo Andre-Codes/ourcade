@@ -138,6 +138,19 @@ export const MANUAL_CREATIVES = [
     difficulty: "intermediate",
     action: "Grab a pencil and follow the eight steps",
   },
+  {
+    id: "cr-draw-baby-dragon",
+    lane: "draw",
+    guide: true,
+    plate: "baby-dragon",
+    title: "How to draw a baby dragon",
+    blurb:
+      "Eight steps grow two simple circles into a chubby, sitting baby dragon — horns, little wings, and a spiky tail. A cozy beginner draw.",
+    image: "baby-dragon",
+    time: "15 min",
+    difficulty: "beginner",
+    action: "Grab a pencil and follow the eight steps",
+  },
 
   // ── DRAW — the lane is plate-only by default now: ~40 public-domain drawing
   //    plates come from scripts/fetch-draw-guides.js (src/data/generated). Add

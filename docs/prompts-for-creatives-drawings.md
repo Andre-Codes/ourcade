@@ -129,73 +129,87 @@ Write captions as very short action phrases, usually 2 to 10 words.
 
 ---
 
-# MODERN 
 
 Create a clean illustrated “how to draw” progression plate for:
 
 
-[SUBJECT] 
+[DIFFICULTY_AND_SUBJECT]
 
 
-Create a polished advanced-artist drawing tutorial plate with the same overall spirit as a modernized vintage field-guide / beginner art-manual page, but do not include a title, heading, tips box, time/materials info, goal labels, or any large instructional header.
+
+Create a polished artist-style drawing tutorial plate with the feel of a modernized vintage field-guide / beginner art-manual page. The image should show the drawing progression clearly and beautifully, but should not include a title, heading, tips box, materials list, goal labels, time estimate, or large instructional header.
 
 The plate should feel like a refined hand-drawn art lesson: charming, organized, slightly whimsical, and visually rich without becoming cluttered.
 
 Style:
 - Warm cream/off-white paper background with subtle paper texture
-- Clean black ink line art with visible light pencil construction lines where useful
-- Handwritten-style numbered step markers and short captions are allowed
+- Clean black ink line art
+- Visible light gray pencil construction lines where useful
+- Handwritten-style numbered step markers are allowed
+- Short step captions are allowed
 - Modernized vintage tutorial-sheet aesthetic
 - Friendly, polished, storybook-meets-field-guide look
 - Slightly more detailed than a basic beginner guide
-- Soft spot color only in the finished example 
 - Main progression steps should remain mostly black-and-white line art
-- Cute, readable, approachable subject design
-- No photorealism, no heavy rendering, no digital UI look
+- Optional soft spot color only on the finished example
+- No photorealism
+- No digital UI look
+- No heavy rendering
+- No messy sketchbook clutter
 
 Layout:
 - Use 8 to 10 numbered drawing steps
-- Arrange the steps in a clean grid across the left and center of the page
-- Each step should be clearly separated with generous spacing
-- Each step should include a small numbered circle
-- Each step may include a concise handwritten caption beneath it
-- Progress from simple construction shapes to a finished ink drawing
-- Keep the drawings crop-friendly and visually consistent
+- Arrange the steps in a clean grid across the page
+- Each step should be clearly separated and easy to crop individually
+- Keep all steps roughly the same size and alignment
+- Include one larger finished version of the subject, either centered or placed to the side
+- Optional small variation thumbnails may appear on the right side, but only if they do not crowd the main tutorial
+- Maintain generous spacing and a calm, readable composition
 
-Required sections:
-1. Step-by-step drawing progression
-   - Show the subject evolving from basic shapes
-   - Include construction lines, overlap guides, and gradually added details
-   - End with a clean inked version of the subject
+Progression accuracy is critical:
+This must be a true cumulative drawing tutorial, not a set of separate similar drawings.
 
-2. Complete colored example
-   - Include one larger fully finished colored version near the upper-right or right-center
-   - Use soft watercolor/gouache-style coloring
-   - Keep it charming, detailed, and polished
-   - This should look like the “finished” inspiration version, but without a big label
+Each numbered step must preserve the exact same underlying character pose, proportions, silhouette, orientation, head position, body angle, limb placement, accessory placement, and overall design from the previous step.
 
-3. Anatomy / structure notes section
-   - Include a small annotated line-art version of the subject
-   - Use subtle dashed callout lines
-   - Add concise handwritten notes pointing out important structure, proportions, gesture, silhouette, or design logic
-   - Make this useful for more advanced artists, not just beginners
+Treat the guide like a transparent tracing-layer tutorial: every new step should visibly build on the prior step by adding only new construction lines, costume pieces, facial features, folds, accessories, cleanup, or final details.
 
+The final drawing should feel like Step 1 gradually accumulated details until it became the completed subject.
 
+Avoid:
+- Changing the pose between steps
+- Changing the proportions between steps
+- Changing the silhouette after it is established
+- Changing hand, foot, or accessory placement
+- Redesigning the subject between panels
+- Jumping from simple construction to a nearly finished drawing too early
+- Creating different variants in the main progression
+- Adding too many final details in the early steps
+- Making each panel look like a separate interpretation of the subject
 
-Do not include:
-- No title
-- No main heading
-- No “how to draw” text
-- No tips box
-- No time estimate
-- No materials list
-- No goal box
-- No large “finished!” label
-- No brand names
-- No excessive explanation
-- No cluttered borders
+Drawing progression structure:
+1. Begin with very simple construction shapes: gesture line, head circle, body mass, centerline, and major proportion guides.
+2. Lock the proportions and pose: torso shape, limb guides, major silhouette guides, and accessory placement.
+3. Establish the main recognizable silhouette: head shape, clothing/blocking, major costume or object shapes.
+4. Add primary forms: arms, legs, face placement, clothing masses, and large accessories.
+5. Refine the silhouette: beard/hair/fur/clothing edges, sleeves, hems, hands, feet, or key shape language.
+6. Add secondary details: facial features, folds, seams, belts, pouches, tools, props, or texture zones.
+7. Add decorative details: small costume elements, trim, buttons, patterns, object details, and line variation.
+8. Clean the line art while preserving the exact same pose and structure.
+9. Final clean ink drawing, same design, ready for color.
+10. Optional finished color version using soft, restrained spot color.
 
-Composition:
-- Landscape orientation
-- Balanced page with progression steps on the left/middle, colored final example on far the right, anatomy notes below or near the final 
-- Make the whole plate feel intentional, collectible, and useful for artists who want to study the design
+Caption style:
+- Captions should be short, handwritten-style, and practical.
+- Use simple phrases like “Start with simple shapes,” “Lock the pose,” “Add the main costume,” “Refine the silhouette,” and “Clean the final lines.”
+- Captions should not overwhelm the art.
+- Do not include long explanations inside the image.
+
+Subject design:
+- The subject should be cute, readable, and approachable
+- Use clear shapes that a viewer could realistically follow
+- Keep the design charming but not overly complex
+- The finished subject should look polished, memorable, and website-worthy
+- Preserve the same primary design throughout the entire sequence
+
+Final result:
+A high-quality illustrated drawing-guide plate that looks like a beautifully curated creative activity for a website: digestible, fun, accurate, and visually appealing.
