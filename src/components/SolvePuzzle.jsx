@@ -116,7 +116,10 @@ function WordLadder({ puzzle }) {
     setVals(blankInit());
   };
 
-  const wordLen = puzzle.answer[0]?.length || 4;
+  // Width = glyph cells + the per-letter 0.3em letter-spacing + side padding,
+  // so every letter shows (a plain `${len}ch` clips, since `ch` ignores the
+  // letter-spacing each character adds).
+  const rungWidth = (len) => `calc(${len}ch + ${len} * 0.3em + 16px)`;
 
   return (
     <div className="arcade-solve">
@@ -133,7 +136,7 @@ function WordLadder({ puzzle }) {
                 maxLength={puzzle.answer[i].length}
                 readOnly={revealed}
                 onChange={(e) => setRung(i, e.target.value)}
-                style={{ width: `${wordLen + 1}ch` }}
+                style={{ width: rungWidth(puzzle.answer[i].length) }}
                 aria-label={`rung ${i + 1}`}
                 autoComplete="off"
                 autoCapitalize="characters"

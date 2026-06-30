@@ -1792,7 +1792,7 @@ main > section + section { margin-top: 44px; }
 .arcade-solve-input {
   font-family: 'Share Tech Mono', monospace; color: var(--neon-lime);
   background: #0c0916; border: 1px solid #2a2f4a; border-radius: 6px;
-  caret-color: var(--neon-lime); text-transform: uppercase;
+  caret-color: var(--neon-lime); text-transform: uppercase; box-sizing: border-box;
 }
 .arcade-solve-input:focus { outline: 2px solid var(--neon-aqua); outline-offset: -2px; }
 .arcade-solve-input:read-only { color: var(--neon-gold); cursor: default; }
@@ -1800,6 +1800,8 @@ main > section + section { margin-top: 44px; }
 .arcade-solve-ladder-input {
   font-size: 1.3rem; letter-spacing: 0.3em; text-align: center;
   padding: 2px 4px; background: transparent; border: none; border-radius: 0;
+  /* nudge right by one trailing letter-spacing so the word reads centered */
+  text-indent: 0.3em;
 }
 .arcade-solve-ladder-input:focus { outline: none; }
 .arcade-solve-ladder li.is-blank:focus-within { border-color: var(--neon-aqua); border-style: solid; }
