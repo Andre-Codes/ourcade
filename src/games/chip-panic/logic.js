@@ -450,7 +450,9 @@ export function useDiscard(state) {
   }
   let next = { ...state, discard: false };
   const expired = [];
-  drawInto(next, expired);
+  // A discard deals a fresh tray but does NOT count toward the betting timer:
+  // raise previews + countdowns are frozen across it (tickExpiry: false).
+  drawInto(next, expired, { tickExpiry: false });
   next.over = isGameOver(next);
   return {
     state: next,
@@ -617,12 +619,23 @@ function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
    Mutates `state` in place (the caller already cloned what it needs). Pushes any
    raises that expire on this draw into `expired`. Order: refill/exhaust bag →
    COMMIT previews → DECREMENT older committed raises → deal the next tray. A raise
-   is never decremented by the draw that created it (N subsequent draws). */
-function drawInto(state, expired) {
+   is never decremented by the draw that created it (N subsequent draws).
+
+   `tickExpiry` (default true) drives the betting clock: a normal draw commits
+   previews and ticks countdowns. A discard passes `false` so it deals a fresh tray
+   WITHOUT advancing raise expiry — the discard is "free" toward the betting timer. */
+function drawInto(state, expired, { tickExpiry = true } = {}) {
   // 1. bag
   if (state.bag.length === 0) {
     if (state.oneDeck) { state.tray = null; return; }
     state.bag = shuffle(freshDeck(), state.rng);
+  }
+
+  if (!tickExpiry) {
+    // Discard: just deal the next tray, leaving raise previews + countdowns frozen.
+    state.tray = { ...state.bag[0], faceUp: true };
+    state.bag = state.bag.slice(1);
+    return;
   }
 
   // 2. commit previewed raises (only on still-anted, still-alive, affordable lanes)

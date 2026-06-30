@@ -19,7 +19,7 @@ const GAME_ID = "blackjack";
 const START_CHIPS = 100;
 const MAX_BET = 50;
 const FEED_MS = 2400;          // result-panel visible duration
-const DEALER_STEP_MS = 460;    // pause between each dealer card reveal
+const DEALER_STEP_MS = 780;    // pause between each dealer card reveal
 // Denominations low → high paired with the canonical CHIP_ORDER (blue, red, green,
 // black) so chips read the same across every cabinet. Displayed high → low below.
 const CHIP_DENOMS = [1, 5, 10, 25]
@@ -71,7 +71,7 @@ const BJ_CSS = `
   .bj-big.alt { background: linear-gradient(180deg,#fff,#ffd23f); }
   .bj-big:disabled { opacity: .4; cursor: not-allowed; filter: none; }
 
-  .bj-betrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .bj-betrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
   .bj-chip { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .bj-chip img { width: 44px; height: 44px; }
   .bj-chip span { font-family: 'Press Start 2P',monospace; font-size: .5rem; color: #9fdcb4; }
