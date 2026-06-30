@@ -2,72 +2,79 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-presidential-ham",
-    "title": "Every U.S. president, solemnly holding a ham",
-    "blurb": "A painted gallery of commanders-in-chief cradling a ham for reasons no one will explain. It's history, it's deli meat, it's exactly the kind of thing the early web was built for.",
-    "url": "https://presidentialham.com",
-    "foundNote": "history meets the cold cuts"
+    "id": "gw-internet-roadtrip",
+    "title": "A road trip where the entire internet drives one car by committee",
+    "blurb": "Thousands of strangers vote on every turn, honk, and radio station for a single shared car crawling down real roads. It's the most chaotic carpool since your friend's mom drove six kids to the arcade.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "foundNote": "left the driveway in 2025"
   },
   {
-    "id": "gw-cube-rule",
-    "title": "The Cube Rule finally settles 'is a hot dog a sandwich'",
-    "blurb": "One unifying theory of food, based entirely on where the structural starch sits. Bring it to your next argument and watch friendships dissolve like a Pop-Tart in milk.",
-    "url": "https://cuberule.com"
+    "id": "gw-one-million-checkboxes",
+    "title": "One million checkboxes everyone shares at the same time",
+    "blurb": "Check a box and somewhere a stranger unchecks it two seconds later. Teens started smuggling secret binary messages through the grid, which is exactly the kind of nonsense the old web was built for.",
+    "url": "https://onemillioncheckboxes.com"
   },
   {
-    "id": "gw-true-size",
-    "title": "Drag any country across the globe to see how big it REALLY is",
-    "blurb": "Turns out the maps in your 4th-grade classroom were lying to you about Greenland. Yank it down to the equator and gasp.",
-    "url": "https://thetruesize.com",
-    "foundNote": "map projections, exposed"
+    "id": "gw-wplace",
+    "title": "A pixel canvas painted onto the whole planet that never resets",
+    "blurb": "Four trillion pixels stretched over a world map, where everyone paints together and nothing ever wipes clean. Like the Million Dollar Homepage, except the size of Earth and slightly out of control.",
+    "url": "https://wplace.live",
+    "foundNote": "launched 2025"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "A game where you hunt a cow you cannot see",
-    "blurb": "Your only clue is a voice screaming 'COW' louder as your cursor gets warmer. Peak hot-and-cold, peak nonsense, peak afternoon-killer.",
+    "id": "gw-find-the-invisible-cow",
+    "title": "A game where you hunt an invisible cow by sound alone",
+    "blurb": "A man yells \"COW\" louder as your cursor gets warmer, then screams in triumph when you find it. Peak 2003 school-computer-lab energy, no install required.",
     "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your sound on"
+    "foundNote": "headphones recommended"
+  },
+  {
+    "id": "gw-nicest-place",
+    "title": "A wall of strangers offering you a video hug",
+    "blurb": "People around the world smile, wave, and reach out for a virtual embrace. It's the opposite of the comments section and we will not be taking questions.",
+    "url": "https://thenicestplace.net"
   },
   {
     "id": "gw-infinite-craft",
-    "title": "Combine 'water' + 'fire' and eventually invent 'Obama's Pizza Planet'",
-    "blurb": "Neal Agarwal's alchemy toy lets you smush concepts together forever until reality stops making sense. Like Tap Surge for your brain, minus the dots.",
-    "url": "https://neal.fun/infinite-craft",
-    "foundNote": "no two runs alike"
+    "title": "Combine elements forever until you accidentally make 'Obama's Pizza Planet'",
+    "blurb": "Start with water, fire, earth, and wind, then keep smashing things together until the AI hands you something gloriously cursed. Alchemy for people who skipped chemistry.",
+    "url": "https://neal.fun/infinite-craft/"
   },
   {
-    "id": "gw-password-game",
-    "title": "A password field that turns into a boss fight",
-    "blurb": "It demands a Roman numeral that multiplies to 35, a chess move, and the current phase of the moon. We rate the despair a solid dial-up handshake out of ten.",
-    "url": "https://neal.fun/password-game",
-    "foundNote": "good luck, soldier"
+    "id": "gw-one-million-chessboards",
+    "title": "A million chessboards where moving a piece moves it for everyone",
+    "blurb": "No turns, no rules you'd recognize, just a thousand-by-thousand grid of boards and total cooperative anarchy. Bobby Fischer would have unplugged the modem.",
+    "url": "https://onemillionchessboards.com"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "title": "The deep archive of every weird single-purpose website",
+    "blurb": "A curated vault of the strange little one-trick sites the random button forgot. It's a webring for things that should not exist, and we mean that with love.",
+    "url": "https://theuselesswebindex.com"
+  },
+  {
+    "id": "gw-sandspiel-studio",
+    "title": "A falling-sand toy where you build tiny physics worlds",
+    "blurb": "Pour sand, light fires, flood it all, then share the little pixel ecosystem you cooked up. The kind of time-sink that ate entire study halls in the Flash era.",
+    "url": "https://studio.sandspiel.club"
+  },
+  {
+    "id": "gw-koalas-to-the-max",
+    "title": "Tap colored circles until a koala slowly appears",
+    "blurb": "Split each blob into four smaller blobs and watch a fuzzy face emerge from pure pixel division. Hypnotic in a way no productivity app will ever match.",
+    "url": "https://www.koalastothemax.com"
+  },
+  {
+    "id": "gw-lhc-destroyed-world",
+    "title": "A site that confirms the Large Hadron Collider hasn't ended the world yet",
+    "blurb": "One enormous word answers the question: NOPE. Check back daily for the most reassuring single-page report on the internet.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "foundNote": "still NOPE"
   },
   {
     "id": "gw-pug-in-a-rug",
-    "title": "Is there a pug in a rug? Click to find out",
-    "blurb": "You lift the rug. There is, in fact, a pug. The site delivers on its single promise more reliably than most of the modern internet.",
-    "url": "https://puginarug.com",
-    "foundNote": "100% pug uptime"
-  },
-  {
-    "id": "gw-koalas",
-    "title": "Click to reveal a hidden koala, one pixel-block at a time",
-    "blurb": "A weirdly soothing color puzzle that slowly resolves into a koala face. Lower-stim than Color Panic, somehow just as sticky.",
-    "url": "https://koalastothemax.com",
-    "foundNote": "online since the Flash days"
-  },
-  {
-    "id": "gw-person-not-exist",
-    "title": "A new human face that has never existed, every refresh",
-    "blurb": "An AI dreams up a totally fake person each time you reload. Stare too long and you'll start apologizing to people who aren't real.",
-    "url": "https://thispersondoesnotexist.com",
-    "foundNote": "refresh for a stranger"
-  },
-  {
-    "id": "gw-heyyey",
-    "title": "The 'What Is Love' dancing-head guy, on infinite loop",
-    "blurb": "One bobbing animated head, one eternal beat. It's the SNL sketch energy distilled into a single tab you'll forget to close.",
-    "url": "https://heeeeeeeey.com",
-    "foundNote": "sound recommended"
+    "title": "A pug wrapped in a tiny blanket, available 24/7",
+    "blurb": "That's it. That's the site. A pug, in a rug, asking nothing of you. Best viewed when the rest of the internet has worn you down.",
+    "url": "https://puginarug.com"
   }
 ];
