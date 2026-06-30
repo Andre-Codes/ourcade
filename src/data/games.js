@@ -74,6 +74,21 @@ export const GAMES = [
   //   score: { label: "GUESSES", dir: "asc", format: (n) => `${n}/6` },
   // },
   {
+    id: "spelldown",
+    title: "Spelldown",
+    blurb: "Seven letters, one in the middle you must use. Spell as many words as you can — using all seven is the daily jackpot. Same board for everyone; a fresh one drops at midnight.",
+    emoji: "🐝",
+    accent: "#ffd45e",
+    tags: ["daily", "word", "puzzle", "solo"],
+    rating: 5,
+    plays: 0,
+    category: "game",
+    type: "react",
+    component: lazy(() => import("../games/Spelldown.jsx")),
+    // Board ranks by MOST words found (desc = higher is better).
+    score: { label: "WORDS", dir: "desc" },
+  },
+  {
     id: "pits-and-portals",
     title: "Pits and Portals",
     blurb: "A fragile-hero puzzle-roguelike. No healing — survive by shoving threats into the pits. Every floor is verified beatable hitless.",

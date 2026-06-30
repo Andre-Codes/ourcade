@@ -111,7 +111,11 @@ function wordLadder(start, end, dict, maxLen) {
 
 // A few hand-picked, on-brand endpoint pairs (nostalgic / arcade flavored). We
 // try each; only those that actually resolve to a clean 4–6 rung ladder ship.
+// Mix of 4- and 5-letter endpoints — buildWordLadders picks the right dict by
+// the start word's length, so both lengths can live in one list. (Every pair
+// here was verified against the committed lists to resolve within the window.)
 const LADDER_PAIRS = [
+  // ── 4-letter ──
   ["GAME", "CODE", "Old-school: change one letter at a time."],
   ["PLAY", "QUIT", "From the title screen to the exit."],
   ["BYTE", "BITE", "A snack-sized hop."],
@@ -127,6 +131,30 @@ const LADDER_PAIRS = [
   ["CAVE", "GOLD", "Dig for treasure."],
   ["BOOK", "WORD", "Inside every book."],
   ["SHIP", "PORT", "Bring it home to harbor."],
+  ["COIN", "GOLD", "Pocket the treasure."],
+  ["DICE", "LUCK", "Roll for it."],
+  ["PONG", "GAME", "The first arcade hit."],
+  ["BOSS", "WINS", "Beat the boss."],
+  ["JUMP", "DASH", "Two platformer moves."],
+  ["KING", "PAWN", "Both on the chessboard."],
+  ["WAVE", "FOAM", "Down at the beach."],
+  ["NUKE", "BOMB", "One big blast."],
+  ["RACE", "LAPS", "Round and round the track."],
+  ["DUSK", "DAWN", "Two ends of the day."],
+  ["SLOT", "REEL", "Spin to win."],
+  ["CARD", "DECK", "Shuffle the deck."],
+  ["DOOR", "KEYS", "Unlock it."],
+  ["GROW", "SEED", "Plant a seed."],
+  ["WOLF", "HOWL", "It lets one out at the moon."],
+  ["STAR", "DUST", "Sprinkled across the sky."],
+  // ── 5-letter (5.txt's dense graph) ──
+  ["SNAKE", "SCORE", "Old phone classic, up on the board."],
+  ["PIXEL", "BYTES", "Tiny pieces of the screen."],
+  ["FLAME", "SPARK", "Catch fire, one letter at a time."],
+  ["HEART", "BEATS", "It beats."],
+  ["TOKEN", "COINS", "Arcade currency."],
+  ["MAZES", "PATHS", "Find your way through."],
+  ["SCORE", "BOARD", "Up on the leaderboard."],
 ];
 
 function buildWordLadders(dict4, dict5, want) {
@@ -145,6 +173,120 @@ function buildWordLadders(dict4, dict5, want) {
       rungs,
       answer: sol,
       hint,
+    });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANAGRAM — unscramble a real word. The word list does the work twice: it
+// confirms the answer is a real word, and it guarantees the SCRAMBLE we show
+// isn't accidentally a different valid word (or a second valid anagram of the
+// same letters), so there's exactly one intended solution.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Sorted-letter signature — two words are anagrams iff their signatures match.
+const signature = (w) => w.toUpperCase().split("").sort().join("");
+
+// A bank of fun, common, on-brand words to scramble (5–7 letters). Curated so
+// the answer always reads as a "real" word a casual player knows; the generator
+// still verifies each is in the list and has a unique anagram before shipping it.
+const ANAGRAM_WORDS = [
+  "ARCADE", "PIXELS", "ROCKET", "PLANET", "DRAGON", "WIZARD", "CASTLE", "KNIGHT",
+  "GOBLIN", "POTION", "SHIELD", "DESERT", "JUNGLE", "ISLAND", "GALAXY", "COMETS",
+  "GARDEN", "PUZZLE", "RIDDLE", "SECRET", "MAGNET", "ROBOTS", "SIGNAL", "BUTTON",
+  "SCREEN", "RECORD", "SPRITE", "TUNNEL", "BRIDGE", "TROPHY", "MEDALS", "WINNER",
+  "MARBLE", "PEBBLE", "TURTLE", "FALCON", "JAGUAR", "PYTHON", "BEACON", "METEOR",
+  "ORBITS", "ANCHOR", "HARBOR", "VOYAGE", "VOLCANO", "THUNDER", "CRYSTAL", "DOLPHIN",
+  "PENGUIN", "COMPASS", "LANTERN", "CIRCUIT",
+];
+
+function buildAnagrams(dictByLen, want) {
+  const out = [];
+  for (const word of shuffle(ANAGRAM_WORDS)) {
+    if (out.length >= want) break;
+    const W = word.toUpperCase();
+    const dict = dictByLen[W.length];
+    if (!dict || !dict.has(W)) continue; // must be a real word of its length
+
+    // Single-answer guard: skip if another word shares the same letters (so the
+    // player can't legitimately type a different correct word).
+    let answers = 0;
+    for (const w of dict) {
+      if (signature(w) === signature(W)) {
+        if (++answers > 1) break;
+      }
+    }
+    if (answers > 1) continue;
+
+    // A scramble that isn't the word itself and isn't ANOTHER real word.
+    let scramble = null;
+    for (let t = 0; t < 40; t++) {
+      const s = shuffle(W.split("")).join("");
+      if (s !== W && !dict.has(s)) {
+        scramble = s;
+        break;
+      }
+    }
+    if (!scramble) continue;
+
+    out.push({
+      kind: "anagram",
+      prompt: "These letters spell one word. Unscramble them, then check.",
+      scramble,
+      answer: W,
+      hint: `It's a ${W.length}-letter word starting with “${W[0]}”.`,
+    });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WORD SANDWICH — one short word completes two longer ones: LEFT___ + ___RIGHT.
+// Curated for fair, gettable outer words (a player has to recognize CARTON and
+// ONLY to land ON); the generator VERIFIES that LEFT+answer and answer+RIGHT are
+// both real dictionary words, dropping any pair that fails — so a typo or a list
+// that disagrees can never ship a broken puzzle.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// { left, right, answer } — the two outer fragments and the connector word.
+// The displayed clue is `${left}___  +  ___${right}` with answer the middle word.
+const SANDWICHES = [
+  { left: "SON", right: "WORK", answer: "NET" }, // SONNET + NETWORK
+  { left: "GAR", right: "WORK", answer: "NET" }, // GARNET + NETWORK
+  { left: "BON", right: "WORK", answer: "NET" }, // BONNET + NETWORK
+  { left: "CABI", right: "WORK", answer: "NET" }, // CABINET + NETWORK
+  { left: "CRAY", right: "CE", answer: "ON" }, // CRAYON + ONCE
+  { left: "LEM", right: "CE", answer: "ON" }, // LEMON + ONCE
+  { left: "BEAC", right: "CE", answer: "ON" }, // BEACON + ONCE
+  { left: "FALC", right: "CE", answer: "ON" }, // FALCON + ONCE
+  { left: "SEAS", right: "CE", answer: "ON" }, // SEASON + ONCE
+  { left: "DRAG", right: "LY", answer: "ON" }, // DRAGON + ONLY
+  { left: "CART", right: "LY", answer: "ON" }, // CARTON + ONLY
+  { left: "NYL", right: "LY", answer: "ON" }, // NYLON + ONLY
+  { left: "WAG", right: "WARD", answer: "ON" }, // WAGON + ONWARD
+  { left: "KEY", right: "ED", answer: "BOARD" }, // KEYBOARD + BOARDED
+];
+
+function buildSandwiches(dictByLen, want) {
+  const out = [];
+  for (const s of shuffle(SANDWICHES)) {
+    if (out.length >= want) break;
+    const M = s.answer.toUpperCase();
+    const leftWord = (s.left + M).toUpperCase();
+    const rightWord = (M + s.right).toUpperCase();
+    const lDict = dictByLen[leftWord.length];
+    const rDict = dictByLen[rightWord.length];
+    // Both outer words must be real, or the clue has no answer — drop it.
+    if (!lDict || !lDict.has(leftWord)) continue;
+    if (!rDict || !rDict.has(rightWord)) continue;
+    out.push({
+      kind: "middle",
+      prompt: "One short word finishes both. Fill the blanks with the same word.",
+      left: s.left.toUpperCase(),
+      right: s.right.toUpperCase(),
+      answer: M,
+      hint: `It's a ${M.length}-letter word — and a word on its own.`,
     });
   }
   return out;
@@ -540,6 +682,18 @@ const KIND_META = {
     difficulty: "beginner",
     action: "Climb the ladder, then check it",
   },
+  anagram: {
+    label: "Anagram",
+    time: "2 min",
+    difficulty: "beginner",
+    action: "Unscramble the word, then check it",
+  },
+  middle: {
+    label: "Word Sandwich",
+    time: "3 min",
+    difficulty: "intermediate",
+    action: "Find the missing word, then check it",
+  },
   cipher: {
     label: "Cipher",
     time: "5 min",
@@ -595,6 +749,8 @@ function titleFor(p, n) {
 
 const BLURBS = {
   word_ladder: "Change one letter at a time until you climb from the first word to the last.",
+  anagram: "Every letter of a real word, shuffled. Slide them back into place.",
+  middle: "One little word finishes two bigger ones. Find the word that fits both blanks.",
   cipher: "A secret phrase, scrambled by a Caesar shift. Slide the letters back to read it.",
   rebus: "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
   odd_one_out: "Four things, one pattern, one impostor. Find the one that breaks the rule.",
@@ -628,8 +784,21 @@ const dict4 = loadWords(4);
 const dict5 = loadWords(5);
 console.log(`  loaded ${dict4.size} four-letter and ${dict5.size} five-letter words`);
 
+// A length→Set map so the anagram + sandwich generators can verify words of any
+// length (KEYBOARD is 8, BOARDED is 7, etc.). dict4/dict5 are reused as-is.
+const dictByLen = {
+  3: loadWords(3),
+  4: dict4,
+  5: dict5,
+  6: loadWords(6),
+  7: loadWords(7),
+  8: loadWords(8),
+};
+
 const puzzles = [
-  ...buildWordLadders(dict4, dict5, 8),
+  ...buildWordLadders(dict4, dict5, 14),
+  ...buildAnagrams(dictByLen, 12),
+  ...buildSandwiches(dictByLen, 10),
   ...buildCiphers(6),
   ...buildRebuses(6),
   ...buildOddOneOut(6),

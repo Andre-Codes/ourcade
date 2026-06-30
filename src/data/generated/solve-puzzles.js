@@ -16,20 +16,20 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "WORD",
+        "LOSE",
         "____",
         "____",
         "____",
-        "GAME"
+        "WINS"
       ],
       "answer": [
-        "WORD",
-        "WARD",
-        "WARE",
-        "WAME",
-        "GAME"
+        "LOSE",
+        "LONE",
+        "LINE",
+        "WINE",
+        "WINS"
       ],
-      "hint": "Two of our favorite things."
+      "hint": "Turn a loss into a win."
     }
   },
   {
@@ -46,18 +46,18 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "BOOK",
+        "SNAKE",
         "____",
         "____",
-        "WORD"
+        "SCORE"
       ],
       "answer": [
-        "BOOK",
-        "BORK",
-        "WORK",
-        "WORD"
+        "SNAKE",
+        "SNARE",
+        "SCARE",
+        "SCORE"
       ],
-      "hint": "Inside every book."
+      "hint": "Old phone classic, up on the board."
     }
   },
   {
@@ -74,22 +74,22 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "FROG",
+        "SLOT",
         "____",
         "____",
         "____",
         "____",
-        "TOAD"
+        "REEL"
       ],
       "answer": [
-        "FROG",
-        "PROG",
-        "PROD",
-        "TROD",
-        "TRAD",
-        "TOAD"
+        "SLOT",
+        "SLAT",
+        "SEAT",
+        "SEAL",
+        "REAL",
+        "REEL"
       ],
-      "hint": "Almost the same creature."
+      "hint": "Spin to win."
     }
   },
   {
@@ -106,22 +106,20 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "MOON",
+        "BOSS",
         "____",
         "____",
         "____",
-        "____",
-        "STAR"
+        "WINS"
       ],
       "answer": [
-        "MOON",
-        "BOON",
-        "BOOR",
-        "BOAR",
-        "SOAR",
-        "STAR"
+        "BOSS",
+        "COSS",
+        "CONS",
+        "WONS",
+        "WINS"
       ],
-      "hint": "Across the night sky."
+      "hint": "Beat the boss."
     }
   },
   {
@@ -138,22 +136,20 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "HEAD",
+        "COIN",
         "____",
         "____",
         "____",
-        "____",
-        "TAIL"
+        "GOLD"
       ],
       "answer": [
-        "HEAD",
-        "HEED",
-        "TEED",
-        "TEEL",
-        "TAEL",
-        "TAIL"
+        "COIN",
+        "COON",
+        "GOON",
+        "GOOD",
+        "GOLD"
       ],
-      "hint": "Flip it, gradually."
+      "hint": "Pocket the treasure."
     }
   },
   {
@@ -170,18 +166,22 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "GAME",
+        "DOOR",
         "____",
         "____",
-        "CODE"
+        "____",
+        "____",
+        "KEYS"
       ],
       "answer": [
-        "GAME",
-        "CAME",
-        "COME",
-        "CODE"
+        "DOOR",
+        "BOOR",
+        "BOOS",
+        "BOYS",
+        "BEYS",
+        "KEYS"
       ],
-      "hint": "Old-school: change one letter at a time."
+      "hint": "Unlock it."
     }
   },
   {
@@ -189,6 +189,198 @@ export default [
     "lane": "solve",
     "guide": true,
     "title": "Word Ladder #7",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "NUKE",
+        "____",
+        "____",
+        "____",
+        "____",
+        "BOMB"
+      ],
+      "answer": [
+        "NUKE",
+        "CUKE",
+        "COKE",
+        "COME",
+        "COMB",
+        "BOMB"
+      ],
+      "hint": "One big blast."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #8",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "FLAME",
+        "____",
+        "____",
+        "____",
+        "____",
+        "SPARK"
+      ],
+      "answer": [
+        "FLAME",
+        "FLAKE",
+        "SLAKE",
+        "SPAKE",
+        "SPARE",
+        "SPARK"
+      ],
+      "hint": "Catch fire, one letter at a time."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-009",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #9",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "STAR",
+        "____",
+        "____",
+        "____",
+        "____",
+        "DUST"
+      ],
+      "answer": [
+        "STAR",
+        "STAT",
+        "STET",
+        "SUET",
+        "DUET",
+        "DUST"
+      ],
+      "hint": "Sprinkled across the sky."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-010",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #10",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "CARD",
+        "____",
+        "____",
+        "____",
+        "____",
+        "DECK"
+      ],
+      "answer": [
+        "CARD",
+        "BARD",
+        "BARK",
+        "BERK",
+        "BECK",
+        "DECK"
+      ],
+      "hint": "Shuffle the deck."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-011",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #11",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "KING",
+        "____",
+        "____",
+        "____",
+        "____",
+        "PAWN"
+      ],
+      "answer": [
+        "KING",
+        "PING",
+        "PANG",
+        "PANS",
+        "PAWS",
+        "PAWN"
+      ],
+      "hint": "Both on the chessboard."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-012",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #12",
+    "blurb": "Change one letter at a time until you climb from the first word to the last.",
+    "time": "3 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Climb the ladder, then check it",
+    "puzzle": {
+      "kind": "word_ladder",
+      "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
+      "rungs": [
+        "SCORE",
+        "____",
+        "____",
+        "____",
+        "____",
+        "BOARD"
+      ],
+      "answer": [
+        "SCORE",
+        "SCARE",
+        "SCARS",
+        "SOARS",
+        "BOARS",
+        "BOARD"
+      ],
+      "hint": "Up on the leaderboard."
+    }
+  },
+  {
+    "id": "cr-solve-word-ladder-013",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Ladder #13",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
     "difficulty": "beginner",
@@ -217,10 +409,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-word-ladder-008",
+    "id": "cr-solve-word-ladder-014",
     "lane": "solve",
     "guide": true,
-    "title": "Word Ladder #8",
+    "title": "Word Ladder #14",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
     "difficulty": "beginner",
@@ -230,20 +422,424 @@ export default [
       "kind": "word_ladder",
       "prompt": "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       "rungs": [
-        "CAVE",
+        "BOOK",
         "____",
         "____",
-        "____",
-        "GOLD"
+        "WORD"
       ],
       "answer": [
-        "CAVE",
-        "COVE",
-        "COLE",
-        "COLD",
-        "GOLD"
+        "BOOK",
+        "BORK",
+        "WORK",
+        "WORD"
       ],
-      "hint": "Dig for treasure."
+      "hint": "Inside every book."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-001",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #1",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "ULNNTE",
+      "answer": "TUNNEL",
+      "hint": "It's a 6-letter word starting with “T”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-002",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #2",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "KOTERC",
+      "answer": "ROCKET",
+      "hint": "It's a 6-letter word starting with “R”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-003",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #3",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "DZIRWA",
+      "answer": "WIZARD",
+      "hint": "It's a 6-letter word starting with “W”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-004",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #4",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "JGNLUE",
+      "answer": "JUNGLE",
+      "hint": "It's a 6-letter word starting with “J”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #5",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "ZEPLZU",
+      "answer": "PUZZLE",
+      "hint": "It's a 6-letter word starting with “P”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-006",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #6",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "IERNNW",
+      "answer": "WINNER",
+      "hint": "It's a 6-letter word starting with “W”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-007",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #7",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "RORBHA",
+      "answer": "HARBOR",
+      "hint": "It's a 6-letter word starting with “H”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #8",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "LRATENN",
+      "answer": "LANTERN",
+      "hint": "It's a 7-letter word starting with “L”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-009",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #9",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "ATSCLRY",
+      "answer": "CRYSTAL",
+      "hint": "It's a 7-letter word starting with “C”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-010",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #10",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "SNLAID",
+      "answer": "ISLAND",
+      "hint": "It's a 6-letter word starting with “I”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-011",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #11",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "NEGTMA",
+      "answer": "MAGNET",
+      "hint": "It's a 6-letter word starting with “M”."
+    }
+  },
+  {
+    "id": "cr-solve-anagram-012",
+    "lane": "solve",
+    "guide": true,
+    "title": "Anagram #12",
+    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Unscramble the word, then check it",
+    "puzzle": {
+      "kind": "anagram",
+      "prompt": "These letters spell one word. Unscramble them, then check.",
+      "scramble": "LBEBPE",
+      "answer": "PEBBLE",
+      "hint": "It's a 6-letter word starting with “P”."
+    }
+  },
+  {
+    "id": "cr-solve-middle-001",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #1",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "BON",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-002",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #2",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "KEY",
+      "right": "ED",
+      "answer": "BOARD",
+      "hint": "It's a 5-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-003",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #3",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "CART",
+      "right": "LY",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-004",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #4",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "GAR",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #5",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "SON",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-006",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #6",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "NYL",
+      "right": "LY",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-007",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #7",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "DRAG",
+      "right": "LY",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #8",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "CABI",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-009",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #9",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "CRAY",
+      "right": "CE",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
+    }
+  },
+  {
+    "id": "cr-solve-middle-010",
+    "lane": "solve",
+    "guide": true,
+    "title": "Word Sandwich #10",
+    "blurb": "One little word finishes two bigger ones. Find the word that fits both blanks.",
+    "time": "3 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Find the missing word, then check it",
+    "puzzle": {
+      "kind": "middle",
+      "prompt": "One short word finishes both. Fill the blanks with the same word.",
+      "left": "SEAS",
+      "right": "CE",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
     }
   },
   {
@@ -259,10 +855,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "RFYLI WMS KYPGM ZSR MSP NPGLACQQ GQ GL YLMRFCP AYQRJC",
-      "shift": 24,
+      "ciphertext": "KYREB PFL DRIZF SLK FLI GIZETVJJ ZJ ZE REFKYVI TRJKCV",
+      "shift": 17,
       "answer": "THANK YOU MARIO BUT OUR PRINCESS IS IN ANOTHER CASTLE",
-      "hint": "Shift every letter back by 24. (A becomes C.)"
+      "hint": "Shift every letter back by 17. (A becomes J.)"
     }
   },
   {
@@ -278,10 +874,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "BM Y ZYPPCJ PMJJ",
-      "shift": 24,
-      "answer": "DO A BARREL ROLL",
-      "hint": "Shift every letter back by 24. (A becomes C.)"
+      "ciphertext": "OWDUGEW LG LZW SJUSVW",
+      "shift": 18,
+      "answer": "WELCOME TO THE ARCADE",
+      "hint": "Shift every letter back by 18. (A becomes I.)"
     }
   },
   {
@@ -297,10 +893,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "NBY WUEY CM U FCY",
-      "shift": 20,
-      "answer": "THE CAKE IS A LIE",
-      "hint": "Shift every letter back by 20. (A becomes G.)"
+      "ciphertext": "OIUM WDMZ QVAMZB KWQV",
+      "shift": 8,
+      "answer": "GAME OVER INSERT COIN",
+      "hint": "Shift every letter back by 8. (A becomes S.)"
     }
   },
   {
@@ -316,10 +912,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "DLSJVTL AV AOL HYJHKL",
-      "shift": 7,
-      "answer": "WELCOME TO THE ARCADE",
-      "hint": "Shift every letter back by 7. (A becomes T.)"
+      "ciphertext": "DOO BRXU EDVH DUH EHORQJ WR XV",
+      "shift": 3,
+      "answer": "ALL YOUR BASE ARE BELONG TO US",
+      "hint": "Shift every letter back by 3. (A becomes X.)"
     }
   },
   {
@@ -335,10 +931,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "FVB MVBUK AOL ZLJYLA WHNL",
-      "shift": 7,
-      "answer": "YOU FOUND THE SECRET PAGE",
-      "hint": "Shift every letter back by 7. (A becomes T.)"
+      "ciphertext": "ZNK IGQK OY G ROK",
+      "shift": 6,
+      "answer": "THE CAKE IS A LIE",
+      "hint": "Shift every letter back by 6. (A becomes U.)"
     }
   },
   {
@@ -354,10 +950,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "MPDE GTPHPO TY YPEDNLAP",
-      "shift": 11,
+      "ciphertext": "XAOP REASAZ EJ JAPOYWLA",
+      "shift": 22,
       "answer": "BEST VIEWED IN NETSCAPE",
-      "hint": "Shift every letter back by 11. (A becomes P.)"
+      "hint": "Shift every letter back by 22. (A becomes E.)"
     }
   },
   {
@@ -365,6 +961,69 @@ export default [
     "lane": "solve",
     "guide": true,
     "title": "Rebus #1",
+    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Read the picture, then reveal the phrase",
+    "puzzle": {
+      "kind": "rebus",
+      "prompt": "Read the picture. What word or phrase does it spell?",
+      "display": [
+        "TIMING TIM ING"
+      ],
+      "answer": "split-second timing",
+      "hint": "The timing got split."
+    }
+  },
+  {
+    "id": "cr-solve-rebus-002",
+    "lane": "solve",
+    "guide": true,
+    "title": "Rebus #2",
+    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Read the picture, then reveal the phrase",
+    "puzzle": {
+      "kind": "rebus",
+      "prompt": "Read the picture. What word or phrase does it spell?",
+      "display": [
+        "CYCLE",
+        "CYCLE",
+        "CYCLE"
+      ],
+      "answer": "tricycle",
+      "hint": "Three of them."
+    }
+  },
+  {
+    "id": "cr-solve-rebus-003",
+    "lane": "solve",
+    "guide": true,
+    "title": "Rebus #3",
+    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Read the picture, then reveal the phrase",
+    "puzzle": {
+      "kind": "rebus",
+      "prompt": "Read the picture. What word or phrase does it spell?",
+      "display": [
+        "ME ME ME ME ME",
+        "(once)"
+      ],
+      "answer": "all about me",
+      "hint": "Nothing but me."
+    }
+  },
+  {
+    "id": "cr-solve-rebus-004",
+    "lane": "solve",
+    "guide": true,
+    "title": "Rebus #4",
     "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -384,96 +1043,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-rebus-002",
-    "lane": "solve",
-    "guide": true,
-    "title": "Rebus #2",
-    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Read the picture, then reveal the phrase",
-    "puzzle": {
-      "kind": "rebus",
-      "prompt": "Read the picture. What word or phrase does it spell?",
-      "display": [
-        "GAME GAME",
-        "(in a)"
-      ],
-      "answer": "two-player game",
-      "hint": "Two games."
-    }
-  },
-  {
-    "id": "cr-solve-rebus-003",
-    "lane": "solve",
-    "guide": true,
-    "title": "Rebus #3",
-    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Read the picture, then reveal the phrase",
-    "puzzle": {
-      "kind": "rebus",
-      "prompt": "Read the picture. What word or phrase does it spell?",
-      "display": [
-        "STAND",
-        "—————",
-        "  I  "
-      ],
-      "answer": "I understand",
-      "hint": "I, under stand."
-    }
-  },
-  {
-    "id": "cr-solve-rebus-004",
-    "lane": "solve",
-    "guide": true,
-    "title": "Rebus #4",
-    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Read the picture, then reveal the phrase",
-    "puzzle": {
-      "kind": "rebus",
-      "prompt": "Read the picture. What word or phrase does it spell?",
-      "display": [
-        "ME ME ME ME ME",
-        "(once)"
-      ],
-      "answer": "all about me",
-      "hint": "Nothing but me."
-    }
-  },
-  {
     "id": "cr-solve-rebus-005",
     "lane": "solve",
     "guide": true,
     "title": "Rebus #5",
-    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Read the picture, then reveal the phrase",
-    "puzzle": {
-      "kind": "rebus",
-      "prompt": "Read the picture. What word or phrase does it spell?",
-      "display": [
-        "CYCLE",
-        "CYCLE",
-        "CYCLE"
-      ],
-      "answer": "tricycle",
-      "hint": "Three of them."
-    }
-  },
-  {
-    "id": "cr-solve-rebus-006",
-    "lane": "solve",
-    "guide": true,
-    "title": "Rebus #6",
     "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -491,33 +1064,31 @@ export default [
     }
   },
   {
+    "id": "cr-solve-rebus-006",
+    "lane": "solve",
+    "guide": true,
+    "title": "Rebus #6",
+    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Read the picture, then reveal the phrase",
+    "puzzle": {
+      "kind": "rebus",
+      "prompt": "Read the picture. What word or phrase does it spell?",
+      "display": [
+        "KNEE",
+        "LIGHT"
+      ],
+      "answer": "neon light",
+      "hint": "Knee-on light."
+    }
+  },
+  {
     "id": "cr-solve-odd-one-out-001",
     "lane": "solve",
     "guide": true,
     "title": "Odd One Out #1",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Spot the misfit, then check it",
-    "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "CIRCLE",
-        "SQUARE",
-        "TRIANGLE",
-        "CUBE"
-      ],
-      "answer": "CUBE",
-      "why": "The others are 2-D shapes. A cube is 3-D."
-    }
-  },
-  {
-    "id": "cr-solve-odd-one-out-002",
-    "lane": "solve",
-    "guide": true,
-    "title": "Odd One Out #2",
     "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -537,10 +1108,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-odd-one-out-003",
+    "id": "cr-solve-odd-one-out-002",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #3",
+    "title": "Odd One Out #2",
     "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -561,10 +1132,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-odd-one-out-004",
+    "id": "cr-solve-odd-one-out-003",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #4",
+    "title": "Odd One Out #3",
     "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -574,20 +1145,20 @@ export default [
       "kind": "odd_one_out",
       "prompt": "Four of a kind — except one. Which one does NOT belong?",
       "items": [
-        "MODEM",
-        "FLOPPY",
-        "CD-ROM",
-        "WI-FI"
+        "CIRCLE",
+        "SQUARE",
+        "TRIANGLE",
+        "CUBE"
       ],
-      "answer": "WI-FI",
-      "why": "The others are 90s computer hardware you could hold. Wi-Fi is wireless and modern."
+      "answer": "CUBE",
+      "why": "The others are 2-D shapes. A cube is 3-D."
     }
   },
   {
-    "id": "cr-solve-odd-one-out-005",
+    "id": "cr-solve-odd-one-out-004",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #5",
+    "title": "Odd One Out #4",
     "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -604,6 +1175,30 @@ export default [
       ],
       "answer": "PURPLE",
       "why": "Red, orange and green appear on a traffic light. Purple does not."
+    }
+  },
+  {
+    "id": "cr-solve-odd-one-out-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Odd One Out #5",
+    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Spot the misfit, then check it",
+    "puzzle": {
+      "kind": "odd_one_out",
+      "prompt": "Four of a kind — except one. Which one does NOT belong?",
+      "items": [
+        "64",
+        "16",
+        "4",
+        "1",
+        "9"
+      ],
+      "answer": "9",
+      "why": "The others are powers of four (4⁰,4¹,4²,4³). 9 is not."
     }
   },
   {
@@ -721,6 +1316,97 @@ export default [
       "size": 5,
       "rows": [
         [
+          3
+        ],
+        [
+          0
+        ],
+        [
+          5
+        ],
+        [
+          4
+        ],
+        [
+          3
+        ]
+      ],
+      "cols": [
+        [
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "solution": [
+        [
+          0,
+          1,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          1,
+          0
+        ]
+      ],
+      "reveal": "a coffee cup"
+    }
+  },
+  {
+    "id": "cr-solve-nonogram-002",
+    "lane": "solve",
+    "guide": true,
+    "title": "Pixel Nonogram #2",
+    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
+    "time": "10 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid to reveal the picture",
+    "puzzle": {
+      "kind": "nonogram",
+      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
+      "size": 5,
+      "rows": [
+        [
           1
         ],
         [
@@ -795,95 +1481,6 @@ export default [
         ]
       ],
       "reveal": "a tiny house"
-    }
-  },
-  {
-    "id": "cr-solve-nonogram-002",
-    "lane": "solve",
-    "guide": true,
-    "title": "Pixel Nonogram #2",
-    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
-    "time": "10 min",
-    "difficulty": "intermediate",
-    "cost": "free",
-    "action": "Fill the grid to reveal the picture",
-    "puzzle": {
-      "kind": "nonogram",
-      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
-      "size": 5,
-      "rows": [
-        [
-          1,
-          1
-        ],
-        [
-          5
-        ],
-        [
-          5
-        ],
-        [
-          3
-        ],
-        [
-          1
-        ]
-      ],
-      "cols": [
-        [
-          2
-        ],
-        [
-          4
-        ],
-        [
-          4
-        ],
-        [
-          4
-        ],
-        [
-          2
-        ]
-      ],
-      "solution": [
-        [
-          0,
-          1,
-          0,
-          1,
-          0
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          0,
-          1,
-          1,
-          1,
-          0
-        ],
-        [
-          0,
-          0,
-          1,
-          0,
-          0
-        ]
-      ],
-      "reveal": "heart"
     }
   },
   {
@@ -999,6 +1596,98 @@ export default [
       "size": 5,
       "rows": [
         [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "cols": [
+        [
+          2
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          5
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "solution": [
+        [
+          0,
+          1,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          1,
+          0
+        ]
+      ],
+      "reveal": "a mushroom"
+    }
+  },
+  {
+    "id": "cr-solve-nonogram-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Pixel Nonogram #5",
+    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
+    "time": "10 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid to reveal the picture",
+    "puzzle": {
+      "kind": "nonogram",
+      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
+      "size": 5,
+      "rows": [
+        [
           1,
           1
         ],
@@ -1077,97 +1766,6 @@ export default [
     }
   },
   {
-    "id": "cr-solve-nonogram-005",
-    "lane": "solve",
-    "guide": true,
-    "title": "Pixel Nonogram #5",
-    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
-    "time": "10 min",
-    "difficulty": "intermediate",
-    "cost": "free",
-    "action": "Fill the grid to reveal the picture",
-    "puzzle": {
-      "kind": "nonogram",
-      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
-      "size": 5,
-      "rows": [
-        [
-          3
-        ],
-        [
-          0
-        ],
-        [
-          5
-        ],
-        [
-          4
-        ],
-        [
-          3
-        ]
-      ],
-      "cols": [
-        [
-          2
-        ],
-        [
-          1,
-          3
-        ],
-        [
-          1,
-          3
-        ],
-        [
-          1,
-          3
-        ],
-        [
-          1
-        ]
-      ],
-      "solution": [
-        [
-          0,
-          1,
-          1,
-          1,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          0
-        ],
-        [
-          0,
-          1,
-          1,
-          1,
-          0
-        ]
-      ],
-      "reveal": "a coffee cup"
-    }
-  },
-  {
     "id": "cr-solve-sudoku4-001",
     "lane": "solve",
     "guide": true,
@@ -1184,12 +1782,6 @@ export default [
       "given": [
         [
           0,
-          3,
-          0,
-          0
-        ],
-        [
-          0,
           0,
           0,
           1
@@ -1202,35 +1794,41 @@ export default [
         ],
         [
           0,
-          4,
           0,
-          3
+          0,
+          2
+        ],
+        [
+          0,
+          3,
+          0,
+          0
         ]
       ],
       "solution": [
         [
-          1,
           3,
-          2,
-          4
-        ],
-        [
           4,
           2,
-          3,
           1
         ],
         [
-          3,
           1,
+          2,
           4,
+          3
+        ],
+        [
+          4,
+          1,
+          3,
           2
         ],
         [
           2,
-          4,
+          3,
           1,
-          3
+          4
         ]
       ]
     }
@@ -1251,22 +1849,22 @@ export default [
       "size": 4,
       "given": [
         [
+          2,
           0,
           3,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
           4,
-          0
-        ],
-        [
-          1,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          1,
-          0,
-          4
+          2
         ],
         [
           0,
@@ -1278,21 +1876,21 @@ export default [
       "solution": [
         [
           2,
-          3,
           4,
+          3,
           1
         ],
         [
           1,
-          4,
           3,
-          2
+          2,
+          4
         ],
         [
           3,
           1,
-          2,
-          4
+          4,
+          2
         ],
         [
           4,
@@ -1319,21 +1917,21 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
-          3,
-          0
-        ],
-        [
-          4,
-          0,
-          0,
-          0
-        ],
-        [
-          2,
-          0,
           1,
+          0,
+          0,
+          3
+        ],
+        [
+          3,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
           0
         ],
         [
@@ -1347,8 +1945,14 @@ export default [
         [
           1,
           2,
+          4,
+          3
+        ],
+        [
           3,
-          4
+          4,
+          1,
+          2
         ],
         [
           4,
@@ -1358,15 +1962,9 @@ export default [
         ],
         [
           2,
-          4,
           1,
-          3
-        ],
-        [
           3,
-          1,
-          4,
-          2
+          4
         ]
       ]
     }
@@ -1388,53 +1986,53 @@ export default [
       "given": [
         [
           0,
-          2,
-          0,
-          4
-        ],
-        [
-          0,
           0,
           3,
           0
         ],
         [
           0,
-          0,
+          1,
           0,
           0
         ],
         [
-          4,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
           0,
           0,
-          3
+          2,
+          0
         ]
       ],
       "solution": [
         [
-          3,
           2,
-          1,
-          4
-        ],
-        [
-          1,
           4,
           3,
-          2
-        ],
-        [
-          2,
-          3,
-          4,
           1
         ],
         [
-          4,
+          3,
           1,
+          4,
+          2
+        ],
+        [
+          4,
           2,
+          1,
           3
+        ],
+        [
+          1,
+          3,
+          2,
+          4
         ]
       ]
     }
@@ -1455,20 +2053,14 @@ export default [
       "size": 4,
       "given": [
         [
+          3,
           0,
+          0,
+          2
+        ],
+        [
           0,
           4,
-          0
-        ],
-        [
-          0,
-          2,
-          0,
-          0
-        ],
-        [
-          0,
-          1,
           0,
           0
         ],
@@ -1476,33 +2068,39 @@ export default [
           0,
           0,
           1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
           0
         ]
       ],
       "solution": [
         [
-          1,
           3,
+          1,
           4,
           2
         ],
         [
-          4,
           2,
+          4,
           3,
           1
         ],
         [
-          3,
-          1,
-          2,
-          4
-        ],
-        [
-          2,
           4,
+          2,
           1,
           3
+        ],
+        [
+          1,
+          3,
+          2,
+          4
         ]
       ]
     }
@@ -1525,13 +2123,13 @@ export default [
         [
           0,
           0,
-          0,
+          3,
           0
         ],
         [
           0,
-          2,
           3,
+          0,
           0
         ],
         [
@@ -1542,35 +2140,35 @@ export default [
         ],
         [
           0,
-          3,
+          1,
           0,
-          1
+          0
         ]
       ],
       "solution": [
         [
-          3,
-          4,
           1,
+          4,
+          3,
           2
         ],
         [
-          1,
           2,
           3,
+          1,
           4
         ],
         [
+          3,
           2,
-          1,
           4,
-          3
+          1
         ],
         [
           4,
-          3,
+          1,
           2,
-          1
+          3
         ]
       ]
     }
@@ -1592,53 +2190,53 @@ export default [
       "given": [
         [
           0,
-          4,
-          0,
-          1
-        ],
-        [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
           2,
           0,
-          4,
           0
         ],
         [
+          1,
           0,
-          3,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          3
+        ],
+        [
+          0,
+          1,
           0,
           0
         ]
       ],
       "solution": [
         [
-          3,
           4,
           2,
+          3,
           1
         ],
         [
           1,
-          2,
           3,
-          4
+          4,
+          2
         ],
         [
           2,
-          1,
           4,
+          1,
           3
         ],
         [
-          4,
           3,
           1,
-          2
+          2,
+          4
         ]
       ]
     }
@@ -1659,54 +2257,54 @@ export default [
       "size": 4,
       "given": [
         [
+          2,
+          3,
           0,
-          0,
-          0,
-          4
+          1
         ],
         [
           3,
-          0,
-          4,
-          0
-        ],
-        [
-          0,
           0,
           0,
           0
         ],
         [
           0,
-          3,
+          0,
           0,
           2
+        ],
+        [
+          0,
+          1,
+          0,
+          0
         ]
       ],
       "solution": [
         [
           2,
-          1,
           3,
-          4
-        ],
-        [
-          3,
-          2,
           4,
           1
         ],
         [
+          3,
+          2,
+          1,
+          4
+        ],
+        [
           1,
           4,
-          2,
-          3
+          3,
+          2
         ],
         [
           4,
-          3,
           1,
-          2
+          2,
+          3
         ]
       ]
     }
@@ -1730,51 +2328,51 @@ export default [
           0,
           0,
           0,
-          0
-        ],
-        [
-          0,
-          0,
-          1,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
           3
         ],
         [
-          1,
           0,
-          4,
+          3,
+          1,
           0
+        ],
+        [
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          1
         ]
       ],
       "solution": [
         [
-          2,
-          4,
-          3,
-          1
-        ],
-        [
-          3,
-          2,
-          1,
-          4
-        ],
-        [
-          4,
           1,
           2,
+          4,
           3
         ],
         [
+          4,
+          3,
+          1,
+          2
+        ],
+        [
+          2,
           1,
           3,
+          4
+        ],
+        [
+          3,
           4,
-          2
+          2,
+          1
         ]
       ]
     }
@@ -1795,42 +2393,36 @@ export default [
       "size": 4,
       "given": [
         [
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
           0,
           1,
+          2
+        ],
+        [
           0,
+          0,
+          2,
           0
         ],
         [
           0,
           0,
-          3,
-          4
-        ],
-        [
           0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          4,
           0
         ]
       ],
       "solution": [
         [
           4,
-          1,
-          2,
-          3
-        ],
-        [
-          1,
           2,
           3,
-          4
+          1
         ],
         [
           3,
@@ -1839,10 +2431,16 @@ export default [
           2
         ],
         [
-          2,
+          1,
           3,
+          2,
+          4
+        ],
+        [
+          2,
+          1,
           4,
-          1
+          3
         ]
       ]
     }
@@ -1863,41 +2461,41 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
           3,
-          0,
-          0,
-          0
-        ],
-        [
-          2,
-          0,
-          3,
-          0
-        ],
-        [
-          0,
           0,
           0,
           1
+        ],
+        [
+          0,
+          3,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          0
         ]
       ],
       "solution": [
         [
-          1,
-          2,
-          4,
-          3
-        ],
-        [
           3,
           4,
+          2,
+          1
+        ],
+        [
           1,
+          3,
+          4,
           2
         ],
         [
@@ -1908,9 +2506,9 @@ export default [
         ],
         [
           4,
-          3,
           2,
-          1
+          1,
+          3
         ]
       ]
     }
@@ -1931,31 +2529,37 @@ export default [
       "size": 4,
       "given": [
         [
-          2,
           0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          2,
-          1
-        ],
-        [
-          1,
           0,
           0,
           0
         ],
         [
-          0,
           0,
           4,
+          0,
           0
+        ],
+        [
+          4,
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
         ]
       ],
       "solution": [
+        [
+          1,
+          2,
+          3,
+          4
+        ],
         [
           2,
           4,
@@ -1967,12 +2571,6 @@ export default [
           3,
           2,
           1
-        ],
-        [
-          1,
-          2,
-          3,
-          4
         ],
         [
           3,

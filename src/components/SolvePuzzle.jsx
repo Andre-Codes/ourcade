@@ -4,8 +4,9 @@ import { useState } from "react";
    page (CreativeGuidePage branches here when an item carries a `puzzle`). Most
    puzzles are now a "try it → check" loop sharing the GridControls bar
    (Check / Reveal / Clear + a right/wrong status line):
-     INTERACTIVE (check): word_ladder (type the blanks), cipher (type the decoded
-           phrase), odd_one_out (click the misfit), nonogram, sudoku4, latin4.
+     INTERACTIVE (check): word_ladder (type the blanks), anagram (unscramble),
+           middle (word sandwich), cipher (type the decoded phrase), odd_one_out
+           (click the misfit), nonogram, sudoku4, latin4.
      REVEAL-ONLY (TextPuzzle): rebus + mystery — their answers are free-form
            phrases, so they keep the hint + Reveal Answer disclosure only.
    Self-contained: all the puzzle UI/state lives here so the guide page stays a
@@ -197,6 +198,117 @@ function Cipher({ puzzle }) {
         }}
         placeholder="type the decoded message…"
         aria-label="your decoded message"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+      />
+
+      <HintToggle hint={puzzle.hint} />
+      <GridControls
+        onCheck={check}
+        onReveal={doReveal}
+        onClear={reset}
+        revealed={revealed}
+        status={status}
+      />
+    </div>
+  );
+}
+
+// Anagram: the scrambled letters are shown big; type the unscrambled word, then
+// check. Same try→check→reveal loop as Cipher (spacing/case ignored). Reveal
+// fills the answer; clear empties the input.
+function Anagram({ puzzle }) {
+  const [guess, setGuess] = useState("");
+  const [status, setStatus] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const check = () =>
+    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+  const doReveal = () => {
+    setRevealed(true);
+    setStatus(null);
+    setGuess(puzzle.answer);
+  };
+  const reset = () => {
+    setRevealed(false);
+    setStatus(null);
+    setGuess("");
+  };
+
+  return (
+    <div className="arcade-solve">
+      {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
+      <p className="arcade-solve-mono arcade-solve-cipher">{puzzle.scramble.split("").join(" ")}</p>
+
+      <input
+        className="arcade-solve-input arcade-solve-cipher-input"
+        type="text"
+        value={guess}
+        readOnly={revealed}
+        maxLength={puzzle.answer.length}
+        onChange={(e) => {
+          setStatus(null);
+          setGuess(e.target.value);
+        }}
+        placeholder="type the word…"
+        aria-label="your unscrambled word"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+      />
+
+      <HintToggle hint={puzzle.hint} />
+      <GridControls
+        onCheck={check}
+        onReveal={doReveal}
+        onClear={reset}
+        revealed={revealed}
+        status={status}
+      />
+    </div>
+  );
+}
+
+// Word sandwich: one short word completes both LEFT___ and ___RIGHT. Type the
+// connector, then check. Same loop as Cipher/Anagram.
+function WordSandwich({ puzzle }) {
+  const [guess, setGuess] = useState("");
+  const [status, setStatus] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const check = () =>
+    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+  const doReveal = () => {
+    setRevealed(true);
+    setStatus(null);
+    setGuess(puzzle.answer);
+  };
+  const reset = () => {
+    setRevealed(false);
+    setStatus(null);
+    setGuess("");
+  };
+
+  return (
+    <div className="arcade-solve">
+      {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
+      <p className="arcade-solve-mono arcade-solve-cipher">
+        {puzzle.left}___ &nbsp;+&nbsp; ___{puzzle.right}
+      </p>
+
+      <input
+        className="arcade-solve-input arcade-solve-cipher-input"
+        type="text"
+        value={guess}
+        readOnly={revealed}
+        maxLength={puzzle.answer.length}
+        onChange={(e) => {
+          setStatus(null);
+          setGuess(e.target.value);
+        }}
+        placeholder="the word that fits both…"
+        aria-label="your connecting word"
         autoComplete="off"
         autoCapitalize="characters"
         spellCheck={false}
@@ -533,6 +645,10 @@ export default function SolvePuzzle({ puzzle }) {
   switch (puzzle.kind) {
     case "word_ladder":
       return <WordLadder puzzle={puzzle} />;
+    case "anagram":
+      return <Anagram puzzle={puzzle} />;
+    case "middle":
+      return <WordSandwich puzzle={puzzle} />;
     case "cipher":
       return <Cipher puzzle={puzzle} />;
     case "rebus":
