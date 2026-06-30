@@ -171,6 +171,10 @@ export const MANUAL_NEWS = [
   "WATER COOLER REPORT: somebody voted 'hot' on something deeply not. We respect the chaos.",
   "Bored of games? The Water Cooler's got what everyone's talking about today — no algorithm required.",
   "TIP JAR: the Water Cooler's 'On This Day' dug up something you completely forgot existed.",
+  "PSA: some cabinets autosave and let you walk away. Others watch you reach for the EXIT and just smile. Know which is which.",
+  "BREAKING: a player rage-quit Solitaire mid-deal and lost everything. The game offered no apology. It rarely does.",
+  "PUBLIC NOTICE: Memory Match does NOT save your progress. It will, however, remember that YOU left.",
+  "REMINDER: the casino bank follows you between Blackjack and Video Poker like a loyal, slightly enabling friend.",
 ];
 
 // Mascot tips — plain strings.
@@ -182,6 +186,13 @@ export const MANUAL_TIPS = [
   "Stuck for something to do? The Water Cooler's Hot or Not lets you settle the day's big debates.",
   "The Water Cooler isn't a feed — it's a finite page. Read it all, then go touch grass. I won't tell.",
   "Heads up: the Water Cooler's 'On This Day' is my favorite rabbit hole. Bring a snack.",
+  "Not every game here is nice. Some autosave like sweethearts; others let you walk away and quietly delete your run out of spite. 😈",
+  "Pro tip: High Card Bust will let you RESUME a run. Solitaire will let you regret leaving. Choose your cabinet's love language wisely.",
+  "Quit a game and it asks 'are you sure?' — that's the polite ones. The mean ones don't ask. They just take it.",
+  "Your chip bank rides along between Blackjack and Video Poker. Bust out and it'll spot you a fresh stack — but it remembers your highest, not your dignity.",
+  "Reach for EXIT mid-game and you might get a warning. Or you might get nothing but the cold, unsaved void. Games have moods.",
+  "I autosave my mixtape after every track. Some of these games can't even be bothered to save YOUR progress. The audacity. 🎧",
+  "Memory Match has a perfect memory and zero mercy: leave halfway and that board is gone. It's not personal. (It's a little personal.)",
 ];
 
 // Timeless curiosities — shape: { id, title, blurb, url? }. The 🌌 card.

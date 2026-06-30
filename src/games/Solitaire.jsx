@@ -5,6 +5,8 @@ import { useArcadeScore } from "../lib/scores.js";
 import { cardImg, cardBackImg } from "../lib/kenney.js";
 import { shareImage } from "../lib/share.js";
 import { playSfxVariant } from "../lib/sfx.js";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import { useQuitConfirm } from "../lib/useQuitConfirm.js";
 import {
   deal, drawFromStock, wasteToTableau, wasteToFoundation,
   tableauToTableau, tableauToFoundation, autoToFoundation,
@@ -127,6 +129,11 @@ export default function Solitaire() {
   const [submitted, setSubmitted] = useState(false);
 
   useArcadeBackButton(false);
+
+  // Guard EXIT: confirm only when a game is in progress (solitaire has no save
+  // state, so leaving mid-game forfeits the deal).
+  const quit = useQuitConfirm();
+  const onExit = () => quit.request(() => navigate("/"), { armed: phase === "playing" && moves > 0 });
 
   const tick = useRef(null);
   const autoTimer = useRef(null);
@@ -283,7 +290,7 @@ export default function Solitaire() {
   return (
     <div className="sol-root">
       <div className="sol-bar">
-        <button className="sol-btn" onClick={() => navigate("/")}>← EXIT</button>
+        <button className="sol-btn" onClick={onExit}>← EXIT</button>
         <button className="sol-btn" onClick={() => startGame(drawMode)}>NEW</button>
         {phase === "playing" && canAutoComplete(game) && (
           <button className="sol-btn" onClick={runAutoComplete}>AUTO ▸</button>
@@ -385,6 +392,16 @@ export default function Solitaire() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={quit.open}
+        title="Quit this game?"
+        message="Your progress will be lost — solitaire doesn't save mid-game."
+        confirmLabel="Quit"
+        cancelLabel="Keep playing"
+        onConfirm={quit.confirm}
+        onCancel={quit.cancel}
+      />
     </div>
   );
 }

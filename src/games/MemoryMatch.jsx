@@ -4,6 +4,8 @@ import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { kImg, MEMORY_ICONS } from "../lib/kenney.js";
 import { playSfx, playSfxVariant } from "../lib/sfx.js";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import { useQuitConfirm } from "../lib/useQuitConfirm.js";
 
 // ── Memory Match ──────────────────────────────────────────────────────────────
 // Concentration grid using the nostalgic Kenney object icons (floppy, CD, gamepad,
@@ -160,6 +162,11 @@ export default function MemoryMatch() {
   // Hide the shell back button on every screen — we draw our own.
   useArcadeBackButton(false);
 
+  // Guard the back arrow: confirm only when a game is in progress (memory match
+  // has no save state, so leaving mid-game forfeits the run).
+  const quit = useQuitConfirm();
+  const onBack = () => quit.request(() => navigate("/"), { armed: phase === "playing" && moves > 0 });
+
   const flipTimer = useRef(null);
   const tickTimer = useRef(null);
   useEffect(() => () => { clearTimeout(flipTimer.current); clearInterval(tickTimer.current); }, []);
@@ -246,7 +253,7 @@ export default function MemoryMatch() {
 
   return (
     <div className="mem-root">
-      <button className="mem-back" onClick={() => navigate("/")} aria-label="Back">←</button>
+      <button className="mem-back" onClick={onBack} aria-label="Back">←</button>
 
       <div className="mem-head"><h1>MEMORY MATCH</h1></div>
       <div className="mem-stats">
@@ -305,6 +312,16 @@ export default function MemoryMatch() {
           </Link>
         </div>
       )}
+
+      <ConfirmDialog
+        open={quit.open}
+        title="Quit this game?"
+        message="Your progress will be lost — memory match doesn't save mid-game."
+        confirmLabel="Quit"
+        cancelLabel="Keep playing"
+        onConfirm={quit.confirm}
+        onCancel={quit.cancel}
+      />
     </div>
   );
 }

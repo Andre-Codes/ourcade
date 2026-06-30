@@ -2,16 +2,20 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
-import { lsGet, lsSet } from "../lib/store.js";
+import { lsGet, lsSet, lsRemove, lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { cardImg, cardBackImg, chipImg } from "../lib/kenney.js";
 import { playSfx, playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
   TIERS, ANTE_TIER, currentAnte, NO_RAISE, START_CHIPS,
+  serializeGame, hydrateGame, isSaveable,
   devStackBag, DEV_STRAIGHT_FLUSH, DEV_ROYAL_FLUSH,
 } from "./chip-panic/logic.js";
+
+const SAVE_KEY = "chip-panic:save"; // ourcade:-prefixed by store.js
 
 /* ─────────────────────────────────────────────────────────────────────────
    HIGH CARD BUST — poker solitaire with a chip economy + rotating objectives.
@@ -357,6 +361,13 @@ export default function ChipPanic() {
     return saved === MODE.HIGH_STAKES || saved === MODE.PANIC ? saved : MODE.HIGH_STAKES;
   });
   const [game, setGame] = useState(null);
+  // A resumable in-progress run from a previous visit, if one was saved.
+  // { state, mode } | null — `state` is the hydrated game; `mode` is its ruleset.
+  const [savedRun, setSavedRun] = useState(() => {
+    const blob = lsGetJSON(SAVE_KEY, null);
+    const state = hydrateGame(blob);
+    return state ? { state, mode: blob?.mode } : null;
+  });
   const [feed, setFeed] = useState(null);
   const [panicPct, setPanicPct] = useState(1);
   const [flash, setFlash] = useState({}); // lane index → "scored"|"saved"|"busted"
@@ -605,6 +616,20 @@ export default function ChipPanic() {
     clearTimeout(bannerTimer.current); clearTimeout(jackpotTimer.current); clearPanic();
   }, [clearPanic]);
 
+  // ── autosave / resume ────────────────────────────────────────────────────────
+  // Mirror the live run into localStorage so the player can leave the page and
+  // resume from the title screen. A finished run clears the save (nothing to
+  // resume); we don't autosave while sitting on the title/over screens.
+  useEffect(() => {
+    if (screen !== SCREEN.PLAY) return;
+    if (isSaveable(game)) {
+      lsSetJSON(SAVE_KEY, { ...serializeGame(game), mode });
+    } else if (game && game.over) {
+      lsRemove(SAVE_KEY);
+      setSavedRun(null);
+    }
+  }, [game, mode, screen]);
+
   // ── DEV cheat (dev builds only): stack the deck so the current tray + next draws
   //    are a straight flush / royal flush. Press J (straight flush) or K (royal)
   //    during play, then drop the five queued cards into one EMPTY lane to fire the
@@ -631,6 +656,8 @@ export default function ChipPanic() {
     const chosen = m || mode;
     setMode(chosen);
     lsSet("chip-panic:mode", chosen);
+    lsRemove(SAVE_KEY); // a fresh run discards any prior autosave
+    setSavedRun(null);
     setGame(newGame());
     setFeed(null);
     setFlash({});
@@ -642,6 +669,48 @@ export default function ChipPanic() {
     setPanicPct(1);
     setScreen(SCREEN.PLAY);
   }, [mode, clearFx]);
+
+  // Resume the saved in-progress run (only offered when one exists).
+  const resume = useCallback(() => {
+    if (!savedRun) return;
+    if (savedRun.mode) setMode(savedRun.mode); // restore the run's ruleset
+    setGame(savedRun.state);
+    setFeed(null);
+    setFlash({});
+    setHudBump(false);
+    setBannerClaim(false);
+    setAnteUp(null);
+    setJackpot(null);
+    clearFx();
+    setPanicPct(1);
+    setScreen(SCREEN.PLAY);
+  }, [savedRun, clearFx]);
+
+  // Confirm dialog: { kind: "discard-save" | "quit", ... } | null.
+  const [dialog, setDialog] = useState(null);
+
+  // NEW GAME from the title: if a saved run exists, confirm before discarding it.
+  const requestNewGame = useCallback((m) => {
+    if (savedRun) setDialog({ kind: "discard-save", mode: m });
+    else start(m);
+  }, [savedRun, start]);
+
+  // QUIT from the in-game bar. The run is already autosaved, so the choice is:
+  // leave (keep the save → RESUME later) or end the run now (submit the score).
+  const requestQuit = useCallback(() => {
+    setDialog({ kind: "quit" });
+  }, []);
+
+  // End the run: submit the score, clear the save, go to the over screen.
+  const endRun = useCallback(() => {
+    clearPanic();
+    const gg = gameRef.current;
+    submit(gg?.score || 0);
+    lsRemove(SAVE_KEY);
+    setSavedRun(null);
+    setDialog(null);
+    setScreen(SCREEN.OVER);
+  }, [clearPanic, submit]);
 
   const onLane = useCallback((l) => {
     const gg = gameRef.current;
@@ -677,7 +746,7 @@ export default function ChipPanic() {
   return (
     <div className="hcb-root" style={rootStyle} ref={rootRef}>
       <div className="hcb-bar">
-        <button className="hcb-btn" onClick={() => (screen === SCREEN.PLAY ? (clearPanic(), submit(g?.score || 0), setScreen(SCREEN.OVER)) : navigate("/"))}>
+        <button className="hcb-btn" onClick={() => (screen === SCREEN.PLAY ? requestQuit() : navigate("/"))}>
           {screen === SCREEN.PLAY ? "QUIT" : "← EXIT"}
         </button>
         <span className="sp" />
@@ -859,7 +928,17 @@ export default function ChipPanic() {
               HIGH STAKES<small>ante · raises · wanted hands</small>
             </button>
           </div>
-          <button className="hcb-big" onPointerDown={() => start(MODE.HIGH_STAKES)}>PLAY</button>
+          {savedRun && (
+            <button className="hcb-big" onPointerDown={resume}>
+              RESUME<small>{savedRun.state.chips} chips · score {Number(savedRun.state.score || 0).toLocaleString()}</small>
+            </button>
+          )}
+          <button
+            className={savedRun ? "hcb-btn" : "hcb-big"}
+            onPointerDown={() => requestNewGame(MODE.HIGH_STAKES)}
+          >
+            {savedRun ? "NEW GAME" : "PLAY"}
+          </button>
           {best != null && <div className="sub">best · {best.toLocaleString()}</div>}
         </div>
       )}
@@ -872,6 +951,28 @@ export default function ChipPanic() {
           <button className="hcb-big" onPointerDown={() => start()}>PLAY AGAIN</button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={dialog?.kind === "discard-save"}
+        title="Start a new run?"
+        message="Your saved run will be discarded. This can't be undone."
+        confirmLabel="Discard & start new"
+        cancelLabel="Keep my run"
+        onConfirm={() => { const m = dialog?.mode; setDialog(null); start(m); }}
+        onCancel={() => setDialog(null)}
+      />
+      <ConfirmDialog
+        open={dialog?.kind === "quit"}
+        title="Leave the table?"
+        message="Your run is saved — RESUME it from the title anytime. Or end it now to lock in your score."
+        confirmLabel="Save & leave"
+        tone="safe"
+        altLabel="End run now"
+        cancelLabel="Keep playing"
+        onConfirm={() => { setDialog(null); navigate("/"); }}
+        onAlt={endRun}
+        onCancel={() => setDialog(null)}
+      />
     </div>
   );
 }

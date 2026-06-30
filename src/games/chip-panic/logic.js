@@ -260,6 +260,38 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
   return state;
 }
 
+/* ── save / resume ─────────────────────────────────────────────────────────────
+   The state is plain-serializable EXCEPT `rng` (a function — JSON.stringify drops
+   it). We strip it on save and reattach Math.random on load; runs aren't seeded,
+   and `rng` is only consumed when the bag needs a reshuffle, so a fresh
+   Math.random is fine. The drawn `bag` is already a snapshot array, so the deck
+   order survives a round-trip. Bump SAVE_VERSION on any incompatible shape change
+   so old saves are discarded rather than mis-hydrated. */
+export const SAVE_VERSION = 1;
+
+// A run worth saving: in progress and not finished.
+export const isSaveable = (state) => !!state && !state.over;
+
+/* Return a plain, JSON-safe snapshot of the run (drops the rng function). */
+export function serializeGame(state) {
+  if (!state) return null;
+  const { rng, ...rest } = state; // eslint-disable-line no-unused-vars
+  return { v: SAVE_VERSION, state: rest };
+}
+
+/* Rebuild a live game from a serialized snapshot. Returns null (→ fall back to
+   New Game) on a version mismatch or any structural surprise. */
+export function hydrateGame(saved) {
+  if (!saved || saved.v !== SAVE_VERSION || !saved.state) return null;
+  const s = saved.state;
+  // Minimal structural validation — enough to reject corrupt / stale blobs.
+  if (!Array.isArray(s.lanes) || s.lanes.length !== LANES) return null;
+  if (!Array.isArray(s.bag) || !Array.isArray(s.locked)) return null;
+  if (typeof s.chips !== "number" || typeof s.draws !== "number") return null;
+  if (s.over) return null; // finished runs aren't resumable
+  return { ...s, rng: Math.random };
+}
+
 export const laneFull = (lane) => lane.length >= LANE_CAP;
 
 // The current cost to open a new lane (rises with progress).

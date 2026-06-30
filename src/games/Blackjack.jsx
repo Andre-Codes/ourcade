@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { getBank, setBank, bankBest } from "../lib/chipBank.js";
 import { cardImg, cardBackImg, chipImg, CHIP_ORDER } from "../lib/kenney.js";
 import { playSfx, playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
@@ -157,8 +158,10 @@ export default function Blackjack() {
   const { submit, best } = useArcadeScore(GAME_ID);
 
   const [phase, setPhase] = useState("start"); // start | bet | player | dealer | settled | over
-  const [chips, setChips] = useState(START_CHIPS);
-  const [bestBankroll, setBestBankroll] = useState(START_CHIPS);
+  // Chips ride the shared casino bank (persists across sessions, shared with
+  // Video Poker; auto-tops to the stake if you walked away broke).
+  const [chips, setChips] = useState(() => getBank().chips);
+  const [bestBankroll, setBestBankroll] = useState(() => getBank().chips);
   const [bet, setBet] = useState(0);
   const [player, setPlayer] = useState([]);
   const [dealer, setDealer] = useState([]);
@@ -184,8 +187,12 @@ export default function Blackjack() {
     return () => document.head.removeChild(s);
   }, []);
 
+  // Track the session high-water bankroll (drives the YOU WIN over-screen) and
+  // write the live balance back to the shared bank (which advances the all-time
+  // peak that the leaderboard scores on).
   useEffect(() => {
     if (chips > bestBankroll) setBestBankroll(chips);
+    setBank(chips);
   }, [chips, bestBankroll]);
 
   // Bump the bank pile whenever the bankroll changes (skip the initial mount).
@@ -217,8 +224,9 @@ export default function Blackjack() {
     shoe.current = freshShoe();
     clearTimeout(dealerTimer.current);
     clearFx();
-    setChips(START_CHIPS);
-    setBestBankroll(START_CHIPS);
+    const bank = getBank().chips; // current balance, auto-topped to the stake if broke
+    setChips(bank);
+    setBestBankroll(bank);
     setBet(0);
     setPlayer([]);
     setDealer([]);
@@ -340,7 +348,7 @@ export default function Blackjack() {
 
   function nextHand() {
     if (chips <= 0) {
-      submit(bestBankroll);
+      submit(bankBest());
       setPhase("over");
       return;
     }
@@ -353,7 +361,7 @@ export default function Blackjack() {
   }
 
   function cashOut() {
-    submit(bestBankroll);
+    submit(bankBest());
     setPhase("over");
   }
 
@@ -465,7 +473,8 @@ export default function Blackjack() {
         <div className="bj-overlay">
           <h1>BLACKJACK</h1>
           <div className="sub">dealer stands on 17 · blackjack pays 3:2</div>
-          <button className="bj-big" onPointerDown={newSession}>BUY IN · 100 CHIPS</button>
+          <button className="bj-big" onPointerDown={newSession}>SIT DOWN · {chips} CHIPS</button>
+          <div className="sub">your bank carries between the tables</div>
           {best != null && <div className="sub">best bankroll · {best}</div>}
         </div>
       )}

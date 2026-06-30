@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { getBank, setBank, bankBest } from "../lib/chipBank.js";
 import { cardImg, cardBackImg, chipImg, CHIP_ORDER } from "../lib/kenney.js";
 import { playSfxVariant } from "../lib/sfx.js";
 import { useFx, FxLayer } from "../lib/fx.jsx";
@@ -192,7 +193,9 @@ export default function VideoPoker() {
   const { submit, best } = useArcadeScore(GAME_ID);
 
   const [phase, setPhase] = useState("start"); // start | bet | draw | over
-  const [credits, setCredits] = useState(START_CREDITS);
+  // Credits ride the shared casino bank (persists across sessions, shared with
+  // Blackjack; auto-tops to the stake if you walked away broke).
+  const [credits, setCredits] = useState(() => getBank().chips);
   const [bet, setBet] = useState(1);
   const [hand, setHand] = useState(null); // Card[5] | null
   const [held, setHeld] = useState([false, false, false, false, false]);
@@ -216,9 +219,12 @@ export default function VideoPoker() {
     return () => document.head.removeChild(s);
   }, []);
 
-  // Track the high-water bankroll and submit it (best CREDITS, dir:"desc").
+  // Track the session high-water bankroll (drives the YOU WIN over-screen) and
+  // write the live balance back to the shared bank (which advances the all-time
+  // peak that the leaderboard scores on).
   useEffect(() => {
     if (credits > bestBankroll) setBestBankroll(credits);
+    setBank(credits);
   }, [credits, bestBankroll]);
 
   useEffect(() => () => clearTimeout(feedTimer.current), []);
@@ -232,8 +238,9 @@ export default function VideoPoker() {
 
   function newSession() {
     clearFx();
-    setCredits(START_CREDITS);
-    setBestBankroll(START_CREDITS);
+    const bank = getBank().chips; // current balance, auto-topped to the stake if broke
+    setCredits(bank);
+    setBestBankroll(bank);
     setBet(1);
     setHand(null);
     setFeed(null);
@@ -308,7 +315,7 @@ export default function VideoPoker() {
   // After a settled hand: continue to the next bet, or end the session if broke.
   function nextHand() {
     if (credits <= 0) {
-      submit(bestBankroll);
+      submit(bankBest());
       setPhase("over");
       return;
     }
@@ -320,7 +327,7 @@ export default function VideoPoker() {
   }
 
   function cashOut() {
-    submit(bestBankroll);
+    submit(bankBest());
     setPhase("over");
   }
 
@@ -428,7 +435,8 @@ export default function VideoPoker() {
         <div className="vp-overlay">
           <h1>VIDEO POKER</h1>
           <div className="sub">jacks or better · hold &amp; draw</div>
-          <button className="vp-big" onPointerDown={newSession}>INSERT 100 CREDITS</button>
+          <button className="vp-big" onPointerDown={newSession}>SIT DOWN · {credits} CREDITS</button>
+          <div className="sub">your bank carries between the tables</div>
           {best != null && <div className="sub">best bankroll · {best}</div>}
         </div>
       )}
