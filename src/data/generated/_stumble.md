@@ -1,177 +1,175 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-06-28T14:28:33.082Z
+# Generated 2026-07-01T11:11:16.660Z
 # web_search_requests = 6
 
 ## Search queries Claude actually ran
-- delightful indie web projects 2026 weird single-purpose websites
-- strange new websites to stumble upon 2026
-- remarkable indie web personal site project 2026 web revival
-- odd online archive fascinating creator project 2026
-- Neocities featured sites unusual digital garden shrine 2026
-- single-purpose website you map ocean sounds live cam delightful
+- delightful weird single-purpose websites 2026
+- best indie web projects to stumble into
+- neal.fun new interactive experiment 2026
+- strange fascinating online archive project rediscovered
+- delightful personal website digital garden discover 2026
+- weird single purpose website launched recently boingboing kottke
 
 ## Sources returned ([page_age] title / url)
 - [July 15, 2025] Top 20 Weird Websites to Visit in 2026
   https://elementor.com/blog/top-weird-websites-to-visit/
-- [date ?] projects - IndieWeb
-  https://indieweb.org/projects
 - [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
   https://middlehost.com/blog/100-weird-websites/
 - [January 28, 2026] Top 20 Weird Websites to Visit in 2026 - DiviFlash
   https://diviflash.com/weird-websites/
-- [April 26, 2026] IndieWeb
-  https://indieweb.org/
+- [1 week ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
+- [December 12, 2025] Top 10 Cool and Interesting Websites to Visit in 2026 | Gearfuse
+  https://www.gearfuse.com/top-10-cool-and-interesting-websites-to-visit/
+- [1 month ago] 30 Weird & Funny Websites That Still Work in 2026 (Tested)
+  https://theguidex.com/weird-website-list/
+- [April 24, 2026] 7 weird, wacky, and wonderful websites - Negative PID
+  https://negativepid.blog/7-weird-wacky-and-wonderful-websites/
 - [February 24, 2026] Top 50 Weird Websites To Visit In 2026
   https://itechnolabs.ca/blog/top-weird-websites-to-visit/
-- [September 7, 2025] 🧶✏️👩🏽‍💻 The internet’s hidden creative renaissance (and how to find it)
-  https://newpublic.substack.com/p/the-handmade-internet-is-making-a
-- [November 21, 2025] Exploring the indie web and finding the COOLEST personal websites! - YouTube
-  https://www.youtube.com/watch?v=RjKi64rX8w8
-- [January 26, 2026] 19 Weirdest Websites To Visit [2026 Weird Edition]
-  https://www.operationtechnology.com/blog/top-19-weird-websites/
-- [September 14, 2025] Top 55 weird websites to visit in 2026
-  https://www.hostinger.com/tutorials/weird-websites
-- [January 28, 2026] Top 20 Weird Websites to Visit in 2026 - DiviFlash
-  https://diviflash.com/weird-websites/
 - [September 14, 2025] Top 55 weird websites to visit in 2026
   https://www.hostinger.com/tutorials/weird-websites
 - [January 26, 2026] 19 Weirdest Websites To Visit [2026 Weird Edition]
   https://www.operationtechnology.com/blog/top-19-weird-websites/
-- [July 15, 2025] Top 20 Weird Websites to Visit in 2026
-  https://elementor.com/blog/top-weird-websites-to-visit/
-- [February 24, 2026] Top 50 Weird Websites To Visit In 2026
-  https://itechnolabs.ca/blog/top-weird-websites-to-visit/
-- [June 9, 2023] Top 120+ strange websites on Google in 2026 [updated list]
-  https://replug.io/blog/strange-websites
-- [May 10, 2026] 27+ Best Dark Web Sites in 2026 (Hidden Services Tor Links) - TorWire
-  https://torwire.com/dark-web/best/dark-web-sites/
-- [date ?] Weird Websites and Mobile Sites 2026
-  https://winners.webbyawards.com/winners/websites-and-mobile-sites/general-desktop-mobile-sites/weird
-- [March 24, 2026] 23 Best Weirdest Websites In 2026 - Colorlib
-  https://colorlib.com/wp/weirdest-websites/
-- [2 weeks ago] Cloudhiker - The greatest Sites of the Internet
-  https://cloudhiker.net/
-- [February 12, 2026] The Indie Web Renaissance: Personal Sites and Homebrew Clubs Thriving Amid Corporate Fatigue • Buttondown
-  https://buttondown.com/cmdr-nova/archive/the-indie-web-renaissance-personal-sites-and/
-- [January 20, 2026] 2026 Personal Websites Renaissance: Ditching Social Media for Privacy
-  https://www.webpronews.com/2026-personal-websites-renaissance-ditching-social-media-for-privacy/
-- [January 21, 2026] What is the Web Revival Movement?
-  https://houdinimagazine.com/articles/2026-01-21-what-is-the-web-revival-movement
-- [April 3, 2026] 15 Award-Winning Best Website Designs to Inspire Your 2026
-  https://thesource.com/2026/04/03/best-website-designs-2026/
 - [date ?] projects - IndieWeb
   https://indieweb.org/projects
-- [September 7, 2025] 🧶✏️👩🏽‍💻 The internet’s hidden creative renaissance (and how to find it)
-  https://newpublic.substack.com/p/the-handmade-internet-is-making-a
-- [April 26, 2026] IndieWeb
-  https://indieweb.org/
-- [May 2, 2026] TIL about the "Indie Web", a revival of the days of personal websites on the early internet. (screenshots included) - Lemmy.World
-  https://lemmy.world/post/46306755
-- [December 30, 2025] Defining the indieweb for 2026
-  https://www.thisdaysportion.com/posts/defining-the-indieweb-for-2026/
-- [date ?] Archive of the Odd
-  https://archiveoftheodd.com/
-- [date ?] Latest Works | Archive of Our Own
-  https://archive.transformativeworks.org/works
-- [December 1, 2025] 2026 Public Domain Film Remix Contest: The Internet Archive is Looking For Creative Short Films Made By You! | Internet Archive Blogs
-  https://blog.archive.org/2025/12/01/2026-public-domain-day-remix-contest/
-- [July 27, 2024] About the Archive – Archive of the Odd
-  https://archiveoftheodd.com/about-the-archive/
-- [January 13, 2022] Archive of the Odd by Cormack Baldwin — Kickstarter
-  https://www.kickstarter.com/projects/cmbaldwin/archive-of-the-odd
-- [date ?] The Oddworld Archives
-  https://oddworldlibrary.net/archives/
-- [date ?] Archive of the Odd - itch.io
-  https://archive-of-the-odd.itch.io/
-- [date ?] Original Work - Works | Archive of Our Own
-  https://archiveofourown.org/tags/Original%20Work/works
+- [date ?] Best Indie Websites | Free Examples & Designs - Webflow
+  https://webflow.com/made-in-webflow/indie
+- [date ?] GitHub - pfefferle/awesome-indieweb: A curated list of awesome IndieWeb stuff · GitHub
+  https://github.com/pfefferle/awesome-indieweb
+- [December 22, 2023] Places to Find Indie Web Content · Untested
+  https://untested.sonnet.io/notes/places-to-find-indie-web-content/
+- [April 13, 2024] Small Web, Indie Web
+  https://scottwillsey.com/small-web/
+- [July 1, 2025] Top Indie Web Tools for Creators in 2025 - Webring Studio
+  https://webringstudio.com/top-indie-web-tools-for-creators-in-2025/
+- [February 26, 2026] Brennan's IndieWeb Themes, Tools, and Resources · brennan.day
+  https://brennan.day/indieweb/
+- [September 20, 2025] The Indie Web is leading a quiet rebellion against big tech | by Nathan Lindahl | Medium
+  https://medium.com/@Nathans_Tweets/the-indie-web-is-leading-a-quiet-rebellion-against-big-tech-f53e32ad11a5
+- [date ?] Neal.fun
+  https://neal.fun/
+- [April 6, 2026] Neal.fun - Interactive Web Games and Experiments | GamesNav
+  https://www.gamesnav.com/games/neal-fun
+- [date ?] GitHub - kaloodinaz/neal-fun: From exploring the depths of the ocean to pondering the scales of the universe, from reflecting on life achievements to creatively drawing logos from memory - each game provides a distinctive experience and an opportunity to learn new facts and skills · GitHub
+  https://github.com/kaloodinaz/neal-fun
+- [date ?] Neal.Fun | Remake!
+  https://neal-fun-interactive-experiments--happyguy.on.websim.com/
+- [May 5, 2026] Cursor Camp is a wholesome no-chat online hangout spot - Boing Boing
+  https://boingboing.net/2026/05/05/cursor-camp-is-a-wholesome-no-chat-online-hangout-spot.html
+- [March 3, 2026] Neal.fun: Every Game & Tool — Complete 2026 Guide
+  https://ailistingtool.com/blog/neal-fun-games-complete-guide-2
+- [date ?] 7 Neal.Fun Games That Will Blow Your Mind in 2025
+  https://postunreel.com/blog/neal-fun-complete-guide-interactive-games-experiments
+- [February 27, 2026] Neal.Fun: Every Game & Hidden Gem Explained - AIListingTool
+  https://ailistingtool.com/blog/neal-fun-games-complete-guide
+- [date ?] Neal.Fun | Remake!
+  https://websim.com/@smileyface/neal-fun-interactive-experiments/16
+- [April 11, 2025] Neal.fun: The New #1 Website To Cure Your Boredom | Yardbarker
+  https://www.yardbarker.com/video_games/articles/nealfun_the_new_1_website_to_cure_your_boredom/s1_17458_42036566
+- [September 16, 2017] Exploring Strange (and Amazing) Collections on the Internet Archive – The Always Learning Librarian
+  https://alwayslearninglibrarian.wordpress.com/2017/09/16/exploring-strange-and-amazing-collections-on-the-internet-archive/
+- [December 16, 2018] Most unusual: Weird & wonderful archives, museums, and collections | by The Arweave Project | Medium
+  https://arweave.medium.com/most-unusual-weird-wonderful-archives-museums-and-collections-8a87f413fa50
+- [November 30, 2022] Rediscovered Frontiers - Chapter 1 - TheInfamousMan - Multifandom [Archive of Our Own]
+  https://archiveofourown.org/works/43336629/chapters/108936258
+- [October 4, 2004] The Weird Web : Free Download, Borrow, and Streaming : Internet Archive
+  https://archive.org/details/nc117_weird_web
+- [date ?] The Archive Project (2006) clip 1 on ASO - Australia's audio and visual heritage online
+  https://aso.gov.au/titles/documentaries/the-archive-project/clip1/
+- [April 18, 2026] Cool items | Internet Archive Blogs
+  https://blog.archive.org/category/cool-items/
+- [date ?] Strange but true : a collection of true stories from the files of Fate magazine : Free Download, Borrow, and Streaming : Internet Archive
+  https://archive.org/details/strangebuttrueco0000unse
+- [October 19, 2023] A Brief Compendium of Fascinating Archives to Explore
+  https://www.messynessychic.com/2019/09/13/a-brief-compendium-of-fascinating-archives-to-explore/
+- [August 27, 2016] 15 Mysterious and Strange Websites : blameitonjorge : Free Download, Borrow, and Streaming : Internet Archive
+  https://archive.org/details/youtube-ttj3CY1jZHw
 - [December 22, 2025] One Trillion Possibilities: The Internet Archive and the Vanishing Open Web - Filmmaker MagazineFilmmaker Magazine
   https://filmmakermagazine.com/132634-one-trillion-possibilities-the-internet-archive-and-the-vanishing-open-web/
-- [December 3, 2022] The Odd Future Tape Vol. 1 : Odd Future : Free Download, Borrow, and Streaming : Internet Archive
-  https://archive.org/details/of-tape-odd-future
-- [date ?] Neocities - Sites tagged shrine
-  https://neocities.org/browse?tag=shrine
-- [date ?] Neocities - Sites tagged shrines
-  https://neocities.org/browse?tag=shrines
-- [date ?] ICO Shrine
-  https://icoshrine.neocities.org/
-- [date ?] shrines | petrapixel - Neocities
-  https://petrapixel.neocities.org/shrines/
-- [3 weeks ago] Neocities - Activity
-  https://neocities.org/activity?tag=shrines
-- [date ?] My shrines!
-  https://digitalspaceplace.neocities.org/shrine
-- [date ?] Neocities - Sites tagged garden
-  https://neocities.org/browse?tag=garden
-- [date ?] nimravidae...! -{shrines}- - Neocities
-  https://nimravidae.neocities.org/shrines
-- [date ?] shrines
-  https://girlfreak.neocities.org/shrines
-- [date ?] Ocean Web Cams | Open Oceans Global
-  https://www.openoceans.org/web-cams
-- [January 20, 2026] Beach Sounds & Ocean Waves with Seagulls - Live Beaches
-  https://www.livebeaches.com/webcams/beach-sounds-ocean-waves-with-seagulls/
-- [date ?] Live Underwater Webcams | Around The World | Fish and Marine Life
-  https://www.mangolinkcam.com/webcams/aquatic/deepsea.html
-- [date ?] Explore.org Ocean Cams
-  https://explore.org/livecams/oceans
-- [April 17, 2025] Soundscape Listening Room • MBARI
-  https://www.mbari.org/project/soundscape-listening-room/
-- [date ?] Beach Live Webcams - World Cams
-  https://worldcams.tv/beaches/
-- [April 2, 2026] Ocean City Maryland Boardwalk Audio Cam | Live Ocean City Webcams
-  https://oceancitylive.com/ocean-city-webcams/ocean-city-maryland-boardwalk-audio-cam/
-- [October 5, 2023] Calm Relaxing Underwater Sea Life Webcam - Live Beaches
-  https://www.livebeaches.com/webcams/calm-relaxing-underwater-sea-life-webcam/
-- [date ?] California Coastal Commission
-  https://www.coastal.ca.gov/publiced/fun/webcams.html
-- [May 11, 2023] Get Your Ocean Fix From Home | Smithsonian Ocean
-  https://ocean.si.edu/human-connections/exploration/get-your-ocean-fix-home
+- [May 4, 2026] Digital Gardening in 2026: The Return of the Curated Web | by Theo James | Medium | Medium
+  https://medium.com/@theo-james/digital-gardening-in-2025-the-return-of-the-curated-web-3ae36f7add77
+- [date ?] A Brief History & Ethos of the Digital Garden
+  https://maggieappleton.com/garden-history
+- [date ?] What Is a Digital Garden? A Beginner’s Guide to Growing Ideas – Backyard Corner
+  https://backyardcorner.com/what-is-a-digital-garden/
+- [January 18, 2023] Some of my favourite "digital garden" websites: - http://100r.co/ - https://wiki... | Hacker News
+  https://news.ycombinator.com/item?id=34426164
+- [November 29, 2022] About My Digital Garden - DEV Community
+  https://dev.to/abbeyperini/about-my-digital-garden-2o4h
+- [date ?] digital-garden · GitHub Topics · GitHub
+  https://github.com/topics/digital-garden
+- [September 11, 2022] A Digital Garden Inventory. Nearly fifty Digital Garden examples… | by Raymond D Sims | Medium
+  https://medium.com/@raysims/a-digital-garden-inventory-d6450fe74b4
+- [date ?] GitHub - MaggieAppleton/digital-gardeners: Resources, links, projects, and ideas for gardeners tending their digital notes on the public interwebs · GitHub
+  https://github.com/MaggieAppleton/digital-gardeners
+- [date ?] 🌱 My blog is a digital garden, not a blog
+  https://joelhooks.com/digital-garden/
+- [date ?] Digital Gardening for Non-Technical Folks
+  https://maggieappleton.com/nontechnical-gardening
+- [February 15, 2008] Single Serving Sites
+  https://kottke.org/08/02/single-serving-sites
+- [February 24, 2026] Single-serving site - Wikipedia
+  https://en.wikipedia.org/wiki/Single-serving_site
+- [December 7, 2005] Secret sites
+  https://kottke.org/05/12/secret-sites
+- [June 24, 2020] What are some good blogs/sites that are like kottke.org? | Ask MetaFilter
+  https://ask.metafilter.com/345959/What-are-some-good-blogs-sites-that-are-like-kottkeorg
+- [date ?] Single Purpose Web Sites
+  https://archive.gadgetopia.com/post/6282/
+- [September 27, 2011] Jason Kottke: How does a computer program compare to the Web's best link blogger?
+  https://www.slate.com/articles/technology/robot_invasion/2011/09/will_robots_steal_your_job_4.html
+- [April 9, 2009] kottke.org posts about Boing Boing (kottke.org)
+  https://kottke.org/tag/Boing%20Boing
+- [February 21, 2008] What are some good blogs/sites that are like kottke.org? - internet recommendations | Ask MetaFilter
+  https://ask.metafilter.com/84235/What-are-some-good-blogssites-that-are-like-kottkeorg
+- [March 6, 2024] Boing Boing - A Directory of Mostly Wonderful Things
+  https://boingboing.net/
 
 ## Hooks derived from the above
-I'll search for delightful internet artifacts and indie web projects.
-Let me search for more specific indie web projects, archives, and unique creator work.
-Let me do a couple more targeted searches for distinctive single-purpose sites and discovery tools.
-I have plenty of material now. Here's the curated list.
+I'll search for delightful internet artifacts and indie web projects worth stumbling into.
+Let me search for more specific fascinating projects, odd archives, and newly-noticed old sites.
+Let me do a couple more targeted searches for creator projects and personal web gems.
+I have plenty of material. Let me compile the list.
 
-- The Zoomquilt — a hypnotic, infinitely zooming collaborative painting that flows seamlessly through surreal dreamlike landscapes forever — <https://zoomquilt.org>
-- Find the Invisible Cow — 
-a game where you find an invisible cow on your screen, with the only clue being a man shouting "cow" that gets louder as your cursor gets closer
- — <https://findtheinvisiblecow.com>
-- Pointer Pointer — 
-does one thing with surprising accuracy: wherever you place your cursor, it finds a photo of someone pointing directly at it
+- **The Useless Web** — one big button that flings you to a random pointless single-purpose page, still the best portal into the weird web after a decade — <https://theuselessweb.com>
+- **Pointer Pointer** — 
+move your cursor anywhere and the site returns a photograph of someone pointing directly at that exact position
  — <https://pointerpointer.com>
-- WindowSwap — 
-swap your view with someone else's window
- from somewhere in the world, a quiet glimpse into a stranger's life — <https://window-swap.com>
-- Radio Garden — 
-spin the globe and listen to live radio
- from thousands of stations across the planet — <https://radio.garden>
-- The Quiet Place Project — 
-offers a moment of peacefulness, encouraging visitors to take a break from the chaos and simply breathe for a few minutes
- — <https://thequietplaceproject.com>
-- Endless Horse — 
-an ASCII art horse with legs that never end; you scroll and the legs keep going down the page with no sign of stopping
+- **Cursor Camp** — a brand-new neal.fun space where 
+everyone visiting appears as small cursors with no chat, no usernames, no profiles — you interact only by moving around
+ — <https://neal.fun/cursor-camp>
+- **WindowSwap** — 
+look out of random windows around the world submitted by strangers; there's no interaction beyond watching, but it feels intimate, almost intrusive
+ — <https://window-swap.com>
+- **Endless Horse** — 
+an image of a horse with never-ending legs as long as you dare to scroll, with no links, credits, or context — all it does is tempt you to test how long the legs are
  — <https://endless.horse>
-- Paper Toilet — 
-an interactive site that offers a humorous take on the mundane activity of rolling and unrolling tissue paper
- — <https://pashpash.com/PaperToilet>
-- Cloudhiker — a discovery engine that helps you 
-find the most interesting, weird or awesome websites
- with a single click — <https://cloudhiker.net>
-- wiby.me — a search engine for the old, handmade web that surfaces simple personal pages; an afternoon-killer of forgotten sites — <https://wiby.me>
-- Neocities — the modern GeoCities successor where 
-a wide range of polish, niche interests, page visit counters, guest books, chat rooms, and random little games
- thrive; browse the shrines tag for fan-devotion pages — <https://neocities.org/browse?tag=shrine>
-- The ICO Shrine — an obsessively maintained fan archive decoding the invented "Yorda'syorudas" language from the game ICO, 
-still actively updated in 2026
- — <https://icoshrine.neocities.org>
-- Archive of the Odd — 
-a biannual zine of horror and supernatural stories told in unusual formats, including messages, letters, news articles, product support pages, and defunct forum pages
- — <https://archiveoftheodd.com>
-- Slop Evader — 
-an artist's browser extension by Tega Brain that limits search results to content published before ChatGPT's release, pushing back against the decline of the internet as an information tool
+- **Radio Garden** — spin a globe and tune into live radio stations broadcasting anywhere on Earth right now — <https://radio.garden>
+- **The Deep Sea** — a scroll-down journey by Neal Agarwal where 
+you don't read that the ocean is deep, you feel it as your scroll bar keeps going and going
+ — <https://neal.fun/deep-sea>
+- **Infinite Craft** — 
+combine elements infinitely using AI, creating absurd items like "Obama's Pizza Planet"
+ — <https://neal.fun/infinite-craft>
+- **Internet Artifacts** — a scrollable timeline treating web history as a museum, 
+a curated journey through web history
+ from Agarwal — <https://neal.fun/internet-artifacts>
+- **Zoomquilt** — 
+an infinite zoom into a surreal painting chain
+ that loops forever into hand-drawn dreamscapes — <https://zoomquilt.org>
+- **This Is Sand** — 
+pour digital sand, oddly calming
+, building up strange colored dunes with a click — <https://thisissand.com>
+- **Purple.com** — 
+the oldest known single-serving site, launched in 1994, with no links and only a purple-colored background
+ — <https://purple.com>
+- **Zombo.com** — a 1999 relic still online where 
+a page of seven rotating colour wheels parodies the era's single-serving sites
+ — <https://zombo.com>
+- **Do Nothing for 2 Minutes** — 
+a two-minute timer that resets if you touch the mouse or keyboard
+, the calming hook that predated the Calm app — <https://donothingfor2minutes.com>
+- **Slop Evader** — 
+a browser extension by artist Tega Brain that limits search results to content published before Nov 30, 2022, the day ChatGPT was released
  — <https://slopevader.com>
-- Coral City Camera — 
-a live stream of an urban reef off the coast of Miami deployed by the art-science hybrid group Coral Morphologic
-, a meditative window into wild sea life — <https://www.coralcitycamera.com>

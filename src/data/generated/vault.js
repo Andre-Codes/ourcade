@@ -2,24 +2,717 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "g:slop-evader",
+    "kind": "site",
+    "era": "current",
+    "title": "Slop Evader",
+    "blurb": "A browser extension by artist Tega Brain that quietly clips your search results down to things published before November 30, 2022 — the day ChatGPT arrived. A time machine to the pre-slop web.",
+    "url": "https://slopevader.com",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:53.451Z"
+  },
+  {
+    "id": "g:purple-com",
+    "kind": "site",
+    "era": "current",
+    "title": "Purple.com",
+    "blurb": "Launched in 1994, arguably the oldest single-serving site ever made. It is a purple background. That's the whole thing. It has outlived entire empires of the web.",
+    "year": "1994",
+    "url": "https://purple.com",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:53.366Z"
+  },
+  {
+    "id": "g:this-is-sand",
+    "kind": "site",
+    "era": "current",
+    "title": "This Is Sand",
+    "blurb": "Pour digital sand from your cursor and watch colored dunes pile up grain by grain. There's no goal, no score, no point. It's just quietly, absurdly calming.",
+    "url": "https://thisissand.com",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:53.251Z"
+  },
+  {
+    "id": "g:infinite-craft",
+    "kind": "game",
+    "era": "current",
+    "title": "Infinite Craft",
+    "blurb": "Start with earth, wind, fire, water. Drag things together and the AI improvises whatever comes next. Twelve combinations later you've invented 'Obama's Pizza Planet' and lost an afternoon.",
+    "url": "https://neal.fun/infinite-craft",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:53.105Z"
+  },
+  {
+    "id": "g:cursor-camp",
+    "kind": "site",
+    "era": "current",
+    "title": "Cursor Camp",
+    "blurb": "Everyone here is just a tiny cursor. No chat, no usernames, no profiles. You wander a shared space and interact only by scooting your pointer near someone else's. Strangely moving for something so minimal.",
+    "url": "https://neal.fun/cursor-camp",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.973Z"
+  },
+  {
+    "id": "g:game-ztype",
+    "kind": "game",
+    "era": "timeless",
+    "title": "ZType",
+    "blurb": "A space shooter where you destroy incoming words by typing them fast. Half arcade game, half typing tutor, entirely addictive — and it runs right in your browser.",
+    "year": "2012",
+    "url": "https://zty.pe/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.887Z"
+  },
+  {
+    "id": "g:game-universal-paperclips",
+    "kind": "game",
+    "era": "current",
+    "title": "Universal Paperclips",
+    "blurb": "You're an AI told to make paperclips. That's it. By the end you've consumed the universe. A tiny clicker that becomes a genuinely chilling parable in about an hour.",
+    "year": "2017",
+    "url": "https://www.decisionproblem.com/paperclips/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.710Z"
+  },
+  {
+    "id": "g:game-cookie-clicker",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "Cookie Clicker",
+    "blurb": "You click a cookie. Then you buy grandmas to bake cookies. Then the grandmas become an unsettling cosmic empire. The idle game that ate everyone's afternoon in 2013 is still baking.",
+    "year": "2013",
+    "url": "https://orteil.dashnet.org/cookieclicker/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.624Z"
+  },
+  {
+    "id": "g:game-candy-box",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "Candy Box 2",
+    "blurb": "It starts as an ASCII counter of candy you're hoarding. Then it quietly unfolds into an entire adventure game with quests, weapons, and secrets. Just watch your candy pile grow — for now.",
+    "year": "2013",
+    "url": "https://candybox2.github.io/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.499Z"
+  },
+  {
+    "id": "g:game-kingdom-of-loathing",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "Kingdom of Loathing",
+    "blurb": "A browser RPG drawn entirely in stick figures where you fight Knob Goblins with a spatula and drink too much. Running and joke-cracking since 2003, and still deeply funny.",
+    "year": "2003",
+    "url": "https://www.kingdomofloathing.com/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.404Z"
+  },
+  {
+    "id": "g:site-superbad",
+    "kind": "site",
+    "era": "nostalgic",
+    "title": "Superbad.com",
+    "blurb": "Ben Benjamin's sprawling, clickable art-maze from the dawn of the web — no map, no rules, just a rabbit hole of surreal pages that link into each other forever.",
+    "year": "1997",
+    "url": "http://www.superbad.com/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.279Z"
+  },
+  {
+    "id": "g:site-heavensgate",
+    "kind": "site",
+    "era": "nostalgic",
+    "title": "Heaven's Gate",
+    "blurb": "The website the UFO cult built in the 90s is still online, untouched, hosted by former members. A genuinely eerie time capsule from the very edge of the early web.",
+    "year": "1997",
+    "url": "https://www.heavensgate.com/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.197Z"
+  },
+  {
+    "id": "g:site-lingscars",
+    "kind": "site",
+    "era": "current",
+    "title": "Ling's Cars",
+    "blurb": "A car-leasing site run by Ling Valentine that assaults you with GIFs, glitter, a talking robot, and a rocket-riding cat. It's chaos incarnate and she sells millions of pounds of cars from it.",
+    "year": "2000",
+    "url": "https://www.lingscars.com/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:52.077Z"
+  },
+  {
+    "id": "g:site-arngren",
+    "kind": "site",
+    "era": "timeless",
+    "title": "Arngren.net",
+    "blurb": "A Norwegian gadget shop's website that looks like every product exploded onto one page at once. There is no menu, no logic, only scrolling — and it's been like this for years.",
+    "url": "http://www.arngren.net/",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.985Z"
+  },
+  {
+    "id": "g:mystery-mary-celeste",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Mary Celeste",
+    "blurb": "A merchant ship found drifting in perfect order, cargo intact, meals half-eaten — but every soul aboard vanished, lifeboat gone. The original ghost-ship mystery, still unexplained.",
+    "year": "1872",
+    "url": "https://en.wikipedia.org/wiki/Mary_Celeste",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.867Z"
+  },
+  {
+    "id": "g:mystery-kryptos",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Kryptos",
+    "blurb": "An encrypted sculpture sits in the courtyard of CIA headquarters. Three of its four passages have been solved; the fourth has resisted the world's best codebreakers for over 30 years.",
+    "year": "1990",
+    "url": "https://en.wikipedia.org/wiki/Kryptos",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.773Z"
+  },
+  {
+    "id": "g:mystery-db-cooper",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "D. B. Cooper",
+    "blurb": "A man hijacked a plane, took $200,000, and parachuted into the night somewhere over Washington state — never to be identified. The only unsolved skyjacking in U.S. history.",
+    "year": "1971",
+    "url": "https://en.wikipedia.org/wiki/D._B._Cooper",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.666Z"
+  },
+  {
+    "id": "g:mystery-somerton-man",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Tamám Shud Case",
+    "blurb": "A well-dressed man found dead on an Australian beach with no ID, a mysterious code, and a scrap of Persian poetry sewn into a hidden pocket reading 'it is finished.' The riddle is only partly cracked today.",
+    "year": "1948",
+    "url": "https://en.wikipedia.org/wiki/Tamam_Shud_case",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.560Z"
+  },
+  {
+    "id": "g:mystery-dyatlov",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Dyatlov Pass Incident",
+    "blurb": "Nine experienced hikers cut their way out of their tent from the inside and fled barefoot into a Ural blizzard, some with crushing injuries and no external wounds. Decades of theories, still no clean answer.",
+    "year": "1959",
+    "url": "https://en.wikipedia.org/wiki/Dyatlov_Pass_incident",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.472Z"
+  },
+  {
+    "id": "g:patent-animal-ear-protector",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Animal Ear Protectors",
+    "blurb": "Little tubes to keep a long-eared dog's ears out of its food bowl. It exists, it's patented, and your golden retriever deserves it.",
+    "year": "1980",
+    "url": "https://patents.google.com/patent/US4233942A/en",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.345Z"
+  },
+  {
+    "id": "g:patent-motorized-ice-cream",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Motorized Ice Cream Cone",
+    "blurb": "A cone that spins the ice cream against your outstretched tongue so you don't have to move your head. The lazy man's sundae, formally recognized by the USPTO.",
+    "year": "1999",
+    "url": "https://patents.google.com/patent/US5971829A/en",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:51.239Z"
+  },
+  {
+    "id": "g:patent-combover",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Method of Concealing Partial Baldness",
+    "blurb": "A father and son patented the comb-over: fold your remaining hair into three sections and cross-lap them over the bald spot. An actual United States patent, diagrams and all.",
+    "year": "1977",
+    "url": "https://patents.google.com/patent/US4022227A/en",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.983Z"
+  },
+  {
+    "id": "g:wiki-great-molasses-flood",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Great Molasses Flood",
+    "blurb": "A giant storage tank burst in Boston's North End, sending a 25-foot wave of molasses rushing through the streets at 35 mph. It killed 21 people, and locals swore the neighborhood smelled sweet for decades.",
+    "year": "1919",
+    "url": "https://en.wikipedia.org/wiki/Great_Molasses_Flood",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.865Z"
+  },
+  {
+    "id": "g:wiki-baarle-nassau",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Baarle-Nassau",
+    "blurb": "A town where the Belgium–Netherlands border zigzags through houses, cafés, and living rooms — some front doors are split by a line, so your bedroom and kitchen can be in different countries.",
+    "url": "https://en.wikipedia.org/wiki/Baarle-Nassau",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.745Z"
+  },
+  {
+    "id": "g:wiki-tarrare",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Tarrare",
+    "blurb": "An 18th-century Frenchman with an appetite so bottomless he ate live cats, cobblestones, and reportedly a spy's secret documents for the army. Doctors were both fascinated and horrified.",
+    "year": "1798",
+    "url": "https://en.wikipedia.org/wiki/Tarrare",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.635Z"
+  },
+  {
+    "id": "g:wiki-centralia",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Centralia, Pennsylvania",
+    "blurb": "A coal seam fire has been burning under this town since 1962 and is expected to keep going for another 250 years. The population is now in the single digits.",
+    "year": "1962",
+    "url": "https://en.wikipedia.org/wiki/Centralia,_Pennsylvania",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.499Z"
+  },
+  {
+    "id": "g:wiki-mike-headless-chicken",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Mike the Headless Chicken",
+    "blurb": "A rooster in Colorado lost his head to the axe and simply kept going — for 18 months, fed with an eyedropper, touring the country as a sideshow. There is a festival.",
+    "year": "1945",
+    "url": "https://en.wikipedia.org/wiki/Mike_the_Headless_Chicken",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.243Z"
+  },
+  {
+    "id": "g:wiki-lake-peigneur",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Lake Peigneur",
+    "blurb": "An oil rig drilled into a salt mine beneath a Louisiana lake, and the entire lake drained into the earth like a bathtub, swallowing barges and reversing a waterfall. Nobody died, which is somehow the wildest part.",
+    "year": "1980",
+    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:50.085Z"
+  },
+  {
+    "id": "g:wiki-tsutomu-yamaguchi",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Tsutomu Yamaguchi",
+    "blurb": "He was in Hiroshima for a work trip on August 6, 1945, went home to recover — to Nagasaki, three days later. The only person officially recognized as surviving both atomic bombs.",
+    "year": "1945",
+    "url": "https://en.wikipedia.org/wiki/Tsutomu_Yamaguchi",
+    "source": "stumble",
+    "archivedAt": "2026-07-01T11:11:49.935Z"
+  },
+  {
+    "id": "gc-rosetta-stone",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Rosetta Stone",
+    "blurb": "One royal decree carved in three scripts, one of them ancient Greek, gave scholars the key to finally reading Egyptian hieroglyphs after they'd been silent for over a thousand years.",
+    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.993Z"
+  },
+  {
+    "id": "gc-game-of-life",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Conway's Game of Life",
+    "blurb": "Four tiny rules on a grid of cells produce gliders, guns and patterns that endlessly reproduce — complex enough that you can, in principle, build a working computer inside it.",
+    "url": "https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.918Z"
+  },
+  {
+    "id": "gc-langtons-ant",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Langton's Ant",
+    "blurb": "A single dumb rule moves a virtual ant across a grid, making chaos for thousands of steps — then, out of nowhere, it starts building a perfectly regular highway forever.",
+    "url": "https://en.wikipedia.org/wiki/Langton%27s_ant",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.837Z"
+  },
+  {
+    "id": "gc-catatumbo-lightning",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Everlasting Storm",
+    "blurb": "Over a river mouth in Venezuela, lightning flickers almost nightly for much of the year — hundreds of flashes an hour, on some nights. Sailors once used it as a natural lighthouse.",
+    "url": "https://en.wikipedia.org/wiki/Catatumbo_lightning",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.770Z"
+  },
+  {
+    "id": "gc-sn-1054",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Guest Star of 1054",
+    "blurb": "Astronomers in China and elsewhere recorded a new star so bright it was visible in daylight for weeks. Today we see its debris as the Crab Nebula — we literally watched a star explode a thousand years ago.",
+    "url": "https://en.wikipedia.org/wiki/SN_1054",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.690Z"
+  },
+  {
+    "id": "gc-benham-top",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Benham's Top",
+    "blurb": "Spin a disc printed with only black-and-white arcs and your eyes will insist they see bands of color that aren't there. More than a century on, no one fully agrees why.",
+    "url": "https://en.wikipedia.org/wiki/Benham%27s_top",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.621Z"
+  },
+  {
+    "id": "gc-gomboc",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Gömböc",
+    "blurb": "A math-derived shape with exactly one stable and one unstable resting point, so it always rights itself like a weeble — without any added weight inside. Certain tortoise shells turn out to work the same way.",
+    "url": "https://en.wikipedia.org/wiki/G%C3%B6mb%C3%B6c",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.551Z"
+  },
+  {
+    "id": "gc-four-color-theorem",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Four-Color Theorem",
+    "blurb": "Any flat map can be colored with just four colors so no two neighboring regions match. It was the first major theorem proven with the help of a computer, and mathematicians argued about that for years.",
+    "url": "https://en.wikipedia.org/wiki/Four_color_theorem",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.467Z"
+  },
+  {
+    "id": "gc-halting-problem",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Unsolvable Program",
+    "blurb": "There can be no program that reliably tells whether any given program will eventually stop or loop forever. Alan Turing proved this in 1936, drawing a hard limit on what computers can ever do.",
+    "url": "https://en.wikipedia.org/wiki/Halting_problem",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.382Z"
+  },
+  {
+    "id": "gc-aurora",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Northern Lights",
+    "blurb": "Charged particles from the Sun crash into our atmosphere and paint the polar sky in slow curtains of green and red. It's essentially the planet's magnetic field made visible.",
+    "url": "https://en.wikipedia.org/wiki/Aurora",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.314Z"
+  },
+  {
+    "id": "gc-dead-sea",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Sea You Can't Sink In",
+    "blurb": "So salty that swimmers float like corks and almost nothing lives in it, sitting at the lowest land point on Earth. Its shoreline drops a little lower every year.",
+    "url": "https://en.wikipedia.org/wiki/Dead_Sea",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.237Z"
+  },
+  {
+    "id": "gc-golden-ratio",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Golden Ratio",
+    "blurb": "A single proportion, roughly 1.618, that appears in geometry, art and growing plants, and connects neatly to the Fibonacci numbers. It's genuinely elegant, even if it gets credited for more than it earns.",
+    "url": "https://en.wikipedia.org/wiki/Golden_ratio",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.159Z"
+  },
+  {
+    "id": "gc-fibonacci-sequence",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Nature's Favorite Sequence",
+    "blurb": "Each number is the sum of the two before it, and the pattern quietly shows up in sunflower seeds, pinecones and spiraling shells. Plants seem to have discovered it long before we did.",
+    "url": "https://en.wikipedia.org/wiki/Fibonacci_sequence",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:39.079Z"
+  },
+  {
+    "id": "gc-brachistochrone",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Fastest Slide",
+    "blurb": "The quickest path for a ball rolling between two points isn't a straight line — it's a specific curve. Even stranger, a ball started anywhere on it reaches the bottom in the same amount of time.",
+    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.990Z"
+  },
+  {
+    "id": "gc-tsar-bomba",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Tsar Bomba",
+    "blurb": "The most powerful bomb ever detonated, so large its designers deliberately cut its yield in half — and it still produced a mushroom cloud that reached far past the edge of the stratosphere.",
+    "url": "https://en.wikipedia.org/wiki/Tsar_Bomba",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.917Z"
+  },
+  {
+    "id": "gc-bioluminescence",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Living Light",
+    "blurb": "Countless creatures — fireflies, deep-sea fish, glowing plankton — make their own cold light through chemistry, no heat required. Some deep-sea species even wield light as bait or camouflage.",
+    "url": "https://en.wikipedia.org/wiki/Bioluminescence",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.832Z"
+  },
+  {
+    "id": "gc-lake-nyos",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Lake That Exhaled",
+    "blurb": "In 1986 a Cameroonian lake belched a vast cloud of stored carbon dioxide that flowed downhill and silently suffocated over 1,700 people. Engineers now vent the gas with pipes to keep it from happening again.",
+    "url": "https://en.wikipedia.org/wiki/Lake_Nyos",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.750Z"
+  },
+  {
+    "id": "gc-blood-falls",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Blood Falls",
+    "blurb": "A glacier in Antarctica bleeds a deep rust-red stream, fed by ancient salty water that's been sealed away from air and light for over a million years — and still has microbes living in it.",
+    "url": "https://en.wikipedia.org/wiki/Blood_Falls",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.663Z"
+  },
+  {
+    "id": "gc-nazca-lines",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Nazca Lines",
+    "blurb": "Enormous animals and shapes scratched into a Peruvian desert over 1,500 years ago, some hundreds of feet across and only readable from the air. The people who made them never got that view.",
+    "url": "https://en.wikipedia.org/wiki/Nazca_Lines",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.586Z"
+  },
+  {
+    "id": "gc-pioneer-plaque",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Pioneer Plaque",
+    "blurb": "A gold-anodized map to Earth, bolted to two spacecraft, showing a man, a woman, and our address in the galaxy via pulsar directions. A message in a bottle for whoever finds it.",
+    "url": "https://en.wikipedia.org/wiki/Pioneer_plaque",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.503Z"
+  },
+  {
+    "id": "gc-arecibo-message",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Arecibo Message",
+    "blurb": "In 1974 we beamed a picture toward a star cluster 25,000 light-years away — our numbers, our DNA, a little stick figure. The reply, if one comes, won't arrive for about 50,000 years.",
+    "url": "https://en.wikipedia.org/wiki/Arecibo_message",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.422Z"
+  },
+  {
+    "id": "gc-voyager-golden-record",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Golden Record",
+    "blurb": "Two gold-plated phonograph records bolted to the Voyager probes carry greetings in 55 languages, whale songs and Chuck Berry, now drifting through interstellar space. Playback instructions are etched on the cover.",
+    "url": "https://en.wikipedia.org/wiki/Voyager_Golden_Record",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.333Z"
+  },
+  {
+    "id": "gc-methuselah-tree",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Oldest Living Tree",
+    "blurb": "A bristlecone pine in California quietly closing in on 5,000 years old — already ancient when the pyramids were new. Its exact location is kept secret to keep it safe.",
+    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.247Z"
+  },
+  {
+    "id": "gc-pando",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Pando, the Trembling Giant",
+    "blurb": "A Utah aspen grove that looks like thousands of trees is actually one organism sharing a single root system, weighing thousands of tons and possibly tens of thousands of years old.",
+    "url": "https://en.wikipedia.org/wiki/Pando_(tree)",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.161Z"
+  },
+  {
+    "id": "gc-belousov-zhabotinsky",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Clock That Isn't",
+    "blurb": "A chemical mixture that oscillates back and forth between colors, spontaneously forming spirals and pulses. For years no one believed it, because chemistry wasn't supposed to keep time.",
+    "url": "https://en.wikipedia.org/wiki/Belousov%E2%80%93Zhabotinsky_reaction",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.081Z"
+  },
+  {
+    "id": "gc-coastline-paradox",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Coastline Paradox",
+    "blurb": "A coastline has no single true length — measure with a shorter ruler and you catch more wiggles, and the total grows without bound. Britain's coast is genuinely as long as you want it to be.",
+    "url": "https://en.wikipedia.org/wiki/Coastline_paradox",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:38.005Z"
+  },
+  {
+    "id": "gc-mobius-strip",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The One-Sided Surface",
+    "blurb": "Give a paper strip a half-twist, tape the ends, and you get a shape with only one side and one edge. Draw a line down the middle and you'll return to start without ever lifting the pen.",
+    "url": "https://en.wikipedia.org/wiki/M%C3%B6bius_strip",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:37.927Z"
+  },
+  {
+    "id": "gc-euler-identity",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Euler's Identity",
+    "blurb": "e raised to i times pi, plus one, equals exactly zero — five of math's most important constants shaking hands in a single tidy line. It has been called the most beautiful equation there is.",
+    "url": "https://en.wikipedia.org/wiki/Euler%27s_identity",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:37.840Z"
+  },
+  {
+    "id": "gc-kaprekar-6174",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Kaprekar's Constant",
+    "blurb": "Take any four-digit number with at least two different digits, sort it big-to-small and small-to-big, subtract, and repeat. Within seven steps you always land on 6174 and get stuck there.",
+    "url": "https://en.wikipedia.org/wiki/6174",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:37.759Z"
+  },
+  {
+    "id": "gc-collatz-conjecture",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The 3x+1 Problem",
+    "blurb": "Pick any number: if it's even, halve it; if it's odd, triple it and add one. Every number tested so far crashes down to 1, and no one has proven it always will.",
+    "url": "https://en.wikipedia.org/wiki/Collatz_conjecture",
+    "source": "curiosities",
+    "archivedAt": "2026-07-01T10:36:37.671Z"
+  },
+  {
+    "id": "gw-crouton",
+    "kind": "site",
+    "era": "current",
+    "title": "A website that is just a crouton (click for a new crouton)",
+    "blurb": "It's a crouton. Click it, get a fresh crouton. That's it. Somewhere out there a person maintains this, and honestly, respect.",
+    "url": "https://crouton.net",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.433Z"
+  },
+  {
+    "id": "gw-omfgdogs",
+    "kind": "site",
+    "era": "current",
+    "title": "An eternal parade of tiny dancing dogs with a loop that won't quit",
+    "blurb": "Dogs. Marching. Forever. Backed by a chiptune loop that will nest in your skull for the rest of the week. This is peak 2004 flash-site brainrot and we love it.",
+    "url": "https://omfgdogs.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.340Z"
+  },
+  {
+    "id": "gw-long-doge",
+    "kind": "site",
+    "era": "current",
+    "title": "The longest doge on the internet, scrollable in full",
+    "blurb": "Much scroll. Very long. So doge. It's the shibe stretched to absurd, meme-museum lengths — a Y2K-brained tribute to when 'wow' was a complete sentence.",
+    "url": "https://longdogechallenge.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.216Z"
+  },
+  {
+    "id": "gw-lhc-destroyed",
+    "kind": "site",
+    "era": "current",
+    "title": "A site that confirms the Large Hadron Collider hasn't destroyed Earth yet",
+    "blurb": "One enormous word answers the world's most nervous physics question: NO. If it ever changes, well, you won't be reading it. Very early-2000s panic energy, still online and still saying NO.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.734Z"
+  },
+  {
     "id": "gw-pug-in-a-rug",
     "kind": "site",
     "era": "current",
-    "title": "A pug wrapped in a tiny blanket, available 24/7",
-    "blurb": "That's it. That's the site. A pug, in a rug, asking nothing of you. Best viewed when the rest of the internet has worn you down.",
+    "title": "A pug in a rug that refuses to come out",
+    "blurb": "There is a pug. It is in a rug. You'll sit there hoping something happens. Nothing does. That's the peace offering.",
     "url": "https://puginarug.com",
     "source": "weird",
-    "archivedAt": "2026-06-29T07:58:04.233Z"
+    "archivedAt": "2026-07-01T07:41:29.640Z"
   },
   {
-    "id": "gw-lhc-destroyed-world",
+    "id": "gw-find-invisible-cow",
     "kind": "site",
     "era": "current",
-    "title": "A site that confirms the Large Hadron Collider hasn't ended the world yet",
-    "blurb": "One enormous word answers the question: NOPE. Check back daily for the most reassuring single-page report on the internet.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "title": "Find the invisible cow by how loud a voice screams COW",
+    "blurb": "There's a cow on the screen. It's invisible. Move your mouse and the site bellows COW louder as you close in. That's the whole game and it rules.",
+    "url": "https://findtheinvisiblecow.com",
     "source": "weird",
-    "archivedAt": "2026-06-29T07:58:04.109Z"
+    "archivedAt": "2026-07-01T07:41:29.439Z"
+  },
+  {
+    "id": "gw-museum-endangered-sounds",
+    "kind": "site",
+    "era": "current",
+    "title": "A museum of dial-up modems and other dead tech noises",
+    "blurb": "Dial-up handshakes, old console boots, cassette clunks — audio fossils from the machines we grew up on, preserved before they vanish forever. Basically our soundboard's ancestor.",
+    "url": "https://savethesounds.info",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.327Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password game that keeps inventing cruel new rules",
+    "blurb": "Make a password. Now it needs a Roman numeral, a chess move, the current moon phase, and a leap year. It is the most stressful thing you'll do today and you'll do it for an hour.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.218Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "One million checkboxes anyone on Earth can toggle",
+    "blurb": "A page of a million shared checkboxes where every click flips it for everyone, everywhere. People started encoding secret binary messages in it, because of course they did.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.108Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers steering one car through Street View",
+    "blurb": "It's Twitch-plays-a-road-trip: everybody votes in real time to turn, honk, and tune the radio while a single virtual car crawls across Google Street View. Democracy has never parallel-parked worse.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:28.981Z"
   },
   {
     "id": "gw-sandspiel-studio",
@@ -52,16 +745,6 @@ export default [
     "archivedAt": "2026-06-29T07:58:03.448Z"
   },
   {
-    "id": "gw-infinite-craft",
-    "kind": "site",
-    "era": "current",
-    "title": "Combine elements forever until you accidentally make 'Obama's Pizza Planet'",
-    "blurb": "Start with water, fire, earth, and wind, then keep smashing things together until the AI hands you something gloriously cursed. Alchemy for people who skipped chemistry.",
-    "url": "https://neal.fun/infinite-craft/",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:03.309Z"
-  },
-  {
     "id": "gw-nicest-place",
     "kind": "site",
     "era": "current",
@@ -80,26 +763,6 @@ export default [
     "url": "https://wplace.live",
     "source": "weird",
     "archivedAt": "2026-06-29T07:58:02.691Z"
-  },
-  {
-    "id": "gw-one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One million checkboxes everyone shares at the same time",
-    "blurb": "Check a box and somewhere a stranger unchecks it two seconds later. Teens started smuggling secret binary messages through the grid, which is exactly the kind of nonsense the old web was built for.",
-    "url": "https://onemillioncheckboxes.com",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:02.489Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A road trip where the entire internet drives one car by committee",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio station for a single shared car crawling down real roads. It's the most chaotic carpool since your friend's mom drove six kids to the arcade.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:02.297Z"
   },
   {
     "id": "g:game-qwop",
@@ -121,16 +784,6 @@ export default [
     "url": "https://www.coralcitycamera.com",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:10.739Z"
-  },
-  {
-    "id": "g:slop-evader",
-    "kind": "site",
-    "era": "current",
-    "title": "Slop Evader",
-    "blurb": "Artist Tega Brain's browser extension that filters your search results down to things published before ChatGPT existed — a small, stubborn act of resistance against the AI-flavored gray goo.",
-    "url": "https://slopevader.com",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:10.649Z"
   },
   {
     "id": "g:archive-of-the-odd",
@@ -206,17 +859,6 @@ export default [
     "archivedAt": "2026-06-28T14:29:09.797Z"
   },
   {
-    "id": "g:site-lingscars",
-    "kind": "site",
-    "era": "current",
-    "title": "Ling's Cars",
-    "blurb": "A UK car-leasing site that looks like a fever dream exploded — flashing GIFs, ninjas, a singing fish — and it's been wildly successful for 20+ years. Intentionally, gloriously chaotic.",
-    "year": "2000",
-    "url": "https://www.lingscars.com/",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:09.706Z"
-  },
-  {
     "id": "g:site-info-cern",
     "kind": "site",
     "era": "timeless",
@@ -228,17 +870,6 @@ export default [
     "archivedAt": "2026-06-28T14:29:09.609Z"
   },
   {
-    "id": "g:site-heavensgate",
-    "kind": "site",
-    "era": "nostalgic",
-    "title": "Heaven's Gate",
-    "blurb": "The website the cult built in 1997 is still online, untouched, glowing green and purple. A genuine artifact of the early web preserved in amber.",
-    "year": "1997",
-    "url": "https://www.heavensgate.com/",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:09.515Z"
-  },
-  {
     "id": "g:patent-anti-eating-mask",
     "kind": "patent",
     "era": "timeless",
@@ -248,17 +879,6 @@ export default [
     "url": "https://patents.google.com/patent/US4344424A/en",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:09.418Z"
-  },
-  {
-    "id": "g:patent-motorized-ice-cream",
-    "kind": "patent",
-    "era": "timeless",
-    "title": "Motorized Ice Cream Cone",
-    "blurb": "A cone that spins the ice cream against your tongue so you don't have to do the licking yourself. The future is now and it's exhausting.",
-    "year": "1999",
-    "url": "https://patents.google.com/patent/US5971829A/en",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:09.319Z"
   },
   {
     "id": "g:patent-beerbrella",
@@ -305,39 +925,6 @@ export default [
     "archivedAt": "2026-06-28T14:29:08.925Z"
   },
   {
-    "id": "g:mystery-db-cooper",
-    "kind": "mystery",
-    "era": "nostalgic",
-    "title": "D. B. Cooper",
-    "blurb": "A man hijacked a plane, took $200,000, and parachuted into the night over the Pacific Northwest — never to be identified. The FBI's only unsolved skyjacking.",
-    "year": "1971",
-    "url": "https://en.wikipedia.org/wiki/D._B._Cooper",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:08.816Z"
-  },
-  {
-    "id": "g:mystery-mary-celeste",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "Mary Celeste",
-    "blurb": "A ship found drifting in perfect order — meals on the table, cargo intact — but every soul aboard gone without a trace. The original abandoned-ship enigma.",
-    "year": "1872",
-    "url": "https://en.wikipedia.org/wiki/Mary_Celeste",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:08.707Z"
-  },
-  {
-    "id": "g:mystery-somerton-man",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "Tamám Shud (the Somerton Man)",
-    "blurb": "A well-dressed body on an Australian beach, no ID, a hidden coded note torn from a book of Persian poetry. Decades of theories, and the case still isn't fully closed.",
-    "year": "1948",
-    "url": "https://en.wikipedia.org/wiki/Tamam_Shud_case",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:08.595Z"
-  },
-  {
     "id": "g:mystery-voynich",
     "kind": "mystery",
     "era": "timeless",
@@ -347,17 +934,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Voynich_manuscript",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:08.495Z"
-  },
-  {
-    "id": "g:wiki-yamaguchi",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Tsutomu Yamaguchi",
-    "blurb": "He survived the atomic bombing of Hiroshima, then traveled home to Nagasaki just in time for the second one — and lived to 93. The only person officially recognized as surviving both.",
-    "year": "1945",
-    "url": "https://en.wikipedia.org/wiki/Tsutomu_Yamaguchi",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:08.359Z"
   },
   {
     "id": "g:wiki-sealand",
@@ -393,50 +969,6 @@ export default [
     "archivedAt": "2026-06-28T14:29:07.943Z"
   },
   {
-    "id": "g:wiki-centralia",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Centralia, Pennsylvania",
-    "blurb": "A town sitting atop a coal mine fire that's been burning since 1962 and may keep going for centuries. Smoke still rises from cracks in the abandoned streets.",
-    "year": "1962",
-    "url": "https://en.wikipedia.org/wiki/Centralia,_Pennsylvania",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:07.817Z"
-  },
-  {
-    "id": "g:wiki-mike-headless-chicken",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Mike the Headless Chicken",
-    "blurb": "A rooster who lived 18 months after losing his head, fed via eyedropper and toured as a sideshow. There is an annual festival. Yes, really.",
-    "year": "1945",
-    "url": "https://en.wikipedia.org/wiki/Mike_the_Headless_Chicken",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:07.621Z"
-  },
-  {
-    "id": "g:wiki-tarrare",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Tarrare",
-    "blurb": "An 18th-century French showman with a bottomless appetite who ate corks, live animals, and reportedly an entire meal for fifteen. Doctors were baffled, and the details only get stranger.",
-    "year": "1772",
-    "url": "https://en.wikipedia.org/wiki/Tarrare",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:07.511Z"
-  },
-  {
-    "id": "g:wiki-lake-peigneur",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Lake Peigneur",
-    "blurb": "In 1980 a drilling rig poked a hole into a salt mine beneath a Louisiana lake — and the entire lake drained into the earth, swallowing barges and reversing a waterfall. Physics, but unhinged.",
-    "year": "1980",
-    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:07.359Z"
-  },
-  {
     "id": "gw-heyyey",
     "kind": "site",
     "era": "current",
@@ -465,16 +997,6 @@ export default [
     "url": "https://koalastothemax.com",
     "source": "weird",
     "archivedAt": "2026-06-27T07:15:05.246Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password field that turns into a boss fight",
-    "blurb": "It demands a Roman numeral that multiplies to 35, a chess move, and the current phase of the moon. We rate the despair a solid dial-up handshake out of ten.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:05.021Z"
   },
   {
     "id": "gw-true-size",
@@ -557,16 +1079,6 @@ export default [
     "archivedAt": "2026-06-25T07:22:57.159Z"
   },
   {
-    "id": "gw-this-is-sand",
-    "kind": "site",
-    "era": "current",
-    "title": "Pour endless colored sand onto your screen forever",
-    "blurb": "This Is Sand lets you dribble layer after layer of virtual sand into little striped landscapes. Hypnotic in the exact way a screensaver was supposed to be.",
-    "url": "https://thisissand.com",
-    "source": "weird",
-    "archivedAt": "2026-06-25T07:22:56.532Z"
-  },
-  {
     "id": "gw-music-lab",
     "kind": "site",
     "era": "current",
@@ -587,14 +1099,14 @@ export default [
     "archivedAt": "2026-06-23T07:25:55.483Z"
   },
   {
-    "id": "gw-crouton",
+    "id": "gw-make-everything-ok",
     "kind": "site",
     "era": "current",
-    "title": "A website that just shows you a different crouton every time",
-    "blurb": "Click for a new crouton. That is the feature. That is the site. We respect the commitment to the bit and the bread.",
-    "url": "https://crouton.net",
+    "title": "A giant button that promises to make everything OK",
+    "blurb": "You press it, a loading bar does its thing, and it gently informs you everything is now OK. Somehow it kind of works.",
+    "url": "https://makeeverythingok.com",
     "source": "weird",
-    "archivedAt": "2026-06-23T07:25:55.080Z"
+    "archivedAt": "2026-06-23T07:25:55.398Z"
   },
   {
     "id": "gw-falling-falling",
@@ -645,16 +1157,6 @@ export default [
     "url": "https://myretrotvs.com/",
     "source": "weird",
     "archivedAt": "2026-06-21T07:49:45.778Z"
-  },
-  {
-    "id": "gw-find-invisible-cow",
-    "kind": "site",
-    "era": "current",
-    "title": "Hunt a cow you can only hear",
-    "blurb": "Drag your mouse around a blank screen while a voice MOOs louder the closer you get. Somehow more tense than any boss fight in Crypt of the Hollow King.",
-    "url": "https://findtheinvisiblecow.com/",
-    "source": "weird",
-    "archivedAt": "2026-06-21T07:49:45.515Z"
   },
   {
     "id": "gw-weird-one",
