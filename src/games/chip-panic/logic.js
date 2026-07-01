@@ -15,9 +15,13 @@
 
    RESOLUTION — a full (5-card) lane resolves three ways:
      * HIGH CARD      → BUST + LOCK (permanent). Ante + any raise lost; streak resets.
-     * ANY PAIR       → a defensive SAVE: the lane CLEARS (slot freed) but scores 0,
-                        the ante is lost, no chips returned, the discard does NOT
-                        refresh, and the streak is unchanged.
+     * ANY PAIR       → a defensive SAVE, but ONLY if a SAVE TOKEN is spent: the lane
+                        CLEARS (slot freed) but scores 0, the ante is lost, no chips
+                        returned, the discard does NOT refresh, and the streak is
+                        unchanged. With NO token left, a pair BUSTS + LOCKS exactly like
+                        a high card. Tokens are a limited pool (start 2, earn one back
+                        every SCORES_PER_SAVE_TOKEN true scores, cap SAVE_TOKEN_CAP) —
+                        so late-run pairs turn dangerous and the board can collapse.
      * TWO PAIR or +  → a true SCORE: base points, ante returned (+profit), any
                         winning raise multiplies the score and pays profit, the
                         discard refreshes, and a matching WANTED hand pays its bonus.
@@ -69,7 +73,16 @@ export function anteFor(scoreHands, wantedHits, draws = 0) {
     + Math.floor(draws / DRAWS_PER_ANTE);
 }
 export const SCORE_MIN = HAND.TWO_PAIR; // two pair or better truly scores
-export const SAVE_HAND = HAND.PAIR; // any pair is a defensive save (clears, no score)
+export const SAVE_HAND = HAND.PAIR; // a pair is a defensive save — but ONLY if a save
+// token is spent (see below). With no token left, a pair BUSTS + LOCKS like a high card.
+
+// Save tokens — the pair-save is a LIMITED resource, not a free valve. A full lane that
+// resolves as a bare pair costs one token to rescue; run out and pairs start busting,
+// so the board can actually collapse. You start with START_SAVE_TOKENS and earn one back
+// every SCORES_PER_SAVE_TOKEN true scores, capped at SAVE_TOKEN_CAP.
+export const START_SAVE_TOKENS = 2;
+export const SCORES_PER_SAVE_TOKEN = 5;
+export const SAVE_TOKEN_CAP = 4;
 
 // Base points per hand category on a true score. (A pair never scores — it's only
 // a save — so HAND.PAIR is intentionally absent.)
@@ -274,7 +287,8 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     discard: true, // starts charged
     score: 0,
     streak: 0,
-    scoreHands: 0, // cumulative true scores (drives the rising ante)
+    scoreHands: 0, // cumulative true scores (drives the rising ante + save-token earn-back)
+    saveTokens: START_SAVE_TOKENS, // pair-saves remaining (a bare pair busts at 0)
     wantedHits: 0, // cumulative Wanted completions (drives the rising ante)
     handStats: {}, // hand rank (HAND.*) → count of lanes resolved as that hand this run
     draws: 0,
@@ -294,7 +308,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
    Math.random is fine. The drawn `bag` is already a snapshot array, so the deck
    order survives a round-trip. Bump SAVE_VERSION on any incompatible shape change
    so old saves are discarded rather than mis-hydrated. */
-export const SAVE_VERSION = 2; // v2 adds handStats to the run snapshot
+export const SAVE_VERSION = 3; // v3 adds saveTokens to the run snapshot
 
 // A run worth saving: in progress and not finished.
 export const isSaveable = (state) => !!state && !state.over;
@@ -316,7 +330,12 @@ export function hydrateGame(saved) {
   if (!Array.isArray(s.bag) || !Array.isArray(s.locked)) return null;
   if (typeof s.chips !== "number" || typeof s.draws !== "number") return null;
   if (s.over) return null; // finished runs aren't resumable
-  return { ...s, handStats: s.handStats || {}, rng: Math.random };
+  return {
+    ...s,
+    handStats: s.handStats || {},
+    saveTokens: typeof s.saveTokens === "number" ? s.saveTokens : START_SAVE_TOKENS,
+    rng: Math.random,
+  };
 }
 
 export const laneFull = (lane) => lane.length >= LANE_CAP;
@@ -433,7 +452,7 @@ export function placeCard(state, l) {
   const anteAmt = state.anteAmt.slice();
   const raise = state.raise.slice();
   const raiseSel = state.raiseSel.slice();
-  let { chips, score, discard, streak, wanted, scoreHands, wantedHits } = state;
+  let { chips, score, discard, streak, wanted, scoreHands, wantedHits, saveTokens } = state;
   let handStats = state.handStats;
 
   // Opening an empty lane pays the current (rising) ante; remember what was paid so
@@ -452,23 +471,39 @@ export function placeCard(state, l) {
   let resolution = null;
   let wantedClaim = null;
   let jackpotClaim = null;
+  let bustNow = false; // this placement locked the lane (high card, or a token-less pair)
+  let savedByToken = false; // a pair was rescued by spending a save token
   if (lanes[l].length === LANE_CAP) {
     const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], antePaidAmt: anteAmt[l], wanted, streak, l });
     resolution = r;
     score += r.points;
     chips += r.chipsReturned;
 
-    // Tally the resolved hand type for the end-of-run breakdown.
+    // Tally the resolved hand type for the end-of-run breakdown. A token-less pair is
+    // still tallied as PAIR (its true poker rank), so the end screen shows "PAIR ×n"
+    // even though it locked the lane.
     handStats = { ...handStats, [r.hand.rank]: (handStats[r.hand.rank] || 0) + 1 };
 
-    if (r.bust) {
+    // A pair only truly SAVES if a token is available to spend; otherwise it BUSTS +
+    // LOCKS like a high card. resolveLane stays pure (it still reports saved/bust by
+    // poker rank) — placeCard decides whether that save is honored.
+    savedByToken = r.saved && saveTokens > 0;
+    bustNow = r.bust || (r.saved && !savedByToken);
+    if (savedByToken) saveTokens -= 1; // honored pair-save spends a token
+
+    if (bustNow) {
       locked[l] = true; // keep cards for the cracked visual
       streak = 0; // a bust resets the wanted streak
     } else {
-      // SAVE or SCORE both clear the lane.
+      // A real SAVE (token spent) or a SCORE both clear the lane.
       lanes[l] = [];
       anted[l] = false;
-      if (r.scored) { discard = true; scoreHands += 1; } // a true score refreshes discard + counts toward the rising ante
+      if (r.scored) {
+        discard = true; // a true score refreshes the discard + counts toward the rising ante
+        scoreHands += 1;
+        // Earn a save token back every Nth score (capped) — skilled play buys mercy.
+        if (scoreHands % SCORES_PER_SAVE_TOKEN === 0 && saveTokens < SAVE_TOKEN_CAP) saveTokens += 1;
+      }
     }
     anteAmt[l] = 0;
 
@@ -506,7 +541,7 @@ export function placeCard(state, l) {
     raiseSel[l] = NO_RAISE;
   }
 
-  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits, handStats };
+  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits, saveTokens, handStats };
   const expired = [];
   drawInto(next, expired);
   next.over = isGameOver(next);
@@ -525,7 +560,10 @@ export function placeCard(state, l) {
       burned: false,
       chipsDelta: next.chips - state.chips,
       discardRefreshed: !state.discard && next.discard,
-      streakReset: resolution && resolution.bust && state.streak > 0,
+      streakReset: bustNow && state.streak > 0,
+      savedByToken, // a pair rescued by a token (feed: "pair saved · 1 token used")
+      pairBusted: !!(resolution && resolution.saved && !savedByToken), // pair locked for lack of a token
+      saveTokens: next.saveTokens,
     },
   };
 }

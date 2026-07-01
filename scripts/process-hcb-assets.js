@@ -32,6 +32,7 @@ async function main() {
     { src: "wanted-badge.png", out: "wanted-badge.webp", size: 128 }, // banner badge (~26px)
     { src: "ante-up.png", out: "ante-up.webp", size: 256 },           // "ANTE UP" popup icon (larger)
     { src: "discard-token.png", out: "discard.webp", size: 128 },     // discard-button icon (~26px)
+    { src: "save-token.png", out: "save-token.webp", size: 128 },     // SAVES HUD icon (~16px)
     { src: "diamond-badge.png", out: "jackpot-badge.webp", size: 128 }, // JACKPOT banner badge (~16px)
     { src: "logo.png", out: "logo.webp", width: 680 },                // title-screen masthead (~340px)
   ];

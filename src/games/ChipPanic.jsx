@@ -12,7 +12,7 @@ import HelpPanel from "./chip-panic/HelpPanel.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
-  TIERS, ANTE_TIER, currentAnte, laneStake, NO_RAISE, START_CHIPS,
+  TIERS, ANTE_TIER, currentAnte, laneStake, NO_RAISE, START_CHIPS, START_SAVE_TOKENS,
   serializeGame, hydrateGame, isSaveable,
   devStackBag, DEV_STRAIGHT_FLUSH, DEV_ROYAL_FLUSH,
 } from "./chip-panic/logic.js";
@@ -24,9 +24,11 @@ const SAVE_KEY = "chip-panic:save"; // ourcade:-prefixed by store.js
 
    Draw ONE card into the tray, then tap a lane to drop it (or spend your discard).
    Opening an empty lane costs a Blue ANTE (1 chip). A lane fills at five cards and
-   resolves three ways: a HIGH CARD busts + locks it (ante lost), ANY PAIR is a
-   defensive SAVE (clears the lane but scores 0 and burns the ante), and TWO PAIR or
-   better truly SCORES (points, chips back, refreshes the discard). Raise above the
+   resolves three ways: a HIGH CARD busts + locks it (ante lost); ANY PAIR is a
+   defensive SAVE that clears the lane (0 points, ante burned) — but ONLY if you spend
+   a SAVE TOKEN, and with none left a pair busts + locks like a high card; TWO PAIR or
+   better truly SCORES (points, chips back, refreshes the discard). You start with 2
+   save tokens and earn one back every 5th scoring hand (cap 4). Raise above the
    ante (Red/Gold/Black) for a multiplier — raises need stronger hands and expire.
    Chase the WANTED hand up top for bonus points + chips and build a streak (resets
    when a lane busts). The run ends when all four lanes lock — or you're out of
@@ -42,6 +44,7 @@ const GAME_ID = "chip-panic";
 const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
 const ANTE_UP_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/ante-up.webp";
 const DISCARD_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/discard.webp";
+const SAVE_TOKEN_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/save-token.webp";
 const JACKPOT_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/jackpot-badge.webp";
 const LOGO_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/logo.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
@@ -72,6 +75,9 @@ const HCB_CSS = `
   .hcb-stat { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: #c9b3ec; white-space: nowrap; }
   .hcb-stat b { color: #ffd23f; font-size: 1.15rem; vertical-align: -.06em; }
   .hcb-stat.chips b { color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.45); }
+  .hcb-stat.saves { display: inline-flex; align-items: center; gap: 4px; }
+  .hcb-stat.saves .ic { width: 16px; height: 16px; display: block; filter: drop-shadow(0 0 6px rgba(255,180,84,.5)); }
+  .hcb-stat.saves b { color: #ffb454; text-shadow: 0 0 8px rgba(255,180,84,.4); }
   .hcb-stat.mode b { color: #bf5af2; font-size: .72rem; vertical-align: 0; }
 
   /* WANTED banner — the rotating objective. Fixed width so the hand name never
@@ -408,6 +414,7 @@ export default function ChipPanic() {
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
   const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
   const [discardImgOk, setDiscardImgOk] = useState(true); // false once the discard icon fails to load
+  const [saveTokenImgOk, setSaveTokenImgOk] = useState(true); // false once the save-token icon fails to load
   const [jackBadgeOk, setJackBadgeOk] = useState(true); // false once the jackpot badge fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
   const [jackpot, setJackpot] = useState(null); // { hand, pts, chips, on } — JACKPOT celebration
@@ -574,13 +581,18 @@ export default function ChipPanic() {
         playSfx("card-fan-1"); // the lane's cards fan out as it clears on a successful hand
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
-      } else if (res.saved) {
-        showFeed({ hand: res.hand.name, math: "", why: "pair only — saved, ante lost", kind: "save", claim: null });
+      } else if (result.savedByToken) {
+        // A pair rescued by spending a save token (resolution.saved is true AND a token
+        // was available). A token-less pair falls through to the bust branch below.
+        showFeed({ hand: res.hand.name, math: "", why: "pair saved · 1 token used", kind: "save", claim: null });
         if (geo && res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
         setFlash((f) => ({ ...f, [lane]: "saved" }));
       } else {
-        // bust
-        showFeed({ hand: res.hand.name, math: "BUST", why: result.streakReset ? "high card · streak lost" : "high card · lane locked", kind: "bad", claim: null });
+        // bust — a high card, or a pair with no save tokens left
+        const why = result.pairBusted
+          ? "no save left · lane locked"
+          : (result.streakReset ? "high card · streak lost" : "high card · lane locked");
+        showFeed({ hand: res.hand.name, math: "BUST", why, kind: "bad", claim: null });
         if (geo) {
           spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 420 });
           if (res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
@@ -819,6 +831,14 @@ export default function ChipPanic() {
         <span className="hcb-stat">SCORE <b>{(g?.score || 0).toLocaleString()}</b></span>
         <span className={`hcb-stat chips${hudBump ? " bump" : ""}`} ref={chipHudRef}>CHIPS <b>{g?.chips ?? START_CHIPS}</b></span>
         {screen === SCREEN.PLAY && (
+          <span className="hcb-stat saves" aria-label={`Save tokens: ${g?.saveTokens ?? START_SAVE_TOKENS}`}>
+            {saveTokenImgOk
+              ? <img className="ic" src={SAVE_TOKEN_IMG} alt="saves" draggable="false" onError={() => setSaveTokenImgOk(false)} />
+              : <span className="ic">🛟</span>}
+            <b>{g?.saveTokens ?? START_SAVE_TOKENS}</b>
+          </span>
+        )}
+        {screen === SCREEN.PLAY && (
           <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "HIGH STAKES"}</b></span>
         )}
       </div>
@@ -1011,7 +1031,7 @@ export default function ChipPanic() {
           {/* Only High Stakes is available for now. Classic + Panic land later. */}
           <div className="hcb-modes">
             <button className="hcb-mode on" onPointerDown={() => { setMode(MODE.HIGH_STAKES); lsSet("chip-panic:mode", MODE.HIGH_STAKES); }}>
-              HIGH STAKES<small>ante · raises · wanted hands</small>
+              HIGH STAKES<small>ante · raises · limited saves</small>
             </button>
           </div>
           <button className="hcb-btn" onPointerDown={() => setHelpOpen(true)}>HELP · HOW TO PLAY</button>

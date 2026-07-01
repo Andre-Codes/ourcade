@@ -143,13 +143,17 @@ export default function HelpPanel({ open, onClose }) {
             </div>
             <div className="hcbh-row save">
               <span className="k">SAVE</span>
-              <span>Any single Pair — the lane clears but scores 0, and the ante is lost.</span>
+              <span>Any single Pair, <b>if you have a save token</b> — the lane clears (0 pts, ante lost) and spends one token.</span>
             </div>
             <div className="hcbh-row bust">
               <span className="k">BUST</span>
-              <span>High Card — the lane locks for good, ante + any raise lost, streak resets.</span>
+              <span>High Card — or a Pair with no save tokens left — the lane locks for good, ante + any raise lost, streak resets.</span>
             </div>
           </div>
+          <p className="hcbh-p" style={{ marginTop: 8 }}>
+            You start each run with <b>2 save tokens</b> and earn <b>+1 every 5th scoring
+            hand</b> (max 4). Run out and pairs start busting — watch the <b>SAVES</b> count up top.
+          </p>
         </div>
 
         <div className="hcbh-sec">
