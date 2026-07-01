@@ -65,32 +65,63 @@ const VP_CSS = `
     box-sizing: border-box;
     position: relative; width: min(620px, 96vw); max-width: 100%;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
-    padding: 20px 18px; border-radius: 20px;
-    /* the cabinet bezel */
-    background: linear-gradient(160deg, #1a2740, #0c1322 60%, #060c16);
-    border: 2px solid #2c3e60;
-    box-shadow:
-      0 12px 34px rgba(0,0,0,.6),
-      inset 0 1px 0 rgba(120,160,220,.18),
-      inset 0 -2px 6px rgba(0,0,0,.6);
-  }
-  /* the recessed glass panel (the actual "screen"), behind the content */
-  .vp-screen::before {
-    content: ""; position: absolute; inset: 10px; border-radius: 12px; pointer-events: none; z-index: 0;
+    /* chunky molded-plastic TV bezel: thicker frame, rounded like a tube set */
+    padding: 26px 24px; border-radius: 26px / 30px;
     background:
-      radial-gradient(ellipse 75% 60% at 50% 38%, rgba(63,191,255,.16), transparent 70%),
-      radial-gradient(ellipse 120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%),
-      linear-gradient(180deg, #0a1a30, #050f1f);
+      linear-gradient(160deg, #243044, #141c2c 55%, #0a0e16),
+      #11151d;
+    border: 2px solid #38445c;
     box-shadow:
-      inset 0 0 26px rgba(0,0,0,.85),
-      inset 0 0 70px rgba(63,191,255,.10),
-      0 0 14px rgba(63,191,255,.10);
+      0 18px 46px rgba(0,0,0,.7),
+      0 2px 0 rgba(255,255,255,.05),
+      inset 0 2px 0 rgba(150,180,225,.22),
+      inset 0 -3px 8px rgba(0,0,0,.7),
+      inset 3px 0 7px rgba(0,0,0,.45),
+      inset -3px 0 7px rgba(0,0,0,.45);
   }
-  /* visible scanlines layered over the glass */
+  /* the recessed glass panel (the actual "screen"), behind the content. Strong
+     corner rounding = the convex bulge of a CRT tube; colored inner glows add a
+     hint of RGB-phosphor chromatic fringing at the edges. */
+  .vp-screen::before {
+    content: ""; position: absolute; inset: 12px; border-radius: 22px / 32px; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 34%, rgba(63,191,255,.18), transparent 72%),
+      radial-gradient(ellipse 130% 130% at 50% 50%, transparent 48%, rgba(0,0,0,.66) 100%),
+      linear-gradient(180deg, #0b1c32, #04101f);
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,.9),
+      inset 0 0 80px rgba(63,191,255,.12),
+      inset 5px 0 22px rgba(255,40,90,.06),
+      inset -5px 0 22px rgba(40,120,255,.07),
+      0 0 16px rgba(63,191,255,.12);
+  }
+  /* visible scanlines + a faint aperture-grille vertical mask, layered over the
+     glass and gently flickering like a live tube. */
   .vp-screen::after {
-    content: ""; position: absolute; inset: 10px; border-radius: 12px; pointer-events: none; z-index: 3;
-    background: repeating-linear-gradient(rgba(0,0,0,.28) 0 1px, transparent 1px 3px);
-    opacity: .55;
+    content: ""; position: absolute; inset: 12px; border-radius: 22px / 32px; pointer-events: none; z-index: 3;
+    background:
+      repeating-linear-gradient(rgba(0,0,0,.30) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+    opacity: .6;
+    animation: vp-flicker 5.5s steps(60) infinite;
+  }
+  /* Extra CRT glass layer (real element so it can animate alongside the pseudo-
+     elements): a slow rolling refresh band + a fixed top-left specular glare, so
+     the screen reads as curved glass catching the room light. */
+  .vp-crt {
+    position: absolute; inset: 12px; border-radius: 22px / 32px;
+    pointer-events: none; z-index: 4; overflow: hidden;
+  }
+  .vp-crt::before { /* rolling horizontal refresh/retrace band */
+    content: ""; position: absolute; left: 0; right: 0; height: 30%;
+    background: linear-gradient(180deg, transparent, rgba(160,210,255,.07) 50%, transparent);
+    animation: vp-roll 7s linear infinite;
+  }
+  .vp-crt::after { /* baked-in glass glare in the upper-left corner */
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 42% at 28% 16%, rgba(255,255,255,.10), transparent 60%),
+      radial-gradient(ellipse 90% 70% at 50% 0%, rgba(180,220,255,.06), transparent 55%);
   }
 
   /* Paytable */
@@ -178,8 +209,19 @@ const VP_CSS = `
     70%  { opacity: 1; }
     100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(.6); }
   }
+  /* barely-there brightness wobble of the tube */
+  @keyframes vp-flicker {
+    0%,100% { opacity: .60; } 47% { opacity: .60; } 48% { opacity: .50; }
+    49% { opacity: .62; } 50% { opacity: .55; } 51% { opacity: .60; }
+  }
+  /* the bright refresh band drifting down the glass */
+  @keyframes vp-roll {
+    0% { top: -32%; } 100% { top: 102%; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .vp-fx .fx-chip, .vp-feed { animation-duration: 1ms !important; transition: none !important; }
+    .vp-screen::after { animation: none !important; }
+    .vp-crt::before { animation: none !important; opacity: 0; }
   }
 
   .vp-overlay {
@@ -372,6 +414,7 @@ export default function VideoPoker() {
 
         {phase !== "start" && (
           <div className="vp-screen">
+            <div className="vp-crt" aria-hidden="true" />
             <div className="vp-pay">
               <table>
                 <tbody>
