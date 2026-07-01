@@ -11,6 +11,7 @@ import {
 } from "../data/creatives.js";
 import { hostnameOf } from "./ArtifactCard.jsx";
 import { creativeArt } from "./creativeArt.js";
+import { isSolvedRecently } from "../lib/solveState.js";
 import { seededShuffle } from "../lib/daily.js";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
@@ -52,6 +53,8 @@ function CreativeCard({ item }) {
   const art = creativeArt(item); // bundled slug → remote url → null
   const guide = isGuide(item);
   const laneLabel = LANE_LABEL[item.lane] || item.lane;
+  // A solve puzzle you've cracked in the last week shows a ✓ badge (self-expires).
+  const solved = isSolve(item) && isSolvedRecently(item.id);
 
   return (
     <div className="arcade-stumble-card arcade-creative-card">
@@ -75,6 +78,7 @@ function CreativeCard({ item }) {
       {item.blurb && <p className="arcade-stumble-blurb">{item.blurb}</p>}
 
       <div className="arcade-creative-badges">
+        {solved && <span className="arcade-creative-badge is-solved">✓ solved</span>}
         {item.time && <span className="arcade-creative-badge">⏱ {item.time}</span>}
         {item.difficulty && (
           <span className="arcade-creative-badge">
@@ -93,7 +97,7 @@ function CreativeCard({ item }) {
       {guide ? (
         <Link
           className="arcade-stumble-open arcade-creative-open"
-          to={`/creatives/${item.id}`}
+          to={`/action-lab/${item.id}`}
         >
           {isSolve(item) ? "solve it →" : "open the guide →"}
         </Link>
@@ -159,8 +163,8 @@ export default function CreativesPage() {
         <header className="arcade-vault-head">
           <div className="arcade-vault-masthead">
             <div className="arcade-masthead-text">
-              <h1 className="arcade-vault-title">🎨 CREATIVES</h1>
-              <span className="arcade-vault-standing">things creative people can do today</span>
+              <h1 className="arcade-vault-title">🧪 ACTION LAB</h1>
+              <span className="arcade-vault-standing">things to make & solve today</span>
             </div>
           </div>
           <div className="arcade-vault-stat">
@@ -180,8 +184,8 @@ export default function CreativesPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="search creatives…"
-            aria-label="search creatives"
+            placeholder="search the lab…"
+            aria-label="search Action Lab"
           />
           <div className="arcade-chips arcade-vault-chips">
             <button

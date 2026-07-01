@@ -38,6 +38,9 @@ export default function App() {
           <Route path="/stumble" element={<StumblePage />} />
           <Route path="/watercooler" element={<WaterCoolerPage />} />
           <Route path="/vault" element={<VaultPage />} />
+          <Route path="/action-lab" element={<CreativesPage />} />
+          <Route path="/action-lab/:id" element={<CreativeGuidePage />} />
+          {/* legacy /creatives paths kept as aliases so old links/bookmarks still resolve */}
           <Route path="/creatives" element={<CreativesPage />} />
           <Route path="/creatives/:id" element={<CreativeGuidePage />} />
           <Route path="/new" element={<NewGamesPage />} />

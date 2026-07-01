@@ -152,6 +152,11 @@ function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
       {/* cabinet "screen" */}
       <div className="arcade-screen">
         <span className="arcade-card-emoji">{game.emoji}</span>
+        {game.original && (
+          <span className="arcade-original" title="Made by Ourcade — an original, not a clone">
+            ✦ OURCADE ORIGINAL
+          </span>
+        )}
       </div>
 
       <h2 className="arcade-card-title">{game.title}</h2>
@@ -327,7 +332,7 @@ export default function Home() {
         <a href="#arcade-today" className="arcade-tab arcade-tab-hot">TODAY!</a>
         <Link to="/watercooler" className="arcade-tab arcade-tab-cool">💧 WATER COOLER</Link>
         <Link to="/vault" className="arcade-tab arcade-tab-cool">🗄️ THE VAULT</Link>
-        <Link to="/creatives" className="arcade-tab arcade-tab-cool">🎨 CREATIVES</Link>
+        <Link to="/action-lab" className="arcade-tab arcade-tab-cool">🧪 ACTION LAB</Link>
         <a href="#arcade-games" className="arcade-tab">GAMES</a>
         <a href="#arcade-tools" className="arcade-tab">TOOLS</a>
         <Link to="/new" className="arcade-tab arcade-tab-hot">NEW!</Link>

@@ -4,7 +4,7 @@
 
    The cereal-box / old-web brain-teaser lane: small puzzles a visitor
    solves in 1–5 minutes, then reveals/checks the answer. Two families:
-     TEXT  (reveal toggle): word ladder, cipher, rebus, odd-one-out, mystery
+     TEXT  (reveal toggle): word ladder, cipher, rebus, complete-the-pattern, mystery
      GRID  (interactive):   5×5 nonogram, 4×4 sudoku, 4×4 Latin square
 
    Like fetch-draw-guides.js, this is a BUILD-TIME emitter: it computes
@@ -20,9 +20,9 @@
    Word source: the committed ENABLE/Words-With-Friends lists in
    assets-src/wordlists/<n>.txt (sorted by length: 3.txt = 3-letter words…).
    Word ladders are the one format the big list truly powers (BFS over the
-   one-letter-change graph). Ciphers/rebuses/odd-one-out/mysteries are
-   curated from small banks below — they're combinatorially trivial and read
-   better hand-written.
+   one-letter-change graph). Ciphers/rebuses/patterns/mysteries are
+   curated (or procedurally parameterized) from small banks below — they're
+   combinatorially trivial and read better hand-written.
 
    Run:  npm run gen:solve     (no network, no API key)
    ============================================================ */
@@ -50,6 +50,7 @@ function mulberry32(a) {
 }
 const rng = mulberry32(SEED);
 const randInt = (n) => Math.floor(rng() * n);
+const rand = (min, max) => min + randInt(max - min + 1); // inclusive [min, max]
 const pick = (arr) => arr[randInt(arr.length)];
 function shuffle(arr) {
   const a = arr.slice();
@@ -363,55 +364,96 @@ function buildRebuses(want) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ODD ONE OUT — spot the item that breaks the pattern. Curated.
+// COMPLETE THE PATTERN — show the first terms of a sequence, type the next one.
+// A mix of classic number sequences (procedurally parameterized) and a few
+// hand-authored "invented" ones. Each entry becomes { sequence, answer, rule }.
+// (Hand-authored invented patterns can also live in src/data/manual/creatives.js.)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ODD_ONE_OUT = [
-  {
-    items: ["A1", "C3", "E5", "G8"],
-    answer: "G8",
-    why: "Letters skip one (A, C, E, G) and numbers should match (1, 3, 5, 7) — so it should be G7, not G8.",
+// Procedural generators for well-known sequences. Each returns a full run of
+// values from which we show the first N-1 and ask for the Nth.
+const PATTERN_GENERATORS = [
+  // Arithmetic: start + k·step
+  () => {
+    const start = rand(1, 6);
+    const step = rand(2, 6);
+    const seq = Array.from({ length: 6 }, (_, k) => start + k * step);
+    return { seq, rule: `Add ${step} each time (starts at ${start}).` };
   },
-  {
-    items: ["2", "3", "5", "7", "9"],
-    answer: "9",
-    why: "All the others are prime numbers. 9 = 3 × 3 is not prime.",
+  // Geometric: start · ratio^k
+  () => {
+    const start = rand(1, 3);
+    const ratio = rand(2, 3);
+    const seq = Array.from({ length: 5 }, (_, k) => start * ratio ** k);
+    return { seq, rule: `Multiply by ${ratio} each time (starts at ${start}).` };
   },
-  {
-    items: ["MARIO", "LINK", "SAMUS", "SONIC"],
-    answer: "SONIC",
-    why: "The other three are Nintendo characters. Sonic is from Sega.",
+  // Fibonacci-style: each term is the sum of the two before it.
+  () => {
+    const a = rand(1, 3);
+    const b = rand(a, a + 3);
+    const seq = [a, b];
+    while (seq.length < 7) seq.push(seq[seq.length - 1] + seq[seq.length - 2]);
+    return { seq, rule: "Each number is the sum of the two before it (Fibonacci-style)." };
   },
-  {
-    items: ["CIRCLE", "SQUARE", "TRIANGLE", "CUBE"],
-    answer: "CUBE",
-    why: "The others are 2-D shapes. A cube is 3-D.",
+  // Perfect squares starting past 1 (the 1,4,9,… run is in the curated bank).
+  () => {
+    const from = rand(2, 4);
+    const seq = Array.from({ length: 6 }, (_, k) => (from + k) ** 2);
+    return { seq, rule: `The perfect squares — ${from}², ${from + 1}², ${from + 2}², …` };
   },
-  {
-    items: ["RED", "ORANGE", "GREEN", "PURPLE"],
-    answer: "PURPLE",
-    why: "Red, orange and green appear on a traffic light. Purple does not.",
+  // Triangular numbers: 1,3,6,10,… (running sum of 1..n)
+  () => {
+    const seq = [];
+    let total = 0;
+    for (let n = 1; n <= 7; n++) { total += n; seq.push(total); }
+    return { seq, rule: "Triangular numbers — add 1, then 2, then 3, then 4, …" };
   },
-  {
-    items: ["64", "16", "4", "1", "9"],
-    answer: "9",
-    why: "The others are powers of four (4⁰,4¹,4²,4³). 9 is not.",
-  },
-  {
-    items: ["MODEM", "FLOPPY", "CD-ROM", "WI-FI"],
-    answer: "WI-FI",
-    why: "The others are 90s computer hardware you could hold. Wi-Fi is wireless and modern.",
+  // Doubling then +1 offset walk: alternating +k pattern that reads as invented.
+  () => {
+    const start = rand(2, 5);
+    const seq = [start];
+    for (let k = 1; k < 6; k++) seq.push(seq[k - 1] + k); // +1, +2, +3, …
+    return { seq, rule: "The gap grows by one each step — +1, then +2, then +3, …" };
   },
 ];
 
-function buildOddOneOut(want) {
-  return shuffle(ODD_ONE_OUT)
-    .slice(0, want)
-    .map((o) => ({
-      kind: "odd_one_out",
-      prompt: "Four of a kind — except one. Which one does NOT belong?",
-      ...o,
-    }));
+// A few hand-authored patterns (numeric or lettered) that read like puzzle-book
+// brain-teasers rather than pure formulas.
+const PATTERN_CURATED = [
+  { seq: [1, 1, 2, 3, 5, 8, 13], rule: "Fibonacci — each number is the sum of the previous two." },
+  { seq: [2, 3, 5, 7, 11, 13, 17], rule: "The prime numbers in order." },
+  { seq: [1, 4, 9, 16, 25, 36], rule: "The perfect squares: 1², 2², 3², 4², …" },
+  { seq: [1, 8, 27, 64, 125], rule: "The perfect cubes: 1³, 2³, 3³, 4³, …" },
+  { seq: ["O", "T", "T", "F", "F", "S", "S"], rule: "First letters of One, Two, Three, Four, Five, Six, Seven — next is Eight → E." },
+  { seq: ["M", "T", "W", "T", "F", "S"], rule: "First letters of the days of the week — next is Sunday → S." },
+  { seq: ["J", "F", "M", "A", "M", "J"], rule: "First letters of the months — next is July → J." },
+];
+
+function buildPatterns(want) {
+  const out = [];
+  // Half from the procedural generators, half from the curated bank (deduped by id later).
+  const proc = shuffle(PATTERN_GENERATORS.slice());
+  const cur = shuffle(PATTERN_CURATED.slice());
+  let pi = 0;
+  let ci = 0;
+  while (out.length < want && (pi < proc.length || ci < cur.length)) {
+    const useCurated = (out.length % 2 === 1 && ci < cur.length) || pi >= proc.length;
+    let seq;
+    let rule;
+    if (useCurated) { ({ seq, rule } = cur[ci++]); }
+    else { ({ seq, rule } = proc[pi++]()); }
+    const shown = seq.slice(0, -1);
+    const answer = seq[seq.length - 1];
+    out.push({
+      kind: "pattern",
+      prompt: "Complete the pattern — what comes next?",
+      sequence: shown.map(String),
+      answer: String(answer),
+      hint: "Look at how each term relates to the one before it.",
+      rule,
+    });
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -706,11 +748,11 @@ const KIND_META = {
     difficulty: "beginner",
     action: "Read the picture, then reveal the phrase",
   },
-  odd_one_out: {
-    label: "Odd One Out",
+  pattern: {
+    label: "Complete the Pattern",
     time: "2 min",
     difficulty: "beginner",
-    action: "Spot the misfit, then check it",
+    action: "Work out the rule, then type what comes next",
   },
   mystery: {
     label: "Minute Mystery",
@@ -753,7 +795,7 @@ const BLURBS = {
   middle: "One little word finishes two bigger ones. Find the word that fits both blanks.",
   cipher: "A secret phrase, scrambled by a Caesar shift. Slide the letters back to read it.",
   rebus: "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-  odd_one_out: "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+  pattern: "A sequence with the last term missing. Spot the rule, then type what comes next.",
   mystery: "A one-paragraph case with a single fatal contradiction. Out-detective the suspect.",
   nonogram: "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
   sudoku4: "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
@@ -801,7 +843,7 @@ const puzzles = [
   ...buildSandwiches(dictByLen, 10),
   ...buildCiphers(6),
   ...buildRebuses(6),
-  ...buildOddOneOut(6),
+  ...buildPatterns(8),
   ...buildMysteries(4),
   ...buildNonograms(5),
   ...buildGridNumbers("sudoku4", 6),

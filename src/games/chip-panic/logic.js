@@ -151,6 +151,29 @@ export const WANTED_CONDS = {
   bj21:     { key: "bj21",     name: "Blackjack 21",  test: (cs) => blackjackTotal(cs) === 21 },
 };
 
+/* Plain-English "how to complete it" prose for each condition wanted, shown in the
+   rules-status popup. Every condition still requires a true Two-Pair+ SCORE on top. */
+export const WANTED_COND_HINT = {
+  allRed:    "all five cards are hearts or diamonds",
+  allBlack:  "all five cards are spades or clubs",
+  noFaces:   "no Jacks, Queens, or Kings in the lane",
+  faceParty: "at least three face cards (J/Q/K)",
+  ace:       "the lane contains at least one Ace",
+  lucky7:    "the lane contains at least one 7",
+  rainbow:   "one of each suit appears in the lane",
+  suitMaj:   "at least three cards share a suit",
+  noOdds:    "every card is an even number (no aces, no odds)",
+  bj21:      "the five cards total exactly 21 (blackjack)",
+};
+
+// Plain-English "how to complete it" prose for a wanted (hand or condition), for the
+// rules-status popup. Falls back gracefully for older/stubbed wanted objects.
+export function wantedHint(wanted) {
+  if (!wanted) return "";
+  if (wanted.kind === "cond") return WANTED_COND_HINT[wanted.cond] || "";
+  return `resolve a lane as exactly ${(HAND_NAME[wanted.hand] || "this hand").toUpperCase()}`;
+}
+
 export const WANTED_COND_REWARDS = {
   allRed:    { pts: 75,  chips: 2 },
   allBlack:  { pts: 75,  chips: 2 },
@@ -253,6 +276,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     streak: 0,
     scoreHands: 0, // cumulative true scores (drives the rising ante)
     wantedHits: 0, // cumulative Wanted completions (drives the rising ante)
+    handStats: {}, // hand rank (HAND.*) → count of lanes resolved as that hand this run
     draws: 0,
     over: false,
     wanted: null,
@@ -270,7 +294,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
    Math.random is fine. The drawn `bag` is already a snapshot array, so the deck
    order survives a round-trip. Bump SAVE_VERSION on any incompatible shape change
    so old saves are discarded rather than mis-hydrated. */
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2; // v2 adds handStats to the run snapshot
 
 // A run worth saving: in progress and not finished.
 export const isSaveable = (state) => !!state && !state.over;
@@ -292,13 +316,30 @@ export function hydrateGame(saved) {
   if (!Array.isArray(s.bag) || !Array.isArray(s.locked)) return null;
   if (typeof s.chips !== "number" || typeof s.draws !== "number") return null;
   if (s.over) return null; // finished runs aren't resumable
-  return { ...s, rng: Math.random };
+  return { ...s, handStats: s.handStats || {}, rng: Math.random };
 }
 
 export const laneFull = (lane) => lane.length >= LANE_CAP;
 
 // The current cost to open a new lane (rises with progress).
 export const currentAnte = (state) => anteFor(state.scoreHands, state.wantedHits, state.draws);
+
+/* Chips currently committed to lane `l` and the multiplier in play — for the
+   per-lane "at stake" readout. `atStake` is what's LOST if the lane busts/saves
+   (the paid ante + any committed raise stake); `mult` is the points multiplier a
+   committed raise would apply on a win (1 = ante only, no raise). Returns null for
+   a lane with nothing at stake (not yet anted, or locked). */
+export function laneStake(state, l) {
+  if (!state.anted[l] || state.locked[l]) return null;
+  let atStake = state.anteAmt[l] || 0;
+  let mult = 1;
+  const r = state.raise[l];
+  if (r) {
+    const tier = TIERS[r.tier];
+    if (tier) { atStake += tier.extra; mult = tier.mult; }
+  }
+  return { atStake, mult };
+}
 
 // Can the current tray be placed into lane `l`? An empty lane requires either an
 // ante already paid or enough chips to pay it now; a non-empty anted lane is always
@@ -384,6 +425,7 @@ export function placeCard(state, l) {
   const raise = state.raise.slice();
   const raiseSel = state.raiseSel.slice();
   let { chips, score, discard, streak, wanted, scoreHands, wantedHits } = state;
+  let handStats = state.handStats;
 
   // Opening an empty lane pays the current (rising) ante; remember what was paid so
   // it can be refunded on a true score / forfeited on a loss.
@@ -406,6 +448,9 @@ export function placeCard(state, l) {
     resolution = r;
     score += r.points;
     chips += r.chipsReturned;
+
+    // Tally the resolved hand type for the end-of-run breakdown.
+    handStats = { ...handStats, [r.hand.rank]: (handStats[r.hand.rank] || 0) + 1 };
 
     if (r.bust) {
       locked[l] = true; // keep cards for the cracked visual
@@ -452,7 +497,7 @@ export function placeCard(state, l) {
     raiseSel[l] = NO_RAISE;
   }
 
-  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits };
+  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits, handStats };
   const expired = [];
   drawInto(next, expired);
   next.over = isGameOver(next);

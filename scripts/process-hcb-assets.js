@@ -26,18 +26,24 @@ async function main() {
   const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
   // Each entry: source PNG → public WebP, at a display-appropriate master size.
+  // Badges use a square `size` (fit:contain). The title logo is a wide masthead, so
+  // it sets `width` only (height auto) to keep its natural aspect ratio.
   const jobs = [
     { src: "wanted-badge.png", out: "wanted-badge.webp", size: 128 }, // banner badge (~26px)
     { src: "ante-up.png", out: "ante-up.webp", size: 256 },           // "ANTE UP" popup icon (larger)
     { src: "discard-token.png", out: "discard.webp", size: 128 },     // discard-button icon (~26px)
     { src: "diamond-badge.png", out: "jackpot-badge.webp", size: 128 }, // JACKPOT banner badge (~16px)
+    { src: "logo.png", out: "logo.webp", width: 680 },                // title-screen masthead (~340px)
   ];
 
   for (const j of jobs) {
     const src = join(SRC, j.src);
     if (!existsSync(src)) { console.log(`  (skipped ${j.out} — no assets-src/high_card_bust/${j.src})`); continue; }
+    const resize = j.width
+      ? { width: j.width, withoutEnlargement: true }
+      : { width: j.size, height: j.size, fit: "contain", background: TRANSPARENT };
     await trimmed(src)
-      .resize({ width: j.size, height: j.size, fit: "contain", background: TRANSPARENT })
+      .resize(resize)
       .webp({ quality: 88 })
       .toFile(join(OUT, j.out));
     console.log(`  public/games/chip-panic/${j.out}`);

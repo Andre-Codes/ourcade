@@ -1084,143 +1084,203 @@ export default [
     }
   },
   {
-    "id": "cr-solve-odd-one-out-001",
+    "id": "cr-solve-pattern-001",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #1",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+    "title": "Complete the Pattern #1",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Spot the misfit, then check it",
+    "action": "Work out the rule, then type what comes next",
     "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "A1",
-        "C3",
-        "E5",
-        "G8"
-      ],
-      "answer": "G8",
-      "why": "Letters skip one (A, C, E, G) and numbers should match (1, 3, 5, 7) — so it should be G7, not G8."
-    }
-  },
-  {
-    "id": "cr-solve-odd-one-out-002",
-    "lane": "solve",
-    "guide": true,
-    "title": "Odd One Out #2",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Spot the misfit, then check it",
-    "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "2",
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
         "3",
         "5",
         "7",
         "9"
       ],
-      "answer": "9",
-      "why": "All the others are prime numbers. 9 = 3 × 3 is not prime."
+      "answer": "11",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "Add 2 each time (starts at 1)."
     }
   },
   {
-    "id": "cr-solve-odd-one-out-003",
+    "id": "cr-solve-pattern-002",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #3",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+    "title": "Complete the Pattern #2",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Spot the misfit, then check it",
+    "action": "Work out the rule, then type what comes next",
     "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "CIRCLE",
-        "SQUARE",
-        "TRIANGLE",
-        "CUBE"
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "J",
+        "F",
+        "M",
+        "A",
+        "M"
       ],
-      "answer": "CUBE",
-      "why": "The others are 2-D shapes. A cube is 3-D."
+      "answer": "J",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "First letters of the months — next is July → J."
     }
   },
   {
-    "id": "cr-solve-odd-one-out-004",
+    "id": "cr-solve-pattern-003",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #4",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+    "title": "Complete the Pattern #3",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Spot the misfit, then check it",
+    "action": "Work out the rule, then type what comes next",
     "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "RED",
-        "ORANGE",
-        "GREEN",
-        "PURPLE"
-      ],
-      "answer": "PURPLE",
-      "why": "Red, orange and green appear on a traffic light. Purple does not."
-    }
-  },
-  {
-    "id": "cr-solve-odd-one-out-005",
-    "lane": "solve",
-    "guide": true,
-    "title": "Odd One Out #5",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Spot the misfit, then check it",
-    "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "64",
-        "16",
-        "4",
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
         "1",
-        "9"
+        "3",
+        "6",
+        "10",
+        "15",
+        "21"
       ],
-      "answer": "9",
-      "why": "The others are powers of four (4⁰,4¹,4²,4³). 9 is not."
+      "answer": "28",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "Triangular numbers — add 1, then 2, then 3, then 4, …"
     }
   },
   {
-    "id": "cr-solve-odd-one-out-006",
+    "id": "cr-solve-pattern-004",
     "lane": "solve",
     "guide": true,
-    "title": "Odd One Out #6",
-    "blurb": "Four things, one pattern, one impostor. Find the one that breaks the rule.",
+    "title": "Complete the Pattern #4",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Spot the misfit, then check it",
+    "action": "Work out the rule, then type what comes next",
     "puzzle": {
-      "kind": "odd_one_out",
-      "prompt": "Four of a kind — except one. Which one does NOT belong?",
-      "items": [
-        "MARIO",
-        "LINK",
-        "SAMUS",
-        "SONIC"
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "4",
+        "9",
+        "16",
+        "25"
       ],
-      "answer": "SONIC",
-      "why": "The other three are Nintendo characters. Sonic is from Sega."
+      "answer": "36",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "The perfect squares: 1², 2², 3², 4², …"
+    }
+  },
+  {
+    "id": "cr-solve-pattern-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Complete the Pattern #5",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "4",
+        "9",
+        "16",
+        "25"
+      ],
+      "answer": "36",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "The perfect squares — 1², 2², 3², …"
+    }
+  },
+  {
+    "id": "cr-solve-pattern-006",
+    "lane": "solve",
+    "guide": true,
+    "title": "Complete the Pattern #6",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "8",
+        "27",
+        "64"
+      ],
+      "answer": "125",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "The perfect cubes: 1³, 2³, 3³, 4³, …"
+    }
+  },
+  {
+    "id": "cr-solve-pattern-007",
+    "lane": "solve",
+    "guide": true,
+    "title": "Complete the Pattern #7",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "2",
+        "4",
+        "8"
+      ],
+      "answer": "16",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "Multiply by 2 each time (starts at 1)."
+    }
+  },
+  {
+    "id": "cr-solve-pattern-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Complete the Pattern #8",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "1",
+        "2",
+        "3",
+        "5",
+        "8"
+      ],
+      "answer": "13",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "Fibonacci — each number is the sum of the previous two."
     }
   },
   {
@@ -1236,10 +1296,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "“I just finished the game — beat the final boss five minutes ago!” the kid grinned. The detective glanced at the cartridge slot and shook her head.",
-      "question": "Why didn't she believe him?",
-      "answer": "The console was powered off and cold to the touch. A machine that ran a boss fight five minutes ago would still be warm.",
-      "hint": "Heat takes time to fade."
+      "story": "She said she'd printed the report that morning, straight off the new printer. The detective picked up the page, then quietly asked her to come downtown.",
+      "question": "How did he know she was lying?",
+      "answer": "The printer's ink cartridge was still sealed in its wrapper inside the box. Nothing had been printed on that machine yet.",
+      "hint": "Check whether the tool was ever actually used."
     }
   },
   {
@@ -1255,10 +1315,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "She said she'd printed the report that morning, straight off the new printer. The detective picked up the page, then quietly asked her to come downtown.",
-      "question": "How did he know she was lying?",
-      "answer": "The printer's ink cartridge was still sealed in its wrapper inside the box. Nothing had been printed on that machine yet.",
-      "hint": "Check whether the tool was ever actually used."
+      "story": "The gamer swore he'd been online all night chasing a high score. But the moment Detective Byte stepped into the den, she knew he was lying.",
+      "question": "What gave him away?",
+      "answer": "The modem was unplugged — its cable coiled on the desk. You can't be online all night with no connection.",
+      "hint": "Look at the hardware, not the screen."
     }
   },
   {
@@ -1274,10 +1334,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "The suspect claimed he'd been typing a letter on his computer when the lights went out at 9 p.m. and never left his chair. But the screen told a different story.",
-      "question": "What was wrong?",
-      "answer": "With the power out, the monitor would be dark — yet he described reading his half-finished letter on it. No power, no glowing screen.",
-      "hint": "What needs electricity to be seen?"
+      "story": "“I just finished the game — beat the final boss five minutes ago!” the kid grinned. The detective glanced at the cartridge slot and shook her head.",
+      "question": "Why didn't she believe him?",
+      "answer": "The console was powered off and cold to the touch. A machine that ran a boss fight five minutes ago would still be warm.",
+      "hint": "Heat takes time to fade."
     }
   },
   {
@@ -1293,10 +1353,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "The gamer swore he'd been online all night chasing a high score. But the moment Detective Byte stepped into the den, she knew he was lying.",
-      "question": "What gave him away?",
-      "answer": "The modem was unplugged — its cable coiled on the desk. You can't be online all night with no connection.",
-      "hint": "Look at the hardware, not the screen."
+      "story": "The suspect claimed he'd been typing a letter on his computer when the lights went out at 9 p.m. and never left his chair. But the screen told a different story.",
+      "question": "What was wrong?",
+      "answer": "With the power out, the monitor would be dark — yet he described reading his half-finished letter on it. No power, no glowing screen.",
+      "hint": "What needs electricity to be seen?"
     }
   },
   {
@@ -1318,13 +1378,15 @@ export default [
           3
         ],
         [
-          0
-        ],
-        [
           5
         ],
         [
-          4
+          1,
+          1,
+          1
+        ],
+        [
+          1
         ],
         [
           3
@@ -1335,19 +1397,18 @@ export default [
           2
         ],
         [
-          1,
-          3
-        ],
-        [
-          1,
-          3
-        ],
-        [
-          1,
-          3
-        ],
-        [
+          2,
           1
+        ],
+        [
+          5
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2
         ]
       ],
       "solution": [
@@ -1359,13 +1420,6 @@ export default [
           0
         ],
         [
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
           1,
           1,
           1,
@@ -1374,9 +1428,16 @@ export default [
         ],
         [
           1,
+          0,
           1,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
           1,
-          1,
+          0,
           0
         ],
         [
@@ -1387,7 +1448,7 @@ export default [
           0
         ]
       ],
-      "reveal": "a coffee cup"
+      "reveal": "a mushroom"
     }
   },
   {
@@ -1498,60 +1559,54 @@ export default [
       "size": 5,
       "rows": [
         [
-          1,
-          1,
-          1
+          3
         ],
         [
-          3
+          0
         ],
         [
           5
         ],
         [
-          1,
-          1,
-          1
+          4
         ],
         [
-          1,
-          1
+          3
         ]
       ],
       "cols": [
         [
-          1,
           2
         ],
         [
-          2,
-          1
-        ],
-        [
-          4
-        ],
-        [
-          2,
-          1
+          1,
+          3
         ],
         [
           1,
-          2
+          3
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1
         ]
       ],
       "solution": [
         [
-          1,
           0,
           1,
-          0,
-          1
+          1,
+          1,
+          0
         ],
         [
           0,
-          1,
-          1,
-          1,
+          0,
+          0,
+          0,
           0
         ],
         [
@@ -1563,20 +1618,20 @@ export default [
         ],
         [
           1,
-          0,
           1,
-          0,
-          1
+          1,
+          1,
+          0
         ],
         [
           0,
           1,
-          0,
+          1,
           1,
           0
         ]
       ],
-      "reveal": "a space invader"
+      "reveal": "a coffee cup"
     }
   },
   {
@@ -1584,98 +1639,6 @@ export default [
     "lane": "solve",
     "guide": true,
     "title": "Pixel Nonogram #4",
-    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
-    "time": "10 min",
-    "difficulty": "intermediate",
-    "cost": "free",
-    "action": "Fill the grid to reveal the picture",
-    "puzzle": {
-      "kind": "nonogram",
-      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
-      "size": 5,
-      "rows": [
-        [
-          3
-        ],
-        [
-          5
-        ],
-        [
-          1,
-          1,
-          1
-        ],
-        [
-          1
-        ],
-        [
-          3
-        ]
-      ],
-      "cols": [
-        [
-          2
-        ],
-        [
-          2,
-          1
-        ],
-        [
-          5
-        ],
-        [
-          2,
-          1
-        ],
-        [
-          2
-        ]
-      ],
-      "solution": [
-        [
-          0,
-          1,
-          1,
-          1,
-          0
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          0,
-          1,
-          0,
-          1
-        ],
-        [
-          0,
-          0,
-          1,
-          0,
-          0
-        ],
-        [
-          0,
-          1,
-          1,
-          1,
-          0
-        ]
-      ],
-      "reveal": "a mushroom"
-    }
-  },
-  {
-    "id": "cr-solve-nonogram-005",
-    "lane": "solve",
-    "guide": true,
-    "title": "Pixel Nonogram #5",
     "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
     "time": "10 min",
     "difficulty": "intermediate",
@@ -1765,6 +1728,95 @@ export default [
     }
   },
   {
+    "id": "cr-solve-nonogram-005",
+    "lane": "solve",
+    "guide": true,
+    "title": "Pixel Nonogram #5",
+    "blurb": "Use the number clues to fill the grid — the finished squares reveal a tiny pixel icon.",
+    "time": "10 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid to reveal the picture",
+    "puzzle": {
+      "kind": "nonogram",
+      "prompt": "Fill squares so each row and column matches its number clues (a clue like 2 1 means a run of 2, a gap, then a run of 1). Click a cell to fill; click again to mark it empty.",
+      "size": 5,
+      "rows": [
+        [
+          1,
+          1
+        ],
+        [
+          5
+        ],
+        [
+          5
+        ],
+        [
+          3
+        ],
+        [
+          1
+        ]
+      ],
+      "cols": [
+        [
+          2
+        ],
+        [
+          4
+        ],
+        [
+          4
+        ],
+        [
+          4
+        ],
+        [
+          2
+        ]
+      ],
+      "solution": [
+        [
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          1,
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      ],
+      "reveal": "heart"
+    }
+  },
+  {
     "id": "cr-solve-sudoku4-001",
     "lane": "solve",
     "guide": true,
@@ -1782,52 +1834,52 @@ export default [
         [
           0,
           0,
-          0,
-          1
+          3,
+          0
         ],
         [
-          0,
-          0,
           4,
+          0,
+          2,
           0
         ],
         [
           0,
+          1,
           0,
-          0,
-          2
+          0
         ],
         [
-          0,
           3,
+          0,
           0,
           0
         ]
       ],
       "solution": [
         [
+          1,
+          2,
           3,
+          4
+        ],
+        [
           4,
+          3,
           2,
           1
         ],
         [
-          1,
           2,
+          1,
           4,
           3
         ],
         [
+          3,
           4,
           1,
-          3,
           2
-        ],
-        [
-          2,
-          3,
-          1,
-          4
         ]
       ]
     }
@@ -1849,7 +1901,7 @@ export default [
       "given": [
         [
           2,
-          0,
+          1,
           3,
           0
         ],
@@ -1860,14 +1912,14 @@ export default [
           0
         ],
         [
-          3,
           0,
-          4,
-          2
+          0,
+          0,
+          0
         ],
         [
-          0,
-          0,
+          1,
+          3,
           0,
           0
         ]
@@ -1875,27 +1927,27 @@ export default [
       "solution": [
         [
           2,
-          4,
-          3,
-          1
-        ],
-        [
           1,
           3,
-          2,
           4
         ],
         [
           3,
-          1,
           4,
-          2
+          2,
+          1
         ],
         [
           4,
           2,
           1,
           3
+        ],
+        [
+          1,
+          3,
+          4,
+          2
         ]
       ]
     }
@@ -1916,54 +1968,54 @@ export default [
       "size": 4,
       "given": [
         [
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
           1,
+          0,
+          0
+        ],
+        [
+          0,
           0,
           0,
           3
         ],
         [
-          3,
           0,
           0,
-          0
-        ],
-        [
-          0,
-          0,
-          2,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
+          4,
           0
         ]
       ],
       "solution": [
         [
-          1,
           2,
+          3,
+          1,
+          4
+        ],
+        [
           4,
+          1,
+          3,
+          2
+        ],
+        [
+          1,
+          4,
+          2,
           3
         ],
         [
           3,
-          4,
-          1,
-          2
-        ],
-        [
-          4,
-          3,
           2,
+          4,
           1
-        ],
-        [
-          2,
-          1,
-          3,
-          4
         ]
       ]
     }
@@ -1986,52 +2038,52 @@ export default [
         [
           0,
           0,
-          3,
+          0,
           0
         ],
         [
+          4,
           0,
-          1,
           0,
-          0
+          1
         ],
         [
           0,
           2,
-          0,
+          4,
           0
         ],
         [
           0,
           0,
-          2,
+          0,
           0
         ]
       ],
       "solution": [
         [
           2,
+          1,
+          3,
+          4
+        ],
+        [
           4,
           3,
+          2,
           1
         ],
         [
-          3,
           1,
-          4,
-          2
-        ],
-        [
-          4,
           2,
-          1,
+          4,
           3
         ],
         [
-          1,
           3,
-          2,
-          4
+          4,
+          1,
+          2
         ]
       ]
     }
@@ -2052,54 +2104,54 @@ export default [
       "size": 4,
       "given": [
         [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          4,
+          3
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
           3,
           0,
           0,
-          2
-        ],
-        [
-          0,
-          4,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          1,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
+          1
         ]
       ],
       "solution": [
         [
+          4,
           3,
           1,
-          4,
           2
         ],
         [
-          2,
-          4,
-          3,
-          1
-        ],
-        [
-          4,
-          2,
           1,
+          2,
+          4,
           3
         ],
         [
+          2,
           1,
           3,
-          2,
           4
+        ],
+        [
+          3,
+          4,
+          2,
+          1
         ]
       ]
     }
@@ -2122,52 +2174,52 @@ export default [
         [
           0,
           0,
-          3,
-          0
-        ],
-        [
-          0,
-          3,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          4,
-          0
-        ],
-        [
-          0,
           1,
+          3
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          2,
           0,
           0
         ]
       ],
       "solution": [
         [
-          1,
+          2,
           4,
-          3,
-          2
+          1,
+          3
         ],
         [
-          2,
-          3,
           1,
+          3,
+          2,
           4
         ],
         [
           3,
-          2,
+          1,
           4,
-          1
+          2
         ],
         [
           4,
-          1,
           2,
-          3
+          3,
+          1
         ]
       ]
     }
@@ -2189,52 +2241,52 @@ export default [
       "given": [
         [
           0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
           2,
-          0,
           0
         ],
         [
-          1,
           0,
+          4,
           0,
-          2
-        ],
-        [
-          0,
-          0,
-          0,
-          3
+          0
         ],
         [
           0,
           1,
           0,
-          0
+          4
         ]
       ],
       "solution": [
         [
-          4,
+          1,
           2,
+          4,
+          3
+        ],
+        [
+          4,
           3,
+          2,
           1
         ],
         [
-          1,
           3,
           4,
+          1,
           2
         ],
         [
           2,
-          4,
           1,
-          3
-        ],
-        [
           3,
-          1,
-          2,
           4
         ]
       ]
@@ -2256,54 +2308,54 @@ export default [
       "size": 4,
       "given": [
         [
-          2,
-          3,
-          0,
-          1
-        ],
-        [
-          3,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          2
-        ],
-        [
           0,
           1,
           0,
           0
+        ],
+        [
+          1,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
         ]
       ],
       "solution": [
         [
-          2,
-          3,
           4,
-          1
-        ],
-        [
-          3,
-          2,
           1,
-          4
-        ],
-        [
-          1,
-          4,
           3,
           2
         ],
         [
-          4,
           1,
           2,
+          4,
           3
+        ],
+        [
+          3,
+          4,
+          2,
+          1
+        ],
+        [
+          2,
+          3,
+          1,
+          4
         ]
       ]
     }
@@ -2327,39 +2379,39 @@ export default [
           0,
           0,
           0,
-          3
+          0
+        ],
+        [
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
         ],
         [
           0,
           3,
-          1,
-          0
-        ],
-        [
-          2,
           0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          2,
           1
         ]
       ],
       "solution": [
         [
+          3,
+          4,
+          1,
+          2
+        ],
+        [
           1,
           2,
           4,
           3
-        ],
-        [
-          4,
-          3,
-          1,
-          2
         ],
         [
           2,
@@ -2368,8 +2420,8 @@ export default [
           4
         ],
         [
-          3,
           4,
+          3,
           2,
           1
         ]
@@ -2392,53 +2444,53 @@ export default [
       "size": 4,
       "given": [
         [
-          4,
           0,
           0,
+          3,
           0
         ],
         [
           0,
           0,
           1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
           2
         ],
         [
+          4,
           0,
           0,
-          2,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
+          3
         ]
       ],
       "solution": [
         [
-          4,
           2,
+          4,
           3,
           1
         ],
         [
           3,
-          4,
+          2,
           1,
-          2
+          4
         ],
         [
           1,
           3,
-          2,
-          4
+          4,
+          2
         ],
         [
-          2,
-          1,
           4,
+          1,
+          2,
           3
         ]
       ]
@@ -2460,54 +2512,54 @@ export default [
       "size": 4,
       "given": [
         [
-          3,
           0,
+          2,
           0,
-          1
+          0
         ],
         [
-          0,
           3,
           0,
-          2
-        ],
-        [
-          0,
-          0,
-          0,
+          2,
           0
         ],
         [
           4,
           0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
           0,
           0
         ]
       ],
       "solution": [
         [
-          3,
-          4,
+          1,
           2,
-          1
+          4,
+          3
         ],
         [
-          1,
           3,
-          4,
-          2
-        ],
-        [
+          1,
           2,
-          1,
-          3,
           4
         ],
         [
           4,
-          2,
+          3,
           1,
-          3
+          2
+        ],
+        [
+          2,
+          4,
+          3,
+          1
         ]
       ]
     }
@@ -2530,52 +2582,52 @@ export default [
         [
           0,
           0,
+          2,
+          3
+        ],
+        [
+          1,
+          0,
           0,
           0
         ],
         [
           0,
-          4,
           0,
-          0
-        ],
-        [
-          4,
           3,
-          0,
           0
         ],
         [
           0,
           0,
           0,
-          2
+          0
         ]
       ],
       "solution": [
         [
-          1,
-          2,
-          3,
-          4
-        ],
-        [
-          2,
           4,
           1,
+          2,
           3
         ],
         [
+          1,
+          3,
+          4,
+          2
+        ],
+        [
+          2,
           4,
           3,
-          2,
           1
         ],
         [
           3,
+          2,
           1,
-          4,
-          2
+          4
         ]
       ]
     }

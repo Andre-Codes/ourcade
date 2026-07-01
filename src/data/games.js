@@ -40,6 +40,7 @@ import { lazy } from "react";
 export const GAMES = [
   {
     id: "relic-run",
+    original: true,
     title: "Web Run",
     blurb: "A Wikipedia-race through a haunted 2003 webring. Same start and target for everyone each day — surf the fake retro pages and reach today's lost page in the fewest clicks.",
     emoji: "🖱️",
@@ -75,6 +76,7 @@ export const GAMES = [
   // },
   {
     id: "spelldown",
+    original: true,
     title: "Spelldown",
     blurb: "Seven letters, one in the middle you must use. Spell as many words as you can — using all seven is the daily jackpot. Same board for everyone; a fresh one drops at midnight.",
     emoji: "🐝",
@@ -90,6 +92,7 @@ export const GAMES = [
   },
   {
     id: "pits-and-portals",
+    original: true,
     title: "Pits and Portals",
     blurb: "A fragile-hero puzzle-roguelike. No healing — survive by shoving threats into the pits. Every floor is verified beatable hitless.",
     emoji: "🕯️",
@@ -103,6 +106,7 @@ export const GAMES = [
   },
   {
     id: "crypt-crawler",
+    original: true,
     title: "Crypt of the Hollow King",
     blurb: "A deterministic magic-tower puzzle-crawler. Plan every step — no luck, just route-finding and HP math.",
     emoji: "🏰",
@@ -116,6 +120,7 @@ export const GAMES = [
   },
   {
     id: "tap-surge",
+    original: true,
     title: "Tap Surge",
     blurb: "Tap the dots before they vanish. Miss three and it's over. Gets faster the higher you score.",
     emoji: "⚡",
@@ -130,6 +135,7 @@ export const GAMES = [
   },
   {
     id: "modem-defender",
+    original: true,
     title: "Modem Defender",
     blurb: "Brick-breaker for the dial-up age. Bounce a data packet off your modem to smash a wall of pop-ups, viruses, spam and toolbars; crack loot crates for firewalls, multiball and more. Clear every level, survive the BSOD bosses. Drop the ball and it's NO CARRIER.",
     emoji: "📡",
@@ -212,6 +218,7 @@ export const GAMES = [
   },
   {
     id: "chip-panic",
+    original: true,
     title: "High Card Bust",
     blurb: "Poker solitaire, push-your-luck. Open a lane with a chip ante, then fill it to five: TWO PAIR or better truly scores, any pair only saves the lane (no points, ante gone), and a HIGH CARD locks it for good. Raise for a multiplier, chase the rotating WANTED hand for bonus chips and points, and build a streak — all four lanes locked ends the run.",
     emoji: "🎴",
@@ -226,6 +233,7 @@ export const GAMES = [
   },
   {
     id: "color-panic",
+    original: true,
     title: "Color Panic",
     blurb: "Tap only the target color as tiles rain down. The target keeps changing — keep up.",
     emoji: "🎨",
@@ -240,6 +248,7 @@ export const GAMES = [
   },
   {
     id: "piano-tiles",
+    original: true,
     title: "Piano Tiles",
     blurb: "Tap the lane the moment a tile hits the line. Perfect beats Good beats Miss.",
     emoji: "🎹",
@@ -254,6 +263,7 @@ export const GAMES = [
   },
   {
     id: "splitter",
+    original: true,
     title: "Splitter",
     blurb: "Pop the dots before they split into more. The longer you last, the faster they come.",
     emoji: "💥",
@@ -268,6 +278,7 @@ export const GAMES = [
   },
   {
     id: "mind-flood",
+    original: true,
     title: "Mind Flood",
     blurb: "Six cognitive trainers — Corsi, Stroop Clash, Math Rush, N-Back, Task Switch, and Go/No-Go.",
     emoji: "🧠",
@@ -377,6 +388,7 @@ export const GAMES = [
   },
   {
     id: "name-o-tron",
+    original: true,
     title: "Name-O-Tron 3000",
     blurb: "Feed it any name and the supercomputer prints a 100% scientific readout — coolness, mystery, arcade skill — plus a verdict you can share.",
     emoji: "🔮",
@@ -390,6 +402,7 @@ export const GAMES = [
   },
   {
     id: "soundboard",
+    original: true,
     title: "Ourcade Soundboard",
     blurb: "A grid of old-internet pads — the dial-up handshake, Windows 98 & XP startup/shutdown chimes, and more. Tap to relive the noise.",
     emoji: "🔊",

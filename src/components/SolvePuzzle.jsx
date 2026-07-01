@@ -1,16 +1,21 @@
 import { useState } from "react";
+import { markSolved } from "../lib/solveState.js";
 
-/* SolvePuzzle — renders one "Solve This" puzzle inside the /creatives/:id guide
+/* SolvePuzzle — renders one "Solve This" puzzle inside the /action-lab/:id guide
    page (CreativeGuidePage branches here when an item carries a `puzzle`). Most
    puzzles are now a "try it → check" loop sharing the GridControls bar
    (Check / Reveal / Clear + a right/wrong status line):
      INTERACTIVE (check): word_ladder (type the blanks), anagram (unscramble),
-           middle (word sandwich), cipher (type the decoded phrase), odd_one_out
-           (click the misfit), nonogram, sudoku4, latin4.
+           middle (word sandwich), cipher (type the decoded phrase), pattern
+           (type the next term), nonogram, sudoku4, latin4.
      REVEAL-ONLY (TextPuzzle): rebus + mystery — their answers are free-form
            phrases, so they keep the hint + Reveal Answer disclosure only.
    Self-contained: all the puzzle UI/state lives here so the guide page stays a
-   simple branch. Data shape is produced by scripts/gen-solve-puzzles.js. */
+   simple branch. Data shape is produced by scripts/gen-solve-puzzles.js.
+
+   A correct check records the completion (markSolved(itemId)) so the Action Lab
+   card can show a ✓ solved badge for a week. `itemId` is threaded to each
+   renderer; a missing id just no-ops the mark. */
 
 // ── shared bits ────────────────────────────────────────────────────────────
 
@@ -80,12 +85,20 @@ function HintToggle({ hint }) {
 // (so spacing and punctuation never matter — "DO A BARREL ROLL" === "doabarrelroll").
 const normalizeAnswer = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
+// Set the check status and, when the answer is right, record the completion so the
+// Action Lab card shows a ✓ solved badge. Every interactive renderer routes its
+// check through here to keep the "mark on solve" behavior in one place.
+const settle = (setStatus, ok, itemId) => {
+  setStatus(ok ? "right" : "wrong");
+  if (ok) markSolved(itemId);
+};
+
 // ── text family ──────────────────────────────────────────────────────────--
 
 // Word ladder: type the missing rungs, then check. A blank is right when it
 // matches the canonical answer at that position (case-insensitive); first/last
 // rungs are given. Reveal fills every rung; clear empties the typed blanks.
-function WordLadder({ puzzle }) {
+function WordLadder({ puzzle, itemId }) {
   const blanks = puzzle.rungs
     .map((w, i) => (w === "____" ? i : -1))
     .filter((i) => i >= 0);
@@ -104,7 +117,7 @@ function WordLadder({ puzzle }) {
 
   const check = () => {
     const ok = blanks.every((i) => vals[i] === puzzle.answer[i].toUpperCase());
-    setStatus(ok ? "right" : "wrong");
+    settle(setStatus, ok, itemId);
   };
   const doReveal = () => {
     setRevealed(true);
@@ -164,13 +177,13 @@ function WordLadder({ puzzle }) {
 
 // Cipher: type the decoded phrase, then check. Spacing/punctuation are ignored
 // in the comparison. Reveal shows the plaintext; clear empties the input.
-function Cipher({ puzzle }) {
+function Cipher({ puzzle, itemId }) {
   const [guess, setGuess] = useState("");
   const [status, setStatus] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
   const check = () =>
-    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+    settle(setStatus, normalizeAnswer(guess) === normalizeAnswer(puzzle.answer), itemId);
   const doReveal = () => {
     setRevealed(true);
     setStatus(null);
@@ -218,13 +231,13 @@ function Cipher({ puzzle }) {
 // Anagram: the scrambled letters are shown big; type the unscrambled word, then
 // check. Same try→check→reveal loop as Cipher (spacing/case ignored). Reveal
 // fills the answer; clear empties the input.
-function Anagram({ puzzle }) {
+function Anagram({ puzzle, itemId }) {
   const [guess, setGuess] = useState("");
   const [status, setStatus] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
   const check = () =>
-    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+    settle(setStatus, normalizeAnswer(guess) === normalizeAnswer(puzzle.answer), itemId);
   const doReveal = () => {
     setRevealed(true);
     setStatus(null);
@@ -272,13 +285,13 @@ function Anagram({ puzzle }) {
 
 // Word sandwich: one short word completes both LEFT___ and ___RIGHT. Type the
 // connector, then check. Same loop as Cipher/Anagram.
-function WordSandwich({ puzzle }) {
+function WordSandwich({ puzzle, itemId }) {
   const [guess, setGuess] = useState("");
   const [status, setStatus] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
   const check = () =>
-    setStatus(normalizeAnswer(guess) === normalizeAnswer(puzzle.answer) ? "right" : "wrong");
+    settle(setStatus, normalizeAnswer(guess) === normalizeAnswer(puzzle.answer), itemId);
   const doReveal = () => {
     setRevealed(true);
     setStatus(null);
@@ -338,66 +351,64 @@ function Rebus({ puzzle }) {
   );
 }
 
-// Odd one out: click the item you think breaks the pattern, then check — no
-// typing. Reveal highlights the real answer and explains why; clear deselects.
-function OddOneOut({ puzzle }) {
-  const [chosen, setChosen] = useState(null);
+// Complete the pattern: the first terms of a sequence are shown with a trailing
+// "?"; type the next term, then check. The answer compares loosely (spacing/case
+// ignored, so "1 3" or "13" both count for 13). Reveal fills the answer and, if
+// present, explains the rule; clear empties the input. Works for known sequences
+// (Fibonacci, squares, …) and hand-authored invented ones (see manual/creatives.js).
+function Pattern({ puzzle, itemId }) {
+  const [guess, setGuess] = useState("");
   const [status, setStatus] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
-  const choose = (it) => {
-    if (revealed) return;
-    setStatus(null);
-    setChosen(it);
-  };
-  const check = () => {
-    if (chosen == null) return;
-    setStatus(chosen === puzzle.answer ? "right" : "wrong");
-  };
+  const check = () =>
+    settle(setStatus, normalizeAnswer(guess) === normalizeAnswer(puzzle.answer), itemId);
   const doReveal = () => {
     setRevealed(true);
     setStatus(null);
-    setChosen(puzzle.answer);
+    setGuess(String(puzzle.answer));
   };
   const reset = () => {
     setRevealed(false);
     setStatus(null);
-    setChosen(null);
+    setGuess("");
   };
 
   return (
     <div className="arcade-solve">
       {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
 
-      <ul className="arcade-solve-options">
-        {puzzle.items.map((it, i) => {
-          const selected = chosen === it;
-          const isAnswer = revealed && it === puzzle.answer;
-          return (
-            <li key={i}>
-              <button
-                type="button"
-                className={`arcade-solve-option${selected ? " is-selected" : ""}${
-                  isAnswer ? " is-answer" : ""
-                }`}
-                onClick={() => choose(it)}
-                aria-pressed={selected}
-              >
-                {it}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <p className="arcade-solve-mono arcade-solve-pattern">
+        {puzzle.sequence.map((t, i) => (
+          <span key={i} className="arcade-solve-pattern-term">{t}</span>
+        ))}
+        <span className="arcade-solve-pattern-term is-next">?</span>
+      </p>
 
+      <input
+        className="arcade-solve-input arcade-solve-cipher-input"
+        type="text"
+        value={guess}
+        readOnly={revealed}
+        onChange={(e) => {
+          setStatus(null);
+          setGuess(e.target.value);
+        }}
+        placeholder="what comes next…"
+        aria-label="the next term in the pattern"
+        autoComplete="off"
+        spellCheck={false}
+      />
+
+      <HintToggle hint={puzzle.hint} />
       <GridControls
         onCheck={check}
         onReveal={doReveal}
         onClear={reset}
         revealed={revealed}
         status={status}
+        revealNote={revealed && puzzle.rule ? puzzle.rule : null}
       />
-      {revealed && puzzle.why && <p className="arcade-solve-why">{puzzle.why}</p>}
     </div>
   );
 }
@@ -423,7 +434,7 @@ const NONO_EMPTY = 0;
 const NONO_FILLED = 1;
 const NONO_X = 2;
 
-function Nonogram({ puzzle }) {
+function Nonogram({ puzzle, itemId }) {
   const { size, rows, cols, solution, reveal } = puzzle;
   const blank = () => Array.from({ length: size }, () => Array(size).fill(NONO_EMPTY));
   const [cells, setCells] = useState(blank);
@@ -445,7 +456,7 @@ function Nonogram({ puzzle }) {
     const ok = solution.every((row, r) =>
       row.every((v, c) => (v === 1) === (cells[r][c] === NONO_FILLED))
     );
-    setStatus(ok ? "right" : "wrong");
+    settle(setStatus, ok, itemId);
   };
 
   const doReveal = () => {
@@ -525,7 +536,7 @@ function RowFragment({ children }) {
 // Shared 4×4 number grid for sudoku4 + latin4. `given` cells are locked; the
 // player TAPS a blank cell to cycle its value empty→1→2→…→size→empty (the same
 // click-to-cycle idiom as the nonogram — touch-friendly, no keyboard).
-function NumberGrid({ puzzle }) {
+function NumberGrid({ puzzle, itemId }) {
   const { size, given, solution } = puzzle;
   const init = () => given.map((row) => row.slice());
   const [cells, setCells] = useState(init);
@@ -549,7 +560,7 @@ function NumberGrid({ puzzle }) {
   const check = () => {
     const full = cells.every((row) => row.every((v) => v !== 0));
     const ok = full && solution.every((row, r) => row.every((v, c) => v === cells[r][c]));
-    setStatus(ok ? "right" : "wrong");
+    settle(setStatus, ok, itemId);
   };
 
   const doReveal = () => {
@@ -640,28 +651,28 @@ function GridControls({ onCheck, onReveal, onClear, revealed, status, revealNote
 
 // ── dispatcher ───────────────────────────────────────────────────────────--
 
-export default function SolvePuzzle({ puzzle }) {
+export default function SolvePuzzle({ puzzle, itemId }) {
   if (!puzzle || !puzzle.kind) return null;
   switch (puzzle.kind) {
     case "word_ladder":
-      return <WordLadder puzzle={puzzle} />;
+      return <WordLadder puzzle={puzzle} itemId={itemId} />;
     case "anagram":
-      return <Anagram puzzle={puzzle} />;
+      return <Anagram puzzle={puzzle} itemId={itemId} />;
     case "middle":
-      return <WordSandwich puzzle={puzzle} />;
+      return <WordSandwich puzzle={puzzle} itemId={itemId} />;
     case "cipher":
-      return <Cipher puzzle={puzzle} />;
+      return <Cipher puzzle={puzzle} itemId={itemId} />;
     case "rebus":
       return <Rebus puzzle={puzzle} />;
-    case "odd_one_out":
-      return <OddOneOut puzzle={puzzle} />;
+    case "pattern":
+      return <Pattern puzzle={puzzle} itemId={itemId} />;
     case "mystery":
       return <Mystery puzzle={puzzle} />;
     case "nonogram":
-      return <Nonogram puzzle={puzzle} />;
+      return <Nonogram puzzle={puzzle} itemId={itemId} />;
     case "sudoku4":
     case "latin4":
-      return <NumberGrid puzzle={puzzle} />;
+      return <NumberGrid puzzle={puzzle} itemId={itemId} />;
     default:
       return null;
   }

@@ -222,6 +222,32 @@ export const MANUAL_CREATIVES = [
   //    your OWN draw items here when you want — a plate-only guide (just an image
   //    + title; see template above) or a full per-step guide. Nothing required
   //    here; leave it empty and the generated plates carry the lane.
+
+  // ── SOLVE — hand-authored "complete the pattern" puzzles. The generated pool
+  //    (scripts/gen-solve-puzzles.js) makes classic sequences; author INVENTED
+  //    ones here. Shape: puzzle.kind "pattern" with sequence[] (terms shown),
+  //    answer (next term), and an optional rule (revealed with the answer).
+  {
+    id: "cr-solve-pattern-invented-001",
+    lane: "solve",
+    guide: true,
+    title: "Complete the Pattern — Invented #1",
+    blurb: "A made-up sequence with its own quirky rule. Spot the trick, then type what comes next.",
+    time: "2 min",
+    difficulty: "intermediate",
+    cost: "free",
+    action: "Work out the rule, then type what comes next",
+    puzzle: {
+      kind: "pattern",
+      prompt: "Complete the pattern — what comes next?",
+      // Rule: double the previous term, then subtract its position (1-indexed).
+      // 2 → 2·2-2=2? Authored explicitly so the invented rule is unambiguous:
+      sequence: ["3", "5", "9", "17", "33"],
+      answer: "65",
+      hint: "Each step roughly doubles — but not exactly. Look at the gaps: 2, 4, 8, 16…",
+      rule: "Double the gap each time: +2, +4, +8, +16, then +32 → 65.",
+    },
+  },
 ];
 
 // Minimal safety net (one per lane) if MANUAL_CREATIVES is ever emptied, so the

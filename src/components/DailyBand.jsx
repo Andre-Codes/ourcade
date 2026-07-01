@@ -125,7 +125,7 @@ function CreativeOfTheDay({ dayKey: key }) {
   // Guides/puzzles open on-site; external items link out — mirrors CreativeCard.
   return guide ? (
     <Link
-      to={`/creatives/${item.id}`}
+      to={`/action-lab/${item.id}`}
       className="arcade-hero arcade-creative-hero"
       style={{ "--accent": "var(--neon-aqua)" }}
     >

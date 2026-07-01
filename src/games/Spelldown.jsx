@@ -197,10 +197,10 @@ export default function Spelldown() {
             : <span className="spd-entry-ph">type or tap…</span>}
         </div>
 
-        {toast && <div className="spd-toast">{toast}</div>}
-
-        {/* letter ring: center + 6 outer */}
+        {/* letter ring: center + 6 outer. The toast floats UP over the ring (an
+            absolutely-positioned child) so notifications never shove the UI down. */}
         <div className={`spd-ring${flashPangram ? " is-pangram" : ""}`}>
+          {toast && <div className="spd-toast">{toast}</div>}
           <button type="button" className="spd-hex is-center" onClick={() => press(board.center)}>
             {board.center}
           </button>
@@ -271,8 +271,15 @@ const CSS = `
 .spd-entry-ph{font-size:.9rem;font-weight:500;color:#7a6f4a;letter-spacing:0;text-transform:none}
 .spd-ch{color:#fdf6e3}
 .spd-ch.is-center{color:#ffd45e}
-.spd-toast{position:relative;background:#fdf6e3;color:#1a1606;font-weight:700;padding:7px 15px;
-  border-radius:8px;font-size:.82rem;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+/* toast floats up and hovers over the letter ring (absolute inside .spd-ring) so
+   it never reflows the layout. Translucent + blurred so the letters read through;
+   pointer-events off so it never blocks a tap. */
+.spd-toast{position:absolute;left:50%;top:-14px;transform:translate(-50%,-100%);z-index:5;
+  pointer-events:none;white-space:nowrap;background:rgba(253,246,227,.92);color:#1a1606;font-weight:700;
+  padding:7px 15px;border-radius:8px;font-size:.82rem;box-shadow:0 6px 20px rgba(0,0,0,.5);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:spdToast .22s ease-out}
+@keyframes spdToast{from{opacity:0;transform:translate(-50%,-70%)}to{opacity:1;transform:translate(-50%,-100%)}}
+@media (prefers-reduced-motion: reduce){.spd-toast{animation:none}}
 /* letter ring — a simple responsive hex-ish cluster (center + 6 around) */
 .spd-ring{position:relative;width:230px;height:204px;margin:4px 0}
 .spd-ring.is-pangram .spd-hex{animation:spdPan .6s}

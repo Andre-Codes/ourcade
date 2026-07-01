@@ -86,8 +86,8 @@ export default function CreativeGuidePage() {
     return (
       <div className="arcade-notfound">
         <NedryGag message="That guide wandered off the drawing table." />
-        <Link to="/creatives" className="arcade-back-link">
-          ← Back to Creatives
+        <Link to="/action-lab" className="arcade-back-link">
+          ← Back to Action Lab
         </Link>
       </div>
     );
@@ -109,7 +109,7 @@ export default function CreativeGuidePage() {
 
   return (
     <div className="arcade-stage">
-      <BackBar to="/creatives" label="BACK TO CREATIVES" />
+      <BackBar to="/action-lab" label="BACK TO ACTION LAB" />
 
       <article className="arcade-guide">
         <header className="arcade-guide-head">
@@ -147,7 +147,7 @@ export default function CreativeGuidePage() {
             materials / steps / tips walkthrough. */}
         {solve ? (
           <section className="arcade-guide-section">
-            <SolvePuzzle puzzle={item.puzzle} />
+            <SolvePuzzle puzzle={item.puzzle} itemId={item.id} />
           </section>
         ) : (
           <>
@@ -194,8 +194,8 @@ export default function CreativeGuidePage() {
               <span className="arcade-creative-action-arrow">→</span> {item.action}
             </p>
           )}
-          <Link to="/creatives" className="arcade-back-link">
-            ← find another creative mission
+          <Link to="/action-lab" className="arcade-back-link">
+            ← find another mission
           </Link>
         </div>
       </article>
