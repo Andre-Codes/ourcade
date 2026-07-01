@@ -91,7 +91,7 @@ const VOWELS = new Set("AEIOU".split(""));
 const EXOTIC = new Set("JQXZ".split(""));
 // How many boards to ship (the rotation pool). The sweep finds far more; we keep
 // the nicest this many.
-const TARGET_BOARDS = 48;
+const TARGET_BOARDS = 180;
 
 // A curated allowlist of everyday pangram words. A board that CAN show one of
 // these as its pangram is ranked ahead of one whose only pangrams are obscure
