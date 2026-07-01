@@ -4,7 +4,7 @@ import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
-  boardFor, judge, isPangram, rankFor, shareLine, spelldownNumber, MIN_LEN,
+  boardFor, judge, isPangram, rankFor, shareLine, spelldownNumber, revealWords, MIN_LEN,
 } from "./spelldown/logic.js";
 
 /* SPELLDOWN — Ourcade's daily word-finder (a Spelling-Bee-shaped cabinet).
@@ -63,12 +63,14 @@ export default function Spelldown() {
   const num = useMemo(() => spelldownNumber(day), [day]);
   const { submit } = useArcadeScore("spelldown");
 
-  // Yesterday's board — revealed (full answer list) in a collapsed expander so a
-  // player can see what they missed. Deterministic like today's; boardFor never
-  // returns null, so the reveal is always safe.
+  // Yesterday's board — a collapsed expander showing ONE possible answer set (a
+  // date-seeded 40-word sample of yesterday's accepted pool) so a player gets
+  // closure without the reveal being an exhaustive dump. Deterministic like
+  // today's; boardFor never returns null, so the reveal is always safe.
   const prevDay = useMemo(() => shiftDayKey(day, 1), [day]);
   const prevBoard = useMemo(() => boardFor(prevDay), [prevDay]);
   const prevNum = useMemo(() => spelldownNumber(prevDay), [prevDay]);
+  const prevReveal = useMemo(() => revealWords(prevBoard, prevDay), [prevBoard, prevDay]);
 
   const [state, setState] = useState(() => loadDayState(day));
   const [entry, setEntry] = useState("");
@@ -189,7 +191,7 @@ export default function Spelldown() {
             <div className="spd-fill" style={{ width: `${pct}%` }} />
           </div>
           <span className="spd-count">
-            {state.found.length}/{board.maxWords}
+            {Math.min(state.found.length, board.maxWords)}/{board.maxWords}
           </span>
         </div>
 
@@ -248,8 +250,9 @@ export default function Spelldown() {
           </div>
         </div>
 
-        {/* prior-day reveal: the full answer list for yesterday's board, so
-            players get closure on what they missed. Collapsed by default. */}
+        {/* prior-day reveal: ONE possible answer set for yesterday's board — a
+            date-seeded sample of its accepted pool — so players get closure
+            without an exhaustive dump. Collapsed by default. */}
         {prevNum >= 1 && (
           <details className="spd-prior">
             <summary>Yesterday's words · Spelldown #{prevNum}</summary>
@@ -260,10 +263,12 @@ export default function Spelldown() {
                     <span key={ch} className={ch === prevBoard.center ? "is-center" : ""}>{ch}</span>
                   ))}
                 </span>
-                <span className="spd-prior-count">{prevBoard.words.length} words</span>
+                <span className="spd-prior-count">
+                  {prevReveal.length} of {prevBoard.accepted.length} possible
+                </span>
               </div>
               <div className="spd-found-list">
-                {prevBoard.words.map((w) => (
+                {prevReveal.map((w) => (
                   <span key={w} className={`spd-word${prevBoard.pangrams.includes(w) ? " is-pangram" : ""}`}>
                     {w}
                   </span>

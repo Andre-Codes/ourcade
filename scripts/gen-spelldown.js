@@ -14,13 +14,25 @@
    happens here against the committed ENABLE word lists, and the browser ships
    only finished, vetted data — it never sees the 173k-word list and never
    validates words at runtime, it just checks membership in the day's precomputed
-   word array (logic.js).
+   word arrays (logic.js).
+
+   TWO-TIER WORD LISTS. Each board ships TWO lists:
+       • required[] — the GOAL: up to 40 common words (google-10000-english
+         intersection). Completing the day = finding these; ranks/progress and
+         "n/max" all measure against required (maxWords = required.length).
+       • accepted[] — the broader pool: EVERY valid ENABLE word for the set +
+         center (the required set PLUS the obscure tail). judge() accepts against
+         THIS, so a player who happens to know an unusual word (e.g. PRETTIER on
+         EINOPRT·E) is credited even though it isn't one of the required 40.
+   pangrams[] are sourced from accepted (any pangram, common or not, lights the
+   🐝), but at least one pangram is guaranteed to also be in required so the goal
+   set always contains the jackpot.
 
    HOW BOARDS ARE CHOSEN. Board LETTER-SETS are discovered against the exhaustive
-   ENABLE list (below), but each board's shipped ANSWER list is CURATED: it's
-   intersected with a common-words set (google-10000-english, common-10k.txt) so
-   the obscure ENABLE tail never pads a day's word list — every answer reads as a
-   real word, which keeps the game and the prior-day reveal friendly. On top of
+   ENABLE list (below). The REQUIRED list is CURATED — intersected with a
+   common-words set (google-10000-english, common-10k.txt) so the goal never
+   depends on obscure words and reads friendly; the ACCEPTED list is the full
+   ENABLE membership so nothing valid is wrongly rejected. On top of
    that we make the SHAPE of each board friendly: (1) the PANGRAM is the
    centerpiece, so we require every board to have one (in the curated set) and
    surface boards whose pangrams read as everyday words; (2) rank thresholds in
@@ -54,15 +66,25 @@ const WORDLIST_DIR = path.join(ROOT, "assets-src", "wordlists");
 const OUT_DIR = path.join(ROOT, "src", "data", "generated");
 const OUT_FILE = "spelldown.js";
 
-// Board tuning. Words are 4–7 letters (4 = classic Spelling-Bee minimum; 7 is
-// the natural pangram length for a 7-distinct-letter set).
+// Board tuning. The REQUIRED (goal) set is 4–7 letters — 4 = classic
+// Spelling-Bee minimum; 7 is the natural pangram length for a 7-distinct-letter
+// set. The ACCEPTED pool goes LONGER (up to ACCEPT_MAX_LEN): a word that repeats
+// the set's letters can exceed 7 (e.g. PRETTIER, 8, on EINOPRT·E), and we don't
+// want to wrongly reject those at play time even though they're never the goal.
 const MIN_WORD = 4;
-const POOL_LENS = [4, 5, 6, 7];
-// Comfortable board sizes (English 7-letter sets are productive; this keeps the
-// "missed words" reveal from being demoralizing while leaving room to dig).
-const MIN_BOARD = 24;
-const MAX_BOARD = 52;
-const TARGET_BOARD = 36; // we prefer centers landing near here
+const REQUIRED_LENS = [4, 5, 6, 7]; // lengths eligible for the common goal set
+const ACCEPT_MAX_LEN = 15; // longest word we consider for the accepted pool
+// Comfortable board sizes, measured against the REQUIRED (common-words) goal set.
+// English 7-letter sets rarely yield 40+ *common* words, so MIN stays modest to
+// keep a healthy rotation pool; the broader ACCEPTED pool (below) carries the
+// obscure tail without being required.
+const MIN_BOARD = 28; // min required (common) goal words per board
+const MAX_BOARD = 60; // pre-cap sanity bound on required before the 40-cap
+const TARGET_BOARD = 40; // the day's goal; required is capped here
+const REQUIRED_CAP = 40; // hard cap on the required goal set ("40 to finish")
+// The accepted pool must be a meaningful superset of the goal set, else the two
+// tiers add nothing — require at least this many extra accepted words.
+const MIN_ACCEPTED_EXTRA = 8;
 // Prefer a required (center) letter that's common, so the constraint feels fair.
 const COMMON_CENTER = "ETAOINSRL".split("");
 const VOWELS = new Set("AEIOU".split(""));
@@ -148,9 +170,11 @@ const letterRank = (c) => {
   return i < 0 ? 99 : i;
 };
 
-// Build the full word pool once, each tagged with its set-mask.
+// Build the full word pool once, each tagged with its set-mask. The pool spans
+// 4..ACCEPT_MAX_LEN so long words (PRETTIER, 8) are eligible for `accepted`;
+// only 4..7-letter words can enter the common `required` goal set (below).
 const POOL = [];
-for (const len of POOL_LENS) {
+for (let len = MIN_WORD; len <= ACCEPT_MAX_LEN; len++) {
   for (const w of loadWords(len)) {
     if (w.length >= MIN_WORD) POOL.push([w, maskOf(w)]);
   }
@@ -158,21 +182,38 @@ for (const len of POOL_LENS) {
 
 // Every word for a 7-letter set `letters` with required `center`: word uses only
 // those letters (mask subset) AND contains the center. Pangram = all seven.
+// Returns two tiers: `accepted` (full ENABLE membership) and `required` (the
+// curated common-words subset, capped at REQUIRED_CAP). Pangram = all seven.
 function boardFor(letters, center) {
   const Lmask = maskOf(letters);
   const cbit = 1 << (center.charCodeAt(0) - A);
-  const words = [];
+  const accepted = [];
+  let required = [];
   const pangrams = [];
   for (const [w, m] of POOL) {
     if ((m & ~Lmask) !== 0) continue; // contains a letter outside the set
     if ((m & cbit) === 0) continue; // missing the required center
-    if (!COMMON.has(w)) continue; // curate: only ship common (google-10k) words
-    words.push(w);
-    if (m === Lmask) pangrams.push(w); // uses all seven distinct letters
+    accepted.push(w); // every valid word (any length) is accepted at play time
+    // Goal set: common words, 4..7 letters only (keeps the goal tidy/familiar).
+    if (w.length <= 7 && COMMON.has(w)) required.push(w);
+    // Pangram = uses all seven distinct letters with no repeat, so m === Lmask
+    // AND length 7 (a longer word repeats a letter and can't match this).
+    if (m === Lmask && w.length === 7) pangrams.push(w);
   }
-  words.sort();
+  // Cap the goal set at REQUIRED_CAP. Pin any pangram that's already common so
+  // the jackpot never gets trimmed out, then fill with the shortest/most
+  // approachable words, then store alphabetically.
+  if (required.length > REQUIRED_CAP) {
+    const pinned = required.filter((w) => pangrams.includes(w));
+    const rest = required
+      .filter((w) => !pinned.includes(w))
+      .sort((a, b) => a.length - b.length || a.localeCompare(b));
+    required = [...pinned, ...rest].slice(0, REQUIRED_CAP);
+  }
+  accepted.sort();
+  required.sort();
   pangrams.sort();
-  return { words, pangrams };
+  return { accepted, required, pangrams };
 }
 
 // ── candidate letter-sets ─────────────────────────────────────────────────────
@@ -196,9 +237,14 @@ function bestBoardForSet(letters) {
     if (EXOTIC.has(center)) continue; // never force J/Q/X/Z as the required letter
     const b = boardFor(letters, center);
     if (b.pangrams.length < 1) continue;
-    if (b.words.length < MIN_BOARD || b.words.length > MAX_BOARD) continue;
-    // Prefer a common center, then a size near the target.
-    const key = [letterRank(center), Math.abs(b.words.length - TARGET_BOARD)];
+    // The goal set must contain the jackpot — at least one pangram is common.
+    if (!b.pangrams.some((p) => b.required.includes(p))) continue;
+    // Band is measured against the REQUIRED (goal) size.
+    if (b.required.length < MIN_BOARD || b.required.length > MAX_BOARD) continue;
+    // Accepted must be a meaningful superset of the goal set.
+    if (b.accepted.length < b.required.length + MIN_ACCEPTED_EXTRA) continue;
+    // Prefer a common center, then a goal size near the target.
+    const key = [letterRank(center), Math.abs(b.required.length - TARGET_BOARD)];
     if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && key[1] < best.key[1])) {
       best = { center, board: b, key, vowels };
     }
@@ -208,16 +254,17 @@ function bestBoardForSet(letters) {
     id: `spd-${letters.toLowerCase()}-${best.center.toLowerCase()}`,
     letters, // 7 distinct, sorted
     center: best.center, // required letter
-    words: best.board.words, // every valid word (UPPER), sorted
-    pangrams: best.board.pangrams, // subset using all 7
-    maxWords: best.board.words.length,
+    required: best.board.required, // the goal: <=40 common words (UPPER), sorted
+    accepted: best.board.accepted, // every valid ENABLE word (superset), sorted
+    pangrams: best.board.pangrams, // subset using all 7 (from accepted)
+    maxWords: best.board.required.length, // ranks/progress measure the goal set
     _vowels: best.vowels, // ranking only (stripped before output)
   };
 }
 
 // ── run ───────────────────────────────────────────────────────────────────────
 console.log("\nGEN-SPELLDOWN — building the daily Spelldown boards\n");
-console.log(`  pool: ${POOL.length} words (lengths ${POOL_LENS.join("/")}, min ${MIN_WORD})`);
+console.log(`  pool: ${POOL.length} words (lengths ${MIN_WORD}..${ACCEPT_MAX_LEN})`);
 console.log(`  candidate 7-letter sets: ${candidateSets.size}`);
 
 const all = [];
@@ -251,7 +298,7 @@ console.log(
 
 for (const b of boards) {
   console.log(
-    `  ${b.letters} ·${b.center}  ${String(b.maxWords).padStart(2)}w  ` +
+    `  ${b.letters} ·${b.center}  ${String(b.maxWords).padStart(2)}r/${String(b.accepted.length).padStart(2)}a  ` +
       `${b.pangrams.length}p  [${b.pangrams.slice(0, 3).join(", ")}]`
   );
 }
@@ -266,8 +313,9 @@ if (boards.length < 14) {
 const banner =
   "// AUTO-GENERATED by scripts/gen-spelldown.js — do not edit by hand.\n" +
   "// Daily Spelldown boards (7 letters, 1 required center) for the cabinet at\n" +
-  "// #/play/spelldown. Run `npm run gen:spelldown` to regenerate from the\n" +
-  "// committed word lists in assets-src/wordlists/.\n";
+  "// #/play/spelldown. Each board has required[] (the <=40 common goal words) and\n" +
+  "// accepted[] (the broader ENABLE pool judged at play time). Run\n" +
+  "// `npm run gen:spelldown` to regenerate from assets-src/wordlists/.\n";
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.writeFileSync(

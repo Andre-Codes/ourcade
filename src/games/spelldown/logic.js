@@ -7,13 +7,17 @@
    every surface talks about the SAME daily board.
 
    The board pool is precomputed at build time (scripts/gen-spelldown.js) — each
-   entry is { letters (7 distinct), center (required), words[], pangrams[],
-   maxWords }. The browser never enumerates or dictionary-validates anything; it
-   just checks membership in the day's word list. The solution rotates with
-   rotateDaily so every device sees one shared board per local day and the whole
-   pool cycles before any repeat. */
+   entry is { letters (7 distinct), center (required), required[], accepted[],
+   pangrams[], maxWords }. Two tiers: `required` is the up-to-40 common GOAL set
+   (ranks / "n/max" / share all measure against it, maxWords = required.length);
+   `accepted` is the broader ENABLE pool that judge() credits at play time, so a
+   valid-but-obscure word (PRETTIER on EINOPRT·E) is never wrongly rejected. The
+   browser never enumerates or dictionary-validates anything; it just checks
+   membership in these lists. The solution rotates with rotateDaily so every
+   device sees one shared board per local day and the whole pool cycles before
+   any repeat. */
 
-import { rotateDaily, dayNumberFromKey } from "../../lib/daily.js";
+import { rotateDaily, dayNumberFromKey, daySeed, seededShuffle } from "../../lib/daily.js";
 import BOARDS from "../../data/generated/spelldown.js";
 
 export const MIN_LEN = 4; // shortest word that scores
@@ -28,7 +32,10 @@ const FALLBACK_BOARD = {
   id: "spd-fallback",
   letters: "ACINOTU",
   center: "U",
-  words: ["AUCTION", "CAUTION", "COUNT", "UNTO", "UNIT", "AUTO", "TUNA"],
+  required: ["AUCTION", "CAUTION", "COUNT", "UNTO", "UNIT", "AUTO", "TUNA"],
+  // Fallback only ever runs if the generated pool is empty; accepted == required
+  // here (a valid superset, trivially) so the safety net stays well-formed.
+  accepted: ["AUCTION", "CAUTION", "COUNT", "UNTO", "UNIT", "AUTO", "TUNA"],
   pangrams: ["AUCTION", "CAUTION"],
   maxWords: 7,
 };
@@ -70,8 +77,9 @@ export function judge(word, board, found) {
   if (!w.includes(board.center)) return "nocenter";
   const has = found instanceof Set ? found.has(w) : (found || []).includes(w);
   if (has) return "already";
-  // Membership in the precomputed list IS the dictionary check.
-  if (!board.words.includes(w)) return "notword";
+  // Membership in the ACCEPTED pool IS the dictionary check — the broad ENABLE
+  // list, not just the common goal set, so a valid-but-uncommon word counts.
+  if (!board.accepted.includes(w)) return "notword";
   return "ok";
 }
 
@@ -95,7 +103,8 @@ const RANKS = [
 
 // The rank for a given found-count on a board. Returns the rank object plus the
 // fraction and the next rank (for the progress bar). At/after the top threshold
-// the next rank is null.
+// the next rank is null. NOTE: foundCount can exceed maxWords now (a player may
+// find accepted-but-not-required words), so pct is clamped to 1.
 export function rankFor(foundCount, board) {
   const max = Math.max(1, board.maxWords);
   const pct = Math.min(1, foundCount / max);
@@ -120,5 +129,31 @@ export function shareLine(dayKey, foundCount, board, foundPangram) {
   const n = spelldownNumber(dayKey);
   const rank = rankFor(foundCount, board);
   const bee = foundPangram ? " 🐝" : "";
-  return `OURCADE Spelldown #${n}  ${foundCount}/${board.maxWords} — ${rank.label}${bee}`;
+  // Clamp to the goal set so a share never reads "43/40" when extra accepted
+  // words push the count past the required max.
+  const shown = Math.min(foundCount, board.maxWords);
+  return `OURCADE Spelldown #${n}  ${shown}/${board.maxWords} — ${rank.label}${bee}`;
+}
+
+// ── prior-day reveal ─────────────────────────────────────────────────────────
+// One possible answer set for a board: a DETERMINISTIC per-day sample of up to
+// 40 words, COMMON-WEIGHTED so the reveal reads friendly (recognizable words),
+// not a wall of obscure ENABLE tail. We fill from the curated `required` (common)
+// set first, then top up from the extra `accepted` words only if needed to reach
+// 40 — each layer seed-shuffled so the sample still varies day to day but always
+// leads with words a player would actually know. Seeded by the day key so it's
+// identical across reloads and devices (same idiom as rotateDaily). Pure given
+// (board, dayKey). Returned alphabetically for a tidy reveal.
+const REVEAL_SIZE = 40;
+export function revealWords(board, dayKey) {
+  const seed = daySeed(`${dayKey}|spd-reveal`);
+  const required = board.required || [];
+  const requiredSet = new Set(required);
+  const extras = (board.accepted || []).filter((w) => !requiredSet.has(w));
+  // Common words first, then obscure extras only to reach the target size.
+  const picked = [
+    ...seededShuffle(required, seed),
+    ...seededShuffle(extras, seed ^ 0x9e3779b9),
+  ].slice(0, REVEAL_SIZE);
+  return picked.sort();
 }
