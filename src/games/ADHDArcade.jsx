@@ -29,6 +29,10 @@ export const GLOBAL_CSS =`
   @keyframes surgeRing  { from{stroke-dashoffset:0} to{stroke-dashoffset:var(--circ)} }
   @keyframes surgeDanger{ 0%,100%{box-shadow:inset 0 0 0 0 rgba(255,45,78,0);background:rgba(255,45,78,0)} 50%{box-shadow:inset 0 0 120px 18px rgba(255,45,78,0.6);background:rgba(255,45,78,0.07)} }
   @keyframes surgeDeath { 0%{transform:translate(0,0)} 15%{transform:translate(-9px,5px)} 30%{transform:translate(8px,-6px)} 45%{transform:translate(-7px,-4px)} 60%{transform:translate(6px,6px)} 75%{transform:translate(-4px,3px)} 100%{transform:translate(0,0)} }
+  @keyframes ptBurst  { 0%{transform:scale(0.4);opacity:0.95} 100%{transform:scale(1.7);opacity:0} }
+  @keyframes ptRipple { 0%{transform:scale(0.2);opacity:0.8} 100%{transform:scale(1.6);opacity:0} }
+  @keyframes ptBar    { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.6)} }
+  @keyframes ptFlourish { 0%{transform:scale(0.6);opacity:0} 40%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:0} }
 `;
 
 const T = {
@@ -764,45 +768,102 @@ function FallingTile({tile,isTarget,inGrace,onTap}) {
 
 // ═══════════════════════════════════════════════════════════════════
 //  GAME 3: PIANO TILES
-//  4 lanes, tiles fall from top. Tap/hold a lane button when a tile
-//  enters the hit zone at the bottom. Perfect/Good/Miss scoring.
-//  Speed and density increase with score. 3 misses = game over.
-//  Each lane plays a distinct musical note for audio feedback.
+//  4 lanes, tiles fall from top. Tap a lane when a tile's leading edge
+//  reaches the hit line. Perfect/Good/Miss scoring. Speed and density
+//  increase with score. 3 misses = game over. Each tile carries a note
+//  from a procedural melody walker, so a clean run plays a coherent tune.
 // ═══════════════════════════════════════════════════════════════════
 
 const PT_LANES   = 4;
 const PT_COLOR   = "#e8c547";
+const PT_LANE_COLORS = ["#e8c547","#5ac8fa","#bf5af2","#ff6b6b"];
 
-// Note frequencies per lane (pentatonic scale — always sounds good)
-const PT_NOTES   = [261.63, 329.63, 392.00, 523.25]; // C4 D4 G4 C5
+// ── Smart procedural melody engine ──────────────────────────────────
+// Notes are chosen by a melodic walker, not by lane, so successive taps
+// form a coherent line instead of four static pitches. Diatonic C-major
+// across ~2 octaves; a rotating I–vi–IV–V progression biases each note
+// toward the current chord's tones, and motion favours small steps that
+// resolve toward chord roots — so a clean run sounds intentional.
+const PT_SCALE = [0, 2, 4, 5, 7, 9, 11]; // C major semitone degrees
+const PT_ROOT_MIDI = 60;                 // C4
+const PT_RANGE = 15;                     // scale steps spanned (~2 octaves)
+// Chord degrees (indices into a per-octave scale) for I, vi, IV, V.
+const PT_PROG = [[0,2,4],[5,0,2],[3,5,0],[4,6,1]];
+const midiToFreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+// Frequency for scale-step `i` (0..PT_RANGE), wrapping octaves.
+function ptStepFreq(i) {
+  const oct = Math.floor(i / PT_SCALE.length);
+  const deg = ((i % PT_SCALE.length) + PT_SCALE.length) % PT_SCALE.length;
+  return midiToFreq(PT_ROOT_MIDI + oct * 12 + PT_SCALE[deg]);
+}
 
-function playPianoNote(lane, quality) {
+// Stateful walker: returns { freq, step } for the next melodic note.
+function makeMelody() {
+  let step = 4;      // start mid-range
+  let n = 0;         // notes played (drives the progression)
+  return () => {
+    const chord = PT_PROG[Math.floor(n / 4) % PT_PROG.length];
+    // Candidate next steps: small intervals around current position.
+    const cands = [-4,-3,-2,-1,-1,1,1,2,3,4].map(d => step + d)
+      .filter(s => s >= 0 && s <= PT_RANGE);
+    // Prefer chord tones; nudge back toward centre if drifting to edges.
+    const scored = cands.map(s => {
+      const deg = ((s % PT_SCALE.length) + PT_SCALE.length) % PT_SCALE.length;
+      const inChord = chord.includes(deg) ? 0 : 3;
+      const edge = Math.abs(s - PT_RANGE / 2) * 0.15;
+      return { s, w: inChord + edge + Math.random() * 1.6 };
+    }).sort((a,b) => a.w - b.w);
+    step = scored[0].s;
+    n++;
+    return { freq: ptStepFreq(step), step };
+  };
+}
+
+// Rich piano-ish voice: detuned twin oscillators + octave shimmer through
+// a swept low-pass, into a shared reverb-ish delay for space. Velocity
+// (gain) scales with hit quality. Cheap: 3 oscillators, all stop-scheduled.
+let _ptVerb = null;
+function ptVerb() {
+  if (_ptVerb) return _ptVerb;
+  const ctx = getCtx();
+  const send = ctx.createGain();  send.gain.value = 0.18;
+  const dly  = ctx.createDelay(); dly.delayTime.value = 0.14;
+  const fb   = ctx.createGain();  fb.gain.value = 0.32;
+  const damp = ctx.createBiquadFilter(); damp.type = "lowpass"; damp.frequency.value = 2200;
+  send.connect(dly); dly.connect(damp); damp.connect(fb); fb.connect(dly);
+  damp.connect(ctx.destination);
+  _ptVerb = send;
+  return send;
+}
+
+function playPianoNote(freq, quality) {
   try {
     const ctx = getCtx();
-    const freq = PT_NOTES[lane];
-    const gainVal = quality === "perfect" ? 0.22 : quality === "good" ? 0.16 : 0.06;
-    const osc  = ctx.createOscillator();
-    const filt = ctx.createBiquadFilter();
-    const env  = ctx.createGain();
-    osc.connect(filt); filt.connect(env); env.connect(ctx.destination);
-    osc.type = "triangle";
-    filt.type = "lowpass"; filt.frequency.value = 1800; filt.Q.value = 0.6;
     const t = ctx.currentTime;
-    osc.frequency.setValueAtTime(freq, t);
-    osc.frequency.exponentialRampToValueAtTime(freq * 0.98, t + 0.25);
-    env.gain.setValueAtTime(0, t);
-    env.gain.linearRampToValueAtTime(gainVal, t + 0.01);
-    env.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-    osc.start(t); osc.stop(t + 0.35);
-    // Soft overtone
-    const osc2 = ctx.createOscillator();
-    const env2 = ctx.createGain();
-    osc2.connect(env2); env2.connect(ctx.destination);
-    osc2.type = "sine"; osc2.frequency.value = freq * 2;
-    env2.gain.setValueAtTime(0, t);
-    env2.gain.linearRampToValueAtTime(gainVal * 0.3, t + 0.008);
-    env2.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-    osc2.start(t); osc2.stop(t + 0.2);
+    const peak = quality === "perfect" ? 0.24 : quality === "good" ? 0.17 : 0.08;
+    const filt = ctx.createBiquadFilter();
+    filt.type = "lowpass"; filt.Q.value = 0.7;
+    filt.frequency.setValueAtTime(5200, t);
+    filt.frequency.exponentialRampToValueAtTime(1400, t + 0.28); // bright→mellow
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(peak, t + 0.006);      // sharp attack
+    env.gain.exponentialRampToValueAtTime(peak * 0.35, t + 0.12); // body
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);      // long tail
+    filt.connect(env);
+    env.connect(ctx.destination);
+    try { env.connect(ptVerb()); } catch {}
+    // Detuned twin (triangle) for a fuller strike.
+    [[freq, 0, "triangle", 1], [freq, +4, "triangle", 0.7], [freq * 2, 0, "sine", 0.28]]
+      .forEach(([f, cents, type, amp]) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain(); g.gain.value = amp;
+        o.type = type; o.frequency.value = f; o.detune.value = cents;
+        // Tiny pitch settle for a struck feel.
+        o.frequency.exponentialRampToValueAtTime(f * 0.996, t + 0.3);
+        o.connect(g); g.connect(filt);
+        o.start(t); o.stop(t + 0.95);
+      });
   } catch {}
 }
 
@@ -831,13 +892,27 @@ function ptSpawnGap(score) {
   return Math.round(1200 - Math.pow(t, 1.4) * 920);
 }
 
-// Hit window from bottom of play area (px). Perfect ±18, Good ±38
-const PT_HIT_ZONE_H = 72; // height of the hit zone bar
-const PT_PERFECT    = 18;
-const PT_GOOD       = 40;
+// ── Responsive geometry ─────────────────────────────────────────────
+// One source of truth for tile height, hit line, and the tap-row height,
+// derived from the measured play-area height so render + hit-detection
+// always agree and everything scales to the viewport.
+const PT_TAP_H_MIN = 64, PT_TAP_H_MAX = 96;
+const PT_TILE_MIN  = 64, PT_TILE_MAX  = 120;
+function ptGeom(areaH) {
+  const h = areaH || 600;
+  const tileH   = clamp(h * 0.16, PT_TILE_MIN, PT_TILE_MAX);
+  const hitLineY = h - clamp(h * 0.12, PT_TAP_H_MIN, PT_TAP_H_MAX); // travel to here
+  return {
+    tileH,
+    hitLineY,
+    tapH: h - hitLineY,           // tap-row band height
+    perfect: tileH * 0.22,        // hit window: fraction of tile height
+    good:    tileH * 0.5,
+  };
+}
 
 export function PianoTiles({onExit}) {
-  const [tiles, setTiles]         = useState([]);   // {id, lane, startY, speed, born}
+  const [tiles, setTiles]         = useState([]);   // {id, lane, speed, born, note, step}
   const [score, setScore]         = useState(0);
   const [misses, setMisses]       = useState(0);
   const [combo, setCombo]         = useState(0);
@@ -845,8 +920,11 @@ export function PianoTiles({onExit}) {
   const [countdown, setCountdown] = useState(3);
   const [gameOver, setGameOver]   = useState(false);
   const [popups, setPopups]       = useState([]);
-  const [laneFlash, setLaneFlash] = useState([false,false,false,false]);
-  const [hitFeedback, setHitFeedback] = useState(null); // {text,color,key}
+  const [laneFlash, setLaneFlash] = useState([0,0,0,0]);   // hit-quality per lane for ripple
+  const [hitFeedback, setHitFeedback] = useState(null);    // {text,color,key}
+  const [bursts, setBursts]       = useState([]);          // hit-line flash bursts
+  const [flourish, setFlourish]   = useState(null);        // combo milestone flourish
+  const [areaH, setAreaH]         = useState(600);         // measured play-area height
 
   const scoreRef    = useRef(0);
   const missRef     = useRef(0);
@@ -855,11 +933,22 @@ export function PianoTiles({onExit}) {
   const tilesRef    = useRef([]);
   const areaRef     = useRef(null);
   const spawnTimer  = useRef(null);
-  const frameRef    = useRef(null);
+  const melodyRef   = useRef(makeMelody());
   // Track rendered tile positions via rAF
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
 
   tilesRef.current = tiles;
+  const geom = ptGeom(areaH);
+
+  // Measure the play area so geometry is right on first paint and responsive.
+  useEffect(()=>{
+    const el=areaRef.current; if(!el) return;
+    const measure=()=>setAreaH(el.getBoundingClientRect().height||600);
+    measure();
+    const ro=new ResizeObserver(measure);
+    ro.observe(el);
+    return()=>ro.disconnect();
+  },[]);
 
   useEffect(()=>{
     if(countdown<=0){setRunning(true);return;}
@@ -881,10 +970,17 @@ export function PianoTiles({onExit}) {
     const rect=areaRef.current.getBoundingClientRect();
     const laneW=rect.width/PT_LANES;
     const x=lane*laneW+laneW/2;
-    const y=rect.height-PT_HIT_ZONE_H-30;
+    const y=ptGeom(rect.height).hitLineY-24;
     const id=uid();
-    setPopups(p=>[...p,{id,x,y,val:text,color,neg:false,text:true}]);
+    setPopups(p=>[...p,{id,x,y,val:text,color}]);
     setTimeout(()=>setPopups(p=>p.filter(pp=>pp.id!==id)),700);
+  },[]);
+
+  // Brief flash at the hit line where a tile landed.
+  const addBurst=useCallback((lane,color,perfect)=>{
+    const id=uid();
+    setBursts(b=>[...b,{id,lane,color,perfect}]);
+    setTimeout(()=>setBursts(b=>b.filter(x=>x.id!==id)),420);
   },[]);
 
   const recordMiss=useCallback(()=>{
@@ -900,7 +996,8 @@ export function PianoTiles({onExit}) {
     }
   },[]);
 
-  // Spawn tiles recursively
+  // Spawn tiles recursively. Each tile picks its note from the melody walker
+  // at spawn time, so the order tiles fall in defines the tune.
   const scheduleSpawn=useCallback(()=>{
     if(gameOverRef.current) return;
     const gap=ptSpawnGap(scoreRef.current);
@@ -908,17 +1005,21 @@ export function PianoTiles({onExit}) {
       if(gameOverRef.current) return;
       const lane=randI(0,PT_LANES-1);
       const speed=ptTileSpeed(scoreRef.current);
+      const {freq,step}=melodyRef.current();
       const id=uid();
-      const tile={id,lane,speed,born:Date.now()};
+      const tile={id,lane,speed,born:Date.now(),note:freq,step};
       setTiles(t=>[...t,tile]);
-      // Auto-expire: if still on screen after speed+200ms = missed
+      // Auto-expire once the tile has fallen a bit past the Good window — the
+      // logical miss lines up with the tile visibly leaving the hit line.
+      const g=ptGeom(areaRef.current?.getBoundingClientRect().height||600);
+      const expireMs=Math.round(speed*(1 + g.good/g.hitLineY)) + 40;
       setTimeout(()=>{
         setTiles(prev=>{
           const still=prev.find(tl=>tl.id===id);
           if(still) recordMiss();
           return prev.filter(tl=>tl.id!==id);
         });
-      }, speed+200);
+      }, expireMs);
       scheduleSpawn();
     }, gap);
   },[recordMiss]);
@@ -932,30 +1033,30 @@ export function PianoTiles({onExit}) {
   // Tap a lane button
   const tapLane=useCallback((lane)=>{
     if(gameOverRef.current) return;
-    // Flash lane
-    setLaneFlash(f=>{const n=[...f];n[lane]=true;return n;});
-    setTimeout(()=>setLaneFlash(f=>{const n=[...f];n[lane]=false;return n;}),120);
-
     if(!areaRef.current) return;
     const rect=areaRef.current.getBoundingClientRect();
-    const areaH=rect.height-PT_HIT_ZONE_H;
+    const g=ptGeom(rect.height);
     const now=Date.now();
 
-    // Find tile in this lane closest to the hit zone
+    // Find the tile in this lane whose leading (bottom) edge is nearest the
+    // hit line. leadY uses the SAME geometry the tiles are rendered with.
     const laneTiles=tilesRef.current
       .filter(t=>t.lane===lane)
       .map(t=>{
-        const elapsed=now-t.born;
-        const progress=elapsed/t.speed;       // 0=top 1=bottom
-        const y=progress*areaH;               // px from top of play area
-        const distFromBottom=areaH-y;
-        return{...t,y,distFromBottom};
+        const progress=(now-t.born)/t.speed;
+        const leadY=progress*g.hitLineY;        // bottom edge, px from top
+        return{...t,leadY,delta:leadY-g.hitLineY};
       })
-      .sort((a,b)=>a.distFromBottom-b.distFromBottom);
+      .sort((a,b)=>Math.abs(a.delta)-Math.abs(b.delta));
 
     const closest=laneTiles[0];
+    const flash=(q)=>{
+      setLaneFlash(f=>{const n=[...f];n[lane]=q;return n;});
+      setTimeout(()=>setLaneFlash(f=>{const n=[...f];n[lane]=0;return n;}),160);
+    };
+
     if(!closest){
-      // Empty tap — small penalty
+      flash(-1);
       const pen=Math.max(3,Math.floor(scoreRef.current/100));
       scoreRef.current=Math.max(0,scoreRef.current-pen);
       setScore(scoreRef.current);
@@ -963,14 +1064,14 @@ export function PianoTiles({onExit}) {
       return;
     }
 
-    const dist=Math.abs(closest.distFromBottom);
+    const dist=Math.abs(closest.delta);
     let quality=null;
-    if(dist<=PT_PERFECT)      quality="perfect";
-    else if(dist<=PT_GOOD)    quality="good";
-    else if(closest.distFromBottom>0) quality="early"; // tile hasn't arrived yet — too early
+    if(dist<=g.perfect)        quality="perfect";
+    else if(dist<=g.good)      quality="good";
+    else if(closest.delta<0)   quality="early"; // hasn't reached the line yet
 
     if(!quality||quality==="early"){
-      // Too early or too far — miss
+      flash(-1);
       const pen=Math.max(3,Math.floor(scoreRef.current/80));
       scoreRef.current=Math.max(0,scoreRef.current-pen);
       setScore(scoreRef.current);
@@ -980,42 +1081,51 @@ export function PianoTiles({onExit}) {
     }
 
     // Hit!
+    const perfect=quality==="perfect";
     setTiles(t=>t.filter(tl=>tl.id!==closest.id));
-    comboRef.current+=1; setCombo(comboRef.current);
-    const comboMult=comboRef.current>=20?4:comboRef.current>=10?3:comboRef.current>=5?2:1;
-    const basePts=quality==="perfect"?100:60;
-    const pts=basePts*comboMult;
+    comboRef.current+=1; const c=comboRef.current; setCombo(c);
+    const comboMult=c>=20?4:c>=10?3:c>=5?2:1;
+    const pts=(perfect?100:60)*comboMult;
     scoreRef.current+=pts; setScore(scoreRef.current);
-    playPianoNote(lane, quality);
-    addPopup(lane, quality==="perfect"?"PERFECT!":"GOOD", quality==="perfect"?PT_COLOR:"#88ddff");
-    setHitFeedback({text:quality==="perfect"?"✦ PERFECT":"GOOD",color:quality==="perfect"?PT_COLOR:"#88ddff",key:uid()});
-  },[addPopup]);
+    playPianoNote(closest.note, quality);
+    const col=PT_LANE_COLORS[lane];
+    flash(perfect?2:1);
+    addBurst(lane, perfect?col:"#88ddff", perfect);
+    addPopup(lane, perfect?"PERFECT!":"GOOD", perfect?col:"#88ddff");
+    setHitFeedback({text:perfect?"✦ PERFECT":"GOOD",color:perfect?PT_COLOR:"#88ddff",key:uid()});
+    // Combo milestone flourish.
+    if(c===5||c===10||c===20||c===30||c===50)
+      setFlourish({text:`×${comboMult} COMBO`,key:uid()});
+  },[addPopup,addBurst]);
 
   const restart=()=>{
     clearTimeout(spawnTimer.current);
     gameOverRef.current=false; missRef.current=0; scoreRef.current=0; comboRef.current=0;
+    melodyRef.current=makeMelody();
     setTiles([]); setScore(0); setMisses(0); setCombo(0);
     setGameOver(false); setCountdown(3); setRunning(false);
-    setLaneFlash([false,false,false,false]); setPopups([]);
+    setLaneFlash([0,0,0,0]); setPopups([]); setBursts([]); setFlourish(null);
   };
 
   if(gameOver) return <GameOver score={score} color={PT_COLOR} game="pianotiles" onRestart={restart} onExit={onExit}/>;
 
-  // Compute tile positions from elapsed time
+  const hudH=`clamp(52px, 8vh, 62px)`;
   const now=Date.now();
-  const areaH=areaRef.current?.getBoundingClientRect().height-PT_HIT_ZONE_H||600;
-  const computedTiles=tiles.map(t=>{
-    const elapsed=now-t.born;
-    const progress=Math.min(1,elapsed/t.speed);
-    return{...t,progress,y:progress*areaH};
-  });
+  const laneW=100/PT_LANES;
 
-  const laneColors=["#e8c547","#5ac8fa","#bf5af2","#ff6b6b"];
+  // Compute tile positions from the shared geometry (leading edge = leadY).
+  const computedTiles=tiles.map(t=>{
+    const progress=Math.min(1.2,(now-t.born)/t.speed);
+    const leadY=progress*geom.hitLineY;
+    // Proximity 0→1 as the tile nears the line, for glow ramp.
+    const prox=clamp(1-Math.abs(leadY-geom.hitLineY)/geom.hitLineY,0,1);
+    return{...t,leadY,prox};
+  });
 
   return (
     <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",background:T.bg,display:"flex",flexDirection:"column"}}>
       {/* HUD */}
-      <div style={{height:62,display:"flex",alignItems:"center",padding:"0 10px",gap:8,background:`linear-gradient(${T.surface}f0,transparent)`,zIndex:100,borderBottom:"1px solid #ffffff08",flexShrink:0}}>
+      <div style={{height:hudH,display:"flex",alignItems:"center",padding:"0 10px",gap:8,background:`linear-gradient(${T.surface}f0,transparent)`,zIndex:100,borderBottom:"1px solid #ffffff08",flexShrink:0}}>
         <button onPointerDown={onExit} style={{background:"#ffffff08",border:"1px solid #ffffff12",color:"#ffffff55",padding:"5px 10px",borderRadius:4,fontFamily:"'Share Tech Mono'",fontSize:12,cursor:"pointer",flexShrink:0}}>←</button>
         <span style={{fontFamily:"'Black Ops One'",fontSize:13,color:PT_COLOR,textShadow:`0 0 8px ${PT_COLOR}`,flexShrink:0}}>PIANO TILES</span>
         <div style={{flex:1}}/>
@@ -1033,54 +1143,88 @@ export function PianoTiles({onExit}) {
       <div ref={areaRef} style={{flex:1,position:"relative",overflow:"hidden"}}>
         {!running&&countdown>=0&&<Countdown n={countdown} color={PT_COLOR}/>}
 
-        {/* Lane dividers */}
-        {[1,2,3].map(i=>(
-          <div key={i} style={{position:"absolute",top:0,bottom:0,left:`${i*25}%`,width:1,background:"#ffffff08",zIndex:1}}/>
+        {/* Keyboard-runway lanes: faint per-lane sheen + dividers */}
+        {PT_LANE_COLORS.map((col,i)=>(
+          <div key={"lane"+i} style={{
+            position:"absolute",top:0,bottom:0,left:`${i*laneW}%`,width:`${laneW}%`,
+            background:`linear-gradient(180deg, ${col}00 55%, ${col}0a 100%)`,
+            borderRight:i<PT_LANES-1?"1px solid #ffffff08":"none",zIndex:1,
+          }}/>
         ))}
 
-        {/* Hit zone bar */}
+        {/* Hit line: bar + soft glow, pulses with combo */}
         <div style={{
-          position:"absolute",bottom:PT_HIT_ZONE_H-2,left:0,right:0,height:2,
-          background:`linear-gradient(90deg,${laneColors.join(",")})`,
-          opacity:0.5,zIndex:3,
+          position:"absolute",top:geom.hitLineY-1.5,left:0,right:0,height:3,
+          background:`linear-gradient(90deg,${PT_LANE_COLORS.join(",")})`,
+          opacity:combo>=3?0.85:0.55,zIndex:3,
+          boxShadow:`0 0 ${combo>=5?18:10}px ${PT_COLOR}${combo>=5?"88":"44"}`,
+          animation:combo>=5?"ptBar 0.6s ease-in-out infinite":"none",
         }}/>
-        {/* Hit zone glow */}
         <div style={{
-          position:"absolute",bottom:PT_HIT_ZONE_H-14,left:0,right:0,height:12,
-          background:"linear-gradient(transparent,rgba(255,255,255,0.04))",
-          zIndex:2,
+          position:"absolute",top:geom.hitLineY-16,left:0,right:0,height:16,
+          background:"linear-gradient(transparent,rgba(255,255,255,0.05))",zIndex:2,
         }}/>
 
-        {/* Falling tiles */}
+        {/* Falling tiles — glow ramps up as they approach the line */}
         {computedTiles.map(t=>{
-          const laneW=100/PT_LANES;
-          const col=laneColors[t.lane];
+          const col=PT_LANE_COLORS[t.lane];
+          const glow=8+t.prox*22;
           return (
             <div key={t.id} style={{
               position:"absolute",
-              left:`${t.lane*laneW+0.5}%`,
-              width:`${laneW-1}%`,
-              top:t.y-90,
-              height:88,
-              borderRadius:8,
-              background:`linear-gradient(180deg,${col}cc,${col}99)`,
-              boxShadow:`0 0 16px ${col}55, inset 0 1px 0 rgba(255,255,255,0.2)`,
-              border:`1px solid ${col}88`,
+              left:`${t.lane*laneW+0.6}%`,
+              width:`${laneW-1.2}%`,
+              top:t.leadY-geom.tileH,
+              height:geom.tileH,
+              borderRadius:10,
+              background:`linear-gradient(180deg,${col}e6,${col}99)`,
+              boxShadow:`0 0 ${glow}px ${col}${t.prox>0.7?"aa":"66"}, inset 0 2px 0 rgba(255,255,255,0.28), inset 0 -3px 8px rgba(0,0,0,0.25)`,
+              border:`1px solid ${col}`,
               zIndex:2,
-            }}/>
+            }}>
+              {/* glass streak */}
+              <div style={{position:"absolute",inset:"6% 8% auto 8%",height:"22%",borderRadius:6,background:"linear-gradient(180deg,rgba(255,255,255,0.35),transparent)"}}/>
+            </div>
           );
         })}
+
+        {/* Hit-line bursts */}
+        {bursts.map(b=>(
+          <div key={b.id} style={{
+            position:"absolute",left:`${b.lane*laneW}%`,width:`${laneW}%`,
+            top:geom.hitLineY-geom.tileH*0.5,height:geom.tileH,
+            pointerEvents:"none",zIndex:6,
+            display:"flex",alignItems:"center",justifyContent:"center",
+          }}>
+            <div style={{
+              width:"70%",height:"70%",borderRadius:"50%",
+              background:`radial-gradient(circle, ${b.color}${b.perfect?"cc":"88"} 0%, ${b.color}00 70%)`,
+              animation:"ptBurst 0.4s ease-out forwards",
+            }}/>
+          </div>
+        ))}
 
         {/* Hit feedback overlay */}
         {hitFeedback&&(
           <div key={hitFeedback.key} style={{
-            position:"absolute",top:"30%",left:0,right:0,
+            position:"absolute",top:"28%",left:0,right:0,
             textAlign:"center",pointerEvents:"none",
             fontFamily:"'Black Ops One'",fontSize:26,
             color:hitFeedback.color,
             textShadow:`0 0 16px ${hitFeedback.color}`,
             animation:"floatUp 0.6s ease-out forwards",zIndex:10,
           }}>{hitFeedback.text}</div>
+        )}
+
+        {/* Combo milestone flourish */}
+        {flourish&&(
+          <div key={flourish.key} style={{
+            position:"absolute",top:"46%",left:0,right:0,textAlign:"center",
+            pointerEvents:"none",zIndex:11,
+            fontFamily:"'Black Ops One'",fontSize:34,color:T.gold,
+            textShadow:`0 0 22px ${T.gold}, 0 0 44px ${T.gold}66`,
+            animation:"ptFlourish 0.85s ease-out forwards",
+          }}>{flourish.text}</div>
         )}
 
         {/* Score popups */}
@@ -1090,31 +1234,40 @@ export function PianoTiles({onExit}) {
       </div>
 
       {/* Lane tap buttons */}
-      <div style={{height:PT_HIT_ZONE_H,display:"flex",flexShrink:0,borderTop:"1px solid #ffffff10"}}>
-        {laneColors.map((col,i)=>(
-          <div
-            key={i}
-            onPointerDown={e=>{e.preventDefault();tapLane(i);}}
-            style={{
-              flex:1,
-              background:laneFlash[i]?`${col}55`:`${col}0d`,
-              borderRight:i<PT_LANES-1?"1px solid #ffffff10":"none",
-              cursor:"pointer",
-              display:"flex",alignItems:"center",justifyContent:"center",
-              transition:"background 0.06s",
-              userSelect:"none",
-              WebkitUserSelect:"none",
-            }}
-          >
-            <div style={{
-              width:36,height:36,borderRadius:"50%",
-              border:`2px solid ${col}${laneFlash[i]?"ff":"55"}`,
-              background:laneFlash[i]?`${col}44`:"transparent",
-              transition:"all 0.06s",
-              boxShadow:laneFlash[i]?`0 0 12px ${col}`:"none",
-            }}/>
-          </div>
-        ))}
+      <div style={{height:geom.tapH,display:"flex",flexShrink:0,borderTop:"1px solid #ffffff10",background:T.surface}}>
+        {PT_LANE_COLORS.map((col,i)=>{
+          const q=laneFlash[i];               // 0 idle, -1 miss, 1 good, 2 perfect
+          const lit=q>0;
+          const bg=q===-1?"#ff2d5522":lit?`${col}${q===2?"55":"3a"}`:`${col}0d`;
+          return (
+            <div
+              key={i}
+              onPointerDown={e=>{e.preventDefault();tapLane(i);}}
+              style={{
+                flex:1,position:"relative",overflow:"hidden",
+                background:bg,
+                borderRight:i<PT_LANES-1?"1px solid #ffffff10":"none",
+                cursor:"pointer",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                transition:"background 0.09s",
+                userSelect:"none",WebkitUserSelect:"none",
+              }}
+            >
+              {lit&&<div style={{
+                position:"absolute",inset:0,pointerEvents:"none",
+                background:`radial-gradient(circle at 50% 50%, ${col}66 0%, transparent 60%)`,
+                animation:"ptRipple 0.32s ease-out forwards",
+              }}/>}
+              <div style={{
+                width:"clamp(30px,7vw,42px)",aspectRatio:"1",borderRadius:"50%",
+                border:`2px solid ${col}${lit?"ff":"55"}`,
+                background:lit?`${col}44`:"transparent",
+                transition:"all 0.09s",
+                boxShadow:lit?`0 0 14px ${col}`:"none",
+              }}/>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
