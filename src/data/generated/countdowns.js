@@ -2,684 +2,683 @@
 // The Countdown pool. Shape: { id, title, unit, blurb?, entries:[{rank,title,by?,note?,trend}] }
 export default [
   {
-    "id": "ctd-feed-sounds",
-    "title": "TOP 5 SOUNDS GLUED TO YOUR FOR-YOU PAGE",
+    "id": "ctd-songs-stuck-in-head",
+    "title": "TOP 5 SONGS STUCK IN EVERYONE'S HEAD",
     "unit": "song",
-    "blurb": "The audio living rent-free in everyone's skull this month.",
+    "blurb": "Ranked by how many times it looped in your skull during math class.",
     "entries": [
       {
         "rank": 1,
-        "title": "Du bist gut genug",
-        "by": "TikTok",
-        "note": "A tender lyric chopped into bait. Pure AIM-away-message energy.",
+        "title": "drop dead",
+        "by": "Olivia Rodrigo",
+        "note": "The angst is calling from a burned CD-R.",
         "trend": "new"
       },
       {
         "rank": 2,
-        "title": "Murder on the Dancefloor",
-        "by": "Sophie Ellis-Bextor",
-        "note": "Proof that 2026 is just 2016 wearing 2002's outfit.",
+        "title": "Smooth Criminal",
+        "by": "Michael Jackson",
+        "note": "TikTok found the moonwalk. Somewhere a VCR weeps with joy.",
         "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Nihilistic Penguin",
-        "by": "Unknown",
-        "note": "That doomed little waddle is all of us walking to first period.",
+        "title": "Petal",
+        "by": "Ariana Grande",
+        "note": "Ponytail deployed, tour buses idling.",
         "trend": "new"
       },
       {
         "rank": 4,
+        "title": "the new Katy Perry single",
+        "by": "Katy Perry",
+        "note": "Autoplay would've ambushed every MySpace profile.",
+        "trend": "same"
+      },
+      {
+        "rank": 5,
+        "title": "the new Tyler, The Creator album",
+        "by": "Tyler, The Creator",
+        "note": "Would've eaten your dial-up alive to download.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-new-music-friday",
+    "title": "TOP 5 NEW MUSIC FRIDAY DROPS",
+    "unit": "song",
+    "blurb": "The release-day haul, ranked like a stack of jewel cases.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "the new Tyler, The Creator album",
+        "by": "Tyler, The Creator",
+        "note": "Headphone-shopping-cart energy.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
+        "title": "the new Katy Perry single",
+        "by": "Katy Perry",
+        "note": "Built for the mall speakers you can't escape.",
+        "trend": "new"
+      },
+      {
+        "rank": 3,
+        "title": "the new Muse single",
+        "by": "Muse",
+        "note": "Still riding the 2003 alt-rock CD you never returned.",
+        "trend": "new"
+      },
+      {
+        "rank": 4,
+        "title": "the new Marshmello drop",
+        "by": "Marshmello",
+        "note": "The helmet remains undefeated at LAN parties.",
+        "trend": "new"
+      },
+      {
+        "rank": 5,
+        "title": "the cure",
+        "by": "Olivia Rodrigo",
+        "note": "Not the band; the kids will figure it out.",
+        "trend": "up"
+      }
+    ]
+  },
+  {
+    "id": "ctd-album-eras",
+    "title": "TOP 5 ALBUM ERAS WE'RE LIVING IN",
+    "unit": "song",
+    "blurb": "Whole eras, not singles — pop's answer to the double album.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Petal",
+        "by": "Ariana Grande",
+        "note": "Album number eight and a ten-city victory lap.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
+        "title": "Olivia Rodrigo's third album",
+        "by": "Olivia Rodrigo",
+        "note": "The follow-up to the follow-up. Diary locked.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "the new Tyler, The Creator album",
+        "by": "Tyler, The Creator",
+        "note": "Concept-album season, cue the interludes.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Katy Perry's new era",
+        "by": "Katy Perry",
+        "note": "The comeback tour cranks the fog machine.",
+        "trend": "new"
+      },
+      {
+        "rank": 5,
+        "title": "the Michael Jackson catalog",
+        "by": "Michael Jackson",
+        "note": "Old era, new streams — the moonwalk pays rent.",
+        "trend": "up"
+      }
+    ]
+  },
+  {
+    "id": "ctd-tiktok-revivals",
+    "title": "TOP 5 OLD SONGS TIKTOK DUG BACK UP",
+    "unit": "song",
+    "blurb": "Songs older than the app that revived them.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Smooth Criminal",
+        "by": "Michael Jackson",
+        "note": "Annie's still not okay; the trend insists on asking.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
         "title": "Mr. Brightside",
         "by": "The Killers",
-        "note": "Never trends because it never actually left.",
-        "trend": "same"
-      },
-      {
-        "rank": 5,
-        "title": "Axel F",
-        "by": "Crazy Frog",
-        "note": "Ringtone royalty refusing to retire gracefully.",
-        "trend": "down"
-      }
-    ]
-  },
-  {
-    "id": "ctd-sad-girl-anthems",
-    "title": "TOP 5 CRY-IN-THE-CAR ANTHEMS",
-    "unit": "song",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "You Seem Pretty Sad For A Girl So In Love",
-        "by": "Olivia Rodrigo",
-        "note": "Title's longer than a dial-up handshake, but it'll wreck you faster.",
-        "trend": "new"
-      },
-      {
-        "rank": 2,
-        "title": "Complicated",
-        "by": "Avril Lavigne",
-        "note": "Why'd you have to go and make things so... timeless.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "Since U Been Gone",
-        "by": "Kelly Clarkson",
-        "note": "Belted into every hairbrush since the CRT era.",
+        "note": "Refuses to leave any playlist, any decade.",
         "trend": "up"
       },
       {
-        "rank": 4,
-        "title": "Bring Me To Life",
+        "rank": 3,
+        "title": "Bring Me to Life",
         "by": "Evanescence",
-        "note": "Wake me up inside the LimeWire download.",
-        "trend": "down"
+        "note": "Wake me up inside every three years, apparently.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Since U Been Gone",
+        "by": "Kelly Clarkson",
+        "note": "The shower-anthem hall of fame welcomes it back.",
+        "trend": "up"
       },
       {
         "rank": 5,
-        "title": "How to Save a Life",
-        "by": "The Fray",
-        "note": "Played under every dramatic hospital-show montage ever made.",
-        "trend": "same"
+        "title": "Dragostea Din Tei",
+        "by": "O-Zone",
+        "note": "The Numa Numa guy's entire brand, restored.",
+        "trend": "up"
       }
     ]
   },
   {
-    "id": "ctd-y2k-dancefloor",
-    "title": "TOP 5 Y2K DANCEFLOOR DESTROYERS",
+    "id": "ctd-2000s-anthems",
+    "title": "TOP 5 SONGS THAT DEFINED THE 2000s",
     "unit": "song",
-    "blurb": "Gymnasium hits that still hold up under a disco ball.",
     "entries": [
       {
         "rank": 1,
         "title": "Hey Ya!",
         "by": "OutKast",
-        "note": "Still shaking it like a Polaroid picture, grandpa.",
+        "note": "Shake it like a Polaroid picture you can no longer buy film for.",
         "trend": "same"
       },
       {
         "rank": 2,
-        "title": "Yeah!",
-        "by": "Usher",
-        "note": "Peace up, A-town down, retainer in.",
+        "title": "Toxic",
+        "by": "Britney Spears",
+        "note": "The undisputed ringtone champion of homeroom.",
         "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Hollaback Girl",
-        "by": "Gwen Stefani",
-        "note": "Taught an entire generation to spell 'bananas.'",
+        "title": "Yeah!",
+        "by": "Usher",
+        "note": "Feat. Lil Jon, feat. every single school dance.",
         "trend": "same"
       },
       {
         "rank": 4,
         "title": "Crazy in Love",
         "by": "Beyoncé",
-        "note": "The uh-oh heard round the school dance.",
-        "trend": "down"
+        "note": "The horn sample that launched a thousand ringtones.",
+        "trend": "up"
       },
       {
         "rank": 5,
-        "title": "Toxic",
-        "by": "Britney Spears",
-        "note": "Flight-attendant cosplay, certified banger.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-ringtone-legends",
-    "title": "TOP 5 POLYPHONIC RINGTONE LEGENDS",
-    "unit": "song",
-    "blurb": "The tones you paid $2.99 for and refused to apologize for.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Axel F",
-        "by": "Crazy Frog",
-        "note": "The most annoying download you proudly funded twice.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
         "title": "In Da Club",
         "by": "50 Cent",
-        "note": "Go shorty, it's your text-message tone.",
-        "trend": "up"
-      },
-      {
-        "rank": 3,
-        "title": "Lose Yourself",
-        "by": "Eminem",
-        "note": "Mom's spaghetti, mid-class, on full volume.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Hips Don't Lie",
-        "by": "Shakira",
-        "note": "Truthful hips, untruthful 'I swear it was on silent.'",
+        "note": "Birthday shoutout, whether it's your birthday or not.",
         "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Dragostea Din Tei",
-        "by": "O-Zone",
-        "note": "Numa Numa: the original lip-sync webcam smash.",
-        "trend": "new"
       }
     ]
   },
   {
-    "id": "ctd-emo-revival",
-    "title": "TOP 5 EMO BANGERS THE ALGORITHM REVIVED",
+    "id": "ctd-one-hit-wonders",
+    "title": "TOP 5 ONE-HIT WONDERS STILL ON REPEAT",
     "unit": "song",
-    "blurb": "2026 is the new 2016 is the new 2006, apparently.",
     "entries": [
       {
         "rank": 1,
-        "title": "In the End",
-        "by": "Linkin Park",
-        "note": "Nu-metal feelings are officially cool again. Eyeliner included.",
-        "trend": "new"
+        "title": "All Star",
+        "by": "Smash Mouth",
+        "note": "Legally required in every early-2000s trailer.",
+        "trend": "same"
       },
       {
         "rank": 2,
-        "title": "Welcome to the Black Parade",
-        "by": "My Chemical Romance",
-        "note": "The side-swept fringe is back, regrettably.",
-        "trend": "up"
+        "title": "How You Remind Me",
+        "by": "Nickelback",
+        "note": "You'll defend it in secret. We all do.",
+        "trend": "down"
       },
       {
         "rank": 3,
-        "title": "Ocean Avenue",
-        "by": "Yellowcard",
-        "note": "Skate-park anthems never truly clock out.",
+        "title": "Absolutely (Story of a Girl)",
+        "by": "Nine Days",
+        "note": "One girl, one song, endless nostalgia.",
         "trend": "same"
       },
       {
         "rank": 4,
-        "title": "Sk8er Boi",
-        "by": "Avril Lavigne",
-        "note": "He was a boy, she was a girl — can the algorithm make it more obvious?",
+        "title": "Butterfly",
+        "by": "Crazy Town",
+        "note": "Come my lady, come come my lady — into the void.",
         "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Misery Business",
-        "by": "Paramount",
-        "note": "Mall-bench classic, dug up and dusted off.",
-        "trend": "new"
+        "title": "Teenage Dirtbag",
+        "by": "Wheatus",
+        "note": "The anthem of every kid picked last in gym.",
+        "trend": "up"
       }
     ]
   },
   {
-    "id": "ctd-nostalgia-reboots",
-    "title": "TOP 5 REBOOTS BETTING ON YOUR CHILDHOOD",
+    "id": "ctd-superhero-then-now",
+    "title": "TOP 5 SUPERHERO MOVIES, THEN & NOW",
     "unit": "movie",
+    "blurb": "One fresh cape, four that built the multiplex.",
     "entries": [
       {
         "rank": 1,
-        "title": "Masters of the Universe",
-        "by": "Amazon MGM Studios",
-        "note": "He-Man returns after ~40 years. By the power of nostalgia.",
+        "title": "Supergirl: Woman of Tomorrow",
+        "by": "DC Studios",
+        "note": "Milly Alcock's grumpy Girl of Steel, no dial-up required.",
         "trend": "new"
       },
       {
         "rank": 2,
-        "title": "Toy Story 5",
-        "by": "Pixar",
-        "note": "The toys' new villain is your kid's tablet. Brutally relatable.",
-        "trend": "new"
+        "title": "Spider-Man",
+        "by": "Sony/Columbia",
+        "note": "The one that made the whole mall line up in 2002.",
+        "trend": "same"
       },
       {
         "rank": 3,
-        "title": "Spider-Man",
-        "by": "Columbia Pictures",
-        "note": "The reboot benchmark. Upside-down kiss included.",
-        "trend": "same"
+        "title": "X-Men",
+        "by": "20th Century Fox",
+        "note": "Proved the black-leather comic movie could actually work.",
+        "trend": "up"
       },
       {
         "rank": 4,
         "title": "Batman Begins",
         "by": "Warner Bros.",
-        "note": "Proved a reboot could actually be good. Bar set.",
-        "trend": "up"
+        "note": "The reboot that taught Hollywood a new trick.",
+        "trend": "same"
       },
       {
         "rank": 5,
-        "title": "King Kong",
-        "by": "Universal Pictures",
-        "note": "Three hours of Peter Jackson loving a very large ape.",
+        "title": "Iron Man",
+        "by": "Marvel Studios",
+        "note": "The post-credits scene that started, well, everything.",
         "trend": "down"
       }
     ]
   },
   {
-    "id": "ctd-old-vs-new-movies",
-    "title": "TOP 5 MOVIES WHERE OLD STUFF FIGHTS NEW STUFF",
+    "id": "ctd-2000s-movies",
+    "title": "TOP 5 MOVIES THAT OWNED THE 2000s",
     "unit": "movie",
-    "blurb": "Analog vs. digital: the eternal arcade-age grudge match.",
     "entries": [
       {
         "rank": 1,
-        "title": "Toy Story 5",
-        "by": "Pixar",
-        "note": "Wooden cowboys vs. glowing screens. Pick a side, partner.",
-        "trend": "new"
+        "title": "The Lord of the Rings: The Return of the King",
+        "by": "New Line Cinema",
+        "note": "Eleven endings, zero regrets.",
+        "trend": "same"
       },
       {
         "rank": 2,
-        "title": "WALL-E",
-        "by": "Pixar",
-        "note": "A rusty robot out-feeling a world of touchscreens.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "The Iron Giant",
-        "by": "Warner Bros.",
-        "note": "Souls beat circuits, every single time.",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Terminator 2: Judgment Day",
-        "by": "TriStar Pictures",
-        "note": "Old model protects, new model menaces. Classic.",
-        "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Tron",
-        "by": "Walt Disney Productions",
-        "note": "We've been arguing analog vs. digital since the arcade days.",
-        "trend": "same"
-      }
-    ]
-  },
-  {
-    "id": "ctd-cable-reruns",
-    "title": "TOP 5 MOVIES THAT NEVER LEFT BASIC CABLE",
-    "unit": "movie",
-    "blurb": "Aired so often they basically paid rent.",
-    "entries": [
-      {
-        "rank": 1,
         "title": "Shrek",
         "by": "DreamWorks",
-        "note": "On so much it qualifies as a roommate.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "The Lord of the Rings: The Fellowship of the Ring",
-        "by": "New Line Cinema",
-        "note": "Always on, always 'just the next scene, I swear.'",
+        "note": "Somebody once told me it'd be on this list.",
         "trend": "up"
       },
       {
         "rank": 3,
         "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
         "by": "Walt Disney Pictures",
-        "note": "Made the whole school want a magic compass.",
+        "note": "Made a theme-park ride cool, somehow.",
         "trend": "same"
       },
       {
         "rank": 4,
-        "title": "Mean Girls",
-        "by": "Paramount Pictures",
-        "note": "On Wednesdays the channel wore pink.",
+        "title": "Gladiator",
+        "by": "DreamWorks/Universal",
+        "note": "Are you not entertained? You are.",
         "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Finding Nemo",
-        "by": "Pixar",
-        "note": "A whole generation learned to just keep swimming.",
-        "trend": "new"
+        "title": "The Matrix Reloaded",
+        "by": "Warner Bros.",
+        "note": "Bullet-time, but make it a burned DVD.",
+        "trend": "up"
       }
     ]
   },
   {
-    "id": "ctd-quotable-movies",
-    "title": "TOP 5 MOVIES YOU QUOTED INTO THE GROUND",
+    "id": "ctd-teen-movies",
+    "title": "TOP 5 TEEN MOVIES THAT RAISED US",
     "unit": "movie",
     "entries": [
       {
         "rank": 1,
+        "title": "Mean Girls",
+        "by": "Paramount",
+        "note": "On Wednesdays we wore out the VHS.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
         "title": "Napoleon Dynamite",
         "by": "Fox Searchlight",
-        "note": "Gosh. Idiot. The whole cafeteria knew the lines.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "Anchorman",
-        "by": "DreamWorks",
-        "note": "60% of the time, it worked every time.",
+        "note": "Vote for Pedro, still.",
         "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Zoolander",
-        "by": "Paramount Pictures",
-        "note": "A whole philosophy about being really, really ridiculously good-looking.",
+        "title": "Bring It On",
+        "by": "Universal",
+        "note": "Brr, it's cold in here — there must be some Toros in the atmosphere.",
         "trend": "same"
       },
       {
         "rank": 4,
-        "title": "Dodgeball",
-        "by": "20th Century Fox",
-        "note": "Dodge, duck, dip, dive, and dodge.",
+        "title": "A Cinderella Story",
+        "by": "Warner Bros.",
+        "note": "Flip phone as glass slipper. Iconic.",
         "trend": "down"
       },
       {
         "rank": 5,
-        "title": "Old School",
-        "by": "DreamWorks",
-        "note": "We went streaking. Through the quad.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-summer-shows",
-    "title": "TOP 5 SHOWS RUNNING YOUR SUMMER",
-    "unit": "show",
-    "blurb": "The stacked slate eating everyone's evenings.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Bear",
-        "by": "FX",
-        "note": "Yes, Chef. Still yelling. Still the best thing on.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "House of the Dragon",
-        "by": "HBO",
-        "note": "Dragons, betrayal, and at least one haircut you'll argue about.",
-        "trend": "up"
-      },
-      {
-        "rank": 3,
-        "title": "Avatar: The Last Airbender",
-        "by": "Netflix",
-        "note": "Live-action round two. The cabbage merchant deserves a raise.",
-        "trend": "new"
-      },
-      {
-        "rank": 4,
-        "title": "Lost",
-        "by": "ABC",
-        "note": "We still don't know what the island was. Beautiful disaster.",
-        "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "24",
-        "by": "Fox",
-        "note": "The original 'one more episode' real-time stress test.",
-        "trend": "same"
-      }
-    ]
-  },
-  {
-    "id": "ctd-finale-feels",
-    "title": "TOP 5 SHOWS WE'RE NOT READY TO LOSE",
-    "unit": "show",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Bear",
-        "by": "FX",
-        "note": "Final season. Grab tissues and a fire extinguisher.",
-        "trend": "new"
-      },
-      {
-        "rank": 2,
-        "title": "Friends",
-        "by": "NBC",
-        "note": "The one where it ended and we never recovered.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "Seinfeld",
-        "by": "NBC",
-        "note": "A finale about nothing, naturally.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Lost",
-        "by": "ABC",
-        "note": "Ended on faith and a lot of confused group chats.",
-        "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Avatar: The Last Airbender",
-        "by": "Nickelodeon",
-        "note": "The cartoon finale that out-acted most live-action dramas.",
+        "title": "Superbad",
+        "by": "Columbia",
+        "note": "McLovin: the only ID that ever mattered.",
         "trend": "up"
       }
     ]
   },
   {
-    "id": "ctd-fantasy-kingdoms",
-    "title": "TOP 5 FANTASY KINGDOMS WORTH DEFENDING",
+    "id": "ctd-shows-bingeing",
+    "title": "TOP 5 SHOWS EVERYONE'S BINGING",
     "unit": "show",
+    "blurb": "The queue everyone's actually watching, not just adding.",
     "entries": [
       {
         "rank": 1,
         "title": "House of the Dragon",
         "by": "HBO",
-        "note": "Targaryen family reunion: now with extra fire.",
+        "note": "Highest body count in the family so far. Dragons don't do warnings.",
+        "trend": "up"
+      },
+      {
+        "rank": 2,
+        "title": "The Bear",
+        "by": "FX",
+        "note": "The final service. Yes, chef, one last time.",
+        "trend": "same"
+      },
+      {
+        "rank": 3,
+        "title": "Ted Lasso",
+        "by": "Apple TV+",
+        "note": "Coach is back, biscuits presumably recompiled.",
+        "trend": "new"
+      },
+      {
+        "rank": 4,
+        "title": "Avatar: The Last Airbender",
+        "by": "Netflix",
+        "note": "Season two, live-action, benders reassembled.",
+        "trend": "up"
+      },
+      {
+        "rank": 5,
+        "title": "Lanterns",
+        "by": "HBO",
+        "note": "Green Lantern by way of a moody crime drama. Ring not included.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-tv-goodbyes-comebacks",
+    "title": "TOP 5 TV GOODBYES & COMEBACKS",
+    "unit": "show",
+    "blurb": "The exits and the encores, ranked.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "The Bear",
+        "by": "FX",
+        "note": "The kitchen closes. Pour one out for the walk-in.",
+        "trend": "up"
+      },
+      {
+        "rank": 2,
+        "title": "Ted Lasso",
+        "by": "Apple TV+",
+        "note": "The comeback nobody expected, back for the underdogs.",
+        "trend": "new"
+      },
+      {
+        "rank": 3,
+        "title": "Avatar: The Last Airbender",
+        "by": "Netflix",
+        "note": "The gang re-ups for round two.",
+        "trend": "up"
+      },
+      {
+        "rank": 4,
+        "title": "House of the Dragon",
+        "by": "HBO",
+        "note": "It won't stop until the family tree is bald.",
+        "trend": "same"
+      },
+      {
+        "rank": 5,
+        "title": "Life, Larry and the Pursuit of Unhappiness",
+        "by": "HBO",
+        "note": "Larry David, sketch-style, still pretty, pretty good.",
+        "trend": "new"
+      }
+    ]
+  },
+  {
+    "id": "ctd-comedy-returns",
+    "title": "TOP 5 COMEDY RETURNS WORTH THE WAIT",
+    "unit": "show",
+    "blurb": "Funny people, back on the schedule.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Life, Larry and the Pursuit of Unhappiness",
+        "by": "HBO",
+        "note": "The Curb brain, freed into sketches.",
+        "trend": "new"
+      },
+      {
+        "rank": 2,
+        "title": "Ted Lasso",
+        "by": "Apple TV+",
+        "note": "Believe... in a fourth season.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "The Bear",
+        "by": "FX",
+        "note": "Comedy? Drama? A panic attack with a whisk? Yes.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Curb Your Enthusiasm",
+        "by": "HBO",
+        "note": "The blueprint for the awkward-guy comeback.",
+        "trend": "down"
+      },
+      {
+        "rank": 5,
+        "title": "Arrested Development",
+        "by": "Netflix/Fox",
+        "note": "There's always money in the nostalgia banana stand.",
+        "trend": "down"
+      }
+    ]
+  },
+  {
+    "id": "ctd-fantasy-tv",
+    "title": "TOP 5 FANTASY EPICS, OLD & NEW",
+    "unit": "show",
+    "blurb": "Dragons, benders and things that go bump in prestige TV.",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "House of the Dragon",
+        "by": "HBO",
+        "note": "The Targaryens argue; a kingdom burns. Classic.",
         "trend": "up"
       },
       {
         "rank": 2,
         "title": "Avatar: The Last Airbender",
         "by": "Netflix",
-        "note": "Four nations, one CGI budget that finally showed up.",
-        "trend": "new"
+        "note": "Four nations, one very ambitious VFX budget.",
+        "trend": "up"
       },
       {
         "rank": 3,
-        "title": "Xena: Warrior Princess",
-        "by": "Universal Television",
-        "note": "Streaming-before-streaming binge, leather edition.",
-        "trend": "same"
+        "title": "Lanterns",
+        "by": "HBO",
+        "note": "Space cops with a True-Detective streak.",
+        "trend": "new"
       },
       {
         "rank": 4,
+        "title": "Buffy the Vampire Slayer",
+        "by": "The WB/UPN",
+        "note": "Set the whole 'monster of the week' vibe.",
+        "trend": "same"
+      },
+      {
+        "rank": 5,
         "title": "Charmed",
         "by": "The WB",
-        "note": "Three sisters and one chandelier-shaking opening credits.",
+        "note": "The Power of Three still streams strong.",
         "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Hercules: The Legendary Journeys",
-        "by": "Universal Television",
-        "note": "Syndication royalty in a sensible skirt.",
-        "trend": "same"
       }
     ]
   },
   {
-    "id": "ctd-comfort-rewatch",
-    "title": "TOP 5 COMFORT REWATCHES FOR A SICK DAY",
+    "id": "ctd-saturday-cartoons",
+    "title": "TOP 5 SATURDAY-MORNING CARTOONS FOREVER",
     "unit": "show",
-    "blurb": "Background noise for an entire generation.",
     "entries": [
       {
         "rank": 1,
         "title": "SpongeBob SquarePants",
         "by": "Nickelodeon",
-        "note": "Still funnier than most shows aimed at grown-ups.",
+        "note": "Are you ready, kids? You've been ready for decades.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "Pokémon",
+        "by": "The WB",
+        "note": "Gotta catch the rerun before the bus.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Ed, Edd n Eddy",
+        "by": "Cartoon Network",
+        "note": "The jawbreaker economy remains unmatched.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Kim Possible",
+        "by": "Disney Channel",
+        "note": "Beep beep — that's your Kimmunicator.",
+        "trend": "up"
+      },
+      {
+        "rank": 5,
+        "title": "Codename: Kids Next Door",
+        "by": "Cartoon Network",
+        "note": "The only org chart that mattered at age nine.",
+        "trend": "down"
+      }
+    ]
+  },
+  {
+    "id": "ctd-after-school-tv",
+    "title": "TOP 5 AFTER-SCHOOL TV LEGENDS",
+    "unit": "show",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Toonami",
+        "by": "Cartoon Network",
+        "note": "TOM piloting the Absolution past your homework.",
+        "trend": "same"
+      },
+      {
+        "rank": 2,
+        "title": "Dragon Ball Z",
+        "by": "Cartoon Network",
+        "note": "Three episodes of charging up, zero regrets.",
+        "trend": "up"
+      },
+      {
+        "rank": 3,
+        "title": "Lizzie McGuire",
+        "by": "Disney Channel",
+        "note": "The animated inner monologue we all needed.",
+        "trend": "same"
+      },
+      {
+        "rank": 4,
+        "title": "Yu-Gi-Oh!",
+        "by": "Kids' WB",
+        "note": "It's time to d-d-d-duel your chores.",
+        "trend": "up"
+      },
+      {
+        "rank": 5,
+        "title": "That's So Raven",
+        "by": "Disney Channel",
+        "note": "Saw the twist coming. Literally.",
+        "trend": "down"
+      }
+    ]
+  },
+  {
+    "id": "ctd-sitcoms-quote",
+    "title": "TOP 5 SITCOMS WE STILL QUOTE",
+    "unit": "show",
+    "entries": [
+      {
+        "rank": 1,
+        "title": "Friends",
+        "by": "NBC",
+        "note": "Could this list BE any more nostalgic?",
         "trend": "same"
       },
       {
         "rank": 2,
         "title": "The Office",
         "by": "NBC",
-        "note": "The official soundtrack to doing the dishes.",
+        "note": "Bears. Beets. Buffering on your old laptop.",
         "trend": "up"
       },
       {
         "rank": 3,
-        "title": "That '70s Show",
-        "by": "Fox",
-        "note": "Ironic that the '00s show is now the throwback.",
+        "title": "Scrubs",
+        "by": "NBC",
+        "note": "Cried at a sitcom, blamed allergies.",
         "trend": "same"
       },
       {
         "rank": 4,
         "title": "Malcolm in the Middle",
         "by": "Fox",
-        "note": "Chaos parenting before it had a hashtag.",
-        "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Drake & Josh",
-        "by": "Nickelodeon",
-        "note": "Megan was right about everyone.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-after-school-cartoons",
-    "title": "TOP 5 AFTER-SCHOOL CARTOON BLOCKS",
-    "unit": "show",
-    "blurb": "Backpack on the floor, snack in hand, TV already warm.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Avatar: The Last Airbender",
-        "by": "Nickelodeon",
-        "note": "The benchmark every reboot is sweating over.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "Teen Titans",
-        "by": "Cartoon Network",
-        "note": "The theme song that was secretly two theme songs.",
+        "note": "No family group chat needed; just chaos.",
         "trend": "up"
       },
       {
-        "rank": 3,
-        "title": "Kim Possible",
-        "by": "Disney Channel",
-        "note": "Beep-beep-be-beep. You felt that in your spine.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Justice League",
-        "by": "Cartoon Network",
-        "note": "Saturday mornings, but make it cinematic.",
-        "trend": "down"
-      },
-      {
         "rank": 5,
-        "title": "Dragon Ball Z",
-        "by": "Toonami",
-        "note": "Three episodes to charge one attack. Worth it.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-stress-shows",
-    "title": "TOP 5 SHOWS THAT RAISE YOUR BLOOD PRESSURE",
-    "unit": "show",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "The Bear",
-        "by": "FX",
-        "note": "A 22-minute panic attack with gorgeous plating.",
-        "trend": "same"
-      },
-      {
-        "rank": 2,
-        "title": "24",
-        "by": "Fox",
-        "note": "The ticking clock that ruined relaxation forever.",
-        "trend": "up"
-      },
-      {
-        "rank": 3,
-        "title": "Hell's Kitchen",
-        "by": "Fox",
-        "note": "Gordon Ramsay yelling is comfort food now, somehow.",
-        "trend": "same"
-      },
-      {
-        "rank": 4,
-        "title": "Prison Break",
-        "by": "Fox",
-        "note": "A tattoo that was also a blueprint. We bought it.",
-        "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Survivor",
+        "title": "Everybody Loves Raymond",
         "by": "CBS",
-        "note": "Outwit, outplay, outstress your snack supply.",
-        "trend": "new"
-      }
-    ]
-  },
-  {
-    "id": "ctd-live-action-adaptations",
-    "title": "TOP 5 LIVE-ACTION GLOW-UPS (OR GLOW-DOWNS)",
-    "unit": "show",
-    "blurb": "Cartoon-to-real-actors: the boss fight of TV.",
-    "entries": [
-      {
-        "rank": 1,
-        "title": "Avatar: The Last Airbender",
-        "by": "Netflix",
-        "note": "The adaptation everyone's grading on a brutal curve.",
-        "trend": "new"
-      },
-      {
-        "rank": 2,
-        "title": "Sabrina the Teenage Witch",
-        "by": "ABC",
-        "note": "Comic-book magic on a talking-cat-puppet budget.",
-        "trend": "same"
-      },
-      {
-        "rank": 3,
-        "title": "Smallville",
-        "by": "The WB",
-        "note": "Ten seasons of 'no flights, no tights.'",
-        "trend": "up"
-      },
-      {
-        "rank": 4,
-        "title": "Goosebumps",
-        "by": "Fox Kids",
-        "note": "Book covers scarier than the episodes, honestly.",
+        "note": "Your grandparents' favorite, and honestly? Solid.",
         "trend": "down"
-      },
-      {
-        "rank": 5,
-        "title": "Power Rangers",
-        "by": "Fox Kids",
-        "note": "Recycled monster footage, undying hype.",
-        "trend": "same"
       }
     ]
   }

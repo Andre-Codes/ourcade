@@ -2,183 +2,183 @@
 // Timeless Curiosity pool. Shape: { id, title, blurb, url } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gc-euler-identity",
-    "title": "Euler's Identity",
-    "blurb": "Five of math's heaviest hitters — e, i, pi, 1, and 0 — fit into one tidy equation that equals nothing left over. People call it the most beautiful formula ever written, and they're not really arguing about it.",
-    "url": "https://en.wikipedia.org/wiki/Euler%27s_identity"
-  },
-  {
-    "id": "gc-seven-bridges",
-    "title": "The Seven Bridges of Königsberg",
-    "blurb": "A town wondered if you could cross all seven of its bridges exactly once. Euler proved you couldn't, and accidentally invented the entire field of graph theory while shutting down a walking tour.",
-    "url": "https://en.wikipedia.org/wiki/Seven_Bridges_of_K%C3%B6nigsberg"
-  },
-  {
-    "id": "gc-coastline-paradox",
-    "title": "The Coastline Paradox",
-    "blurb": "Britain's coastline has no fixed length — measure with a shorter ruler and it gets longer, forever, because of all the wiggles inside wiggles. The answer to 'how long is the shore' is honestly 'how patient are you.'",
-    "url": "https://en.wikipedia.org/wiki/Coastline_paradox"
+    "id": "gc-collatz-conjecture",
+    "title": "The 3x+1 Problem",
+    "blurb": "Pick any number: if it's even, halve it; if it's odd, triple it and add one. Every number tested so far crashes down to 1, and no one has proven it always will.",
+    "url": "https://en.wikipedia.org/wiki/Collatz_conjecture"
   },
   {
     "id": "gc-kaprekar-6174",
     "title": "Kaprekar's Constant",
-    "blurb": "Take any four-digit number with at least two different digits, sort the digits high-to-low and low-to-high, subtract, repeat. In at most seven steps you land on 6174 and get stuck there. Try it on a napkin.",
+    "blurb": "Take any four-digit number with at least two different digits, sort it big-to-small and small-to-big, subtract, and repeat. Within seven steps you always land on 6174 and get stuck there.",
     "url": "https://en.wikipedia.org/wiki/6174"
   },
   {
+    "id": "gc-euler-identity",
+    "title": "Euler's Identity",
+    "blurb": "e raised to i times pi, plus one, equals exactly zero — five of math's most important constants shaking hands in a single tidy line. It has been called the most beautiful equation there is.",
+    "url": "https://en.wikipedia.org/wiki/Euler%27s_identity"
+  },
+  {
     "id": "gc-mobius-strip",
-    "title": "The Möbius Strip",
-    "blurb": "Give a paper strip a half-twist, tape the ends, and you've made a loop with only one side and one edge. Draw a line down the middle without lifting your pen and you'll meet yourself coming back.",
+    "title": "The One-Sided Surface",
+    "blurb": "Give a paper strip a half-twist, tape the ends, and you get a shape with only one side and one edge. Draw a line down the middle and you'll return to start without ever lifting the pen.",
     "url": "https://en.wikipedia.org/wiki/M%C3%B6bius_strip"
   },
   {
-    "id": "gc-foucault-pendulum",
-    "title": "Foucault's Pendulum",
-    "blurb": "Hang a heavy weight on a long wire, set it swinging, and over hours its path slowly rotates. The pendulum isn't turning — the Earth underneath it is, and this is the calm proof you can watch in a museum lobby.",
-    "url": "https://en.wikipedia.org/wiki/Foucault_pendulum"
+    "id": "gc-coastline-paradox",
+    "title": "The Coastline Paradox",
+    "blurb": "A coastline has no single true length — measure with a shorter ruler and you catch more wiggles, and the total grows without bound. Britain's coast is genuinely as long as you want it to be.",
+    "url": "https://en.wikipedia.org/wiki/Coastline_paradox"
   },
   {
-    "id": "gc-belousov-reaction",
-    "title": "The Belousov–Zhabotinsky Reaction",
-    "blurb": "A chemical soup that refuses to settle, oscillating between colors over and over like a heartbeat in a beaker. When Belousov first described it, reviewers didn't believe chemistry was allowed to do that.",
+    "id": "gc-belousov-zhabotinsky",
+    "title": "The Clock That Isn't",
+    "blurb": "A chemical mixture that oscillates back and forth between colors, spontaneously forming spirals and pulses. For years no one believed it, because chemistry wasn't supposed to keep time.",
     "url": "https://en.wikipedia.org/wiki/Belousov%E2%80%93Zhabotinsky_reaction"
-  },
-  {
-    "id": "gc-wow-signal",
-    "title": "The Wow! Signal",
-    "blurb": "In 1977 a radio telescope caught a strong, 72-second burst from the direction of Sagittarius. An astronomer circled the printout and wrote 'Wow!' in the margin, and nobody has explained it or heard it again since.",
-    "url": "https://en.wikipedia.org/wiki/Wow!_signal"
-  },
-  {
-    "id": "gc-voyager-golden-record",
-    "title": "The Voyager Golden Record",
-    "blurb": "Both Voyager probes carry a gold-plated record of Earth sounds, music, and greetings, plus instructions for how to play it. It's a message in a bottle drifting through interstellar space at roughly 38,000 miles per hour.",
-    "url": "https://en.wikipedia.org/wiki/Voyager_Golden_Record"
-  },
-  {
-    "id": "gc-pale-blue-dot",
-    "title": "The Pale Blue Dot",
-    "blurb": "From about 3.7 billion miles away, Voyager 1 turned around and photographed Earth as a single faint pixel inside a sunbeam. Everyone you've ever heard of has lived their whole life on that speck.",
-    "url": "https://en.wikipedia.org/wiki/Pale_Blue_Dot"
   },
   {
     "id": "gc-pando",
     "title": "Pando, the Trembling Giant",
-    "blurb": "A Utah forest of around 47,000 aspen trunks is actually one organism, all sharing a single root system. It weighs millions of pounds and may be tens of thousands of years old — possibly the heaviest living thing on Earth.",
+    "blurb": "A Utah aspen grove that looks like thousands of trees is actually one organism sharing a single root system, weighing thousands of tons and possibly tens of thousands of years old.",
     "url": "https://en.wikipedia.org/wiki/Pando_(tree)"
   },
   {
-    "id": "gc-greenland-shark",
-    "title": "The Greenland Shark",
-    "blurb": "This cold, slow Arctic shark can live for centuries, with some individuals estimated to be around 400 years old. A shark swimming today may have been born before the telescope was invented.",
-    "url": "https://en.wikipedia.org/wiki/Greenland_shark"
+    "id": "gc-methuselah-tree",
+    "title": "The Oldest Living Tree",
+    "blurb": "A bristlecone pine in California quietly closing in on 5,000 years old — already ancient when the pyramids were new. Its exact location is kept secret to keep it safe.",
+    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)"
   },
   {
-    "id": "gc-periodical-cicadas",
-    "title": "Prime-Numbered Cicadas",
-    "blurb": "Periodical cicadas stay underground and emerge in massive broods every 13 or 17 years — both prime numbers. The leading idea is that prime cycles make it hard for predators to sync up with the buffet.",
-    "url": "https://en.wikipedia.org/wiki/Periodical_cicadas"
+    "id": "gc-voyager-golden-record",
+    "title": "The Golden Record",
+    "blurb": "Two gold-plated phonograph records bolted to the Voyager probes carry greetings in 55 languages, whale songs and Chuck Berry, now drifting through interstellar space. Playback instructions are etched on the cover.",
+    "url": "https://en.wikipedia.org/wiki/Voyager_Golden_Record"
   },
   {
-    "id": "gc-pistol-shrimp",
-    "title": "The Pistol Shrimp",
-    "blurb": "This little shrimp snaps a specialized claw so fast it creates a collapsing bubble that briefly reaches thousands of degrees and stuns its prey with the shockwave. A snack-sized creature firing an underwater gun made of physics.",
-    "url": "https://en.wikipedia.org/wiki/Alpheidae"
+    "id": "gc-arecibo-message",
+    "title": "The Arecibo Message",
+    "blurb": "In 1974 we beamed a picture toward a star cluster 25,000 light-years away — our numbers, our DNA, a little stick figure. The reply, if one comes, won't arrive for about 50,000 years.",
+    "url": "https://en.wikipedia.org/wiki/Arecibo_message"
   },
   {
-    "id": "gc-mantis-shrimp",
-    "title": "The Mantis Shrimp",
-    "blurb": "It punches with the acceleration of a bullet and sees with up to sixteen types of color receptors, where humans get by on three. Equal parts boxer and impossible camera, all in a reef burrow.",
-    "url": "https://en.wikipedia.org/wiki/Mantis_shrimp"
+    "id": "gc-pioneer-plaque",
+    "title": "The Pioneer Plaque",
+    "blurb": "A gold-anodized map to Earth, bolted to two spacecraft, showing a man, a woman, and our address in the galaxy via pulsar directions. A message in a bottle for whoever finds it.",
+    "url": "https://en.wikipedia.org/wiki/Pioneer_plaque"
   },
   {
-    "id": "gc-slime-mold",
-    "title": "The Maze-Solving Slime Mold",
-    "blurb": "Physarum is a single-celled blob with no brain, yet it can find the shortest path through a maze and even recreate efficient transit networks when fed in the shape of a city. Intelligence without a head.",
-    "url": "https://en.wikipedia.org/wiki/Physarum_polycephalum"
+    "id": "gc-nazca-lines",
+    "title": "The Nazca Lines",
+    "blurb": "Enormous animals and shapes scratched into a Peruvian desert over 1,500 years ago, some hundreds of feet across and only readable from the air. The people who made them never got that view.",
+    "url": "https://en.wikipedia.org/wiki/Nazca_Lines"
+  },
+  {
+    "id": "gc-blood-falls",
+    "title": "Blood Falls",
+    "blurb": "A glacier in Antarctica bleeds a deep rust-red stream, fed by ancient salty water that's been sealed away from air and light for over a million years — and still has microbes living in it.",
+    "url": "https://en.wikipedia.org/wiki/Blood_Falls"
+  },
+  {
+    "id": "gc-lake-nyos",
+    "title": "The Lake That Exhaled",
+    "blurb": "In 1986 a Cameroonian lake belched a vast cloud of stored carbon dioxide that flowed downhill and silently suffocated over 1,700 people. Engineers now vent the gas with pipes to keep it from happening again.",
+    "url": "https://en.wikipedia.org/wiki/Lake_Nyos"
+  },
+  {
+    "id": "gc-bioluminescence",
+    "title": "Living Light",
+    "blurb": "Countless creatures — fireflies, deep-sea fish, glowing plankton — make their own cold light through chemistry, no heat required. Some deep-sea species even wield light as bait or camouflage.",
+    "url": "https://en.wikipedia.org/wiki/Bioluminescence"
+  },
+  {
+    "id": "gc-tsar-bomba",
+    "title": "Tsar Bomba",
+    "blurb": "The most powerful bomb ever detonated, so large its designers deliberately cut its yield in half — and it still produced a mushroom cloud that reached far past the edge of the stratosphere.",
+    "url": "https://en.wikipedia.org/wiki/Tsar_Bomba"
+  },
+  {
+    "id": "gc-brachistochrone",
+    "title": "The Fastest Slide",
+    "blurb": "The quickest path for a ball rolling between two points isn't a straight line — it's a specific curve. Even stranger, a ball started anywhere on it reaches the bottom in the same amount of time.",
+    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve"
+  },
+  {
+    "id": "gc-fibonacci-sequence",
+    "title": "Nature's Favorite Sequence",
+    "blurb": "Each number is the sum of the two before it, and the pattern quietly shows up in sunflower seeds, pinecones and spiraling shells. Plants seem to have discovered it long before we did.",
+    "url": "https://en.wikipedia.org/wiki/Fibonacci_sequence"
+  },
+  {
+    "id": "gc-golden-ratio",
+    "title": "The Golden Ratio",
+    "blurb": "A single proportion, roughly 1.618, that appears in geometry, art and growing plants, and connects neatly to the Fibonacci numbers. It's genuinely elegant, even if it gets credited for more than it earns.",
+    "url": "https://en.wikipedia.org/wiki/Golden_ratio"
+  },
+  {
+    "id": "gc-dead-sea",
+    "title": "The Sea You Can't Sink In",
+    "blurb": "So salty that swimmers float like corks and almost nothing lives in it, sitting at the lowest land point on Earth. Its shoreline drops a little lower every year.",
+    "url": "https://en.wikipedia.org/wiki/Dead_Sea"
+  },
+  {
+    "id": "gc-aurora",
+    "title": "The Northern Lights",
+    "blurb": "Charged particles from the Sun crash into our atmosphere and paint the polar sky in slow curtains of green and red. It's essentially the planet's magnetic field made visible.",
+    "url": "https://en.wikipedia.org/wiki/Aurora"
+  },
+  {
+    "id": "gc-halting-problem",
+    "title": "The Unsolvable Program",
+    "blurb": "There can be no program that reliably tells whether any given program will eventually stop or loop forever. Alan Turing proved this in 1936, drawing a hard limit on what computers can ever do.",
+    "url": "https://en.wikipedia.org/wiki/Halting_problem"
+  },
+  {
+    "id": "gc-four-color-theorem",
+    "title": "The Four-Color Theorem",
+    "blurb": "Any flat map can be colored with just four colors so no two neighboring regions match. It was the first major theorem proven with the help of a computer, and mathematicians argued about that for years.",
+    "url": "https://en.wikipedia.org/wiki/Four_color_theorem"
+  },
+  {
+    "id": "gc-gomboc",
+    "title": "The Gömböc",
+    "blurb": "A math-derived shape with exactly one stable and one unstable resting point, so it always rights itself like a weeble — without any added weight inside. Certain tortoise shells turn out to work the same way.",
+    "url": "https://en.wikipedia.org/wiki/G%C3%B6mb%C3%B6c"
+  },
+  {
+    "id": "gc-benham-top",
+    "title": "Benham's Top",
+    "blurb": "Spin a disc printed with only black-and-white arcs and your eyes will insist they see bands of color that aren't there. More than a century on, no one fully agrees why.",
+    "url": "https://en.wikipedia.org/wiki/Benham%27s_top"
+  },
+  {
+    "id": "gc-sn-1054",
+    "title": "The Guest Star of 1054",
+    "blurb": "Astronomers in China and elsewhere recorded a new star so bright it was visible in daylight for weeks. Today we see its debris as the Crab Nebula — we literally watched a star explode a thousand years ago.",
+    "url": "https://en.wikipedia.org/wiki/SN_1054"
+  },
+  {
+    "id": "gc-catatumbo-lightning",
+    "title": "The Everlasting Storm",
+    "blurb": "Over a river mouth in Venezuela, lightning flickers almost nightly for much of the year — hundreds of flashes an hour, on some nights. Sailors once used it as a natural lighthouse.",
+    "url": "https://en.wikipedia.org/wiki/Catatumbo_lightning"
+  },
+  {
+    "id": "gc-langtons-ant",
+    "title": "Langton's Ant",
+    "blurb": "A single dumb rule moves a virtual ant across a grid, making chaos for thousands of steps — then, out of nowhere, it starts building a perfectly regular highway forever.",
+    "url": "https://en.wikipedia.org/wiki/Langton%27s_ant"
+  },
+  {
+    "id": "gc-game-of-life",
+    "title": "Conway's Game of Life",
+    "blurb": "Four tiny rules on a grid of cells produce gliders, guns and patterns that endlessly reproduce — complex enough that you can, in principle, build a working computer inside it.",
+    "url": "https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
   },
   {
     "id": "gc-rosetta-stone",
     "title": "The Rosetta Stone",
-    "blurb": "A single decree carved in three scripts — Egyptian hieroglyphs, Demotic, and Greek — gave scholars the key to read hieroglyphs again after roughly 1,400 years of silence. One slab reopened an entire civilization's voice.",
+    "blurb": "One royal decree carved in three scripts, one of them ancient Greek, gave scholars the key to finally reading Egyptian hieroglyphs after they'd been silent for over a thousand years.",
     "url": "https://en.wikipedia.org/wiki/Rosetta_Stone"
-  },
-  {
-    "id": "gc-linear-b",
-    "title": "Cracking Linear B",
-    "blurb": "An ancient Mediterranean script sat unread for decades until architect-turned-codebreaker Michael Ventris realized it was early Greek. He solved it as an amateur and the whole field had to catch up.",
-    "url": "https://en.wikipedia.org/wiki/Linear_B"
-  },
-  {
-    "id": "gc-quipu",
-    "title": "The Inca Quipu",
-    "blurb": "The Inca recorded numbers and possibly more using knotted strings, with the type and position of each knot carrying meaning. An entire empire ran its accounts on colored thread instead of paper.",
-    "url": "https://en.wikipedia.org/wiki/Quipu"
-  },
-  {
-    "id": "gc-iron-pillar-delhi",
-    "title": "The Iron Pillar of Delhi",
-    "blurb": "A roughly 1,600-year-old iron column stands in the open air and has barely rusted, thanks to a protective layer that formed on its surface. Ancient metallurgists out-engineered weather itself.",
-    "url": "https://en.wikipedia.org/wiki/Iron_pillar_of_Delhi"
-  },
-  {
-    "id": "gc-greek-fire",
-    "title": "Greek Fire",
-    "blurb": "The Byzantine navy had an incendiary weapon that reportedly kept burning on water, and it helped save Constantinople more than once. The recipe was guarded so well it's now genuinely lost to history.",
-    "url": "https://en.wikipedia.org/wiki/Greek_fire"
-  },
-  {
-    "id": "gc-cave-of-crystals",
-    "title": "The Cave of the Crystals",
-    "blurb": "Deep under Mexico, a flooded chamber grew gypsum crystals the size of tree trunks, some over 30 feet long. The same brutal heat that built them makes the cave nearly impossible for humans to enter.",
-    "url": "https://en.wikipedia.org/wiki/Cave_of_the_Crystals"
-  },
-  {
-    "id": "gc-catatumbo-lightning",
-    "title": "Catatumbo Lightning",
-    "blurb": "Where a Venezuelan river meets a lake, thunderstorms flash almost nightly for much of the year, racking up an astonishing number of strikes per hour. It's a permanent lightning factory you could practically set your clock to.",
-    "url": "https://en.wikipedia.org/wiki/Catatumbo_lightning"
-  },
-  {
-    "id": "gc-richat-structure",
-    "title": "The Eye of the Sahara",
-    "blurb": "A nearly 30-mile bullseye of concentric rings sits in the Mauritanian desert, so striking that astronauts use it as a landmark. It's not a crater — it's a deeply eroded geologic dome, which is somehow weirder.",
-    "url": "https://en.wikipedia.org/wiki/Richat_Structure"
-  },
-  {
-    "id": "gc-sonoluminescence",
-    "title": "Sonoluminescence",
-    "blurb": "Blast a tiny bubble in liquid with sound and it can collapse so violently that it emits a flash of light. We've watched it happen for decades and still don't fully agree on how the bubble glows.",
-    "url": "https://en.wikipedia.org/wiki/Sonoluminescence"
-  },
-  {
-    "id": "gc-aerogel",
-    "title": "Aerogel, Frozen Smoke",
-    "blurb": "A solid that's mostly air, so light and ghostly it looks like a chunk of blue haze, yet it can support many times its own weight and insulates like almost nothing else. NASA used it to catch comet dust.",
-    "url": "https://en.wikipedia.org/wiki/Aerogel"
-  },
-  {
-    "id": "gc-mpemba-effect",
-    "title": "The Mpemba Effect",
-    "blurb": "Under certain conditions, warmer water can freeze faster than cooler water — an observation noticed by a Tanzanian schoolboy and still debated by physicists. Common sense quietly loses this one a lot.",
-    "url": "https://en.wikipedia.org/wiki/Mpemba_effect"
-  },
-  {
-    "id": "gc-infinite-monkey-theorem",
-    "title": "The Infinite Monkey Theorem",
-    "blurb": "Given infinite time, a monkey hitting random keys will almost surely type the complete works of Shakespeare. It's mathematically true and emotionally insulting to every writer at once.",
-    "url": "https://en.wikipedia.org/wiki/Infinite_monkey_theorem"
-  },
-  {
-    "id": "gc-gabriels-horn",
-    "title": "Gabriel's Horn",
-    "blurb": "A trumpet-shaped solid that has infinite surface area but a finite volume. You could fill it with paint but never have enough paint to coat the inside — math being deliberately rude.",
-    "url": "https://en.wikipedia.org/wiki/Gabriel%27s_horn"
-  },
-  {
-    "id": "gc-coffee-ring-effect",
-    "title": "The Coffee Ring Effect",
-    "blurb": "A spilled drop of coffee dries into a dark ring instead of a solid blot, because the liquid evaporates fastest at the edges and drags particles outward. There are physics papers about the stain on your desk.",
-    "url": "https://en.wikipedia.org/wiki/Coffee_ring_effect"
   }
 ];

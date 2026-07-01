@@ -1,134 +1,118 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-06-21T15:20:15.925Z
-# web_search_requests = 4
+# Generated 2026-07-01T10:20:19.709Z
+# web_search_requests = 5
 
 ## Search queries Claude actually ran
-- trending movies TV shows June 2026
+- biggest movies TV shows summer 2026
 - popular new music albums songs June 2026
-- biggest new video games June 2026
-- viral internet meme moment June 2026
+- biggest video game releases June 2026
+- viral internet meme moment this week June 2026
+- pop culture news trending this week late June 2026
 
 ## Sources returned ([page_age] title / url)
-- [4 days ago] 6 TV and Streaming Shows You Should Binge-Watch in June | Rotten Tomatoes
-  https://editorial.rottentomatoes.com/article/6-tv-and-streaming-shows-you-should-binge-watch-in-june-2026/
-- [date ?] What to Watch on Netflix: June 19, 2026 | Color Book to The American Experiment - Netflix Tudum
-  https://www.netflix.com/tudum/articles/what-to-watch-on-netflix-june-19-2026
-- [4 days ago] The Most Anticipated Movies of 2026 | Rotten Tomatoes
-  https://editorial.rottentomatoes.com/article/the-most-anticipated-movies-of-2026/
-- [3 weeks ago] TV Shows (June 2026) | Rotten Tomatoes
-  https://www.rottentomatoes.com/browse/tv_series_browse
-- [3 weeks ago] The 5 Most Anticipated TV Shows of June | Rotten Tomatoes
-  https://editorial.rottentomatoes.com/article/most-anticipated-tv-of-june-2026/
-- [1 week ago] Top 21 New Movies Streaming in June 2026
-  https://www.thewrap.com/creative-content/what-to-watch/best-new-streaming-movies-june-2026/
-- [3 weeks ago] Best TV Shows (June 2026) | Rotten Tomatoes
-  https://www.rottentomatoes.com/browse/tv_series_browse/sort:popular
-- [12 hours ago] New on Netflix in 2026: Best Movies and Shows Streaming in June 2026
-  https://www.analyticsinsight.net/ott/new-on-netflix-in-2026-best-movies-and-shows-streaming-in-june-2026
-- [3 weeks ago] 20 new shows and movies to watch in June 2026: 'The Bear,' 'House of the Dragon' and more
-  https://www.yahoo.com/entertainment/tv/articles/20-shows-movies-watch-june-040000868.html
-- [2 weeks ago] New TV shows and movies for June 2026: What’s coming next | Tom's Guide
-  https://www.tomsguide.com/news/new-tv-shows
-- [3 days ago] New Albums in 2026: Calendar of New Music Releases Coming
-  https://www.billboard.com/lists/new-albums-2026-calendar-new-music-releases-this-year/
-- [2 weeks ago] New album releases 2026: Dates for Madonna, Ariana Grande, Niall Horan and more | Official Charts
-  https://www.officialcharts.com/chart-news/new-album-releases-2026/
-- [3 weeks ago] June 2026 Album & Single Releases, Music Releases
-  https://www.albumoftheyear.org/2026/releases/june-06/
+- [May 19, 2026] 33 TV Shows That Are Premiering Or Returning In Summer 2026 That Are Worth Checking Out
+  https://www.buzzfeed.com/noradominick/summer-tv-preview-2026
+- [May 11, 2026] ComicBook Summer 2026 Preview: 45 Biggest New Movies & TV Shows (With Exclusive Images & Quotes) - ComicBook.com
+  https://comicbook.com/movies/feature/comicbook-summer-2026-movies-tv-preview/
+- [3 weeks ago] 24 Best New Shows in Summer 2026: 'Lanterns,' 'House of the Dragon'
+  https://www.indiewire.com/lists/best-new-shows-summer-2026-preview-lanterns-house-of-the-dragon/
+- [1 week ago] The Complete Guide to Summer TV 2026: Everything to Know About What to Watch This Season - TV Guide
+  https://www.tvguide.com/news/features/summer-tv-guide-2026/
+- [11 hours ago] TV Premiere Dates 2026 | Rotten Tomatoes
+  https://editorial.rottentomatoes.com/article/tv-premiere-dates-2026/
+- [2 weeks ago] 3 biggest Prime Video movies and shows I can’t wait to watch in summer 2026 | Tom's Guide
+  https://www.tomsguide.com/entertainment/prime-video/3-biggest-prime-video-movies-and-shows-i-cant-wait-to-watch-in-summer-2026
+- [1 month ago] The New Shows of the 2026 Summer TV Season - TV Guide
+  https://www.tvguide.com/galleries/new-tv-shows-2026-summer-season/
+- [1 day ago] 29 Best TV Shows of 2026 (So Far): Top Streaming Series to Watch Right Now
+  https://www.timeout.com/film/best-streaming-and-tv-shows-of-2026-so-far
+- [5 days ago] New Music Friday: The best albums out June 26 : All Songs Considered : NPR Music : NPR
+  https://www.npr.org/2026/06/26/nx-s1-5871172/new-music-friday-best-albums-june-26-2026
 - [1 day ago] List of 2026 albums - Wikipedia
   https://en.wikipedia.org/wiki/List_of_2026_albums
-- [2 days ago] The 50 best songs of 2026 so far
-  https://www.pastemagazine.com/music/best-songs/the-50-best-songs-of-2026-so-far
+- [16 hours ago] New Albums in 2026: Calendar of New Music Releases Coming
+  https://www.billboard.com/lists/new-albums-2026-calendar-new-music-releases-this-year/
+- [5 days ago] New Music Friday release radar for June 26, 2026: top albums, song releases | DraftKings Network
+  https://dknetwork.draftkings.com/2026/06/25/new-music-friday-release-radar-for-june-26-2026-top-albums-song-releases/
+- [1 month ago] The 50 Best Albums Of 2026 So Far
+  https://stereogum.com/2500311/the-50-best-albums-of-2026-so-far/lists/album-list
+- [2 weeks ago] June 2026 Album & Single Releases, Music Releases
+  https://www.albumoftheyear.org/2026/releases/june-06/
+- [6 days ago] New album releases 2026: Dates for Madonna, Ariana Grande, The Rolling Stones and more | Official Charts
+  https://www.officialcharts.com/chart-news/new-album-releases-2026/
 - [date ?] 2026 Album Releases, Music Releases - Album of The Year
   https://www.albumoftheyear.org/2026/releases/
-- [1 week ago] New Music Friday release radar for June 12, 2026: top albums, song releases | DraftKings Network
-  https://dknetwork.draftkings.com/2026/06/11/new-music-friday-release-radar-for-june-12-2026-top-albums-song-releases/
-- [May 19, 2026] Here's a Look Ahead to June 2026's New Music Releases
-  https://ultimateclassicrock.com/june-2026-new-music-releases/
-- [5 days ago] Upcoming Video Game Release Dates Schedule | VGC
-  https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/
-- [3 days ago] Upcoming 2026 games: All the new PC games you won't want to miss, from big hits to hidden gems
-  https://www.pcgamer.com/games/new-pc-games-2026/
-- [3 days ago] 2026 Upcoming Games Release Schedule - GameSpot
-  https://www.gamespot.com/articles/2026-upcoming-games-release-schedule/1100-6534941/
-- [5 days ago] New games 2026 and beyond: The biggest video game release dates for PS5, Xbox Series X, PC, Switch, and more
+- [May 8, 2026] New Releases & Songs of 2026. Best Music Albums
+  https://www.newreleasesnow.com/
+- [1 day ago] New games 2026 and beyond: The biggest video game release dates for PS5, Xbox Series X, PC, Switch, and more
   https://www.gamesradar.com/video-game-release-dates/
-- [3 weeks ago] The Biggest New Game Releases Of June 2026 - GameSpot
+- [5 days ago] 2026 Upcoming Games Release Schedule - GameSpot
+  https://www.gamespot.com/articles/2026-upcoming-games-release-schedule/1100-6534941/
+- [1 week ago] Upcoming Video Game Release Dates Schedule | VGC
+  https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/
+- [1 month ago] The Biggest New Game Releases Of June 2026 - GameSpot
   https://www.gamespot.com/gallery/the-biggest-new-game-releases-of-june-2026/
-- [3 weeks ago] June 2026 Video Game Releases: Full List And Highlights
-  https://screenrant.com/june-2026-video-games-releases-schedule-lineup/
-- [9 hours ago] 2026 in video games - Wikipedia
-  https://en.wikipedia.org/wiki/2026_in_video_games
-- [13 hours ago] List of video games released in 2026 - Wikipedia
+- [3 days ago] Game Release Calendar June 2026 | Upcoming Video Game Releases | GamingBuddy
+  https://gamingbuddy.eu/release-calendar/2026/june
+- [13 hours ago] New 2026 games: Our release date calendar | PC Gamer
+  https://www.pcgamer.com/games/new-pc-games-2026/
+- [12 hours ago] List of video games released in 2026 - Wikipedia
   https://en.wikipedia.org/wiki/List_of_video_games_released_in_2026
-- [2 days ago] Top Trending Memes on Social Media (June 2026)
+- [1 week ago] Top Trending Memes on Social Media (June 2026)
   https://napoleoncat.com/blog/trending-memes/
+- [1 week ago] ALL JUNE 2026 MEMES EXPLAINED | The REAL ORIGIN ...
+  https://www.youtube.com/watch?v=Bs4VDwfXg0M
+- [3 weeks ago] These Are The Internet's 51 Best Memes Of June (So Far)
+  https://brobible.com/culture/article/these-are-the-51-best-memes-of-june-so-far/
+- [1 week ago] The Best June 2026 Memes - The Memedroid Blog
+  https://www.memedroid.com/blog/post/382/The-Best-June-2026-Memes
+- [2 weeks ago] 8.3K likes, 183 comments, and 164 shares | TDAWG Quits COD to Rank 2026 Memes #gaming | Tdawgsmitty (@tdawgsmitty) | Posted Jun 13, 2026 | Spotlight
+  https://www.snapchat.com/@tdawgsmitty/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZ3JlZHdldWprAZ7DOD0-AZ7DOCC2AAAAAQ
+- [2 weeks ago] FUNNIEST MEMES of 2026 (SO FAR) - YouTube
+  https://www.youtube.com/watch?v=IK8L7kgqM3w
+- [1 week ago] Chinese Memes June 2026 — What's Viral on RedNote Now | RedNoteMeme
+  https://rednotememe.com/chinese-internet-slang-2026
+- [2 weeks ago] Category:Internet memes introduced in 2026 - Wikipedia
+  https://en.wikipedia.org/wiki/Category:Internet_memes_introduced_in_2026
 - [March 31, 2026] The Funniest Memes Of 2026 (So Far)
   https://www.ranker.com/list/funny-memes-2026/alby-thompson
-- [1 week ago] 7.4K likes, 171 comments, and 147 shares | TDAWG Quits COD to Rank 2026 Memes #gaming | Tdawgsmitty (@tdawgsmitty) | Posted Jun 13, 2026 | Spotlight
-  https://www.snapchat.com/@tdawgsmitty/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYZ3JlZHdldWprAZ7DOD0-AZ7DOCC2AAAAAQ
-- [date ?] Category:Internet memes introduced in 2026 - Wikipedia
-  https://en.wikipedia.org/wiki/Category:Internet_memes_introduced_in_2026
-- [2 weeks ago] First Meme of June 2026 | TikTok
-  https://www.tiktok.com/discover/first-meme-of-june-2026
-- [1 week ago] 2026 Meme | TikTok
-  https://www.tiktok.com/discover/2026-meme
-- [1 week ago] Memes 2026 | TikTok
-  https://www.tiktok.com/discover/memes-2026
-- [date ?] 2026 Memes | MemesGuy - Viral Trends & Internet Culture
-  https://memesguy.com/year/2026
-- [3 weeks ago] Top Trending Memes 2026: What's Viral Now?
-  https://www.accio.com/business/top-trending-memes-2026
-- [2 days ago] Shitposts Are Postponed, I Need Some Time to Relax and Bounce on Memes: June 18, 2026 │ Exclaim!
-  https://exclaim.ca/comedy/article/funny-memes-of-the-week-june-18-2026
+- [date ?] Top Memes of 2026: Trending and Viral Funny Moments
+  https://www.tiktok.com/@lastminit_/video/7598399764274662674
+- [February 24, 2026] The Official 2026 Pop Culture Ins & Outs
+  https://www.betches.com/article/entertainment/the-official-2026-pop-culture-ins-outs-702941-20260102
+- [date ?] Pop Culture : NPR
+  https://www.npr.org/sections/pop-culture/
+- [12 hours ago] Funny Celebrity Posts From June 2026
+  https://www.buzzfeed.com/chelseastewart/funny-celebrity-posts-june-2026
+- [3 weeks ago] Pop Culture Releases in June 2026: Movies & TV Shows - Plataforma Media
+  https://www.plataformamedia.com/en/2026/06/12/pop-culture-releases-in-june-2026-movies-tv-shows/
+- [2 weeks ago] Celebrity, Pop Culture, TV, and Book Reviews - Good Morning America
+  https://www.goodmorningamerica.com/culture
+- [May 28, 2026] Top 5 Pop Cultural Moments That will Define Summer 2026 – The Mayfield Crier
+  https://mayfieldcrier.org/5801/uncategorized/top-5-pop-cultural-moments-that-will-define-summer-2026/
+- [5 hours ago] All TV Shows Canceled in June 2026 Including The Boroughs & Ponies
+  https://www.comingsoon.net/tv/news/2156337-tv-shows-canceled-in-june-2026-series-cancellations
+- [date ?] 2026's Pop Culture Wrapped so far… 👀
+  https://www.instagram.com/p/DZDJCDBjBZM/
 
 ## Hooks derived from the above
-I'll search for what's currently trending across multiple pop-culture categories.
-Let me search for video games, viral memes, and pop-culture news.
-I have strong coverage across movies, TV, music, games, and memes. Here's the list:
-
-- **Grand Theft Auto 6** — 
-Widely anticipated as one of the biggest entertainment launches of all time
-; the console launch is set for November, so hype is peaking now.
-- **Star Fox (Switch 2)** — 
-Nintendo is bringing back the series on June 25, 2026, and it's actually a remake of Star Fox 64
- — pure arcade-rail-shooter nostalgia bait.
-- **Final Fantasy VII Rebirth on Switch 2 / Xbox** — 
-Final Fantasy 7 Rebirth released for the Xbox Series X/S and Nintendo Switch 2 on June 3, 2026
-, finally widening the audience for the JRPG epic.
-- **Dead or Alive: Last Round** — 
-The franchise is celebrating its 30th anniversary in 2026, and this updated version serves as a celebration of arcade glory days
-.
-- **The 7th Guest Remake** — 
-A groundbreaking, spooky CD-ROM-era PC game gets a remake, returning to evil toymaker Henry Stauf's haunted mansion
- — peak retro horror.
-- **The Bear (final season)** — 
-One of the most acclaimed and talked-about shows of this decade, with full-season drops every June since 2022
-, now wrapping up.
-- **Toy Story 5** — 
-Buzz and Woody are back to face a new challenge when they realize children are replacing their toys with gadgets
- — a literal old-toys-vs-screens nostalgia hook.
-- **Masters of the Universe** — 
-After nearly 40 years, He-Man returns to the big screen in a new adaptation
- — '80s toy-and-cartoon nostalgia made for an arcade vibe.
-- **Olivia Rodrigo – "You Seem Pretty Sad For A Girl So In Love"** — 
-The three-time Grammy winner is releasing her third studio album
-, one of the buzziest drops of the month.
-- **Avatar: The Last Airbender (live-action S2)** — 
-A highly anticipated returning favorite this month
-, riding heavy fan nostalgia for the animated original.
-- **House of the Dragon S3** — 
-A returning series headlining a stacked summer TV slate
-, with Westeros dragon-riding drama back in the conversation.
-- **Nihilistic Penguin meme** — 
-People see themselves in that slow, determined "I'm done with this life" waddle, and the meme was quickly adopted by brands like BMW and Lidl
-.
-- **"Du bist gut genug" sound** — 
-By mid-June 2026 these edits had become a major TikTok trend, turning a heartfelt song lyric into one of the month's most recognizable meme sounds
-.
-- **"KitKat Heist" memes** — 
-Based on a real robbery where over 400,000 KitKat bars were stolen during transport across Europe, dubbed the "chocolatiest crime" online
-.
-- **"2026 is the new 2016" / nostalgia revival** — 
-Old underground stuff blowing up because of TikTok
- is a running joke right now — a perfect meta-wink for a retro arcade site.
+I'll search for what's currently popular across several categories.
+Let me search for video games and viral internet moments/memes.
+I have strong material across movies/TV, music, games, and memes. Let me do one more search for broad pop-culture news to round out the list.
+- <cite index="19-5">Grand Theft Auto 6</cite> — <cite index="19-5,23-2">GTA 6's console launch is set for November and it's anticipated as one of the biggest entertainment launches of all time; pre-orders are already live.</cite>
+- <cite index="21-15">Final Fantasy VII Rebirth on Switch 2</cite> — <cite index="21-15,21-16">the massive middle chapter of the Remake trilogy finally lands on Nintendo's console.</cite>
+- <cite index="38-17,38-18">House of the Dragon Season 3</cite> — <cite index="38-8,38-10">back with the highest death toll of any Thrones/HotD season and the franchise's biggest battles yet.</cite>
+- <cite index="4-1,4-9">The Bear (final season)</cite> — <cite index="4-1,36-25">FX's kitchen drama ends its run, and the fifth and final season's small wins mean more.</cite>
+- <cite index="1-20,1-21">Ted Lasso Season 4</cite> — <cite index="1-20,1-21">Ted returns to AFC Richmond to coach a second-division women's football team.</cite>
+- <cite index="2-19">Supergirl: Woman of Tomorrow</cite> — <cite index="36-21,36-22">Milly Alcock's fearless, grumpy Supergirl hits theaters as the DCU's big superhero swing.</cite>
+- <cite index="5-7">Avatar: The Last Airbender (live-action) Season 2</cite> — <cite index="5-7">Aang, Katara and Sokka are officially back in live-action on Netflix.</cite>
+- <cite index="7-23">Lanterns</cite> — <cite index="7-23,7-24">HBO's Green Lantern series pairs Hal Jordan and John Stewart in a True Detective-style crime mystery with extraterrestrial links.</cite>
+- <cite index="40-6">Olivia Rodrigo — new album era</cite> — <cite index="40-6">she's back with singles "drop dead" and "the cure" and a third studio album.</cite>
+- <cite index="40-1,40-8">Ariana Grande — Petal + summer tour</cite> — <cite index="40-1,40-8">she kicked off a 10-city tour and announced her 8th album, Petal.</cite>
+- <cite index="12-4">Tyler, The Creator / Katy Perry new drops</cite> — <cite index="12-3,12-4">a stacked New Music Friday with Tyler, The Creator, Katy Perry, Muse and Marshmello all dropping.</cite>
+- <cite index="40-11,40-13">Michael Jackson revival</cite> — <cite index="40-11,40-13">after the Jafaar Jackson biopic, Gen Z is rediscovering the moonwalk and hits like "Smooth Criminal" on TikTok.</cite>
+- <cite index="25-4">The Coldplay concert kiss-cam moment</cite> — <cite index="25-4">an incident dubbed possibly the most infamous kiss-cam moment ever.</cite>
+- <cite index="25-17,25-18">The Nihilistic Penguin meme</cite> — <cite index="25-17,25-18,25-21">a penguin's determined "done with this life" waddle became a burnout mascot adopted by brands like BMW and Lidl.</cite>
+- <cite index="25-14,25-15">The "KitKat Heist" memes</cite> — <cite index="25-14,25-15">a real robbery of 400,000+ KitKat bars became "the chocolatiest crime" online.</cite>
+- <cite index="36-3">Taylor Swift & Travis Kelce MSG buzz</cite> — <cite index="36-3">rumors of a July 3 Madison Square Garden celebration, from wedding reception to surprise performances.</cite>
+- <cite index="38-14,38-15">Larry David's "Life, Larry and the Pursuit of Unhappiness"</cite> — <cite index="38-14,38-15">the Curb creator returns to HBO with a sketch series skewering America's 250th anniversary.</cite>

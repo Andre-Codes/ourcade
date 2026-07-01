@@ -2,94 +2,89 @@
 // Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].
 export default [
   {
-    "id": "hon-gta-6",
-    "subject": "GTA 6 launch hype",
-    "emoji": "🚗"
-  },
-  {
-    "id": "hon-star-fox-switch2",
-    "subject": "Star Fox returning on Switch 2",
-    "emoji": "🦊"
+    "id": "hon-gta-6-november",
+    "subject": "GTA 6 launching this November",
+    "emoji": "🎮"
   },
   {
     "id": "hon-ff7-rebirth-switch2",
-    "subject": "FF7 Rebirth on Switch 2",
+    "subject": "Final Fantasy VII on Switch 2",
     "emoji": "⚔️"
-  },
-  {
-    "id": "hon-dead-or-alive-30th",
-    "subject": "Dead or Alive turns 30",
-    "emoji": "🥋"
-  },
-  {
-    "id": "hon-7th-guest-remake",
-    "subject": "The 7th Guest remake",
-    "emoji": "👻"
-  },
-  {
-    "id": "hon-the-bear-finale",
-    "subject": "The Bear final season",
-    "emoji": "🐻"
-  },
-  {
-    "id": "hon-toy-story-5",
-    "subject": "Toy Story 5",
-    "emoji": "🤠"
-  },
-  {
-    "id": "hon-masters-of-universe",
-    "subject": "Masters of the Universe movie",
-    "emoji": "⚔️"
-  },
-  {
-    "id": "hon-olivia-rodrigo-album",
-    "subject": "Olivia Rodrigo's new album",
-    "emoji": "🎤"
-  },
-  {
-    "id": "hon-avatar-live-action-s2",
-    "subject": "Avatar live-action season 2",
-    "emoji": "🌊"
   },
   {
     "id": "hon-house-of-dragon-s3",
-    "subject": "House of the Dragon S3",
+    "subject": "House of the Dragon Season 3",
     "emoji": "🐉"
   },
   {
+    "id": "hon-the-bear-final",
+    "subject": "The Bear's final season",
+    "emoji": "🐻"
+  },
+  {
+    "id": "hon-ted-lasso-s4",
+    "subject": "Ted Lasso Season 4",
+    "emoji": "⚽"
+  },
+  {
+    "id": "hon-supergirl-tomorrow",
+    "subject": "Supergirl: Woman of Tomorrow",
+    "emoji": "🦸"
+  },
+  {
+    "id": "hon-avatar-live-s2",
+    "subject": "Live-action Avatar Season 2",
+    "emoji": "💨"
+  },
+  {
+    "id": "hon-lanterns-hbo",
+    "subject": "HBO's Lanterns series",
+    "emoji": "💚"
+  },
+  {
+    "id": "hon-olivia-drop-dead",
+    "subject": "Olivia Rodrigo's \"drop dead\"",
+    "emoji": "🎤"
+  },
+  {
+    "id": "hon-ariana-petal",
+    "subject": "Ariana Grande's Petal album",
+    "emoji": "🌸"
+  },
+  {
+    "id": "hon-tyler-katy-friday",
+    "subject": "Tyler & Katy new music drops",
+    "emoji": "🎵"
+  },
+  {
+    "id": "hon-mj-tiktok-revival",
+    "subject": "Michael Jackson TikTok revival",
+    "emoji": "🕺"
+  },
+  {
+    "id": "hon-coldplay-kisscam",
+    "subject": "The Coldplay kiss-cam moment",
+    "emoji": "📹"
+  },
+  {
     "id": "hon-nihilistic-penguin",
-    "subject": "Nihilistic Penguin meme",
+    "subject": "The Nihilistic Penguin meme",
     "emoji": "🐧"
   },
   {
-    "id": "hon-du-bist-gut-genug",
-    "subject": "\"Du bist gut genug\" sound",
-    "emoji": "🎶"
-  },
-  {
     "id": "hon-kitkat-heist",
-    "subject": "KitKat Heist memes",
+    "subject": "The KitKat Heist memes",
     "emoji": "🍫"
   },
   {
-    "id": "hon-2026-is-new-2016",
-    "subject": "\"2026 is the new 2016\"",
-    "emoji": "🔁"
+    "id": "hon-taylor-travis-msg",
+    "subject": "Taylor & Travis MSG buzz",
+    "emoji": "💍"
   },
   {
-    "id": "hon-he-man-comeback",
-    "subject": "He-Man's big return",
-    "emoji": "💪"
-  },
-  {
-    "id": "hon-cd-rom-horror",
-    "subject": "CD-ROM horror games",
-    "emoji": "💿"
-  },
-  {
-    "id": "hon-rail-shooter-revival",
-    "subject": "Rail shooter revival",
-    "emoji": "🚀"
+    "id": "hon-larry-david-hbo",
+    "subject": "Larry David's new sketch series",
+    "emoji": "😑"
   },
   {
     "id": "hon-flip-phones",
@@ -103,23 +98,28 @@ export default [
   },
   {
     "id": "hon-physical-media",
-    "subject": "Owning physical media",
-    "emoji": "📀"
+    "subject": "Physical media",
+    "emoji": "💿"
   },
   {
-    "id": "hon-dial-up-handshake",
+    "id": "hon-dial-up-sound",
     "subject": "The dial-up handshake sound",
     "emoji": "📞"
   },
   {
-    "id": "hon-tamagotchi",
-    "subject": "Tamagotchi pets",
-    "emoji": "🥚"
+    "id": "hon-burned-mixtape-cds",
+    "subject": "Burned mixtape CDs",
+    "emoji": "📀"
   },
   {
-    "id": "hon-burned-mix-cds",
-    "subject": "Burned mix CDs",
-    "emoji": "💽"
+    "id": "hon-webrings",
+    "subject": "Webrings",
+    "emoji": "🔗"
+  },
+  {
+    "id": "hon-tamagotchi",
+    "subject": "Tamagotchi",
+    "emoji": "🥚"
   },
   {
     "id": "hon-aim-away-messages",
@@ -127,79 +127,34 @@ export default [
     "emoji": "💬"
   },
   {
-    "id": "hon-myspace-top-8",
-    "subject": "MySpace Top 8",
-    "emoji": "🌐"
-  },
-  {
-    "id": "hon-cargo-shorts",
-    "subject": "Cargo shorts",
-    "emoji": "🩳"
-  },
-  {
-    "id": "hon-velour-tracksuits",
-    "subject": "Velour tracksuits",
-    "emoji": "🧥"
-  },
-  {
-    "id": "hon-popup-internet-ads",
-    "subject": "Pop-up internet ads",
-    "emoji": "🪟"
-  },
-  {
-    "id": "hon-screensaver-pipes",
-    "subject": "3D Pipes screensaver",
-    "emoji": "🖥️"
-  },
-  {
-    "id": "hon-clippy",
-    "subject": "Clippy the assistant",
-    "emoji": "📎"
-  },
-  {
-    "id": "hon-blockbuster-fridays",
-    "subject": "Friday night video rentals",
-    "emoji": "📼"
-  },
-  {
-    "id": "hon-webrings",
-    "subject": "Webrings",
-    "emoji": "💍"
-  },
-  {
-    "id": "hon-under-construction-gifs",
-    "subject": "\"Under Construction\" GIFs",
-    "emoji": "🚧"
-  },
-  {
-    "id": "hon-ringtone-shopping",
-    "subject": "Buying polyphonic ringtones",
-    "emoji": "🎵"
-  },
-  {
-    "id": "hon-mall-arcades",
-    "subject": "Mall arcades",
-    "emoji": "🕹️"
-  },
-  {
     "id": "hon-butterfly-clips",
     "subject": "Butterfly hair clips",
     "emoji": "🦋"
   },
   {
-    "id": "hon-jncos",
-    "subject": "JNCO jeans",
-    "emoji": "👖"
+    "id": "hon-blockbuster-fridays",
+    "subject": "Blockbuster Friday nights",
+    "emoji": "🎬"
+  },
+  {
+    "id": "hon-myspace-top-8",
+    "subject": "MySpace Top 8",
+    "emoji": "🎇"
   },
   {
     "id": "hon-gel-bracelets",
     "subject": "Jelly gel bracelets",
-    "emoji": "📿"
+    "emoji": "⭕"
   },
   {
-    "id": "hon-floppy-disk-save",
-    "subject": "Floppy disk save icon",
-    "emoji": "💾"
+    "id": "hon-lan-parties",
+    "subject": "LAN parties",
+    "emoji": "🖥️"
+  },
+  {
+    "id": "hon-nokia-brick",
+    "subject": "The indestructible Nokia brick",
+    "emoji": "🧱"
   },
   {
     "id": "hon-winamp-skins",
@@ -207,38 +162,78 @@ export default [
     "emoji": "🎧"
   },
   {
+    "id": "hon-popup-ads",
+    "subject": "Pop-up ads",
+    "emoji": "🪟"
+  },
+  {
+    "id": "hon-clippy",
+    "subject": "Clippy the paperclip",
+    "emoji": "📎"
+  },
+  {
+    "id": "hon-velour-tracksuits",
+    "subject": "Velour tracksuits",
+    "emoji": "🧥"
+  },
+  {
+    "id": "hon-screensavers",
+    "subject": "Flying-toaster screensavers",
+    "emoji": "🍞"
+  },
+  {
+    "id": "hon-ringtone-downloads",
+    "subject": "Paying for ringtones",
+    "emoji": "🔔"
+  },
+  {
     "id": "hon-comic-sans",
     "subject": "Comic Sans",
     "emoji": "🔤"
   },
   {
-    "id": "hon-lan-parties",
-    "subject": "LAN parties",
-    "emoji": "🖧"
+    "id": "hon-chunky-highlights",
+    "subject": "Chunky hair highlights",
+    "emoji": "💛"
+  },
+  {
+    "id": "hon-livejournal",
+    "subject": "LiveJournal diaries",
+    "emoji": "📓"
+  },
+  {
+    "id": "hon-disc-changers",
+    "subject": "6-disc CD changers",
+    "emoji": "🎶"
+  },
+  {
+    "id": "hon-emoticon-noses",
+    "subject": "Emoticons with noses :-)",
+    "emoji": "😊"
+  },
+  {
+    "id": "hon-visor-pdas",
+    "subject": "Palm Pilot PDAs",
+    "emoji": "📇"
+  },
+  {
+    "id": "hon-glitter-gel-pens",
+    "subject": "Glitter gel pens",
+    "emoji": "✒️"
+  },
+  {
+    "id": "hon-shutter-shades",
+    "subject": "Shutter shades",
+    "emoji": "🕶️"
+  },
+  {
+    "id": "hon-instant-messenger-buddies",
+    "subject": "Buddy list logins",
+    "emoji": "👥"
   },
   {
     "id": "hon-best-viewed-1024",
     "subject": "\"Best viewed in 1024x768\"",
-    "emoji": "📺"
-  },
-  {
-    "id": "hon-chunky-sneakers",
-    "subject": "Chunky platform sneakers",
-    "emoji": "👟"
-  },
-  {
-    "id": "hon-glittery-lip-gloss",
-    "subject": "Glittery lip gloss",
-    "emoji": "💋"
-  },
-  {
-    "id": "hon-emo-side-bangs",
-    "subject": "Emo side bangs",
-    "emoji": "🖤"
-  },
-  {
-    "id": "hon-disposable-cameras",
-    "subject": "Disposable cameras",
-    "emoji": "📷"
+    "emoji": "🖼️"
   }
 ];
