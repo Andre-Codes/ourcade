@@ -2,24 +2,104 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-crouton",
+    "kind": "site",
+    "era": "current",
+    "title": "A website that is just a crouton (click for a new crouton)",
+    "blurb": "It's a crouton. Click it, get a fresh crouton. That's it. Somewhere out there a person maintains this, and honestly, respect.",
+    "url": "https://crouton.net",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.433Z"
+  },
+  {
+    "id": "gw-omfgdogs",
+    "kind": "site",
+    "era": "current",
+    "title": "An eternal parade of tiny dancing dogs with a loop that won't quit",
+    "blurb": "Dogs. Marching. Forever. Backed by a chiptune loop that will nest in your skull for the rest of the week. This is peak 2004 flash-site brainrot and we love it.",
+    "url": "https://omfgdogs.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.340Z"
+  },
+  {
+    "id": "gw-long-doge",
+    "kind": "site",
+    "era": "current",
+    "title": "The longest doge on the internet, scrollable in full",
+    "blurb": "Much scroll. Very long. So doge. It's the shibe stretched to absurd, meme-museum lengths — a Y2K-brained tribute to when 'wow' was a complete sentence.",
+    "url": "https://longdogechallenge.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:30.216Z"
+  },
+  {
+    "id": "gw-lhc-destroyed",
+    "kind": "site",
+    "era": "current",
+    "title": "A site that confirms the Large Hadron Collider hasn't destroyed Earth yet",
+    "blurb": "One enormous word answers the world's most nervous physics question: NO. If it ever changes, well, you won't be reading it. Very early-2000s panic energy, still online and still saying NO.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.734Z"
+  },
+  {
     "id": "gw-pug-in-a-rug",
     "kind": "site",
     "era": "current",
-    "title": "A pug wrapped in a tiny blanket, available 24/7",
-    "blurb": "That's it. That's the site. A pug, in a rug, asking nothing of you. Best viewed when the rest of the internet has worn you down.",
+    "title": "A pug in a rug that refuses to come out",
+    "blurb": "There is a pug. It is in a rug. You'll sit there hoping something happens. Nothing does. That's the peace offering.",
     "url": "https://puginarug.com",
     "source": "weird",
-    "archivedAt": "2026-06-29T07:58:04.233Z"
+    "archivedAt": "2026-07-01T07:41:29.640Z"
   },
   {
-    "id": "gw-lhc-destroyed-world",
+    "id": "gw-find-invisible-cow",
     "kind": "site",
     "era": "current",
-    "title": "A site that confirms the Large Hadron Collider hasn't ended the world yet",
-    "blurb": "One enormous word answers the question: NOPE. Check back daily for the most reassuring single-page report on the internet.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "title": "Find the invisible cow by how loud a voice screams COW",
+    "blurb": "There's a cow on the screen. It's invisible. Move your mouse and the site bellows COW louder as you close in. That's the whole game and it rules.",
+    "url": "https://findtheinvisiblecow.com",
     "source": "weird",
-    "archivedAt": "2026-06-29T07:58:04.109Z"
+    "archivedAt": "2026-07-01T07:41:29.439Z"
+  },
+  {
+    "id": "gw-museum-endangered-sounds",
+    "kind": "site",
+    "era": "current",
+    "title": "A museum of dial-up modems and other dead tech noises",
+    "blurb": "Dial-up handshakes, old console boots, cassette clunks — audio fossils from the machines we grew up on, preserved before they vanish forever. Basically our soundboard's ancestor.",
+    "url": "https://savethesounds.info",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.327Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password game that keeps inventing cruel new rules",
+    "blurb": "Make a password. Now it needs a Roman numeral, a chess move, the current moon phase, and a leap year. It is the most stressful thing you'll do today and you'll do it for an hour.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.218Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "One million checkboxes anyone on Earth can toggle",
+    "blurb": "A page of a million shared checkboxes where every click flips it for everyone, everywhere. People started encoding secret binary messages in it, because of course they did.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:29.108Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers steering one car through Street View",
+    "blurb": "It's Twitch-plays-a-road-trip: everybody votes in real time to turn, honk, and tune the radio while a single virtual car crawls across Google Street View. Democracy has never parallel-parked worse.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-01T07:41:28.981Z"
   },
   {
     "id": "gw-sandspiel-studio",
@@ -80,26 +160,6 @@ export default [
     "url": "https://wplace.live",
     "source": "weird",
     "archivedAt": "2026-06-29T07:58:02.691Z"
-  },
-  {
-    "id": "gw-one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One million checkboxes everyone shares at the same time",
-    "blurb": "Check a box and somewhere a stranger unchecks it two seconds later. Teens started smuggling secret binary messages through the grid, which is exactly the kind of nonsense the old web was built for.",
-    "url": "https://onemillioncheckboxes.com",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:02.489Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A road trip where the entire internet drives one car by committee",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio station for a single shared car crawling down real roads. It's the most chaotic carpool since your friend's mom drove six kids to the arcade.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:02.297Z"
   },
   {
     "id": "g:game-qwop",
@@ -467,16 +527,6 @@ export default [
     "archivedAt": "2026-06-27T07:15:05.246Z"
   },
   {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password field that turns into a boss fight",
-    "blurb": "It demands a Roman numeral that multiplies to 35, a chess move, and the current phase of the moon. We rate the despair a solid dial-up handshake out of ten.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:05.021Z"
-  },
-  {
     "id": "gw-true-size",
     "kind": "site",
     "era": "current",
@@ -587,14 +637,14 @@ export default [
     "archivedAt": "2026-06-23T07:25:55.483Z"
   },
   {
-    "id": "gw-crouton",
+    "id": "gw-make-everything-ok",
     "kind": "site",
     "era": "current",
-    "title": "A website that just shows you a different crouton every time",
-    "blurb": "Click for a new crouton. That is the feature. That is the site. We respect the commitment to the bit and the bread.",
-    "url": "https://crouton.net",
+    "title": "A giant button that promises to make everything OK",
+    "blurb": "You press it, a loading bar does its thing, and it gently informs you everything is now OK. Somehow it kind of works.",
+    "url": "https://makeeverythingok.com",
     "source": "weird",
-    "archivedAt": "2026-06-23T07:25:55.080Z"
+    "archivedAt": "2026-06-23T07:25:55.398Z"
   },
   {
     "id": "gw-falling-falling",
@@ -645,16 +695,6 @@ export default [
     "url": "https://myretrotvs.com/",
     "source": "weird",
     "archivedAt": "2026-06-21T07:49:45.778Z"
-  },
-  {
-    "id": "gw-find-invisible-cow",
-    "kind": "site",
-    "era": "current",
-    "title": "Hunt a cow you can only hear",
-    "blurb": "Drag your mouse around a blank screen while a voice MOOs louder the closer you get. Somehow more tense than any boss fight in Crypt of the Hollow King.",
-    "url": "https://findtheinvisiblecow.com/",
-    "source": "weird",
-    "archivedAt": "2026-06-21T07:49:45.515Z"
   },
   {
     "id": "gw-weird-one",
