@@ -246,15 +246,18 @@ const HCB_CSS = `
   .hcb-lane.cant .hcb-open { color: #ff8a8a; }
   .hcb-lane.cant .hcb-open small { color: #ff8a8a; }
 
-  /* Per-lane "chips at stake" readout — replaces the ANTE hint once a lane is open.
-     Pinned to the top of the slots so it clears the upward-growing card stack. */
+  /* Per-lane "chips you'll win" readout — replaces the ANTE hint once a lane is
+     open. Shows the total chip payout on a win (ante return + any winning raise),
+     with a small chip icon. Pinned to the top of the slots so it clears the
+     upward-growing card stack. */
   .hcb-slots .hcb-stake {
-    position: absolute; top: 3px; left: 0; right: 0; z-index: 2;
+    position: absolute; top: 2px; left: 0; right: 0; z-index: 2;
     display: flex; flex-direction: column; align-items: center; gap: 1px;
     pointer-events: none; text-align: center;
   }
-  .hcb-slots .hcb-stake .amt { font-family: 'Press Start 2P',monospace; font-size: .44rem; letter-spacing: .02em; color: #ffd23f; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
-  .hcb-slots .hcb-stake .mult { font-family: 'Press Start 2P',monospace; font-size: .4rem; letter-spacing: .02em; color: #3fffd0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+  .hcb-slots .hcb-stake .amt { display: inline-flex; align-items: center; gap: 3px; font-family: 'Press Start 2P',monospace; font-size: .64rem; letter-spacing: .02em; color: #ffd23f; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+  .hcb-slots .hcb-stake .amt img { width: 13px; height: 13px; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+  .hcb-slots .hcb-stake .mult { font-family: 'Press Start 2P',monospace; font-size: .52rem; letter-spacing: .02em; color: #3fffd0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 
   /* Double-tap arm: first tap greenlights the lane, a second tap places. */
   .hcb-lane.armed .hcb-slots { border-color: #3fffd0; border-style: solid; box-shadow: 0 0 14px rgba(63,255,208,.5) inset, 0 0 8px rgba(63,255,208,.35); }
@@ -942,8 +945,11 @@ export default function ChipPanic() {
                       </span>
                     )}
                     {stake && !empty && !locked && (
-                      <span className="hcb-stake" aria-label={`At stake: ${stake.atStake} chips`}>
-                        <span className="amt">◈ {stake.atStake}</span>
+                      <span className="hcb-stake" aria-label={`To win: ${stake.toWin} chips`}>
+                        <span className="amt">
+                          <img src={chipImg("blue")} alt="" draggable="false" />
+                          {stake.toWin}
+                        </span>
                         {stake.mult > 1 && <span className="mult">×{stake.mult}</span>}
                       </span>
                     )}

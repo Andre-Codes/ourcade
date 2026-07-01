@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
+import { todayKey, prettyDate, dayNumberFromKey, shiftDayKey } from "../lib/daily.js";
 import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
@@ -62,6 +62,13 @@ export default function Spelldown() {
   const board = useMemo(() => boardFor(day), [day]);
   const num = useMemo(() => spelldownNumber(day), [day]);
   const { submit } = useArcadeScore("spelldown");
+
+  // Yesterday's board — revealed (full answer list) in a collapsed expander so a
+  // player can see what they missed. Deterministic like today's; boardFor never
+  // returns null, so the reveal is always safe.
+  const prevDay = useMemo(() => shiftDayKey(day, 1), [day]);
+  const prevBoard = useMemo(() => boardFor(prevDay), [prevDay]);
+  const prevNum = useMemo(() => spelldownNumber(prevDay), [prevDay]);
 
   const [state, setState] = useState(() => loadDayState(day));
   const [entry, setEntry] = useState("");
@@ -241,6 +248,31 @@ export default function Spelldown() {
           </div>
         </div>
 
+        {/* prior-day reveal: the full answer list for yesterday's board, so
+            players get closure on what they missed. Collapsed by default. */}
+        {prevNum >= 1 && (
+          <details className="spd-prior">
+            <summary>Yesterday's words · Spelldown #{prevNum}</summary>
+            <div className="spd-prior-body">
+              <div className="spd-prior-meta">
+                <span className="spd-prior-letters">
+                  {prevBoard.letters.split("").map((ch) => (
+                    <span key={ch} className={ch === prevBoard.center ? "is-center" : ""}>{ch}</span>
+                  ))}
+                </span>
+                <span className="spd-prior-count">{prevBoard.words.length} words</span>
+              </div>
+              <div className="spd-found-list">
+                {prevBoard.words.map((w) => (
+                  <span key={w} className={`spd-word${prevBoard.pangrams.includes(w) ? " is-pangram" : ""}`}>
+                    {w}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </details>
+        )}
+
         <div className="spd-actions">
           <ShareButton label="Share your Spelldown" title="Ourcade — Spelldown" text={share} />
         </div>
@@ -314,6 +346,21 @@ const CSS = `
 .spd-word{font-size:.74rem;font-weight:700;letter-spacing:.02em;background:#2a2410;color:#e7dcc0;
   padding:3px 7px;border-radius:6px;text-transform:uppercase}
 .spd-word.is-pangram{background:#c9a227;color:#1a1606}
+.spd-prior{width:100%;max-width:420px;margin-top:2px}
+.spd-prior>summary{list-style:none;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.76rem;
+  color:#cbb778;background:#16130a;border-radius:10px;padding:9px 12px;user-select:none;
+  display:flex;align-items:center;gap:6px}
+.spd-prior>summary::-webkit-details-marker{display:none}
+.spd-prior>summary::before{content:"▸";color:#8a7d52;transition:transform .15s}
+.spd-prior[open]>summary::before{transform:rotate(90deg)}
+.spd-prior>summary:hover{color:#ffd45e}
+.spd-prior-body{margin-top:6px}
+.spd-prior-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.spd-prior-letters{display:flex;gap:3px}
+.spd-prior-letters span{font-family:'Share Tech Mono',monospace;font-weight:700;font-size:.82rem;
+  color:#e7dcc0;text-transform:uppercase}
+.spd-prior-letters span.is-center{color:#ffd45e}
+.spd-prior-count{font-size:.72rem;color:#8a7d52;font-family:'Share Tech Mono',monospace}
 .spd-actions{display:flex;gap:10px;margin-top:4px}
 .spd-next{margin:2px 0 0;font-size:.72rem;color:#8a7d52;font-family:'Share Tech Mono',monospace}
 @media(max-width:380px){

@@ -107,6 +107,15 @@ export function dayNumberFromKey(key) {
   return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
 }
 
+// The "YYYY-MM-DD" key for the day `n` days before `key` (default 1 = yesterday).
+// Parsed/formatted as UTC (like prettyDate) so it echoes the key exactly and never
+// drifts across a DST boundary.
+export function shiftDayKey(key, n = 1) {
+  const [y, m, d] = key.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d) - n * 86400000);
+  return dayKey(new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
+}
+
 // xmur3 string hash → unsigned 32-bit int. Stable across engines.
 export function daySeed(str) {
   let h = 1779033703 ^ str.length;

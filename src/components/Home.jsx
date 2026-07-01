@@ -172,7 +172,13 @@ function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
 
       <div className="arcade-card-tags">
         {game.tags.map((t) => (
-          <span key={t} className="arcade-tag">{t}</span>
+          <span
+            key={t}
+            className={`arcade-tag${t === "daily" ? " is-daily" : ""}`}
+            title={t === "daily" ? "Refreshes every day — a new challenge at midnight" : undefined}
+          >
+            {t === "daily" ? "↻ daily" : t}
+          </span>
         ))}
       </div>
 

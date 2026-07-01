@@ -33,6 +33,8 @@ export const GLOBAL_CSS =`
   @keyframes ptRipple { 0%{transform:scale(0.2);opacity:0.8} 100%{transform:scale(1.6);opacity:0} }
   @keyframes ptBar    { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.6)} }
   @keyframes ptFlourish { 0%{transform:scale(0.6);opacity:0} 40%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:0} }
+  @keyframes ptMiss   { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+  @keyframes ptMissFlash { 0%{opacity:0} 25%{opacity:1} 100%{opacity:0} }
 `;
 
 const T = {
@@ -797,12 +799,15 @@ function ptStepFreq(i) {
   return midiToFreq(PT_ROOT_MIDI + oct * 12 + PT_SCALE[deg]);
 }
 
-// Stateful walker: returns { freq, step } for the next melodic note.
+// Stateful walker. `.next()` returns one melodic note { freq, step };
+// `.chord(count)` returns `count` harmonically-related notes (the current
+// progression chord, spread across octaves) for simultaneous tiles.
 function makeMelody() {
   let step = 4;      // start mid-range
   let n = 0;         // notes played (drives the progression)
-  return () => {
-    const chord = PT_PROG[Math.floor(n / 4) % PT_PROG.length];
+  const curChord = () => PT_PROG[Math.floor(n / 4) % PT_PROG.length];
+  const next = () => {
+    const chord = curChord();
     // Candidate next steps: small intervals around current position.
     const cands = [-4,-3,-2,-1,-1,1,1,2,3,4].map(d => step + d)
       .filter(s => s >= 0 && s <= PT_RANGE);
@@ -817,6 +822,31 @@ function makeMelody() {
     n++;
     return { freq: ptStepFreq(step), step };
   };
+  const chord = (count) => {
+    const deg = curChord();                 // e.g. [0,2,4] — a triad
+    n++;                                     // advance progression once per chord
+    // Build voices from low to high, cycling triad tones up the octaves so the
+    // notes stack into a real chord instead of a cluster.
+    const notes = [];
+    for (let i = 0; i < count; i++) {
+      const oct = Math.floor(i / deg.length);
+      const s = oct * PT_SCALE.length + deg[i % deg.length];
+      notes.push(midiToFreq(PT_ROOT_MIDI + Math.floor(s / PT_SCALE.length) * 12
+        + PT_SCALE[s % PT_SCALE.length]));
+    }
+    step = deg[deg.length - 1] % PT_SCALE.length; // continue melody from the top voice
+    return notes;
+  };
+  return { next, chord };
+}
+
+// How many tiles arrive together. Solo until difficulty tops out (~score 2000
+// where ptTileSpeed bottoms), then occasional 2-tile chords, later rare 3-tile.
+function ptChordSize(score) {
+  if (score < 2000) return 1;
+  const r = Math.random();
+  if (score >= 3200) return r < 0.15 ? 3 : r < 0.5 ? 2 : 1;
+  return r < 0.4 ? 2 : 1;
 }
 
 // Rich piano-ish voice: detuned twin oscillators + octave shimmer through
@@ -870,14 +900,27 @@ function playPianoNote(freq, quality) {
 function playMissThud() {
   try {
     const ctx = getCtx();
+    const t = ctx.currentTime;
+    // Low body thud.
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
     osc.connect(env); env.connect(ctx.destination);
-    osc.type = "sine"; osc.frequency.value = 90;
-    osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.15);
-    env.gain.setValueAtTime(0.1, ctx.currentTime);
-    env.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.22);
+    osc.type = "sine"; osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(42, t + 0.18);
+    env.gain.setValueAtTime(0.16, t);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+    osc.start(t); osc.stop(t + 0.28);
+    // Dissonant buzz on top so a miss reads as "wrong", not just quiet.
+    const buzz = ctx.createOscillator();
+    const benv = ctx.createGain();
+    const bfilt = ctx.createBiquadFilter();
+    buzz.connect(bfilt); bfilt.connect(benv); benv.connect(ctx.destination);
+    buzz.type = "sawtooth"; buzz.frequency.setValueAtTime(220, t);
+    buzz.frequency.exponentialRampToValueAtTime(150, t + 0.12);
+    bfilt.type = "lowpass"; bfilt.frequency.value = 900;
+    benv.gain.setValueAtTime(0.07, t);
+    benv.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    buzz.start(t); buzz.stop(t + 0.18);
   } catch {}
 }
 
@@ -910,6 +953,8 @@ function ptGeom(areaH) {
     good:    tileH * 0.5,
   };
 }
+// How long a missed tile flashes red before it's cleared.
+const PT_MISS_FLASH_MS = 300;
 
 export function PianoTiles({onExit}) {
   const [tiles, setTiles]         = useState([]);   // {id, lane, speed, born, note, step}
@@ -924,6 +969,7 @@ export function PianoTiles({onExit}) {
   const [hitFeedback, setHitFeedback] = useState(null);    // {text,color,key}
   const [bursts, setBursts]       = useState([]);          // hit-line flash bursts
   const [flourish, setFlourish]   = useState(null);        // combo milestone flourish
+  const [missFlash, setMissFlash] = useState(null);        // red screen flash key on miss
   const [areaH, setAreaH]         = useState(600);         // measured play-area height
 
   const scoreRef    = useRef(0);
@@ -969,7 +1015,8 @@ export function PianoTiles({onExit}) {
     if(!areaRef.current) return;
     const rect=areaRef.current.getBoundingClientRect();
     const laneW=rect.width/PT_LANES;
-    const x=lane*laneW+laneW/2;
+    // Keep the popup fully on-screen: clamp its centre away from both edges.
+    const x=clamp(lane*laneW+laneW/2, 34, rect.width-34);
     const y=ptGeom(rect.height).hitLineY-24;
     const id=uid();
     setPopups(p=>[...p,{id,x,y,val:text,color}]);
@@ -989,6 +1036,9 @@ export function PianoTiles({onExit}) {
     setMisses(missRef.current);
     comboRef.current=0; setCombo(0);
     playMissThud();
+    // Make the miss unmistakable: centered MISS + a full-screen red flash.
+    setHitFeedback({text:"MISS",color:T.red,key:uid()});
+    setMissFlash(uid());
     if(missRef.current>=3){
       gameOverRef.current=true;
       clearTimeout(spawnTimer.current);
@@ -996,30 +1046,42 @@ export function PianoTiles({onExit}) {
     }
   },[]);
 
-  // Spawn tiles recursively. Each tile picks its note from the melody walker
-  // at spawn time, so the order tiles fall in defines the tune.
+  // Spawn tiles recursively. Notes come from the melody walker at spawn time,
+  // so the order tiles fall in defines the tune. Once difficulty tops out,
+  // some spawns are chords: 2+ tiles in different lanes sharing a `born` (so
+  // they arrive together) with harmonically-related notes.
   const scheduleSpawn=useCallback(()=>{
     if(gameOverRef.current) return;
     const gap=ptSpawnGap(scoreRef.current);
     spawnTimer.current=setTimeout(()=>{
       if(gameOverRef.current) return;
-      const lane=randI(0,PT_LANES-1);
       const speed=ptTileSpeed(scoreRef.current);
-      const {freq,step}=melodyRef.current();
-      const id=uid();
-      const tile={id,lane,speed,born:Date.now(),note:freq,step};
-      setTiles(t=>[...t,tile]);
+      const born=Date.now();
+      const size=ptChordSize(scoreRef.current);
+      // Pick `size` distinct lanes.
+      const lanes=[0,1,2,3].sort(()=>Math.random()-0.5).slice(0,size);
+      const notes=size>1 ? melodyRef.current.chord(size) : [melodyRef.current.next().freq];
+      const newTiles=lanes.map((lane,i)=>({
+        id:uid(),lane,speed,born,note:notes[i],chord:size>1,
+      }));
+      setTiles(t=>[...t,...newTiles]);
       // Auto-expire once the tile has fallen a bit past the Good window — the
-      // logical miss lines up with the tile visibly leaving the hit line.
+      // logical miss lines up with the tile visibly leaving the hit line. Mark
+      // the tile "missed" briefly first so the player sees which one they lost.
       const g=ptGeom(areaRef.current?.getBoundingClientRect().height||600);
       const expireMs=Math.round(speed*(1 + g.good/g.hitLineY)) + 40;
-      setTimeout(()=>{
-        setTiles(prev=>{
-          const still=prev.find(tl=>tl.id===id);
-          if(still) recordMiss();
-          return prev.filter(tl=>tl.id!==id);
-        });
-      }, expireMs);
+      newTiles.forEach(nt=>{
+        setTimeout(()=>{
+          // Read current tiles from the ref (synchronous, not a deferred state
+          // updater) to decide if this tile is still un-tapped = a miss.
+          const still=tilesRef.current.some(tl=>tl.id===nt.id && !tl.missed);
+          if(!still) return;
+          setTiles(prev=>prev.map(tl=>tl.id===nt.id?{...tl,missed:true}:tl));
+          recordMiss();
+          // Clear the missed tile after its flash plays.
+          setTimeout(()=>setTiles(prev=>prev.filter(tl=>tl.id!==nt.id)),PT_MISS_FLASH_MS);
+        }, expireMs);
+      });
       scheduleSpawn();
     }, gap);
   },[recordMiss]);
@@ -1041,7 +1103,7 @@ export function PianoTiles({onExit}) {
     // Find the tile in this lane whose leading (bottom) edge is nearest the
     // hit line. leadY uses the SAME geometry the tiles are rendered with.
     const laneTiles=tilesRef.current
-      .filter(t=>t.lane===lane)
+      .filter(t=>t.lane===lane && !t.missed)   // a missed tile is flashing out
       .map(t=>{
         const progress=(now-t.born)/t.speed;
         const leadY=progress*g.hitLineY;        // bottom edge, px from top
@@ -1091,7 +1153,9 @@ export function PianoTiles({onExit}) {
     const col=PT_LANE_COLORS[lane];
     flash(perfect?2:1);
     addBurst(lane, perfect?col:"#88ddff", perfect);
-    addPopup(lane, perfect?"PERFECT!":"GOOD", perfect?col:"#88ddff");
+    // Single hit label, centered. A small +points rises at the tapped lane —
+    // informative, not a duplicate of the label. ScorePopup adds the "+".
+    addPopup(lane, pts, perfect?col:"#88ddff");
     setHitFeedback({text:perfect?"✦ PERFECT":"GOOD",color:perfect?PT_COLOR:"#88ddff",key:uid()});
     // Combo milestone flourish.
     if(c===5||c===10||c===20||c===30||c===50)
@@ -1104,7 +1168,7 @@ export function PianoTiles({onExit}) {
     melodyRef.current=makeMelody();
     setTiles([]); setScore(0); setMisses(0); setCombo(0);
     setGameOver(false); setCountdown(3); setRunning(false);
-    setLaneFlash([0,0,0,0]); setPopups([]); setBursts([]); setFlourish(null);
+    setLaneFlash([0,0,0,0]); setPopups([]); setBursts([]); setFlourish(null); setMissFlash(null);
   };
 
   if(gameOver) return <GameOver score={score} color={PT_COLOR} game="pianotiles" onRestart={restart} onExit={onExit}/>;
@@ -1165,10 +1229,11 @@ export function PianoTiles({onExit}) {
           background:"linear-gradient(transparent,rgba(255,255,255,0.05))",zIndex:2,
         }}/>
 
-        {/* Falling tiles — glow ramps up as they approach the line */}
+        {/* Falling tiles — glow ramps up as they approach the line. A missed
+            tile turns red, shakes, and shows an ✕ so it's obvious which was lost. */}
         {computedTiles.map(t=>{
-          const col=PT_LANE_COLORS[t.lane];
-          const glow=8+t.prox*22;
+          const col=t.missed?T.red:PT_LANE_COLORS[t.lane];
+          const glow=t.missed?26:8+t.prox*22;
           return (
             <div key={t.id} style={{
               position:"absolute",
@@ -1178,12 +1243,15 @@ export function PianoTiles({onExit}) {
               height:geom.tileH,
               borderRadius:10,
               background:`linear-gradient(180deg,${col}e6,${col}99)`,
-              boxShadow:`0 0 ${glow}px ${col}${t.prox>0.7?"aa":"66"}, inset 0 2px 0 rgba(255,255,255,0.28), inset 0 -3px 8px rgba(0,0,0,0.25)`,
+              boxShadow:`0 0 ${glow}px ${col}${t.missed||t.prox>0.7?"cc":"66"}, inset 0 2px 0 rgba(255,255,255,0.28), inset 0 -3px 8px rgba(0,0,0,0.25)`,
               border:`1px solid ${col}`,
-              zIndex:2,
+              zIndex:t.missed?5:2,
+              animation:t.missed?"ptMiss 0.3s ease-out":"none",
+              display:"flex",alignItems:"center",justifyContent:"center",
             }}>
               {/* glass streak */}
               <div style={{position:"absolute",inset:"6% 8% auto 8%",height:"22%",borderRadius:6,background:"linear-gradient(180deg,rgba(255,255,255,0.35),transparent)"}}/>
+              {t.missed&&<span style={{fontFamily:"'Black Ops One'",fontSize:Math.min(34,geom.tileH*0.4),color:"#fff",textShadow:`0 0 10px ${T.red}`}}>✕</span>}
             </div>
           );
         })}
@@ -1204,12 +1272,22 @@ export function PianoTiles({onExit}) {
           </div>
         ))}
 
+        {/* Miss flash — red vignette pulse across the whole play area */}
+        {missFlash&&(
+          <div key={missFlash} style={{
+            position:"absolute",inset:0,pointerEvents:"none",zIndex:9,
+            boxShadow:"inset 0 0 90px 20px rgba(255,45,85,0.55)",
+            background:"rgba(255,45,85,0.06)",
+            animation:"ptMissFlash 0.4s ease-out forwards",
+          }}/>
+        )}
+
         {/* Hit feedback overlay */}
         {hitFeedback&&(
           <div key={hitFeedback.key} style={{
             position:"absolute",top:"28%",left:0,right:0,
             textAlign:"center",pointerEvents:"none",
-            fontFamily:"'Black Ops One'",fontSize:26,
+            fontFamily:"'Black Ops One'",fontSize:hitFeedback.text==="MISS"?34:26,
             color:hitFeedback.color,
             textShadow:`0 0 16px ${hitFeedback.color}`,
             animation:"floatUp 0.6s ease-out forwards",zIndex:10,

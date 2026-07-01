@@ -15,7 +15,7 @@ export default function PianoTilesGame() {
     return () => document.head.removeChild(s);
   }, []);
   return (
-    <div style={{ width: "100vw", height: "100svh", background: "#08080f", overflow: "hidden", position: "relative" }}>
+    <div style={{ width: "100%", height: "100svh", background: "#08080f", overflow: "hidden", position: "relative" }}>
       <PianoTiles onExit={() => navigate("/")} />
     </div>
   );

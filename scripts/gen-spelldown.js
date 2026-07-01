@@ -16,15 +16,17 @@
    validates words at runtime, it just checks membership in the day's precomputed
    word array (logic.js).
 
-   HOW BOARDS ARE CHOSEN. The ENABLE list is exhaustive (lots of obscure but
-   valid words) and the repo has no word-frequency data, so we can't rank words
-   by how common they are. Instead we make the SHAPE of each board friendly and
-   lean on two facts: (1) the PANGRAM is the centerpiece, so we require every
-   board to have one and surface boards whose pangrams read as real words; (2)
-   obscure words are harmless — they're only ever "bonus" finds, and the rank
-   thresholds in logic.js are a PERCENT of the day's max, so "Genius" never needs
-   the obscure tail. Concretely we sweep every 7-distinct-letter set that appears
-   in the dictionary, then keep only sets that are:
+   HOW BOARDS ARE CHOSEN. Board LETTER-SETS are discovered against the exhaustive
+   ENABLE list (below), but each board's shipped ANSWER list is CURATED: it's
+   intersected with a common-words set (google-10000-english, common-10k.txt) so
+   the obscure ENABLE tail never pads a day's word list — every answer reads as a
+   real word, which keeps the game and the prior-day reveal friendly. On top of
+   that we make the SHAPE of each board friendly: (1) the PANGRAM is the
+   centerpiece, so we require every board to have one (in the curated set) and
+   surface boards whose pangrams read as everyday words; (2) rank thresholds in
+   logic.js are a PERCENT of the day's max, so "Genius" never needs an obscure
+   tail. Concretely we sweep every 7-distinct-letter set that appears in the
+   dictionary, then keep only sets that are:
        • vowel-friendly  (≥ 2 vowels, ≤ 1 of J/Q/X/Z),
        • a comfortable size  (BOARD band below — not thin, not demoralizing),
        • have ≥ 1 pangram with a NON-exotic required center,
@@ -109,6 +111,29 @@ function loadWords(len) {
     .filter((w) => w.length === len && /^[A-Z]+$/.test(w));
 }
 
+// The curated common-words set (google-10000-english, no-swears). Board LETTER-SETS
+// are still discovered against the exhaustive ENABLE list above, but each board's
+// shipped ANSWER list is intersected with this set so the obscure ENABLE tail never
+// pads a day's word list (or the prior-day reveal). Flat file (frequency order, not
+// length-sorted); we keep only the 4–7-letter Spelldown band as a Set for O(1)
+// membership. ENABLE stays authoritative for quantity games / other generators.
+function loadCommonSet() {
+  const file = path.join(WORDLIST_DIR, "common-10k.txt");
+  if (!fs.existsSync(file)) {
+    throw new Error(
+      "common-10k.txt not found in assets-src/wordlists — Spelldown answers are " +
+        "curated against it. Fetch google-10000-english-no-swears.txt into that path."
+    );
+  }
+  const set = new Set();
+  for (const raw of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
+    const w = raw.trim().toUpperCase();
+    if (w.length >= MIN_WORD && w.length <= 7 && /^[A-Z]+$/.test(w)) set.add(w);
+  }
+  return set;
+}
+const COMMON = loadCommonSet();
+
 // ── letter-set bitmask helpers ────────────────────────────────────────────────
 const A = "A".charCodeAt(0);
 const maskOf = (w) => {
@@ -141,6 +166,7 @@ function boardFor(letters, center) {
   for (const [w, m] of POOL) {
     if ((m & ~Lmask) !== 0) continue; // contains a letter outside the set
     if ((m & cbit) === 0) continue; // missing the required center
+    if (!COMMON.has(w)) continue; // curate: only ship common (google-10k) words
     words.push(w);
     if (m === Lmask) pangrams.push(w); // uses all seven distinct letters
   }
@@ -200,25 +226,27 @@ for (const letters of candidateSets) {
   if (b) all.push(b);
 }
 
-// Keep ONLY boards whose pangram is an everyday word (NICE_PANGRAMS). Because the
-// daily layer (rotateDaily) shuffles the whole pool, a board buried at the end of
-// the file can still surface on day 1 — so "friendly" has to be a property of
-// EVERY shipped board, not just the first few. Filtering (not just ranking)
-// guarantees no day ever lands on an obscure pangram like GLAIKET.
-const nice = all.filter((b) => hasNicePangram(b.pangrams));
+// Every playable board is already friendly: its answer list — pangram included —
+// is curated to the common-words set, so no day can land on an obscure pangram
+// like GLAIKET (that whole tail is gone). NICE_PANGRAMS is therefore a RANKING
+// preference now, not a hard filter: boards whose pangram is a hand-picked
+// everyday word (AUCTION, THUNDER…) sort to the front, but the rest still fill out
+// a healthy rotation pool instead of collapsing it to a handful.
+const niceCount = all.filter((b) => hasNicePangram(b.pangrams)).length;
 
-// Among the friendly boards, prefer more pangrams, then more vowels, then size
-// near the target — then take the pool.
-nice.sort(
+// Rank: hand-picked everyday pangram first, then more pangrams, more vowels, then
+// size near the target — and keep the best TARGET_BOARDS.
+all.sort(
   (a, b) =>
+    Number(hasNicePangram(b.pangrams)) - Number(hasNicePangram(a.pangrams)) ||
     b.pangrams.length - a.pangrams.length ||
     b._vowels - a._vowels ||
     Math.abs(a.maxWords - TARGET_BOARD) - Math.abs(b.maxWords - TARGET_BOARD)
 );
 
-const boards = nice.slice(0, TARGET_BOARDS).map(({ _vowels, ...keep }) => keep);
+const boards = all.slice(0, TARGET_BOARDS).map(({ _vowels, ...keep }) => keep);
 console.log(
-  `  ${all.length} playable boards; ${nice.length} with an everyday pangram.`
+  `  ${all.length} playable boards; ${niceCount} with a hand-picked everyday pangram.`
 );
 
 for (const b of boards) {

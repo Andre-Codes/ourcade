@@ -749,7 +749,7 @@ const KIND_META = {
     action: "Read the picture, then reveal the phrase",
   },
   pattern: {
-    label: "Complete the Pattern",
+    label: "Pattern",
     time: "2 min",
     difficulty: "beginner",
     action: "Work out the rule, then type what comes next",

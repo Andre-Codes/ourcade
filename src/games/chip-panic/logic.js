@@ -324,21 +324,30 @@ export const laneFull = (lane) => lane.length >= LANE_CAP;
 // The current cost to open a new lane (rises with progress).
 export const currentAnte = (state) => anteFor(state.scoreHands, state.wantedHits, state.draws);
 
-/* Chips currently committed to lane `l` and the multiplier in play — for the
-   per-lane "at stake" readout. `atStake` is what's LOST if the lane busts/saves
-   (the paid ante + any committed raise stake); `mult` is the points multiplier a
-   committed raise would apply on a win (1 = ante only, no raise). Returns null for
-   a lane with nothing at stake (not yet anted, or locked). */
+/* Chips currently committed to lane `l`, the chips it would PAY OUT on a win, and
+   the multiplier in play — for the per-lane readout. `atStake` is what's LOST if
+   the lane busts/saves (the paid ante + any committed raise stake). `toWin` is the
+   total chips COLLECTED if the lane scores (ante back + flat profit, plus the raise
+   stake back + its profit when a committed raise meets its requirement) — the same
+   arithmetic resolveLane pays. `mult` is the points multiplier a committed raise
+   would apply on a win (1 = ante only, no raise). Returns null for a lane with
+   nothing at stake (not yet anted, or locked). */
 export function laneStake(state, l) {
   if (!state.anted[l] || state.locked[l]) return null;
-  let atStake = state.anteAmt[l] || 0;
+  const anteAmt = state.anteAmt[l] || 0;
+  let atStake = anteAmt;
+  let toWin = anteAmt + ANTE_PROFIT; // ante refund + flat profit on any true score
   let mult = 1;
   const r = state.raise[l];
   if (r) {
     const tier = TIERS[r.tier];
-    if (tier) { atStake += tier.extra; mult = tier.mult; }
+    if (tier) {
+      atStake += tier.extra;
+      toWin += tier.extra + tier.profit; // raise stake back + profit if it lands
+      mult = tier.mult;
+    }
   }
-  return { atStake, mult };
+  return { atStake, toWin, mult };
 }
 
 // Can the current tray be placed into lane `l`? An empty lane requires either an

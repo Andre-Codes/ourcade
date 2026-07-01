@@ -60,6 +60,7 @@ const HCBH_CSS = `
   .hcbh-tier { display: flex; align-items: center; gap: 8px; font-family: 'Press Start 2P', monospace; font-size: .46rem; letter-spacing: .02em; color: #cdd2ee; }
   .hcbh-tier .dot { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
   .hcbh-tier .mul { flex: 0 0 auto; width: 34px; color: #ffd23f; }
+  .hcbh-tier .pay { flex: 0 0 auto; width: 62px; color: #3fffd0; }
   .hcbh-tier .req { flex: 1 1 auto; text-align: right; color: #9b86c4; }
 
   .hcbh-close {
@@ -84,10 +85,11 @@ function useHcbhStyles() {
 }
 
 // Raise tiers — mirrors TIERS in logic.js (Red/Gold/Black; ante-Blue isn't a raise).
+// `pay` is the chips the raise returns on a win = its stake back + profit.
 const TIERS = [
-  { color: "#ff5a5a", mult: "×3", req: "needs trips+" },
-  { color: "#3fd07a", mult: "×5", req: "needs straight+" },
-  { color: "#cbb4ff", mult: "×8", req: "needs full house+" },
+  { color: "#ff5a5a", mult: "×3", req: "needs trips+", pay: "+2 chips" },
+  { color: "#3fd07a", mult: "×5", req: "needs straight+", pay: "+4 chips" },
+  { color: "#cbb4ff", mult: "×8", req: "needs full house+", pay: "+7 chips" },
 ];
 
 export default function HelpPanel({ open, onClose }) {
@@ -161,10 +163,17 @@ export default function HelpPanel({ open, onClose }) {
               <div className="hcbh-tier" key={t.mult}>
                 <span className="dot" style={{ background: t.color, color: t.color }} />
                 <span className="mul">{t.mult}</span>
+                <span className="pay">{t.pay}</span>
                 <span className="req">{t.req}</span>
               </div>
             ))}
           </div>
+          <p className="hcbh-p">
+            <b>Chip payout.</b> A scoring lane returns your <b>ante + 1 chip</b>. A raise that
+            lands adds its own return on top (shown above), so the number over each lane is the
+            <b> total chips you'll pocket if it wins</b>. A raise that misses its hand forfeits its
+            stake, but the ante still pays out — a bust or save loses everything staked.
+          </p>
         </div>
 
         <div className="hcbh-sec">

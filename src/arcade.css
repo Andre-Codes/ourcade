@@ -491,6 +491,15 @@ main > section + section { margin-top: 44px; }
   padding: 2px 7px;
 }
 
+/* "daily" is a live feature, not a genre — accent it with the cabinet color so a
+   player spots at a glance which games hand out a fresh challenge each day. */
+.arcade-tag.is-daily {
+  color: color-mix(in srgb, var(--accent) 82%, white);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  font-weight: 700;
+}
+
 .arcade-card-play {
   position: absolute;
   bottom: 14px; left: 16px;
