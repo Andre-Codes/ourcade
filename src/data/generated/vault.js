@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-sad-trombone",
+    "kind": "site",
+    "era": "current",
+    "title": "A dedicated website for the sad trombone",
+    "blurb": "One big button. One perfect wah-wah-wahhh. That's it — the internet's official soundtrack for defeat, disappointment, and dropping the ball in Modem Defender.",
+    "url": "https://sadtrombone.com",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.916Z"
+  },
+  {
+    "id": "gw-street-view-wonders",
+    "kind": "site",
+    "era": "current",
+    "title": "A curated tour of Street View's weirdest corners",
+    "blurb": "Someone combed the entire planet's roadside cameras so you can wander deserts, ice sheets, and strange little towns from your chair. It's armchair travel with a very long extension cord.",
+    "url": "https://neal.fun/wonders-of-street-view",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.832Z"
+  },
+  {
+    "id": "gw-drawing-garden",
+    "kind": "site",
+    "era": "current",
+    "title": "Wherever you drag, flowers grow",
+    "blurb": "Click and hold and a lush garden blooms under your cursor while gentle music plays. No goal, no score — just you, becoming briefly responsible for spring.",
+    "url": "https://drawing.garden",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.687Z"
+  },
+  {
+    "id": "gw-lhc",
+    "kind": "site",
+    "era": "current",
+    "title": "Has the Large Hadron Collider destroyed the world yet?",
+    "blurb": "A single-serving site that answers the year's most reassuring question. Spoiler: the answer is still NO, in comforting giant letters. Bookmark it for peace of mind.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.601Z"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug. In a rug. And a timer judging you.",
+    "blurb": "That's the whole site — a pug bundled in a rug, plus a clock counting how long you've spent honoring it. No shop, no menu, no reason. Just vibes and a soft dog.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.191Z"
+  },
+  {
+    "id": "gw-sito-synergy",
+    "kind": "site",
+    "era": "current",
+    "title": "A collaborative art grid that's been nesting since 1997",
+    "blurb": "Gridcosm stacks 3×3 grids inside 3×3 grids forever, each cell hand-drawn by whoever showed up that year. It's been quietly zooming inward since dial-up was the only-up.",
+    "url": "https://www.sito.org/synergy/",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:54.051Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "An endless stream of strangers hugging you",
+    "blurb": "Real people, on video, opening their arms just for you, forever. It's the exact opposite energy of the comment section you just crawled out of.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:53.947Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password that fights back",
+    "blurb": "Type a password against rules that keep multiplying — add a Roman numeral, a chess move, today's moon phase, a chicken you must keep alive. It's less a form field and more a boss fight.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:53.827Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "One car. The whole internet is driving it.",
+    "blurb": "Thousands of strangers vote on every turn, honk, and radio station to steer a single virtual car down real roads. It's a road trip where nobody's allowed to touch the wheel alone — democracy at 25 mph.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-03T07:14:53.715Z"
+  },
+  {
     "id": "g:slop-evader",
     "kind": "site",
     "era": "current",
@@ -645,26 +735,6 @@ export default [
     "archivedAt": "2026-07-01T07:41:30.216Z"
   },
   {
-    "id": "gw-lhc-destroyed",
-    "kind": "site",
-    "era": "current",
-    "title": "A site that confirms the Large Hadron Collider hasn't destroyed Earth yet",
-    "blurb": "One enormous word answers the world's most nervous physics question: NO. If it ever changes, well, you won't be reading it. Very early-2000s panic energy, still online and still saying NO.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.734Z"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug in a rug that refuses to come out",
-    "blurb": "There is a pug. It is in a rug. You'll sit there hoping something happens. Nothing does. That's the peace offering.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.640Z"
-  },
-  {
     "id": "gw-find-invisible-cow",
     "kind": "site",
     "era": "current",
@@ -685,16 +755,6 @@ export default [
     "archivedAt": "2026-07-01T07:41:29.327Z"
   },
   {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password game that keeps inventing cruel new rules",
-    "blurb": "Make a password. Now it needs a Roman numeral, a chess move, the current moon phase, and a leap year. It is the most stressful thing you'll do today and you'll do it for an hour.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.218Z"
-  },
-  {
     "id": "gw-one-million-checkboxes",
     "kind": "site",
     "era": "current",
@@ -703,16 +763,6 @@ export default [
     "url": "https://onemillioncheckboxes.com",
     "source": "weird",
     "archivedAt": "2026-07-01T07:41:29.108Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "Thousands of strangers steering one car through Street View",
-    "blurb": "It's Twitch-plays-a-road-trip: everybody votes in real time to turn, honk, and tune the radio while a single virtual car crawls across Google Street View. Democracy has never parallel-parked worse.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:28.981Z"
   },
   {
     "id": "gw-sandspiel-studio",
@@ -743,16 +793,6 @@ export default [
     "url": "https://onemillionchessboards.com",
     "source": "weird",
     "archivedAt": "2026-06-29T07:58:03.448Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A wall of strangers offering you a video hug",
-    "blurb": "People around the world smile, wave, and reach out for a virtual embrace. It's the opposite of the comments section and we will not be taking questions.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:03.129Z"
   },
   {
     "id": "gw-wplace",
