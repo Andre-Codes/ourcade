@@ -30,6 +30,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { wordLadder } from "../src/lib/wordladder.js"; // shared BFS (daily cabinet reuses it too)
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WORDLIST_DIR = path.join(ROOT, "assets-src", "wordlists");
@@ -79,36 +80,9 @@ function loadWords(len) {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // WORD LADDER — BFS over the one-letter-change graph between two real words.
+// The solver (wordLadder) lives in src/lib/wordladder.js so the daily Laddergram
+// cabinet and its generator share the exact same hop rule and BFS.
 // ═══════════════════════════════════════════════════════════════════════════
-
-// Shortest ladder from `start` to `end` (inclusive), or null if none within
-// maxLen. Standard BFS: neighbors = words differing by exactly one letter.
-function wordLadder(start, end, dict, maxLen) {
-  start = start.toUpperCase();
-  end = end.toUpperCase();
-  if (start.length !== end.length || !dict.has(start) || !dict.has(end)) return null;
-  if (start === end) return null;
-
-  const queue = [[start]];
-  const seen = new Set([start]);
-  while (queue.length) {
-    const pathArr = queue.shift();
-    if (pathArr.length > maxLen) return null; // BFS → first hit is shortest
-    const last = pathArr[pathArr.length - 1];
-    for (let i = 0; i < last.length; i++) {
-      for (let c = 65; c <= 90; c++) {
-        const ch = String.fromCharCode(c);
-        if (ch === last[i]) continue;
-        const next = last.slice(0, i) + ch + last.slice(i + 1);
-        if (!dict.has(next) || seen.has(next)) continue;
-        if (next === end) return [...pathArr, next];
-        seen.add(next);
-        queue.push([...pathArr, next]);
-      }
-    }
-  }
-  return null;
-}
 
 // A few hand-picked, on-brand endpoint pairs (nostalgic / arcade flavored). We
 // try each; only those that actually resolve to a clean 4–6 rung ladder ship.
