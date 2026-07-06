@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
 import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { encodeScore, fmtClock } from "../lib/scoretime.js";
+import { useStopwatch } from "../lib/useStopwatch.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
   puzzleFor, judge, vowelHint, shareLine, vowelsNumber,
@@ -17,13 +19,18 @@ import {
    Mobile-first: a real <input> per row so the phone keyboard appears; the active
    row scrolls into view. All truth in missing-vowels/logic.js. */
 
-const STATE_KEY = "vowels:state"; // { day, solved:{clue:word}, hints:[clue…] }
+const STATE_KEY = "vowels:state"; // { day, solved:{clue:word}, hints:[clue…], startedAt, finishedAt }
 const STREAK_KEY = "vowels:streak";
 
 function loadDayState(day) {
   const s = lsGetJSON(STATE_KEY, null);
-  if (s && s.day === day && s.solved) return { day, solved: s.solved, hints: s.hints || [] };
-  return { day, solved: {}, hints: [] };
+  if (s && s.day === day && s.solved) {
+    return {
+      day, solved: s.solved, hints: s.hints || [],
+      startedAt: s.startedAt || null, finishedAt: s.finishedAt || null,
+    };
+  }
+  return { day, solved: {}, hints: [], startedAt: null, finishedAt: null };
 }
 
 function bumpStreak(day) {
@@ -51,17 +58,35 @@ export default function MissingVowels() {
   const streakedRef = useRef(false);
 
   const solvedCount = Object.keys(state.solved).length;
+  const total = puzzle.items.length;
+  const allDone = solvedCount === total;
+  // The skeletons stay hidden behind a Start gate until the player commits —
+  // otherwise they could study (or fully pre-solve) all six before the clock
+  // ever starts. Pressing Start reveals them AND starts the stopwatch together.
+  const started = !!state.startedAt;
+
+  // Frozen completion time (Start → last solve), stable across reloads; null
+  // until all six are restored. Live clock ticks until then.
+  const finalSecs = state.startedAt && state.finishedAt
+    ? (state.finishedAt - state.startedAt) / 1000
+    : null;
+  const liveSecs = useStopwatch(state.startedAt, !allDone);
+  const shownSecs = finalSecs != null ? finalSecs : liveSecs;
 
   useEffect(() => { lsSetJSON(STATE_KEY, state); }, [state]);
 
-  // Submit words-restored as it grows; bump streak on the first solve.
+  // Submit words-restored + time as it grows; more solved wins, and among equal
+  // counts the faster solver ranks higher (encoded for the "desc" board). Bump
+  // streak on the first solve.
   useEffect(() => {
     if (solvedCount > 0 && solvedCount !== lastSubmitRef.current) {
       lastSubmitRef.current = solvedCount;
-      submit(solvedCount);
+      const started = state.startedAt;
+      const secs = started ? ((state.finishedAt || Date.now()) - started) / 1000 : 0;
+      submit(encodeScore(solvedCount, secs, "desc"));
       if (!streakedRef.current) { streakedRef.current = true; setStreak(bumpStreak(day)); }
     }
-  }, [solvedCount, submit, day]);
+  }, [solvedCount, submit, day, state.startedAt, state.finishedAt]);
 
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -77,9 +102,22 @@ export default function MissingVowels() {
       flash(verdict === "notword" ? "not in the word list" : "doesn't fit the letters");
       return;
     }
-    setState((s) => ({ ...s, solved: { ...s.solved, [item.clue]: guess } }));
+    setState((s) => {
+      const nextSolved = { ...s.solved, [item.clue]: guess };
+      const complete = Object.keys(nextSolved).length === puzzle.items.length;
+      return {
+        ...s, solved: nextSolved,
+        startedAt: s.startedAt || Date.now(), // fallback; normally set by Start
+        finishedAt: complete ? Date.now() : s.finishedAt,
+      };
+    });
     flash("✓ nice");
-  }, [state.solved, entries, flash]);
+  }, [state.solved, entries, flash, puzzle.items.length]);
+
+  // Reveal the skeletons and start the clock in the same instant.
+  const start = useCallback(() => {
+    setState((s) => (s.startedAt ? s : { ...s, startedAt: Date.now() }));
+  }, []);
 
   const useHint = useCallback((item) => {
     if (state.solved[item.clue]) return;
@@ -89,7 +127,6 @@ export default function MissingVowels() {
   }, [state.solved, flash]);
 
   const share = useMemo(() => shareLine(day, solvedCount, puzzle), [day, solvedCount, puzzle]);
-  const allDone = solvedCount === puzzle.items.length;
 
   return (
     <>
@@ -104,7 +141,21 @@ export default function MissingVowels() {
         </div>
 
         <div className="mvw-theme">Theme · {puzzle.theme}</div>
-        <div className="mvw-count">{solvedCount}/{puzzle.items.length} restored</div>
+
+        {!started ? (
+          <div className="mvw-start">
+            <p className="mvw-start-info">
+              {total} everyday words, vowels stripped out. The clock starts the
+              moment you reveal them — decode all {total} as fast as you can.
+            </p>
+            <button type="button" className="mvw-start-btn" onClick={start}>START ▶</button>
+          </div>
+        ) : (
+        <>
+        <div className="mvw-count">
+          {solvedCount}/{total} restored
+          <span className="mvw-clock"> · ⏱ {fmtClock(shownSecs)}</span>
+        </div>
 
         <div className="mvw-list">
           {puzzle.items.map((item) => {
@@ -148,9 +199,15 @@ export default function MissingVowels() {
         {toast && <div className="mvw-toast">{toast}</div>}
 
         <div className="mvw-actions">
-          {allDone && <p className="mvw-done">🎉 all restored!</p>}
+          {allDone && (
+            <p className="mvw-done">
+              🎉 all restored!{finalSecs != null && <> ⏱ {fmtClock(finalSecs)}</>}
+            </p>
+          )}
           <ShareButton label="Share your Missing Vowels" title="Ourcade — Missing Vowels" text={share} />
         </div>
+        </>
+        )}
         <p className="mvw-next">a fresh theme drops at midnight, your time.</p>
       </div>
     </>
@@ -168,6 +225,15 @@ const CSS = `
 .mvw-streak{color:#ff9a52}
 .mvw-theme{font-family:'Press Start 2P',monospace;font-size:.66rem;color:#e0c3ff;letter-spacing:.04em}
 .mvw-count{font-size:.74rem;color:#9c86b5;font-family:'Share Tech Mono',monospace}
+.mvw-clock{color:#c77dff}
+.mvw-start{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:340px;
+  margin-top:18px;padding:22px 18px;background:#1c1228;border:1px solid #382548;border-radius:14px}
+.mvw-start-info{margin:0;font-size:.9rem;line-height:1.5;color:#cdb8e6;text-align:center}
+.mvw-start-btn{height:52px;padding:0 34px;border:0;border-radius:12px;
+  background:linear-gradient(180deg,#d9a8ff,#c77dff);color:#0d0710;
+  font-family:'Press Start 2P',monospace;font-size:.8rem;letter-spacing:.04em;cursor:pointer;
+  box-shadow:0 6px 18px rgba(199,125,255,.35)}
+.mvw-start-btn:active{transform:translateY(1px)}
 .mvw-list{display:flex;flex-direction:column;gap:7px;width:100%;max-width:420px;margin-top:2px}
 .mvw-row{display:flex;align-items:center;gap:10px;min-height:46px;padding:4px 10px 4px 12px;
   background:#1c1228;border:1px solid #382548;border-radius:11px;box-sizing:border-box}

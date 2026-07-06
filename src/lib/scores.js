@@ -58,6 +58,15 @@ export function useArcadeScore(gameId) {
   const { uid, isAnonymous, username, profile } = auth;
   const [best, setBest] = useState(() => (gameId ? readLocalBest(gameId) : null));
 
+  // Re-seed from the local cache whenever the game changes. The useState
+  // initializer only runs on mount, so without this a component reused across
+  // gameIds (e.g. HighScoreBoard hopping between /scores/:id boards) would keep
+  // showing the previous game's best for anonymous users, whose cloud reconcile
+  // below early-returns.
+  useEffect(() => {
+    setBest(gameId ? readLocalBest(gameId) : null);
+  }, [gameId]);
+
   // Reconcile the cached best with the cloud once we know who we are.
   useEffect(() => {
     if (!gameId || !uid || isAnonymous) return;

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
 import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { encodeScore, fmtClock } from "../lib/scoretime.js";
+import { useStopwatch } from "../lib/useStopwatch.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
   puzzleFor, judge, nextLetter, shareLine, chainNumber,
@@ -16,13 +18,15 @@ import {
    Mobile-first: a real <input> so the phone keyboard appears; the chain scrolls
    while the entry stays put. All truth in chain/logic.js. */
 
-const STATE_KEY = "chain:state"; // { day, chain:[word…] }
+const STATE_KEY = "chain:state"; // { day, chain:[word…], startedAt }
 const STREAK_KEY = "chain:streak";
 
 function loadDayState(day, seed) {
   const s = lsGetJSON(STATE_KEY, null);
-  if (s && s.day === day && Array.isArray(s.chain) && s.chain.length) return { day, chain: s.chain };
-  return { day, chain: [seed] };
+  if (s && s.day === day && Array.isArray(s.chain) && s.chain.length) {
+    return { day, chain: s.chain, startedAt: s.startedAt || null };
+  }
+  return { day, chain: [seed], startedAt: null };
 }
 
 function bumpStreak(day) {
@@ -62,14 +66,21 @@ export default function Chain() {
 
   useEffect(() => { lsSetJSON(STATE_KEY, state); }, [state]);
 
-  // Submit the chain length as it grows; bump streak on the first added link.
+  // Live clock — starts on the first word, runs while the cabinet is open (Chain
+  // has no finish line, so time is only a tiebreaker between equal-length runs).
+  const liveSecs = useStopwatch(state.startedAt, true);
+
+  // Submit chain length + time-to-reach-it as it grows; longer wins, and among
+  // equal lengths the faster builder ranks higher (encoded for the "desc" board).
+  // Bump streak on the first added link.
   useEffect(() => {
     if (links > 0 && links !== lastSubmitRef.current) {
       lastSubmitRef.current = links;
-      submit(links);
+      const secs = state.startedAt ? (Date.now() - state.startedAt) / 1000 : 0;
+      submit(encodeScore(links, secs, "desc"));
       if (!streakedRef.current) { streakedRef.current = true; setStreak(bumpStreak(day)); }
     }
-  }, [links, submit, day]);
+  }, [links, submit, day, state.startedAt]);
 
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -81,7 +92,7 @@ export default function Chain() {
     if (!w) return;
     const verdict = judge(w, last, chain);
     if (verdict !== "ok") { flash(TOAST[verdict] || "nope"); return; }
-    setState((s) => ({ ...s, chain: [...s.chain, w] }));
+    setState((s) => ({ ...s, chain: [...s.chain, w], startedAt: s.startedAt || Date.now() }));
     setEntry("");
   }, [last, chain, flash]);
 
@@ -110,6 +121,7 @@ export default function Chain() {
         <div className="chn-goal">
           <span>from <b>{puzzle.seed}</b></span>
           <span className={`chn-par${beatPar ? " beat" : ""}`}>{links}/{puzzle.par} links{beatPar ? " ✓" : ""}</span>
+          {state.startedAt && <span className="chn-clock">⏱ {fmtClock(liveSecs)}</span>}
         </div>
 
         <div className="chn-list">
@@ -163,6 +175,7 @@ const CSS = `
 .chn-goal b{color:#e6f7f4;letter-spacing:.06em}
 .chn-par{font-family:'Share Tech Mono',monospace;font-size:.76rem;color:#7faea8}
 .chn-par.beat{color:#39d6c4;font-weight:700}
+.chn-clock{font-family:'Share Tech Mono',monospace;font-size:.74rem;color:#39d6c4;letter-spacing:.02em}
 .chn-list{display:flex;flex-direction:column;gap:5px;width:100%;max-width:320px;
   max-height:40vh;overflow-y:auto;padding:2px}
 .chn-word{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;

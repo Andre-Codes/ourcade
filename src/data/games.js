@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import { decodeScore, fmtClock } from "../lib/scoretime.js";
 
 // ─────────────────────────────────────────────────────────────────────────
 //  GAME REGISTRY
@@ -119,8 +120,16 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/Laddergram.jsx")),
-    // Board ranks by fewest steps (asc = lower is better).
-    score: { label: "STEPS", dir: "asc" },
+    // Board ranks by fewest steps, then fastest (asc = lower is better). Score
+    // packs steps + solve seconds via scoretime.encodeScore(steps, secs, "asc").
+    score: {
+      label: "STEPS · TIME",
+      dir: "asc",
+      format: (n) => {
+        const { value, secs } = decodeScore(n, "asc");
+        return `${value} step${value === 1 ? "" : "s"} · ${fmtClock(secs)}`;
+      },
+    },
   },
   {
     id: "missing-vowels",
@@ -135,8 +144,16 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/MissingVowels.jsx")),
-    // Board ranks by words restored (desc = higher is better).
-    score: { label: "SOLVED", dir: "desc" },
+    // Board ranks by words restored, then fastest (desc = higher is better).
+    // Score packs solved + seconds via encodeScore(solved, secs, "desc").
+    score: {
+      label: "SOLVED · TIME",
+      dir: "desc",
+      format: (n) => {
+        const { value, secs } = decodeScore(n, "desc");
+        return `${value}/6 · ${fmtClock(secs)}`;
+      },
+    },
   },
   {
     id: "chain",
@@ -151,8 +168,16 @@ export const GAMES = [
     category: "game",
     type: "react",
     component: lazy(() => import("../games/Chain.jsx")),
-    // Board ranks by longest chain (desc = higher is better).
-    score: { label: "LENGTH", dir: "desc" },
+    // Board ranks by longest chain, then fastest to reach it (desc = higher is
+    // better). Score packs length + seconds via encodeScore(length, secs, "desc").
+    score: {
+      label: "LENGTH · TIME",
+      dir: "desc",
+      format: (n) => {
+        const { value, secs } = decodeScore(n, "desc");
+        return `${value} · ${fmtClock(secs)}`;
+      },
+    },
   },
   {
     id: "pits-and-portals",

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey } from "../lib/daily.js";
 import { lsGetJSON, lsSetJSON } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
+import { encodeScore, fmtClock } from "../lib/scoretime.js";
+import { useStopwatch } from "../lib/useStopwatch.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
   puzzleFor, judgeStep, isSolved, nextHint, shareLine, laddergramNumber,
@@ -19,15 +21,18 @@ import {
    with autocorrect/caps off; the rung list scrolls but the entry stays above the
    fold. All truth in laddergram/logic.js. */
 
-const STATE_KEY = "laddergram:state"; // { day, chain:[word…], hintsUsed, done }
+const STATE_KEY = "laddergram:state"; // { day, chain:[word…], hintsUsed, done, startedAt, finishedAt }
 const STREAK_KEY = "laddergram:streak";
 
 function loadDayState(day, start) {
   const s = lsGetJSON(STATE_KEY, null);
   if (s && s.day === day && Array.isArray(s.chain) && s.chain.length) {
-    return { day, chain: s.chain, hintsUsed: s.hintsUsed || 0, done: !!s.done };
+    return {
+      day, chain: s.chain, hintsUsed: s.hintsUsed || 0, done: !!s.done,
+      startedAt: s.startedAt || null, finishedAt: s.finishedAt || null,
+    };
   }
-  return { day, chain: [start], hintsUsed: 0, done: false };
+  return { day, chain: [start], hintsUsed: 0, done: false, startedAt: null, finishedAt: null };
 }
 
 function bumpStreak(day) {
@@ -76,14 +81,24 @@ export default function Laddergram() {
     setTimeout(() => setToast(null), 1400);
   }, []);
 
-  // Submit the step count once, the day it's solved.
+  // Frozen solve time (start of play → the winning rung). Stable across reloads
+  // because both stamps are persisted; null until solved.
+  const finalSecs = state.done && state.startedAt && state.finishedAt
+    ? (state.finishedAt - state.startedAt) / 1000
+    : null;
+  // Live clock while climbing; freezes at finalSecs once solved.
+  const liveSecs = useStopwatch(state.startedAt, !done);
+  const shownSecs = finalSecs != null ? finalSecs : liveSecs;
+
+  // Submit steps + solve time once, the day it's solved. Fewer steps wins;
+  // among equal steps, faster wins (encoded for the "asc" board).
   useEffect(() => {
     if (done && !submittedRef.current) {
       submittedRef.current = true;
-      submit(steps);
+      submit(encodeScore(steps, finalSecs || 0, "asc"));
       setStreak(bumpStreak(day));
     }
-  }, [done, steps, submit, day]);
+  }, [done, steps, submit, day, finalSecs]);
 
   const addWord = useCallback((raw) => {
     const w = (raw || "").trim().toUpperCase();
@@ -93,7 +108,12 @@ export default function Laddergram() {
     setState((s) => {
       const nextChain = [...s.chain, w];
       const solved = w === puzzle.end.toUpperCase();
-      return { ...s, chain: nextChain, done: solved };
+      const now = Date.now();
+      return {
+        ...s, chain: nextChain, done: solved,
+        startedAt: s.startedAt || now, // clock starts on the first rung
+        finishedAt: solved ? now : s.finishedAt,
+      };
     });
     setEntry("");
   }, [done, last, chain, puzzle.end, flash]);
@@ -140,6 +160,7 @@ export default function Laddergram() {
           <span className="ldg-goal-arrow">→</span>
           <span className="ldg-goal-w">{puzzle.end}</span>
           <span className="ldg-par">par {puzzle.par}</span>
+          {state.startedAt && <span className="ldg-clock">⏱ {fmtClock(shownSecs)}</span>}
         </div>
 
         <div className="ldg-rungs">
@@ -185,7 +206,10 @@ export default function Laddergram() {
             <p className="ldg-win-h">
               {steps <= puzzle.par ? "🎉 solved on par!" : `solved in ${steps} steps`}
             </p>
-            <p className="ldg-win-s">{steps} step{steps === 1 ? "" : "s"} · par {puzzle.par}</p>
+            <p className="ldg-win-s">
+              {steps} step{steps === 1 ? "" : "s"} · par {puzzle.par}
+              {finalSecs != null && <> · ⏱ {fmtClock(finalSecs)}</>}
+            </p>
             <ShareButton label="Share your Laddergram" title="Ourcade — Laddergram" text={share} />
           </div>
         )}
@@ -209,6 +233,7 @@ const CSS = `
 .ldg-goal-w{color:#e8f5ee;letter-spacing:.04em}
 .ldg-goal-arrow{color:#4fdd8a}
 .ldg-par{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#6f9a80;margin-left:2px}
+.ldg-clock{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#4fdd8a;letter-spacing:.02em}
 .ldg-rungs{display:flex;flex-direction:column;gap:5px;width:100%;max-width:320px;
   max-height:38vh;overflow-y:auto;padding:2px}
 .ldg-rung{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;
