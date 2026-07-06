@@ -34,17 +34,6 @@ const FEATURED_IMAGES = import.meta.glob("../assets/featured/*.webp", {
   import: "default",
 });
 
-// tiny local copy of Home's star row (kept decoupled so Home stays untouched)
-function Stars({ rating = 0 }) {
-  const r = Math.max(0, Math.min(5, rating));
-  return (
-    <span className="arcade-stars" aria-label={`${r} out of 5 stars`}>
-      {"★".repeat(r)}
-      <span className="arcade-stars-empty">{"★".repeat(5 - r)}</span>
-    </span>
-  );
-}
-
 // ── Game of the Day ───────────────────────────────────────────────────────
 function GameOfTheDay({ dayKey: key }) {
   const games = useMemo(() => GAMES.filter((g) => g.category === "game"), []);
@@ -64,12 +53,6 @@ function GameOfTheDay({ dayKey: key }) {
         </div>
         <div className="arcade-hero-info">
           <h3 className="arcade-hero-title">{game.title}</h3>
-          <div className="arcade-hero-meta">
-            <Stars rating={game.rating} />
-            <span className="arcade-plays">
-              played {Number(game.plays || 0).toLocaleString("en-US")}×
-            </span>
-          </div>
           <p className="arcade-hero-blurb">{game.blurb}</p>
           <span className="arcade-hero-play">PLAY TODAY ▶</span>
         </div>

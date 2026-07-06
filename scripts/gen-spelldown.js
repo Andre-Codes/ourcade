@@ -196,9 +196,10 @@ function boardFor(letters, center) {
     accepted.push(w); // every valid word (any length) is accepted at play time
     // Goal set: common words, 4..7 letters only (keeps the goal tidy/familiar).
     if (w.length <= 7 && COMMON.has(w)) required.push(w);
-    // Pangram = uses all seven distinct letters with no repeat, so m === Lmask
-    // AND length 7 (a longer word repeats a letter and can't match this).
-    if (m === Lmask && w.length === 7) pangrams.push(w);
+    // Pangram = uses all seven distinct board letters. m === Lmask means every
+    // board letter appears (mask is per-distinct-letter), so a longer word that
+    // repeats a letter still counts (e.g. DEGENERATE uses all of ADEGNRT).
+    if (m === Lmask) pangrams.push(w);
   }
   // Cap the goal set at REQUIRED_CAP. Pin any pangram that's already common so
   // the jackpot never gets trimmed out, then fill with the shortest/most

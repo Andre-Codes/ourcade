@@ -213,6 +213,28 @@ export function getRelicRunStats() {
   };
 }
 
+// ---- Spelldown: all-time longest word ever found ----
+// Local-only (NOT a syncKey, like the relic:* keys above): one record of the
+// player's longest word across every day, so a great find keeps being rewarded
+// after that day's board rotates away. Stored as { word, day, len }.
+export function getSpelldownLongest() {
+  const rec = readJSON("spelldown:longest", null);
+  if (!rec || typeof rec.word !== "string" || !rec.word) return null;
+  return { word: rec.word, day: rec.day || null, len: rec.word.length };
+}
+// Record only when `word` is strictly longer than the stored record (ties keep
+// the earlier find). Returns the (possibly updated) record and whether it's a
+// new personal best, so the caller can celebrate.
+export function recordSpelldownLongest(word, day) {
+  const w = (word || "").toUpperCase();
+  const prev = getSpelldownLongest();
+  if (!w) return { record: prev, isNew: false };
+  if (prev && w.length <= prev.len) return { record: prev, isNew: false };
+  const record = { word: w, day: day || null, len: w.length };
+  write("spelldown:longest", JSON.stringify(record));
+  return { record, isNew: true };
+}
+
 // ---- magic 8-ball: per-device sound mute (default: not muted) ----
 export function getEightBallMuted() {
   return read("eightball:muted") === "1";

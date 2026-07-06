@@ -62,16 +62,6 @@ function useVisitorCount() {
   return useMemo(() => visitorCountForDay(todayKey()), []);
 }
 
-function Stars({ rating = 0 }) {
-  const r = Math.max(0, Math.min(5, rating));
-  return (
-    <span className="arcade-stars" aria-label={`${r} out of 5 stars`}>
-      {"★".repeat(r)}
-      <span className="arcade-stars-empty">{"★".repeat(5 - r)}</span>
-    </span>
-  );
-}
-
 // The user's favorited gameIds, reactive to store changes (toggles here, cloud
 // hydration in AuthProvider). Drives the ⭐ on each cabinet + the home shelf.
 function useFavorites() {
@@ -160,13 +150,6 @@ function GameCard({ game, cta = "PLAY ▶", isFav = false }) {
       </div>
 
       <h2 className="arcade-card-title">{game.title}</h2>
-
-      <div className="arcade-card-meta">
-        <Stars rating={game.rating} />
-        <span className="arcade-plays">
-          played {Number(game.plays || 0).toLocaleString("en-US")}×
-        </span>
-      </div>
 
       <p className="arcade-card-blurb">{game.blurb}</p>
 
@@ -294,6 +277,19 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [activeTags, setActiveTags] = useState([]);
 
+  // ---- shelf reveal windows: show a starter set, "view more" reveals the rest.
+  // Same idiom as VaultPage/CreativesPage. Games start at 10, tools at 3; each
+  // click reveals another page of that size. Reset whenever the filter changes
+  // (below) so a search never appears truncated.
+  const GAMES_PAGE = 10;
+  const TOOLS_PAGE = 3;
+  const [gamesShown, setGamesShown] = useState(GAMES_PAGE);
+  const [toolsShown, setToolsShown] = useState(TOOLS_PAGE);
+  useEffect(() => {
+    setGamesShown(GAMES_PAGE);
+    setToolsShown(TOOLS_PAGE);
+  }, [query, activeTags]);
+
   // the union of every tag in the registry, for the filter chips
   const allTags = useMemo(() => {
     const s = new Set();
@@ -316,6 +312,12 @@ export default function Home() {
   const games = visible.filter((g) => g.category === "game");
   const tools = visible.filter((g) => g.category === "tool");
   const filtering = query.trim() !== "" || activeTags.length > 0;
+  // While filtering, reveal every match (search must never look truncated);
+  // otherwise page the shelves so the floor isn't an overwhelming wall.
+  const gamesVisible = filtering ? games : games.slice(0, gamesShown);
+  const toolsVisible = filtering ? tools : tools.slice(0, toolsShown);
+  const moreGames = games.length - gamesVisible.length;
+  const moreTools = tools.length - toolsVisible.length;
   // Nedry only wags when NOTHING matches anywhere — an empty shelf whose sibling
   // still has hits gets a quiet one-liner, not the full gag.
   const noMatches = games.length === 0 && tools.length === 0;
@@ -443,15 +445,31 @@ export default function Home() {
           </h2>
           {!filtering && (
             <p className="arcade-floor-note">
-              {GAMES.length} cabinets. that&apos;s all of them. that&apos;s the point. ✦
+              showing {gamesVisible.length} of {games.length} cabinets. ✦
             </p>
           )}
           {games.length ? (
-            <div className="arcade-grid">
-              {games.map((game) => (
-                <GameCard key={game.id} game={game} cta="PLAY ▶" isFav={favs.includes(game.id)} />
-              ))}
-            </div>
+            <>
+              <div className="arcade-grid">
+                {gamesVisible.map((game) => (
+                  <GameCard key={game.id} game={game} cta="PLAY ▶" isFav={favs.includes(game.id)} />
+                ))}
+              </div>
+              {moreGames > 0 && (
+                <div className="arcade-vault-more">
+                  <button
+                    type="button"
+                    className="arcade-stumble"
+                    onClick={() => setGamesShown((n) => n + GAMES_PAGE)}
+                  >
+                    view {Math.min(moreGames, GAMES_PAGE)} more ▾
+                  </button>
+                  <span className="arcade-vault-count">
+                    showing {gamesVisible.length} of {games.length}
+                  </span>
+                </div>
+              )}
+            </>
           ) : noMatches ? (
             <NedryGag message="Nothing matches — try another tag." />
           ) : (
@@ -462,11 +480,27 @@ export default function Home() {
         <section id="arcade-tools">
           <h2 className="arcade-section-title">🧰 TOOLS &amp; TOYS</h2>
           {tools.length ? (
-            <div className="arcade-grid">
-              {tools.map((game) => (
-                <GameCard key={game.id} game={game} cta="OPEN ▶" isFav={favs.includes(game.id)} />
-              ))}
-            </div>
+            <>
+              <div className="arcade-grid">
+                {toolsVisible.map((game) => (
+                  <GameCard key={game.id} game={game} cta="OPEN ▶" isFav={favs.includes(game.id)} />
+                ))}
+              </div>
+              {moreTools > 0 && (
+                <div className="arcade-vault-more">
+                  <button
+                    type="button"
+                    className="arcade-stumble"
+                    onClick={() => setToolsShown((n) => n + TOOLS_PAGE)}
+                  >
+                    view {Math.min(moreTools, TOOLS_PAGE)} more ▾
+                  </button>
+                  <span className="arcade-vault-count">
+                    showing {toolsVisible.length} of {tools.length}
+                  </span>
+                </div>
+              )}
+            </>
           ) : noMatches ? null : (
             <p className="arcade-floor-note">No tools match this filter — check The Floor.</p>
           )}

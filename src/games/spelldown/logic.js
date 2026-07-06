@@ -99,6 +99,10 @@ const RANKS = [
   { id: "great", label: "Great", at: 0.45 },
   { id: "amazing", label: "Amazing", at: 0.6 },
   { id: "genius", label: "Genius", at: 0.8 },
+  // The completion tier: only reached at 100% of the goal set. rankFor uses
+  // `pct >= at` with pct clamped to 1, so `at: 1.0` fires exactly when every
+  // required word is found — the official "you finished the board" rank.
+  { id: "wordsmith", label: "Wordsmith!", at: 1.0 },
 ];
 
 // The rank for a given found-count on a board. Returns the rank object plus the
@@ -119,7 +123,14 @@ export function rankFor(foundCount, board) {
   };
 }
 
-export const TOP_RANK = RANKS[RANKS.length - 1]; // "Genius"
+export const TOP_RANK = RANKS[RANKS.length - 1]; // "Wordsmith!" (100% completion)
+
+// The board is officially "done" once every REQUIRED (goal) word is found; bonus
+// accepted words beyond that don't gate completion. Shared so the cabinet and any
+// headless surface agree on when the end card / celebration should fire.
+export function isComplete(foundCount, board) {
+  return foundCount >= Math.max(1, board.maxWords);
+}
 
 // ── share ──────────────────────────────────────────────────────────────────
 // A compact, no-spoiler share line (no words revealed), e.g.

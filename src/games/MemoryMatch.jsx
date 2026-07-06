@@ -101,10 +101,17 @@ const MEM_CSS = `
   .mem-back-face::after { content: "?"; font-family: 'Black Ops One',sans-serif; }
   .mem-front-face {
     transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
-    background: linear-gradient(150deg,#fff,#d7f6ee);
+    /* Deep teal-charcoal (not the near-white it used to be): pale Kenney icons —
+       cd, usb, mp3, headphones, cursor… — were invisible on a white face. Kept
+       clearly distinct from the blue face-down back so a flip still reads. */
+    background: linear-gradient(150deg,#123c37,#08201e);
     border: 2px solid #3fffd0; padding: 14%;
   }
-  .mem-front-face img { width: 100%; height: 100%; object-fit: contain; }
+  /* White inner glow behind the icon so every icon (light OR dark) has contrast. */
+  .mem-front-face img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 0 3px rgba(255,255,255,.55)) drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  }
   .mem-tile.matched .mem-front-face {
     border-color: #34c759; box-shadow: 0 0 16px rgba(52,199,89,.5);
     animation: mem-pulse .4s ease;
@@ -158,6 +165,7 @@ export default function MemoryMatch() {
   const [picks, setPicks] = useState([]); // indices currently face-up & unmatched
   const [locked, setLocked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [finalMoves, setFinalMoves] = useState(null); // set at board-clear from the winning move number
 
   // Hide the shell back button on every screen — we draw our own.
   useArcadeBackButton(false);
@@ -191,6 +199,7 @@ export default function MemoryMatch() {
     setPicks([]);
     setLocked(false);
     setSubmitted(false);
+    setFinalMoves(null);
     setPhase("playing");
     tickTimer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
   }
@@ -208,7 +217,12 @@ export default function MemoryMatch() {
     setPicks(newPicks);
 
     if (newPicks.length === 2) {
-      setMoves((m) => m + 1);
+      // This attempt's authoritative move number. Derive it directly (not from
+      // the async `moves` state) so the winning move — which flips `phase` in the
+      // SAME batch — submits the exact count shown on screen, with no reliance on
+      // React state settling before the win effect runs.
+      const moveNo = moves + 1;
+      setMoves(moveNo);
       const [a, b] = newPicks;
       if (next[a].icon === next[b].icon) {
         // Match — mark matched, clear picks.
@@ -219,7 +233,7 @@ export default function MemoryMatch() {
         setPicks([]);
         playSfxVariant("card-place", [1, 3]);
         playSfx("confirmation");
-        if (matched.every((t) => t.matched)) finish();
+        if (matched.every((t) => t.matched)) finish(moveNo);
       } else {
         // No match — flip both back after a beat.
         setLocked(true);
@@ -232,15 +246,19 @@ export default function MemoryMatch() {
     }
   }
 
-  function finish() {
+  // The authoritative final move count, captured at the instant the board is
+  // cleared (from flip()'s local moveNo). This — not the async `moves` state — is
+  // what the win screen shows and what we submit, so the leaderboard always
+  // matches the CLEARED screen.
+  function finish(finalMoveCount) {
     clearInterval(tickTimer.current);
+    setFinalMoves(finalMoveCount);
     setPhase("won");
   }
 
   // Submit once when we reach the win screen (moves = the score, lower better).
-  const finalMoves = moves;
   useEffect(() => {
-    if (phase === "won" && !submitted) {
+    if (phase === "won" && finalMoves != null && !submitted) {
       submit(finalMoves);
       setSubmitted(true);
     }

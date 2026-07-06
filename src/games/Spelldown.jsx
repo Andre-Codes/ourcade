@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey, prettyDate, dayNumberFromKey, shiftDayKey } from "../lib/daily.js";
-import { lsGetJSON, lsSetJSON } from "../lib/store.js";
+import { lsGetJSON, lsSetJSON, getSpelldownLongest, recordSpelldownLongest } from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
 import ShareButton from "../components/ShareButton.jsx";
 import {
-  boardFor, judge, isPangram, rankFor, shareLine, spelldownNumber, revealWords, MIN_LEN,
+  boardFor, judge, isPangram, rankFor, shareLine, spelldownNumber, revealWords, isComplete, MIN_LEN,
 } from "./spelldown/logic.js";
 
 /* SPELLDOWN — Ourcade's daily word-finder (a Spelling-Bee-shaped cabinet).
@@ -57,6 +57,17 @@ const TOAST = {
   already: "already found",
 };
 
+// Pre-baked confetti pieces for the completion burst: a fixed set of inline
+// styles (position, colour, delay) computed once at module load so the render
+// stays cheap and the burst looks varied. Gold/amber palette to match the board.
+const CONFETTI_COLORS = ["#ffd45e", "#c9a227", "#ff9a52", "#fdf6e3", "#e7dcc0"];
+const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
+  left: `${(i * 37 + 11) % 100}%`,
+  background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  animationDelay: `${(i % 7) * 0.09}s`,
+  animationDuration: `${1.1 + ((i * 13) % 7) * 0.12}s`,
+}));
+
 export default function Spelldown() {
   const day = useMemo(() => todayKey(), []);
   const board = useMemo(() => boardFor(day), [day]);
@@ -81,6 +92,17 @@ export default function Spelldown() {
   const [order, setOrder] = useState(() => board.letters.split("").filter((c) => c !== board.center));
   const [streak, setStreak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
   const lastSubmitRef = useRef(-1);
+  // All-time longest word ever, and whether the CURRENT session set a new one
+  // (drives the "new personal longest!" call-out on the end card).
+  const [longestEver, setLongestEver] = useState(() => getSpelldownLongest());
+  const [longestIsNew, setLongestIsNew] = useState(false);
+  // One-shot completion: fire the celebration exactly once when the last
+  // required word lands — not again on a mid-day reload of a finished board.
+  const [celebrate, setCelebrate] = useState(false);
+  const celebratedRef = useRef(false);
+  // Was the board ALREADY complete when this component mounted? (A reload of a
+  // finished day.) If so, we render the end card but skip the celebration burst.
+  const completeOnMountRef = useRef(isComplete(state.found.length, board));
 
   // Persist per-day progress whenever it changes.
   useEffect(() => { lsSetJSON(STATE_KEY, state); }, [state]);
@@ -100,6 +122,19 @@ export default function Spelldown() {
     [state.found, board]
   );
   const rank = useMemo(() => rankFor(state.found.length, board), [state.found.length, board]);
+  const done = useMemo(() => isComplete(state.found.length, board), [state.found.length, board]);
+
+  // Fire the completion celebration exactly once, the moment the board becomes
+  // complete THIS session. On a mid-day reload of an already-finished board we
+  // still show the end card (done stays true) but skip the confetti burst.
+  useEffect(() => {
+    if (done && !celebratedRef.current) {
+      celebratedRef.current = true;
+      // Only burst if the board wasn't already complete on mount (i.e. the win
+      // just happened). foundOnMount is captured once via the ref below.
+      if (!completeOnMountRef.current) setCelebrate(true);
+    }
+  }, [done]);
 
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -123,6 +158,10 @@ export default function Spelldown() {
       if (s.found.length === 0) setStreak(bumpStreak(day)); // first word today
       return next;
     });
+    // Track the all-time longest word (rewards a great find beyond today).
+    const { record, isNew } = recordSpelldownLongest(word, day);
+    if (record) setLongestEver(record);
+    if (isNew) setLongestIsNew(true);
     setEntry("");
     if (pan) {
       setFlashPangram(true);
@@ -170,6 +209,13 @@ export default function Spelldown() {
     [state.found]
   );
 
+  // End-card stats: today's longest word and any pangrams found today.
+  const longestToday = foundSorted[0] || null;
+  const pangramsToday = useMemo(
+    () => state.found.filter((w) => isPangram(w, board)),
+    [state.found, board]
+  );
+
   const pct = Math.round(rank.pct * 100);
 
   return (
@@ -182,6 +228,11 @@ export default function Spelldown() {
             #{num} · {prettyDate(day)}
             {streak.streak > 0 && <span className="spd-streak"> · 🔥 {streak.streak}-day streak</span>}
           </div>
+          {longestEver && (
+            <div className="spd-longest" title="Your longest word ever, across every Spelldown">
+              ✎ longest ever · <b>{longestEver.word}</b> ({longestEver.len})
+            </div>
+          )}
         </div>
 
         {/* rank + progress */}
@@ -194,6 +245,49 @@ export default function Spelldown() {
             {Math.min(state.found.length, board.maxWords)}/{board.maxWords}
           </span>
         </div>
+
+        {/* completion end card — appears once every REQUIRED word is found. Input
+            stays live below so a player can keep hunting bonus accepted words. */}
+        {done && (
+          <div className={`spd-endcard${celebrate ? " is-celebrating" : ""}`}>
+            {celebrate && (
+              <div className="spd-confetti" aria-hidden="true">
+                {CONFETTI.map((c, i) => (
+                  <span key={i} className="spd-confetti-bit" style={c} />
+                ))}
+              </div>
+            )}
+            <div className="spd-end-crown">👑</div>
+            <div className="spd-end-rank">Wordsmith!</div>
+            <div className="spd-end-sub">you found every word — the board is complete.</div>
+            <div className="spd-end-stats">
+              <div className="spd-end-stat">
+                <span className="spd-end-k">Words</span>
+                <span className="spd-end-v">{state.found.length}/{board.maxWords}</span>
+              </div>
+              {longestToday && (
+                <div className="spd-end-stat">
+                  <span className="spd-end-k">Longest today</span>
+                  <span className="spd-end-v">
+                    {longestToday}{isPangram(longestToday, board) ? " 🐝" : ""}
+                  </span>
+                </div>
+              )}
+              <div className="spd-end-stat">
+                <span className="spd-end-k">Pangrams</span>
+                <span className="spd-end-v">
+                  {pangramsToday.length ? pangramsToday.join(", ") : "—"}
+                </span>
+              </div>
+            </div>
+            {longestIsNew && (
+              <div className="spd-end-pb">★ new personal longest word! ★</div>
+            )}
+            <div className="spd-end-actions">
+              <ShareButton label="Share your Spelldown" title="Ourcade — Spelldown" text={share} />
+            </div>
+          </div>
+        )}
 
         {/* current entry */}
         <div className={`spd-entry${shake ? " is-shake" : ""}`}>
@@ -296,6 +390,37 @@ const CSS = `
   letter-spacing:.04em;color:#ffd45e;text-shadow:0 0 18px rgba(255,212,94,.4)}
 .spd-sub{margin-top:8px;font-size:.8rem;color:#cbb778;font-family:'Share Tech Mono',monospace}
 .spd-streak{color:#ff9a52}
+.spd-longest{margin-top:6px;font-size:.72rem;color:#cbb778;font-family:'Share Tech Mono',monospace}
+.spd-longest b{color:#ffd45e;letter-spacing:.03em}
+
+/* completion end card + celebration */
+.spd-endcard{position:relative;overflow:hidden;width:100%;max-width:420px;margin:2px 0 4px;
+  background:linear-gradient(160deg,#2a2410,#16130a);border:1px solid #c9a227;border-radius:14px;
+  padding:18px 16px 16px;text-align:center;box-shadow:0 0 26px rgba(201,162,39,.28)}
+.spd-endcard.is-celebrating{animation:spdEndPop .5s ease-out}
+@keyframes spdEndPop{0%{transform:scale(.94);opacity:.4}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
+.spd-end-crown{font-size:1.9rem;line-height:1}
+.spd-end-rank{margin-top:4px;font-family:'Press Start 2P','Black Ops One',monospace;font-size:1rem;
+  color:#ffd45e;text-shadow:0 0 16px rgba(255,212,94,.5)}
+.spd-end-sub{margin-top:8px;font-size:.76rem;color:#cbb778}
+.spd-end-stats{display:flex;flex-direction:column;gap:6px;margin:14px auto 4px;max-width:320px}
+.spd-end-stat{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;
+  background:#100e07;border-radius:8px;padding:8px 12px}
+.spd-end-k{color:#8a7d52;font-family:'Share Tech Mono',monospace;text-transform:uppercase;letter-spacing:.04em}
+.spd-end-v{color:#f3e9cd;font-weight:700;text-align:right}
+.spd-end-pb{margin-top:10px;font-size:.78rem;font-weight:800;color:#1a1606;background:#ffd45e;
+  border-radius:8px;padding:6px 10px;display:inline-block;letter-spacing:.02em}
+.spd-end-actions{margin-top:14px;display:flex;justify-content:center}
+/* confetti — pieces fall from the top of the card and fade out */
+.spd-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.spd-confetti-bit{position:absolute;top:-12px;width:7px;height:11px;border-radius:2px;opacity:0;
+  animation-name:spdFall;animation-timing-function:ease-in;animation-iteration-count:1;animation-fill-mode:forwards}
+@keyframes spdFall{0%{transform:translateY(-12px) rotate(0);opacity:0}
+  12%{opacity:1}100%{transform:translateY(240px) rotate(540deg);opacity:0}}
+@media (prefers-reduced-motion: reduce){
+  .spd-endcard.is-celebrating{animation:none}
+  .spd-confetti{display:none}
+}
 .spd-rankbar{display:flex;align-items:center;gap:10px;width:100%;max-width:420px}
 .spd-rank{font-size:.78rem;font-weight:800;color:#ffd45e;min-width:74px;text-transform:uppercase;letter-spacing:.03em}
 .spd-track{flex:1;height:8px;background:#2a2410;border-radius:99px;overflow:hidden}
@@ -311,11 +436,11 @@ const CSS = `
 /* toast floats up and hovers over the letter ring (absolute inside .spd-ring) so
    it never reflows the layout. Translucent + blurred so the letters read through;
    pointer-events off so it never blocks a tap. */
-.spd-toast{position:absolute;left:50%;top:-14px;transform:translate(-50%,-100%);z-index:5;
+.spd-toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;
   pointer-events:none;white-space:nowrap;background:rgba(253,246,227,.92);color:#1a1606;font-weight:700;
   padding:7px 15px;border-radius:8px;font-size:.82rem;box-shadow:0 6px 20px rgba(0,0,0,.5);
   backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:spdToast .22s ease-out}
-@keyframes spdToast{from{opacity:0;transform:translate(-50%,-70%)}to{opacity:1;transform:translate(-50%,-100%)}}
+@keyframes spdToast{from{opacity:0;transform:translate(-50%,-38%)}to{opacity:1;transform:translate(-50%,-50%)}}
 @media (prefers-reduced-motion: reduce){.spd-toast{animation:none}}
 /* letter ring — a simple responsive hex-ish cluster (center + 6 around) */
 .spd-ring{position:relative;width:230px;height:204px;margin:4px 0}
