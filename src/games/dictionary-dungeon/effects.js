@@ -26,6 +26,8 @@
 // ── categories ───────────────────────────────────────────────────────────────
 // Each category: base bonus + which enemy kind-tags it is strong/weak against +
 // flavor text buckets (generic / strong / resisted).
+// Flavor lines may contain "{WORD}" — resolveWordEffect swaps in the played
+// word so the log reads "You swing the HAMMER...". Lines without it still work.
 export const EFFECT_CATEGORIES = {
   weapon: {
     id: "weapon",
@@ -34,15 +36,15 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["ghost", "spirit"],
     text: {
       generic: [
-        "You conjure a blade of sharpened letters and strike.",
-        "Steel flashes out of the word and bites deep.",
-        "The word takes an edge and cuts clean.",
+        "You swing the {WORD} and steel bites deep.",
+        "The {WORD} flashes out of the dark and cuts clean.",
+        "You level the {WORD} and drive it home.",
       ],
       strong: [
-        "The blade finds soft flesh and opens it wide.",
-        "A perfect cut — the creature reels from the wound.",
+        "The {WORD} finds soft flesh and opens it wide.",
+        "A perfect cut — the {WORD} leaves the creature reeling.",
       ],
-      resisted: ["The blade passes through with little to catch on."],
+      resisted: ["The {WORD} passes through with little to catch on."],
     },
   },
   blunt: {
@@ -52,14 +54,14 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["slime", "ghost"],
     text: {
       generic: [
-        "You swing a heavy weight of a word with bone-rattling force.",
-        "The word lands like a dropped anvil.",
+        "You swing the {WORD} in a bone-rattling arc.",
+        "The {WORD} lands like a dropped anvil.",
       ],
       strong: [
-        "The blow shatters brittle bone in a spray of chips.",
-        "Armor buckles and cracks under the impact.",
+        "The {WORD} shatters brittle bone in a spray of chips.",
+        "Armor buckles and cracks under the {WORD}.",
       ],
-      resisted: ["The blow sinks in and stops, absorbed."],
+      resisted: ["The {WORD} sinks in and stops, absorbed."],
     },
   },
   piercing: {
@@ -69,11 +71,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["ghost"],
     text: {
       generic: [
-        "The word narrows to a point and punches through.",
-        "A thrust slips past the guard and lodges deep.",
+        "The {WORD} narrows to a point and punches through.",
+        "You thrust the {WORD} past the guard and lodge it deep.",
       ],
-      strong: ["The point finds a seam in the armor and drives home."],
-      resisted: ["The point skitters off, finding no purchase."],
+      strong: ["The {WORD} finds a seam in the armor and drives home."],
+      resisted: ["The {WORD} skitters off, finding no purchase."],
     },
   },
   fire: {
@@ -83,14 +85,14 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["fire", "stone"],
     text: {
       generic: [
-        "Flame leaps from the word and licks over the enemy.",
-        "You raise a burning word; heat rolls off it.",
+        "The {WORD} flares up and licks over the enemy.",
+        "You raise the {WORD}; heat rolls off it.",
       ],
       strong: [
-        "The fire catches perfectly, and the creature shrieks as it scorches.",
-        "Flames race across it — this thing HATES fire.",
+        "The {WORD} catches perfectly and the creature shrieks as it scorches.",
+        "Flame races across it — this thing HATES the {WORD}.",
       ],
-      resisted: ["The flames gutter against it and die."],
+      resisted: ["The {WORD} gutters against it and dies."],
     },
   },
   light: {
@@ -100,11 +102,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: [],
     text: {
       generic: [
-        "The word glows, pushing back the dungeon dark.",
-        "Clean light spills out and dazzles the creature.",
+        "The {WORD} glows, pushing back the dungeon dark.",
+        "Clean light spills from the {WORD} and dazzles the creature.",
       ],
-      strong: ["The light sears the shadow-thing where it stands."],
-      resisted: ["The glow washes over it harmlessly."],
+      strong: ["The {WORD} sears the shadow-thing where it stands."],
+      resisted: ["The {WORD} washes over it harmlessly."],
     },
   },
   holy: {
@@ -114,14 +116,14 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: [],
     text: {
       generic: [
-        "A note of something sacred rings out of the word.",
-        "The word gathers a clean, righteous weight.",
+        "Something sacred rings out of the {WORD}.",
+        "The {WORD} gathers a clean, righteous weight.",
       ],
       strong: [
-        "Holy light tears through the unholy thing.",
-        "The creature recoils, smoking where the word touched it.",
+        "The {WORD} tears through the unholy thing in holy light.",
+        "The creature recoils, smoking where the {WORD} touched it.",
       ],
-      resisted: ["The blessing passes without effect on the living."],
+      resisted: ["The {WORD} passes without effect on the living."],
     },
   },
   magic: {
@@ -131,11 +133,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["magic"],
     text: {
       generic: [
-        "The word hums with unstable magic and discharges.",
-        "Arcane sparks leap from the letters.",
+        "The {WORD} hums with unstable magic and discharges.",
+        "Arcane sparks leap from the {WORD}.",
       ],
-      strong: ["Raw magic overloads the creature and it seizes up."],
-      resisted: ["The spell fizzles against its wards."],
+      strong: ["The {WORD} overloads the creature and it seizes up."],
+      resisted: ["The {WORD} fizzles against its wards."],
     },
   },
   defense: {
@@ -145,8 +147,8 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: [],
     text: {
       generic: [
-        "You brace behind a wall of letters; the next blow will land softer.",
-        "A shield locks into place before you.",
+        "You brace behind the {WORD}; the next blow will land softer.",
+        "The {WORD} locks into place before you.",
       ],
     },
   },
@@ -157,9 +159,9 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: [],
     text: {
       generic: [
-        "You take a quick bite and recover a little strength.",
-        "The word turns to food just long enough to help.",
-        "Questionable dungeon hygiene, but it restores you.",
+        "You wolf down the {WORD} and recover a little strength.",
+        "The {WORD} appears just long enough to help.",
+        "Questionable dungeon hygiene, but the {WORD} restores you.",
       ],
     },
   },
@@ -170,12 +172,12 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["skeleton", "undead", "construct", "stone"],
     text: {
       generic: [
-        "Venom seeps from the word and works into the wound.",
-        "A sick green haze rises off the letters.",
+        "Venom seeps from the {WORD} and works into the wound.",
+        "A sick green haze rises off the {WORD}.",
       ],
-      strong: ["The poison takes hold fast; the creature staggers, sickened."],
+      strong: ["The {WORD} takes hold fast; the creature staggers, sickened."],
       resisted: [
-        "Venom drips from the word, but there's nothing living left in it to poison.",
+        "The {WORD} drips venom, but there's nothing living left in it to poison.",
       ],
     },
   },
@@ -186,11 +188,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["holy", "undead", "demon"],
     text: {
       generic: [
-        "Shadow pours out of the word and clings to the enemy.",
-        "The word drinks the light around it and lashes out.",
+        "The {WORD} pours shadow that clings to the enemy.",
+        "The {WORD} drinks the light around it and lashes out.",
       ],
-      strong: ["Darkness smothers the creature; it flails, blinded."],
-      resisted: ["The dark recognizes its own and does little."],
+      strong: ["The {WORD} smothers the creature; it flails, blinded."],
+      resisted: ["The {WORD} recognizes its own and does little."],
     },
   },
   ice: {
@@ -200,11 +202,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["fire"],
     text: {
       generic: [
-        "The word frosts over and cold cracks outward.",
-        "A rime of ice spreads from the letters.",
+        "The {WORD} frosts over and cold cracks outward.",
+        "A rime spreads from the {WORD}.",
       ],
-      strong: ["The creature stiffens, half-frozen mid-lunge."],
-      resisted: ["The frost melts off it without slowing it."],
+      strong: ["The {WORD} stiffens the creature half-frozen mid-lunge."],
+      resisted: ["The {WORD} melts off it without slowing it."],
     },
   },
   water: {
@@ -214,11 +216,11 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["plant"],
     text: {
       generic: [
-        "A wave crashes out of the word.",
-        "The word runs to water and rushes the enemy.",
+        "The {WORD} crashes out in a wave.",
+        "The {WORD} rushes the enemy in a cold flood.",
       ],
-      strong: ["The flood quenches and staggers the burning thing."],
-      resisted: ["The water sheets off it and drains away."],
+      strong: ["The {WORD} quenches and staggers the burning thing."],
+      resisted: ["The {WORD} sheets off it and drains away."],
     },
   },
   tool: {
@@ -228,10 +230,10 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: [],
     text: {
       generic: [
-        "You put the word to work like a tool and pry an opening.",
-        "The word finds the mechanism and jams it.",
+        "You put the {WORD} to work and pry an opening.",
+        "The {WORD} finds the mechanism and jams it.",
       ],
-      strong: ["The tool slips into a joint and wrenches it apart."],
+      strong: ["The {WORD} slips into a joint and wrenches it apart."],
     },
   },
   treasure: {
@@ -241,10 +243,10 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["goblin"],
     text: {
       generic: [
-        "The word glitters into coin; you pocket a little.",
-        "Treasure spills from the letters — useful and shiny.",
+        "The {WORD} glitters into coin; you pocket a little.",
+        "The {WORD} spills treasure — useful and shiny.",
       ],
-      resisted: ["The greedy thing lunges for the loot, unbothered by the hit."],
+      resisted: ["The greedy thing lunges for the {WORD}, unbothered by the hit."],
     },
   },
   nature: {
@@ -254,10 +256,10 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["fire"],
     text: {
       generic: [
-        "Roots and bramble burst from the word and grab hold.",
-        "The word grows wild and thorny in an instant.",
+        "The {WORD} bursts into root and bramble and grabs hold.",
+        "The {WORD} grows wild and thorny in an instant.",
       ],
-      strong: ["Vines seize the creature and wrench it down."],
+      strong: ["The {WORD} seizes the creature and wrenches it down."],
     },
   },
   beastly: {
@@ -267,10 +269,10 @@ export const EFFECT_CATEGORIES = {
     weakAgainst: ["holy"],
     text: {
       generic: [
-        "The word turns fang and claw and tears in.",
-        "Something feral answers the word and mauls the enemy.",
+        "The {WORD} turns fang and claw and tears in.",
+        "The {WORD} answers feral and mauls the enemy.",
       ],
-      strong: ["Jaws close and rip a chunk free."],
+      strong: ["The {WORD} closes its jaws and rips a chunk free."],
     },
   },
 };
@@ -283,22 +285,27 @@ export const EFFECT_CATEGORIES = {
 const WORD_LISTS = {
   weapon: [
     "sword", "blade", "axe", "dagger", "knife", "spear", "lance", "sabre", "saber",
-    "rapier", "cutlass", "scimitar", "machete", "glaive", "halberd",
+    "rapier", "cutlass", "scimitar", "machete", "glaive", "halberd", "poniard",
     "pike", "javelin", "arrow", "dart", "sling", "whip", "flail", "sickle",
     "scythe", "cleaver", "bayonet", "trident", "harpoon", "shiv", "stiletto",
-    "broadsword", "claymore", "falchion", "kris", "bolo", "sword", "edge", "point",
-    "blades", "swords", "knives", "spears", "arrows", "daggers", "axes",
+    "broadsword", "claymore", "falchion", "kris", "bolo", "edge", "point",
+    "assegai", "kukri", "yatagan", "sabres", "rapiers", "cutlasses",
+    "blades", "swords", "knives", "spears", "arrows", "daggers", "axes", "lances",
+    "hatchet", "tomahawk", "cutlass", "billhook", "partisan",
   ],
   blunt: [
     "hammer", "mace", "club", "cudgel", "mallet", "maul", "bat", "staff", "rod",
-    "cane", "baton", "bludgeon", "sledge", "hammers", "clubs",
+    "cane", "baton", "bludgeon", "sledge", "hammers", "clubs", "shillelagh",
     "brick", "stone", "rock", "boulder", "anvil", "fist", "knuckle", "pestle",
     "cobble", "cobblestone", "slab", "bricks", "stones", "rocks", "bash",
+    "quarterstaff", "truncheon", "blackjack", "cosh", "knobkerrie",
+    "boulders", "mauls", "maces", "cudgels", "bricks",
   ],
   piercing: [
     "needle", "pin", "awl", "nail", "spike", "thorn", "quill", "fang", "tusk",
     "talon", "beak", "spine", "barb", "prong", "skewer", "stake", "sting",
-    "needles", "nails", "spikes", "thorns", "fangs", "talons", "barbs",
+    "needles", "nails", "spikes", "thorns", "fangs", "talons", "barbs", "bodkin",
+    "bradawl", "gimlet", "stinger", "caltrop", "goad", "lancet", "pricker",
   ],
   fire: [
     "fire", "flame", "torch", "ember", "blaze", "inferno", "pyre", "bonfire",
@@ -306,12 +313,15 @@ const WORD_LISTS = {
     "lava", "magma", "furnace", "kiln", "candle", "lantern", "wildfire",
     "flames", "torches", "embers", "sparks", "cinders", "coals", "flares",
     "brimstone", "heat", "glow", "combust", "ignite", "smolder", "brand",
+    "flambeau", "brazier", "cresset", "pyres", "wildfires",
+    "firebrand", "kindle", "singe", "char", "blazes", "infernos",
   ],
   light: [
     "light", "sun", "sunlight", "sunshine", "ray", "beam", "glare", "gleam",
     "shine", "dawn", "daylight", "star", "starlight", "lamp", "beacon",
     "radiance", "luster", "glimmer", "lights", "beams", "rays", "stars",
-    "flash", "spark", "halo", "aura", "prism", "dazzle",
+    "flash", "spark", "halo", "aura", "prism", "dazzle", "lumen", "glint",
+    "shimmer", "sunbeam", "corona", "nimbus", "gloaming", "aurora",
   ],
   holy: [
     "holy", "prayer", "angel", "relic", "saint", "blessing", "bless", "grace",
@@ -319,75 +329,108 @@ const WORD_LISTS = {
     "psalm", "hymn", "amen", "halo", "seraph", "cleric", "priest", "monk",
     "sanctify", "hallow", "pilgrim", "chalice", "prayers", "angels", "saints",
     "creed", "gospel", "spirit", "soul", "heaven", "mercy", "pure", "purity",
+    "cherub", "reliquary", "sanctum", "vestment", "censer", "sacrament",
+    "benediction", "orison", "litany", "consecrate", "beatify", "vespers",
   ],
   magic: [
     "magic", "spell", "rune", "wand", "charm", "hex", "sigil", "glyph", "arcane",
     "enchant", "conjure", "sorcery", "wizardry", "witch", "wizard", "mage",
     "sorcerer", "warlock", "potion", "elixir", "incant", "curse", "jinx",
     "spells", "runes", "wands", "charms", "hexes", "glyphs", "scrolls",
-    "familiar", "cauldron", "talisman", "amulet", "mystic", "occult",
+    "familiar", "cauldron", "talisman", "amulet", "mystic", "occult", "philter",
+    "thaumaturgy", "necromancy", "divination", "scrying", "evocation", "cantrip",
+    "warlocks", "wizards", "sorcerers", "runic", "eldritch",
   ],
   defense: [
     "shield", "armor", "armour", "guard", "wall", "barrier", "bulwark", "ward",
     "aegis", "plate", "mail", "helm", "helmet", "buckler", "shell", "carapace",
     "fortress", "rampart", "bastion", "parapet", "shields", "walls", "guards",
     "gauntlet", "breastplate", "cover", "bunker", "barricade", "defend",
+    "cuirass", "greaves", "pauldron", "vambrace", "brigandine", "hauberk",
+    "palisade", "portcullis", "battlement", "redoubt",
   ],
   food: [
+    // Everyday
     "apple", "bread", "meat", "honey", "stew", "soup", "cheese", "egg", "eggs",
     "fruit", "berry", "pear", "plum", "grape", "melon", "peach", "cherry",
     "cake", "pie", "tart", "roast", "bacon", "ham", "fish", "rice", "beans",
     "carrot", "potato", "turnip", "onion", "garlic", "nut", "acorn", "grain",
     "wheat", "corn", "milk", "cream", "butter", "jam", "loaf", "biscuit",
     "apples", "berries", "meats", "feast", "meal", "ration", "porridge", "broth",
+    "mutton", "venison", "gravy", "pudding", "custard", "scone", "muffin",
+    "pottage", "gruel", "hardtack", "jerky", "sausage", "pickle", "relish",
+    // Clever / obscure fruits & dishes — dual-purpose (heal + rarity bonus)
+    "durian", "persimmon", "kumquat", "lychee", "loquat", "quince", "medlar",
+    "pomelo", "tamarind", "jujube", "damson", "rambutan", "guava",
+    "papaya", "mango", "fig", "date", "raisin", "currant", "sultana",
+    "pomegranate", "apricot", "nectarine", "satsuma", "citron",
+    "plantain", "yam", "cassava", "taro", "leek", "parsnip", "radish", "kale",
+    "lentil", "chickpea", "hummus", "falafel", "couscous", "risotto", "goulash",
+    "kimchi", "sauerkraut", "chutney", "marmalade", "compote", "tapioca",
+    "marzipan", "nougat", "praline", "brioche", "crumpet", "bannock", "damper",
   ],
   poison: [
     "poison", "venom", "toxin", "bane", "blight", "plague", "rot", "decay",
     "sludge", "bile", "acid", "corrode", "fester", "spore", "mold", "fungus",
     "hemlock", "nightshade", "arsenic", "cyanide", "toxic", "noxious", "putrid",
     "venoms", "toxins", "spores", "poisons", "miasma", "corruption", "ooze",
+    "wormwood", "belladonna", "henbane", "mandrake", "toadstool", "pestilence",
+    "gangrene", "necrosis", "virulent", "septic", "canker", "murrain",
   ],
   dark: [
     "shadow", "dark", "darkness", "night", "gloom", "murk", "void", "abyss",
     "nether", "shade", "dusk", "midnight", "eclipse", "black", "raven", "crow",
     "grave", "tomb", "crypt", "specter", "phantom", "wraith", "shadows",
     "dread", "doom", "bane", "sinister", "wicked", "evil", "cursed", "grim",
+    "umbra", "penumbra", "stygian", "tenebrous", "sepulcher",
+    "necropolis", "shroud", "pall", "obsidian", "nocturne", "eventide",
   ],
   ice: [
     "ice", "frost", "snow", "cold", "chill", "freeze", "glacier", "hail",
     "sleet", "icicle", "blizzard", "winter", "rime", "frozen", "arctic",
     "shiver", "numb", "icy", "snowflake", "frostbite", "iceberg", "floe",
-    "frosts", "icicles", "snows", "glaciers",
+    "frosts", "icicles", "snows", "glaciers", "hoarfrost", "permafrost",
+    "tundra", "glacial", "hailstone", "snowdrift", "flurry", "gelid",
   ],
   water: [
     "water", "wave", "flood", "rain", "river", "stream", "ocean", "sea", "tide",
     "torrent", "deluge", "surge", "splash", "spray", "geyser", "current",
     "brook", "creek", "pond", "lake", "puddle", "drench", "soak", "wash",
     "waves", "floods", "rivers", "streams", "waters", "downpour", "monsoon",
+    "cascade", "cataract", "maelstrom", "riptide", "undertow", "billow",
+    "freshet", "estuary", "rivulet", "spume", "brine", "tsunami",
   ],
   tool: [
     "key", "lever", "crowbar", "wrench", "pliers", "chisel", "saw", "drill",
     "pick", "pickaxe", "shovel", "spade", "hook", "rope", "chain", "clamp",
     "vise", "wedge", "screw", "bolt", "hinge", "gear", "cog", "file", "rasp",
     "keys", "chains", "hooks", "levers", "tongs", "auger", "gimlet",
+    "mattock", "trowel", "plumb", "caliper", "ratchet", "spanner", "grapnel",
+    "winch", "pulley", "fulcrum", "skeleton",
   ],
   treasure: [
     "coin", "gold", "silver", "gem", "jewel", "ruby", "emerald", "diamond",
     "pearl", "sapphire", "topaz", "opal", "amber", "crown", "chest", "hoard",
     "loot", "bounty", "riches", "treasure", "coins", "gems", "jewels", "gilt",
     "bullion", "ingot", "trove", "fortune", "wealth", "prize", "medallion",
+    "doubloon", "ducat", "florin", "guilder", "sovereign", "specie", "lucre",
+    "garnet", "amethyst", "beryl", "jade", "onyx", "carnelian", "scepter",
   ],
   nature: [
     "vine", "root", "branch", "thorn", "bramble", "briar", "leaf", "moss",
     "ivy", "bark", "wood", "timber", "forest", "grove", "seed", "sprout",
     "bloom", "flower", "petal", "grass", "reed", "fern", "oak", "elm", "birch",
     "vines", "roots", "branches", "thorns", "leaves", "trees", "bushes", "weed",
+    "lichen", "bracken", "nettle", "thistle", "creeper", "tendril", "sapling",
+    "underbrush", "thicket", "coppice", "verdure", "foliage", "willow", "alder",
   ],
   beastly: [
     "wolf", "bear", "lion", "tiger", "boar", "hound", "fang", "claw", "beast",
     "hawk", "eagle", "falcon", "serpent", "snake", "viper", "cobra", "shark",
     "wolves", "bears", "lions", "claws", "fangs", "jaws", "maw", "brute",
     "raptor", "predator", "hunter", "pack", "swarm", "horde", "ram", "bull",
+    "lynx", "panther", "jackal", "hyena", "badger", "wolverine", "mastiff",
+    "behemoth", "leviathan", "chimera", "manticore", "basilisk", "wyvern",
   ],
 };
 
@@ -477,11 +520,13 @@ export function resolveWordEffect(word, enemy = {}, seed = 0) {
     status = null;
   }
 
-  // Choose the flavor bucket.
+  // Choose the flavor bucket, then weave the actual word in: any "{WORD}"
+  // placeholder is replaced with the played word (lines without it still work).
   let bucket = def.text.generic;
   if (resisted && def.text.resisted) bucket = def.text.resisted;
   else if ((strong || weakTo.has(cat)) && def.text.strong) bucket = def.text.strong;
-  const text = pick(bucket, seed) || pick(def.text.generic, seed) || "";
+  const raw = pick(bucket, seed) || pick(def.text.generic, seed) || "";
+  const text = raw.replace(/\{WORD\}/g, (word || "").toUpperCase());
 
   return {
     category: cat,

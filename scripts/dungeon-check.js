@@ -22,14 +22,18 @@ import { dayKey } from "../src/lib/daily.js";
 import { allWords, rarityTier } from "../src/games/dictionary-dungeon/dict.js";
 import { getRule, ruleNeedsContext } from "../src/games/dictionary-dungeon/rules.js";
 import { allEffectWords } from "../src/games/dictionary-dungeon/effects.js";
-import { LEVELS, BOSSES } from "../src/games/dictionary-dungeon/pools.js";
+import { LEVELS, BOSSES, RELICS, SCROLLS, EVENTS, MERCHANT_STOCK } from "../src/games/dictionary-dungeon/pools.js";
 import {
   buildRun,
   currentTarget,
   currentRoom,
   isChoiceRoom,
+  isMerchantRoom,
+  isEventRoom,
   resolveTurn,
   takeRelic,
+  leaveMerchant,
+  resolveEvent,
 } from "../src/games/dictionary-dungeon/logic.js";
 
 const DAYS = 60;
@@ -47,14 +51,20 @@ const WORDS = [...allWords()];
 
 function countAnswers(spec) {
   const rule = getRule(spec);
-  // Memory/enemy rules: not counted in isolation (ctx-dependent, always
-  // satisfiable in practice) — return Infinity so they never fail solvability.
   const s = String(spec);
-  if (s === "longer" || s === "freshletters" || s === "enemyletter") return Infinity;
+  // A pure memory/enemy rule (or a combo whose ONLY constraint is one of those)
+  // is ctx-dependent and always satisfiable in practice — never the sole gate.
+  const parts = s.split("&").map((p) => p.trim());
+  const memoryOnly = parts.every((p) => p === "longer" || p === "freshletters");
+  if (memoryOnly) return Infinity;
+  // Count real words satisfying the (possibly combined) predicate. Pass a tier
+  // whenever any sub-rule is rarity-based; give memory sub-rules a neutral ctx
+  // (no prevWord / enemyName) so they don't over-restrict the count.
+  const needsTier = parts.some((p) => p.startsWith("tier:"));
   let n = 0;
   for (const w of WORDS) {
-    const tier = s.startsWith("tier:") ? rarityTier(w) : null;
-    if (rule.test(w, { tier })) n++;
+    const ctx = { tier: needsTier ? rarityTier(w) : null, prevWord: null, enemyName: "" };
+    if (rule.test(w, ctx)) n++;
   }
   return n;
 }
@@ -120,12 +130,33 @@ for (const key of keys) {
   // Walk every step, confirm each rule is solvable and structure is sane.
   let earlyCommonOk = true;
   a.levels.forEach((lvl, li) => {
-    // structure: each level has ≥1 gate, ≥1 monster, ≥1 treasure.
+    // structure: each level has ≥1 gate, ≥1 monster, ≥1 treasure; and no more
+    // than 1 merchant / 1 event / 1 trap (assembler caps).
     const types = lvl.rooms.map((r) => r.type);
+    const countType = (t) => types.filter((x) => x === t).length;
     check(`${key} ${lvl.id} has gate`, types.includes("gate"));
     check(`${key} ${lvl.id} has monster`, types.includes("monster"));
     check(`${key} ${lvl.id} has treasure`, types.includes("treasure"));
+    check(`${key} ${lvl.id} ≤1 merchant`, countType("merchant") <= 1, `${countType("merchant")}`);
+    check(`${key} ${lvl.id} ≤1 event`, countType("event") <= 1, `${countType("event")}`);
+    check(`${key} ${lvl.id} ≤1 trap`, countType("trap") <= 1, `${countType("trap")}`);
+    // Merchant/event only appear from Level 2 on.
+    if (li === 0) check(`${key} entry-hall has no merchant/event`, !types.includes("merchant") && !types.includes("event"));
     for (const room of lvl.rooms) {
+      if (room.type === "merchant") {
+        check(`${key} ${lvl.id} merchant has offers`, Array.isArray(room.offers) && room.offers.length >= 2);
+        for (const o of room.offers) check(`${key} merchant offer priced`, typeof o.price === "number" && o.price > 0);
+        continue;
+      }
+      if (room.type === "event") {
+        check(`${key} ${lvl.id} event has choices`, !!room.event && room.event.choices.length >= 2);
+        continue;
+      }
+      if (room.type === "treasure") {
+        check(`${key} ${lvl.id} treasure has relics`, Array.isArray(room.relicChoices) && room.relicChoices.length >= 1);
+        continue;
+      }
+      // gate / monster / trap → word rooms with a solvable rule
       const count = answersFor(room.ruleSpec);
       const rule = getRule(room.ruleSpec);
       const need = THRESHOLDS[rule.difficulty] ?? THRESHOLDS.medium;
@@ -137,6 +168,23 @@ for (const key of keys) {
     }
   });
   if (earlyCommonOk) commonPathDays++;
+}
+
+// ── 3b) event outcomes reference real relics/scrolls ──────────────────────────
+console.log("Event / merchant catalog validity:");
+const relicIds = new Set(RELICS.map((r) => r.id));
+const scrollIds = new Set(SCROLLS.map((s) => s.id));
+for (const ev of EVENTS) {
+  check(`event "${ev.id}" has body + choices`, !!ev.bodyText && ev.choices.length >= 2);
+  for (const c of ev.choices) {
+    const o = c.outcome || {};
+    if (o.relic) check(`event "${ev.id}" relic "${o.relic}" exists`, relicIds.has(o.relic));
+    if (o.scroll) check(`event "${ev.id}" scroll "${o.scroll}" exists`, scrollIds.has(o.scroll));
+  }
+}
+for (const m of MERCHANT_STOCK) {
+  if (m.kind === "relic") check(`merchant "${m.id}" relic "${m.grant}" exists`, relicIds.has(m.grant));
+  if (m.kind === "scroll") check(`merchant "${m.id}" scroll "${m.grant}" exists`, scrollIds.has(m.grant));
 }
 check("early levels keep a common-word path every day", commonPathDays === keys.length, `${commonPathDays}/${keys.length}`);
 
@@ -166,13 +214,17 @@ process.exit(failures ? 1 : 0);
 // stuck with no valid word.
 function findAnswer(state) {
   const target = currentTarget(state);
-  const rule = getRule(target ? target.ruleSpec : "any");
+  const spec = target ? target.ruleSpec : "any";
+  const rule = getRule(spec);
   const prev = state.prevWord;
-  // Try a bounded scan of the dictionary for a satisfying word.
+  const needsTier = String(spec).includes("tier:");
+  // Try a bounded scan of the dictionary for a satisfying word not already used.
+  const used = new Set(state.used || []);
   let scanned = 0;
   for (const w of WORDS) {
-    if (++scanned > 60000) break; // bound per turn
-    const tier = String(target?.ruleSpec).startsWith("tier:") ? rarityTier(w) : null;
+    if (++scanned > 80000) break; // bound per turn
+    if (used.has(w)) continue;
+    const tier = needsTier ? rarityTier(w) : null;
     if (!rule.test(w, { prevWord: prev, enemyName: target?.name || "", tier })) continue;
     return w;
   }
@@ -190,6 +242,20 @@ function autoSolve(key) {
     if (isChoiceRoom(state)) {
       const room = currentRoom(state);
       takeRelic(state, room.relicChoices[0]);
+      continue;
+    }
+    if (isMerchantRoom(state)) {
+      leaveMerchant(state); // solver doesn't need to shop
+      continue;
+    }
+    if (isEventRoom(state)) {
+      // Pick the first choice the solver can afford (or the last as fallback).
+      const room = currentRoom(state);
+      let idx = room.event.choices.findIndex(
+        (c) => c.requires?.coins == null || state.coins >= c.requires.coins
+      );
+      if (idx < 0) idx = room.event.choices.length - 1;
+      resolveEvent(state, idx);
       continue;
     }
     const w = findAnswer(state);

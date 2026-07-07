@@ -238,20 +238,42 @@ function build(spec) {
     };
   }
 
-  // share a letter with the enemy's name: "enemyletter" (needs ctx.enemyName)
+  // share 3+ DISTINCT letters with the enemy's name: "enemyletter"
+  // (needs ctx.enemyName). Much harder than the old "any 1 letter" — you have
+  // to actually raid the enemy's name for letters.
   if (s === "enemyletter") {
+    const NEED = 3;
     return {
-      displayText: "Play a word sharing a letter with the enemy's name.",
-      difficulty: "easy",
+      displayText: `Play a word sharing ${NEED}+ letters with the enemy's name.`,
+      difficulty: "medium",
       tags: ["theme"],
       test: (w, ctx) => {
         if (!ctx?.enemyName) return true;
         const en = new Set(ctx.enemyName.toUpperCase().replace(/[^A-Z]/g, "").split(""));
-        for (const ch of w) if (en.has(ch)) return true;
-        return false;
+        const shared = new Set();
+        for (const ch of w) if (en.has(ch)) shared.add(ch);
+        return shared.size >= NEED;
       },
     };
   }
+
+  // must contain two DIFFERENT rare letters is silly-hard; instead "twovowels"
+  // exact handled above. New: "palindromeish" not added (too niche). Add a few
+  // more useful singles:
+
+  // must be a common OR familiar word AND 5+ letters is a combo — use "&".
+
+  // ends with a vowel: "vend"
+  if (s === "vend") {
+    return {
+      displayText: "Play a word ending in a vowel.",
+      difficulty: "easy",
+      tags: ["vowel", "structural"],
+      test: (w) => isVowel(w[w.length - 1]),
+    };
+  }
+
+  // more banned-vowel convenience already covered by "no:X".
 
   // "any" — no constraint (fallback / very first room)
   if (s === "any") {
@@ -266,14 +288,42 @@ function build(spec) {
   throw new Error(`Unknown rule spec: "${spec}"`);
 }
 
+// ── combined rules ("A&B") ────────────────────────────────────────────────────
+// A spec containing "&" means EVERY sub-rule must pass. The combined rule's
+// displayText joins the parts with " · and ", its difficulty is the hardest of
+// its parts (bumped one tier if there are 2+ non-trivial parts), and its tags
+// are the union. Reserved for late levels / bosses in the pools.
+const DIFF_ORDER = { easy: 0, medium: 1, hard: 2 };
+const DIFF_NAME = ["easy", "medium", "hard"];
+
+function buildCombo(spec) {
+  const parts = spec.split("&").map((p) => p.trim()).filter(Boolean);
+  const subs = parts.map((p) => ({ spec: p, ...build(p) }));
+  // Lowercase the leading verb of each sub after the first so it reads as a
+  // clause list: "Play a word 5+ letters long · and with no E · and a double letter."
+  const clause = (dt, first) => {
+    let t = dt.replace(/\.$/, "");
+    t = t.replace(/^Play a word /i, "").replace(/^Play an? /i, "");
+    return first ? `Play a word ${t}` : t;
+  };
+  const displayText =
+    subs.map((sub, i) => clause(sub.displayText, i === 0)).join(" · and ") + ".";
+  const maxDiff = Math.max(...subs.map((sub) => DIFF_ORDER[sub.difficulty] ?? 1));
+  const bumped = Math.min(2, maxDiff + (subs.length >= 2 ? 1 : 0));
+  const tags = [...new Set(subs.flatMap((sub) => sub.tags || []))].concat("combo");
+  const test = (w, ctx) => subs.every((sub) => sub.test(w, ctx));
+  return { displayText, difficulty: DIFF_NAME[bumped], tags, test };
+}
+
 // Cache built rules by spec so repeated lookups are cheap and stable.
 const _cache = new Map();
 
-/* Build (or fetch) a rule object from a spec string. Deterministic. */
+/* Build (or fetch) a rule object from a spec string. Deterministic. A spec with
+   "&" is a combined rule (all sub-rules must pass). */
 export function getRule(spec) {
   const key = String(spec).trim();
   if (_cache.has(key)) return _cache.get(key);
-  const built = build(key);
+  const built = key.includes("&") ? buildCombo(key) : build(key);
   const rule = { id: key, spec: key, ...built };
   _cache.set(key, rule);
   return rule;
@@ -289,5 +339,6 @@ export function passesRule(spec, word, ctx) {
    The check script uses this to know a rule can't be counted in isolation. */
 export function ruleNeedsContext(spec) {
   const s = String(spec).trim();
+  if (s.includes("&")) return s.split("&").some((p) => ruleNeedsContext(p));
   return /^tier:/.test(s) || s === "longer" || s === "freshletters" || s === "enemyletter";
 }

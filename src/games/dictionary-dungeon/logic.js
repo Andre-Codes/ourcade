@@ -32,6 +32,8 @@ import {
   SCROLLS,
   SCROLL_BY_ID,
   FLAVOR,
+  MERCHANT_STOCK,
+  EVENTS,
 } from "./pools.js";
 
 // Re-exported so the render-only cabinet can resolve owned relic/scroll ids to
@@ -67,21 +69,34 @@ function stream(seed) {
 
 // Non-boss room types the assembler places. Every level gets at least one
 // gate + one monster + one reward (treasure), per the design's assembly rules.
-function assembleRooms(level, s) {
+// From Level 2 (levelIdx >= 1) on, a merchant and/or an event may also appear,
+// capped at ≤1 each so pacing stays clean. `dayKey` (or a seed) rotates the
+// FIRST room's rule so the very first thing a player faces differs day to day.
+function assembleRooms(level, levelIdx, dayKey, s) {
   const n = level.roomCount;
   const types = [];
   // Guaranteed beats.
   types.push("gate");
   types.push("monster");
   types.push("treasure");
-  // Fill the rest with monster/gate (favor monsters), never more than one trap.
+  // Fill the rest. From Level 2 on, allow one merchant + one event; never more
+  // than one trap. Favor monsters otherwise.
   let traps = 0;
+  let merchants = 0;
+  let events = 0;
+  const canExtra = levelIdx >= 1;
   while (types.length < n) {
     const r = s.rand();
-    if (r < 0.15 && traps < 1) {
+    if (canExtra && r < 0.16 && merchants < 1) {
+      types.push("merchant");
+      merchants++;
+    } else if (canExtra && r < 0.32 && events < 1) {
+      types.push("event");
+      events++;
+    } else if (r < 0.44 && traps < 1) {
       types.push("trap");
       traps++;
-    } else if (r < 0.6) types.push("monster");
+    } else if (r < 0.72) types.push("monster");
     else types.push("gate");
   }
   const order = s.shuffle(types);
@@ -98,11 +113,17 @@ function assembleRooms(level, s) {
   let enemyIdx = 0;
   const nextEnemy = () => enemyPool[enemyIdx++ % enemyPool.length];
 
+  // For Entry Hall (levelIdx 0), the FIRST room's rule rotates by day so the
+  // opening isn't always the same. rotateDaily over the level's rule pool gives
+  // a different opener each day while staying deterministic.
+  const openerRule =
+    levelIdx === 0 && dayKey ? rotateDaily(level.ruleSpecs, dayKey, DUNGEON_SALT ^ 0x0110) : null;
+
   return order.map((type, i) => {
     const room = {
       idx: i,
       type,
-      ruleSpec: nextRule(),
+      ruleSpec: i === 0 && openerRule ? openerRule : nextRule(),
       intro: s.pick(level.intros),
     };
     if (type === "monster" || type === "trap") {
@@ -113,6 +134,19 @@ function assembleRooms(level, s) {
     }
     if (type === "treasure") {
       room.relicChoices = s.pickN(RELICS, 3).map((r) => r.id);
+    }
+    if (type === "merchant") {
+      // Seeded stock of 3 offers, priced with a mild per-level markup.
+      const markup = 1 + levelIdx * 0.15;
+      room.offers = s.pickN(MERCHANT_STOCK, 3).map((m) => ({
+        ...m,
+        price: Math.max(1, Math.round(m.basePrice * markup)),
+        sold: false,
+      }));
+    }
+    if (type === "event") {
+      room.event = s.pick(EVENTS);
+      room.eventResolved = false;
     }
     return room;
   });
@@ -129,8 +163,7 @@ export function buildRun(dayKey) {
 
   const levels = LEVELS.map((level, li) => {
     const ls = stream((baseSeed ^ daySeed(`${level.id}|${li}`)) >>> 0);
-    const rooms = assembleRooms(level, ls);
-    const boss = BOSS_BY_ID[level.bossId];
+    const rooms = assembleRooms(level, li, dayKey, ls);
     return {
       id: level.id,
       name: level.name,
@@ -142,9 +175,6 @@ export function buildRun(dayKey) {
     };
   });
 
-  // Offer a couple of scrolls to start (deterministic).
-  const startScrolls = s.pickN(SCROLLS, 2).map((sc) => sc.id);
-
   return {
     v: SAVE_VERSION,
     mode: daily ? "daily" : "practice",
@@ -153,16 +183,19 @@ export function buildRun(dayKey) {
     hearts: START_HEARTS,
     maxHearts: START_HEARTS,
     coins: START_COINS,
-    relics: [], // relic ids owned
-    scrolls: startScrolls, // scroll ids owned
+    relics: [], // relic ids owned — start EMPTY (earned/bought in-run)
+    scrolls: [], // scroll ids owned — start EMPTY (bought at merchants)
     levelIdx: 0,
     roomIdx: 0, // index into level.rooms; === rooms.length means BOSS
     bossPhase: 0,
     levels,
     prevWord: null, // for memory rules (per room reset)
     words: [], // every accepted word this run (for recap)
+    used: [], // UPPERCASE words already played (no-repeat across the run)
     // per-level flags for relic once-per-level effects
     levelFlags: {},
+    roomFails: 0, // wrong-word count in the CURRENT room (rule-fail penalty)
+    famished: false, // set while a food-sealing enemy is alive in this room
     over: false,
     won: false,
     deathCause: null,
@@ -230,6 +263,7 @@ export function currentTarget(state) {
       kindTags: e.kindTags,
       weaknessTags: e.weaknessTags,
       resistanceTags: e.resistanceTags,
+      sealsFood: !!e.sealsFood,
       intent: e.intents ? e.intents[0] : "",
       ruleSpec: room.ruleSpec,
     };
@@ -278,13 +312,29 @@ function applyRelics(state, w, tier, effectCat, parts, ctx) {
   if (has("whetstone") && effectCat === "weapon") parts.push({ label: "Whetstone", amount: 2 });
   if (has("tinderbox") && effectCat === "fire") parts.push({ label: "Tinderbox", amount: 2 });
   if (has("reliquary") && effectCat === "holy") parts.push({ label: "Reliquary", amount: 2 });
+  if (has("poisoners-ring") && effectCat === "poison") parts.push({ label: "Poisoner's Ring", amount: 2 });
+  if (has("frost-lens") && effectCat === "ice") parts.push({ label: "Frost Lens", amount: 2 });
+  if (has("silver-fang") && effectCat === "beastly") parts.push({ label: "Silver Fang", amount: 2 });
+  if (has("runed-anvil") && effectCat === "blunt") parts.push({ label: "Runed Anvil", amount: 2 });
+  if (has("short-blade") && w.length <= 4) parts.push({ label: "Short Blade", amount: 2 });
+  if (has("goblin-lens") && tier === "goblin") parts.push({ label: "Goblin Lens", amount: 6 });
   if (has("commoners-cloak") && tier === "common" && !state.levelFlags[flag("cloak")]) {
     state.levelFlags[flag("cloak")] = true;
+    heal += 1;
+  }
+  if (has("vowel-crown") && countVowelsIn(w) >= 3 && !state.levelFlags[flag("vcrown") + state.roomIdx]) {
+    state.levelFlags[flag("vcrown") + state.roomIdx] = true;
     heal += 1;
   }
   if (has("palindrome-coin") && /(.)\1/.test(w)) coins += 2;
 
   return { heal, coins };
+}
+
+function countVowelsIn(w) {
+  let n = 0;
+  for (const ch of w) if ("AEIOU".includes(ch)) n++;
+  return n;
 }
 
 /* Resolve a typed word against the current step. Returns:
@@ -295,6 +345,7 @@ function applyRelics(state, w, tier, effectCat, parts, ctx) {
 
    reason (when !accepted): "invalid" | "rulefail". */
 export function resolveTurn(state, rawWord, seedOverride) {
+  syncRoomEntry(state); // keep the food-seal flag correct (first turn / resume)
   const w = (rawWord || "").toUpperCase().replace(/[^A-Z]/g, "");
   const target = currentTarget(state);
   const rule = getRule(target ? target.ruleSpec : "any");
@@ -310,6 +361,13 @@ export function resolveTurn(state, rawWord, seedOverride) {
     return out;
   }
 
+  // 1b) no repeats across the whole run — a spent word won't answer twice.
+  if ((state.used || []).includes(w)) {
+    out.reason = "repeat";
+    out.logLines.push(`> ${w} — ${flav("repeat")}`);
+    return out;
+  }
+
   const tier = rarityTier(w);
   const ctx = { prevWord: state.prevWord, enemyName: target?.name || "", tier };
 
@@ -318,16 +376,22 @@ export function resolveTurn(state, rawWord, seedOverride) {
   const rulePasses = ruleBypassed || rule.test(w, ctx);
   if (!rulePasses) {
     out.reason = "rulefail";
-    // Vowel Pardon / Iron Bookmark / queued forgive can save a heart on fail.
-    const forgive = consumeFailForgiveness(state);
+    state.roomFails = (state.roomFails || 0) + 1;
     out.logLines.push(`> ${w} is valid — ${flav("ruleFail")}`);
-    if (!forgive && target && (target.kind === "trap" || target.kind === "boss")) {
-      // Traps and bosses punish wrong words with a heart.
-      state.hearts -= 1;
-      out.logLines.push(`> The room bites back. You lose a heart. (❤ ${state.hearts})`);
-      checkDeath(state, out, `a wrong word in the ${currentLevel(state).name}`);
-    } else if (forgive) {
-      out.logLines.push(`> ${forgive} shields you from the mistake.`);
+    // The FIRST wrong word in a room is a free warning; the 2nd+ costs a heart
+    // (any room, not just traps/bosses). Fail-forgiveness (relic/scroll) can
+    // still save the heart. Traps/bosses always sting from the first miss.
+    const hard = target && (target.kind === "trap" || target.kind === "boss");
+    const penalize = hard || state.roomFails >= 2;
+    if (penalize) {
+      const forgive = consumeFailForgiveness(state);
+      if (forgive) {
+        out.logLines.push(`> ${forgive} shields you from the mistake.`);
+      } else {
+        state.hearts -= 1;
+        out.logLines.push(`> ${flav("ruleFailPenalty")} (❤ ${state.hearts})`);
+        checkDeath(state, out, `a wrong word in the ${currentLevel(state).name}`);
+      }
     }
     return out;
   }
@@ -337,6 +401,7 @@ export function resolveTurn(state, rawWord, seedOverride) {
   out.ok = true;
   state.prevWord = w;
   state.words.push({ word: w, tier, rank: commonRank(w) });
+  (state.used || (state.used = [])).push(w);
 
   // 3) damage
   const parts = [{ label: "letters", amount: w.length }];
@@ -374,8 +439,21 @@ export function resolveTurn(state, rawWord, seedOverride) {
   else out.logLines.push(`> ${flav("plainHit")}`);
   if (effect && effect.resisted) out.logLines.push(`> ${target.name} resists it.`);
 
-  // heals / coins from effect + relics
-  const heal = (effect?.heal || 0) + relicExtra.heal;
+  // heals / coins from effect + relics. FOOD heals are special: a food-sealing
+  // enemy (state.famished) nullifies them unless the Glutton's Charm unseals;
+  // Iron Stomach adds +1. Non-food heals (e.g. Vowel Crown relic) are unaffected.
+  const isFood = effectCat === "food";
+  let effectHeal = effect?.heal || 0;
+  let foodSealed = false;
+  if (isFood && effectHeal > 0) {
+    if (state.relics.includes("iron-stomach")) effectHeal += 1;
+    if (state.famished && !state.relics.includes("gluttons-charm")) {
+      effectHeal = 0;
+      foodSealed = true;
+    }
+  }
+  if (foodSealed) out.logLines.push(`> ${flav("foodSealed")}`);
+  const heal = effectHeal + relicExtra.heal;
   if (heal > 0) {
     state.hearts = Math.min(state.maxHearts, state.hearts + heal);
     out.logLines.push(`> You recover ${heal} heart${heal === 1 ? "" : "s"}. (❤ ${state.hearts})`);
@@ -449,6 +527,12 @@ function consumeFailForgiveness(state) {
 }
 
 function enemyCounter(state, target, out) {
+  // A queued Smoke Bomb skips one incoming counterattack.
+  if (state.pending.skipCounter) {
+    delete state.pending.skipCounter;
+    out.logLines.push(`> Smoke swallows ${target.name}'s counter — no damage.`);
+    return;
+  }
   const dmg = target.damage || 1;
   state.hearts -= dmg;
   out.logLines.push(`> ${target.name} strikes for ${dmg} heart${dmg === 1 ? "" : "s"}. (❤ ${state.hearts})`);
@@ -464,6 +548,7 @@ function deathBy(name) {
 function awardClear(state, out, boss = false) {
   let coins = boss ? 8 : 3;
   if (state.relics.includes("coin-purse")) coins += 3;
+  if (state.relics.includes("lucky-coin")) coins += 5;
   state.coins += coins;
   out.effects.coins = coins;
 }
@@ -479,10 +564,12 @@ function checkDeath(state, out, cause) {
 }
 
 // Move to the next room; on the last boss defeated, win the run. Resets the
-// per-room memory word.
+// per-room memory word + fail counter, and re-syncs the food-seal flag for
+// whatever room we land on.
 function advanceRoom(state, out) {
   const lvl = currentLevel(state);
   state.prevWord = null;
+  state.roomFails = 0;
   delete state.bossHP;
   if (state.roomIdx < lvl.rooms.length) {
     state.roomIdx += 1; // may land on the boss (roomIdx === rooms.length)
@@ -492,6 +579,11 @@ function advanceRoom(state, out) {
       state.levelIdx += 1;
       state.roomIdx = 0;
       state.bossPhase = 0;
+      // Second Wind relic: heal 1 at the start of each new level.
+      if (state.relics.includes("second-wind")) {
+        state.hearts = Math.min(state.maxHearts, state.hearts + 1);
+        out.logLines.push(`> Second Wind: you catch your breath. (❤ ${state.hearts})`);
+      }
     } else {
       // final boss cleared → victory
       state.over = true;
@@ -499,6 +591,15 @@ function advanceRoom(state, out) {
       out.logLines.push("> The dungeon is silent. You have won.");
     }
   }
+  syncRoomEntry(state);
+}
+
+// Recompute the food-seal flag for the CURRENT room: true iff a live
+// food-sealing enemy is present. Called on every room entry and defensively at
+// the top of resolveTurn so a resumed save is correct too.
+export function syncRoomEntry(state) {
+  const target = currentTarget(state);
+  state.famished = !!(target && target.sealsFood && (target.hp == null || target.hp > 0));
 }
 
 // ── scrolls ───────────────────────────────────────────────────────────────────
@@ -530,13 +631,87 @@ export function useScroll(state, scrollId) {
     case "reveal-starter":
       message = `Hint: try a word starting with ${hintStarter(state) || "?"}.`;
       break;
+    case "reveal-three":
+      message = `Hints: try starting with ${hintLetters(state, 3).join(", ") || "?"}.`;
+      break;
     case "reroll-rule":
       message = rerollRule(state);
       break;
+    case "heal-4":
+      state.hearts = Math.min(state.maxHearts, state.hearts + 4);
+      message = `Greater Draught: +4 hearts. (❤ ${state.hearts})`;
+      break;
+    case "bonus-damage-big":
+      state.pending.bonusDamage = 12;
+      message = "Greater Word Bomb primed: your next word deals +12.";
+      break;
+    case "skip-counter":
+      state.pending.skipCounter = true;
+      message = "Smoke Bomb ready: the enemy's next counter is skipped.";
+      break;
+    case "gain-coins":
+      state.coins += 10;
+      message = `Coin Scroll: +10 coins. (🪙 ${state.coins})`;
+      break;
+    case "banish": {
+      // Deal a flat 8 to the current enemy/boss (no word played).
+      const dealt = dealDirectDamage(state, 8);
+      message = dealt ? "Banish Scroll: 8 damage torn out of the enemy." : "Nothing here to banish.";
+      break;
+    }
     default:
       message = sc.description;
   }
   return { ok: true, message };
+}
+
+// Flat damage to the current enemy/boss (used by the Banish scroll). Advances
+// the room if it kills. Returns true if there was a target to hit.
+function dealDirectDamage(state, amount) {
+  const target = currentTarget(state);
+  const out = { logLines: [] };
+  if (target && (target.kind === "monster" || target.kind === "trap")) {
+    const room = currentRoom(state);
+    room.enemyHP = Math.max(0, room.enemyHP - amount);
+    if (room.enemyHP <= 0) {
+      awardClear(state, out);
+      advanceRoom(state, out);
+    }
+    return true;
+  }
+  if (target && target.kind === "boss") {
+    const boss = currentBoss(state);
+    const phase = boss.phases[state.bossPhase];
+    state.bossHP = Math.max(0, (state.bossHP ?? phase.hp) - amount);
+    if (state.bossHP <= 0) {
+      if (state.bossPhase + 1 < boss.phases.length) {
+        state.bossPhase += 1;
+        state.bossHP = boss.phases[state.bossPhase].hp;
+        state.prevWord = null;
+      } else {
+        awardClear(state, out, true);
+        advanceRoom(state, out);
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+// N distinct useful starting letters for the current rule (Lantern scroll).
+function hintLetters(state, n) {
+  const target = currentTarget(state);
+  const rule = getRule(target ? target.ruleSpec : "any");
+  const ctx = { prevWord: state.prevWord, enemyName: target?.name || "" };
+  const SAMPLES = ["APPLE", "STONE", "TORCH", "BRICK", "CANDLE", "GHOUL", "QUARTZ", "JELLY", "OXEN", "VIVID", "WATER", "ZEBRA", "KNIFE", "MAGIC", "NIGHT", "PEARL", "RIVER", "SWORD", "URCHIN", "YEAST", "DAGGER", "EMBER", "FLAME", "HAMMER", "IRON", "LANTERN", "BONE", "CRYPT", "DUSK", "FROST"];
+  const out = [];
+  for (const cand of SAMPLES) {
+    if (out.length >= n) break;
+    if (isWord(cand) && rule.test(cand, { ...ctx, tier: rarityTier(cand) }) && !out.includes(cand[0])) {
+      out.push(cand[0]);
+    }
+  }
+  return out;
 }
 
 // A valid starting letter for the current rule (best-effort; scans A–Z for a
@@ -583,6 +758,106 @@ export function takeRelic(state, relicId) {
 export function isChoiceRoom(state) {
   const room = currentRoom(state);
   return !!room && room.type === "treasure";
+}
+export function isMerchantRoom(state) {
+  const room = currentRoom(state);
+  return !!room && room.type === "merchant";
+}
+export function isEventRoom(state) {
+  const room = currentRoom(state);
+  return !!room && room.type === "event";
+}
+
+// ── merchant ──────────────────────────────────────────────────────────────────
+/* Buy offer #i in the current merchant room. Deducts coins (with Merchant's
+   Token discount), grants the item, marks the offer sold. The room is NOT
+   advanced by a purchase — the player leaves via leaveMerchant(). */
+export function buyItem(state, offerIdx) {
+  const room = currentRoom(state);
+  if (!room || room.type !== "merchant") return { ok: false, message: "No merchant here." };
+  const offer = room.offers?.[offerIdx];
+  if (!offer || offer.sold) return { ok: false, message: "That's not for sale." };
+  const discount = state.relics.includes("merchants-token") ? 0.75 : 1;
+  const price = Math.max(1, Math.round(offer.price * discount));
+  if (state.coins < price) return { ok: false, message: `Not enough coins (need ${price}).` };
+  state.coins -= price;
+  offer.sold = true;
+  let message = "";
+  switch (offer.kind) {
+    case "heal":
+      state.hearts = Math.min(state.maxHearts, state.hearts + offer.value);
+      message = `Bought ${offer.name}: +${offer.value} hearts. (❤ ${state.hearts})`;
+      break;
+    case "maxheart":
+      state.maxHearts += offer.value;
+      state.hearts += offer.value;
+      message = `Bought ${offer.name}: max hearts +${offer.value}. (❤ ${state.hearts}/${state.maxHearts})`;
+      break;
+    case "scroll":
+      state.scrolls.push(offer.grant);
+      message = `Bought ${offer.name}.`;
+      break;
+    case "relic":
+      if (!state.relics.includes(offer.grant)) state.relics.push(offer.grant);
+      message = `Bought ${offer.name}.`;
+      break;
+    default:
+      message = `Bought ${offer.name}.`;
+  }
+  return { ok: true, message, coins: state.coins };
+}
+
+/* Leave the merchant room and advance. */
+export function leaveMerchant(state) {
+  const room = currentRoom(state);
+  if (!room || room.type !== "merchant") return { ok: false };
+  const out = { ok: true, logLines: ["> You leave the merchant and press on."] };
+  advanceRoom(state, out);
+  return out;
+}
+
+// ── events ────────────────────────────────────────────────────────────────────
+/* Resolve the current event room by choice index. Applies the outcome and
+   advances. Returns { ok, logLines }. */
+export function resolveEvent(state, choiceIdx) {
+  const room = currentRoom(state);
+  if (!room || room.type !== "event" || !room.event) return { ok: false };
+  const choice = room.event.choices?.[choiceIdx];
+  if (!choice) return { ok: false };
+  // Gate on requirements (e.g. enough coins).
+  if (choice.requires?.coins != null && state.coins < choice.requires.coins) {
+    return { ok: false, message: `You need ${choice.requires.coins} coins for that.` };
+  }
+  const out = { ok: true, logLines: [] };
+  applyOutcome(state, choice.outcome || {}, out);
+  if (choice.resultText) out.logLines.push(`> ${choice.resultText}`);
+  advanceRoom(state, out);
+  return out;
+}
+
+// Apply an event outcome bag to state. Supports heal/hearts(±)/coins(±)/
+// relic/scroll/maxheart.
+function applyOutcome(state, o, out) {
+  if (o.heal) {
+    state.hearts = Math.min(state.maxHearts, state.hearts + o.heal);
+  }
+  if (o.hearts) {
+    state.hearts = Math.min(state.maxHearts, state.hearts + o.hearts);
+    if (state.hearts <= 0) {
+      state.hearts = 0;
+      state.over = true;
+      state.won = false;
+      state.deathCause = "an ill-fated bargain";
+      out.logLines.push("> The bargain takes your last heart. You fall.");
+    }
+  }
+  if (o.maxheart) {
+    state.maxHearts += o.maxheart;
+    state.hearts += o.maxheart;
+  }
+  if (o.coins) state.coins = Math.max(0, state.coins + o.coins);
+  if (o.relic && !state.relics.includes(o.relic)) state.relics.push(o.relic);
+  if (o.scroll) state.scrolls.push(o.scroll);
 }
 
 // ── progress / scoring ────────────────────────────────────────────────────────
@@ -659,7 +934,9 @@ export function shareLine(state) {
 }
 
 // ── save / resume (mirrors chip-panic/logic.js) ───────────────────────────────
-export const SAVE_VERSION = 1;
+// v2: added merchant/event rooms, no-repeat `used`, roomFails, famished, zero
+// starting inventory. Old v1 saves are discarded (start fresh).
+export const SAVE_VERSION = 2;
 
 export const isSaveable = (state) => !!state && !state.over;
 
@@ -674,5 +951,9 @@ export function hydrateGame(saved) {
   if (!Array.isArray(s.levels) || !s.levels.length) return null;
   if (typeof s.hearts !== "number" || typeof s.levelIdx !== "number") return null;
   if (s.over) return null; // finished runs aren't resumable
+  // Backfill fields that may be absent in an early-v2 blob.
+  if (!Array.isArray(s.used)) s.used = (s.words || []).map((r) => r.word);
+  if (typeof s.roomFails !== "number") s.roomFails = 0;
+  if (typeof s.famished !== "boolean") s.famished = false;
   return s;
 }

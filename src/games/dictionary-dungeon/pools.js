@@ -65,7 +65,7 @@ export const LEVELS = [
       "The Goblin Library smells of mildew and spite. Somewhere a footnote is being defaced.",
     ],
     ruleSpecs: ["tier:common", "tier:notcommon", "tier:obscure", "len>=6", "double", "contains:I", "no:S", "norepeat", "enemyletter"],
-    enemyIds: ["footnote-goblin", "book-imp", "ink-leech", "paper-wraith", "margin-gnome"],
+    enemyIds: ["footnote-goblin", "book-imp", "ink-leech", "paper-wraith", "margin-gnome", "gluttonous-maw"],
     bossId: "footnote-king",
   },
   {
@@ -79,8 +79,8 @@ export const LEVELS = [
       "In the Catacombs the walls are carved with hard, clacking letters and no soft ones.",
       "The Consonant Catacombs rattle with a language of edges.",
     ],
-    ruleSpecs: ["vowels<=1", "double", "rareletter", "contains:K", "len>=6", "freshletters", "no:E", "cframe", "tier:obscure"],
-    enemyIds: ["scrabble-wyrm", "apostrophe-wraith", "redaction-slime", "bone-golem", "consonant-crab"],
+    ruleSpecs: ["vowels<=1", "double", "rareletter", "contains:K", "len>=6", "freshletters", "no:E", "cframe", "tier:obscure", "no:E&double", "len>=6&cframe", "vowels<=1&len>=5"],
+    enemyIds: ["scrabble-wyrm", "apostrophe-wraith", "redaction-slime", "bone-golem", "consonant-crab", "famine-wraith"],
     bossId: "scrabble-wyrm-boss",
   },
   {
@@ -94,8 +94,8 @@ export const LEVELS = [
       "The Final Lexicon towers over you, its shelves vanishing into dark far overhead.",
       "This is the Final Lexicon. The dungeon has been reading you the whole way down.",
     ],
-    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "contains:R", "double", "longer"],
-    enemyIds: ["lexicon-sentinel", "verbose-shade", "silent-index", "creeping-errata"],
+    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "contains:R", "double", "longer", "len>=7&no:E", "no:E&norepeat", "len>=6&contains:R", "tier:obscure&len>=6"],
+    enemyIds: ["lexicon-sentinel", "verbose-shade", "silent-index", "creeping-errata", "hunger-sentinel"],
     bossId: "unabridged-lich",
   },
 ];
@@ -251,6 +251,30 @@ export const ENEMIES = [
     intents: ["correct you for 2 hearts", "rewrite the floor beneath your feet"],
     flavor: ["Errata creep across the shelves, changing what was true a moment ago."],
   },
+  // ── Food-sealers (sealsFood: true) ──────────────────────────────────────────
+  // These clamp your food heals to 0 for the whole fight — a clever "no snacking
+  // mid-battle" pressure. Slay it and food works again. logic.js reads sealsFood.
+  {
+    id: "gluttonous-maw", name: "Gluttonous Maw", emoji: "👄", baseHP: 13, damage: 1,
+    kindTags: ["beast", "flesh"], weaknessTags: ["fire", "holy"], resistanceTags: ["food"],
+    sealsFood: true,
+    intents: ["swallow your snacks whole", "gape wide, eating the smell of food"],
+    flavor: ["A Gluttonous Maw yawns open — it eats your rations before you can. Food will not heal you here."],
+  },
+  {
+    id: "famine-wraith", name: "Famine Wraith", emoji: "🦴", baseHP: 15, damage: 2,
+    kindTags: ["undead", "spirit"], weaknessTags: ["holy", "light"], resistanceTags: ["poison", "food"],
+    sealsFood: true,
+    intents: ["starve you for 2 hearts", "wither every crumb to dust"],
+    flavor: ["A Famine Wraith drifts in and the air goes hungry. Any food you conjure turns to ash. Kill it to eat again."],
+  },
+  {
+    id: "hunger-sentinel", name: "Hunger Sentinel", emoji: "🗿", baseHP: 16, damage: 2,
+    kindTags: ["construct", "armor"], weaknessTags: ["magic", "tool"], resistanceTags: ["food", "poison"],
+    sealsFood: true,
+    intents: ["seal your pantry for 2 hearts", "grind shut every door to sustenance"],
+    flavor: ["A Hunger Sentinel bars the way, and your provisions rot in an instant. No food heals until it falls."],
+  },
 ];
 
 export const ENEMY_BY_ID = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
@@ -338,6 +362,19 @@ export const RELICS = [
   { id: "reliquary", name: "Reliquary", emoji: "✝️", effectTag: "holy-plus2", description: "Holy-words deal an extra +2 damage." },
   { id: "thesaurus-shard", name: "Thesaurus Shard", emoji: "💠", effectTag: "long-plus1", description: "+1 damage for every word 5+ letters long." },
   { id: "coin-purse", name: "Bottomless Purse", emoji: "👛", effectTag: "coins-per-clear", description: "Earn +3 coins each room cleared." },
+  // Expansion
+  { id: "poisoners-ring", name: "Poisoner's Ring", emoji: "💍", effectTag: "poison-plus2", description: "Poison-words deal an extra +2 damage." },
+  { id: "frost-lens", name: "Frost Lens", emoji: "❄️", effectTag: "ice-plus2", description: "Ice-words deal an extra +2 damage." },
+  { id: "silver-fang", name: "Silver Fang", emoji: "🐺", effectTag: "beastly-plus2", description: "Beast-words deal an extra +2 damage." },
+  { id: "goblin-lens", name: "Goblin Lens", emoji: "🔍", effectTag: "goblin-plus6", description: "Goblin-tier words deal +6 damage." },
+  { id: "vowel-crown", name: "Vowel Crown", emoji: "👑", effectTag: "vowel-heavy-heal", description: "Words with 3+ vowels heal 1 heart (once per room)." },
+  { id: "iron-stomach", name: "Iron Stomach", emoji: "🍖", effectTag: "food-plus1", description: "Food-words heal +1 extra." },
+  { id: "gluttons-charm", name: "Glutton's Charm", emoji: "🍗", effectTag: "food-unseal", description: "Food heals even against food-sealing enemies." },
+  { id: "merchants-token", name: "Merchant's Token", emoji: "🎟️", effectTag: "shop-discount", description: "Everything in merchant rooms costs 25% less." },
+  { id: "lucky-coin", name: "Lucky Coin", emoji: "🍀", effectTag: "coins-per-clear-2", description: "Earn +5 coins each room cleared." },
+  { id: "short-blade", name: "Short Blade", emoji: "🔪", effectTag: "short-plus2", description: "+2 damage for words 4 letters or shorter." },
+  { id: "runed-anvil", name: "Runed Anvil", emoji: "🔨", effectTag: "blunt-plus2", description: "Blunt-words deal an extra +2 damage." },
+  { id: "second-wind", name: "Second Wind", emoji: "🌬️", effectTag: "level-heal", description: "Heal 1 heart at the start of each level." },
 ];
 
 export const RELIC_BY_ID = Object.fromEntries(RELICS.map((r) => [r.id, r]));
@@ -351,6 +388,13 @@ export const SCROLLS = [
   { id: "vowel-pardon", name: "Vowel Pardon", emoji: "🕊️", effectTag: "forgive-fail", description: "Your next failed word is forgiven (no heart lost)." },
   { id: "reroll-room", name: "Reroll Scroll", emoji: "🎲", effectTag: "reroll-rule", description: "Swaps this room's rule for another of the same tier." },
   { id: "healing-draught", name: "Healing Draught", emoji: "🧪", effectTag: "heal-2", description: "Restores 2 hearts." },
+  // Expansion
+  { id: "greater-draught", name: "Greater Draught", emoji: "⚗️", effectTag: "heal-4", description: "Restores 4 hearts." },
+  { id: "smoke-bomb", name: "Smoke Bomb", emoji: "💨", effectTag: "skip-counter", description: "The enemy's next counterattack is skipped." },
+  { id: "lantern-scroll", name: "Lantern Scroll", emoji: "🔦", effectTag: "reveal-three", description: "Reveals three useful letters for this room." },
+  { id: "greater-bomb", name: "Greater Word Bomb", emoji: "🧨", effectTag: "bonus-damage-big", description: "Your next valid word deals +12 damage." },
+  { id: "banish-scroll", name: "Banish Scroll", emoji: "🌀", effectTag: "banish", description: "Instantly deal 8 damage to the enemy." },
+  { id: "coin-scroll", name: "Coin Scroll", emoji: "🪙", effectTag: "gain-coins", description: "Gain 10 coins." },
 ];
 
 export const SCROLL_BY_ID = Object.fromEntries(SCROLLS.map((s) => [s.id, s]));
@@ -364,29 +408,168 @@ export const FLAVOR = {
     "The letters scatter — that isn't a real word here.",
     "Nothing happens. The word means nothing to the stones.",
     "A word that isn't a word. The dark stays silent.",
+    "The walls wait for a real word. That wasn't one.",
+    "The letters refuse to hold their shape.",
+    "Gibberish. The torches don't even flicker.",
   ],
   ruleFail: [
     "The word is real, but it breaks the room's law.",
     "Valid — but not what this room demands.",
     "A true word, wrongly shaped for this place.",
     "The rule rejects it. Try again.",
+    "The room glares. Your word doesn't fit its law.",
+    "Real, yes — but the wrong shape for this door.",
+  ],
+  ruleFailPenalty: [
+    "The room punishes the second wrong word. A heart flickers out.",
+    "Twice wrong. The walls take their due — you lose a heart.",
+    "The dungeon's patience ends. That mistake costs you a heart.",
   ],
   plainHit: [
     "The word lands with a dull, magical thud.",
     "Plain letters, plainly delivered.",
     "No special weight to it — but it strikes all the same.",
     "The word does its honest work.",
+    "A workmanlike blow — nothing fancy, but it counts.",
+    "The word connects, flat and true.",
   ],
   enemyDown: [
     "The creature comes apart into loose punctuation.",
     "It crumbles, unmade by a single well-chosen word.",
     "The thing collapses into a heap of spent letters.",
     "Defeated — it dissolves back into the dungeon's murmur.",
+    "It folds shut like a closing book and is gone.",
+    "The last of it unspools into silence.",
   ],
   roomClear: [
     "The way ahead grinds open.",
     "The room settles, its challenge spent.",
     "A door you hadn't noticed swings wide.",
     "Silence. You've cleared it.",
+    "The pressure lifts. The next room waits.",
+    "A passage exhales dust and opens.",
+  ],
+  repeat: [
+    "You've already spoken that word this run. The dungeon remembers.",
+    "That word is spent — it won't answer twice.",
+    "The dungeon has heard that one already. Find another.",
+  ],
+  foodSealed: [
+    "The food turns to ash before it reaches your lips.",
+    "Your snack withers to dust — this thing has sealed your pantry.",
+    "The morsel rots in an instant. No nourishment here.",
   ],
 };
+
+// ── MERCHANTS ──────────────────────────────────────────────────────────────────
+// A merchant room draws a small seeded stock (2–4 offers) from this catalog and
+// prices each. buyItem (logic.js) deducts coins. `kind` decides what's granted:
+//   "scroll"/"relic" (grants the id), "heal" (restores value hearts),
+//   "maxheart" (raises max + current hearts). basePrice scales mildly by level
+//   in logic.js. Treasure rooms still give a FREE relic — merchants are the sink.
+export const MERCHANT_STOCK = [
+  { id: "buy-heal", kind: "heal", value: 2, basePrice: 8, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
+  { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 16, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
+  { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
+  { id: "buy-hint", kind: "scroll", grant: "hint-scroll", basePrice: 6, name: "Hint Scroll", emoji: "📜", description: "Reveals a valid starting letter." },
+  { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
+  { id: "buy-bomb", kind: "scroll", grant: "word-bomb", basePrice: 12, name: "Word Bomb", emoji: "💣", description: "Next word deals +6." },
+  { id: "buy-greater-bomb", kind: "scroll", grant: "greater-bomb", basePrice: 20, name: "Greater Word Bomb", emoji: "🧨", description: "Next word deals +12." },
+  { id: "buy-banish", kind: "scroll", grant: "banish-scroll", basePrice: 18, name: "Banish Scroll", emoji: "🌀", description: "Deal 8 damage instantly." },
+  { id: "buy-relic-quill", kind: "relic", grant: "rusty-quill", basePrice: 20, name: "Rusty Quill", emoji: "🪶", description: "+2 damage for 6+ letter words." },
+  { id: "buy-relic-whetstone", kind: "relic", grant: "whetstone", basePrice: 20, name: "Whetstone", emoji: "⚔️", description: "Weapon-words deal +2." },
+  { id: "buy-relic-purse", kind: "relic", grant: "coin-purse", basePrice: 24, name: "Bottomless Purse", emoji: "👛", description: "+3 coins per room cleared." },
+  { id: "buy-relic-stomach", kind: "relic", grant: "iron-stomach", basePrice: 18, name: "Iron Stomach", emoji: "🍖", description: "Food heals +1 extra." },
+];
+
+// ── EVENTS ─────────────────────────────────────────────────────────────────────
+// Zork-style choice rooms. resolveEvent (logic.js) applies the chosen outcome and
+// advances. Each outcome is an object read by applyOutcome: { heal, coins, hearts
+// (negative = lose), relic, scroll, maxheart }. `requires` (optional) gates a
+// choice on { coins } the player must have. Text is flavor.
+export const EVENTS = [
+  {
+    id: "cracked-fountain",
+    bodyText: "A cracked fountain trickles something that might be water, might be ink. A coin slot gleams at its base.",
+    choices: [
+      { label: "Toss in 6 coins", requires: { coins: 6 }, outcome: { coins: -6, heal: 3 }, resultText: "The fountain drinks your coins and mends you. (+3 hearts)" },
+      { label: "Drink from it", outcome: { hearts: -1, scroll: "healing-draught" }, resultText: "It burns going down (−1 heart) — but a Healing Draught condenses in your hand." },
+      { label: "Leave it be", outcome: {}, resultText: "You move on, thirsty but whole." },
+    ],
+  },
+  {
+    id: "whispering-shelf",
+    bodyText: "A shelf of books whispers your name. One volume juts out, waiting to be pulled.",
+    choices: [
+      { label: "Pull the book", outcome: { relic: "goblin-dictionary" }, resultText: "The book snaps to dust, leaving a Goblin Dictionary behind." },
+      { label: "Shush the shelf", outcome: { coins: 5 }, resultText: "The shelf falls silent, embarrassed, and a few coins roll out. (+5 coins)" },
+    ],
+  },
+  {
+    id: "starving-goblin",
+    bodyText: "A thin goblin blocks the passage, holding out a trembling bowl. 'Food?' it rasps.",
+    choices: [
+      { label: "Share your rations", outcome: { hearts: -1, relic: "gluttons-charm" }, resultText: "You give up a meal (−1 heart). The goblin presses a Glutton's Charm into your palm." },
+      { label: "Give it 8 coins", requires: { coins: 8 }, outcome: { coins: -8, scroll: "greater-draught" }, resultText: "It buys food elsewhere and gratefully hands you a Greater Draught." },
+      { label: "Step over it", outcome: {}, resultText: "You step past. It watches you go, unblinking." },
+    ],
+  },
+  {
+    id: "gambling-skull",
+    bodyText: "A grinning skull rattles two dice. 'Double or nothing on your luck,' it clacks.",
+    choices: [
+      { label: "Bet 10 coins", requires: { coins: 10 }, outcome: { coins: 10 }, resultText: "The dice land in your favor — the pot doubles back to you. (+10 coins)" },
+      { label: "Bet a heart", outcome: { hearts: -1, coins: 15 }, resultText: "You wager blood (−1 heart) and the skull pays out in gold. (+15 coins)" },
+      { label: "Walk away", outcome: {}, resultText: "The skull sighs. 'Cowardice. Very sensible.'" },
+    ],
+  },
+  {
+    id: "sealed-altar",
+    bodyText: "An altar of black glass asks for a sacrifice. A slot for coins. A slot for something worse.",
+    choices: [
+      { label: "Offer 12 coins", requires: { coins: 12 }, outcome: { coins: -12, maxheart: 1 }, resultText: "The altar accepts your gold and widens your heart. (max hearts +1)" },
+      { label: "Offer nothing", outcome: {}, resultText: "The altar dims, unimpressed, and lets you pass." },
+    ],
+  },
+  {
+    id: "lost-quill",
+    bodyText: "A quill floats mid-air, scratching at a page that keeps erasing itself.",
+    choices: [
+      { label: "Take the quill", outcome: { relic: "rusty-quill" }, resultText: "You snatch the quill — a Rusty Quill, still warm with ink." },
+      { label: "Read the page", outcome: { scroll: "lantern-scroll" }, resultText: "The page reveals a hint before vanishing — a Lantern Scroll folds into your pack." },
+    ],
+  },
+  {
+    id: "mirror-pool",
+    bodyText: "A still pool shows your reflection — but it's holding something you aren't.",
+    choices: [
+      { label: "Reach in", outcome: { hearts: -1, relic: "second-wind" }, resultText: "Cold bites your arm (−1 heart) but you pull out a charm of Second Wind." },
+      { label: "Study the reflection", outcome: { coins: 6 }, resultText: "You memorize a trick and coins surface from the deep. (+6 coins)" },
+      { label: "Turn away", outcome: {}, resultText: "You refuse to look. It's the wisest thing you do all day." },
+    ],
+  },
+  {
+    id: "toll-door",
+    bodyText: "A stone face set in the door yawns wide. 'Pay the toll or answer with blood.'",
+    choices: [
+      { label: "Pay 5 coins", requires: { coins: 5 }, outcome: { coins: -5 }, resultText: "The door accepts your coin and grinds open." },
+      { label: "Pay a heart", outcome: { hearts: -1, coins: 8 }, resultText: "It drinks a heart (−1) and, oddly, spits back a bribe of coins. (+8)" },
+    ],
+  },
+  {
+    id: "candle-vendor",
+    bodyText: "A hooded figure sells a single guttering candle. 'It remembers the way,' they murmur.",
+    choices: [
+      { label: "Buy it (7 coins)", requires: { coins: 7 }, outcome: { coins: -7, scroll: "lantern-scroll" }, resultText: "The candle becomes a Lantern Scroll in your grip." },
+      { label: "Blow it out", outcome: { heal: 1 }, resultText: "Darkness, then calm. You breathe easier. (+1 heart)" },
+    ],
+  },
+  {
+    id: "ration-cache",
+    bodyText: "A forgotten cache of preserved food sits in an alcove, impossibly untouched.",
+    choices: [
+      { label: "Eat your fill", outcome: { heal: 3 }, resultText: "You feast on strange durian and hardtack. (+3 hearts)" },
+      { label: "Pocket it for coin", outcome: { coins: 9 }, resultText: "You'll sell it later. Someone always wants old rations. (+9 coins)" },
+    ],
+  },
+];

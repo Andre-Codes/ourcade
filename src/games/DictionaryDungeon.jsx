@@ -58,9 +58,13 @@ export default function DictionaryDungeon() {
     };
   }, []);
 
-  // Resume an in-progress save once logic is ready.
+  // Resume an in-progress save once logic is ready — but ONLY on first load.
+  // Without this guard, returning to the title (which sets state=null) would
+  // re-trigger this effect and yank the player straight back into the run.
+  const resumedRef = useRef(false);
   useEffect(() => {
-    if (!logic || state) return;
+    if (!logic || state || resumedRef.current) return;
+    resumedRef.current = true;
     const saved = lsGetJSON(SAVE_KEY, null);
     const hydrated = saved && logic.hydrateGame(saved);
     if (hydrated) {
@@ -125,7 +129,13 @@ export default function DictionaryDungeon() {
       setLog((prev) => [...prev, ...res.logLines].slice(-80));
       setInput("");
       if (!res.accepted) {
-        flash(res.reason === "invalid" ? "Not a word" : "Breaks the room's rule");
+        flash(
+          res.reason === "invalid"
+            ? "Not a word"
+            : res.reason === "repeat"
+              ? "Already used this run"
+              : "Breaks the room's rule"
+        );
       }
       if (working.over) {
         setTimeout(() => finishRun(working), 650);
@@ -175,6 +185,49 @@ export default function DictionaryDungeon() {
     [logic, state]
   );
 
+  const onBuy = useCallback(
+    (offerIdx) => {
+      if (!logic || !state) return;
+      const working = structuredClone(state);
+      const r = logic.buyItem(working, offerIdx);
+      if (r.ok) {
+        setState(working);
+        setLog((prev) => [...prev, `> ${r.message}`].slice(-80));
+      } else {
+        flash(r.message);
+      }
+    },
+    [logic, state, flash]
+  );
+
+  const onLeaveMerchant = useCallback(() => {
+    if (!logic || !state) return;
+    const working = structuredClone(state);
+    const r = logic.leaveMerchant(working);
+    if (r.ok) {
+      setState(working);
+      setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
+    }
+    setTimeout(() => inputRef.current?.focus(), 20);
+  }, [logic, state]);
+
+  const onEvent = useCallback(
+    (choiceIdx) => {
+      if (!logic || !state) return;
+      const working = structuredClone(state);
+      const r = logic.resolveEvent(working, choiceIdx);
+      if (r.ok) {
+        setState(working);
+        setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
+        if (working.over) setTimeout(() => finishRun(working), 650);
+      } else if (r.message) {
+        flash(r.message);
+      }
+      setTimeout(() => inputRef.current?.focus(), 20);
+    },
+    [logic, state, flash]
+  );
+
   const onHint = useCallback(() => {
     if (!logic || !state) return;
     const start = logic.hintStarter(state);
@@ -216,6 +269,9 @@ export default function DictionaryDungeon() {
           onSubmit={onSubmit}
           onUseScroll={onUseScroll}
           onTakeRelic={onTakeRelic}
+          onBuy={onBuy}
+          onLeaveMerchant={onLeaveMerchant}
+          onEvent={onEvent}
           onHint={onHint}
           onQuit={goTitle}
           toast={toast}
@@ -268,12 +324,15 @@ function Title({ logic, day, onStart }) {
 }
 
 // ── play ──────────────────────────────────────────────────────────────────────
-function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTakeRelic, onHint, onQuit, toast, logRef, inputRef }) {
+function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onHint, onQuit, toast, logRef, inputRef }) {
   const lvl = logic.currentLevel(state);
   const target = logic.currentTarget(state);
   const rule = logic.activeRule(state);
   const prog = logic.runProgress(state);
   const choice = logic.isChoiceRoom(state);
+  const merchant = logic.isMerchantRoom(state);
+  const event = logic.isEventRoom(state);
+  const special = choice || merchant || event; // non-word rooms
   const room = logic.currentRoom(state);
   const boss = target?.kind === "boss";
   const hpPct = target && target.hp != null ? Math.max(0, (target.hp / target.maxHP) * 100) : 0;
@@ -315,22 +374,63 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
           </div>
         )}
 
-        {/* rule box (parchment) */}
-        <div className="dd-rule">{rule.displayText}</div>
+        {/* event body OR the parchment rule box (word rooms only) */}
+        {event ? (
+          <div className="dd-event-body">{room.event.bodyText}</div>
+        ) : merchant ? (
+          <div className="dd-scene">A hooded merchant spreads their wares. Spend your coin.</div>
+        ) : (
+          <div className="dd-rule">{rule.displayText}</div>
+        )}
       </div>
 
-      {/* treasure choice OR word input */}
+      {/* treasure / merchant / event panels OR word input */}
       {choice ? (
         <div className="dd-treasure">
-          <div className="dd-treasure-head">Choose a relic:</div>
+          <div className="dd-treasure-head">Choose a relic (free):</div>
           <div className="dd-relic-choices">
             {room.relicChoices.map((id) => {
-              const r = logic.RELICS?.find?.((x) => x.id === id) || relicMeta(logic, id);
+              const r = relicMeta(logic, id);
               return (
                 <button key={id} className="dd-relic-card" onClick={() => onTakeRelic(id)}>
                   <div className="dd-relic-emoji">{r?.emoji}</div>
                   <div className="dd-relic-name">{r?.name}</div>
                   <div className="dd-relic-desc">{r?.description}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : merchant ? (
+        <div className="dd-treasure">
+          <div className="dd-treasure-head">🛒 Merchant · 🪙 {state.coins}</div>
+          <div className="dd-relic-choices">
+            {room.offers.map((o, i) => {
+              const afford = state.coins >= o.price && !o.sold;
+              return (
+                <button
+                  key={o.id + i}
+                  className="dd-relic-card dd-shop-card"
+                  disabled={!afford}
+                  onClick={() => onBuy(i)}
+                >
+                  <div className="dd-relic-emoji">{o.emoji}</div>
+                  <div className="dd-relic-name">{o.name} <span className="dd-price">{o.sold ? "SOLD" : `🪙 ${o.price}`}</span></div>
+                  <div className="dd-relic-desc">{o.description}</div>
+                </button>
+              );
+            })}
+          </div>
+          <button className="dd-btn dd-btn-ghost dd-leave" onClick={onLeaveMerchant}>Leave shop</button>
+        </div>
+      ) : event ? (
+        <div className="dd-treasure">
+          <div className="dd-relic-choices">
+            {room.event.choices.map((c, i) => {
+              const gated = c.requires?.coins != null && state.coins < c.requires.coins;
+              return (
+                <button key={i} className="dd-relic-card" disabled={gated} onClick={() => onEvent(i)}>
+                  <div className="dd-relic-name">{c.label}{gated ? ` (need 🪙 ${c.requires.coins})` : ""}</div>
                 </button>
               );
             })}
@@ -343,7 +443,7 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
             className="dd-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="type a word…"
+            placeholder="your word"
             autoComplete="off"
             autoCapitalize="characters"
             spellCheck={false}
@@ -353,8 +453,8 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
         </form>
       )}
 
-      {/* action buttons */}
-      {!choice && (
+      {/* action buttons — only in word rooms */}
+      {!special && (
         <div className="dd-actions">
           <ScrollMenu logic={logic} scrolls={state.scrolls} onUse={onUseScroll} />
           <RelicMenu logic={logic} relics={state.relics} />
@@ -555,6 +655,13 @@ const CSS = `
 .dd-relic-emoji { font-size: 1.2rem; }
 .dd-relic-name { color: var(--gold); font-weight: 700; margin: 2px 0; }
 .dd-relic-desc { font-size: .82rem; opacity: .8; }
+.dd-relic-card:disabled { opacity: .45; cursor: default; }
+.dd-shop-card { display: flex; flex-direction: column; }
+.dd-price { float: right; font-size: .82rem; color: #e7ddc9; font-weight: 400; }
+.dd-leave { margin-top: 4px; }
+.dd-event-body { margin-top: 12px; padding: 12px 14px; font-style: italic; line-height: 1.6;
+  color: #e7ddc9; border-left: 3px solid var(--accent, var(--gold)); background: rgba(255,255,255,.03);
+  border-radius: 0 8px 8px 0; }
 
 .dd-actions { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; position: relative; }
 .dd-act { flex: 1; min-width: 90px; padding: 9px; border-radius: 9px; cursor: pointer; font-family: inherit; font-size: .82rem;
@@ -564,14 +671,15 @@ const CSS = `
 .dd-menu { flex: 1; min-width: 90px; position: relative; }
 .dd-menu .dd-act { width: 100%; }
 .dd-pop { position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; z-index: 5;
+  min-width: 220px; max-width: min(320px, 90vw);
   background: #1a1611; border: 1px solid rgba(217,180,94,.4); border-radius: 10px; padding: 6px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.6); max-height: 240px; overflow-y: auto; }
-.dd-pop-item { display: block; width: 100%; text-align: left; padding: 8px; border-radius: 7px; cursor: pointer;
-  background: none; border: none; color: #e7ddc9; font-family: inherit; }
+  box-shadow: 0 10px 30px rgba(0,0,0,.6); max-height: 240px; overflow-y: auto; overflow-x: hidden; }
+.dd-pop-item { display: block; width: 100%; min-width: 0; text-align: left; padding: 8px; border-radius: 7px;
+  cursor: pointer; background: none; border: none; color: #e7ddc9; font-family: inherit; }
 .dd-pop-item.static { cursor: default; }
 .dd-pop-item:not(.static):hover { background: rgba(217,180,94,.12); }
-.dd-pop-item b { display: block; color: var(--gold); font-size: .85rem; }
-.dd-pop-item span { font-size: .76rem; opacity: .78; }
+.dd-pop-item b { display: block; color: var(--gold); font-size: .85rem; word-break: break-word; }
+.dd-pop-item span { display: block; font-size: .76rem; opacity: .78; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
 .dd-pop-empty { padding: 8px; opacity: .6; font-size: .82rem; }
 
 .dd-log { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.07); border-radius: 10px;
