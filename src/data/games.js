@@ -56,6 +56,23 @@ export const GAMES = [
     // Free-play "Random Relic Run" never submits.
     score: { label: "CLICKS", dir: "asc" },
   },
+  {
+    id: "dictionary-dungeon",
+    original: true,
+    title: "Dictionary Dungeon",
+    blurb:
+      "A text roguelike where language is the weapon. Type valid words to clear rooms, slay enemies, and survive the daily dungeon — same run for everyone today. Longer, rarer words hit harder, and some words hide a sting.",
+    emoji: "📖",
+    accent: "#d9b45e",
+    tags: ["daily", "word", "roguelike", "solo"],
+    rating: 5,
+    plays: 0,
+    category: "game",
+    type: "react",
+    component: lazy(() => import("../games/DictionaryDungeon.jsx")),
+    // Daily run ranks by total score (higher better). Practice never submits.
+    score: { label: "SCORE", dir: "desc" },
+  },
   // The Daily Quarter (Wordle-style word game) is PARKED — replaced as the daily
   // game by Daily Relic Run (too close to Wordle). Source files are kept on disk
   // (src/games/QuarterGame.jsx, src/games/quarter/, src/data/quarterWords.js,
