@@ -23,19 +23,22 @@ const SAVE_KEY = "chip-panic:save"; // ourcade:-prefixed by store.js
    HIGH CARD BUST — poker solitaire with a chip economy + rotating objectives.
 
    Draw ONE card into the tray, then tap a lane to drop it (or spend your discard).
-   Opening an empty lane costs a Blue ANTE (1 chip). A lane fills at five cards and
-   resolves three ways: a HIGH CARD busts + locks it (ante lost); ANY PAIR is a
-   defensive SAVE that clears the lane (0 points, ante burned) — but ONLY if you spend
-   a SAVE TOKEN, and with none left a pair busts + locks like a high card; TWO PAIR or
-   better truly SCORES (points, chips back, refreshes the discard). You start with 2
+   Opening an empty lane costs a Blue ANTE (1 chip). Each open lane carries a
+   RESOLUTION TIMER (⏱): feeding a lane refreshes it, but a NEGLECTED lane force-
+   resolves when the clock runs out — with whatever cards it holds. A lane resolves
+   three ways: a HIGH CARD busts + locks it (ante lost); ANY PAIR is a defensive
+   SAVE that clears the lane (0 points) — but ONLY if you spend a SAVE TOKEN, and
+   with none left a pair busts + locks like a high card; TWO PAIR or better truly
+   SCORES (points + chips back, the chips SCALED by hand strength — weak hands earn
+   little, big hands pay a premium — and refreshes the discard). You start with 2
    save tokens and earn one back every 5th scoring hand (cap 4). Raise above the
    ante (Red/Gold/Black) for a multiplier — raises need stronger hands and expire.
    Chase the WANTED hand up top for bonus points + chips and build a streak (resets
-   when a lane busts). The run ends when all four lanes lock — or you're out of
-   chips with nowhere legal to place. Score feeds the Arcade Score Standard board.
+   when a lane busts). The run ends when all lanes lock — or you're out of chips
+   with nowhere legal to place. Score feeds the Arcade Score Standard board.
 
-   Turn-based: engine state lives in plain React state. The only timer is Panic
-   mode's per-card placement clock.
+   Turn-based: engine state lives in plain React state. The lane resolution timer
+   ticks per DRAW (not wall-clock); Panic mode adds a per-card placement clock.
    ───────────────────────────────────────────────────────────────────────── */
 
 const GAME_ID = "chip-panic";
@@ -264,6 +267,17 @@ const HCB_CSS = `
   .hcb-slots .hcb-stake .amt { display: inline-flex; align-items: center; gap: 3px; font-family: 'Press Start 2P',monospace; font-size: .64rem; letter-spacing: .02em; color: #ffd23f; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
   .hcb-slots .hcb-stake .amt img { width: 13px; height: 13px; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
   .hcb-slots .hcb-stake .mult { font-family: 'Press Start 2P',monospace; font-size: .52rem; letter-spacing: .02em; color: #3fffd0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+
+  /* Lane RESOLUTION timer — draws left before the lane force-resolves. Pinned to the
+     top-left of the slots so it clears the stake readout (top-center) and the cards
+     (which grow upward). Turns red + pulses when urgent. This is the core pressure. */
+  .hcb-slots .hcb-timer {
+    position: absolute; top: 2px; left: 3px; z-index: 3; pointer-events: none;
+    font-family: 'Press Start 2P',monospace; font-size: .5rem; letter-spacing: .02em;
+    color: #8fb8ff; text-shadow: 0 1px 3px rgba(0,0,0,.85);
+    background: rgba(0,0,0,.35); border-radius: 4px; padding: 2px 3px;
+  }
+  .hcb-slots .hcb-timer.urgent { color: #ff6a6a; animation: hcb-pulse .6s ease-in-out infinite; }
 
   /* Double-tap arm: first tap greenlights the lane, a second tap places. */
   .hcb-lane.armed .hcb-slots { border-color: #3fffd0; border-style: solid; box-shadow: 0 0 14px rgba(63,255,208,.5) inset, 0 0 8px rgba(63,255,208,.35); }
@@ -605,6 +619,38 @@ export default function ChipPanic() {
       showFeed({ hand: "RAISE EXPIRED", math: "", why: "ran out of draws", kind: "bad", claim: null });
     }
 
+    // Timed-out lanes: any OPEN lane whose resolution timer expired on this draw
+    // force-resolved with whatever it held. Flash each; surface the most notable one
+    // in the feed only if the placed lane didn't already own the feed this turn.
+    const timeouts = result.timeouts || [];
+    if (timeouts.length) {
+      const flashUpdates = {};
+      for (const t of timeouts) {
+        const tr = t.resolution;
+        flashUpdates[t.laneIndex] = tr.scored ? "scored" : t.savedByToken ? "saved" : "busted";
+        if (!reduceMotion.current) {
+          const geo = fxFromLane(t.laneIndex);
+          if (geo) {
+            if (tr.scored && tr.chipsReturned > 0) spawnChipsTo(TIERS[ANTE_TIER].color, tr.chipsReturned, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
+            else { spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 380 }); if (tr.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, tr.chipsLost, geo.laneX, geo.laneMidY); }
+          }
+        }
+      }
+      setFlash((f) => ({ ...f, ...flashUpdates }));
+      clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setFlash({}), 700);
+      // Feed: prefer a timed-out BUST (the tension moment); else a timed-out score.
+      if (!res) {
+        const bust = timeouts.find((t) => t.bustNow);
+        const t = bust || timeouts[0];
+        const tr = t.resolution;
+        if (tr.scored) showFeed({ hand: tr.hand.name, math: `+${tr.points}`, why: "lane timed out", kind: "win", chips: tr.chipsReturned, claim: null });
+        else if (t.savedByToken) showFeed({ hand: tr.hand.name, math: "", why: "timed out · pair saved", kind: "save", claim: null });
+        else showFeed({ hand: tr.hand.name, math: "TIMED OUT", why: "lane locked", kind: "bad", claim: null });
+      }
+      playSfxVariant("card-place", [1, 3]);
+    }
+
     // A Wanted claim pulses the banner + chimes (the reward text shows in the panel).
     if (claimSection) {
       clearTimeout(bannerTimer.current);
@@ -938,7 +984,10 @@ export default function ChipPanic() {
               const canOpen = empty && (g.chips >= ante);
               const cant = empty && !canOpen && !locked;
               const betted = !!committed || sel !== NO_RAISE;
-              const expiring = committed && committed.draws <= 1;
+              // Lane resolution timer: live only on an open, non-empty, unlocked lane.
+              const laneTimer = anted && !locked && lane.length > 0 ? g.timer[l] : 0;
+              const timerUrgent = laneTimer > 0 && laneTimer <= 3;
+              const expiring = (committed && committed.draws <= 1) || timerUrgent;
               const stake = laneStake(g, l); // chips committed + multiplier in play (null if none)
               const isArmed = armed === l;
               const fl = flash[l];
@@ -953,6 +1002,14 @@ export default function ChipPanic() {
                   style={{ "--tier": glow(tier.color) }}
                 >
                   <div className="hcb-slots" onPointerDown={() => onLane(l)}>
+                    {laneTimer > 0 && (
+                      <span
+                        className={`hcb-timer ${timerUrgent ? "urgent" : ""}`}
+                        aria-label={`Lane resolves in ${laneTimer} draws`}
+                      >
+                        ⏱ {laneTimer}
+                      </span>
+                    )}
                     {lane.map((card, i) => (
                       <span className="hcb-card" key={card.id + i}>
                         <img src={cardImg(card.id)} alt={card.id} draggable="false" />

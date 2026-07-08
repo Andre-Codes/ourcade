@@ -48,15 +48,43 @@
 import { freshDeck, shuffle, isRed } from "../cards/deck.js";
 import { evaluate, bestMadeHand, HAND, HAND_NAME } from "../poker/handEval.js";
 
-export const LANES = 4;
+export const LANES = 3;
 export const LANE_CAP = 5; // a full lane = 5 cards = one poker hand
 export const START_CHIPS = 12;
 export const BET_EXPIRY_DRAWS = 5; // a committed raise must land within this many draws
 export const RAISE_MAX_CARDS = 3; // a lane can only be newly raised at <= this many cards
 
+/* Lane RESOLUTION TIMER — the core bust-pressure lever (sim-validated). Each open
+   lane carries a countdown of "draws since it was last FED". Opening a lane sets it
+   to LANE_TIMER; placing a card into that lane REFRESHES it to LANE_TIMER; every
+   draw ticks all OTHER open lanes down by 1. When a lane's timer hits 0 it
+   FORCE-RESOLVES with whatever cards it holds (2..5) — a rushed lane resolves weak,
+   so a high card there busts+locks. Keep few lanes and focus-feed the urgent one.
+   Tuned to ~1.90 high-card locks/run at LANES=3 (scripts/lane-timer-sim.js). */
+export const LANE_TIMER = 10;
+
 export const ANTE_TIER = 1; // index into TIERS — Blue is the ante baseline
 export const BASE_ANTE = 1; // chips to open a lane at the start of a run
-export const ANTE_PROFIT = 1; // FLAT chips returned ABOVE the (paid) ante on a true score
+// Chips returned ABOVE the (paid) ante on a true score, SCALED by hand strength
+// ("hands have weight, like real poker"). Two Pair is the floor; it climbs to +20
+// for a Royal. A weak forced-resolution earns little; a strong hand pays a premium.
+export const ANTE_PROFIT_BY_HAND = {
+  [HAND.TWO_PAIR]: 1,
+  [HAND.THREE]: 2,
+  [HAND.STRAIGHT]: 3,
+  [HAND.FLUSH]: 4,
+  [HAND.FULL_HOUSE]: 6,
+  [HAND.FOUR]: 10,
+  [HAND.STRAIGHT_FLUSH]: 14,
+  [HAND.ROYAL_FLUSH]: 20,
+};
+export const MIN_ANTE_PROFIT = ANTE_PROFIT_BY_HAND[HAND.TWO_PAIR]; // the two-pair floor
+export const ANTE_PROFIT = MIN_ANTE_PROFIT; // back-compat alias == the floor
+// Profit for a resolved hand rank, never below the floor (defensive: an unmapped
+// rank still nets the two-pair minimum, so a score can never pay less than +1).
+export function anteProfitFor(rank) {
+  return ANTE_PROFIT_BY_HAND[rank] ?? MIN_ANTE_PROFIT;
+}
 // Rising ante (poker-blinds pressure): the cost to open a lane climbs as the run
 // goes. Every SCORE_HANDS_PER_ANTE scoring hands, every WANTED_HITS_PER_ANTE
 // Wanted completions, AND every DRAWS_PER_ANTE cards drawn each add 1, stacking
@@ -279,6 +307,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
     anteAmt: Array(LANES).fill(0), // chips actually paid to open each lane (for refund)
     raise: Array(LANES).fill(null), // committed raise { tier, draws } | null
     raiseSel: Array(LANES).fill(NO_RAISE), // previewed raise tier (cycles among affordable)
+    timer: Array(LANES).fill(0), // draws-since-last-fed on each OPEN lane (0 when closed)
     tray: null,
     bag: shuffle(freshDeck(), rng),
     oneDeck,
@@ -308,7 +337,7 @@ export function newGame({ oneDeck = false, rng = Math.random } = {}) {
    Math.random is fine. The drawn `bag` is already a snapshot array, so the deck
    order survives a round-trip. Bump SAVE_VERSION on any incompatible shape change
    so old saves are discarded rather than mis-hydrated. */
-export const SAVE_VERSION = 3; // v3 adds saveTokens to the run snapshot
+export const SAVE_VERSION = 4; // v4: 3 lanes + per-lane resolution timer (+ hand-scaled profit)
 
 // A run worth saving: in progress and not finished.
 export const isSaveable = (state) => !!state && !state.over;
@@ -330,6 +359,7 @@ export function hydrateGame(saved) {
   if (!Array.isArray(s.bag) || !Array.isArray(s.locked)) return null;
   if (typeof s.chips !== "number" || typeof s.draws !== "number") return null;
   if (s.over) return null; // finished runs aren't resumable
+  if (!Array.isArray(s.timer) || s.timer.length !== LANES) return null; // v4 shape
   return {
     ...s,
     handStats: s.handStats || {},
@@ -355,7 +385,9 @@ export function laneStake(state, l) {
   if (!state.anted[l] || state.locked[l]) return null;
   const anteAmt = state.anteAmt[l] || 0;
   let atStake = anteAmt;
-  let toWin = anteAmt + ANTE_PROFIT; // ante refund + flat profit on any true score
+  // ante refund + the FLOOR profit (two-pair). The lane isn't full yet so the final
+  // hand is unknown; show the guaranteed-worst-case gain, which scales UP on stronger hands.
+  let toWin = anteAmt + MIN_ANTE_PROFIT;
   let mult = 1;
   const r = state.raise[l];
   if (r) {
@@ -438,132 +470,77 @@ function affordsAnyRaise(state, l) {
   return false;
 }
 
-/* Place the tray card into lane `l`. Opening an empty lane pays the ante. If the
-   lane fills to LANE_CAP it resolves (three-way). Then the draw transition runs
-   (commits pending raises, ticks expiry, deals the next tray). Returns
-   { state, result }. Invalid placement returns the state unchanged. */
+/* Place the tray card into lane `l`. Opening an empty lane pays the ante. Placing a
+   card REFRESHES that lane's resolution timer. If the lane fills to LANE_CAP it
+   resolves (three-way, voluntary). Then the draw transition runs — which ticks
+   every OTHER open lane's timer and FORCE-RESOLVES any that time out — and deals
+   the next tray. Returns { state, result }. Invalid placement returns unchanged. */
 export function placeCard(state, l) {
   if (!canPlace(state, l)) {
     return { state, result: { type: "invalid", laneIndex: l } };
   }
-  const lanes = state.lanes.map((lane) => lane.slice());
-  const locked = state.locked.slice();
-  const anted = state.anted.slice();
-  const anteAmt = state.anteAmt.slice();
-  const raise = state.raise.slice();
-  const raiseSel = state.raiseSel.slice();
-  let { chips, score, discard, streak, wanted, scoreHands, wantedHits, saveTokens } = state;
-  let handStats = state.handStats;
+  // Build a mutable carrier with cloned arrays; applyResolution + drawInto mutate it.
+  const m = {
+    ...state,
+    lanes: state.lanes.map((lane) => lane.slice()),
+    locked: state.locked.slice(),
+    anted: state.anted.slice(),
+    anteAmt: state.anteAmt.slice(),
+    raise: state.raise.slice(),
+    raiseSel: state.raiseSel.slice(),
+    timer: state.timer.slice(),
+  };
 
-  // Opening an empty lane pays the current (rising) ante; remember what was paid so
-  // it can be refunded on a true score / forfeited on a loss.
+  // Opening an empty lane pays the current (rising) ante and starts its timer.
   let antePaid = false;
-  if (lanes[l].length === 0 && !anted[l]) {
+  if (m.lanes[l].length === 0 && !m.anted[l]) {
     const ante = currentAnte(state);
-    chips -= ante;
-    anted[l] = true;
-    anteAmt[l] = ante;
+    m.chips -= ante;
+    m.anted[l] = true;
+    m.anteAmt[l] = ante;
+    m.timer[l] = LANE_TIMER;
     antePaid = true;
   }
 
-  lanes[l].push(state.tray);
+  m.lanes[l].push(state.tray);
+  m.timer[l] = LANE_TIMER; // feeding a lane refreshes its resolution clock
 
-  let resolution = null;
-  let wantedClaim = null;
-  let jackpotClaim = null;
-  let bustNow = false; // this placement locked the lane (high card, or a token-less pair)
-  let savedByToken = false; // a pair was rescued by spending a save token
-  if (lanes[l].length === LANE_CAP) {
-    const r = resolveLane({ lane: lanes[l], committedRaise: raise[l], antePaidAmt: anteAmt[l], wanted, streak, l });
-    resolution = r;
-    score += r.points;
-    chips += r.chipsReturned;
-
-    // Tally the resolved hand type for the end-of-run breakdown. A token-less pair is
-    // still tallied as PAIR (its true poker rank), so the end screen shows "PAIR ×n"
-    // even though it locked the lane.
-    handStats = { ...handStats, [r.hand.rank]: (handStats[r.hand.rank] || 0) + 1 };
-
-    // A pair only truly SAVES if a token is available to spend; otherwise it BUSTS +
-    // LOCKS like a high card. resolveLane stays pure (it still reports saved/bust by
-    // poker rank) — placeCard decides whether that save is honored.
-    savedByToken = r.saved && saveTokens > 0;
-    bustNow = r.bust || (r.saved && !savedByToken);
-    if (savedByToken) saveTokens -= 1; // honored pair-save spends a token
-
-    if (bustNow) {
-      locked[l] = true; // keep cards for the cracked visual
-      streak = 0; // a bust resets the wanted streak
-    } else {
-      // A real SAVE (token spent) or a SCORE both clear the lane.
-      lanes[l] = [];
-      anted[l] = false;
-      if (r.scored) {
-        discard = true; // a true score refreshes the discard + counts toward the rising ante
-        scoreHands += 1;
-        // Earn a save token back every Nth score (capped) — skilled play buys mercy.
-        if (scoreHands % SCORES_PER_SAVE_TOKEN === 0 && saveTokens < SAVE_TOKEN_CAP) saveTokens += 1;
-      }
-    }
-    anteAmt[l] = 0;
-
-    // Apply a JACKPOT (SF/Royal) — the always-on side goal. Pays its reward, advances
-    // the same streak a wanted would, counts toward the rising ante, and a milestone
-    // unlock fires here. resolveLane shares one streak number between jackpot + wanted.
-    const unlockOne = () => {
-      const u = firstLocked(locked);
-      if (u !== -1) { locked[u] = false; lanes[u] = []; anted[u] = false; anteAmt[u] = 0; }
-    };
-    if (r.jackpot && r.jackpot.hit) {
-      jackpotClaim = r.jackpot;
-      score += r.jackpot.totalPts;
-      chips += r.jackpot.totalChips;
-      streak = r.jackpot.streak;
-      wantedHits += 1; // a jackpot also raises the ante (a triumphant score)
-      if (r.jackpot.unlockLane) unlockOne();
-    }
-
-    // Apply a completed Wanted (hand or condition; only on a true score). Can co-occur
-    // with a jackpot when a condition wanted also matches the SF/Royal lane.
-    if (r.wanted && r.wanted.hit) {
-      wantedClaim = r.wanted;
-      score += r.wanted.totalPts;
-      chips += r.wanted.totalChips;
-      streak = r.wanted.streak;
-      wantedHits += 1; // Wanted completions also raise the ante
-      if (r.wanted.unlockLane) unlockOne();
-    }
-
-    // Roll a fresh wanted whenever the streak advanced (jackpot and/or wanted).
-    if (jackpotClaim || wantedClaim) wanted = pickWanted(streak, state.rng);
-
-    raise[l] = null;
-    raiseSel[l] = NO_RAISE;
+  // Voluntary resolution: a lane filled to 5 resolves now (before the draw tick).
+  let summary = null;
+  if (m.lanes[l].length === LANE_CAP) {
+    const r = resolveLane({ lane: m.lanes[l], committedRaise: m.raise[l], antePaidAmt: m.anteAmt[l], wanted: m.wanted, streak: m.streak, l });
+    summary = applyResolution(m, l, r);
   }
 
-  let next = { ...state, lanes, locked, anted, anteAmt, raise, raiseSel, chips, score, discard, streak, wanted, scoreHands, wantedHits, saveTokens, handStats };
   const expired = [];
-  drawInto(next, expired);
-  next.over = isGameOver(next);
+  const timeouts = []; // lanes force-resolved by an expiring timer on this draw
+  drawInto(m, expired, { timeouts, fedLane: l });
+  m.over = isGameOver(m);
+
+  const resolution = summary ? summary.resolution : null;
+  const savedByToken = summary ? summary.savedByToken : false;
+  const bustNow = summary ? summary.bustNow : false;
+  const streakWasPositive = summary ? summary.streakWasPositive : false;
 
   return {
-    state: next,
+    state: m,
     result: {
       type: "place",
       laneIndex: l,
       antePaid,
       resolution,
-      wanted: wantedClaim,
-      jackpot: jackpotClaim,
+      wanted: summary ? summary.wantedClaim : null,
+      jackpot: summary ? summary.jackpotClaim : null,
       expired,
+      timeouts, // [{ laneIndex, resolution, wanted, jackpot, bustNow, savedByToken }]
       discarded: false,
       burned: false,
-      chipsDelta: next.chips - state.chips,
-      discardRefreshed: !state.discard && next.discard,
-      streakReset: bustNow && state.streak > 0,
+      chipsDelta: m.chips - state.chips,
+      discardRefreshed: !state.discard && m.discard,
+      streakReset: (bustNow && streakWasPositive) || timeouts.some((t) => t.bustNow),
       savedByToken, // a pair rescued by a token (feed: "pair saved · 1 token used")
       pairBusted: !!(resolution && resolution.saved && !savedByToken), // pair locked for lack of a token
-      saveTokens: next.saveTokens,
+      saveTokens: m.saveTokens,
     },
   };
 }
@@ -575,15 +552,28 @@ export function useDiscard(state) {
   if (state.over || !state.discard || state.tray == null) {
     return { state, result: { type: "invalid", laneIndex: -1 } };
   }
-  let next = { ...state, discard: false };
+  // Clone the arrays a timeout might mutate (lane timers still age across a discard).
+  let next = {
+    ...state,
+    discard: false,
+    lanes: state.lanes.map((lane) => lane.slice()),
+    locked: state.locked.slice(),
+    anted: state.anted.slice(),
+    anteAmt: state.anteAmt.slice(),
+    raise: state.raise.slice(),
+    raiseSel: state.raiseSel.slice(),
+    timer: state.timer.slice(),
+  };
   const expired = [];
-  // A discard deals a fresh tray but does NOT count toward the betting timer:
-  // raise previews + countdowns are frozen across it (tickExpiry: false).
-  drawInto(next, expired, { tickExpiry: false });
+  const timeouts = [];
+  // A discard deals a fresh tray but does NOT count toward the raise/betting timer:
+  // raise previews + countdowns are frozen (tickExpiry:false). Lane resolution
+  // timers still age — an ignored lane can time out on a discarded draw.
+  drawInto(next, expired, { tickExpiry: false, timeouts });
   next.over = isGameOver(next);
   return {
     state: next,
-    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, discarded: true, burned: false, chipsDelta: 0, discardRefreshed: false },
+    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, timeouts, discarded: true, burned: false, chipsDelta: next.chips - state.chips, discardRefreshed: false },
   };
 }
 
@@ -593,13 +583,23 @@ export function burnCard(state) {
   if (state.over || state.tray == null) {
     return { state, result: { type: "invalid", laneIndex: -1 } };
   }
-  let next = { ...state };
+  let next = {
+    ...state,
+    lanes: state.lanes.map((lane) => lane.slice()),
+    locked: state.locked.slice(),
+    anted: state.anted.slice(),
+    anteAmt: state.anteAmt.slice(),
+    raise: state.raise.slice(),
+    raiseSel: state.raiseSel.slice(),
+    timer: state.timer.slice(),
+  };
   const expired = [];
-  drawInto(next, expired);
+  const timeouts = [];
+  drawInto(next, expired, { timeouts });
   next.over = isGameOver(next);
   return {
     state: next,
-    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, discarded: false, burned: true, chipsDelta: 0, discardRefreshed: false },
+    result: { type: "discard", laneIndex: -1, resolution: null, wanted: null, expired, timeouts, discarded: false, burned: true, chipsDelta: next.chips - state.chips, discardRefreshed: false },
   };
 }
 
@@ -629,6 +629,71 @@ export const DEV_ROYAL_FLUSH = ["H10", "H11", "H12", "H13", "H1"];
 
 const firstLocked = (locked) => locked.findIndex(Boolean);
 
+/* Apply a resolved lane's outcome to a MUTABLE run carrier `m` (its arrays are
+   already cloned by the caller; scalars live on `m` directly). Shared by BOTH the
+   voluntary resolution in placeCard (a lane filled to 5) and the forced TIMEOUT
+   resolution in drawInto (a lane whose timer expired at 2..5 cards). Handles the
+   three-way (bust+lock / token-save / score), the jackpot + wanted, streak, the
+   rising-ante counters, handStats, and clears/locks the lane + its timer. Returns
+   a per-lane summary the caller turns into a `result`/feed entry. */
+function applyResolution(m, l, r) {
+  m.score += r.points;
+  m.chips += r.chipsReturned;
+  m.handStats = { ...m.handStats, [r.hand.rank]: (m.handStats[r.hand.rank] || 0) + 1 };
+
+  // A pair only truly SAVES if a token is available; else it BUSTS + LOCKS like a
+  // high card. resolveLane stays pure — this is where the save is honored or not.
+  const savedByToken = r.saved && m.saveTokens > 0;
+  const bustNow = r.bust || (r.saved && !savedByToken);
+  if (savedByToken) m.saveTokens -= 1;
+
+  const streakWasPositive = m.streak > 0;
+  if (bustNow) {
+    m.locked[l] = true; // keep cards for the cracked visual
+    m.streak = 0; // a bust resets the wanted streak
+  } else {
+    m.lanes[l] = [];
+    m.anted[l] = false;
+    if (r.scored) {
+      m.discard = true; // a true score refreshes the discard + counts toward the rising ante
+      m.scoreHands += 1;
+      if (m.scoreHands % SCORES_PER_SAVE_TOKEN === 0 && m.saveTokens < SAVE_TOKEN_CAP) m.saveTokens += 1;
+    }
+  }
+  m.anteAmt[l] = 0;
+  m.timer[l] = 0; // a resolved lane (cleared or locked) has no live timer
+
+  const unlockOne = () => {
+    const u = firstLocked(m.locked);
+    if (u !== -1) { m.locked[u] = false; m.lanes[u] = []; m.anted[u] = false; m.anteAmt[u] = 0; m.timer[u] = 0; }
+  };
+
+  let jackpotClaim = null;
+  let wantedClaim = null;
+  if (r.jackpot && r.jackpot.hit) {
+    jackpotClaim = r.jackpot;
+    m.score += r.jackpot.totalPts;
+    m.chips += r.jackpot.totalChips;
+    m.streak = r.jackpot.streak;
+    m.wantedHits += 1;
+    if (r.jackpot.unlockLane) unlockOne();
+  }
+  if (r.wanted && r.wanted.hit) {
+    wantedClaim = r.wanted;
+    m.score += r.wanted.totalPts;
+    m.chips += r.wanted.totalChips;
+    m.streak = r.wanted.streak;
+    m.wantedHits += 1;
+    if (r.wanted.unlockLane) unlockOne();
+  }
+  if (jackpotClaim || wantedClaim) m.wanted = pickWanted(m.streak, m.rng);
+
+  m.raise[l] = null;
+  m.raiseSel[l] = NO_RAISE;
+
+  return { resolution: r, wantedClaim, jackpotClaim, bustNow, savedByToken, streakWasPositive };
+}
+
 /* Resolve a full (5-card) lane three ways. Returns a rich result for the view:
    { laneIndex, hand, bust, saved, scored, basePoints, raise:{tier,won}|null,
      multiplier, points, chipsReturned, chipsLost, cleared, wanted, jackpot } where
@@ -638,7 +703,13 @@ const firstLocked = (locked) => locked.findIndex(Boolean);
      Both share one advanced streak number; jackpot + a condition wanted can co-occur.
    Chips were spent at ante/commit time; chipsReturned is what comes BACK. */
 function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
-  const hand = evaluate(lane);
+  // A full lane (5 cards, voluntary) uses the exact evaluator; a TIMED-OUT partial
+  // lane (2..4 cards) is read by rank multiplicity via bestMadeHand (no straights /
+  // flushes possible below five) — a rushed lane resolves weak, so a partial with
+  // nothing matched is a HIGH CARD and busts.
+  const hand = lane.length === LANE_CAP
+    ? evaluate(lane)
+    : (() => { const rank = bestMadeHand(lane); return { rank, name: HAND_NAME[rank], tiebreak: [] }; })();
   const bust = hand.rank === HAND.HIGH_CARD;
   const saved = hand.rank === SAVE_HAND; // any pair
   const scored = hand.rank >= SCORE_MIN; // two pair or better
@@ -652,10 +723,11 @@ function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
 
   if (scored) {
     base = HAND_POINTS[hand.rank] || 0;
-    // Refund exactly what was paid to open the lane, plus a FLAT profit (the ante
-    // rises over the run but the profit stays fixed — Wanted hands are the real
-    // way to get ahead).
-    if (anted) chipsReturned += antePaidAmt + ANTE_PROFIT;
+    // Refund exactly what was paid to open the lane, plus a profit SCALED by hand
+    // strength ("hands have weight"): a weak two-pair pays the floor, a full house /
+    // quads pay a premium. The ante still rises over the run, so strong hands are the
+    // way to get ahead.
+    if (anted) chipsReturned += antePaidAmt + anteProfitFor(hand.rank);
     if (committedRaise) {
       const tier = TIERS[committedRaise.tier];
       const won = hand.rank >= tier.min;
@@ -742,16 +814,43 @@ function resolveLane({ lane, committedRaise, antePaidAmt, wanted, streak, l }) {
   };
 }
 
-/* The draw transition — the single place where raises commit and expiry ticks.
-   Mutates `state` in place (the caller already cloned what it needs). Pushes any
-   raises that expire on this draw into `expired`. Order: refill/exhaust bag →
-   COMMIT previews → DECREMENT older committed raises → deal the next tray. A raise
-   is never decremented by the draw that created it (N subsequent draws).
+/* Tick the RESOLUTION TIMER on every open lane EXCEPT the one just fed (`fedLane`,
+   -1 for a discard/burn that fed no lane). A lane whose timer reaches 0 FORCE-
+   RESOLVES with whatever cards it holds (2..5) via applyResolution; its summary is
+   pushed into `timeouts` for the view. Mutates the carrier `m` in place. Runs on
+   EVERY draw (independent of the raise-expiry clock). */
+function tickLaneTimers(m, fedLane, timeouts) {
+  for (let l = 0; l < LANES; l++) {
+    if (l === fedLane) continue;
+    if (!m.anted[l] || m.locked[l]) continue;
+    if (m.lanes[l].length === 0) continue; // nothing to resolve yet
+    m.timer[l] -= 1;
+    if (m.timer[l] > 0) continue;
+    const r = resolveLane({ lane: m.lanes[l], committedRaise: m.raise[l], antePaidAmt: m.anteAmt[l], wanted: m.wanted, streak: m.streak, l });
+    const s = applyResolution(m, l, r);
+    if (timeouts) timeouts.push({
+      laneIndex: l,
+      resolution: r,
+      wanted: s.wantedClaim,
+      jackpot: s.jackpotClaim,
+      bustNow: s.bustNow,
+      savedByToken: s.savedByToken,
+      timedOut: true,
+    });
+  }
+}
 
-   `tickExpiry` (default true) drives the betting clock: a normal draw commits
-   previews and ticks countdowns. A discard passes `false` so it deals a fresh tray
-   WITHOUT advancing raise expiry — the discard is "free" toward the betting timer. */
-function drawInto(state, expired, { tickExpiry = true } = {}) {
+/* The draw transition — the single place where raises commit, lane timers tick, and
+   the next tray is dealt. Mutates `state` in place (the caller already cloned what it
+   needs). Pushes expiring raises into `expired` and timed-out lane resolutions into
+   `timeouts`. Order: refill/exhaust bag → COMMIT raise previews → DECREMENT older
+   raises → TICK lane timers (force-resolve on 0) → deal the next tray.
+
+   `tickExpiry` (default true) drives the raise/betting clock only: a discard passes
+   `false` so raise previews + countdowns freeze across it. Lane RESOLUTION timers
+   tick regardless — a discard is still a draw, and an ignored lane still ages.
+   `fedLane` (default -1) is the lane just placed into, which does NOT age this draw. */
+function drawInto(state, expired, { tickExpiry = true, timeouts = null, fedLane = -1 } = {}) {
   // 1. bag
   if (state.bag.length === 0) {
     if (state.oneDeck) { state.tray = null; return; }
@@ -759,7 +858,8 @@ function drawInto(state, expired, { tickExpiry = true } = {}) {
   }
 
   if (!tickExpiry) {
-    // Discard: just deal the next tray, leaving raise previews + countdowns frozen.
+    // Discard: raise previews + countdowns freeze, but lane timers still age.
+    tickLaneTimers(state, fedLane, timeouts);
     state.tray = { ...state.bag[0], faceUp: true };
     state.bag = state.bag.slice(1);
     return;
@@ -797,7 +897,11 @@ function drawInto(state, expired, { tickExpiry = true } = {}) {
   state.raise = raise;
   state.raiseSel = raiseSel;
 
-  // 4. deal
+  // 4. tick lane resolution timers (force-resolve any that reach 0). Done AFTER the
+  // raise arrays are committed back so applyResolution mutates the live state.
+  tickLaneTimers(state, fedLane, timeouts);
+
+  // 5. deal
   state.tray = { ...state.bag[0], faceUp: true };
   state.bag = state.bag.slice(1);
   state.draws += 1;

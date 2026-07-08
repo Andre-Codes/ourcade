@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { HAND_NAME } from "../poker/handEval.js";
-import { wantedHint, currentAnte } from "./logic.js";
+import { wantedHint, currentAnte, LANE_TIMER } from "./logic.js";
 
 /* WantedInfo — a self-contained "rules status" popup for High Card Bust, opened by
    tapping the WANTED bar. Read-only info panel (not a yes/no), modeled on
@@ -143,6 +143,7 @@ export default function WantedInfo({ open, game, onClose }) {
           <p className="hcbi-sec-h">Run status</p>
           <div className="hcbi-lines">
             <div className="hcbi-line"><span>Ante to open a lane</span><span className="v">{currentAnte(game)} chips</span></div>
+            <div className="hcbi-line"><span>Lane timer ⏱ · feed or it resolves</span><span className="v">{LANE_TIMER} draws</span></div>
             <div className="hcbi-line"><span>Jackpot · SF / Royal</span><span className="v jack">+1000 / +2500</span></div>
           </div>
         </div>

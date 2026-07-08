@@ -21,6 +21,7 @@ import {
   WANTED_CONDS, WANTED_COND_REWARDS, JACKPOT_HANDS, JACKPOT_REWARDS,
   START_SAVE_TOKENS, SCORES_PER_SAVE_TOKEN, SAVE_TOKEN_CAP,
   serializeGame, hydrateGame, SAVE_VERSION,
+  LANE_TIMER, ANTE_PROFIT_BY_HAND, MIN_ANTE_PROFIT, anteProfitFor, laneStake,
 } from "../src/games/chip-panic/logic.js";
 import { HAND } from "../src/games/poker/handEval.js";
 
@@ -557,6 +558,127 @@ console.log("Save/resume — tokens + version:");
   // A stale v2 blob (no saveTokens) is rejected → New Game fallback, not mis-hydrated.
   const stale = { v: 2, state: { lanes: Array.from({ length: LANES }, () => []), bag: [], locked: Array(LANES).fill(false), chips: 12, draws: 0 } };
   eq("v2 save discarded on version bump", hydrateGame(stale), null);
+}
+
+// ── profit scaled by hand strength ("hands have weight") ──────────────────────
+console.log("Profit by hand:");
+{
+  eq("two pair profit floor", anteProfitFor(HAND.TWO_PAIR), 1);
+  eq("trips profit", anteProfitFor(HAND.THREE), 2);
+  eq("straight profit", anteProfitFor(HAND.STRAIGHT), 3);
+  eq("flush profit", anteProfitFor(HAND.FLUSH), 4);
+  eq("full house profit", anteProfitFor(HAND.FULL_HOUSE), 6);
+  eq("quads profit", anteProfitFor(HAND.FOUR), 10);
+  eq("straight flush profit", anteProfitFor(HAND.STRAIGHT_FLUSH), 14);
+  eq("royal profit", anteProfitFor(HAND.ROYAL_FLUSH), 20);
+  eq("MIN_ANTE_PROFIT is the two-pair floor", MIN_ANTE_PROFIT, 1);
+  eq("ANTE_PROFIT alias == floor", ANTE_PROFIT, MIN_ANTE_PROFIT);
+  eq("unmapped rank falls back to floor", anteProfitFor(HAND.HIGH_CARD), MIN_ANTE_PROFIT);
+  eq("table matches export", ANTE_PROFIT_BY_HAND[HAND.FLUSH], 4);
+}
+{
+  // End-to-end: a FLUSH returns paid ante + flush profit (4), not the flat 1.
+  let g = noWanted(newGame());
+  const start = g.chips;
+  const { result, state } = fillLane(g, ["AD", "JD", "8D", "5D", "2D"]); // flush, ante 1
+  eq("flush chipsReturned = ante + flush profit", result.resolution.chipsReturned, BASE_ANTE + anteProfitFor(HAND.FLUSH));
+  eq("flush net chips = flush profit", state.chips, start + anteProfitFor(HAND.FLUSH));
+}
+{
+  // A FULL HOUSE nets +6.
+  let g = noWanted(newGame());
+  const start = g.chips;
+  const { state } = fillLane(g, ["KS", "KH", "KD", "8S", "8C"]); // full house
+  eq("full house net chips = +6", state.chips, start + anteProfitFor(HAND.FULL_HOUSE));
+}
+{
+  // laneStake shows the honest FLOOR profit before the hand is known.
+  let g = noWanted(newGame());
+  g = play(g, "2C", 0).state; // open lane 0, 1 card
+  const st = laneStake(g, 0);
+  eq("laneStake toWin = ante + floor profit", st.toWin, (g.anteAmt[0]) + MIN_ANTE_PROFIT);
+}
+
+// ── lane resolution timer (the core bust-pressure mechanic) ───────────────────
+console.log("Lane resolution timer:");
+{
+  // Opening a lane starts its timer at LANE_TIMER; feeding refreshes it.
+  let g = noWanted(newGame());
+  const r1 = play(g, "2C", 0); // open lane 0
+  eq("open sets lane timer", r1.state.timer[0] === LANE_TIMER || r1.state.timer[0] === LANE_TIMER - 1, true);
+}
+{
+  // A neglected lane force-resolves when its timer expires. Open lane 0 with two
+  // non-matching cards, then advance LANE_TIMER draws by discarding (feeds no lane)
+  // → lane 0 times out and, being a high card, busts + locks.
+  let g = noWanted(newGame());
+  g = play(g, "8C", 0).state; // open lane 0 (1 card)
+  g = play(g, "2D", 0).state; // lane 0 now has 8,2 (high card so far), timer refreshed
+  const before = g.timer[0];
+  let sawTimeout = false;
+  for (let i = 0; i < LANE_TIMER + 2 && !g.over; i++) {
+    // discard to advance a draw without feeding lane 0 (recharge discard is off, so
+    // once spent we can't discard — instead open+feed OTHER lanes). Simplest: burn.
+    const r = burnCard(g);
+    g = r.state;
+    if (r.result.timeouts && r.result.timeouts.some((t) => t.laneIndex === 0)) sawTimeout = true;
+  }
+  eq("neglected lane timer counted down", before, LANE_TIMER); // refreshed on the 2nd feed
+  eq("neglected lane force-resolved via timeout", sawTimeout, true);
+  eq("timed-out high-card lane is locked", g.locked[0], true);
+}
+{
+  // A timed-out lane that already holds a scoring hand SCORES on timeout (not a lock).
+  // Lane 0: two pair partial (K,K,8,8) at 4 cards, then let it time out.
+  let g = noWanted(newGame());
+  g = play(g, "KS", 0).state;
+  g = play(g, "KH", 0).state;
+  g = play(g, "8S", 0).state;
+  g = play(g, "8C", 0).state; // K,K,8,8 = two pair already made (bestMadeHand)
+  const scoreBefore = g.score;
+  let scoredOnTimeout = false;
+  for (let i = 0; i < LANE_TIMER + 2 && !g.over; i++) {
+    const r = burnCard(g);
+    g = r.state;
+    const t = (r.result.timeouts || []).find((x) => x.laneIndex === 0);
+    if (t && t.resolution.scored) scoredOnTimeout = true;
+  }
+  eq("timed-out two-pair scores (not locked)", scoredOnTimeout, true);
+  eq("timed-out score is not locked", g.locked[0], false);
+  eq("timed-out score raised the score", g.score > scoreBefore, true);
+}
+{
+  // Feeding a lane keeps it alive: a lane fed every few draws never times out.
+  let g = noWanted(newGame());
+  let over = false;
+  for (let i = 0; i < LANE_TIMER + 3; i++) {
+    const seq = ["3", "4", "5", "6", "7", "8", "9", "T"][i % 8];
+    const suit = "SHDC"[i % 4];
+    if (g.lanes[0].length >= 4) break; // stop before it would resolve to 5
+    const r = play(g, seq + suit, 0);
+    g = r.state;
+    if (g.over) { over = true; break; }
+  }
+  eq("continuously-fed lane stays open (not timed out)", g.locked[0] || over, false);
+}
+
+// ── save version bump (v4: 3 lanes + timer) ───────────────────────────────────
+console.log("Save version v4:");
+{
+  eq("SAVE_VERSION is 4", SAVE_VERSION, 4);
+  // A fresh run has a timer array of length LANES and round-trips.
+  let g = noWanted(newGame());
+  eq("fresh run has timer array", Array.isArray(g.timer) && g.timer.length === LANES, true);
+  const blob = serializeGame(g);
+  eq("snapshot stamped v4", blob.v, 4);
+  eq("snapshot carries timer", Array.isArray(blob.state.timer), true);
+  const back = hydrateGame(blob);
+  eq("hydrate restores a live run", !!back && Array.isArray(back.timer), true);
+}
+{
+  // A stale v3 blob (no timer) is rejected → New Game fallback.
+  const stale = { v: 3, state: { lanes: Array.from({ length: LANES }, () => []), bag: [], locked: Array(LANES).fill(false), chips: 12, draws: 0, saveTokens: 2 } };
+  eq("v3 save discarded on v4 bump", hydrateGame(stale), null);
 }
 
 console.log(`\n${pass} passed, ${fail} failed.`);

@@ -114,14 +114,14 @@ export default function HelpPanel({ open, onClose }) {
         onPointerDown={(e) => e.stopPropagation()}
       >
         <h2>HOW TO PLAY</h2>
-        <p className="hcbh-tag">Build poker hands across four lanes — survive on chips, chase points.</p>
+        <p className="hcbh-tag">Build poker hands across your lanes — beat the clock, chase points.</p>
 
         <div className="hcbh-sec">
           <p className="hcbh-sec-h">The goal</p>
           <p className="hcbh-p">
-            Open lanes and fill each with <b>5 cards</b> — a poker hand. Strong hands score
-            points; weak ones cost you. You start with <b>12 chips</b>; the run ends when you run
-            out of room.
+            Open lanes and fill each with <b>5 cards</b> — a poker hand. Strong hands pay big;
+            weak ones pay little. You start with <b>12 chips</b>; the run ends when the board
+            locks up or you run out of room.
           </p>
         </div>
 
@@ -135,11 +135,20 @@ export default function HelpPanel({ open, onClose }) {
         </div>
 
         <div className="hcbh-sec">
-          <p className="hcbh-sec-h">When a lane fills (5 cards)</p>
+          <p className="hcbh-sec-h">The lane timer (⏱)</p>
+          <p className="hcbh-p">
+            Every open lane has a <b>countdown</b>. Feeding a lane <b>refreshes</b> its timer, but
+            a <b>neglected</b> lane runs out and <b>force-resolves</b> with whatever cards it holds
+            — so a rushed lane often ends weak. Keep few lanes going and feed the urgent one.
+          </p>
+        </div>
+
+        <div className="hcbh-sec">
+          <p className="hcbh-sec-h">When a lane resolves (filled or timed out)</p>
           <div className="hcbh-res">
             <div className="hcbh-row win">
               <span className="k">SCORE</span>
-              <span>Two Pair or better — points scored, ante back +1 profit, discard refreshes.</span>
+              <span>Two Pair or better — points scored, ante back + profit <b>scaled by hand</b> (bigger hands pay more), discard refreshes.</span>
             </div>
             <div className="hcbh-row save">
               <span className="k">SAVE</span>
@@ -173,10 +182,10 @@ export default function HelpPanel({ open, onClose }) {
             ))}
           </div>
           <p className="hcbh-p">
-            <b>Chip payout.</b> A scoring lane returns your <b>ante + 1 chip</b>. A raise that
-            lands adds its own return on top (shown above), so the number over each lane is the
-            <b> total chips you'll pocket if it wins</b>. A raise that misses its hand forfeits its
-            stake, but the ante still pays out — a bust or save loses everything staked.
+            <b>Chip payout.</b> A scoring lane returns your <b>ante + a profit scaled by the hand</b>
+            (Two Pair +1 … Full House +6 … Royal +20). A raise that lands adds its own return on top
+            (shown above). The number over each lane is at least the floor payout — it climbs with a
+            stronger hand. A raise that misses forfeits its stake; a bust or save loses everything staked.
           </p>
         </div>
 
@@ -194,8 +203,8 @@ export default function HelpPanel({ open, onClose }) {
           <p className="hcbh-sec-h">Scoring &amp; the end</p>
           <p className="hcbh-p">
             Your score is each hand's base points × any winning raise multiplier, plus wanted and
-            jackpot bonuses — it feeds the arcade leaderboard. The run <b>ends</b> when all four
-            lanes are locked, or your drawn card has no legal lane to go in.
+            jackpot bonuses — it feeds the arcade leaderboard. The run <b>ends</b> when every lane
+            is locked, or your drawn card has no legal lane to go in.
           </p>
         </div>
 
