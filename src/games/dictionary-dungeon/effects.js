@@ -368,6 +368,31 @@ const WORD_LISTS = {
     "lentil", "chickpea", "hummus", "falafel", "couscous", "risotto", "goulash",
     "kimchi", "sauerkraut", "chutney", "marmalade", "compote", "tapioca",
     "marzipan", "nougat", "praline", "brioche", "crumpet", "bannock", "damper",
+    // More produce (common fruit & veg) — all real ENABLE words
+    "tomato", "lemon", "lime", "orange", "banana", "cucumber", "pepper",
+    "pumpkin", "squash", "spinach", "broccoli", "cabbage", "celery", "olive",
+    "mushroom", "pea", "beet", "zucchini", "eggplant", "lettuce", "chard",
+    "avocado", "coconut", "walnut", "almond", "chestnut", "hazelnut", "pistachio",
+    "raspberry", "blueberry", "strawberry",
+    // Plurals of foods (so "tomatoes" heals as well as "tomato")
+    "tomatoes", "mangoes", "pears", "plums", "peaches", "grapes", "lemons",
+    "limes", "oranges", "bananas", "cucumbers", "peppers", "pumpkins", "olives",
+    "mushrooms", "peas", "beets", "carrots", "onions", "potatoes", "turnips",
+    "radishes", "leeks", "yams", "figs", "dates", "raisins", "currants",
+    "apricots", "cherries", "cabbages", "avocados", "coconuts", "walnuts",
+    "almonds", "chestnuts", "hazelnuts", "pistachios", "raspberries",
+    "blueberries", "strawberries", "scones", "muffins", "pickles", "biscuits",
+    "loaves", "breads", "cheeses", "soups", "stews", "pies", "cakes", "tarts",
+    "roasts",
+    // Drinks — a little something to wash it down
+    "juice", "cider", "ale", "mead", "wine", "beer", "tea", "coffee", "cocoa",
+    "nectar", "brew", "grog", "punch", "lemonade", "cordial", "tonic", "mocha",
+    "latte", "juices", "ciders", "ales", "meads", "wines", "beers", "teas",
+    "brews", "nectars", "tonics",
+    // More hearty dishes
+    "omelet", "omelette", "pancake", "pancakes", "waffle", "waffles",
+    "dumpling", "dumplings", "noodle", "noodles", "pasta", "pizza", "salad",
+    "salads", "sandwich", "honeycomb", "toffee", "fudge",
   ],
   poison: [
     "poison", "venom", "toxin", "bane", "blight", "plague", "rot", "decay",

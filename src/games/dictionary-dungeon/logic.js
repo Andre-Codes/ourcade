@@ -23,6 +23,7 @@ import {
 import { isWord, rarityTier, commonRank } from "./dict.js";
 import { getRule } from "./rules.js";
 import { resolveWordEffect, effectCategoryOf } from "./effects.js";
+import { FIRST_WORD_TITLES, firstWordOmen, sequenceBadge } from "./titles.js";
 import {
   LEVELS,
   ENEMY_BY_ID,
@@ -46,6 +47,28 @@ const EPOCH_KEY = "2026-06-01"; // anchors the small human "Dungeon #N"
 export const START_HEARTS = 5;
 export const START_COINS = 0;
 const RARE_LETTERS = new Set(["J", "Q", "X", "Z"]);
+
+// Hidden word Easter eggs. These aren't real ENABLE words, so they never pass
+// the dictionary gate — we intercept them BEFORE isWord() and answer with a
+// wink instead of the generic "not a word" line. Purely flavor: the turn is
+// still a whiff (no damage, no heart lost), like any unrecognized word.
+const EGG_WORDS = {
+  SWEETROLL: "> A sweetroll materializes, then vanishes. …Let me guess. Someone stole it?",
+  SWEETROLLS: "> A whole tray of sweetrolls, gone in a blink. The guards would have questions.",
+};
+
+// Effect category → FLAVOR bucket for a repeated (already-spent) word, so
+// replaying SWORD reads differently from replaying APPLE. Categories not listed
+// fall through to the generic `repeat` bucket.
+const REPEAT_BUCKET_BY_CATEGORY = {
+  weapon: "repeatWeapon",
+  piercing: "repeatWeapon",
+  blunt: "repeatBlunt",
+  food: "repeatFood",
+  magic: "repeatMagic",
+  fire: "repeatFire",
+  holy: "repeatHoly",
+};
 
 // ── run number ────────────────────────────────────────────────────────────────
 export function dungeonNumber(dayKey) {
@@ -192,6 +215,8 @@ export function buildRun(dayKey) {
     prevWord: null, // for memory rules (per room reset)
     words: [], // every accepted word this run (for recap)
     used: [], // UPPERCASE words already played (no-repeat across the run)
+    title: null, // { title, revealText } earned from the first valid word (cosmetic)
+    badges: [], // starting-secret omens/badges earned in the first few words (cosmetic)
     // per-level flags for relic once-per-level effects
     levelFlags: {},
     roomFails: 0, // wrong-word count in the CURRENT room (rule-fail penalty)
@@ -354,6 +379,14 @@ export function resolveTurn(state, rawWord, seedOverride) {
   const flav = (bucket) => s.pick(FLAVOR[bucket]);
   const out = { ok: false, accepted: false, reason: null, damage: 0, logLines: [], effects: {}, cleared: false, advanced: false, bossPhaseChanged: false };
 
+  // 0) hidden word Easter eggs (intercept before the dictionary gate — these
+  // aren't ENABLE words, so we answer with a wink instead of "not a word").
+  if (EGG_WORDS[w]) {
+    out.reason = "invalid";
+    out.logLines.push(EGG_WORDS[w]);
+    return out;
+  }
+
   // 1) real word?
   if (!isWord(w)) {
     out.reason = "invalid";
@@ -362,9 +395,16 @@ export function resolveTurn(state, rawWord, seedOverride) {
   }
 
   // 1b) no repeats across the whole run — a spent word won't answer twice.
+  // Category-aware flavor: a spent weapon/food/spell gets its own line (with
+  // {WORD} swapped in); anything else falls back to the generic bucket.
   if ((state.used || []).includes(w)) {
     out.reason = "repeat";
-    out.logLines.push(`> ${w} — ${flav("repeat")}`);
+    const repeatBucket = REPEAT_BUCKET_BY_CATEGORY[effectCategoryOf(w)];
+    if (repeatBucket) {
+      out.logLines.push(`> ${flav(repeatBucket).replace(/\{WORD\}/g, w)}`);
+    } else {
+      out.logLines.push(`> ${w} — ${flav("repeat")}`);
+    }
     return out;
   }
 
@@ -402,6 +442,11 @@ export function resolveTurn(state, rawWord, seedOverride) {
   state.prevWord = w;
   state.words.push({ word: w, tier, rank: commonRank(w) });
   (state.used || (state.used = [])).push(w);
+
+  // 2b) starting secrets — cosmetic first-word title + omens/badges from the
+  // opening words. Flavor only (no hearts/coins/damage), evaluated here so a
+  // resumed run keeps them (state.title/badges persist).
+  applyStartingSecrets(state, w, out);
 
   // 3) damage
   const parts = [{ label: "letters", amount: w.length }];
@@ -543,6 +588,36 @@ function enemyCounter(state, target, out) {
 // already start with "The", so don't double the article.
 function deathBy(name) {
   return /^the\b/i.test(name) ? `slain by ${name}` : `slain by the ${name}`;
+}
+
+// Cosmetic "character-creation" layer. On the FIRST valid word, maybe assign a
+// title and/or an omen; across the first four valid words, maybe award a
+// sequence badge. All flavor — never touches hearts/coins/damage. Badges dedupe
+// by id so a resumed/re-evaluated run doesn't double-award.
+function applyStartingSecrets(state, w, out) {
+  const wordCount = state.words.length; // this word already pushed
+  const addBadge = (b) => {
+    if (!b) return;
+    if (!state.badges) state.badges = [];
+    if (state.badges.some((x) => x.id === b.id)) return;
+    state.badges.push({ id: b.id, name: b.name, text: b.text, kind: b.kind || "badge" });
+    out.logLines.push(`> ✦ ${b.kind === "omen" ? "Omen" : "Secret"}: ${b.name} — ${b.text}`);
+  };
+
+  if (wordCount === 1 && !state.title) {
+    const title = FIRST_WORD_TITLES[w];
+    if (title) {
+      state.title = { title, revealText: `The dungeon remembers your first word. You are named the ${title}.` };
+      out.logLines.push(`> ✦ ${state.title.revealText}`);
+    }
+    const omen = firstWordOmen(w);
+    if (omen) addBadge({ id: "omen:" + w, name: omen.name, text: omen.text, kind: "omen" });
+  }
+
+  // Sequence badges look at the first few words; only meaningful through word 4.
+  if (wordCount >= 2 && wordCount <= 4) {
+    addBadge(sequenceBadge(state));
+  }
 }
 
 function awardClear(state, out, boss = false) {
@@ -914,6 +989,8 @@ export function runRecap(state) {
     floor: floorLabel(state),
     won: state.won,
     deathCause: state.deathCause,
+    title: state.title?.title || null,
+    badges: (state.badges || []).map((b) => ({ name: b.name, kind: b.kind || "badge" })),
   };
 }
 // Higher = rarer, for "rarest word" pick.
@@ -935,8 +1012,10 @@ export function shareLine(state) {
 
 // ── save / resume (mirrors chip-panic/logic.js) ───────────────────────────────
 // v2: added merchant/event rooms, no-repeat `used`, roomFails, famished, zero
-// starting inventory. Old v1 saves are discarded (start fresh).
-export const SAVE_VERSION = 2;
+// starting inventory.
+// v3: added cosmetic first-word title + starting-secret badges (state.title,
+// state.badges). Old saves are discarded (start fresh).
+export const SAVE_VERSION = 3;
 
 export const isSaveable = (state) => !!state && !state.over;
 
@@ -951,9 +1030,11 @@ export function hydrateGame(saved) {
   if (!Array.isArray(s.levels) || !s.levels.length) return null;
   if (typeof s.hearts !== "number" || typeof s.levelIdx !== "number") return null;
   if (s.over) return null; // finished runs aren't resumable
-  // Backfill fields that may be absent in an early-v2 blob.
+  // Backfill fields that may be absent in an older blob.
   if (!Array.isArray(s.used)) s.used = (s.words || []).map((r) => r.word);
   if (typeof s.roomFails !== "number") s.roomFails = 0;
   if (typeof s.famished !== "boolean") s.famished = false;
+  if (s.title === undefined) s.title = null;
+  if (!Array.isArray(s.badges)) s.badges = [];
   return s;
 }

@@ -218,11 +218,12 @@ function findAnswer(state) {
   const rule = getRule(spec);
   const prev = state.prevWord;
   const needsTier = String(spec).includes("tier:");
-  // Try a bounded scan of the dictionary for a satisfying word not already used.
+  // Scan the whole dictionary for a satisfying word not already used. (WORDS is
+  // alphabetically sorted, so a per-turn cap would make late-alphabet rules like
+  // "starts:S" unsolvable for the solver even though real players can answer
+  // them — a full scan of 154k words per turn is still sub-second.)
   const used = new Set(state.used || []);
-  let scanned = 0;
   for (const w of WORDS) {
-    if (++scanned > 80000) break; // bound per turn
     if (used.has(w)) continue;
     const tier = needsTier ? rarityTier(w) : null;
     if (!rule.test(w, { prevWord: prev, enemyName: target?.name || "", tier })) continue;

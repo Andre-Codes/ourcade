@@ -38,8 +38,10 @@ export default function DictionaryDungeon() {
   const [input, setInput] = useState("");
   const [toast, setToast] = useState(null);
   const [screen, setScreen] = useState("title"); // title | play | over
+  const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
   const logRef = useRef(null);
   const inputRef = useRef(null);
+  const fxTimers = useRef([]); // pending setTimeouts (paced log / fx) to clear
   const quit = useQuitConfirm();
   const { submit } = useArcadeScore(GAME_ID);
   const day = todayKey();
@@ -93,6 +95,9 @@ export default function DictionaryDungeon() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
+  // Clear any pending fx/log timers on unmount.
+  useEffect(() => () => fxTimers.current.forEach(window.clearTimeout), []);
+
   // Flash a toast for a moment.
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -108,8 +113,8 @@ export default function DictionaryDungeon() {
       const lvl = logic.currentLevel(s);
       setLog([`> ${lvl?.rooms?.[0]?.intro || "You descend into the dungeon."}`]);
       setInput("");
+      setHitFx(null);
       setScreen("play");
-      setTimeout(() => inputRef.current?.focus(), 50);
     },
     [logic, day]
   );
@@ -120,14 +125,47 @@ export default function DictionaryDungeon() {
       if (!logic || !state || state.over) return;
       const word = input.trim();
       if (!word) return;
-      const next = { ...state };
+      // Clear any pending paced-log / fx timers from a previous fast turn.
+      fxTimers.current.forEach(window.clearTimeout);
+      fxTimers.current = [];
       // resolveTurn mutates a copy; deep-ish clone the parts it touches. The run
       // is plain data, so a structuredClone keeps it simple and correct.
       const working = structuredClone(state);
       const res = logic.resolveTurn(working, word);
-      setState(working);
-      setLog((prev) => [...prev, ...res.logLines].slice(-80));
       setInput("");
+
+      // A kill or boss-phase change should READ, not flash by. Split the log so
+      // the hit + damage lines land immediately (the HP bar drains, the enemy
+      // card pulses), then the "it crumbles" / "shifts" resolution lines follow
+      // a beat later. `resolveTurn` always emits the resolution flavor AFTER the
+      // "N damage." line, so we split on the last damage line.
+      const paced = res.accepted && (res.cleared || res.bossPhaseChanged);
+      if (paced) {
+        const lines = res.logLines;
+        let cut = -1;
+        for (let i = lines.length - 1; i >= 0; i--) {
+          if (/\d+ damage\./.test(lines[i])) { cut = i; break; }
+        }
+        const hitLines = cut >= 0 ? lines.slice(0, cut + 1) : lines;
+        const afterLines = cut >= 0 ? lines.slice(cut + 1) : [];
+        setState(working);
+        setLog((prev) => [...prev, ...hitLines].slice(-80));
+        setHitFx(res.cleared ? "slain" : "hit");
+        if (afterLines.length) {
+          fxTimers.current.push(
+            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines].slice(-80)), 560)
+          );
+        }
+        fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
+      } else {
+        setState(working);
+        setLog((prev) => [...prev, ...res.logLines].slice(-80));
+        if (res.accepted && res.damage > 0) {
+          setHitFx("hit");
+          fxTimers.current.push(window.setTimeout(() => setHitFx(null), 260));
+        }
+      }
+
       if (!res.accepted) {
         flash(
           res.reason === "invalid"
@@ -138,12 +176,39 @@ export default function DictionaryDungeon() {
         );
       }
       if (working.over) {
-        setTimeout(() => finishRun(working), 650);
+        // Let the paced resolution lines land before the over-screen swap.
+        fxTimers.current.push(window.setTimeout(() => finishRun(working), paced ? 950 : 650));
       }
-      setTimeout(() => inputRef.current?.focus(), 20);
     },
     [logic, state, input, flash]
   );
+
+  // On-screen keyboard: feed key taps into the same input the form uses. Letters
+  // append (cap 16), ⌫ pops, ENTER submits. A physical-keyboard bridge (below)
+  // routes real keystrokes here too, so desktop typing still works.
+  const onKey = useCallback(
+    (k) => {
+      if (k === "enter") { onSubmit(); return; }
+      if (k === "back") { setInput((v) => v.slice(0, -1)); return; }
+      if (/^[a-z]$/i.test(k)) setInput((v) => (v.length >= 16 ? v : v + k.toUpperCase()));
+    },
+    [onSubmit]
+  );
+
+  // Physical-keyboard bridge: route real keystrokes into the on-screen keyboard
+  // handler so desktop typing works even though there's no focusable <input>.
+  // Only active during a live run (not on title/over screens).
+  useEffect(() => {
+    if (screen !== "play") return;
+    const onDown = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "Enter") { e.preventDefault(); onKey("enter"); }
+      else if (e.key === "Backspace") { e.preventDefault(); onKey("back"); }
+      else if (/^[a-z]$/i.test(e.key)) onKey(e.key);
+    };
+    window.addEventListener("keydown", onDown);
+    return () => window.removeEventListener("keydown", onDown);
+  }, [screen, onKey]);
 
   const finishRun = useCallback(
     (finalState) => {
@@ -166,7 +231,6 @@ export default function DictionaryDungeon() {
       } else {
         flash(r.message);
       }
-      setTimeout(() => inputRef.current?.focus(), 20);
     },
     [logic, state, flash]
   );
@@ -180,7 +244,6 @@ export default function DictionaryDungeon() {
         setState(working);
         setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
       }
-      setTimeout(() => inputRef.current?.focus(), 20);
     },
     [logic, state]
   );
@@ -208,7 +271,6 @@ export default function DictionaryDungeon() {
       setState(working);
       setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
     }
-    setTimeout(() => inputRef.current?.focus(), 20);
   }, [logic, state]);
 
   const onEvent = useCallback(
@@ -223,7 +285,6 @@ export default function DictionaryDungeon() {
       } else if (r.message) {
         flash(r.message);
       }
-      setTimeout(() => inputRef.current?.focus(), 20);
     },
     [logic, state, flash]
   );
@@ -265,8 +326,7 @@ export default function DictionaryDungeon() {
           state={state}
           log={log}
           input={input}
-          setInput={setInput}
-          onSubmit={onSubmit}
+          onKey={onKey}
           onUseScroll={onUseScroll}
           onTakeRelic={onTakeRelic}
           onBuy={onBuy}
@@ -275,8 +335,8 @@ export default function DictionaryDungeon() {
           onHint={onHint}
           onQuit={goTitle}
           toast={toast}
+          hitFx={hitFx}
           logRef={logRef}
-          inputRef={inputRef}
         />
       )}
       {screen === "over" && state && (
@@ -324,7 +384,7 @@ function Title({ logic, day, onStart }) {
 }
 
 // ── play ──────────────────────────────────────────────────────────────────────
-function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onHint, onQuit, toast, logRef, inputRef }) {
+function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onHint, onQuit, toast, hitFx, logRef }) {
   const lvl = logic.currentLevel(state);
   const target = logic.currentTarget(state);
   const rule = logic.activeRule(state);
@@ -350,6 +410,14 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
         <button className="dd-x" onClick={onQuit} aria-label="Leave">✕</button>
       </div>
 
+      {/* persistent RPG title earned from the first word (cosmetic nameplate) */}
+      {state.title?.title && (
+        <div className="dd-title-banner">
+          <span className="dd-title-mark">✦</span>
+          <span className="dd-title-text">{state.title.title}</span>
+        </div>
+      )}
+
       {/* room card */}
       <div className="dd-card">
         <div className="dd-room-title">
@@ -358,7 +426,7 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
         <div className="dd-scene">{lvl?.tone && `A place of ${lvl.tone}.`}</div>
 
         {target?.name && (
-          <div className="dd-enemy">
+          <div className={`dd-enemy${hitFx ? ` dd-enemy-${hitFx}` : ""}`}>
             <div className="dd-enemy-row">
               <span className="dd-enemy-emoji">{target.emoji}</span>
               <span className="dd-enemy-name">{target.name}</span>
@@ -437,20 +505,13 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
           </div>
         </div>
       ) : (
-        <form className="dd-inputrow" onSubmit={onSubmit}>
-          <input
-            ref={inputRef}
-            className="dd-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="your word"
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            maxLength={16}
-          />
-          <button type="submit" className="dd-submit">Submit</button>
-        </form>
+        <div className="dd-entry">
+          {/* current word — read-only so no device keyboard pops up over the UI */}
+          <div className={`dd-word${input ? "" : " dd-word-empty"}`} aria-live="polite">
+            {input || "your word"}
+          </div>
+          <Keyboard onKey={onKey} />
+        </div>
       )}
 
       {/* action buttons — only in word rooms */}
@@ -465,13 +526,71 @@ function Play({ logic, state, log, input, setInput, onSubmit, onUseScroll, onTak
       {/* result log */}
       <div className="dd-log" ref={logRef}>
         {log.map((line, i) => (
-          <div key={i} className="dd-logline">{line}</div>
+          <div key={i} className="dd-logline">{renderLogLine(line)}</div>
         ))}
       </div>
 
       {toast && <div className="dd-toast">{toast}</div>}
     </div>
   );
+}
+
+// On-screen QWERTY. Taps route through onKey (same handler the physical keyboard
+// bridges into). Kept in-cabinet so no device keyboard pops up to shift/cover
+// the UI. Pattern mirrors QuarterGame.jsx.
+const KB_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+function Keyboard({ onKey }) {
+  return (
+    <div className="dd-kb">
+      {KB_ROWS.map((row, i) => (
+        <div className="dd-kb-row" key={i}>
+          {i === 2 && (
+            <button type="button" className="dd-key dd-key-wide" onClick={() => onKey("back")} aria-label="Backspace">⌫</button>
+          )}
+          {row.split("").map((ch) => (
+            <button type="button" key={ch} className="dd-key" onClick={() => onKey(ch)}>{ch.toUpperCase()}</button>
+          ))}
+          {i === 2 && (
+            <button type="button" className="dd-key dd-key-wide dd-key-enter" onClick={() => onKey("enter")}>ENTER</button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Colorize known tokens in a log line at render time (the logic layer still
+// emits plain strings). Any line that matches nothing renders verbatim. Tokens,
+// in priority order: the "✦ …" secret/title lines, damage numbers, the played
+// word, heals, and coins.
+const LOG_TOKEN = new RegExp(
+  [
+    "(?<secret>^> ✦.*$)", // whole starting-secret / title line
+    "(?<dmg>\\d+ damage)",
+    "(?<played>(?<=You played )[A-Z]{2,})",
+    "(?<heal>recover \\d+ heart[s]?|❤ ?\\d+|❤)",
+    "(?<coin>\\+\\d+ coins|🪙 ?\\d+)",
+  ].join("|"),
+  "gu"
+);
+function renderLogLine(line) {
+  const text = String(line);
+  // The whole-line secret/title styling is simplest handled up front.
+  if (/^> ✦/.test(text)) return <span className="dd-log-secret">{text}</span>;
+  const out = [];
+  let last = 0;
+  let m;
+  LOG_TOKEN.lastIndex = 0;
+  while ((m = LOG_TOKEN.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const g = m.groups || {};
+    const cls = g.dmg ? "dd-log-dmg" : g.played ? "dd-log-word" : g.heal ? "dd-log-heal" : g.coin ? "dd-log-coin" : null;
+    out.push(cls ? <span key={m.index} className={cls}>{m[0]}</span> : m[0]);
+    last = m.index + m[0].length;
+    if (m[0].length === 0) LOG_TOKEN.lastIndex++; // guard against zero-width
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
 }
 
 function ScrollMenu({ logic, scrolls, onUse }) {
@@ -528,6 +647,7 @@ function Over({ logic, state, onAgain }) {
     <div className="dd-over">
       <div className="dd-over-crest">{recap.won ? "🏆" : "💀"}</div>
       <h2 className="dd-over-title">{recap.won ? "You cleared the dungeon!" : "You fell in the dark."}</h2>
+      {recap.title && <p className="dd-over-named">✦ {recap.title}</p>}
       {!recap.won && recap.deathCause && <p className="dd-over-cause">{recap.deathCause}.</p>}
       <div className="dd-over-score">{recap.score.toLocaleString()}</div>
       <div className="dd-over-grid">
@@ -538,6 +658,13 @@ function Over({ logic, state, onAgain }) {
         <Stat label="Best word" value={recap.best || "—"} />
         <Stat label="Rarest word" value={recap.rarest || "—"} />
       </div>
+      {recap.badges?.length > 0 && (
+        <div className="dd-over-relics">
+          {recap.badges.map((b, i) => (
+            <span key={i} className="dd-over-relic dd-over-badge">✦ {b.name}</span>
+          ))}
+        </div>
+      )}
       {recap.relics.length > 0 && (
         <div className="dd-over-relics">
           {recap.relics.map((id) => {
@@ -630,21 +757,50 @@ const CSS = `
 .dd-hpbar { height: 9px; background: rgba(255,255,255,.09); border-radius: 5px; overflow: hidden; }
 .dd-hpbar-fill { height: 100%; background: linear-gradient(90deg, #c0392b, #e05a4a); transition: width .35s; }
 .dd-intent { font-size: .8rem; opacity: .7; margin-top: 6px; font-style: italic; }
+/* hit / kill feedback on the enemy card */
+.dd-enemy-hit { animation: ddHit .26s ease-out; }
+.dd-enemy-slain { animation: ddSlain .6s ease-out; }
+@keyframes ddHit {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); } 55% { transform: translateX(5px); }
+  80% { transform: translateX(-2px); } 100% { transform: translateX(0); }
+}
+@keyframes ddSlain {
+  0% { transform: scale(1); filter: none; opacity: 1; }
+  30% { transform: scale(1.03); filter: brightness(1.8) saturate(0); }
+  100% { transform: scale(.96); filter: grayscale(1) brightness(.6); opacity: .55; }
+}
+
+/* persistent RPG title nameplate */
+.dd-title-banner { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 0 0 10px;
+  padding: 5px 12px; border-radius: 20px; align-self: center; width: fit-content; max-width: 100%;
+  background: linear-gradient(180deg, rgba(217,180,94,.16), rgba(217,180,94,.05));
+  border: 1px solid rgba(217,180,94,.4); box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+.dd-title-mark { color: var(--gold); font-size: .8rem; }
+.dd-title-text { color: #f0e4c8; font-variant: small-caps; letter-spacing: .06em; font-size: .95rem; font-weight: 600;
+  text-shadow: 0 1px 6px rgba(217,180,94,.3); }
 
 .dd-rule { margin-top: 12px; padding: 12px 14px; text-align: center; font-size: 1rem;
   color: #2a2013; border-radius: 8px;
   background: linear-gradient(180deg, #ece0c4, #d8c9a4); border: 1px solid #b8a67e;
   box-shadow: 0 3px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4); font-weight: 600; }
 
-.dd-inputrow { display: flex; gap: 8px; margin-bottom: 10px; }
-.dd-input { flex: 1; padding: 12px 14px; border-radius: 10px; font-size: 1.15rem; letter-spacing: .12em;
-  text-transform: uppercase; text-align: center; font-family: inherit; color: #f4ecd8;
-  background: rgba(0,0,0,.35); border: 1px solid rgba(217,180,94,.4); }
-.dd-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(217,180,94,.25); }
-.dd-submit { padding: 0 18px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: .95rem;
-  font-weight: 700; color: #221703; border: 1px solid rgba(255,240,200,.4);
-  background: linear-gradient(180deg, #e5c069, #b8892f); }
-.dd-submit:active { transform: translateY(1px); }
+/* word entry + on-screen keyboard */
+.dd-entry { margin-bottom: 10px; }
+.dd-word { min-height: 52px; padding: 11px 14px; border-radius: 10px; font-size: 1.25rem; letter-spacing: .14em;
+  text-transform: uppercase; text-align: center; font-family: inherit; color: #f4ecd8; user-select: none;
+  background: rgba(0,0,0,.35); border: 1px solid rgba(217,180,94,.4); margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden; }
+.dd-word-empty { color: rgba(244,236,216,.35); letter-spacing: .08em; text-transform: none; font-style: italic; }
+.dd-kb { display: flex; flex-direction: column; gap: 6px; }
+.dd-kb-row { display: flex; gap: 5px; justify-content: center; }
+.dd-key { flex: 1; min-width: 0; height: 46px; border-radius: 7px; cursor: pointer; font-family: inherit;
+  font-size: .98rem; font-weight: 700; color: #ecdfbe; border: 1px solid rgba(217,180,94,.28);
+  background: linear-gradient(180deg, rgba(70,58,40,.7), rgba(40,32,22,.7)); transition: filter .1s, transform .06s; }
+.dd-key:hover { filter: brightness(1.15); }
+.dd-key:active { transform: translateY(1px); filter: brightness(.95); }
+.dd-key-wide { flex: 1.5; font-size: .74rem; letter-spacing: .04em; }
+.dd-key-enter { color: #221703; border-color: rgba(255,240,200,.4); background: linear-gradient(180deg, #e5c069, #b8892f); }
 
 .dd-treasure { margin-bottom: 12px; }
 .dd-treasure-head { text-align: center; color: var(--gold); margin-bottom: 8px; letter-spacing: .04em; }
@@ -686,6 +842,11 @@ const CSS = `
   padding: 10px 12px; height: 168px; overflow-y: auto; font-family: 'Courier New', monospace;
   font-size: .84rem; line-height: 1.55; color: #cdbf9f; }
 .dd-logline { margin: 1px 0; white-space: pre-wrap; word-break: break-word; }
+.dd-log-dmg { color: #ef6a5a; font-weight: 700; }
+.dd-log-word { color: var(--gold); font-weight: 700; letter-spacing: .04em; }
+.dd-log-heal { color: #7fce7f; font-weight: 700; }
+.dd-log-coin { color: #ecc25a; font-weight: 700; }
+.dd-log-secret { color: #d9b6e8; font-style: italic; }
 
 .dd-toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 20;
   background: #2a2013; color: var(--parch); padding: 9px 18px; border-radius: 20px;
@@ -696,6 +857,8 @@ const CSS = `
 .dd-over-crest { font-size: 3rem; }
 .dd-over-title { font-size: 1.4rem; color: var(--gold); margin: 4px 0 6px; font-variant: small-caps; }
 .dd-over-cause { opacity: .7; font-style: italic; margin: 0 0 8px; }
+.dd-over-named { color: var(--gold); font-variant: small-caps; letter-spacing: .06em; font-size: 1.05rem;
+  margin: 0 0 8px; text-shadow: 0 1px 8px rgba(217,180,94,.3); }
 .dd-over-score { font-size: 2.6rem; color: #f0e4c8; font-weight: 700; letter-spacing: .03em; }
 .dd-over-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
 .dd-statcard { background: rgba(255,255,255,.04); border: 1px solid rgba(217,180,94,.2); border-radius: 9px; padding: 10px 6px; }
@@ -704,5 +867,13 @@ const CSS = `
 .dd-over-relics { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
 .dd-over-relic { font-size: .78rem; padding: 5px 9px; border-radius: 14px; background: rgba(217,180,94,.1);
   border: 1px solid rgba(217,180,94,.3); }
+.dd-over-badge { background: rgba(217,182,232,.1); border-color: rgba(217,182,232,.35); color: #e6d3f0; }
 .dd-over-actions { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+@media (max-width: 380px) {
+  .dd-key { height: 42px; font-size: .9rem; }
+  .dd-kb { gap: 5px; }
+  .dd-kb-row { gap: 4px; }
+  .dd-word { font-size: 1.1rem; min-height: 46px; }
+}
 `;

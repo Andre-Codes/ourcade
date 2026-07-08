@@ -34,7 +34,7 @@ export const LEVELS = [
       "The Entry Hall stretches ahead, its flagstones worn smooth by centuries of the lost.",
       "Somewhere far below, the dungeon breathes. Here in the Entry Hall it is only cold.",
     ],
-    ruleSpecs: ["any", "len>=4", "len>=5", "starts:S", "starts:B", "ends:T", "ends:E", "contains:R", "contains:A", "norepeat", "enemyletter"],
+    ruleSpecs: ["any", "len>=4", "len>=5", "len<=6", "starts:S", "starts:B", "ends:T", "ends:E", "contains:R", "contains:A", "norepeat", "enemyletter"],
     enemyIds: ["paper-rat", "cave-bat", "mold-slime", "shuffling-husk", "grave-spider"],
     bossId: "doorwarden",
   },
@@ -49,7 +49,7 @@ export const LEVELS = [
       "The Vowel Crypt is a chapel of cracked marble; every surface seems to be mid-word.",
       "In the Vowel Crypt the air tastes of unspoken letters.",
     ],
-    ruleSpecs: ["vowels==2", "vowels==1", "no:E", "no:A", "cframe", "vstart", "onevowel", "len>=5", "contains:O"],
+    ruleSpecs: ["vowels==2", "vowels==1", "no:E", "no:A", "cframe", "vstart", "onevowel", "len>=5", "len<=5", "contains:O"],
     enemyIds: ["mute-choirling", "restless-corpse", "pale-wraith", "hollow-monk", "echo-shade"],
     bossId: "mute-choir",
   },
@@ -64,7 +64,7 @@ export const LEVELS = [
       "Ink-stained goblins scatter as you enter the Library. They resent anything spelled correctly.",
       "The Goblin Library smells of mildew and spite. Somewhere a footnote is being defaced.",
     ],
-    ruleSpecs: ["tier:common", "tier:notcommon", "tier:obscure", "len>=6", "double", "contains:I", "no:S", "norepeat", "enemyletter"],
+    ruleSpecs: ["tier:common", "tier:notcommon", "tier:obscure", "len>=6", "len<=5", "len<=5&tier:notcommon", "double", "contains:I", "no:S", "norepeat", "enemyletter"],
     enemyIds: ["footnote-goblin", "book-imp", "ink-leech", "paper-wraith", "margin-gnome", "gluttonous-maw"],
     bossId: "footnote-king",
   },
@@ -79,7 +79,7 @@ export const LEVELS = [
       "In the Catacombs the walls are carved with hard, clacking letters and no soft ones.",
       "The Consonant Catacombs rattle with a language of edges.",
     ],
-    ruleSpecs: ["vowels<=1", "double", "rareletter", "contains:K", "len>=6", "freshletters", "no:E", "cframe", "tier:obscure", "no:E&double", "len>=6&cframe", "vowels<=1&len>=5"],
+    ruleSpecs: ["vowels<=1", "double", "rareletter", "contains:K", "len>=6", "len<=4", "len<=4&vowels<=1", "freshletters", "no:E", "cframe", "tier:obscure", "no:E&double", "len>=6&cframe", "vowels<=1&len>=5"],
     enemyIds: ["scrabble-wyrm", "apostrophe-wraith", "redaction-slime", "bone-golem", "consonant-crab", "famine-wraith"],
     bossId: "scrabble-wyrm-boss",
   },
@@ -94,7 +94,7 @@ export const LEVELS = [
       "The Final Lexicon towers over you, its shelves vanishing into dark far overhead.",
       "This is the Final Lexicon. The dungeon has been reading you the whole way down.",
     ],
-    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "contains:R", "double", "longer", "len>=7&no:E", "no:E&norepeat", "len>=6&contains:R", "tier:obscure&len>=6"],
+    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "contains:R", "double", "longer", "len<=4", "len<=4&rareletter", "len>=7&no:E", "no:E&norepeat", "len>=6&contains:R", "tier:obscure&len>=6"],
     enemyIds: ["lexicon-sentinel", "verbose-shade", "silent-index", "creeping-errata", "hunger-sentinel"],
     bossId: "unabridged-lich",
   },
@@ -323,7 +323,7 @@ export const BOSSES = [
     phases: [
       { hp: 11, ruleSpec: "vowels<=1", intent: "The Wyrm resists soft words. Keep the vowels out." },
       { hp: 12, ruleSpec: "rareletter", intent: "Its scales harden — only a rare letter bites now." },
-      { hp: 12, ruleSpec: "double", intent: "Hit the same note twice: a double letter ends it." },
+      { hp: 12, ruleSpec: "len<=4", intent: "Finish it with a single short, sharp tile-word (4 letters or fewer)." },
     ],
     victory: "The Scrabble Wyrm scatters into a hundred worthless tiles.",
     defeat: "The Wyrm tallies your letters, finds them wanting, and swallows you.",
@@ -453,6 +453,36 @@ export const FLAVOR = {
     "You've already spoken that word this run. The dungeon remembers.",
     "That word is spent — it won't answer twice.",
     "The dungeon has heard that one already. Find another.",
+  ],
+  // Category-aware repeats — chosen when a spent word belongs to an effect
+  // category, so replaying SWORD reads differently from replaying APPLE. {WORD}
+  // is swapped for the played word (like the effect flavor). Falls back to the
+  // generic `repeat` bucket for words with no category.
+  repeatWeapon: [
+    "That {WORD} has no edge left — you've already swung it.",
+    "The {WORD} is notched and spent. It won't cut twice.",
+    "You reach for the {WORD}, but its work here is done.",
+  ],
+  repeatBlunt: [
+    "The {WORD} is already dented from the last blow.",
+    "You've swung the {WORD} once. It's spent.",
+  ],
+  repeatFood: [
+    "No more {WORD} left in your sack.",
+    "You've already eaten the last {WORD}.",
+    "The {WORD} is gone — you finished it a moment ago.",
+  ],
+  repeatMagic: [
+    "That {WORD} is already discharged — the magic is spent.",
+    "The {WORD} fizzles. You've spoken its power once already.",
+  ],
+  repeatFire: [
+    "The {WORD} has already burned out.",
+    "Only cold ash remains of that {WORD}.",
+  ],
+  repeatHoly: [
+    "That {WORD} has already been offered. It answers only once.",
+    "The {WORD} is spent; the blessing does not repeat.",
   ],
   foodSealed: [
     "The food turns to ash before it reaches your lips.",
