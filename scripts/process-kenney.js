@@ -57,13 +57,20 @@ for (const [s, dir] of Object.entries(SUIT_DIR)) {
 // classic poker chips). Output named by color so the casino cabinets pick
 // denominations (e.g. chipImg("red")). Chips keep their full round shape, so no
 // trim — same as cards.
+//
+// Every denomination uses the two-tone "<Color>White" face + its `_border` variant
+// so the chips read as a matched set (white edge-spots on a colored body). "white"
+// has no two-tone twin, so it stays the plain white chip. "whiteblue" (an inverted
+// blue-on-white chip) is registered as an OPTIONAL 5th token for any cabinet that
+// wants a distinct fifth denomination — no game maps to it yet.
 const ch = (from, name) => ({ from: "chip", src: from, name, trim: false });
 const CHIPS = [
   ch("chipWhite_border", "white"),
   ch("chipRedWhite_border", "red"),
-  ch("chipBlue_border", "blue"),
-  ch("chipGreen_border", "green"),
+  ch("chipBlueWhite_border", "blue"),
+  ch("chipGreenWhite_border", "green"),
   ch("chipBlackWhite_border", "black"),
+  ch("chipWhiteBlue_border", "whiteblue"),
 ];
 
 // --- dice/: die shapes + d6 faces for the Dice Roller overhaul (§4) -------------
