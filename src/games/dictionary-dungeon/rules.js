@@ -97,6 +97,52 @@ function build(spec) {
     };
   }
 
+  // starts with a DIGRAPH (2+ letters): "startseq:KN" — for silent-letter themes
+  // (KN-, GN-, PS-, WR-). Difficulty tuned to the digraph's ENABLE answer count
+  // so the solvability gate matches (thin prefixes must be tagged hard).
+  m = s.match(/^startseq:([A-Za-z]{2,})$/);
+  if (m) {
+    const seq = m[1].toUpperCase();
+    // Answer-count buckets (verified): KN 212, PS 151, WR 193 → medium; GN 65 → hard.
+    const MEDIUM_SEQ = new Set(["KN", "PS", "WR"]);
+    const diff = MEDIUM_SEQ.has(seq) ? "medium" : "hard";
+    return {
+      displayText: `Play a word starting with ${seq}.`,
+      difficulty: diff,
+      tags: ["silent", "start", "sequence"],
+      test: (w) => w.startsWith(seq),
+    };
+  }
+
+  // contains a SUBSTRING (2+ letters): "has:MB" — for silent-letter themes
+  // (MB, GH, GN…). Common substrings are plentiful (easy); KN/WR are thinner.
+  m = s.match(/^has:([A-Za-z]{2,})$/);
+  if (m) {
+    const seq = m[1].toUpperCase();
+    // Verified counts: MB 1834, GH 1372, GN 918 → easy; KN 366, WR 379 → medium.
+    const EASY_SEQ = new Set(["MB", "GH", "GN"]);
+    const diff = EASY_SEQ.has(seq) ? "easy" : "medium";
+    return {
+      displayText: `Play a word containing ${seq}.`,
+      difficulty: diff,
+      tags: ["silent", "contains", "sequence"],
+      test: (w) => w.includes(seq),
+    };
+  }
+
+  // curated silent-letter rule: "silentletter" — accepts words whose spelling
+  // carries a classic silent letter (gn-/kn-/ps-/wr-/mn-/pn- openings, or mb/gh
+  // anywhere). ~3830 ENABLE answers, so comfortably solvable; tagged medium
+  // because such words FEEL harder to summon on the spot.
+  if (s === "silentletter") {
+    return {
+      displayText: "Play a word with a silent letter.",
+      difficulty: "medium",
+      tags: ["silent", "theme"],
+      test: (w) => /^(GN|KN|PS|WR|MN|PN)/.test(w) || /(MB|GH)/.test(w),
+    };
+  }
+
   // banned letter: "no:E"
   m = s.match(/^no:([A-Za-z])$/);
   if (m) {
@@ -189,15 +235,15 @@ function build(spec) {
     const want = m[1];
     let label, diff, test;
     if (want === "common") {
-      label = "Play a common word.";
+      label = "Play an everyday word (very common).";
       diff = "easy";
       test = (_w, ctx) => ctx?.tier === "common";
     } else if (want === "familiar") {
-      label = "Play a familiar (top-10k) word.";
+      label = "Play a fairly common word (in the top 10,000).";
       diff = "easy";
       test = (_w, ctx) => ctx?.tier === "common" || ctx?.tier === "familiar";
     } else if (want === "obscure") {
-      label = "Play an obscure word (outside the top 10,000).";
+      label = "Play a rare word (outside the top 10,000).";
       diff = "hard";
       test = (_w, ctx) => ctx?.tier === "obscure" || ctx?.tier === "goblin";
     } else if (want === "goblin") {
@@ -206,7 +252,7 @@ function build(spec) {
       test = (_w, ctx) => ctx?.tier === "goblin";
     } else {
       // notcommon: block top-2k
-      label = "Common words are blocked — play something less familiar.";
+      label = "No everyday words — play something less common.";
       diff = "medium";
       test = (_w, ctx) => ctx?.tier !== "common";
     }

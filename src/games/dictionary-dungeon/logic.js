@@ -108,12 +108,17 @@ function assembleRooms(level, levelIdx, dayKey, s) {
   let merchants = 0;
   let events = 0;
   const canExtra = levelIdx >= 1;
+  // Merchant frequency: a deterministic per-level ~42% intent (over the ~5
+  // eligible levels ⇒ ≈2 merchants/run, so coins matter). Placed BEFORE the fill
+  // loop and capped at one, so a level can never exceed a single merchant.
+  if (canExtra && s.rand() < 0.42 && types.length < n) {
+    types.push("merchant");
+    merchants++;
+  }
   while (types.length < n) {
     const r = s.rand();
-    if (canExtra && r < 0.16 && merchants < 1) {
-      types.push("merchant");
-      merchants++;
-    } else if (canExtra && r < 0.32 && events < 1) {
+    // (merchant is no longer placed here — guaranteed above)
+    if (canExtra && r < 0.24 && events < 1) {
       types.push("event");
       events++;
     } else if (r < 0.44 && traps < 1) {
@@ -124,29 +129,60 @@ function assembleRooms(level, levelIdx, dayKey, s) {
   }
   const order = s.shuffle(types);
 
-  // Assign rules (no exact repeat within the level) and enemies to monster/trap.
-  const rulePool = s.shuffle(level.ruleSpecs);
-  let ruleIdx = 0;
-  const nextRule = () => {
-    const spec = rulePool[ruleIdx % rulePool.length];
-    ruleIdx++;
-    return spec;
+  // Assign rules so EARLIER rooms are easier and LATER rooms harder (and later
+  // LEVELS skew harder overall). We only REORDER which of this level's already-
+  // validated ruleSpecs lands in which room, so every room's rule stays solvable.
+  const DIFF_RANK = { easy: 0, medium: 1, hard: 2 };
+  const rankOf = (spec) => DIFF_RANK[getRule(spec).difficulty] ?? 1;
+  // Sort the pool easy→hard, seeded within-tier order (deterministic, daily-varied).
+  const sortedPool = s
+    .shuffle(level.ruleSpecs)
+    .map((spec, k) => ({ spec, rank: rankOf(spec), k }))
+    .sort((a, b) => a.rank - b.rank || a.k - b.k)
+    .map((o) => o.spec);
+  const P = sortedPool.length;
+  const L = LEVELS.length;
+  const levelBias = L > 1 ? levelIdx / (L - 1) : 0; // 0 (first level) … 1 (last)
+  const usedSpecs = new Set();
+  // Nearest-unused spec outward from a target pool index (repeat only if the pool
+  // is exhausted — matching the old round-robin's fallback).
+  const pickAt = (idx) => {
+    for (let d = 0; d < P; d++) {
+      for (const cand of d === 0 ? [idx] : [idx + d, idx - d]) {
+        if (cand < 0 || cand >= P) continue;
+        const spec = sortedPool[cand];
+        if (!usedSpecs.has(spec)) { usedSpecs.add(spec); return spec; }
+      }
+    }
+    return sortedPool[Math.max(0, Math.min(P - 1, idx))];
   };
+  // Map room position i → pool index: in-level ramp blended with cross-level lift,
+  // plus a tiny seeded jitter (breaks within-tier ties, never crosses a tier).
+  const ruleForRoom = (i) => {
+    const posFrac = n > 1 ? i / (n - 1) : 0;
+    const blend = 0.65 * posFrac + 0.35 * levelBias;
+    const f = blend * (P - 1) + (s.rand() - 0.5);
+    const idx = Math.max(0, Math.min(P - 1, Math.round(f)));
+    return pickAt(idx);
+  };
+
   const enemyPool = s.shuffle(level.enemyIds);
   let enemyIdx = 0;
   const nextEnemy = () => enemyPool[enemyIdx++ % enemyPool.length];
 
   // For Entry Hall (levelIdx 0), the FIRST room's rule rotates by day so the
   // opening isn't always the same. rotateDaily over the level's rule pool gives
-  // a different opener each day while staying deterministic.
+  // a different opener each day while staying deterministic. (It stays easy —
+  // it's drawn from the Entry Hall pool — so room 0 is never forced hard.)
   const openerRule =
     levelIdx === 0 && dayKey ? rotateDaily(level.ruleSpecs, dayKey, DUNGEON_SALT ^ 0x0110) : null;
+  if (openerRule) usedSpecs.add(openerRule); // later rooms won't duplicate it
 
   return order.map((type, i) => {
     const room = {
       idx: i,
       type,
-      ruleSpec: i === 0 && openerRule ? openerRule : nextRule(),
+      ruleSpec: i === 0 && openerRule ? openerRule : ruleForRoom(i),
       intro: s.pick(level.intros),
     };
     if (type === "monster" || type === "trap") {
@@ -159,9 +195,16 @@ function assembleRooms(level, levelIdx, dayKey, s) {
       room.relicChoices = s.pickN(RELICS, 3).map((r) => r.id);
     }
     if (type === "merchant") {
-      // Seeded stock of 3 offers, priced with a mild per-level markup.
+      // Seeded stock of 4 offers, priced with a mild per-level markup. At least
+      // one is ALWAYS a healing potion so healing is reliably purchasable (coins
+      // become real survival triage); the other 3 are drawn from the rest.
       const markup = 1 + levelIdx * 0.15;
-      room.offers = s.pickN(MERCHANT_STOCK, 3).map((m) => ({
+      const HEAL_IDS = new Set(["buy-minor-heal", "buy-heal", "buy-greater-heal"]);
+      const heals = MERCHANT_STOCK.filter((m) => HEAL_IDS.has(m.id));
+      const others = MERCHANT_STOCK.filter((m) => !HEAL_IDS.has(m.id));
+      const guaranteedHeal = s.pick(heals);
+      const rest = s.pickN(others, 3);
+      room.offers = s.shuffle([guaranteedHeal, ...rest]).slice(0, 4).map((m) => ({
         ...m,
         price: Math.max(1, Math.round(m.basePrice * markup)),
         sold: false,
@@ -481,6 +524,10 @@ export function resolveTurn(state, rawWord, seedOverride) {
   // 4) narrate the hit
   out.logLines.push(`> You played ${w}.${tier === "goblin" ? " (a goblin word!)" : tier === "obscure" ? " (obscure)" : ""}`);
   if (effect && effect.text) out.logLines.push(`> ${effect.text}`);
+  // A categoryless word normally gets the plain "no special weight" line — but a
+  // RARE word (goblin/obscure) earns a flavor line that respects its rarity so
+  // an impressive strange word never reads as mundane.
+  else if (tier === "goblin" || tier === "obscure") out.logLines.push(`> ${flav("plainHitRare")}`);
   else out.logLines.push(`> ${flav("plainHit")}`);
   if (effect && effect.resisted) out.logLines.push(`> ${target.name} resists it.`);
 

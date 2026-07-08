@@ -84,6 +84,21 @@ export const LEVELS = [
     bossId: "scrabble-wyrm-boss",
   },
   {
+    id: "tomb-of-forgotten-letters",
+    name: "Tomb of Forgotten Letters",
+    accent: "#6f8f8a",
+    roomCount: 5,
+    tone: "a crypt of letters that are written but never spoken",
+    intros: [
+      "You enter the Tomb of Forgotten Letters. The walls are carved with words whose sounds died long ago.",
+      "In the Tomb, silent letters drift like dust — the K in KNIFE, the G in GNAW, all of them buried here.",
+      "The Tomb of Forgotten Letters holds its breath. Here, half of every word is a ghost.",
+    ],
+    ruleSpecs: ["has:MB", "has:GH", "has:GN", "silentletter", "startseq:KN", "startseq:WR", "startseq:PS", "silentletter&len>=5", "no:E", "double", "len>=6"],
+    enemyIds: ["gnawing-knight", "gnarled-gnome", "tomb-knocker", "ghoul", "silent-wraith"],
+    bossId: "psycho-pseudomancer",
+  },
+  {
     id: "final-lexicon",
     name: "The Final Lexicon",
     accent: "#c9a24a",
@@ -94,7 +109,7 @@ export const LEVELS = [
       "The Final Lexicon towers over you, its shelves vanishing into dark far overhead.",
       "This is the Final Lexicon. The dungeon has been reading you the whole way down.",
     ],
-    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "contains:R", "double", "longer", "len<=4", "len<=4&rareletter", "len>=7&no:E", "no:E&norepeat", "len>=6&contains:R", "tier:obscure&len>=6"],
+    ruleSpecs: ["len>=7", "no:E", "rareletter", "tier:obscure", "vowels==2", "norepeat", "double", "longer", "len<=4&rareletter", "len>=7&no:E", "no:E&norepeat", "len>=6&contains:R", "tier:obscure&len>=6"],
     enemyIds: ["lexicon-sentinel", "verbose-shade", "silent-index", "creeping-errata", "hunger-sentinel"],
     bossId: "unabridged-lich",
   },
@@ -275,6 +290,37 @@ export const ENEMIES = [
     intents: ["seal your pantry for 2 hearts", "grind shut every door to sustenance"],
     flavor: ["A Hunger Sentinel bars the way, and your provisions rot in an instant. No food heals until it falls."],
   },
+  // ── Tomb of Forgotten Letters (silent-letter theme) ─────────────────────────
+  {
+    id: "gnawing-knight", name: "Gnawing Knight", emoji: "🛡️", baseHP: 15, damage: 2,
+    kindTags: ["undead", "armor", "construct"], weaknessTags: ["blunt", "holy"], resistanceTags: ["piercing"],
+    intents: ["hew at you for 2 hearts", "grind its silent, rusted visor toward you"],
+    flavor: ["A Gnawing Knight rises in silent armor — the G in its name never spoken, only felt."],
+  },
+  {
+    id: "gnarled-gnome", name: "Gnarled Gnome", emoji: "🧌", baseHP: 13, damage: 1,
+    kindTags: ["goblin", "flesh"], weaknessTags: ["weapon", "fire"], resistanceTags: [],
+    intents: ["gnash for 1 heart", "gnarl its knotted fingers at your word"],
+    flavor: ["A Gnarled Gnome uncurls from a tomb-niche, gnawing on a forgotten G."],
+  },
+  {
+    id: "tomb-knocker", name: "Tomb Knocker", emoji: "⚰️", baseHP: 14, damage: 1,
+    kindTags: ["undead", "construct"], weaknessTags: ["blunt", "light"], resistanceTags: ["dark"],
+    intents: ["knock the breath from you for 1 heart", "rap a knuckle-bone against the lid, silent K and all"],
+    flavor: ["A Tomb Knocker taps from inside a sealed coffin — the K in KNOCK swallowed by stone."],
+  },
+  {
+    id: "ghoul", name: "Ghoul", emoji: "🧟", baseHP: 15, damage: 2,
+    kindTags: ["undead", "flesh"], weaknessTags: ["holy", "fire"], resistanceTags: ["poison", "dark"],
+    intents: ["maul you for 2 hearts", "drag itself closer through the crypt-dust"],
+    flavor: ["A Ghoul unfolds from a heap of gnawed pages, the GH of its name gone silent."],
+  },
+  {
+    id: "silent-wraith", name: "Silent Wraith", emoji: "👻", baseHP: 14, damage: 1,
+    kindTags: ["undead", "ghost", "spirit"], weaknessTags: ["holy", "light"], resistanceTags: ["weapon", "piercing", "poison"],
+    intents: ["wail soundlessly for 1 heart", "wring the air where a W should have been heard"],
+    flavor: ["A Silent Wraith seeps from the wall — the W in WRAITH written but never sounded."],
+  },
 ];
 
 export const ENEMY_BY_ID = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
@@ -339,6 +385,17 @@ export const BOSSES = [
     ],
     victory: "The Unabridged Lich closes around a word it cannot define — and is undone. The dungeon exhales.",
     defeat: "The Lich adds you to its index and reads on, unbothered.",
+  },
+  {
+    id: "psycho-pseudomancer", name: "The Psycho Pseudomancer", emoji: "🔮", damage: 2,
+    kindTags: ["undead", "spirit", "demon"], weaknessTags: ["holy", "light"], resistanceTags: ["dark", "poison"],
+    phases: [
+      { hp: 11, ruleSpec: "silentletter", intent: "The Pseudomancer speaks in silent letters. Answer in kind." },
+      { hp: 12, ruleSpec: "startseq:PS", intent: "It hisses a soundless P — begin your word with PS." },
+      { hp: 12, ruleSpec: "has:GH", intent: "For the last rite: a word carrying the ghost of GH." },
+    ],
+    victory: "The Psycho Pseudomancer tries to pronounce its own name, chokes on the silent letters, and unravels into unspoken sounds.",
+    defeat: "The Pseudomancer whispers a word with no sound, and the silence takes you.",
   },
 ];
 
@@ -433,6 +490,15 @@ export const FLAVOR = {
     "A workmanlike blow — nothing fancy, but it counts.",
     "The word connects, flat and true.",
   ],
+  // Shown for a RARE (obscure/goblin) word that has no effect category — it may
+  // carry no sword or torch, but its sheer strangeness is a weapon of its own.
+  plainHitRare: [
+    "A word this rare lands with uncanny weight.",
+    "The dungeon flinches — few would dare to speak that one.",
+    "No blade, no flame — but a word that strange cuts all on its own.",
+    "The stones don't recognize it, and that alone unsettles them.",
+    "Such an unusual word; the dark leans in to listen, then recoils.",
+  ],
   enemyDown: [
     "The creature comes apart into loose punctuation.",
     "It crumbles, unmade by a single well-chosen word.",
@@ -498,8 +564,9 @@ export const FLAVOR = {
 //   "maxheart" (raises max + current hearts). basePrice scales mildly by level
 //   in logic.js. Treasure rooms still give a FREE relic — merchants are the sink.
 export const MERCHANT_STOCK = [
-  { id: "buy-heal", kind: "heal", value: 2, basePrice: 8, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
-  { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 16, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
+  { id: "buy-minor-heal", kind: "heal", value: 1, basePrice: 4, name: "Minor Draught", emoji: "🩹", description: "Restore 1 heart." },
+  { id: "buy-heal", kind: "heal", value: 2, basePrice: 14, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
+  { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 24, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
   { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
   { id: "buy-hint", kind: "scroll", grant: "hint-scroll", basePrice: 6, name: "Hint Scroll", emoji: "📜", description: "Reveals a valid starting letter." },
   { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
@@ -598,7 +665,7 @@ export const EVENTS = [
     id: "ration-cache",
     bodyText: "A forgotten cache of preserved food sits in an alcove, impossibly untouched.",
     choices: [
-      { label: "Eat your fill", outcome: { heal: 3 }, resultText: "You feast on strange durian and hardtack. (+3 hearts)" },
+      { label: "Eat your fill", outcome: { heal: 3 }, resultText: "You feast on the preserved rations until your strength returns. (+3 hearts)" },
       { label: "Pocket it for coin", outcome: { coins: 9 }, resultText: "You'll sell it later. Someone always wants old rations. (+9 coins)" },
     ],
   },
