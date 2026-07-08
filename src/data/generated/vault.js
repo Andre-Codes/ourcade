@@ -2,6 +2,106 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-sandspiel",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand toy that quietly became a whole world",
+    "blurb": "Drop sand, water, fire, plants and lava and watch physics do its thing. It's the classic time-waster your school lab banned, now gorgeous.",
+    "url": "https://sandspiel.club",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:44.090Z"
+  },
+  {
+    "id": "gw-flightradar",
+    "kind": "site",
+    "era": "current",
+    "title": "A live map of nearly every plane in the sky right now",
+    "blurb": "Thousands of little aircraft crawling across the whole planet in real time. Click one and find out where a stranger 38,000 feet up is headed.",
+    "url": "https://flightradar24.com",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:43.903Z"
+  },
+  {
+    "id": "gw-true-size",
+    "kind": "site",
+    "era": "current",
+    "title": "Drag any country around a map to expose its real size",
+    "blurb": "Slide Greenland down to the equator and watch it shrink like a Tamagotchi that stopped eating. Every world map you saw in school was lying to you.",
+    "url": "https://thetruesize.com",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:43.795Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "An entire koala hidden inside 65,536 clicks",
+    "blurb": "Click to split squares into smaller squares until a fuzzy face slowly resolves out of the pixels. It's a screensaver, a stress toy, and a mild time sink.",
+    "url": "https://koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:43.598Z"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug, in a rug, and that is the entire website",
+    "blurb": "You open the page. There is a pug wrapped in a rug. Nothing else happens, nothing else needs to. The early web would be proud.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:43.502Z"
+  },
+  {
+    "id": "gw-evolution-trust",
+    "kind": "site",
+    "era": "current",
+    "title": "An interactive lesson on why people betray each other",
+    "blurb": "A tiny playable game-theory story that quietly explains trust, cheating, and why the whole internet feels the way it does. You'll close it a slightly better person.",
+    "url": "https://ncase.me/trust/",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:43.293Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A website where strangers send you a hug",
+    "blurb": "Just short video clips of people opening their arms to your screen. It's absurdly wholesome, it's from a simpler internet, and yeah, it kind of works.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:42.677Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password field that slowly loses its mind",
+    "blurb": "Include a Roman numeral. Now a chess move. Now today's moon phase. It keeps adding rules until you're negotiating with a website like it's a hostage situation.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:42.484Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that weaponizes your own attention span",
+    "blurb": "Click for Stimulation Points, then spend them on true-crime podcasts, a DVD logo bouncing in the corner, and pure sensory chaos. It's a cry for help you can idle.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:42.330Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A Street View car the whole internet is driving at once",
+    "blurb": "Strangers vote in real time on which way to turn, when to honk, and what local radio to tune. Democracy has never been this slow or this beautiful.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-07T07:20:42.161Z"
+  },
+  {
     "id": "gw-sad-trombone",
     "kind": "site",
     "era": "current",
@@ -42,16 +142,6 @@ export default [
     "archivedAt": "2026-07-03T07:14:54.601Z"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug. In a rug. And a timer judging you.",
-    "blurb": "That's the whole site — a pug bundled in a rug, plus a clock counting how long you've spent honoring it. No shop, no menu, no reason. Just vibes and a soft dog.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:54.191Z"
-  },
-  {
     "id": "gw-sito-synergy",
     "kind": "site",
     "era": "current",
@@ -60,36 +150,6 @@ export default [
     "url": "https://www.sito.org/synergy/",
     "source": "weird",
     "archivedAt": "2026-07-03T07:14:54.051Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "An endless stream of strangers hugging you",
-    "blurb": "Real people, on video, opening their arms just for you, forever. It's the exact opposite energy of the comment section you just crawled out of.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:53.947Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password that fights back",
-    "blurb": "Type a password against rules that keep multiplying — add a Roman numeral, a chess move, today's moon phase, a chicken you must keep alive. It's less a form field and more a boss fight.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:53.827Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "One car. The whole internet is driving it.",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio station to steer a single virtual car down real roads. It's a road trip where nobody's allowed to touch the wheel alone — democracy at 25 mph.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:53.715Z"
   },
   {
     "id": "g:slop-evader",
@@ -1027,26 +1087,6 @@ export default [
     "url": "https://thispersondoesnotexist.com",
     "source": "weird",
     "archivedAt": "2026-06-27T07:15:05.330Z"
-  },
-  {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "Click to reveal a hidden koala, one pixel-block at a time",
-    "blurb": "A weirdly soothing color puzzle that slowly resolves into a koala face. Lower-stim than Color Panic, somehow just as sticky.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:05.246Z"
-  },
-  {
-    "id": "gw-true-size",
-    "kind": "site",
-    "era": "current",
-    "title": "Drag any country across the globe to see how big it REALLY is",
-    "blurb": "Turns out the maps in your 4th-grade classroom were lying to you about Greenland. Yank it down to the equator and gasp.",
-    "url": "https://thetruesize.com",
-    "source": "weird",
-    "archivedAt": "2026-06-27T07:15:04.739Z"
   },
   {
     "id": "gw-cube-rule",

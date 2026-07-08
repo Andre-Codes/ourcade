@@ -3,74 +3,82 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "One car. The whole internet is driving it.",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio station to steer a single virtual car down real roads. It's a road trip where nobody's allowed to touch the wheel alone — democracy at 25 mph.",
+    "title": "A Street View car the whole internet is driving at once",
+    "blurb": "Strangers vote in real time on which way to turn, when to honk, and what local radio to tune. Democracy has never been this slow or this beautiful.",
     "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "backseat drivers: finally vindicated"
+    "foundNote": "Twitch-plays-a-minivan energy"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker game that weaponizes your own attention span",
+    "blurb": "Click for Stimulation Points, then spend them on true-crime podcasts, a DVD logo bouncing in the corner, and pure sensory chaos. It's a cry for help you can idle.",
+    "url": "https://neal.fun/stimulation-clicker"
   },
   {
     "id": "gw-password-game",
-    "title": "A password that fights back",
-    "blurb": "Type a password against rules that keep multiplying — add a Roman numeral, a chess move, today's moon phase, a chicken you must keep alive. It's less a form field and more a boss fight.",
-    "url": "https://neal.fun/password-game"
+    "title": "A password field that slowly loses its mind",
+    "blurb": "Include a Roman numeral. Now a chess move. Now today's moon phase. It keeps adding rules until you're negotiating with a website like it's a hostage situation.",
+    "url": "https://neal.fun/password-game",
+    "foundNote": "rage-quit factor: high"
   },
   {
     "id": "gw-nicest-place",
-    "title": "An endless stream of strangers hugging you",
-    "blurb": "Real people, on video, opening their arms just for you, forever. It's the exact opposite energy of the comment section you just crawled out of.",
+    "title": "A website where strangers send you a hug",
+    "blurb": "Just short video clips of people opening their arms to your screen. It's absurdly wholesome, it's from a simpler internet, and yeah, it kind of works.",
     "url": "https://thenicestplace.net",
-    "foundNote": "antidote to a bad day"
-  },
-  {
-    "id": "gw-sito-synergy",
-    "title": "A collaborative art grid that's been nesting since 1997",
-    "blurb": "Gridcosm stacks 3×3 grids inside 3×3 grids forever, each cell hand-drawn by whoever showed up that year. It's been quietly zooming inward since dial-up was the only-up.",
-    "url": "https://www.sito.org/synergy/",
-    "foundNote": "running since 1997"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug. In a rug. And a timer judging you.",
-    "blurb": "That's the whole site — a pug bundled in a rug, plus a clock counting how long you've spent honoring it. No shop, no menu, no reason. Just vibes and a soft dog.",
-    "url": "https://puginarug.com"
-  },
-  {
-    "id": "gw-koalas-to-the-max",
-    "title": "Four dots that slowly become a koala",
-    "blurb": "Move your mouse and each blob splits into four smaller blobs, resolving pixel by pixel into a hidden image. It's a screensaver, a fidget toy, and a tiny act of patience all at once.",
-    "url": "https://koalastothemax.com"
+    "foundNote": "emotional support .net"
   },
   {
     "id": "gw-invisible-cow",
-    "title": "Find the invisible cow by screaming louder",
-    "blurb": "A voice yells 'COW' louder as your cursor gets closer to an unseen cow on a blank screen. It is exactly as dumb and exactly as fun as it sounds. Moo accordingly.",
+    "title": "Find an invisible cow by how loud a voice yells 'COW'",
+    "blurb": "Drag your mouse around a blank screen while a booming narrator gets louder as you get warmer. That's the whole game. You will play it for twenty minutes.",
     "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume down first, roommate"
+    "foundNote": "headphones recommended, dignity not"
   },
   {
-    "id": "gw-lhc",
-    "title": "Has the Large Hadron Collider destroyed the world yet?",
-    "blurb": "A single-serving site that answers the year's most reassuring question. Spoiler: the answer is still NO, in comforting giant letters. Bookmark it for peace of mind.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "foundNote": "the world's calmest status page"
+    "id": "gw-museum-sounds",
+    "title": "A museum for sounds your tech doesn't make anymore",
+    "blurb": "Dial-up handshakes, cartridge blows, Windows startup chimes, cassette clunks. Press each one and feel a very specific decade come rushing back.",
+    "url": "https://savethesounds.info",
+    "foundNote": "pairs well with our Soundboard"
   },
   {
-    "id": "gw-drawing-garden",
-    "title": "Wherever you drag, flowers grow",
-    "blurb": "Click and hold and a lush garden blooms under your cursor while gentle music plays. No goal, no score — just you, becoming briefly responsible for spring.",
-    "url": "https://drawing.garden"
+    "id": "gw-evolution-trust",
+    "title": "An interactive lesson on why people betray each other",
+    "blurb": "A tiny playable game-theory story that quietly explains trust, cheating, and why the whole internet feels the way it does. You'll close it a slightly better person.",
+    "url": "https://ncase.me/trust/",
+    "foundNote": "smarter than it looks"
   },
   {
-    "id": "gw-street-view-wonders",
-    "title": "A curated tour of Street View's weirdest corners",
-    "blurb": "Someone combed the entire planet's roadside cameras so you can wander deserts, ice sheets, and strange little towns from your chair. It's armchair travel with a very long extension cord.",
-    "url": "https://neal.fun/wonders-of-street-view"
+    "id": "gw-pug-in-a-rug",
+    "title": "A pug, in a rug, and that is the entire website",
+    "blurb": "You open the page. There is a pug wrapped in a rug. Nothing else happens, nothing else needs to. The early web would be proud.",
+    "url": "https://puginarug.com",
+    "foundNote": "single-serving site, chef's kiss"
   },
   {
-    "id": "gw-sad-trombone",
-    "title": "A dedicated website for the sad trombone",
-    "blurb": "One big button. One perfect wah-wah-wahhh. That's it — the internet's official soundtrack for defeat, disappointment, and dropping the ball in Modem Defender.",
-    "url": "https://sadtrombone.com",
-    "foundNote": "keep it open during game nights"
+    "id": "gw-koalas",
+    "title": "An entire koala hidden inside 65,536 clicks",
+    "blurb": "Click to split squares into smaller squares until a fuzzy face slowly resolves out of the pixels. It's a screensaver, a stress toy, and a mild time sink.",
+    "url": "https://koalastothemax.com"
+  },
+  {
+    "id": "gw-true-size",
+    "title": "Drag any country around a map to expose its real size",
+    "blurb": "Slide Greenland down to the equator and watch it shrink like a Tamagotchi that stopped eating. Every world map you saw in school was lying to you.",
+    "url": "https://thetruesize.com",
+    "foundNote": "the map projection scandal"
+  },
+  {
+    "id": "gw-flightradar",
+    "title": "A live map of nearly every plane in the sky right now",
+    "blurb": "Thousands of little aircraft crawling across the whole planet in real time. Click one and find out where a stranger 38,000 feet up is headed.",
+    "url": "https://flightradar24.com"
+  },
+  {
+    "id": "gw-sandspiel",
+    "title": "A falling-sand toy that quietly became a whole world",
+    "blurb": "Drop sand, water, fire, plants and lava and watch physics do its thing. It's the classic time-waster your school lab banned, now gorgeous.",
+    "url": "https://sandspiel.club"
   }
 ];
