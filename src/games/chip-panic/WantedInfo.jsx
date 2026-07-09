@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { HAND_NAME } from "../poker/handEval.js";
-import { wantedHint, currentAnte, LANE_TIMER } from "./logic.js";
+import { wantedHint, currentAnte } from "./logic.js";
 
-/* WantedInfo — a self-contained "rules status" popup for High Card Bust, opened by
+/* WantedInfo — a self-contained "rules status" popup for Deadlock Poker, opened by
    tapping the WANTED bar. Read-only info panel (not a yes/no), modeled on
    ConfirmDialog's backdrop + click-outside + Escape structure with its own scoped
    .hcbi-* styles injected once.
@@ -115,7 +115,7 @@ export default function WantedInfo({ open, game, onClose }) {
         className="hcbi-box"
         role="dialog"
         aria-modal="true"
-        aria-label="High Card Bust — rules status"
+        aria-label="Deadlock Poker — rules status"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <h2>WANTED</h2>
@@ -143,7 +143,7 @@ export default function WantedInfo({ open, game, onClose }) {
           <p className="hcbi-sec-h">Run status</p>
           <div className="hcbi-lines">
             <div className="hcbi-line"><span>Ante to open a lane</span><span className="v">{currentAnte(game)} chips</span></div>
-            <div className="hcbi-line"><span>Lane timer ⏱ · feed or it resolves</span><span className="v">{LANE_TIMER} draws</span></div>
+            <div className="hcbi-line"><span>Bust · below Two Pair</span><span className="v">locks the lane</span></div>
             <div className="hcbi-line"><span>Jackpot · SF / Royal</span><span className="v jack">+1000 / +2500</span></div>
           </div>
         </div>

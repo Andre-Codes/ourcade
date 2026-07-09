@@ -12,7 +12,7 @@ import HelpPanel from "./chip-panic/HelpPanel.jsx";
 import { HAND_NAME } from "./poker/handEval.js";
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace,
-  TIERS, ANTE_TIER, currentAnte, laneStake, NO_RAISE, START_CHIPS, START_SAVE_TOKENS,
+  TIERS, ANTE_TIER, currentAnte, laneStake, NO_RAISE, START_CHIPS,
   serializeGame, hydrateGame, isSaveable,
   devStackBag, DEV_STRAIGHT_FLUSH, DEV_ROYAL_FLUSH,
 } from "./chip-panic/logic.js";
@@ -20,22 +20,20 @@ import {
 const SAVE_KEY = "chip-panic:save"; // ourcade:-prefixed by store.js
 
 /* ─────────────────────────────────────────────────────────────────────────
-   HIGH CARD BUST — poker solitaire with a chip economy + rotating objectives.
+   DEADLOCK POKER — poker solitaire with a chip economy + rotating objectives.
+   (Internal id / save keys stay "chip-panic"; formerly titled "High Card Bust".)
 
    Draw ONE card into the tray, then tap a lane to drop it (or spend your discard).
-   Opening an empty lane costs a Blue ANTE (1 chip). Each open lane carries a
-   RESOLUTION TIMER (⏱): feeding a lane refreshes it, but a NEGLECTED lane force-
-   resolves when the clock runs out — with whatever cards it holds. A lane resolves
-   three ways: a HIGH CARD busts + locks it (ante lost); ANY PAIR is a defensive
-   SAVE that clears the lane (0 points) — but ONLY if you spend a SAVE TOKEN, and
-   with none left a pair busts + locks like a high card; TWO PAIR or better truly
-   SCORES (points + chips back, the chips SCALED by hand strength — weak hands earn
-   little, big hands pay a premium — and refreshes the discard). You start with 2
-   save tokens and earn one back every 5th scoring hand (cap 4). Raise above the
-   ante (Red/Gold/Black) for a multiplier — raises need stronger hands and expire.
-   Chase the WANTED hand up top for bonus points + chips and build a streak (resets
-   when a lane busts). The run ends when all lanes lock — or you're out of chips
-   with nowhere legal to place. Score feeds the Arcade Score Standard board.
+   Opening an empty lane costs a Blue ANTE that RISES STEEPLY over the run, so chips
+   stay scarce — running out of chips to open lanes is the usual way a run ends. A
+   lane resolves at 5 cards two ways: BELOW TWO PAIR (a High Card OR any Pair) BUSTS
+   + LOCKS the lane (ante lost, streak resets — a bust costs a lane AND its ante);
+   TWO PAIR or better SCORES (points + chips back, the chips SCALED by hand strength
+   — weak hands earn little, big hands pay a premium — and refreshes the discard).
+   Raise above the ante (Red/Gold/Black) for a multiplier — raises need stronger
+   hands and expire. Chase the WANTED hand up top for bonus points + chips and build
+   a streak (resets when a lane busts). The run ends when all lanes lock — or you're
+   out of chips with nowhere legal to place. Score feeds the Arcade Score board.
 
    Turn-based: engine state lives in plain React state. The lane resolution timer
    ticks per DRAW (not wall-clock); Panic mode adds a per-card placement clock.
@@ -47,7 +45,6 @@ const GAME_ID = "chip-panic";
 const WANTED_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/wanted-badge.webp";
 const ANTE_UP_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/ante-up.webp";
 const DISCARD_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/discard.webp";
-const SAVE_TOKEN_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/save-token.webp";
 const JACKPOT_BADGE = (import.meta.env.BASE_URL || "/") + "games/chip-panic/jackpot-badge.webp";
 const LOGO_IMG = (import.meta.env.BASE_URL || "/") + "games/chip-panic/logo.webp";
 const SCREEN = { TITLE: "title", PLAY: "play", OVER: "over" };
@@ -78,9 +75,6 @@ const HCB_CSS = `
   .hcb-stat { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: #c9b3ec; white-space: nowrap; }
   .hcb-stat b { color: #ffd23f; font-size: 1.15rem; vertical-align: -.06em; }
   .hcb-stat.chips b { color: #3fffd0; text-shadow: 0 0 8px rgba(63,255,208,.45); }
-  .hcb-stat.saves { display: inline-flex; align-items: center; gap: 4px; }
-  .hcb-stat.saves .ic { width: 16px; height: 16px; display: block; filter: drop-shadow(0 0 6px rgba(255,180,84,.5)); }
-  .hcb-stat.saves b { color: #ffb454; text-shadow: 0 0 8px rgba(255,180,84,.4); }
   .hcb-stat.mode b { color: #bf5af2; font-size: .72rem; vertical-align: 0; }
 
   /* WANTED banner — the rotating objective. Fixed width so the hand name never
@@ -237,7 +231,6 @@ const HCB_CSS = `
   .hcb-lane.expiring .hcb-slots { animation: hcb-pulse .7s ease-in-out infinite; }
   @keyframes hcb-pulse { 0%,100% { box-shadow: 0 0 6px var(--tier) inset; } 50% { box-shadow: 0 0 20px var(--tier) inset, 0 0 12px var(--tier); } }
   .hcb-lane.scored .hcb-slots { border-color: #3fffd0; border-style: solid; box-shadow: 0 0 22px rgba(63,255,208,.55); }
-  .hcb-lane.saved .hcb-slots { border-color: #ffb454; border-style: solid; box-shadow: 0 0 16px rgba(255,180,84,.4); }
   .hcb-lane.busted .hcb-slots, .hcb-lane.locked .hcb-slots { border-color: #555; border-style: solid; background: rgba(0,0,0,.42); cursor: default; box-shadow: none; }
   .hcb-lane.locked .hcb-card { filter: grayscale(1) brightness(.5); }
   .hcb-lane.locked .hcb-slots::after {
@@ -267,17 +260,6 @@ const HCB_CSS = `
   .hcb-slots .hcb-stake .amt { display: inline-flex; align-items: center; gap: 3px; font-family: 'Press Start 2P',monospace; font-size: .64rem; letter-spacing: .02em; color: #ffd23f; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
   .hcb-slots .hcb-stake .amt img { width: 13px; height: 13px; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
   .hcb-slots .hcb-stake .mult { font-family: 'Press Start 2P',monospace; font-size: .52rem; letter-spacing: .02em; color: #3fffd0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
-
-  /* Lane RESOLUTION timer — draws left before the lane force-resolves. Pinned to the
-     top-left of the slots so it clears the stake readout (top-center) and the cards
-     (which grow upward). Turns red + pulses when urgent. This is the core pressure. */
-  .hcb-slots .hcb-timer {
-    position: absolute; top: 2px; left: 3px; z-index: 3; pointer-events: none;
-    font-family: 'Press Start 2P',monospace; font-size: .5rem; letter-spacing: .02em;
-    color: #8fb8ff; text-shadow: 0 1px 3px rgba(0,0,0,.85);
-    background: rgba(0,0,0,.35); border-radius: 4px; padding: 2px 3px;
-  }
-  .hcb-slots .hcb-timer.urgent { color: #ff6a6a; animation: hcb-pulse .6s ease-in-out infinite; }
 
   /* Double-tap arm: first tap greenlights the lane, a second tap places. */
   .hcb-lane.armed .hcb-slots { border-color: #3fffd0; border-style: solid; box-shadow: 0 0 14px rgba(63,255,208,.5) inset, 0 0 8px rgba(63,255,208,.35); }
@@ -428,7 +410,6 @@ export default function ChipPanic() {
   const [badgeOk, setBadgeOk] = useState(true); // false once the custom badge image fails to load
   const [anteImgOk, setAnteImgOk] = useState(true); // false once the ante-up icon fails to load
   const [discardImgOk, setDiscardImgOk] = useState(true); // false once the discard icon fails to load
-  const [saveTokenImgOk, setSaveTokenImgOk] = useState(true); // false once the save-token icon fails to load
   const [jackBadgeOk, setJackBadgeOk] = useState(true); // false once the jackpot badge fails to load
   const [anteUp, setAnteUp] = useState(null); // { amount, on } — "ANTE UP" announcement
   const [jackpot, setJackpot] = useState(null); // { hand, pts, chips, on } — JACKPOT celebration
@@ -595,17 +576,9 @@ export default function ChipPanic() {
         playSfx("card-fan-1"); // the lane's cards fan out as it clears on a successful hand
         playSfxVariant("chips-stack", [1, 3]);
         setFlash((f) => ({ ...f, [lane]: "scored" }));
-      } else if (result.savedByToken) {
-        // A pair rescued by spending a save token (resolution.saved is true AND a token
-        // was available). A token-less pair falls through to the bust branch below.
-        showFeed({ hand: res.hand.name, math: "", why: "pair saved · 1 token used", kind: "save", claim: null });
-        if (geo && res.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, res.chipsLost, geo.laneX, geo.laneMidY);
-        setFlash((f) => ({ ...f, [lane]: "saved" }));
       } else {
-        // bust — a high card, or a pair with no save tokens left
-        const why = result.pairBusted
-          ? "no save left · lane locked"
-          : (result.streakReset ? "high card · streak lost" : "high card · lane locked");
+        // bust — the lane resolved below Two Pair (a high card OR any pair)
+        const why = result.streakReset ? "below two pair · streak lost" : "below two pair · lane locked";
         showFeed({ hand: res.hand.name, math: "BUST", why, kind: "bad", claim: null });
         if (geo) {
           spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 420 });
@@ -617,38 +590,6 @@ export default function ChipPanic() {
       flashTimer.current = setTimeout(() => setFlash({}), 700);
     } else if (result.expired && result.expired.length) {
       showFeed({ hand: "RAISE EXPIRED", math: "", why: "ran out of draws", kind: "bad", claim: null });
-    }
-
-    // Timed-out lanes: any OPEN lane whose resolution timer expired on this draw
-    // force-resolved with whatever it held. Flash each; surface the most notable one
-    // in the feed only if the placed lane didn't already own the feed this turn.
-    const timeouts = result.timeouts || [];
-    if (timeouts.length) {
-      const flashUpdates = {};
-      for (const t of timeouts) {
-        const tr = t.resolution;
-        flashUpdates[t.laneIndex] = tr.scored ? "scored" : t.savedByToken ? "saved" : "busted";
-        if (!reduceMotion.current) {
-          const geo = fxFromLane(t.laneIndex);
-          if (geo) {
-            if (tr.scored && tr.chipsReturned > 0) spawnChipsTo(TIERS[ANTE_TIER].color, tr.chipsReturned, geo.laneX, geo.laneMidY, geo.hudX, geo.hudY);
-            else { spawn({ kind: "flash", fxPct: geo.lanePct, ttl: 380 }); if (tr.chipsLost > 0) spawnFallingChips(TIERS[ANTE_TIER].color, tr.chipsLost, geo.laneX, geo.laneMidY); }
-          }
-        }
-      }
-      setFlash((f) => ({ ...f, ...flashUpdates }));
-      clearTimeout(flashTimer.current);
-      flashTimer.current = setTimeout(() => setFlash({}), 700);
-      // Feed: prefer a timed-out BUST (the tension moment); else a timed-out score.
-      if (!res) {
-        const bust = timeouts.find((t) => t.bustNow);
-        const t = bust || timeouts[0];
-        const tr = t.resolution;
-        if (tr.scored) showFeed({ hand: tr.hand.name, math: `+${tr.points}`, why: "lane timed out", kind: "win", chips: tr.chipsReturned, claim: null });
-        else if (t.savedByToken) showFeed({ hand: tr.hand.name, math: "", why: "timed out · pair saved", kind: "save", claim: null });
-        else showFeed({ hand: tr.hand.name, math: "TIMED OUT", why: "lane locked", kind: "bad", claim: null });
-      }
-      playSfxVariant("card-place", [1, 3]);
     }
 
     // A Wanted claim pulses the banner + chimes (the reward text shows in the panel).
@@ -877,14 +818,6 @@ export default function ChipPanic() {
         <span className="hcb-stat">SCORE <b>{(g?.score || 0).toLocaleString()}</b></span>
         <span className={`hcb-stat chips${hudBump ? " bump" : ""}`} ref={chipHudRef}>CHIPS <b>{g?.chips ?? START_CHIPS}</b></span>
         {screen === SCREEN.PLAY && (
-          <span className="hcb-stat saves" aria-label={`Save tokens: ${g?.saveTokens ?? START_SAVE_TOKENS}`}>
-            {saveTokenImgOk
-              ? <img className="ic" src={SAVE_TOKEN_IMG} alt="saves" draggable="false" onError={() => setSaveTokenImgOk(false)} />
-              : <span className="ic">🛟</span>}
-            <b>{g?.saveTokens ?? START_SAVE_TOKENS}</b>
-          </span>
-        )}
-        {screen === SCREEN.PLAY && (
           <span className="hcb-stat mode"><b>{mode === MODE.PANIC ? "PANIC" : "HIGH STAKES"}</b></span>
         )}
       </div>
@@ -984,10 +917,7 @@ export default function ChipPanic() {
               const canOpen = empty && (g.chips >= ante);
               const cant = empty && !canOpen && !locked;
               const betted = !!committed || sel !== NO_RAISE;
-              // Lane resolution timer: live only on an open, non-empty, unlocked lane.
-              const laneTimer = anted && !locked && lane.length > 0 ? g.timer[l] : 0;
-              const timerUrgent = laneTimer > 0 && laneTimer <= 3;
-              const expiring = (committed && committed.draws <= 1) || timerUrgent;
+              const expiring = committed && committed.draws <= 1; // raise about to expire
               const stake = laneStake(g, l); // chips committed + multiplier in play (null if none)
               const isArmed = armed === l;
               const fl = flash[l];
@@ -1002,14 +932,6 @@ export default function ChipPanic() {
                   style={{ "--tier": glow(tier.color) }}
                 >
                   <div className="hcb-slots" onPointerDown={() => onLane(l)}>
-                    {laneTimer > 0 && (
-                      <span
-                        className={`hcb-timer ${timerUrgent ? "urgent" : ""}`}
-                        aria-label={`Lane resolves in ${laneTimer} draws`}
-                      >
-                        ⏱ {laneTimer}
-                      </span>
-                    )}
                     {lane.map((card, i) => (
                       <span className="hcb-card" key={card.id + i}>
                         <img src={cardImg(card.id)} alt={card.id} draggable="false" />
@@ -1082,13 +1004,13 @@ export default function ChipPanic() {
       {screen === SCREEN.TITLE && (
         <div className="hcb-overlay">
           {logoOk
-            ? <img className="hcb-logo" src={LOGO_IMG} alt="High Card Bust" draggable="false" onError={() => setLogoOk(false)} />
-            : <h1>HIGH CARD BUST</h1>}
+            ? <img className="hcb-logo" src={LOGO_IMG} alt="Deadlock Poker" draggable="false" onError={() => setLogoOk(false)} />
+            : <h1>DEADLOCK POKER</h1>}
           <div className="sub">poker solitaire · push your luck · tap HELP for the rules</div>
           {/* Only High Stakes is available for now. Classic + Panic land later. */}
           <div className="hcb-modes">
             <button className="hcb-mode on" onPointerDown={() => { setMode(MODE.HIGH_STAKES); lsSet("chip-panic:mode", MODE.HIGH_STAKES); }}>
-              HIGH STAKES<small>ante · raises · limited saves</small>
+              HIGH STAKES<small>rising ante · raises · bust below two pair</small>
             </button>
           </div>
           <button className="hcb-btn" onPointerDown={() => setHelpOpen(true)}>HELP · HOW TO PLAY</button>

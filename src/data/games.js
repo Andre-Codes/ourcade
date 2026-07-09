@@ -325,8 +325,8 @@ export const GAMES = [
   {
     id: "chip-panic",
     original: true,
-    title: "High Card Bust",
-    blurb: "Poker solitaire, push-your-luck. Open a lane with a chip ante, then fill it to five: TWO PAIR or better truly scores, any pair only saves the lane (no points, ante gone), and a HIGH CARD locks it for good. Raise for a multiplier, chase the rotating WANTED hand for bonus chips and points, and build a streak — all four lanes locked ends the run.",
+    title: "Deadlock Poker",
+    blurb: "Poker solitaire, push-your-luck. Open a lane with a chip ante, then fill it to five: TWO PAIR or better scores and pays chips scaled by the hand — anything less (a high card OR any pair) BUSTS and locks the lane for good. The ante climbs steeply, so chips stay scarce and every bust stings twice. Raise for a multiplier, chase the rotating WANTED hand for bonus chips and points, and build a streak — running out of chips or locking every lane ends the run.",
     emoji: "🎴",
     accent: "#bf5af2",
     tags: ["cards", "poker", "casino", "solo"],

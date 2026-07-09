@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-/* HelpPanel — a self-contained "how to play" modal for High Card Bust, opened from
+/* HelpPanel — a self-contained "how to play" modal for Deadlock Poker, opened from
    the title screen's HELP button. Read-only reference (not a yes/no), modeled on
    WantedInfo/ConfirmDialog: backdrop + click-outside + Escape close, with its own
    scoped .hcbh-* styles injected once. Static content (no game state) — the
@@ -110,18 +110,19 @@ export default function HelpPanel({ open, onClose }) {
         className="hcbh-box"
         role="dialog"
         aria-modal="true"
-        aria-label="High Card Bust — how to play"
+        aria-label="Deadlock Poker — how to play"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <h2>HOW TO PLAY</h2>
-        <p className="hcbh-tag">Build poker hands across your lanes — beat the clock, chase points.</p>
+        <p className="hcbh-tag">Build poker hands across four lanes — make two pair or bust.</p>
 
         <div className="hcbh-sec">
           <p className="hcbh-sec-h">The goal</p>
           <p className="hcbh-p">
-            Open lanes and fill each with <b>5 cards</b> — a poker hand. Strong hands pay big;
-            weak ones pay little. You start with <b>12 chips</b>; the run ends when the board
-            locks up or you run out of room.
+            Open lanes and fill each with <b>5 cards</b> — a poker hand. Reach <b>Two Pair or
+            better</b> to score; anything less <b>busts</b> the lane. You start with <b>12 chips</b>,
+            and the ante to open lanes <b>climbs steeply</b> — the run ends when you can't afford to
+            keep playing or the whole board locks up.
           </p>
         </div>
 
@@ -130,38 +131,25 @@ export default function HelpPanel({ open, onClose }) {
           <p className="hcbh-p">
             One card is drawn into your tray. <b>Tap a lane twice</b> to drop it there (the first
             tap greenlights the lane), or spend your one <b>discard</b> to throw it away. Opening
-            an empty lane costs the <b>ante</b> (starts at 1 chip, rises over the run).
+            an empty lane costs the <b>ante</b> (starts at 1 chip, rises fast over the run).
           </p>
         </div>
 
         <div className="hcbh-sec">
-          <p className="hcbh-sec-h">The lane timer (⏱)</p>
-          <p className="hcbh-p">
-            Every open lane has a <b>countdown</b>. Feeding a lane <b>refreshes</b> its timer, but
-            a <b>neglected</b> lane runs out and <b>force-resolves</b> with whatever cards it holds
-            — so a rushed lane often ends weak. Keep few lanes going and feed the urgent one.
-          </p>
-        </div>
-
-        <div className="hcbh-sec">
-          <p className="hcbh-sec-h">When a lane resolves (filled or timed out)</p>
+          <p className="hcbh-sec-h">When a lane fills (5 cards)</p>
           <div className="hcbh-res">
             <div className="hcbh-row win">
               <span className="k">SCORE</span>
               <span>Two Pair or better — points scored, ante back + profit <b>scaled by hand</b> (bigger hands pay more), discard refreshes.</span>
             </div>
-            <div className="hcbh-row save">
-              <span className="k">SAVE</span>
-              <span>Any single Pair, <b>if you have a save token</b> — the lane clears (0 pts, ante lost) and spends one token.</span>
-            </div>
             <div className="hcbh-row bust">
               <span className="k">BUST</span>
-              <span>High Card — or a Pair with no save tokens left — the lane locks for good, ante + any raise lost, streak resets.</span>
+              <span>Below Two Pair — a High Card <b>or any Pair</b> — the lane locks for good, ante + any raise lost, streak resets.</span>
             </div>
           </div>
           <p className="hcbh-p" style={{ marginTop: 8 }}>
-            You start each run with <b>2 save tokens</b> and earn <b>+1 every 5th scoring
-            hand</b> (max 4). Run out and pairs start busting — watch the <b>SAVES</b> count up top.
+            A bust is doubly punishing: you lose the lane <b>and</b> the ante you paid for it. With
+            chips scarce, keep pushing lanes toward <b>two pair or better</b>.
           </p>
         </div>
 
@@ -185,7 +173,7 @@ export default function HelpPanel({ open, onClose }) {
             <b>Chip payout.</b> A scoring lane returns your <b>ante + a profit scaled by the hand</b>
             (Two Pair +1 … Full House +6 … Royal +20). A raise that lands adds its own return on top
             (shown above). The number over each lane is at least the floor payout — it climbs with a
-            stronger hand. A raise that misses forfeits its stake; a bust or save loses everything staked.
+            stronger hand. A raise that misses forfeits its stake; a bust loses everything staked.
           </p>
         </div>
 

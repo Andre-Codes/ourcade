@@ -16,12 +16,11 @@
 import {
   newGame, placeCard, useDiscard, burnCard, cycleRaise, canRaise, canPlace, isGameOver,
   pickWanted, streakBonus, completesWanted, anteFor, currentAnte, blackjackTotal,
-  HAND_POINTS, TIERS, START_CHIPS, BASE_ANTE, ANTE_PROFIT, SCORE_HANDS_PER_ANTE,
+  HAND_POINTS, TIERS, START_CHIPS, BASE_ANTE, ANTE_PROFIT, ANTE_STEP, SCORE_HANDS_PER_ANTE,
   WANTED_HITS_PER_ANTE, BET_EXPIRY_DRAWS, NO_RAISE, LANES,
   WANTED_CONDS, WANTED_COND_REWARDS, JACKPOT_HANDS, JACKPOT_REWARDS,
-  START_SAVE_TOKENS, SCORES_PER_SAVE_TOKEN, SAVE_TOKEN_CAP,
   serializeGame, hydrateGame, SAVE_VERSION,
-  LANE_TIMER, ANTE_PROFIT_BY_HAND, MIN_ANTE_PROFIT, anteProfitFor, laneStake,
+  ANTE_PROFIT_BY_HAND, MIN_ANTE_PROFIT, anteProfitFor, laneStake,
 } from "../src/games/chip-panic/logic.js";
 import { HAND } from "../src/games/poker/handEval.js";
 
@@ -90,8 +89,8 @@ console.log("Ante / opening lanes:");
   eq("0 chips: empty lane NOT placeable", canPlace({ ...g, tray: card("3C") }, 1), false);
 }
 
-// ── three-way resolution ──────────────────────────────────────────────────────
-console.log("Resolution — bust / save / score:");
+// ── two-way resolution: score (Two Pair+) vs bust (below it) ──────────────────
+console.log("Resolution — score / bust:");
 {
   // High card → bust + lock, no score, ante lost.
   const g = noWanted(newGame());
@@ -104,20 +103,19 @@ console.log("Resolution — bust / save / score:");
   eq("ante lost (down 1)", state.chips, START_CHIPS - BASE_ANTE);
 }
 {
-  // Any pair → SAVE: clears the lane, 0 points, ante lost, NO discard refresh.
+  // Any pair → BUST + LOCK (no save token system): 0 points, ante lost, lane kept.
   let g = noWanted(newGame());
-  g = { ...g, discard: false }; // pre-spent, to prove a save does NOT refresh
   const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair of kings
-  eq("pair is a save", result.resolution.saved, true);
+  eq("pair busts", result.resolution.bust, true);
   eq("pair does NOT score", result.resolution.scored, false);
-  eq("save: 0 points", result.resolution.points, 0);
-  eq("save: lane cleared", state.lanes[0].length, 0);
-  eq("save: not locked", state.locked[0], false);
-  eq("save: discard NOT refreshed", state.discard, false);
-  eq("save: ante lost", state.chips, START_CHIPS - BASE_ANTE);
-  // fresh game has tokens → the pair is honored by spending one
-  eq("save: flagged savedByToken", result.savedByToken, true);
-  eq("save: spent one token", state.saveTokens, START_SAVE_TOKENS - 1);
+  eq("pair bust: 0 points", result.resolution.points, 0);
+  eq("pair bust: lane locked", state.locked[0], true);
+  eq("pair bust: lane NOT cleared", state.lanes[0].length, 5);
+  eq("pair bust: ante lost", state.chips, START_CHIPS - BASE_ANTE);
+  eq("pair bust: bustNow flag", result.bustNow, true);
+  // handStats tallies the pair by its ACTUAL rank (PAIR), not as HIGH_CARD.
+  eq("pair tallies as PAIR", state.handStats[HAND.PAIR], 1);
+  eq("pair not tallied as HIGH_CARD", !!state.handStats[HAND.HIGH_CARD], false);
 }
 {
   // Two pair → SCORE: base points, lane clears, discard refreshes, ante returns+profit.
@@ -139,74 +137,21 @@ console.log("Resolution — bust / save / score:");
   eq("flush scores base", result.resolution.points, HAND_POINTS[HAND.FLUSH]);
 }
 
-// ── save tokens — the pair-save is a LIMITED resource ─────────────────────────
-console.log("Save tokens:");
+// ── pairs bust (no save tokens) ───────────────────────────────────────────────
+console.log("Pairs bust the board:");
 {
-  // A fresh run starts with the full token pool.
-  const g = noWanted(newGame());
-  eq("fresh run has START_SAVE_TOKENS", g.saveTokens, START_SAVE_TOKENS);
-}
-{
-  // Pair WITH a token → honored save: clears, not locked, one token spent.
-  const g = noWanted(newGame());
-  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
-  eq("token pair: savedByToken", result.savedByToken, true);
-  eq("token pair: not pairBusted", result.pairBusted, false);
-  eq("token pair: token spent", state.saveTokens, START_SAVE_TOKENS - 1);
-  eq("token pair: lane cleared", state.lanes[0].length, 0);
-  eq("token pair: not locked", state.locked[0], false);
-}
-{
-  // Pair with ZERO tokens → BUSTS + LOCKS like a high card, while resolveLane stays pure.
-  let g = noWanted({ ...newGame(), saveTokens: 0, streak: 3 });
-  const chipsBefore = g.chips;
-  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair, no token
-  eq("token-less pair: pairBusted flag", result.pairBusted, true);
-  eq("token-less pair: not savedByToken", !!result.savedByToken, false);
-  eq("token-less pair: resolveLane still reports saved (pure)", result.resolution.saved, true);
-  eq("token-less pair: resolveLane bust stays false (pure)", result.resolution.bust, false);
-  eq("token-less pair: lane LOCKED", state.locked[0], true);
-  eq("token-less pair: cards kept for cracked visual", state.lanes[0].length, 5);
-  eq("token-less pair: streak reset", state.streak, 0);
-  eq("token-less pair: streakReset flag", result.streakReset, true);
-  eq("token-less pair: ante lost (down 1)", state.chips, chipsBefore - BASE_ANTE);
-  eq("token-less pair: tokens never go negative", state.saveTokens, 0);
-}
-{
-  // Four token-less pairs across all lanes → every lane locks → game over.
-  let g = noWanted({ ...newGame(), saveTokens: 0 });
+  // A pair in every lane → every lane locks → game over.
+  let g = noWanted(newGame());
   for (let l = 0; l < LANES; l++) g = fillLane(g, ["KS", "KH", "8D", "5S", "2D"], l).state;
-  eq("all token-less pairs lock the board → over", g.over, true);
+  eq("a pair in each lane locks the board → over", g.over, true);
 }
 {
-  // A token-less pair NEVER claims a wanted (a pair never scores, even one that busts).
-  let g = { ...newGame(), saveTokens: 0, wanted: wantHand(HAND.PAIR, 999, 9), streak: 2 };
-  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair, no token
-  eq("token-less pair does not claim a wanted", !!(result.wanted && result.wanted.hit), false);
-  eq("token-less pair: no wanted streak advance", state.streak, 0);
-}
-{
-  // handStats tallies a token-less pair by its ACTUAL rank (PAIR), not as a BUST.
-  let g = noWanted({ ...newGame(), saveTokens: 0 });
-  g = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]).state; // pair, no token
-  eq("token-less pair tallies as PAIR", g.handStats[HAND.PAIR], 1);
-  eq("token-less pair not tallied as HIGH_CARD", !!g.handStats[HAND.HIGH_CARD], false);
-}
-{
-  // Earn-back: from 0 tokens, the Nth true score grants one back (capped by SAVE_TOKEN_CAP).
-  let g = noWanted({ ...newGame(), saveTokens: 0 });
-  for (let i = 0; i < SCORES_PER_SAVE_TOKEN - 1; i++) {
-    g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"], i % LANES).state; // two pair scores
-  }
-  eq("no token yet before the Nth score", g.saveTokens, 0);
-  g = fillLane(g, ["QS", "QH", "9D", "9S", "2D"], 0).state; // the Nth score
-  eq("earned a token on the Nth score", g.saveTokens, 1);
-}
-{
-  // Cap: a score at the cap does not push tokens past SAVE_TOKEN_CAP.
-  let g = noWanted({ ...newGame(), saveTokens: SAVE_TOKEN_CAP, scoreHands: SCORES_PER_SAVE_TOKEN - 1 });
-  g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]).state; // a score crossing the earn-back threshold
-  eq("earn-back respects the cap", g.saveTokens, SAVE_TOKEN_CAP);
+  // A pair NEVER claims a wanted (a pair never scores; it busts).
+  let g = { ...newGame(), wanted: wantHand(HAND.PAIR, 999, 9), streak: 2 };
+  const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
+  eq("pair does not claim a wanted", !!(result.wanted && result.wanted.hit), false);
+  eq("pair bust resets the streak", state.streak, 0);
+  eq("pair bust: streakReset flag", result.streakReset, true);
 }
 
 // ── raises ────────────────────────────────────────────────────────────────────
@@ -268,7 +213,7 @@ console.log("Discard:");
   const d = useDiscard(g);
   eq("spent → uncharged", d.state.discard, false);
   eq("discard drew a fresh tray", d.state.tray != null, true);
-  // a true score recharges; (save not refreshing is covered above)
+  // a true score (Two Pair+) recharges the discard; a bust does not
   const scored = fillLane(d.state, ["KS", "KH", "8D", "8S", "2D"]); // two pair
   eq("score refreshes discard", scored.state.discard, true);
 }
@@ -301,12 +246,12 @@ console.log("Wanted Hands:");
   eq("hand wanted non-match", completesWanted(HAND.THREE, wantHand(HAND.TWO_PAIR), []), false);
 }
 {
-  // A pair save does NOT complete or advance a wanted, and does not reset streak.
+  // A pair does NOT complete a wanted (it busts) and RESETS the streak.
   let g = newGame();
   g = { ...g, wanted: wantHand(HAND.TWO_PAIR), streak: 2 };
   const { state, result } = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]); // pair
   eq("pair does not hit wanted", !!(result.wanted && result.wanted.hit), false);
-  eq("pair save keeps streak", state.streak, 2);
+  eq("pair bust resets streak", state.streak, 0);
 }
 {
   // A bust resets the streak.
@@ -404,12 +349,12 @@ console.log("Wanted Conditions:");
   eq("condition counts toward wantedHits", state.wantedHits, 1);
 }
 {
-  // Condition met but only a PAIR (a save, not a score) → no hit (gated by scored).
+  // Condition met but only a PAIR (a bust, not a score) → no hit (gated by scored).
   let g = newGame();
   g = { ...g, wanted: wantCond("allRed"), streak: 2 };
   const { state, result } = fillLane(g, ["KH", "KD", "8H", "5D", "2H"]); // all red, but only a pair
   eq("condition without a score does NOT hit", !!(result.wanted && result.wanted.hit), false);
-  eq("a pair save keeps the streak", state.streak, 2);
+  eq("a pair bust resets the streak", state.streak, 0);
 }
 {
   // Condition not met though the lane scores → no hit.
@@ -458,13 +403,13 @@ console.log("Jackpot hands:");
 // ── rising ante (poker-blinds pressure) ───────────────────────────────────────
 console.log("Rising ante:");
 {
-  // anteFor formula: base + floor(scoreHands/5) + floor(wantedHits/2), additive.
+  // anteFor formula: base + ANTE_STEP*floor(scoreHands/EVERY) + ANTE_STEP*floor(wantedHits/2).
   eq("ante at start", anteFor(0, 0), BASE_ANTE);
-  eq("ante after 5 scores", anteFor(5, 0), BASE_ANTE + 1);
-  eq("ante after 10 scores", anteFor(10, 0), BASE_ANTE + 2);
-  eq("ante after 2 wanted", anteFor(0, 2), BASE_ANTE + 1);
-  eq("score + wanted stack additively", anteFor(5, 2), BASE_ANTE + 2);
-  eq("partial thresholds floor", anteFor(4, 1), BASE_ANTE);
+  eq("ante after 4 scores", anteFor(SCORE_HANDS_PER_ANTE, 0), BASE_ANTE + ANTE_STEP);
+  eq("ante after 8 scores", anteFor(2 * SCORE_HANDS_PER_ANTE, 0), BASE_ANTE + 2 * ANTE_STEP);
+  eq("ante after 2 wanted", anteFor(0, WANTED_HITS_PER_ANTE), BASE_ANTE + ANTE_STEP);
+  eq("score + wanted stack additively", anteFor(SCORE_HANDS_PER_ANTE, WANTED_HITS_PER_ANTE), BASE_ANTE + 2 * ANTE_STEP);
+  eq("partial thresholds floor", anteFor(SCORE_HANDS_PER_ANTE - 1, 1), BASE_ANTE);
 }
 {
   // A true score increments scoreHands; ante rises after SCORE_HANDS_PER_ANTE of them.
@@ -472,11 +417,11 @@ console.log("Rising ante:");
   const before = g.scoreHands;
   g = fillLane(g, ["KS", "KH", "8D", "8S", "2D"]).state; // two pair → a true score
   eq("score increments scoreHands", g.scoreHands, before + 1);
-  // a SAVE (pair) does NOT count toward the ante
+  // a pair BUST does NOT count toward the ante
   let g2 = noWanted(newGame());
-  g2 = fillLane(g2, ["KS", "KH", "9D", "5S", "2D"]).state; // pair → save
-  eq("save does not count toward ante", g2.scoreHands, 0);
-  // a BUST does not count
+  g2 = fillLane(g2, ["KS", "KH", "9D", "5S", "2D"]).state; // pair → bust
+  eq("pair bust does not count toward ante", g2.scoreHands, 0);
+  // a high-card BUST does not count
   let g3 = noWanted(newGame());
   g3 = fillLane(g3, ["AD", "JC", "8D", "5S", "2D"]).state; // high card → bust
   eq("bust does not count toward ante", g3.scoreHands, 0);
@@ -492,21 +437,22 @@ console.log("Rising ante:");
 {
   // The ante actually charged rises after enough scores, and the refund matches
   // what was PAID (not the current ante).
-  let g = noWanted({ ...newGame(), scoreHands: 5 }); // ante is now 2
-  eq("currentAnte reflects progress", currentAnte(g), BASE_ANTE + 1);
+  const raisedAnte = BASE_ANTE + ANTE_STEP;
+  let g = noWanted({ ...newGame(), scoreHands: SCORE_HANDS_PER_ANTE }); // ante raised one step
+  eq("currentAnte reflects progress", currentAnte(g), raisedAnte);
   const chipsBefore = g.chips;
   const open = play(g, "2C", 0); // open a lane at the raised ante
-  eq("charged the raised ante", open.state.chips, chipsBefore - (BASE_ANTE + 1));
-  eq("stamped the paid ante", open.state.anteAmt[0], BASE_ANTE + 1);
+  eq("charged the raised ante", open.state.chips, chipsBefore - raisedAnte);
+  eq("stamped the paid ante", open.state.anteAmt[0], raisedAnte);
 }
 {
-  // Refund = exact ante paid + flat ANTE_PROFIT, even though the ante later rises.
-  let g = noWanted({ ...newGame(), scoreHands: 5 }); // ante 2
+  // Refund = exact ante paid + hand-scaled ANTE_PROFIT, even though the ante later rises.
+  let g = noWanted({ ...newGame(), scoreHands: SCORE_HANDS_PER_ANTE }); // ante raised one step
   const start = g.chips;
   // open + complete a clean two pair (2s and 7s) in lane 0
   const { state } = fillLane(g, ["2C", "2D", "7S", "7H", "9C"], 0);
-  // chips: -2 ante on open, +2 (paid ante) +1 profit on score = net +1
-  eq("refund = paid ante + flat profit", state.chips, start + ANTE_PROFIT);
+  // chips: -raisedAnte on open, +raisedAnte (paid ante) +ANTE_PROFIT profit on score = net +profit
+  eq("refund = paid ante + profit", state.chips, start + ANTE_PROFIT);
 }
 
 // ── game over ─────────────────────────────────────────────────────────────────
@@ -541,23 +487,20 @@ console.log("One-Deck exhaustion:");
   eq("one-deck run ends", g.over, true);
 }
 
-// ── save / resume — tokens survive a round-trip; the version bump discards old saves ─
-console.log("Save/resume — tokens + version:");
+// ── save / resume — a mid-run state round-trips; the version bump discards old saves ─
+console.log("Save/resume — round-trip + version:");
 {
-  // Spend a token, then serialize → hydrate; saveTokens must round-trip at the version.
+  // Play a couple of cards, then serialize → hydrate; the run must round-trip.
   let g = noWanted(newGame());
-  g = fillLane(g, ["KS", "KH", "8D", "5S", "2D"]).state; // pair → spends a token
-  eq("token spent before save", g.saveTokens, START_SAVE_TOKENS - 1);
+  g = play(g, "KS", 0).state;
+  g = play(g, "KH", 0).state; // an in-progress, unresolved lane
   const blob = serializeGame(g);
-  eq("snapshot carries saveTokens", blob.state.saveTokens, START_SAVE_TOKENS - 1);
   eq("snapshot stamped current version", blob.v, SAVE_VERSION);
   const back = hydrateGame(blob);
-  eq("hydrate restores saveTokens", back.saveTokens, START_SAVE_TOKENS - 1);
-}
-{
-  // A stale v2 blob (no saveTokens) is rejected → New Game fallback, not mis-hydrated.
-  const stale = { v: 2, state: { lanes: Array.from({ length: LANES }, () => []), bag: [], locked: Array(LANES).fill(false), chips: 12, draws: 0 } };
-  eq("v2 save discarded on version bump", hydrateGame(stale), null);
+  eq("hydrate restores chips", back.chips, g.chips);
+  eq("hydrate restores the lane", back.lanes[0].length, 2);
+  eq("hydrate reattaches rng", typeof back.rng, "function");
+  eq("hydrate has no stale timer field", !("timer" in back), true);
 }
 
 // ── profit scaled by hand strength ("hands have weight") ──────────────────────
@@ -599,86 +542,24 @@ console.log("Profit by hand:");
   eq("laneStake toWin = ante + floor profit", st.toWin, (g.anteAmt[0]) + MIN_ANTE_PROFIT);
 }
 
-// ── lane resolution timer (the core bust-pressure mechanic) ───────────────────
-console.log("Lane resolution timer:");
+// ── save version bump (v5: 4 lanes, no timer, no save tokens) ─────────────────
+console.log("Save version v5:");
 {
-  // Opening a lane starts its timer at LANE_TIMER; feeding refreshes it.
+  eq("SAVE_VERSION is 5", SAVE_VERSION, 5);
+  eq("game has 4 lanes", LANES, 4);
+  // A fresh run carries no timer / saveTokens fields and round-trips at v5.
   let g = noWanted(newGame());
-  const r1 = play(g, "2C", 0); // open lane 0
-  eq("open sets lane timer", r1.state.timer[0] === LANE_TIMER || r1.state.timer[0] === LANE_TIMER - 1, true);
-}
-{
-  // A neglected lane force-resolves when its timer expires. Open lane 0 with two
-  // non-matching cards, then advance LANE_TIMER draws by discarding (feeds no lane)
-  // → lane 0 times out and, being a high card, busts + locks.
-  let g = noWanted(newGame());
-  g = play(g, "8C", 0).state; // open lane 0 (1 card)
-  g = play(g, "2D", 0).state; // lane 0 now has 8,2 (high card so far), timer refreshed
-  const before = g.timer[0];
-  let sawTimeout = false;
-  for (let i = 0; i < LANE_TIMER + 2 && !g.over; i++) {
-    // discard to advance a draw without feeding lane 0 (recharge discard is off, so
-    // once spent we can't discard — instead open+feed OTHER lanes). Simplest: burn.
-    const r = burnCard(g);
-    g = r.state;
-    if (r.result.timeouts && r.result.timeouts.some((t) => t.laneIndex === 0)) sawTimeout = true;
-  }
-  eq("neglected lane timer counted down", before, LANE_TIMER); // refreshed on the 2nd feed
-  eq("neglected lane force-resolved via timeout", sawTimeout, true);
-  eq("timed-out high-card lane is locked", g.locked[0], true);
-}
-{
-  // A timed-out lane that already holds a scoring hand SCORES on timeout (not a lock).
-  // Lane 0: two pair partial (K,K,8,8) at 4 cards, then let it time out.
-  let g = noWanted(newGame());
-  g = play(g, "KS", 0).state;
-  g = play(g, "KH", 0).state;
-  g = play(g, "8S", 0).state;
-  g = play(g, "8C", 0).state; // K,K,8,8 = two pair already made (bestMadeHand)
-  const scoreBefore = g.score;
-  let scoredOnTimeout = false;
-  for (let i = 0; i < LANE_TIMER + 2 && !g.over; i++) {
-    const r = burnCard(g);
-    g = r.state;
-    const t = (r.result.timeouts || []).find((x) => x.laneIndex === 0);
-    if (t && t.resolution.scored) scoredOnTimeout = true;
-  }
-  eq("timed-out two-pair scores (not locked)", scoredOnTimeout, true);
-  eq("timed-out score is not locked", g.locked[0], false);
-  eq("timed-out score raised the score", g.score > scoreBefore, true);
-}
-{
-  // Feeding a lane keeps it alive: a lane fed every few draws never times out.
-  let g = noWanted(newGame());
-  let over = false;
-  for (let i = 0; i < LANE_TIMER + 3; i++) {
-    const seq = ["3", "4", "5", "6", "7", "8", "9", "T"][i % 8];
-    const suit = "SHDC"[i % 4];
-    if (g.lanes[0].length >= 4) break; // stop before it would resolve to 5
-    const r = play(g, seq + suit, 0);
-    g = r.state;
-    if (g.over) { over = true; break; }
-  }
-  eq("continuously-fed lane stays open (not timed out)", g.locked[0] || over, false);
-}
-
-// ── save version bump (v4: 3 lanes + timer) ───────────────────────────────────
-console.log("Save version v4:");
-{
-  eq("SAVE_VERSION is 4", SAVE_VERSION, 4);
-  // A fresh run has a timer array of length LANES and round-trips.
-  let g = noWanted(newGame());
-  eq("fresh run has timer array", Array.isArray(g.timer) && g.timer.length === LANES, true);
+  eq("fresh run has no timer field", !("timer" in g), true);
+  eq("fresh run has no saveTokens field", !("saveTokens" in g), true);
   const blob = serializeGame(g);
-  eq("snapshot stamped v4", blob.v, 4);
-  eq("snapshot carries timer", Array.isArray(blob.state.timer), true);
+  eq("snapshot stamped v5", blob.v, 5);
   const back = hydrateGame(blob);
-  eq("hydrate restores a live run", !!back && Array.isArray(back.timer), true);
+  eq("hydrate restores a live run", !!back && back.lanes.length === LANES, true);
 }
 {
-  // A stale v3 blob (no timer) is rejected → New Game fallback.
-  const stale = { v: 3, state: { lanes: Array.from({ length: LANES }, () => []), bag: [], locked: Array(LANES).fill(false), chips: 12, draws: 0, saveTokens: 2 } };
-  eq("v3 save discarded on v4 bump", hydrateGame(stale), null);
+  // A stale v4 blob (3 lanes + timer) is rejected → New Game fallback.
+  const stale = { v: 4, state: { lanes: Array.from({ length: 3 }, () => []), bag: [], locked: Array(3).fill(false), chips: 12, draws: 0, saveTokens: 2, timer: [0, 0, 0] } };
+  eq("v4 save discarded on v5 bump", hydrateGame(stale), null);
 }
 
 console.log(`\n${pass} passed, ${fail} failed.`);

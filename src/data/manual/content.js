@@ -187,7 +187,7 @@ export const MANUAL_TIPS = [
   "The Water Cooler isn't a feed — it's a finite page. Read it all, then go touch grass. I won't tell.",
   "Heads up: the Water Cooler's 'On This Day' is my favorite rabbit hole. Bring a snack.",
   "Not every game here is nice. Some autosave like sweethearts; others let you walk away and quietly delete your run out of spite. 😈",
-  "Pro tip: High Card Bust will let you RESUME a run. Solitaire will let you regret leaving. Choose your cabinet's love language wisely.",
+  "Pro tip: Deadlock Poker will let you RESUME a run. Solitaire will let you regret leaving. Choose your cabinet's love language wisely.",
   "Quit a game and it asks 'are you sure?' — that's the polite ones. The mean ones don't ask. They just take it.",
   "Your chip bank rides along between Blackjack and Video Poker. Bust out and it'll spot you a fresh stack — but it remembers your highest, not your dignity.",
   "Reach for EXIT mid-game and you might get a warning. Or you might get nothing but the cold, unsaved void. Games have moods.",
