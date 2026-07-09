@@ -2,83 +2,86 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-internet-roadtrip",
-    "title": "A Street View car the whole internet is driving at once",
-    "blurb": "Strangers vote in real time on which way to turn, when to honk, and what local radio to tune. Democracy has never been this slow or this beautiful.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "Twitch-plays-a-minivan energy"
+    "id": "gw-single-serving-sites",
+    "title": "A directory of websites that do exactly one thing",
+    "blurb": "Someone catalogs the internet's proudest one-trick ponies — a whole domain built to serve a single dumb, beautiful purpose. It's the spirit this entire arcade was born from.",
+    "url": "https://singleservingsites.cool/"
+  },
+  {
+    "id": "gw-absurd-website",
+    "title": "One absurd web experiment, every single month",
+    "blurb": "A lone creator ships one gloriously pointless web thing per month, and the backlog is nearly fifty deep. Bookmark it like a webring you actually keep visiting.",
+    "url": "https://absurd.website",
+    "foundNote": "still shipping"
+  },
+  {
+    "id": "gw-wplace",
+    "title": "A live global map where the whole internet fights over pixels",
+    "blurb": "It's r/place stretched over the entire planet — pixel wars, tiny alliances, and one guy defending his flag at 3am. Refresh and watch strangers slowly build something insane together.",
+    "url": "https://wplace.live",
+    "foundNote": "currently under construction, forever"
   },
   {
     "id": "gw-stimulation-clicker",
-    "title": "A clicker game that weaponizes your own attention span",
-    "blurb": "Click for Stimulation Points, then spend them on true-crime podcasts, a DVD logo bouncing in the corner, and pure sensory chaos. It's a cry for help you can idle.",
-    "url": "https://neal.fun/stimulation-clicker"
+    "title": "A clicker game that turns into the entire modern internet",
+    "blurb": "Neal Agarwal built the anti-relaxation machine: notifications, feeds, and noise piling on until your brain files for a lunch break. Uncomfortably accurate.",
+    "url": "https://neal.fun/stimulation-clicker/"
   },
   {
-    "id": "gw-password-game",
-    "title": "A password field that slowly loses its mind",
-    "blurb": "Include a Roman numeral. Now a chess move. Now today's moon phase. It keeps adding rules until you're negotiating with a website like it's a hostage situation.",
-    "url": "https://neal.fun/password-game",
-    "foundNote": "rage-quit factor: high"
+    "id": "gw-sito-gridcosm",
+    "title": "A collaborative art grid that's been growing since 1997",
+    "blurb": "Grids nested inside grids inside grids, handed off between strangers one panel at a time for over two decades. This thing has outlived most operating systems.",
+    "url": "https://www.sito.org/synergy/",
+    "foundNote": "online since 1997"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "A website where strangers send you a hug",
-    "blurb": "Just short video clips of people opening their arms to your screen. It's absurdly wholesome, it's from a simpler internet, and yeah, it kind of works.",
-    "url": "https://thenicestplace.net",
-    "foundNote": "emotional support .net"
+    "id": "gw-passweird",
+    "title": "A password generator that's too weird to steal",
+    "blurb": "Instead of xK9#mQ2, it hands you something so cursed and specific no hacker would dare touch it. Genuinely useful, deeply unhinged.",
+    "url": "https://passweird.com"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by how loud a voice yells 'COW'",
-    "blurb": "Drag your mouse around a blank screen while a booming narrator gets louder as you get warmer. That's the whole game. You will play it for twenty minutes.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "headphones recommended, dignity not"
+    "id": "gw-quiet-place",
+    "title": "A website that gently walks you away from the internet",
+    "blurb": "One calm line at a time, it coaxes you to close the tabs and breathe. A rare corner of the web actively rooting for you to leave.",
+    "url": "https://thequietplaceproject.com"
   },
   {
-    "id": "gw-museum-sounds",
-    "title": "A museum for sounds your tech doesn't make anymore",
-    "blurb": "Dial-up handshakes, cartridge blows, Windows startup chimes, cassette clunks. Press each one and feel a very specific decade come rushing back.",
-    "url": "https://savethesounds.info",
-    "foundNote": "pairs well with our Soundboard"
-  },
-  {
-    "id": "gw-evolution-trust",
-    "title": "An interactive lesson on why people betray each other",
-    "blurb": "A tiny playable game-theory story that quietly explains trust, cheating, and why the whole internet feels the way it does. You'll close it a slightly better person.",
-    "url": "https://ncase.me/trust/",
-    "foundNote": "smarter than it looks"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug, in a rug, and that is the entire website",
-    "blurb": "You open the page. There is a pug wrapped in a rug. Nothing else happens, nothing else needs to. The early web would be proud.",
-    "url": "https://puginarug.com",
-    "foundNote": "single-serving site, chef's kiss"
+    "id": "gw-neal-fun",
+    "title": "The playground where half the internet's 'whoa' moments live",
+    "blurb": "Neal's ever-growing pile of interactives, timelines and games — the kind of stuff you send a friend at midnight with just the word 'this.' You'll lose an hour, minimum.",
+    "url": "https://neal.fun"
   },
   {
     "id": "gw-koalas",
-    "title": "An entire koala hidden inside 65,536 clicks",
-    "blurb": "Click to split squares into smaller squares until a fuzzy face slowly resolves out of the pixels. It's a screensaver, a stress toy, and a mild time sink.",
+    "title": "Click a giant koala into a million tiny koalas",
+    "blurb": "Divide and conquer, but the reward is always more koala. Somewhere between a fractal, a stress toy, and a screensaver you can't stop poking.",
     "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-true-size",
-    "title": "Drag any country around a map to expose its real size",
-    "blurb": "Slide Greenland down to the equator and watch it shrink like a Tamagotchi that stopped eating. Every world map you saw in school was lying to you.",
-    "url": "https://thetruesize.com",
-    "foundNote": "the map projection scandal"
+    "id": "gw-invisible-cow",
+    "title": "Find the invisible cow using only a screaming voice",
+    "blurb": "Move your cursor and a voice yells louder the closer you get to a cow you cannot see. It is exactly as stupid and satisfying as it sounds.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your volume up, sorry"
   },
   {
-    "id": "gw-flightradar",
-    "title": "A live map of nearly every plane in the sky right now",
-    "blurb": "Thousands of little aircraft crawling across the whole planet in real time. Click one and find out where a stranger 38,000 feet up is headed.",
-    "url": "https://flightradar24.com"
+    "id": "gw-little-alchemy",
+    "title": "Combine four elements into the entire universe",
+    "blurb": "Start with air, earth, fire and water; end up with, somehow, a Time Machine and a Doctor Who reference. The original before-you-were-crafting-infinite crafting game.",
+    "url": "https://littlealchemy2.com"
   },
   {
-    "id": "gw-sandspiel",
-    "title": "A falling-sand toy that quietly became a whole world",
-    "blurb": "Drop sand, water, fire, plants and lava and watch physics do its thing. It's the classic time-waster your school lab banned, now gorgeous.",
-    "url": "https://sandspiel.club"
+    "id": "gw-pug-in-a-rug",
+    "title": "A pug slowly spinning inside a rug, forever",
+    "blurb": "That's the whole website. That's the whole review. Ten out of ten, would rotate again.",
+    "url": "https://puginarug.com"
+  },
+  {
+    "id": "gw-lhc",
+    "title": "A live check on whether the Large Hadron Collider ate the planet",
+    "blurb": "It answers one urgent question with a big reassuring 'NOPE.' A monument to early-2000s doomer anxiety that still faithfully reports the good news.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "foundNote": "still online, still nope"
   }
 ];
