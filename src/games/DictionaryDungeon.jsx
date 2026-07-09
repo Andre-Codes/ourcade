@@ -106,45 +106,73 @@ export default function DictionaryDungeon() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
-  // Lock page scroll from finger drags, but keep genuinely-scrollable regions
-  // usable. A non-passive touchmove guard on the root swallows the gesture unless
-  // the drag can be legitimately absorbed by:
-  //   (a) an inner overflow:auto/scroll element with room to move (the log), or
-  //   (b) the DOCUMENT itself, once merchant/treasure panels push the content
-  //       past the viewport (so the user can still reach the bottom).
-  // In every other case (short page, at a scroll edge) it preventDefaults, which
-  // is what kills the annoying page rubber-band. Mirrors the 2048 touch lock, but
-  // scoped so overflow content stays reachable.
+  // ── Lock the PAGE; make the cabinet its own scroller. ───────────────────────
+  // The play screen is usually taller than the viewport (status + card + keyboard
+  // + actions + log), so if we let the document scroll, every finger drag drags
+  // the whole page — exactly the annoyance we're killing. Instead:
+  //   1. While the game is mounted, freeze <html>/<body> (position:fixed, no
+  //      document scroll) so nothing rubber-bands.
+  //   2. `.dd-root` becomes the ONE scroll container (height:100dvh; overflow-y:
+  //      auto), so it scrolls INTERNALLY only when content overflows (merchant/
+  //      treasure panels), and the log scrolls within it.
+  //   3. A non-passive touchmove guard on the root preventDefaults any drag that
+  //      no inner scroller (the log) or the root itself can actually absorb — so a
+  //      short screen never rubber-bands, but overflow content stays reachable.
+  useEffect(() => {
+    const { style: body } = document.body;
+    const { style: html } = document.documentElement;
+    const prev = {
+      bodyOverflow: body.overflow, bodyPosition: body.position, bodyWidth: body.width,
+      bodyHeight: body.height, bodyTop: body.top, htmlOverflow: html.overflow,
+      htmlOverscroll: html.overscrollBehavior,
+    };
+    const scrollY = window.scrollY;
+    body.overflow = "hidden";
+    body.position = "fixed";
+    body.top = `-${scrollY}px`;
+    body.width = "100%";
+    body.height = "100%";
+    html.overflow = "hidden";
+    html.overscrollBehavior = "none";
+    return () => {
+      body.overflow = prev.bodyOverflow;
+      body.position = prev.bodyPosition;
+      body.width = prev.bodyWidth;
+      body.height = prev.bodyHeight;
+      body.top = prev.bodyTop;
+      html.overflow = prev.htmlOverflow;
+      html.overscrollBehavior = prev.htmlOverscroll;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   useEffect(() => {
     const node = rootRef.current;
     if (!node) return undefined;
     let startY = 0;
     const onStart = (e) => { startY = e.touches[0]?.clientY ?? 0; };
-    const scroller = () =>
-      document.scrollingElement || document.documentElement || document.body;
+    // Does `el` scroll vertically, with room to move in `dir` (>0 down / <0 up)?
+    const canAbsorb = (el, dir) => {
+      const style = window.getComputedStyle(el);
+      if (!/(auto|scroll)/.test(style.overflowY) || el.scrollHeight <= el.clientHeight) return false;
+      const atTop = el.scrollTop <= 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+      return !((dir > 0 && atTop) || (dir < 0 && atBottom));
+    };
     const onMove = (e) => {
+      if (e.touches.length > 1) return; // pinch/zoom — leave alone
       const dy = (e.touches[0]?.clientY ?? 0) - startY; // >0 drag down, <0 drag up
       if (dy === 0) return;
-      // (a) An inner scroller (the log) with room to move in this direction.
+      // Walk from the touch target UP TO AND INCLUDING the root. If any of them
+      // (the log, or the root itself when panels overflow) can take the scroll,
+      // let it happen natively.
       let el = e.target;
-      while (el && el !== node) {
-        if (el.nodeType === 1) {
-          const style = window.getComputedStyle(el);
-          if (/(auto|scroll)/.test(style.overflowY) && el.scrollHeight > el.clientHeight) {
-            const atTop = el.scrollTop <= 0;
-            const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-            if (!((dy > 0 && atTop) || (dy < 0 && atBottom))) return; // let it scroll
-          }
-        }
+      while (el) {
+        if (el.nodeType === 1 && canAbsorb(el, dy)) return;
+        if (el === node) break;
         el = el.parentNode;
       }
-      // (b) The document can scroll in this direction (content overflows viewport).
-      const doc = scroller();
-      const docTop = doc.scrollTop <= 0;
-      const docBottom = doc.scrollTop + doc.clientHeight >= doc.scrollHeight - 1;
-      const docCanScroll = doc.scrollHeight > doc.clientHeight;
-      if (docCanScroll && !((dy > 0 && docTop) || (dy < 0 && docBottom))) return;
-      // Nothing can absorb the drag → it would only rubber-band the page. Block it.
+      // Nothing can absorb the drag → it would only rubber-band. Block it.
       e.preventDefault();
     };
     node.addEventListener("touchstart", onStart, { passive: true });
@@ -905,14 +933,16 @@ function scrollMeta(logic, id) {
 const CSS = `
 .dd-root {
   --stone: #12100e; --stone2: #1c1814; --gold: #d9b45e; --parch: #e8dcc0;
-  min-height: 100%; color: #e7ddc9; font-family: 'Georgia', 'Times New Roman', serif;
+  color: #e7ddc9; font-family: 'Georgia', 'Times New Roman', serif;
   background:
     radial-gradient(120% 80% at 50% -10%, rgba(120,90,40,.18), transparent 60%),
     linear-gradient(180deg, #17130f 0%, #0d0b09 100%);
   padding: 16px; display: flex; flex-direction: column; align-items: center;
-  /* Keep finger drags from rubber-banding the page; the touchmove guard (JS)
-     still lets the log and any overflowed content scroll. pan-y allows those
-     inner scrolls; overscroll-behavior stops the scroll chaining to the page. */
+  /* The cabinet is the ONE scroll container: it fills the viewport and scrolls
+     internally only when content overflows (merchant/treasure panels). The page
+     behind it is frozen (see the body-lock effect), so finger drags never
+     rubber-band; the touchmove guard blocks drags nothing here can absorb. */
+  height: 100vh; height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain; touch-action: pan-y;
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
