@@ -106,46 +106,13 @@ export default function DictionaryDungeon() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
-  // ── Lock the PAGE; make the cabinet its own scroller. ───────────────────────
-  // The play screen is usually taller than the viewport (status + card + keyboard
-  // + actions + log), so if we let the document scroll, every finger drag drags
-  // the whole page — exactly the annoyance we're killing. Instead:
-  //   1. While the game is mounted, freeze <html>/<body> (position:fixed, no
-  //      document scroll) so nothing rubber-bands.
-  //   2. `.dd-root` becomes the ONE scroll container (height:100dvh; overflow-y:
-  //      auto), so it scrolls INTERNALLY only when content overflows (merchant/
-  //      treasure panels), and the log scrolls within it.
-  //   3. A non-passive touchmove guard on the root preventDefaults any drag that
-  //      no inner scroller (the log) or the root itself can actually absorb — so a
-  //      short screen never rubber-bands, but overflow content stays reachable.
-  useEffect(() => {
-    const { style: body } = document.body;
-    const { style: html } = document.documentElement;
-    const prev = {
-      bodyOverflow: body.overflow, bodyPosition: body.position, bodyWidth: body.width,
-      bodyHeight: body.height, bodyTop: body.top, htmlOverflow: html.overflow,
-      htmlOverscroll: html.overscrollBehavior,
-    };
-    const scrollY = window.scrollY;
-    body.overflow = "hidden";
-    body.position = "fixed";
-    body.top = `-${scrollY}px`;
-    body.width = "100%";
-    body.height = "100%";
-    html.overflow = "hidden";
-    html.overscrollBehavior = "none";
-    return () => {
-      body.overflow = prev.bodyOverflow;
-      body.position = prev.bodyPosition;
-      body.width = prev.bodyWidth;
-      body.height = prev.bodyHeight;
-      body.top = prev.bodyTop;
-      html.overflow = prev.htmlOverflow;
-      html.overscrollBehavior = prev.htmlOverscroll;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
+  // ── Make the cabinet its own scroller; block page drags. ────────────────────
+  // We DON'T touch <html>/<body> layout (that fought the arcade shell and pushed
+  // the top bar off-screen). Instead `.dd-root` is a normal in-flow element that
+  // scrolls internally when content overflows, and a non-passive touchmove guard
+  // stops a drag from ever scrolling the PAGE: it only lets an inner scroller (the
+  // log, or the root when panels overflow) take the gesture — never the document.
+  // So the page feels fixed, but the log and any overflow stay reachable.
   useEffect(() => {
     const node = rootRef.current;
     if (!node) return undefined;
@@ -165,14 +132,13 @@ export default function DictionaryDungeon() {
       if (dy === 0) return;
       // Walk from the touch target UP TO AND INCLUDING the root. If any of them
       // (the log, or the root itself when panels overflow) can take the scroll,
-      // let it happen natively.
+      // let it happen natively; otherwise block so the page can't be dragged.
       let el = e.target;
       while (el) {
         if (el.nodeType === 1 && canAbsorb(el, dy)) return;
         if (el === node) break;
         el = el.parentNode;
       }
-      // Nothing can absorb the drag → it would only rubber-band. Block it.
       e.preventDefault();
     };
     node.addEventListener("touchstart", onStart, { passive: true });
