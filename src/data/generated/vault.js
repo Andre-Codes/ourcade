@@ -2,6 +2,116 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-lhc",
+    "kind": "site",
+    "era": "current",
+    "title": "A live check on whether the Large Hadron Collider ate the planet",
+    "blurb": "It answers one urgent question with a big reassuring 'NOPE.' A monument to early-2000s doomer anxiety that still faithfully reports the good news.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:57.647Z"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug slowly spinning inside a rug, forever",
+    "blurb": "That's the whole website. That's the whole review. Ten out of ten, would rotate again.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:57.501Z"
+  },
+  {
+    "id": "gw-little-alchemy",
+    "kind": "site",
+    "era": "current",
+    "title": "Combine four elements into the entire universe",
+    "blurb": "Start with air, earth, fire and water; end up with, somehow, a Time Machine and a Doctor Who reference. The original before-you-were-crafting-infinite crafting game.",
+    "url": "https://littlealchemy2.com",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:57.342Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "Click a giant koala into a million tiny koalas",
+    "blurb": "Divide and conquer, but the reward is always more koala. Somewhere between a fractal, a stress toy, and a screensaver you can't stop poking.",
+    "url": "https://koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:57.046Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "The playground where half the internet's 'whoa' moments live",
+    "blurb": "Neal's ever-growing pile of interactives, timelines and games — the kind of stuff you send a friend at midnight with just the word 'this.' You'll lose an hour, minimum.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:56.916Z"
+  },
+  {
+    "id": "gw-passweird",
+    "kind": "site",
+    "era": "current",
+    "title": "A password generator that's too weird to steal",
+    "blurb": "Instead of xK9#mQ2, it hands you something so cursed and specific no hacker would dare touch it. Genuinely useful, deeply unhinged.",
+    "url": "https://passweird.com",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:56.618Z"
+  },
+  {
+    "id": "gw-sito-gridcosm",
+    "kind": "site",
+    "era": "current",
+    "title": "A collaborative art grid that's been growing since 1997",
+    "blurb": "Grids nested inside grids inside grids, handed off between strangers one panel at a time for over two decades. This thing has outlived most operating systems.",
+    "url": "https://www.sito.org/synergy/",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:56.449Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that turns into the entire modern internet",
+    "blurb": "Neal Agarwal built the anti-relaxation machine: notifications, feeds, and noise piling on until your brain files for a lunch break. Uncomfortably accurate.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:56.321Z"
+  },
+  {
+    "id": "gw-wplace",
+    "kind": "site",
+    "era": "current",
+    "title": "A live global map where the whole internet fights over pixels",
+    "blurb": "It's r/place stretched over the entire planet — pixel wars, tiny alliances, and one guy defending his flag at 3am. Refresh and watch strangers slowly build something insane together.",
+    "url": "https://wplace.live",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:56.117Z"
+  },
+  {
+    "id": "gw-absurd-website",
+    "kind": "site",
+    "era": "current",
+    "title": "One absurd web experiment, every single month",
+    "blurb": "A lone creator ships one gloriously pointless web thing per month, and the backlog is nearly fifty deep. Bookmark it like a webring you actually keep visiting.",
+    "url": "https://absurd.website",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:55.987Z"
+  },
+  {
+    "id": "gw-single-serving-sites",
+    "kind": "site",
+    "era": "current",
+    "title": "A directory of websites that do exactly one thing",
+    "blurb": "Someone catalogs the internet's proudest one-trick ponies — a whole domain built to serve a single dumb, beautiful purpose. It's the spirit this entire arcade was born from.",
+    "url": "https://singleservingsites.cool/",
+    "source": "weird",
+    "archivedAt": "2026-07-09T07:25:55.803Z"
+  },
+  {
     "id": "gw-sandspiel",
     "kind": "site",
     "era": "current",
@@ -32,26 +142,6 @@ export default [
     "archivedAt": "2026-07-07T07:20:43.795Z"
   },
   {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "An entire koala hidden inside 65,536 clicks",
-    "blurb": "Click to split squares into smaller squares until a fuzzy face slowly resolves out of the pixels. It's a screensaver, a stress toy, and a mild time sink.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:43.598Z"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug, in a rug, and that is the entire website",
-    "blurb": "You open the page. There is a pug wrapped in a rug. Nothing else happens, nothing else needs to. The early web would be proud.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:43.502Z"
-  },
-  {
     "id": "gw-evolution-trust",
     "kind": "site",
     "era": "current",
@@ -80,16 +170,6 @@ export default [
     "url": "https://neal.fun/password-game",
     "source": "weird",
     "archivedAt": "2026-07-07T07:20:42.484Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that weaponizes your own attention span",
-    "blurb": "Click for Stimulation Points, then spend them on true-crime podcasts, a DVD logo bouncing in the corner, and pure sensory chaos. It's a cry for help you can idle.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:42.330Z"
   },
   {
     "id": "gw-internet-roadtrip",
@@ -130,26 +210,6 @@ export default [
     "url": "https://drawing.garden",
     "source": "weird",
     "archivedAt": "2026-07-03T07:14:54.687Z"
-  },
-  {
-    "id": "gw-lhc",
-    "kind": "site",
-    "era": "current",
-    "title": "Has the Large Hadron Collider destroyed the world yet?",
-    "blurb": "A single-serving site that answers the year's most reassuring question. Spoiler: the answer is still NO, in comforting giant letters. Bookmark it for peace of mind.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:54.601Z"
-  },
-  {
-    "id": "gw-sito-synergy",
-    "kind": "site",
-    "era": "current",
-    "title": "A collaborative art grid that's been nesting since 1997",
-    "blurb": "Gridcosm stacks 3×3 grids inside 3×3 grids forever, each cell hand-drawn by whoever showed up that year. It's been quietly zooming inward since dial-up was the only-up.",
-    "url": "https://www.sito.org/synergy/",
-    "source": "weird",
-    "archivedAt": "2026-07-03T07:14:54.051Z"
   },
   {
     "id": "g:slop-evader",
@@ -855,16 +915,6 @@ export default [
     "archivedAt": "2026-06-29T07:58:03.448Z"
   },
   {
-    "id": "gw-wplace",
-    "kind": "site",
-    "era": "current",
-    "title": "A pixel canvas painted onto the whole planet that never resets",
-    "blurb": "Four trillion pixels stretched over a world map, where everyone paints together and nothing ever wipes clean. Like the Million Dollar Homepage, except the size of Earth and slightly out of control.",
-    "url": "https://wplace.live",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:02.691Z"
-  },
-  {
     "id": "g:game-qwop",
     "kind": "game",
     "era": "nostalgic",
@@ -1309,16 +1359,6 @@ export default [
     "archivedAt": "2026-06-17T08:04:01.178Z"
   },
   {
-    "id": "gw-quiet-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A website that walks you away from the internet for two minutes",
-    "blurb": "Minimal, paced, and weirdly soothing — it gently coaxes you off the dopamine treadmill before dumping you back in. We'll allow it.",
-    "url": "https://thequietplaceproject.xyz",
-    "source": "weird",
-    "archivedAt": "2026-06-17T08:04:00.729Z"
-  },
-  {
     "id": "gw-typelit",
     "kind": "site",
     "era": "current",
@@ -1357,15 +1397,5 @@ export default [
     "url": "https://incredibox.com",
     "source": "weird",
     "archivedAt": "2026-06-15T02:36:28.728Z"
-  },
-  {
-    "id": "gw-absurd-website",
-    "kind": "site",
-    "era": "current",
-    "title": "One absurd web toy a month, 48 and counting",
-    "blurb": "absurd.website is one creator's running streak of beautifully pointless browser experiments. Click around — some are art, some are nonsense, all of them feel like finding a stranger's sketchbook.",
-    "url": "https://absurd.website",
-    "source": "weird",
-    "archivedAt": "2026-06-15T02:36:28.476Z"
   }
 ];
