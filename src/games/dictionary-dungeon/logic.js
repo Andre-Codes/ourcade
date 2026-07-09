@@ -26,7 +26,9 @@ import { resolveWordEffect, effectCategoryOf } from "./effects.js";
 import { FIRST_WORD_TITLES, firstWordOmen, sequenceBadge } from "./titles.js";
 import {
   LEVELS,
+  ENEMIES,
   ENEMY_BY_ID,
+  BOSSES,
   BOSS_BY_ID,
   RELICS,
   RELIC_BY_ID,
@@ -47,6 +49,21 @@ const EPOCH_KEY = "2026-06-01"; // anchors the small human "Dungeon #N"
 export const START_HEARTS = 5;
 export const START_COINS = 0;
 const RARE_LETTERS = new Set(["J", "Q", "X", "Z"]);
+
+// ── blocking ──────────────────────────────────────────────────────────────────
+// A defense-category word (shield/parry/block/…) raises a BLOCK that negates the
+// NEXT enemy counterattack, then goes on cooldown so you can't block every turn.
+// Cooldown length / block strength are computed from state so future relics or
+// scrolls can modify them (e.g. a shorter cooldown or a cooldown-ignoring block).
+const BLOCK_COOLDOWN = 3; // turns before another block can be raised
+function blockCooldownFor(state) {
+  // Hook point: relics/scrolls could lower this. Default fixed for now.
+  return BLOCK_COOLDOWN;
+}
+// Damage reduction applied to a blocked counterattack (1 = full negate).
+function blockStrengthFor(state) {
+  return 1; // full block for now; a partial-block relic could return <1.
+}
 
 // Hidden word Easter eggs. These aren't real ENABLE words, so they never pass
 // the dictionary gate — we intercept them BEFORE isWord() and answer with a
@@ -195,16 +212,23 @@ function assembleRooms(level, levelIdx, dayKey, s) {
       room.relicChoices = s.pickN(RELICS, 3).map((r) => r.id);
     }
     if (type === "merchant") {
-      // Seeded stock of 4 offers, priced with a mild per-level markup. At least
-      // one is ALWAYS a healing potion so healing is reliably purchasable (coins
-      // become real survival triage); the other 3 are drawn from the rest.
+      // Seeded stock of 4 offers, priced with a mild per-level markup. Always
+      // include ONE healing potion (reliable survival triage) AND ONE relic
+      // (relics are now a paid purchase alongside the free treasure room); the
+      // remaining slots fill from the rest of the catalog.
       const markup = 1 + levelIdx * 0.15;
       const HEAL_IDS = new Set(["buy-minor-heal", "buy-heal", "buy-greater-heal"]);
       const heals = MERCHANT_STOCK.filter((m) => HEAL_IDS.has(m.id));
-      const others = MERCHANT_STOCK.filter((m) => !HEAL_IDS.has(m.id));
-      const guaranteedHeal = s.pick(heals);
-      const rest = s.pickN(others, 3);
-      room.offers = s.shuffle([guaranteedHeal, ...rest]).slice(0, 4).map((m) => ({
+      const relicStock = MERCHANT_STOCK.filter((m) => m.kind === "relic");
+      const chosen = [];
+      chosen.push(s.pick(heals));
+      if (relicStock.length) chosen.push(s.pick(relicStock));
+      const chosenIds = new Set(chosen.map((m) => m.id));
+      const rest = s.pickN(
+        MERCHANT_STOCK.filter((m) => !chosenIds.has(m.id)),
+        Math.max(0, 4 - chosen.length)
+      );
+      room.offers = s.shuffle([...chosen, ...rest]).slice(0, 4).map((m) => ({
         ...m,
         price: Math.max(1, Math.round(m.basePrice * markup)),
         sold: false,
@@ -264,13 +288,110 @@ export function buildRun(dayKey) {
     levelFlags: {},
     roomFails: 0, // wrong-word count in the CURRENT room (rule-fail penalty)
     famished: false, // set while a food-sealing enemy is alive in this room
+    blockCooldown: 0, // turns until a defense-word BLOCK can be raised again
     over: false,
     won: false,
     deathCause: null,
+    canDescend: false, // set when the current run's last level is cleared (endless prompt)
+    clearedBase: false, // the fixed 6-level dungeon has been beaten at least once
+    descentCycle: 0, // how many endless floors descended past the base dungeon
     // transient scroll effects queued for the next turn
     pending: {}, // e.g. { bonusDamage: 6, forgiveFail: true, clearRule: true }
     log: [],
   };
+}
+
+// ── endless mode (post-Lich) ────────────────────────────────────────────────
+// After the fixed six levels, the run can DESCEND into escalating endless floors
+// ("who can last the longest"). Each descent appends one new level with a punny
+// name, the hardest rule pools, a mixed enemy roster, and a difficulty BAND that
+// scales enemy/boss HP + damage. Occasional cycles are "spikes" (elite floors).
+const ENDLESS_NAMES = [
+  "The Deeper Lexicon", "The Unabridged Depths", "The Apocrypha",
+  "The Errata Abyss", "The Marginalia", "The Lost Appendix",
+  "The Redacted Index", "The Endless Errata", "Appendix ∞",
+];
+const ENDLESS_ACCENTS = ["#b06b6b", "#8f6bb0", "#6f8f8a", "#5fae7a", "#c9a24a"];
+
+// A synthetic endless "level" fed to assembleRooms: hardest rules + all enemies.
+function endlessLevelTemplate(cycle) {
+  const hardPool = LEVELS[LEVELS.length - 1].ruleSpecs; // Final Lexicon (hardest)
+  return {
+    id: `endless-${cycle}`,
+    name: ENDLESS_NAMES[(cycle - 1) % ENDLESS_NAMES.length],
+    accent: ENDLESS_ACCENTS[(cycle - 1) % ENDLESS_ACCENTS.length],
+    roomCount: 5,
+    tone: "a depth the dictionary was never meant to hold",
+    intros: [
+      "You descend past the last page into something unpaginated.",
+      "The words down here were struck from every edition. They remember being read.",
+      "Deeper. The dark turns each letter over, weighing you.",
+    ],
+    ruleSpecs: hardPool,
+    enemyIds: ENEMIES.map((e) => e.id), // full roster
+    bossId: BOSSES[(cycle - 1) % BOSSES.length].id, // rotate bosses
+  };
+}
+
+/* Descend one endless floor: append a scaled level and drop the player into it.
+   Called by the cabinet when the player chooses "Descend Deeper". Mutates state. */
+export function descend(state) {
+  const out = { ok: true, logLines: [] };
+  const cycle = (state.descentCycle || 0) + 1;
+  state.descentCycle = cycle;
+  const template = endlessLevelTemplate(cycle);
+
+  // Difficulty band: HP + damage grow per cycle, with an "elite" spike every 3rd
+  // floor. Deterministic from the run seed so a daily endless is shared.
+  const spike = cycle % 3 === 0 ? 1.35 : 1;
+  const hpBand = (1 + cycle * 0.35) * spike;
+  const dmgBand = 1 + Math.floor(cycle / 2) * 0.5; // damage steps up every 2 floors
+
+  const ls = stream((state.seed ^ daySeed(`endless|${cycle}`)) >>> 0);
+  const rooms = assembleRooms(template, LEVELS.length + cycle - 1, state.dayKey, ls);
+  // Bake scaled enemy HP into the rooms (damage is scaled at read-time by band).
+  for (const room of rooms) {
+    if (room.enemyHP != null) {
+      room.enemyHP = Math.round(room.enemyHP * hpBand);
+      room.enemyMaxHP = Math.round(room.enemyMaxHP * hpBand);
+    }
+  }
+  state.levels.push({
+    id: template.id,
+    name: template.name,
+    accent: template.accent,
+    tone: template.tone,
+    rooms,
+    bossId: template.bossId,
+    totalRooms: rooms.length + 1,
+    endless: true,
+    hpBand,
+    dmgBand,
+  });
+
+  // Enter the new level.
+  state.levelIdx = state.levels.length - 1;
+  state.roomIdx = 0;
+  state.bossPhase = 0;
+  state.canDescend = false;
+  state.prevWord = null;
+  state.roomFails = 0;
+  state.blockCooldown = 0;
+  delete state.pending.blockNext;
+  delete state.bossHP;
+  if (state.relics.includes("second-wind")) {
+    state.hearts = Math.min(state.maxHearts, state.hearts + 1);
+  }
+  out.logLines.push(`> You descend into ${template.name}.${spike > 1 ? " Something far stronger stirs here." : ""}`);
+  syncRoomEntry(state);
+  return out;
+}
+
+/* End the run here (bank the score) after a clear, instead of descending. */
+export function endRun(state) {
+  state.canDescend = false;
+  state.over = true;
+  return { ok: true };
 }
 
 // ── current-room resolution ──────────────────────────────────────────────────
@@ -296,17 +417,23 @@ export function currentBoss(state) {
 // The active enemy/target descriptor for the current step: a room enemy, a boss
 // phase, or null for a gate/treasure/trap with no HP. Includes the rule spec.
 export function currentTarget(state) {
+  // Endless levels (past the fixed 6) carry a difficulty band that scales enemy/
+  // boss HP + damage; fixed levels have no band (multiplier 1).
+  const lvlNow = currentLevel(state);
+  const hpBand = lvlNow?.hpBand || 1;
+  const dmgBand = lvlNow?.dmgBand || 1;
   if (isBossRoom(state)) {
     const boss = currentBoss(state);
     if (!boss) return null;
     const phase = boss.phases[state.bossPhase] || boss.phases[boss.phases.length - 1];
+    const phaseMax = Math.round(phase.hp * hpBand);
     return {
       kind: "boss",
       name: boss.name,
       emoji: boss.emoji,
-      hp: state.bossHP ?? phase.hp,
-      maxHP: phase.hp,
-      damage: boss.damage,
+      hp: state.bossHP ?? phaseMax,
+      maxHP: phaseMax,
+      damage: Math.max(1, Math.round(boss.damage * dmgBand)),
       kindTags: boss.kindTags,
       weaknessTags: boss.weaknessTags,
       resistanceTags: boss.resistanceTags,
@@ -327,7 +454,9 @@ export function currentTarget(state) {
       emoji: e.emoji,
       hp: room.enemyHP,
       maxHP: room.enemyMaxHP,
-      damage: e.damage,
+      // Enemy HP is baked into the room at assembly (scaled there for endless);
+      // damage is scaled here by the level's band.
+      damage: Math.max(1, Math.round(e.damage * dmgBand)),
       kindTags: e.kindTags,
       weaknessTags: e.weaknessTags,
       resistanceTags: e.resistanceTags,
@@ -348,6 +477,14 @@ export function currentTarget(state) {
 export function activeRule(state) {
   const t = currentTarget(state);
   return t ? getRule(t.ruleSpec) : getRule("any");
+}
+
+// Banded max HP for a boss phase (endless levels scale it; fixed levels = raw).
+function bossPhaseMaxHP(state, boss, phaseIdx) {
+  const lvl = currentLevel(state);
+  const band = lvl?.hpBand || 1;
+  const phase = boss.phases[phaseIdx] || boss.phases[boss.phases.length - 1];
+  return Math.round(phase.hp * band);
 }
 
 // ── damage formula ────────────────────────────────────────────────────────────
@@ -430,6 +567,20 @@ export function resolveTurn(state, rawWord, seedOverride) {
     return out;
   }
 
+  // 0b) EXCALIBUR — a legendary power-word unlocked by the Sword in the Stone
+  // relic. It isn't an ENABLE word, so it's an explicit intercept: with the relic
+  // it lands a rule-ignoring legendary weapon strike; without it, the blade
+  // refuses an unworthy hand (a whiff, like any unrecognized word). It IS spent
+  // (added to `used`) so it can't be spammed every turn.
+  if (w === "EXCALIBUR") {
+    if (!state.relics.includes("sword-in-stone")) {
+      out.reason = "invalid";
+      out.logLines.push("> EXCALIBUR does not stir. The blade will not come to an unworthy hand.");
+      return out;
+    }
+    return resolveExcalibur(state, out, s, flav);
+  }
+
   // 1) real word?
   if (!isWord(w)) {
     out.reason = "invalid";
@@ -500,6 +651,29 @@ export function resolveTurn(state, rawWord, seedOverride) {
 
   // word-effect (semantic) — only meaningful vs an enemy/boss with tags
   const effectCat = effectCategoryOf(w);
+
+  // Blocking: a defense-category word raises a block against the NEXT counter,
+  // unless it's on cooldown. Only meaningful vs an enemy/boss (a gate has no
+  // counter). The cooldown ticks down once per accepted turn (below).
+  const targetCanCounter = target && (target.kind === "monster" || target.kind === "trap" || target.kind === "boss");
+  let raisedBlockThisTurn = false;
+  if (effectCat === "defense" && targetCanCounter) {
+    if ((state.blockCooldown || 0) <= 0) {
+      state.pending.blockNext = true;
+      state.blockCooldown = blockCooldownFor(state);
+      raisedBlockThisTurn = true;
+      out.logLines.push(`> You raise the ${w} — the next blow will be turned aside.`);
+    } else {
+      // This turn ticks the cooldown down by 1 (below), so report the value the
+      // player will see AFTER this turn resolves.
+      const after = Math.max(0, state.blockCooldown - 1);
+      out.logLines.push(`> You reach for a guard, but it isn't ready yet (${after} more turn${after === 1 ? "" : "s"}).`);
+    }
+  }
+  // Tick the block cooldown down once per accepted turn — but NOT on the turn a
+  // block was just raised (so a cooldown of N means N full turns before reuse).
+  if (!raisedBlockThisTurn && state.blockCooldown > 0) state.blockCooldown -= 1;
+
   let effect = null;
   if (target && (target.kind === "monster" || target.kind === "trap" || target.kind === "boss")) {
     effect = resolveWordEffect(w, target, seed);
@@ -521,8 +695,11 @@ export function resolveTurn(state, rawWord, seedOverride) {
   let damage = parts.reduce((a, p) => a + Math.max(0, p.amount), 0);
   out.damage = damage;
 
-  // 4) narrate the hit
-  out.logLines.push(`> You played ${w}.${tier === "goblin" ? " (a goblin word!)" : tier === "obscure" ? " (obscure)" : ""}`);
+  // 4) narrate the hit — attribute to the player's earned title if they have one
+  // ("Tower Giant plays APPLES"), else the plain "You played APPLES".
+  const actor = state.title?.title;
+  const actorLine = actor ? `${actor} plays ${w}` : `You played ${w}`;
+  out.logLines.push(`> ${actorLine}.${tier === "goblin" ? " (a goblin word!)" : tier === "obscure" ? " (obscure)" : ""}`);
   if (effect && effect.text) out.logLines.push(`> ${effect.text}`);
   // A categoryless word normally gets the plain "no special weight" line — but a
   // RARE word (goblin/obscure) earns a flavor line that respects its rarity so
@@ -557,6 +734,56 @@ export function resolveTurn(state, rawWord, seedOverride) {
   }
 
   // 5) apply damage to the target and progress
+  applyDamageAndProgress(state, target, damage, out, flav);
+
+  return out;
+}
+
+// EXCALIBUR power-word resolution (relic already confirmed by the caller). A
+// rule-ignoring, no-repeat-of-others legendary weapon strike: big flat damage +
+// weapon-category weakness/resist flavor. Spent afterward (added to `used`) so
+// it can't be repeated. Mutates state/out and returns out.
+const EXCALIBUR_BASE = 18; // legendary flat damage before weakness/resist
+function resolveExcalibur(state, out, s, flav) {
+  const w = "EXCALIBUR";
+  if ((state.used || []).includes(w)) {
+    out.reason = "repeat";
+    out.logLines.push("> EXCALIBUR has already been drawn this run — the stone holds it fast now.");
+    return out;
+  }
+
+  out.accepted = true;
+  out.ok = true;
+  state.prevWord = w;
+  state.words.push({ word: w, tier: "goblin", rank: null });
+  (state.used || (state.used = [])).push(w);
+
+  const target = currentTarget(state);
+  let damage = EXCALIBUR_BASE;
+  // Route through the weapon-category effect vs the target for weakness/resist
+  // flavor (EXCALIBUR reads as a weapon). We reuse SWORD as the effect proxy so
+  // the semantic system stays the single source of weapon interactions.
+  let effect = null;
+  if (target && (target.kind === "monster" || target.kind === "trap" || target.kind === "boss")) {
+    effect = resolveWordEffect("SWORD", target, state.seed >>> 0);
+    if (effect) damage += (effect.damageBonus || 0) + (effect.weaknessBonus || 0);
+  }
+
+  const actor = state.title?.title;
+  out.logLines.push(`> ${actor ? `${actor} draws` : "You draw"} EXCALIBUR from the stone — the dungeon holds its breath.`);
+  out.logLines.push(effect?.resisted
+    ? "> The legendary blade bites, though this foe is oddly unbothered."
+    : "> A blaze of old light: the sword falls like a verdict.");
+
+  out.damage = damage;
+  applyDamageAndProgress(state, target, damage, out, flav);
+  return out;
+}
+
+// Apply a computed hit to the current target (enemy / boss / gate) and advance.
+// Shared by the normal accepted-word path and the EXCALIBUR power-word so both
+// resolve kills, boss phases, and counterattacks identically. Mutates state/out.
+function applyDamageAndProgress(state, target, damage, out, flav) {
   if (target && (target.kind === "monster" || target.kind === "trap")) {
     const room = currentRoom(state);
     room.enemyHP = Math.max(0, room.enemyHP - damage);
@@ -571,13 +798,13 @@ export function resolveTurn(state, rawWord, seedOverride) {
     }
   } else if (target && target.kind === "boss") {
     const boss = currentBoss(state);
-    const phase = boss.phases[state.bossPhase];
-    state.bossHP = Math.max(0, (state.bossHP ?? phase.hp) - damage);
-    out.logLines.push(`> ${damage} damage. (${boss.name} phase ${state.bossPhase + 1}/${boss.phases.length}: ${state.bossHP}/${phase.hp})`);
+    const phaseMax = bossPhaseMaxHP(state, boss, state.bossPhase);
+    state.bossHP = Math.max(0, (state.bossHP ?? phaseMax) - damage);
+    out.logLines.push(`> ${damage} damage. (${boss.name} phase ${state.bossPhase + 1}/${boss.phases.length}: ${state.bossHP}/${phaseMax})`);
     if (state.bossHP <= 0) {
       if (state.bossPhase + 1 < boss.phases.length) {
         state.bossPhase += 1;
-        state.bossHP = boss.phases[state.bossPhase].hp;
+        state.bossHP = bossPhaseMaxHP(state, boss, state.bossPhase);
         state.prevWord = null;
         out.bossPhaseChanged = true;
         out.logLines.push(`> ${boss.name} shifts. ${boss.phases[state.bossPhase].intent}`);
@@ -599,8 +826,6 @@ export function resolveTurn(state, rawWord, seedOverride) {
     advanceRoom(state, out);
     out.cleared = true;
   }
-
-  return out;
 }
 
 // A failed word may be forgiven by a relic (once/level) or a queued scroll.
@@ -625,7 +850,22 @@ function enemyCounter(state, target, out) {
     out.logLines.push(`> Smoke swallows ${target.name}'s counter — no damage.`);
     return;
   }
-  const dmg = target.damage || 1;
+  const baseDmg = target.damage || 1;
+  // A raised BLOCK (from a defense word) reduces the incoming counter. Full block
+  // (strength 1) negates it entirely; a partial-block relic could reduce it.
+  if (state.pending.blockNext) {
+    delete state.pending.blockNext;
+    const reduced = Math.max(0, Math.round(baseDmg * (1 - blockStrengthFor(state))));
+    if (reduced <= 0) {
+      out.logLines.push(`> You turn aside ${target.name}'s blow — no damage.`);
+      return;
+    }
+    state.hearts -= reduced;
+    out.logLines.push(`> You partly block ${target.name}'s blow — only ${reduced} heart${reduced === 1 ? "" : "s"} lost. (❤ ${state.hearts})`);
+    checkDeath(state, out, deathBy(target.name));
+    return;
+  }
+  const dmg = baseDmg;
   state.hearts -= dmg;
   out.logLines.push(`> ${target.name} strikes for ${dmg} heart${dmg === 1 ? "" : "s"}. (❤ ${state.hearts})`);
   checkDeath(state, out, deathBy(target.name));
@@ -692,6 +932,10 @@ function advanceRoom(state, out) {
   const lvl = currentLevel(state);
   state.prevWord = null;
   state.roomFails = 0;
+  // A raised block and its cooldown don't carry between rooms — each fight is
+  // fresh (you can raise a block on the first turn of the next enemy).
+  delete state.pending.blockNext;
+  state.blockCooldown = 0;
   delete state.bossHP;
   if (state.roomIdx < lvl.rooms.length) {
     state.roomIdx += 1; // may land on the boss (roomIdx === rooms.length)
@@ -707,10 +951,18 @@ function advanceRoom(state, out) {
         out.logLines.push(`> Second Wind: you catch your breath. (❤ ${state.hearts})`);
       }
     } else {
-      // final boss cleared → victory
-      state.over = true;
-      state.won = true;
-      out.logLines.push("> The dungeon is silent. You have won.");
+      // Last level in the run cleared. Instead of ending, PAUSE and offer the
+      // choice to descend deeper (endless) or bank the score. The cabinet reads
+      // state.canDescend to show the interstitial. The very first time (the fixed
+      // Unabridged Lich) is the real "you won" beat; deeper clears just survive.
+      state.canDescend = true;
+      if (!state.clearedBase) {
+        state.clearedBase = true;
+        state.won = true;
+        out.logLines.push("> The dungeon is silent. You have cleared the Unabridged Lich.");
+      } else {
+        out.logLines.push("> Another depth conquered. The dark keeps unfolding.");
+      }
     }
   }
   syncRoomEntry(state);
@@ -803,12 +1055,11 @@ function dealDirectDamage(state, amount) {
   }
   if (target && target.kind === "boss") {
     const boss = currentBoss(state);
-    const phase = boss.phases[state.bossPhase];
-    state.bossHP = Math.max(0, (state.bossHP ?? phase.hp) - amount);
+    state.bossHP = Math.max(0, (state.bossHP ?? bossPhaseMaxHP(state, boss, state.bossPhase)) - amount);
     if (state.bossHP <= 0) {
       if (state.bossPhase + 1 < boss.phases.length) {
         state.bossPhase += 1;
-        state.bossHP = boss.phases[state.bossPhase].hp;
+        state.bossHP = bossPhaseMaxHP(state, boss, state.bossPhase);
         state.prevWord = null;
       } else {
         awardClear(state, out, true);
@@ -998,21 +1249,26 @@ export function floorLabel(state) {
   const lvl = currentLevel(state);
   if (!lvl) return "—";
   const room = isBossRoom(state) ? "Boss" : `Room ${state.roomIdx + 1}`;
+  // Endless floors read as "Depth N" (how far past the base dungeon).
+  if (lvl.endless) return `Depth ${state.descentCycle} · ${room}`;
   return `${state.levelIdx + 1} · ${room}`;
 }
 
 /* Final leaderboard score: room/boss clears + surviving hearts + coins + rare
-   word bonuses. One number, higher is better. */
+   word bonuses, plus an escalating endless-depth bonus so "lasting longer" wins. */
 export function runScore(state) {
   const prog = runProgress(state);
   let score = prog.done * 100; // each cleared room/boss
-  if (state.won) score += 500; // victory bonus
+  if (state.won) score += 500; // victory bonus (cleared the base dungeon)
   score += state.hearts * 60; // surviving hearts
   score += state.coins * 5;
   for (const rec of state.words) {
     if (rec.tier === "goblin") score += 25;
     else if (rec.tier === "obscure") score += 10;
   }
+  // Endless depth: each descent is worth progressively more (1000, 2000, …).
+  const cycle = state.descentCycle || 0;
+  if (cycle > 0) score += (cycle * (cycle + 1) / 2) * 1000;
   return score;
 }
 
@@ -1035,6 +1291,7 @@ export function runRecap(state) {
     best: longest?.word || null,
     floor: floorLabel(state),
     won: state.won,
+    depth: state.descentCycle || 0,
     deathCause: state.deathCause,
     title: state.title?.title || null,
     badges: (state.badges || []).map((b) => ({ name: b.name, kind: b.kind || "badge" })),
@@ -1053,7 +1310,9 @@ export function shareLine(state) {
     return `OURCADE Dictionary Dungeon (practice) — ${recap.won ? "Escaped!" : `Floor ${recap.floor}`} · ${recap.score} 📖`;
   }
   const n = dungeonNumber(state.dayKey);
-  const tail = recap.won ? "🏆 Cleared!" : `Floor ${recap.floor} 💀`;
+  const tail = recap.depth > 0
+    ? `🏆 Cleared + Depth ${recap.depth} 🕳️`
+    : recap.won ? "🏆 Cleared!" : `Floor ${recap.floor} 💀`;
   return `OURCADE Dictionary Dungeon #${n} — ${tail} · ${recap.score} 📖`;
 }
 
@@ -1062,7 +1321,9 @@ export function shareLine(state) {
 // starting inventory.
 // v3: added cosmetic first-word title + starting-secret badges (state.title,
 // state.badges). Old saves are discarded (start fresh).
-export const SAVE_VERSION = 3;
+// v4: added blocking (blockCooldown), endless mode (canDescend, clearedBase,
+// descentCycle, appended endless levels). Old saves are discarded.
+export const SAVE_VERSION = 4;
 
 export const isSaveable = (state) => !!state && !state.over;
 
@@ -1083,5 +1344,9 @@ export function hydrateGame(saved) {
   if (typeof s.famished !== "boolean") s.famished = false;
   if (s.title === undefined) s.title = null;
   if (!Array.isArray(s.badges)) s.badges = [];
+  if (typeof s.blockCooldown !== "number") s.blockCooldown = 0;
+  if (typeof s.canDescend !== "boolean") s.canDescend = false;
+  if (typeof s.clearedBase !== "boolean") s.clearedBase = false;
+  if (typeof s.descentCycle !== "number") s.descentCycle = 0;
   return s;
 }

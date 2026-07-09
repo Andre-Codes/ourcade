@@ -239,7 +239,10 @@ function autoSolve(key) {
   state.hearts = 99;
   state.maxHearts = 99;
   let guard = 0;
-  while (!state.over && guard++ < 500) {
+  // Clearing the base dungeon sets state.canDescend (endless prompt) with
+  // over=false; that's a WIN for the solver — it stops here rather than descending
+  // into the (unbounded) endless floors.
+  while (!state.over && !state.canDescend && guard++ < 500) {
     if (isChoiceRoom(state)) {
       const room = currentRoom(state);
       takeRelic(state, room.relicChoices[0]);

@@ -348,6 +348,10 @@ const WORD_LISTS = {
     "gauntlet", "breastplate", "cover", "bunker", "barricade", "defend",
     "cuirass", "greaves", "pauldron", "vambrace", "brigandine", "hauberk",
     "palisade", "portcullis", "battlement", "redoubt",
+    // Active defensive verbs — these are the words that trigger a BLOCK (logic.js
+    // reads the "defense" category + the category's `block` stat).
+    "parry", "parries", "block", "blocks", "deflect", "deflects", "dodge",
+    "dodges", "brace", "braces", "fend", "repel", "repels", "defends", "wards",
   ],
   food: [
     // Everyday

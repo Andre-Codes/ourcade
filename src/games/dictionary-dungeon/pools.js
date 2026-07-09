@@ -411,7 +411,6 @@ export const RELICS = [
   { id: "commoners-cloak", name: "Commoner's Cloak", emoji: "🧥", effectTag: "common-heal", description: "The first common word each level heals 1 heart." },
   { id: "scrabble-tile", name: "Scrabble Tile", emoji: "🔠", effectTag: "rareletter-plus4", description: "Words with J/Q/X/Z deal +4 damage." },
   { id: "vowel-charm", name: "Vowel Charm", emoji: "🔮", effectTag: "vowel-pardon", description: "Once per level, a vowel-rule failure is forgiven." },
-  { id: "lantern-of-hints", name: "Lantern of Hints", emoji: "🏮", effectTag: "boss-hint", description: "Reveals a valid starting letter at the start of each boss." },
   { id: "iron-bookmark", name: "Iron Bookmark", emoji: "🔖", effectTag: "first-fail-forgiven", description: "The first failed word each level costs no heart." },
   { id: "palindrome-coin", name: "Palindrome Coin", emoji: "🪙", effectTag: "double-coins", description: "Words with a double letter earn +2 coins." },
   { id: "whetstone", name: "Whetstone", emoji: "⚔️", effectTag: "weapon-plus2", description: "Weapon-words deal an extra +2 damage." },
@@ -432,14 +431,17 @@ export const RELICS = [
   { id: "short-blade", name: "Short Blade", emoji: "🔪", effectTag: "short-plus2", description: "+2 damage for words 4 letters or shorter." },
   { id: "runed-anvil", name: "Runed Anvil", emoji: "🔨", effectTag: "blunt-plus2", description: "Blunt-words deal an extra +2 damage." },
   { id: "second-wind", name: "Second Wind", emoji: "🌬️", effectTag: "level-heal", description: "Heal 1 heart at the start of each level." },
+  // Legendary: unlocks the EXCALIBUR power-word (handled specially in logic.js).
+  { id: "sword-in-stone", name: "Sword in the Stone", emoji: "🗿", effectTag: "excalibur", description: "You alone may speak EXCALIBUR — a legendary strike that ignores the room's rule." },
 ];
 
 export const RELIC_BY_ID = Object.fromEntries(RELICS.map((r) => [r.id, r]));
 
 // ── SCROLLS ───────────────────────────────────────────────────────────────────
 // One-use tools. `effectTag` resolved in logic.js when consumed.
+// (Hint-flavored scrolls — hint-scroll / lantern-scroll — are parked: the Hint
+// feature is disabled, so they're removed from the offered pool.)
 export const SCROLLS = [
-  { id: "hint-scroll", name: "Hint Scroll", emoji: "📜", effectTag: "reveal-starter", description: "Reveals one valid starting letter for this room." },
   { id: "clean-slate", name: "Clean Slate", emoji: "🧼", effectTag: "clear-rule", description: "Removes this room's rule for one word." },
   { id: "word-bomb", name: "Word Bomb", emoji: "💣", effectTag: "bonus-damage", description: "Your next valid word deals +6 damage." },
   { id: "vowel-pardon", name: "Vowel Pardon", emoji: "🕊️", effectTag: "forgive-fail", description: "Your next failed word is forgiven (no heart lost)." },
@@ -448,7 +450,6 @@ export const SCROLLS = [
   // Expansion
   { id: "greater-draught", name: "Greater Draught", emoji: "⚗️", effectTag: "heal-4", description: "Restores 4 hearts." },
   { id: "smoke-bomb", name: "Smoke Bomb", emoji: "💨", effectTag: "skip-counter", description: "The enemy's next counterattack is skipped." },
-  { id: "lantern-scroll", name: "Lantern Scroll", emoji: "🔦", effectTag: "reveal-three", description: "Reveals three useful letters for this room." },
   { id: "greater-bomb", name: "Greater Word Bomb", emoji: "🧨", effectTag: "bonus-damage-big", description: "Your next valid word deals +12 damage." },
   { id: "banish-scroll", name: "Banish Scroll", emoji: "🌀", effectTag: "banish", description: "Instantly deal 8 damage to the enemy." },
   { id: "coin-scroll", name: "Coin Scroll", emoji: "🪙", effectTag: "gain-coins", description: "Gain 10 coins." },
@@ -568,7 +569,6 @@ export const MERCHANT_STOCK = [
   { id: "buy-heal", kind: "heal", value: 2, basePrice: 14, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
   { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 24, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
   { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
-  { id: "buy-hint", kind: "scroll", grant: "hint-scroll", basePrice: 6, name: "Hint Scroll", emoji: "📜", description: "Reveals a valid starting letter." },
   { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
   { id: "buy-bomb", kind: "scroll", grant: "word-bomb", basePrice: 12, name: "Word Bomb", emoji: "💣", description: "Next word deals +6." },
   { id: "buy-greater-bomb", kind: "scroll", grant: "greater-bomb", basePrice: 20, name: "Greater Word Bomb", emoji: "🧨", description: "Next word deals +12." },
@@ -577,6 +577,14 @@ export const MERCHANT_STOCK = [
   { id: "buy-relic-whetstone", kind: "relic", grant: "whetstone", basePrice: 20, name: "Whetstone", emoji: "⚔️", description: "Weapon-words deal +2." },
   { id: "buy-relic-purse", kind: "relic", grant: "coin-purse", basePrice: 24, name: "Bottomless Purse", emoji: "👛", description: "+3 coins per room cleared." },
   { id: "buy-relic-stomach", kind: "relic", grant: "iron-stomach", basePrice: 18, name: "Iron Stomach", emoji: "🍖", description: "Food heals +1 extra." },
+  { id: "buy-relic-thesaurus", kind: "relic", grant: "thesaurus-shard", basePrice: 20, name: "Thesaurus Shard", emoji: "💠", description: "+1 damage for every 5+ letter word." },
+  { id: "buy-relic-secondwind", kind: "relic", grant: "second-wind", basePrice: 22, name: "Second Wind", emoji: "🌬️", description: "Heal 1 heart each new level." },
+  { id: "buy-relic-tinderbox", kind: "relic", grant: "tinderbox", basePrice: 20, name: "Tinderbox", emoji: "🔥", description: "Fire-words deal +2." },
+  { id: "buy-relic-reliquary", kind: "relic", grant: "reliquary", basePrice: 20, name: "Reliquary", emoji: "✝️", description: "Holy-words deal +2." },
+  { id: "buy-relic-scrabble", kind: "relic", grant: "scrabble-tile", basePrice: 22, name: "Scrabble Tile", emoji: "🔠", description: "J/Q/X/Z words deal +4." },
+  { id: "buy-relic-bookmark", kind: "relic", grant: "iron-bookmark", basePrice: 18, name: "Iron Bookmark", emoji: "🔖", description: "First failed word each level costs no heart." },
+  // Legendary — rare, expensive; unlocks the EXCALIBUR power-word.
+  { id: "buy-relic-excalibur", kind: "relic", grant: "sword-in-stone", basePrice: 40, name: "Sword in the Stone", emoji: "🗿", description: "Speak EXCALIBUR: a rule-ignoring legendary strike." },
 ];
 
 // ── EVENTS ─────────────────────────────────────────────────────────────────────
@@ -633,7 +641,7 @@ export const EVENTS = [
     bodyText: "A quill floats mid-air, scratching at a page that keeps erasing itself.",
     choices: [
       { label: "Take the quill", outcome: { relic: "rusty-quill" }, resultText: "You snatch the quill — a Rusty Quill, still warm with ink." },
-      { label: "Read the page", outcome: { scroll: "lantern-scroll" }, resultText: "The page reveals a hint before vanishing — a Lantern Scroll folds into your pack." },
+      { label: "Read the page", outcome: { coins: 7 }, resultText: "The page crumbles to coins in your hand before it can finish writing. (+7 coins)" },
     ],
   },
   {
@@ -655,9 +663,9 @@ export const EVENTS = [
   },
   {
     id: "candle-vendor",
-    bodyText: "A hooded figure sells a single guttering candle. 'It remembers the way,' they murmur.",
+    bodyText: "A hooded figure sells a single guttering candle. 'It wards off what bites in the dark,' they murmur.",
     choices: [
-      { label: "Buy it (7 coins)", requires: { coins: 7 }, outcome: { coins: -7, scroll: "lantern-scroll" }, resultText: "The candle becomes a Lantern Scroll in your grip." },
+      { label: "Buy it (7 coins)", requires: { coins: 7 }, outcome: { coins: -7, scroll: "healing-draught" }, resultText: "The candle's warmth condenses into a Healing Draught in your grip." },
       { label: "Blow it out", outcome: { heal: 1 }, resultText: "Darkness, then calm. You breathe easier. (+1 heart)" },
     ],
   },

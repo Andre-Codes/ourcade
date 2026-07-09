@@ -22,6 +22,15 @@ import ShareButton from "../components/ShareButton.jsx";
 
 const GAME_ID = "dictionary-dungeon";
 const SAVE_KEY = "dictionary-dungeon:save"; // { ...serializeGame(state), mode }
+const LOG_DIVIDER = "---"; // sentinel line → renders as a stage divider (see renderLogLine)
+const LOG_CAP = 80;
+
+// Append a batch of log lines as a distinct "stage": prefix a divider (unless the
+// log is empty) so each turn/scroll/event reads as its own block, then cap length.
+function appendLog(prev, lines) {
+  const batch = prev.length ? [LOG_DIVIDER, ...lines] : [...lines];
+  return [...prev, ...batch].slice(-LOG_CAP);
+}
 
 // The logic module is loaded lazily (it pulls the big dictionary payload). We
 // cache the promise so re-mounts don't re-import.
@@ -39,8 +48,9 @@ export default function DictionaryDungeon() {
   const [toast, setToast] = useState(null);
   const [screen, setScreen] = useState("title"); // title | play | over
   const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
+  const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
   const logRef = useRef(null);
-  const inputRef = useRef(null);
+  const revealSig = useRef(null); // last-shown encounter signature (dedupe reveals)
   const fxTimers = useRef([]); // pending setTimeouts (paced log / fx) to clear
   const quit = useQuitConfirm();
   const { submit } = useArcadeScore(GAME_ID);
@@ -98,6 +108,57 @@ export default function DictionaryDungeon() {
   // Clear any pending fx/log timers on unmount.
   useEffect(() => () => fxTimers.current.forEach(window.clearTimeout), []);
 
+  // Showcase reveal cards: when the player reaches a NEW level, a NEW enemy, or a
+  // boss shifts to a NEW phase, pop a transient card ("You've encountered a Cave
+  // Bat", its HP + intent) that settles before the fight. Purely presentational —
+  // driven off the current target/level signature. Auto-dismisses (or on tap).
+  const revealTimer = useRef(null);
+  useEffect(() => {
+    if (screen !== "play" || !logic || !state) return;
+    const lvl = logic.currentLevel(state);
+    const target = logic.currentTarget(state);
+    const isFirstRoom = state.roomIdx === 0 && !logic.isBossRoom(state);
+    // Signature: what encounter are we looking at right now?
+    const sig = [
+      lvl?.id,
+      state.levelIdx,
+      logic.isBossRoom(state) ? `boss:${state.bossPhase}` : `room:${state.roomIdx}`,
+      target?.name || "none",
+    ].join("|");
+    if (sig === revealSig.current) return; // already shown this encounter
+    revealSig.current = sig;
+
+    // Decide what (if anything) to showcase. New level entry wins; else a new
+    // enemy or a new boss phase. Non-combat rooms (gate/treasure/merchant/event)
+    // still get a level-entry card on the first room but no enemy card otherwise.
+    let next = null;
+    if (isFirstRoom) {
+      next = { kind: "level", name: lvl?.name, tone: lvl?.tone };
+    } else if (target?.kind === "boss") {
+      next = {
+        kind: "phase", name: target.name, emoji: target.emoji,
+        hp: target.hp, maxHP: target.maxHP, intent: target.intent,
+        phase: target.phase + 1, phaseCount: target.phaseCount,
+      };
+    } else if (target && (target.kind === "monster" || target.kind === "trap")) {
+      next = {
+        kind: "enemy", name: target.name, emoji: target.emoji,
+        hp: target.hp, maxHP: target.maxHP, intent: target.intent,
+      };
+    }
+    if (!next) { setReveal(null); return; }
+    setReveal(next);
+    window.clearTimeout(revealTimer.current);
+    const reduce = typeof window !== "undefined" && window.matchMedia
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    revealTimer.current = window.setTimeout(() => setReveal(null), reduce ? 500 : 1400);
+  }, [screen, logic, state]);
+  useEffect(() => () => window.clearTimeout(revealTimer.current), []);
+  const dismissReveal = useCallback(() => {
+    window.clearTimeout(revealTimer.current);
+    setReveal(null);
+  }, []);
+
   // Flash a toast for a moment.
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -114,6 +175,8 @@ export default function DictionaryDungeon() {
       setLog([`> ${lvl?.rooms?.[0]?.intro || "You descend into the dungeon."}`]);
       setInput("");
       setHitFx(null);
+      setReveal(null);
+      revealSig.current = null; // let the first room re-trigger a level reveal
       setScreen("play");
     },
     [logic, day]
@@ -149,17 +212,19 @@ export default function DictionaryDungeon() {
         const hitLines = cut >= 0 ? lines.slice(0, cut + 1) : lines;
         const afterLines = cut >= 0 ? lines.slice(cut + 1) : [];
         setState(working);
-        setLog((prev) => [...prev, ...hitLines].slice(-80));
+        setLog((prev) => appendLog(prev, hitLines));
         setHitFx(res.cleared ? "slain" : "hit");
         if (afterLines.length) {
+          // The resolution lines belong to the SAME stage as the hit — append
+          // them without a fresh divider (plain concat, still capped).
           fxTimers.current.push(
-            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines].slice(-80)), 560)
+            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines].slice(-LOG_CAP)), 560)
           );
         }
         fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
       } else {
         setState(working);
-        setLog((prev) => [...prev, ...res.logLines].slice(-80));
+        setLog((prev) => appendLog(prev, res.logLines));
         if (res.accepted && res.damage > 0) {
           setHitFx("hit");
           fxTimers.current.push(window.setTimeout(() => setHitFx(null), 260));
@@ -227,7 +292,7 @@ export default function DictionaryDungeon() {
       const r = logic.useScroll(working, scrollId);
       if (r.ok) {
         setState(working);
-        setLog((prev) => [...prev, `> ${r.message}`].slice(-80));
+        setLog((prev) => appendLog(prev, [`> ${r.message}`]));
       } else {
         flash(r.message);
       }
@@ -242,7 +307,7 @@ export default function DictionaryDungeon() {
       const r = logic.takeRelic(working, relicId);
       if (r.ok) {
         setState(working);
-        setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
+        setLog((prev) => appendLog(prev, r.logLines || []));
       }
     },
     [logic, state]
@@ -255,7 +320,7 @@ export default function DictionaryDungeon() {
       const r = logic.buyItem(working, offerIdx);
       if (r.ok) {
         setState(working);
-        setLog((prev) => [...prev, `> ${r.message}`].slice(-80));
+        setLog((prev) => appendLog(prev, [`> ${r.message}`]));
       } else {
         flash(r.message);
       }
@@ -269,7 +334,7 @@ export default function DictionaryDungeon() {
     const r = logic.leaveMerchant(working);
     if (r.ok) {
       setState(working);
-      setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
+      setLog((prev) => appendLog(prev, r.logLines || []));
     }
   }, [logic, state]);
 
@@ -280,7 +345,7 @@ export default function DictionaryDungeon() {
       const r = logic.resolveEvent(working, choiceIdx);
       if (r.ok) {
         setState(working);
-        setLog((prev) => [...prev, ...(r.logLines || [])].slice(-80));
+        setLog((prev) => appendLog(prev, r.logLines || []));
         if (working.over) setTimeout(() => finishRun(working), 650);
       } else if (r.message) {
         flash(r.message);
@@ -289,11 +354,25 @@ export default function DictionaryDungeon() {
     [logic, state, flash]
   );
 
-  const onHint = useCallback(() => {
+  // Endless: descend one deeper floor after a clear.
+  const onDescend = useCallback(() => {
     if (!logic || !state) return;
-    const start = logic.hintStarter(state);
-    flash(start ? `Try a word starting with ${start}` : "No easy hint here");
-  }, [logic, state, flash]);
+    const working = structuredClone(state);
+    const r = logic.descend(working);
+    setState(working);
+    setLog((prev) => appendLog(prev, r.logLines || []));
+    setInput("");
+    setHitFx(null);
+  }, [logic, state]);
+
+  // Endless: bank the score and end the run here.
+  const onEndHere = useCallback(() => {
+    if (!logic || !state) return;
+    const working = structuredClone(state);
+    logic.endRun(working);
+    setState(working);
+    finishRun(working);
+  }, [logic, state, finishRun]);
 
   const goTitle = useCallback(() => {
     quit.request(
@@ -332,12 +411,17 @@ export default function DictionaryDungeon() {
           onBuy={onBuy}
           onLeaveMerchant={onLeaveMerchant}
           onEvent={onEvent}
-          onHint={onHint}
           onQuit={goTitle}
           toast={toast}
           hitFx={hitFx}
           logRef={logRef}
         />
+      )}
+      {screen === "play" && state && reveal && !state.canDescend && (
+        <Reveal reveal={reveal} onDismiss={dismissReveal} />
+      )}
+      {screen === "play" && state && state.canDescend && !state.over && (
+        <Descend logic={logic} state={state} onDescend={onDescend} onEndHere={onEndHere} />
       )}
       {screen === "over" && state && (
         <Over logic={logic} state={state} onAgain={() => setScreen("title") || setState(null)} />
@@ -377,14 +461,15 @@ function Title({ logic, day, onStart }) {
         <li>Type any real word that satisfies the room's rule.</li>
         <li>Longer, rarer words hit harder. Some words have hidden power.</li>
         <li>A ⚔️ word cuts flesh; 🔥 burns; ✝️ smites the undead. Match your word to the foe.</li>
-        <li>Lose all ❤ and the run ends. Clear the Lich to win.</li>
+        <li>A 🛡️ word (SHIELD, PARRY, BLOCK…) turns aside the next blow — then needs a few turns to ready again.</li>
+        <li>Lose all ❤ and the run ends. Clear the Lich… then descend deeper.</li>
       </ul>
     </div>
   );
 }
 
 // ── play ──────────────────────────────────────────────────────────────────────
-function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onHint, onQuit, toast, hitFx, logRef }) {
+function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onQuit, toast, hitFx, logRef }) {
   const lvl = logic.currentLevel(state);
   const target = logic.currentTarget(state);
   const rule = logic.activeRule(state);
@@ -455,7 +540,7 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
       {/* treasure / merchant / event panels OR word input */}
       {choice ? (
         <div className="dd-treasure">
-          <div className="dd-treasure-head">Choose a relic (free):</div>
+          <div className="dd-treasure-head">You uncover a cache of forgotten relics — take one.</div>
           <div className="dd-relic-choices">
             {room.relicChoices.map((id) => {
               const r = relicMeta(logic, id);
@@ -508,18 +593,19 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
         <div className="dd-entry">
           {/* current word — read-only so no device keyboard pops up over the UI */}
           <div className={`dd-word${input ? "" : " dd-word-empty"}`} aria-live="polite">
-            {input || "your word"}
+            {input || "Your word…"}
           </div>
           <Keyboard onKey={onKey} />
         </div>
       )}
 
-      {/* action buttons — only in word rooms */}
+      {/* action buttons — only in word rooms. ENTER lives here now (the primary
+          "cast the word" CTA), next to the Scrolls / Relics menus. */}
       {!special && (
         <div className="dd-actions">
+          <button type="button" className="dd-act dd-act-enter" onClick={() => onKey("enter")}>ENTER</button>
           <ScrollMenu logic={logic} scrolls={state.scrolls} onUse={onUseScroll} />
           <RelicMenu logic={logic} relics={state.relics} />
-          <button className="dd-act" onClick={onHint}>💡 Hint</button>
         </div>
       )}
 
@@ -537,21 +623,19 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
 
 // On-screen QWERTY. Taps route through onKey (same handler the physical keyboard
 // bridges into). Kept in-cabinet so no device keyboard pops up to shift/cover
-// the UI. Pattern mirrors QuarterGame.jsx.
+// the UI. Pattern mirrors QuarterGame.jsx. ENTER lives in the actions row (see
+// Play); the keyboard's row-3 trailing slot is the ⌫ backspace.
 const KB_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 function Keyboard({ onKey }) {
   return (
     <div className="dd-kb">
       {KB_ROWS.map((row, i) => (
         <div className="dd-kb-row" key={i}>
-          {i === 2 && (
-            <button type="button" className="dd-key dd-key-wide" onClick={() => onKey("back")} aria-label="Backspace">⌫</button>
-          )}
           {row.split("").map((ch) => (
             <button type="button" key={ch} className="dd-key" onClick={() => onKey(ch)}>{ch.toUpperCase()}</button>
           ))}
           {i === 2 && (
-            <button type="button" className="dd-key dd-key-wide dd-key-enter" onClick={() => onKey("enter")}>ENTER</button>
+            <button type="button" className="dd-key dd-key-wide" onClick={() => onKey("back")} aria-label="Backspace">⌫</button>
           )}
         </div>
       ))}
@@ -567,7 +651,7 @@ const LOG_TOKEN = new RegExp(
   [
     "(?<secret>^> ✦.*$)", // whole starting-secret / title line
     "(?<dmg>\\d+ damage)",
-    "(?<played>(?<=You played )[A-Z]{2,})",
+    "(?<played>(?<=played )[A-Z]{2,}|(?<=plays )[A-Z]{2,})",
     "(?<heal>recover \\d+ heart[s]?|❤ ?\\d+|❤)",
     "(?<coin>\\+\\d+ coins|🪙 ?\\d+)",
   ].join("|"),
@@ -575,6 +659,8 @@ const LOG_TOKEN = new RegExp(
 );
 function renderLogLine(line) {
   const text = String(line);
+  // Stage divider between distinct turns/actions.
+  if (text === LOG_DIVIDER) return <hr className="dd-log-div" />;
   // The whole-line secret/title styling is simplest handled up front.
   if (/^> ✦/.test(text)) return <span className="dd-log-secret">{text}</span>;
   const out = [];
@@ -639,16 +725,85 @@ function RelicMenu({ logic, relics }) {
   );
 }
 
+// ── reveal (showcase card for new levels / enemies / boss phases) ─────────────
+// A transient overlay that pops in, holds a beat, then settles so the fight can
+// begin. Tap to dismiss early. Purely presentational.
+function Reveal({ reveal, onDismiss }) {
+  const isEnemy = reveal.kind === "enemy" || reveal.kind === "phase";
+  return (
+    <div className="dd-reveal-overlay" onClick={onDismiss}>
+      <div className={`dd-reveal-card dd-reveal-${reveal.kind}`}>
+        {reveal.kind === "level" && (
+          <>
+            <div className="dd-reveal-kicker">You descend into</div>
+            <div className="dd-reveal-name">{reveal.name}</div>
+            {reveal.tone && <div className="dd-reveal-tone">A place of {reveal.tone}.</div>}
+          </>
+        )}
+        {isEnemy && (
+          <>
+            <div className="dd-reveal-kicker">
+              {reveal.kind === "phase"
+                ? `${reveal.name} shifts — Phase ${reveal.phase}/${reveal.phaseCount}`
+                : `You've encountered a`}
+            </div>
+            <div className="dd-reveal-emoji">{reveal.emoji}</div>
+            {reveal.kind === "enemy" && <div className="dd-reveal-name">{reveal.name}</div>}
+            {reveal.hp != null && <div className="dd-reveal-hp">HP {reveal.hp} / {reveal.maxHP}</div>}
+            {reveal.intent && <div className="dd-reveal-intent">Intent: {reveal.intent}</div>}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── descend (endless prompt after a clear) ────────────────────────────────────
+// Shown when the last level is cleared. The FIRST clear (the fixed Lich) reads as
+// the triumphant win; deeper clears are survival milestones. Either way: descend
+// into a harder floor, or bank the score and end here.
+function Descend({ logic, state, onDescend, onEndHere }) {
+  const depth = state.descentCycle || 0;
+  const firstWin = depth === 0; // just beat the base dungeon
+  const score = logic.runScore(state);
+  return (
+    <div className="dd-descend-overlay">
+      <div className="dd-descend">
+        <div className="dd-descend-crest">{firstWin ? "🏆" : "🕳️"}</div>
+        <h2 className="dd-descend-title">
+          {firstWin ? "You cleared the Unabridged Lich!" : `Depth ${depth} survived`}
+        </h2>
+        <p className="dd-descend-sub">
+          {firstWin
+            ? "The dungeon is beaten — but the pages don't end. There is always a deeper shelf."
+            : "The dark keeps unfolding. How far can you read?"}
+        </p>
+        <div className="dd-descend-score">{score.toLocaleString()}</div>
+        <div className="dd-descend-actions">
+          <button className="dd-btn dd-btn-primary" onClick={onDescend}>Descend Deeper ↓</button>
+          <button className="dd-btn dd-btn-ghost" onClick={onEndHere}>
+            {firstWin ? "Take the win (bank score)" : "Stop here (bank score)"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── over ──────────────────────────────────────────────────────────────────────
 function Over({ logic, state, onAgain }) {
   const recap = logic.runRecap(state);
   const share = logic.shareLine(state);
   return (
     <div className="dd-over">
-      <div className="dd-over-crest">{recap.won ? "🏆" : "💀"}</div>
-      <h2 className="dd-over-title">{recap.won ? "You cleared the dungeon!" : "You fell in the dark."}</h2>
+      <div className="dd-over-crest">{recap.depth > 0 ? "🕳️" : recap.won ? "🏆" : "💀"}</div>
+      <h2 className="dd-over-title">
+        {recap.depth > 0
+          ? `Cleared the dungeon — fell at Depth ${recap.depth}`
+          : recap.won ? "You cleared the dungeon!" : "You fell in the dark."}
+      </h2>
       {recap.title && <p className="dd-over-named">✦ {recap.title}</p>}
-      {!recap.won && recap.deathCause && <p className="dd-over-cause">{recap.deathCause}.</p>}
+      {recap.deathCause && (recap.depth > 0 || !recap.won) && <p className="dd-over-cause">{recap.deathCause}.</p>}
       <div className="dd-over-score">{recap.score.toLocaleString()}</div>
       <div className="dd-over-grid">
         <Stat label="Floor reached" value={recap.floor} />
@@ -744,7 +899,10 @@ const CSS = `
 
 .dd-card { border: 1px solid rgba(217,180,94,.28); border-radius: 14px; padding: 14px;
   background: linear-gradient(180deg, rgba(30,24,18,.9), rgba(14,11,9,.9));
-  box-shadow: inset 0 0 40px rgba(0,0,0,.4); margin-bottom: 12px; }
+  box-shadow: inset 0 0 40px rgba(0,0,0,.4); margin-bottom: 12px;
+  /* Fixed footprint so entering a no-enemy room doesn't shift everything below
+     it vs a fight (title + scene + enemy block + HP bar + intent + rule box). */
+  min-height: 210px; position: relative; }
 .dd-room-title { font-size: 1.25rem; color: var(--accent, var(--gold)); text-align: center;
   font-variant: small-caps; letter-spacing: .04em; margin-bottom: 4px; }
 .dd-scene { text-align: center; font-style: italic; opacity: .7; font-size: .88rem; margin-bottom: 10px; }
@@ -769,6 +927,36 @@ const CSS = `
   0% { transform: scale(1); filter: none; opacity: 1; }
   30% { transform: scale(1.03); filter: brightness(1.8) saturate(0); }
   100% { transform: scale(.96); filter: grayscale(1) brightness(.6); opacity: .55; }
+}
+
+/* showcase reveal cards (new level / enemy / boss phase) */
+.dd-reveal-overlay { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: radial-gradient(120% 90% at 50% 40%, rgba(14,10,7,.7), rgba(6,5,4,.86));
+  animation: ddRevealFade .3s ease-out; cursor: pointer; }
+.dd-reveal-card { min-width: 220px; max-width: 360px; text-align: center; padding: 22px 22px 20px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(34,27,19,.98), rgba(16,12,9,.98));
+  border: 1px solid rgba(217,180,94,.45); box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 40px rgba(0,0,0,.4);
+  animation: ddReveal .45s cubic-bezier(.2,1.4,.5,1) both; }
+.dd-reveal-kicker { font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; opacity: .7; color: var(--parch); }
+.dd-reveal-name { font-size: 1.5rem; color: var(--gold); font-variant: small-caps; letter-spacing: .03em; margin: 4px 0;
+  text-shadow: 0 2px 12px rgba(217,180,94,.3); }
+.dd-reveal-tone { font-style: italic; opacity: .75; font-size: .9rem; margin-top: 4px; }
+.dd-reveal-emoji { font-size: 3rem; margin: 8px 0 4px; animation: ddRevealPop .5s ease-out both; }
+.dd-reveal-hp { font-size: .9rem; opacity: .85; margin-top: 4px; color: #e8a99c; }
+.dd-reveal-intent { font-size: .85rem; opacity: .75; font-style: italic; margin-top: 6px; }
+@keyframes ddReveal {
+  0% { transform: scale(.7); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes ddRevealFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ddRevealPop {
+  0% { transform: scale(0) rotate(-12deg); }
+  70% { transform: scale(1.15) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-reveal-card, .dd-reveal-emoji, .dd-descend-overlay { animation-duration: .12s; }
 }
 
 /* persistent RPG title nameplate */
@@ -824,6 +1012,10 @@ const CSS = `
   background: rgba(255,255,255,.05); border: 1px solid rgba(217,180,94,.25); color: #d8ccae; }
 .dd-act:disabled { opacity: .4; cursor: default; }
 .dd-act:not(:disabled):hover { background: rgba(217,180,94,.12); }
+/* ENTER — the primary "cast the word" CTA, moved out of the keyboard. */
+.dd-act-enter { color: #221703; font-weight: 700; letter-spacing: .06em;
+  border-color: rgba(255,240,200,.4); background: linear-gradient(180deg, #e5c069, #b8892f); }
+.dd-act-enter:not(:disabled):hover { filter: brightness(1.06); background: linear-gradient(180deg, #e5c069, #b8892f); }
 .dd-menu { flex: 1; min-width: 90px; position: relative; }
 .dd-menu .dd-act { width: 100%; }
 .dd-pop { position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; z-index: 5;
@@ -842,6 +1034,7 @@ const CSS = `
   padding: 10px 12px; height: 168px; overflow-y: auto; font-family: 'Courier New', monospace;
   font-size: .84rem; line-height: 1.55; color: #cdbf9f; }
 .dd-logline { margin: 1px 0; white-space: pre-wrap; word-break: break-word; }
+.dd-log-div { border: none; border-top: 1px dashed rgba(217,180,94,.28); margin: 6px 0; }
 .dd-log-dmg { color: #ef6a5a; font-weight: 700; }
 .dd-log-word { color: var(--gold); font-weight: 700; letter-spacing: .04em; }
 .dd-log-heal { color: #7fce7f; font-weight: 700; }
@@ -851,6 +1044,19 @@ const CSS = `
 .dd-toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 20;
   background: #2a2013; color: var(--parch); padding: 9px 18px; border-radius: 20px;
   border: 1px solid rgba(217,180,94,.45); font-size: .88rem; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+
+/* descend (endless prompt) — overlay over the play screen */
+.dd-descend-overlay { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: radial-gradient(120% 90% at 50% 30%, rgba(20,14,10,.82), rgba(6,5,4,.94));
+  animation: ddReveal .35s ease-out; }
+.dd-descend { max-width: 420px; width: 100%; text-align: center; padding: 22px 18px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(30,24,18,.96), rgba(14,11,9,.96));
+  border: 1px solid rgba(217,180,94,.4); box-shadow: 0 16px 50px rgba(0,0,0,.6); }
+.dd-descend-crest { font-size: 2.6rem; }
+.dd-descend-title { font-size: 1.3rem; color: var(--gold); margin: 6px 0 4px; font-variant: small-caps; letter-spacing: .03em; }
+.dd-descend-sub { opacity: .8; font-style: italic; margin: 0 0 12px; font-size: .9rem; line-height: 1.5; }
+.dd-descend-score { font-size: 2rem; color: #f0e4c8; font-weight: 700; letter-spacing: .03em; margin-bottom: 14px; }
+.dd-descend-actions { display: flex; flex-direction: column; gap: 8px; }
 
 /* over */
 .dd-over { max-width: 460px; width: 100%; text-align: center; padding-top: 8px; }
