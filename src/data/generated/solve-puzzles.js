@@ -9,7 +9,7 @@ export default [
     "title": "Word Ladder #1",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "intermediate",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -29,6 +29,7 @@ export default [
         "WINE",
         "WINS"
       ],
+      "difficulty": "intermediate",
       "hint": "Turn a loss into a win."
     }
   },
@@ -57,6 +58,7 @@ export default [
         "SCARE",
         "SCORE"
       ],
+      "difficulty": "beginner",
       "hint": "Old phone classic, up on the board."
     }
   },
@@ -67,7 +69,7 @@ export default [
     "title": "Word Ladder #3",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -89,6 +91,7 @@ export default [
         "REAL",
         "REEL"
       ],
+      "difficulty": "advanced",
       "hint": "Spin to win."
     }
   },
@@ -99,7 +102,7 @@ export default [
     "title": "Word Ladder #4",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "intermediate",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -119,6 +122,7 @@ export default [
         "WONS",
         "WINS"
       ],
+      "difficulty": "intermediate",
       "hint": "Beat the boss."
     }
   },
@@ -129,7 +133,7 @@ export default [
     "title": "Word Ladder #5",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "intermediate",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -149,6 +153,7 @@ export default [
         "GOOD",
         "GOLD"
       ],
+      "difficulty": "intermediate",
       "hint": "Pocket the treasure."
     }
   },
@@ -159,7 +164,7 @@ export default [
     "title": "Word Ladder #6",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -181,6 +186,7 @@ export default [
         "BEYS",
         "KEYS"
       ],
+      "difficulty": "advanced",
       "hint": "Unlock it."
     }
   },
@@ -191,7 +197,7 @@ export default [
     "title": "Word Ladder #7",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -213,6 +219,7 @@ export default [
         "COMB",
         "BOMB"
       ],
+      "difficulty": "advanced",
       "hint": "One big blast."
     }
   },
@@ -223,7 +230,7 @@ export default [
     "title": "Word Ladder #8",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -245,6 +252,7 @@ export default [
         "SPARE",
         "SPARK"
       ],
+      "difficulty": "advanced",
       "hint": "Catch fire, one letter at a time."
     }
   },
@@ -255,7 +263,7 @@ export default [
     "title": "Word Ladder #9",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -277,6 +285,7 @@ export default [
         "DUET",
         "DUST"
       ],
+      "difficulty": "advanced",
       "hint": "Sprinkled across the sky."
     }
   },
@@ -287,7 +296,7 @@ export default [
     "title": "Word Ladder #10",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -309,6 +318,7 @@ export default [
         "BECK",
         "DECK"
       ],
+      "difficulty": "advanced",
       "hint": "Shuffle the deck."
     }
   },
@@ -319,7 +329,7 @@ export default [
     "title": "Word Ladder #11",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -341,6 +351,7 @@ export default [
         "PAWS",
         "PAWN"
       ],
+      "difficulty": "advanced",
       "hint": "Both on the chessboard."
     }
   },
@@ -351,7 +362,7 @@ export default [
     "title": "Word Ladder #12",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -373,6 +384,7 @@ export default [
         "BOARS",
         "BOARD"
       ],
+      "difficulty": "advanced",
       "hint": "Up on the leaderboard."
     }
   },
@@ -383,7 +395,7 @@ export default [
     "title": "Word Ladder #13",
     "blurb": "Change one letter at a time until you climb from the first word to the last.",
     "time": "3 min",
-    "difficulty": "beginner",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Climb the ladder, then check it",
     "puzzle": {
@@ -405,6 +417,7 @@ export default [
         "LAVE",
         "SAVE"
       ],
+      "difficulty": "advanced",
       "hint": "Don't lose your progress."
     }
   },
@@ -433,6 +446,7 @@ export default [
         "WORK",
         "WORD"
       ],
+      "difficulty": "beginner",
       "hint": "Inside every book."
     }
   },
@@ -440,216 +454,916 @@ export default [
     "id": "cr-solve-anagram-001",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #1",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #1",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "intermediate",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "ULNNTE",
-      "answer": "TUNNEL",
-      "hint": "It's a 6-letter word starting with “T”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "INMAODD",
+      "letters": "DIAMOND",
+      "words": [
+        "AMID",
+        "AMIDO",
+        "AMIN",
+        "AMINO",
+        "DADO",
+        "DAIMON",
+        "DAMN",
+        "DANIO",
+        "DIAMOND",
+        "DIDO",
+        "DINO",
+        "DOMAIN",
+        "DONA",
+        "MAID",
+        "MAIN",
+        "MANO",
+        "MINA",
+        "MIND",
+        "MOAN",
+        "MODI",
+        "MONAD",
+        "NAOI",
+        "NODI",
+        "NOMA",
+        "NOMAD"
+      ],
+      "total": 25,
+      "difficulty": "intermediate",
+      "pangrams": [
+        "DIAMOND"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-002",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #2",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #2",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "KOTERC",
-      "answer": "ROCKET",
-      "hint": "It's a 6-letter word starting with “R”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "EREDGNA",
+      "letters": "GRENADE",
+      "words": [
+        "AGED",
+        "AGEE",
+        "AGENE",
+        "AGER",
+        "AGREE",
+        "AGREED",
+        "ANGER",
+        "ANGERED",
+        "DANG",
+        "DANGER",
+        "DARE",
+        "DARN",
+        "DEAN",
+        "DEAR",
+        "DEER",
+        "DENE",
+        "DERANGE",
+        "DERE",
+        "DRAG",
+        "DRAGEE",
+        "DREE",
+        "DREG",
+        "EAGER",
+        "EAGRE",
+        "EARED",
+        "EARN",
+        "EARNED",
+        "EDGE",
+        "EDGER",
+        "EGAD",
+        "EGER",
+        "ENDEAR",
+        "ENDER",
+        "ENRAGE",
+        "ENRAGED",
+        "ERNE",
+        "GAED",
+        "GAEN",
+        "GANDER",
+        "GANE",
+        "GARDEN",
+        "GEAR",
+        "GEARED",
+        "GEED",
+        "GENDER",
+        "GENE",
+        "GENERA",
+        "GENRE",
+        "GNAR",
+        "GRAD",
+        "GRADE",
+        "GRAN",
+        "GRAND",
+        "GRANDEE",
+        "GREE",
+        "GREED",
+        "GREEN",
+        "GRENADE",
+        "NARD",
+        "NEAR",
+        "NEARED",
+        "NEED",
+        "NERD",
+        "RAGE",
+        "RAGED",
+        "RAGEE",
+        "RAND",
+        "RANEE",
+        "RANG",
+        "RANGE",
+        "RANGED",
+        "READ",
+        "REDAN",
+        "REDE",
+        "REED",
+        "REGNA",
+        "REND"
+      ],
+      "total": 77,
+      "difficulty": "advanced",
+      "pangrams": [
+        "ANGERED",
+        "DERANGE",
+        "ENRAGED",
+        "GRANDEE",
+        "GRENADE"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-003",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #3",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #3",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "DZIRWA",
-      "answer": "WIZARD",
-      "hint": "It's a 6-letter word starting with “W”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "PEATUCR",
+      "letters": "CAPTURE",
+      "words": [
+        "ACRE",
+        "ACUTE",
+        "ACUTER",
+        "APER",
+        "APERCU",
+        "APTER",
+        "CAPE",
+        "CAPER",
+        "CAPTURE",
+        "CAPUT",
+        "CARE",
+        "CARET",
+        "CARP",
+        "CARPET",
+        "CART",
+        "CARTE",
+        "CATE",
+        "CATER",
+        "CRAP",
+        "CRAPE",
+        "CRATE",
+        "CREPT",
+        "CRUET",
+        "CURATE",
+        "CURE",
+        "CURET",
+        "CURT",
+        "CUTE",
+        "CUTER",
+        "ECRU",
+        "EPACT",
+        "ERUCT",
+        "ERUPT",
+        "PACE",
+        "PACER",
+        "PACT",
+        "PARE",
+        "PAREU",
+        "PART",
+        "PATE",
+        "PATER",
+        "PEAR",
+        "PEART",
+        "PEAT",
+        "PERT",
+        "PRAT",
+        "PRATE",
+        "PRAU",
+        "PREACT",
+        "PRECUT",
+        "PRUTA",
+        "PUCE",
+        "PURE",
+        "RACE",
+        "RAPE",
+        "RAPT",
+        "RATE",
+        "REACT",
+        "REAP",
+        "RECAP",
+        "RECTA",
+        "RECUT",
+        "TACE",
+        "TAPE",
+        "TAPER",
+        "TARE",
+        "TARP",
+        "TAUPE",
+        "TEACUP",
+        "TEAR",
+        "TEPA",
+        "TRACE",
+        "TRAP",
+        "TRUCE",
+        "TRUE",
+        "UPRATE",
+        "UPTEAR",
+        "URATE",
+        "UREA"
+      ],
+      "total": 79,
+      "difficulty": "advanced",
+      "pangrams": [
+        "CAPTURE"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-004",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #4",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #4",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "JGNLUE",
-      "answer": "JUNGLE",
-      "hint": "It's a 6-letter word starting with “J”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "INOMSRC",
+      "letters": "CRIMSON",
+      "words": [
+        "CION",
+        "CIONS",
+        "COIN",
+        "COINS",
+        "COIR",
+        "COIRS",
+        "CONI",
+        "CONS",
+        "CORM",
+        "CORMS",
+        "CORN",
+        "CORNS",
+        "CRIMSON",
+        "CRIS",
+        "ICON",
+        "ICONS",
+        "INRO",
+        "IONS",
+        "IRON",
+        "IRONS",
+        "MICRO",
+        "MICRON",
+        "MICRONS",
+        "MICROS",
+        "MINOR",
+        "MINORS",
+        "MIRS",
+        "MISO",
+        "MOCS",
+        "MONS",
+        "MORN",
+        "MORNS",
+        "MORS",
+        "NIMS",
+        "NOIR",
+        "NOIRS",
+        "NOMS",
+        "NORI",
+        "NORIS",
+        "NORM",
+        "NORMS",
+        "ORCIN",
+        "ORCINS",
+        "ORCS",
+        "ORNIS",
+        "OSMIC",
+        "RIMS",
+        "RINS",
+        "ROCS",
+        "ROMS",
+        "ROSIN",
+        "SCION",
+        "SCORN",
+        "SCRIM",
+        "SONIC",
+        "SORI",
+        "SORN"
+      ],
+      "total": 57,
+      "difficulty": "advanced",
+      "pangrams": [
+        "CRIMSON",
+        "MICRONS"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-005",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #5",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #5",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "ZEPLZU",
-      "answer": "PUZZLE",
-      "hint": "It's a 6-letter word starting with “P”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "HERNDUT",
+      "letters": "THUNDER",
+      "words": [
+        "DENT",
+        "DUET",
+        "DUNE",
+        "DUNT",
+        "DURE",
+        "DURN",
+        "HENT",
+        "HERD",
+        "HERN",
+        "HUED",
+        "HUNT",
+        "HUNTED",
+        "HUNTER",
+        "HURT",
+        "NERD",
+        "NUDE",
+        "NUDER",
+        "NURD",
+        "REND",
+        "RENT",
+        "RUDE",
+        "RUED",
+        "RUNE",
+        "RUNT",
+        "RUTH",
+        "TEND",
+        "TERN",
+        "THEN",
+        "THRU",
+        "THUD",
+        "THUNDER",
+        "TREND",
+        "TRUE",
+        "TRUED",
+        "TUNE",
+        "TUNED",
+        "TUNER",
+        "TURD",
+        "TURN",
+        "TURNED",
+        "UNDE",
+        "UNDER"
+      ],
+      "total": 42,
+      "difficulty": "advanced",
+      "pangrams": [
+        "THUNDER"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-006",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #6",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
+    "title": "Word Sprint #6",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "IERNNW",
-      "answer": "WINNER",
-      "hint": "It's a 6-letter word starting with “W”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "ONPLDIH",
+      "letters": "DOLPHIN",
+      "words": [
+        "DINO",
+        "DIOL",
+        "DOLPHIN",
+        "HIND",
+        "HOLD",
+        "HOLP",
+        "IDOL",
+        "INDOL",
+        "LIDO",
+        "LINO",
+        "LION",
+        "LOID",
+        "LOIN",
+        "NODI",
+        "NOIL",
+        "PHON",
+        "PION",
+        "PLOD",
+        "POIND",
+        "POND"
+      ],
+      "total": 20,
+      "difficulty": "beginner",
+      "pangrams": [
+        "DOLPHIN"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-007",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #7",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
+    "title": "Word Sprint #7",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
     "difficulty": "beginner",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "RORBHA",
-      "answer": "HARBOR",
-      "hint": "It's a 6-letter word starting with “H”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "UEONNDG",
+      "letters": "DUNGEON",
+      "words": [
+        "DOGE",
+        "DONE",
+        "DONG",
+        "DONNE",
+        "DUNE",
+        "DUNG",
+        "DUNGEON",
+        "GENU",
+        "GONE",
+        "GUDE",
+        "GUENON",
+        "GUNNED",
+        "NEON",
+        "NODE",
+        "NONE",
+        "NOUN",
+        "NUDE",
+        "NUDGE",
+        "UDON",
+        "UNDE",
+        "UNDO",
+        "UNDONE"
+      ],
+      "total": 22,
+      "difficulty": "beginner",
+      "pangrams": [
+        "DUNGEON"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-008",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #8",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #8",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "LRATENN",
-      "answer": "LANTERN",
-      "hint": "It's a 7-letter word starting with “L”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "CREEHTA",
+      "letters": "TEACHER",
+      "words": [
+        "ACHE",
+        "ACRE",
+        "AETHER",
+        "ARCH",
+        "ARETE",
+        "CARE",
+        "CARET",
+        "CART",
+        "CARTE",
+        "CATE",
+        "CATER",
+        "CERATE",
+        "CERE",
+        "CETE",
+        "CHAR",
+        "CHARE",
+        "CHART",
+        "CHAT",
+        "CHEAT",
+        "CHEATER",
+        "CHEER",
+        "CHERT",
+        "CRATE",
+        "CREATE",
+        "EACH",
+        "EARTH",
+        "EATER",
+        "EATH",
+        "ECARTE",
+        "ECHE",
+        "ECHT",
+        "ERECT",
+        "ETCH",
+        "ETCHER",
+        "ETHER",
+        "HAET",
+        "HARE",
+        "HART",
+        "HATE",
+        "HATER",
+        "HEAR",
+        "HEART",
+        "HEAT",
+        "HEATER",
+        "HECTARE",
+        "HERE",
+        "HEREAT",
+        "RACE",
+        "RACHET",
+        "RATCH",
+        "RATE",
+        "RATH",
+        "RATHE",
+        "REACH",
+        "REACT",
+        "RECHEAT",
+        "RECTA",
+        "REHEAT",
+        "RETCH",
+        "RETE",
+        "RETEACH",
+        "RHEA",
+        "TACE",
+        "TACH",
+        "TACHE",
+        "TAHR",
+        "TARE",
+        "TEACH",
+        "TEACHER",
+        "TEAR",
+        "TECH",
+        "TERCE",
+        "THAE",
+        "THECA",
+        "THECAE",
+        "THEE",
+        "THERE",
+        "THREE",
+        "TRACE",
+        "TREE"
+      ],
+      "total": 80,
+      "difficulty": "advanced",
+      "pangrams": [
+        "CHEATER",
+        "HECTARE",
+        "RECHEAT",
+        "RETEACH",
+        "TEACHER"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-009",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #9",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #9",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "ATSCLRY",
-      "answer": "CRYSTAL",
-      "hint": "It's a 7-letter word starting with “C”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "RTUEBLO",
+      "letters": "TROUBLE",
+      "words": [
+        "BELT",
+        "BLET",
+        "BLOT",
+        "BLUE",
+        "BLUER",
+        "BLUET",
+        "BLUR",
+        "BLURT",
+        "BOLE",
+        "BOLT",
+        "BOLTER",
+        "BORE",
+        "BORT",
+        "BOTEL",
+        "BOULE",
+        "BOUT",
+        "BRULOT",
+        "BRUT",
+        "BRUTE",
+        "BURET",
+        "BURL",
+        "BUTE",
+        "BUTEO",
+        "BUTLE",
+        "BUTLER",
+        "EURO",
+        "LOBE",
+        "LORE",
+        "LOUR",
+        "LOUT",
+        "LUBE",
+        "LURE",
+        "LUTE",
+        "ORLE",
+        "OUTER",
+        "OUTRE",
+        "REBUT",
+        "ROBE",
+        "ROBLE",
+        "ROLE",
+        "ROTE",
+        "ROTL",
+        "ROUBLE",
+        "ROUE",
+        "ROUT",
+        "ROUTE",
+        "RUBE",
+        "RUBLE",
+        "RULE",
+        "TOLE",
+        "TOLU",
+        "TORE",
+        "TOUR",
+        "TROUBLE",
+        "TRUE",
+        "TUBE",
+        "TUBER",
+        "TULE",
+        "TURBO"
+      ],
+      "total": 59,
+      "difficulty": "advanced",
+      "pangrams": [
+        "TROUBLE"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-010",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #10",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #10",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "intermediate",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "SNLAID",
-      "answer": "ISLAND",
-      "hint": "It's a 6-letter word starting with “I”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "DRAWSZI",
+      "letters": "WIZARDS",
+      "words": [
+        "AIDS",
+        "AIRS",
+        "ARID",
+        "DAIS",
+        "DAWS",
+        "DRAW",
+        "DRAWS",
+        "IZAR",
+        "IZARS",
+        "RADS",
+        "RAID",
+        "RAIDS",
+        "RAIS",
+        "RAWS",
+        "RIAS",
+        "RIDS",
+        "SADI",
+        "SAID",
+        "SARD",
+        "SARI",
+        "SIZAR",
+        "SWARD",
+        "WADI",
+        "WADIS",
+        "WADS",
+        "WAIR",
+        "WAIRS",
+        "WARD",
+        "WARDS",
+        "WARS",
+        "WIZARD",
+        "WIZARDS"
+      ],
+      "total": 32,
+      "difficulty": "intermediate",
+      "pangrams": [
+        "WIZARDS"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-011",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #11",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #11",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "NEGTMA",
-      "answer": "MAGNET",
-      "hint": "It's a 6-letter word starting with “M”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "TADMUIS",
+      "letters": "STADIUM",
+      "words": [
+        "ADIT",
+        "ADITS",
+        "ADMIT",
+        "ADMITS",
+        "ADUST",
+        "AIDS",
+        "AIMS",
+        "AITS",
+        "AMID",
+        "AMIDS",
+        "AMIDST",
+        "AMIS",
+        "AMUS",
+        "AUDIT",
+        "AUDITS",
+        "AUTISM",
+        "DAIS",
+        "DAMS",
+        "DATUM",
+        "DATUMS",
+        "DAUT",
+        "DAUTS",
+        "DIMS",
+        "DITA",
+        "DITAS",
+        "DITS",
+        "DUIT",
+        "DUITS",
+        "DUMA",
+        "DUMAS",
+        "DUST",
+        "MADS",
+        "MAID",
+        "MAIDS",
+        "MAIST",
+        "MAST",
+        "MATS",
+        "MAUD",
+        "MAUDS",
+        "MAUT",
+        "MAUTS",
+        "MIDS",
+        "MIDST",
+        "MIST",
+        "MUDS",
+        "MUST",
+        "MUTS",
+        "SADI",
+        "SAID",
+        "SATI",
+        "SIMA",
+        "SMIT",
+        "SMUT",
+        "STADIUM",
+        "STAID",
+        "STUD",
+        "STUM",
+        "SUIT",
+        "TADS",
+        "TAMIS",
+        "TAMS",
+        "TAUS",
+        "TSADI",
+        "TUIS",
+        "TUMID",
+        "UTAS"
+      ],
+      "total": 66,
+      "difficulty": "advanced",
+      "pangrams": [
+        "STADIUM"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
     "id": "cr-solve-anagram-012",
     "lane": "solve",
     "guide": true,
-    "title": "Anagram #12",
-    "blurb": "Every letter of a real word, shuffled. Slide them back into place.",
-    "time": "2 min",
-    "difficulty": "beginner",
+    "title": "Word Sprint #12",
+    "blurb": "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+    "time": "30 sec",
+    "difficulty": "advanced",
     "cost": "free",
-    "action": "Unscramble the word, then check it",
+    "action": "Beat the clock — find every word you can",
     "puzzle": {
       "kind": "anagram",
-      "prompt": "These letters spell one word. Unscramble them, then check.",
-      "scramble": "LBEBPE",
-      "answer": "PEBBLE",
-      "hint": "It's a 6-letter word starting with “P”."
+      "prompt": "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+      "scramble": "EENISCL",
+      "letters": "SILENCE",
+      "words": [
+        "CEES",
+        "CEIL",
+        "CEILS",
+        "CELS",
+        "CENSE",
+        "CINE",
+        "CINES",
+        "CLINE",
+        "CLINES",
+        "EELS",
+        "ELSE",
+        "ENISLE",
+        "ENSILE",
+        "ESNE",
+        "ICES",
+        "ISLE",
+        "LEES",
+        "LEIS",
+        "LENES",
+        "LENIS",
+        "LENS",
+        "LENSE",
+        "LICE",
+        "LICENSE",
+        "LIEN",
+        "LIENS",
+        "LIES",
+        "LINE",
+        "LINES",
+        "LINS",
+        "NICE",
+        "NIECE",
+        "NIECES",
+        "NILS",
+        "SCENE",
+        "SEEL",
+        "SEEN",
+        "SEINE",
+        "SELENIC",
+        "SENE",
+        "SENILE",
+        "SICE",
+        "SILENCE",
+        "SINCE",
+        "SINE",
+        "SLICE"
+      ],
+      "total": 46,
+      "difficulty": "advanced",
+      "pangrams": [
+        "LICENSE",
+        "SELENIC",
+        "SILENCE"
+      ],
+      "hint": "There's at least one word that uses all 7 letters."
     }
   },
   {
@@ -665,7 +1379,7 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "BON",
+      "left": "GAR",
       "right": "WORK",
       "answer": "NET",
       "hint": "It's a 3-letter word — and a word on its own."
@@ -684,10 +1398,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "KEY",
-      "right": "ED",
-      "answer": "BOARD",
-      "hint": "It's a 5-letter word — and a word on its own."
+      "left": "NYL",
+      "right": "LY",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
     }
   },
   {
@@ -703,10 +1417,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "CART",
-      "right": "LY",
-      "answer": "ON",
-      "hint": "It's a 2-letter word — and a word on its own."
+      "left": "SON",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
     }
   },
   {
@@ -722,10 +1436,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "GAR",
-      "right": "WORK",
-      "answer": "NET",
-      "hint": "It's a 3-letter word — and a word on its own."
+      "left": "DRAG",
+      "right": "LY",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
     }
   },
   {
@@ -741,10 +1455,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "SON",
-      "right": "WORK",
-      "answer": "NET",
-      "hint": "It's a 3-letter word — and a word on its own."
+      "left": "KEY",
+      "right": "ED",
+      "answer": "BOARD",
+      "hint": "It's a 5-letter word — and a word on its own."
     }
   },
   {
@@ -760,10 +1474,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "NYL",
-      "right": "LY",
-      "answer": "ON",
-      "hint": "It's a 2-letter word — and a word on its own."
+      "left": "BON",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
     }
   },
   {
@@ -779,10 +1493,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "DRAG",
-      "right": "LY",
-      "answer": "ON",
-      "hint": "It's a 2-letter word — and a word on its own."
+      "left": "CABI",
+      "right": "WORK",
+      "answer": "NET",
+      "hint": "It's a 3-letter word — and a word on its own."
     }
   },
   {
@@ -798,10 +1512,10 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "CABI",
-      "right": "WORK",
-      "answer": "NET",
-      "hint": "It's a 3-letter word — and a word on its own."
+      "left": "FALC",
+      "right": "CE",
+      "answer": "ON",
+      "hint": "It's a 2-letter word — and a word on its own."
     }
   },
   {
@@ -817,7 +1531,7 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "CRAY",
+      "left": "BEAC",
       "right": "CE",
       "answer": "ON",
       "hint": "It's a 2-letter word — and a word on its own."
@@ -836,8 +1550,8 @@ export default [
     "puzzle": {
       "kind": "middle",
       "prompt": "One short word finishes both. Fill the blanks with the same word.",
-      "left": "SEAS",
-      "right": "CE",
+      "left": "CART",
+      "right": "LY",
       "answer": "ON",
       "hint": "It's a 2-letter word — and a word on its own."
     }
@@ -855,10 +1569,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "KYREB PFL DRIZF SLK FLI GIZETVJJ ZJ ZE REFKYVI TRJKCV",
-      "shift": 17,
-      "answer": "THANK YOU MARIO BUT OUR PRINCESS IS IN ANOTHER CASTLE",
-      "hint": "Shift every letter back by 17. (A becomes J.)"
+      "ciphertext": "ZNK IGQK OY G ROK",
+      "shift": 6,
+      "answer": "THE CAKE IS A LIE",
+      "hint": "Shift every letter back by 6. (A becomes U.)"
     }
   },
   {
@@ -874,10 +1588,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "OWDUGEW LG LZW SJUSVW",
-      "shift": 18,
-      "answer": "WELCOME TO THE ARCADE",
-      "hint": "Shift every letter back by 18. (A becomes I.)"
+      "ciphertext": "KV H IHYYLS YVSS",
+      "shift": 7,
+      "answer": "DO A BARREL ROLL",
+      "hint": "Shift every letter back by 7. (A becomes T.)"
     }
   },
   {
@@ -893,10 +1607,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "OIUM WDMZ QVAMZB KWQV",
-      "shift": 8,
-      "answer": "GAME OVER INSERT COIN",
-      "hint": "Shift every letter back by 8. (A becomes S.)"
+      "ciphertext": "KYREB PFL DRIZF SLK FLI GIZETVJJ ZJ ZE REFKYVI TRJKCV",
+      "shift": 17,
+      "answer": "THANK YOU MARIO BUT OUR PRINCESS IS IN ANOTHER CASTLE",
+      "hint": "Shift every letter back by 17. (A becomes J.)"
     }
   },
   {
@@ -912,10 +1626,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "DOO BRXU EDVH DUH EHORQJ WR XV",
-      "shift": 3,
+      "ciphertext": "SDD QGMJ TSKW SJW TWDGFY LG MK",
+      "shift": 18,
       "answer": "ALL YOUR BASE ARE BELONG TO US",
-      "hint": "Shift every letter back by 3. (A becomes X.)"
+      "hint": "Shift every letter back by 18. (A becomes I.)"
     }
   },
   {
@@ -931,10 +1645,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "ZNK IGQK OY G ROK",
-      "shift": 6,
-      "answer": "THE CAKE IS A LIE",
-      "hint": "Shift every letter back by 6. (A becomes U.)"
+      "ciphertext": "JMAB DQMEML QV VMBAKIXM",
+      "shift": 8,
+      "answer": "BEST VIEWED IN NETSCAPE",
+      "hint": "Shift every letter back by 8. (A becomes S.)"
     }
   },
   {
@@ -950,10 +1664,10 @@ export default [
     "puzzle": {
       "kind": "cipher",
       "prompt": "Each letter was shifted forward in the alphabet. Shift it back to read the message.",
-      "ciphertext": "XAOP REASAZ EJ JAPOYWLA",
-      "shift": 22,
-      "answer": "BEST VIEWED IN NETSCAPE",
-      "hint": "Shift every letter back by 22. (A becomes E.)"
+      "ciphertext": "SUHVV VWDUW WR EHJLQ",
+      "shift": 3,
+      "answer": "PRESS START TO BEGIN",
+      "hint": "Shift every letter back by 3. (A becomes X.)"
     }
   },
   {
@@ -970,10 +1684,11 @@ export default [
       "kind": "rebus",
       "prompt": "Read the picture. What word or phrase does it spell?",
       "display": [
-        "TIMING TIM ING"
+        "O_ER_T_O_",
+        "fill: P A I N"
       ],
-      "answer": "split-second timing",
-      "hint": "The timing got split."
+      "answer": "painless operation",
+      "hint": "Operation with no PAIN in it."
     }
   },
   {
@@ -990,12 +1705,13 @@ export default [
       "kind": "rebus",
       "prompt": "Read the picture. What word or phrase does it spell?",
       "display": [
-        "CYCLE",
-        "CYCLE",
-        "CYCLE"
+        "L",
+        " O",
+        "  V",
+        "   E"
       ],
-      "answer": "tricycle",
-      "hint": "Three of them."
+      "answer": "falling in love",
+      "hint": "Read what the letters spell, then watch what they're doing."
     }
   },
   {
@@ -1003,27 +1719,6 @@ export default [
     "lane": "solve",
     "guide": true,
     "title": "Rebus #3",
-    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Read the picture, then reveal the phrase",
-    "puzzle": {
-      "kind": "rebus",
-      "prompt": "Read the picture. What word or phrase does it spell?",
-      "display": [
-        "ME ME ME ME ME",
-        "(once)"
-      ],
-      "answer": "all about me",
-      "hint": "Nothing but me."
-    }
-  },
-  {
-    "id": "cr-solve-rebus-004",
-    "lane": "solve",
-    "guide": true,
-    "title": "Rebus #4",
     "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -1043,6 +1738,28 @@ export default [
     }
   },
   {
+    "id": "cr-solve-rebus-004",
+    "lane": "solve",
+    "guide": true,
+    "title": "Rebus #4",
+    "blurb": "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Read the picture, then reveal the phrase",
+    "puzzle": {
+      "kind": "rebus",
+      "prompt": "Read the picture. What word or phrase does it spell?",
+      "display": [
+        "STAND",
+        "—————",
+        "  I  "
+      ],
+      "answer": "I understand",
+      "hint": "I, under stand."
+    }
+  },
+  {
     "id": "cr-solve-rebus-005",
     "lane": "solve",
     "guide": true,
@@ -1056,10 +1773,12 @@ export default [
       "kind": "rebus",
       "prompt": "Read the picture. What word or phrase does it spell?",
       "display": [
-        "DICE DICE"
+        "CYCLE",
+        "CYCLE",
+        "CYCLE"
       ],
-      "answer": "paradise",
-      "hint": "Say a pair of these out loud."
+      "answer": "tricycle",
+      "hint": "Three of them."
     }
   },
   {
@@ -1076,11 +1795,11 @@ export default [
       "kind": "rebus",
       "prompt": "Read the picture. What word or phrase does it spell?",
       "display": [
-        "KNEE",
-        "LIGHT"
+        "ME ME ME ME ME",
+        "(once)"
       ],
-      "answer": "neon light",
-      "hint": "Knee-on light."
+      "answer": "all about me",
+      "hint": "Nothing but me."
     }
   },
   {
@@ -1088,6 +1807,58 @@ export default [
     "lane": "solve",
     "guide": true,
     "title": "Pattern #1",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "1",
+        "2",
+        "3",
+        "5",
+        "8",
+        "13"
+      ],
+      "answer": "21",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "Each number is the sum of the two before it (Fibonacci-style)."
+    }
+  },
+  {
+    "id": "cr-solve-pattern-002",
+    "lane": "solve",
+    "guide": true,
+    "title": "Pattern #2",
+    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
+    "time": "2 min",
+    "difficulty": "beginner",
+    "cost": "free",
+    "action": "Work out the rule, then type what comes next",
+    "puzzle": {
+      "kind": "pattern",
+      "prompt": "Complete the pattern — what comes next?",
+      "sequence": [
+        "2",
+        "3",
+        "5",
+        "7",
+        "11",
+        "13"
+      ],
+      "answer": "17",
+      "hint": "Look at how each term relates to the one before it.",
+      "rule": "The prime numbers in order."
+    }
+  },
+  {
+    "id": "cr-solve-pattern-003",
+    "lane": "solve",
+    "guide": true,
+    "title": "Pattern #3",
     "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -1109,10 +1880,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-pattern-002",
+    "id": "cr-solve-pattern-004",
     "lane": "solve",
     "guide": true,
-    "title": "Pattern #2",
+    "title": "Pattern #4",
     "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -1122,22 +1893,22 @@ export default [
       "kind": "pattern",
       "prompt": "Complete the pattern — what comes next?",
       "sequence": [
-        "J",
-        "F",
         "M",
-        "A",
-        "M"
+        "T",
+        "W",
+        "T",
+        "F"
       ],
-      "answer": "J",
+      "answer": "S",
       "hint": "Look at how each term relates to the one before it.",
-      "rule": "First letters of the months — next is July → J."
+      "rule": "First letters of the days of the week — next is Sunday → S."
     }
   },
   {
-    "id": "cr-solve-pattern-003",
+    "id": "cr-solve-pattern-005",
     "lane": "solve",
     "guide": true,
-    "title": "Pattern #3",
+    "title": "Pattern #5",
     "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -1160,10 +1931,10 @@ export default [
     }
   },
   {
-    "id": "cr-solve-pattern-004",
+    "id": "cr-solve-pattern-006",
     "lane": "solve",
     "guide": true,
-    "title": "Pattern #4",
+    "title": "Pattern #6",
     "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
     "time": "2 min",
     "difficulty": "beginner",
@@ -1185,55 +1956,6 @@ export default [
     }
   },
   {
-    "id": "cr-solve-pattern-005",
-    "lane": "solve",
-    "guide": true,
-    "title": "Pattern #5",
-    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Work out the rule, then type what comes next",
-    "puzzle": {
-      "kind": "pattern",
-      "prompt": "Complete the pattern — what comes next?",
-      "sequence": [
-        "4",
-        "9",
-        "16",
-        "25",
-        "36"
-      ],
-      "answer": "49",
-      "hint": "Look at how each term relates to the one before it.",
-      "rule": "The perfect squares — 2², 3², 4², …"
-    }
-  },
-  {
-    "id": "cr-solve-pattern-006",
-    "lane": "solve",
-    "guide": true,
-    "title": "Pattern #6",
-    "blurb": "A sequence with the last term missing. Spot the rule, then type what comes next.",
-    "time": "2 min",
-    "difficulty": "beginner",
-    "cost": "free",
-    "action": "Work out the rule, then type what comes next",
-    "puzzle": {
-      "kind": "pattern",
-      "prompt": "Complete the pattern — what comes next?",
-      "sequence": [
-        "1",
-        "8",
-        "27",
-        "64"
-      ],
-      "answer": "125",
-      "hint": "Look at how each term relates to the one before it.",
-      "rule": "The perfect cubes: 1³, 2³, 3³, 4³, …"
-    }
-  },
-  {
     "id": "cr-solve-pattern-007",
     "lane": "solve",
     "guide": true,
@@ -1247,14 +1969,15 @@ export default [
       "kind": "pattern",
       "prompt": "Complete the pattern — what comes next?",
       "sequence": [
-        "1",
         "2",
-        "4",
-        "8"
+        "3",
+        "5",
+        "8",
+        "12"
       ],
-      "answer": "16",
+      "answer": "17",
       "hint": "Look at how each term relates to the one before it.",
-      "rule": "Multiply by 2 each time (starts at 1)."
+      "rule": "The gap grows by one each step — +1, then +2, then +3, …"
     }
   },
   {
@@ -1296,10 +2019,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "She said she'd printed the report that morning, straight off the new printer. The detective picked up the page, then quietly asked her to come downtown.",
-      "question": "How did he know she was lying?",
-      "answer": "The printer's ink cartridge was still sealed in its wrapper inside the box. Nothing had been printed on that machine yet.",
-      "hint": "Check whether the tool was ever actually used."
+      "story": "The suspect claimed he'd been typing a letter on his computer when the lights went out at 9 p.m. and never left his chair. But the screen told a different story.",
+      "question": "What was wrong?",
+      "answer": "With the power out, the monitor would be dark — yet he described reading his half-finished letter on it. No power, no glowing screen.",
+      "hint": "What needs electricity to be seen?"
     }
   },
   {
@@ -1315,10 +2038,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "The gamer swore he'd been online all night chasing a high score. But the moment Detective Byte stepped into the den, she knew he was lying.",
-      "question": "What gave him away?",
-      "answer": "The modem was unplugged — its cable coiled on the desk. You can't be online all night with no connection.",
-      "hint": "Look at the hardware, not the screen."
+      "story": "She said she'd printed the report that morning, straight off the new printer. The detective picked up the page, then quietly asked her to come downtown.",
+      "question": "How did he know she was lying?",
+      "answer": "The printer's ink cartridge was still sealed in its wrapper inside the box. Nothing had been printed on that machine yet.",
+      "hint": "Check whether the tool was ever actually used."
     }
   },
   {
@@ -1334,10 +2057,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "“I just finished the game — beat the final boss five minutes ago!” the kid grinned. The detective glanced at the cartridge slot and shook her head.",
-      "question": "Why didn't she believe him?",
-      "answer": "The console was powered off and cold to the touch. A machine that ran a boss fight five minutes ago would still be warm.",
-      "hint": "Heat takes time to fade."
+      "story": "The gamer swore he'd been online all night chasing a high score. But the moment Detective Byte stepped into the den, she knew he was lying.",
+      "question": "What gave him away?",
+      "answer": "The modem was unplugged — its cable coiled on the desk. You can't be online all night with no connection.",
+      "hint": "Look at the hardware, not the screen."
     }
   },
   {
@@ -1353,10 +2076,10 @@ export default [
     "puzzle": {
       "kind": "mystery",
       "prompt": "Read the case. Spot the contradiction.",
-      "story": "The suspect claimed he'd been typing a letter on his computer when the lights went out at 9 p.m. and never left his chair. But the screen told a different story.",
-      "question": "What was wrong?",
-      "answer": "With the power out, the monitor would be dark — yet he described reading his half-finished letter on it. No power, no glowing screen.",
-      "hint": "What needs electricity to be seen?"
+      "story": "“I just finished the game — beat the final boss five minutes ago!” the kid grinned. The detective glanced at the cartridge slot and shook her head.",
+      "question": "Why didn't she believe him?",
+      "answer": "The console was powered off and cold to the touch. A machine that ran a boss fight five minutes ago would still be warm.",
+      "hint": "Heat takes time to fade."
     }
   },
   {
@@ -1375,17 +2098,18 @@ export default [
       "size": 5,
       "rows": [
         [
-          3
-        ],
-        [
-          5
-        ],
-        [
-          1,
           1,
           1
         ],
         [
+          1,
+          1
+        ],
+        [
+          0
+        ],
+        [
+          1,
           1
         ],
         [
@@ -1394,51 +2118,51 @@ export default [
       ],
       "cols": [
         [
-          2
+          1
         ],
         [
           2,
           1
         ],
         [
-          5
+          1
         ],
         [
           2,
           1
         ],
         [
-          2
+          1
         ]
       ],
       "solution": [
         [
           0,
           1,
-          1,
+          0,
           1,
           0
         ],
         [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
           0,
           1,
           0,
-          1
+          1,
+          0
         ],
         [
           0,
           0,
-          1,
+          0,
           0,
           0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          1
         ],
         [
           0,
@@ -1448,7 +2172,7 @@ export default [
           0
         ]
       ],
-      "reveal": "a mushroom"
+      "reveal": "a smiley face"
     }
   },
   {
@@ -1467,6 +2191,8 @@ export default [
       "size": 5,
       "rows": [
         [
+          1,
+          1,
           1
         ],
         [
@@ -1481,66 +2207,69 @@ export default [
           1
         ],
         [
-          1,
           1,
           1
         ]
       ],
       "cols": [
         [
-          3
-        ],
-        [
+          1,
           2
         ],
         [
-          5
+          2,
+          1
         ],
         [
+          4
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          1,
           2
-        ],
-        [
-          3
         ]
       ],
       "solution": [
         [
-          0,
+          1,
           0,
           1,
           0,
+          1
+        ],
+        [
+          0,
+          1,
+          1,
+          1,
           0
         ],
         [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
           0,
           1,
+          0,
+          1
+        ],
+        [
+          0,
           1,
+          0,
           1,
           0
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          0,
-          1,
-          0,
-          1
-        ],
-        [
-          1,
-          0,
-          1,
-          0,
-          1
         ]
       ],
-      "reveal": "a tiny house"
+      "reveal": "a space invader"
     }
   },
   {
@@ -1650,18 +2379,17 @@ export default [
       "size": 5,
       "rows": [
         [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          1,
           1,
           1
         ],
         [
-          1,
-          1
-        ],
-        [
-          0
-        ],
-        [
-          1,
           1
         ],
         [
@@ -1670,51 +2398,51 @@ export default [
       ],
       "cols": [
         [
-          1
+          2
         ],
         [
           2,
           1
         ],
         [
-          1
+          5
         ],
         [
           2,
           1
         ],
         [
-          1
+          2
         ]
       ],
       "solution": [
         [
           0,
           1,
-          0,
+          1,
           1,
           0
         ],
         [
-          0,
           1,
-          0,
           1,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0
+          1,
+          1,
+          1
         ],
         [
           1,
           0,
-          0,
+          1,
           0,
           1
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0
         ],
         [
           0,
@@ -1724,7 +2452,7 @@ export default [
           0
         ]
       ],
-      "reveal": "a smiley face"
+      "reveal": "a mushroom"
     }
   },
   {
@@ -1823,7 +2551,7 @@ export default [
     "title": "Mini Sudoku #1",
     "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
     "time": "5 min",
-    "difficulty": "intermediate",
+    "difficulty": "beginner",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -1832,25 +2560,25 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
           3,
-          0
-        ],
-        [
-          4,
-          0,
-          2,
-          0
-        ],
-        [
-          0,
           1,
           0,
+          4
+        ],
+        [
+          2,
+          4,
+          1,
+          3
+        ],
+        [
+          1,
+          3,
+          0,
           0
         ],
         [
-          3,
+          0,
           0,
           0,
           0
@@ -1858,30 +2586,31 @@ export default [
       ],
       "solution": [
         [
+          3,
           1,
           2,
-          3,
           4
         ],
         [
+          2,
           4,
-          3,
-          2,
-          1
-        ],
-        [
-          2,
           1,
-          4,
           3
         ],
         [
+          1,
           3,
           4,
-          1,
           2
+        ],
+        [
+          4,
+          2,
+          3,
+          1
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -1891,7 +2620,7 @@ export default [
     "title": "Mini Sudoku #2",
     "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
     "time": "5 min",
-    "difficulty": "intermediate",
+    "difficulty": "beginner",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -1900,56 +2629,57 @@ export default [
       "size": 4,
       "given": [
         [
+          0,
           2,
-          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ],
+        [
           3,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
+          4,
           1,
-          3,
+          2
+        ],
+        [
+          2,
           0,
-          0
+          3,
+          4
         ]
       ],
       "solution": [
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          3,
+          4,
+          1,
+          2
+        ],
         [
           2,
           1,
           3,
           4
-        ],
-        [
-          3,
-          4,
-          2,
-          1
-        ],
-        [
-          4,
-          2,
-          1,
-          3
-        ],
-        [
-          1,
-          3,
-          4,
-          2
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -1959,7 +2689,7 @@ export default [
     "title": "Mini Sudoku #3",
     "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
     "time": "5 min",
-    "difficulty": "intermediate",
+    "difficulty": "beginner",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -1968,13 +2698,13 @@ export default [
       "size": 4,
       "given": [
         [
-          2,
+          4,
           0,
-          0,
-          0
+          1,
+          2
         ],
         [
-          4,
+          2,
           1,
           0,
           0
@@ -1982,28 +2712,28 @@ export default [
         [
           0,
           0,
-          0,
+          2,
           3
         ],
         [
+          3,
           0,
           0,
-          4,
-          0
+          1
         ]
       ],
       "solution": [
         [
-          2,
+          4,
           3,
           1,
-          4
+          2
         ],
         [
-          4,
+          2,
           1,
           3,
-          2
+          4
         ],
         [
           1,
@@ -2017,7 +2747,8 @@ export default [
           4,
           1
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2027,7 +2758,7 @@ export default [
     "title": "Mini Sudoku #4",
     "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
     "time": "5 min",
-    "difficulty": "intermediate",
+    "difficulty": "beginner",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -2036,36 +2767,42 @@ export default [
       "size": 4,
       "given": [
         [
+          3,
           0,
+          1,
+          4
+        ],
+        [
           0,
+          4,
           0,
           0
         ],
         [
-          4,
           0,
           0,
+          2,
           1
         ],
         [
-          0,
           2,
+          0,
           4,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
+          3
         ]
       ],
       "solution": [
         [
+          3,
           2,
           1,
-          3,
           4
+        ],
+        [
+          1,
+          4,
+          3,
+          2
         ],
         [
           4,
@@ -2074,18 +2811,13 @@ export default [
           1
         ],
         [
-          1,
           2,
+          1,
           4,
           3
-        ],
-        [
-          3,
-          4,
-          1,
-          2
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2104,56 +2836,57 @@ export default [
       "size": 4,
       "given": [
         [
+          3,
           0,
-          0,
-          0,
+          1,
           0
         ],
         [
           0,
           0,
-          4,
-          3
+          0,
+          4
         ],
         [
           0,
           1,
-          0,
-          0
+          4,
+          3
         ],
         [
-          3,
+          4,
           0,
           0,
-          1
+          0
         ]
       ],
       "solution": [
         [
-          4,
           3,
+          4,
           1,
           2
         ],
         [
           1,
           2,
-          4,
-          3
-        ],
-        [
-          2,
-          1,
           3,
           4
         ],
         [
-          3,
+          2,
+          1,
           4,
+          3
+        ],
+        [
+          4,
+          3,
           2,
           1
         ]
-      ]
+      ],
+      "difficulty": "intermediate"
     }
   },
   {
@@ -2172,26 +2905,26 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
+          2,
           1,
+          3,
+          4
+        ],
+        [
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
           3
         ],
         [
           0,
           0,
-          0,
-          0
-        ],
-        [
-          3,
-          0,
-          0,
-          2
-        ],
-        [
-          0,
-          2,
           0,
           0
         ]
@@ -2199,29 +2932,444 @@ export default [
       "solution": [
         [
           2,
+          1,
+          3,
+          4
+        ],
+        [
+          3,
           4,
+          2,
+          1
+        ],
+        [
+          4,
+          2,
           1,
           3
         ],
         [
           1,
           3,
+          4,
+          2
+        ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-007",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #7",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          3,
+          1,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          2
+        ]
+      ],
+      "solution": [
+        [
+          3,
+          1,
           2,
           4
         ],
         [
-          3,
-          1,
+          2,
           4,
-          2
+          1,
+          3
         ],
         [
           4,
           2,
           3,
           1
+        ],
+        [
+          1,
+          3,
+          4,
+          2
         ]
-      ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #8",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          0,
+          3
+        ],
+        [
+          0,
+          0,
+          2,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          4
+        ]
+      ],
+      "solution": [
+        [
+          2,
+          1,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          3,
+          4,
+          1,
+          2
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-009",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #9",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
+        ],
+        [
+          0,
+          1,
+          0,
+          3
+        ],
+        [
+          4,
+          0,
+          1,
+          0
+        ]
+      ],
+      "solution": [
+        [
+          3,
+          4,
+          2,
+          1
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          2,
+          1,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          1,
+          2
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-010",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #10",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          0,
+          4
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          1,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          3
+        ]
+      ],
+      "solution": [
+        [
+          2,
+          1,
+          3,
+          4
+        ],
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          3,
+          4,
+          1,
+          2
+        ],
+        [
+          1,
+          2,
+          4,
+          3
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-011",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #11",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          3,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          4
+        ],
+        [
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "solution": [
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        [
+          2,
+          1,
+          3,
+          4
+        ],
+        [
+          3,
+          4,
+          1,
+          2
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-sudoku4-012",
+    "lane": "solve",
+    "guide": true,
+    "title": "Mini Sudoku #12",
+    "blurb": "Sudoku, shrunk to a friendly 4×4. Rows, columns, and boxes each hold 1–4.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "sudoku4",
+      "prompt": "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          1
+        ]
+      ],
+      "solution": [
+        [
+          3,
+          4,
+          1,
+          2
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          2,
+          1,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          2,
+          1
+        ]
+      ],
+      "difficulty": "advanced"
     }
   },
   {
@@ -2240,56 +3388,57 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
           2,
-          0
-        ],
-        [
-          0,
           4,
           0,
-          0
+          3
         ],
         [
           0,
-          1,
+          0,
           0,
           4
+        ],
+        [
+          3,
+          1,
+          0,
+          2
+        ],
+        [
+          0,
+          3,
+          2,
+          0
         ]
       ],
       "solution": [
         [
-          1,
           2,
           4,
+          1,
           3
+        ],
+        [
+          1,
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          1,
+          4,
+          2
         ],
         [
           4,
           3,
           2,
           1
-        ],
-        [
-          3,
-          4,
-          1,
-          2
-        ],
-        [
-          2,
-          1,
-          3,
-          4
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2308,56 +3457,57 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          1,
-          0,
-          0
-        ],
-        [
-          1,
+          3,
           2,
           0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
           4
+        ],
+        [
+          2,
+          4,
+          3,
+          0
+        ],
+        [
+          1,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0
         ]
       ],
       "solution": [
         [
-          4,
-          1,
           3,
-          2
+          2,
+          1,
+          4
         ],
         [
-          1,
           2,
           4,
-          3
-        ],
-        [
           3,
-          4,
-          2,
           1
         ],
         [
-          2,
-          3,
           1,
-          4
+          3,
+          4,
+          2
+        ],
+        [
+          4,
+          1,
+          2,
+          3
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2376,56 +3526,57 @@ export default [
       "size": 4,
       "given": [
         [
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          4,
-          0
-        ],
-        [
+          2,
           0,
           1,
-          0,
           0
         ],
         [
           0,
-          3,
+          2,
           0,
           1
+        ],
+        [
+          1,
+          4,
+          3,
+          0
+        ],
+        [
+          4,
+          0,
+          2,
+          0
         ]
       ],
       "solution": [
         [
-          3,
-          4,
-          1,
-          2
-        ],
-        [
-          1,
           2,
-          4,
-          3
-        ],
-        [
-          2,
-          1,
           3,
+          1,
           4
         ],
         [
-          4,
           3,
           2,
+          4,
           1
+        ],
+        [
+          1,
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          1,
+          2,
+          3
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2445,55 +3596,56 @@ export default [
       "given": [
         [
           0,
+          4,
+          2,
+          1
+        ],
+        [
           0,
+          1,
           3,
           0
         ],
         [
           0,
-          0,
-          1,
+          2,
+          4,
           0
         ],
         [
+          2,
           0,
-          0,
-          0,
-          2
-        ],
-        [
-          4,
-          0,
-          0,
-          3
+          1,
+          0
         ]
       ],
       "solution": [
         [
-          2,
-          4,
           3,
+          4,
+          2,
           1
         ],
         [
-          3,
-          2,
-          1,
-          4
-        ],
-        [
-          1,
-          3,
           4,
+          1,
+          3,
           2
         ],
         [
-          4,
           1,
           2,
+          4,
           3
+        ],
+        [
+          2,
+          3,
+          1,
+          4
         ]
-      ]
+      ],
+      "difficulty": "beginner"
     }
   },
   {
@@ -2503,7 +3655,7 @@ export default [
     "title": "Latin Square #5",
     "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
     "time": "5 min",
-    "difficulty": "beginner",
+    "difficulty": "intermediate",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -2513,12 +3665,12 @@ export default [
       "given": [
         [
           0,
-          2,
+          0,
           0,
           0
         ],
         [
-          3,
+          1,
           0,
           2,
           0
@@ -2527,41 +3679,42 @@ export default [
           4,
           0,
           0,
-          0
+          1
         ],
         [
+          2,
+          1,
           0,
-          4,
-          0,
-          0
+          3
         ]
       ],
       "solution": [
         [
-          1,
-          2,
+          3,
           4,
-          3
+          1,
+          2
         ],
         [
-          3,
           1,
+          3,
           2,
           4
         ],
         [
           4,
+          2,
           3,
-          1,
-          2
+          1
         ],
         [
           2,
+          1,
           4,
-          3,
-          1
+          3
         ]
-      ]
+      ],
+      "difficulty": "intermediate"
     }
   },
   {
@@ -2571,7 +3724,214 @@ export default [
     "title": "Latin Square #6",
     "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
     "time": "5 min",
-    "difficulty": "beginner",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          1,
+          0,
+          4
+        ],
+        [
+          1,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          3,
+          1
+        ]
+      ],
+      "solution": [
+        [
+          3,
+          1,
+          2,
+          4
+        ],
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          1,
+          2
+        ],
+        [
+          2,
+          4,
+          3,
+          1
+        ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-007",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #7",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          2,
+          3,
+          0
+        ],
+        [
+          0,
+          3,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
+        ],
+        [
+          2,
+          0,
+          0,
+          3
+        ]
+      ],
+      "solution": [
+        [
+          4,
+          2,
+          3,
+          1
+        ],
+        [
+          1,
+          3,
+          4,
+          2
+        ],
+        [
+          3,
+          1,
+          2,
+          4
+        ],
+        [
+          2,
+          4,
+          1,
+          3
+        ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-008",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #8",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          2,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          4
+        ],
+        [
+          4,
+          0,
+          3,
+          0
+        ]
+      ],
+      "solution": [
+        [
+          2,
+          4,
+          1,
+          3
+        ],
+        [
+          3,
+          2,
+          4,
+          1
+        ],
+        [
+          1,
+          3,
+          2,
+          4
+        ],
+        [
+          4,
+          1,
+          3,
+          2
+        ]
+      ],
+      "difficulty": "intermediate"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-009",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #9",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "advanced",
     "cost": "free",
     "action": "Fill the grid, then check it",
     "puzzle": {
@@ -2582,12 +3942,18 @@ export default [
         [
           0,
           0,
-          2,
-          3
+          0,
+          4
         ],
         [
-          1,
+          4,
           0,
+          0,
+          0
+        ],
+        [
+          2,
+          1,
           0,
           0
         ],
@@ -2595,6 +3961,138 @@ export default [
           0,
           0,
           3,
+          0
+        ]
+      ],
+      "solution": [
+        [
+          3,
+          2,
+          1,
+          4
+        ],
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          2,
+          1,
+          4,
+          3
+        ],
+        [
+          1,
+          4,
+          3,
+          2
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-010",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #10",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          2,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          1
+        ],
+        [
+          4,
+          0,
+          0,
+          0
+        ]
+      ],
+      "solution": [
+        [
+          2,
+          3,
+          1,
+          4
+        ],
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        [
+          3,
+          4,
+          2,
+          1
+        ],
+        [
+          4,
+          1,
+          3,
+          2
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-011",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #11",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "advanced",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0
+        ],
+        [
+          2,
+          1,
+          0,
           0
         ],
         [
@@ -2606,16 +4104,85 @@ export default [
       ],
       "solution": [
         [
-          4,
           1,
           2,
+          4,
           3
         ],
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          2,
+          1,
+          3,
+          4
+        ],
+        [
+          3,
+          4,
+          1,
+          2
+        ]
+      ],
+      "difficulty": "advanced"
+    }
+  },
+  {
+    "id": "cr-solve-latin4-012",
+    "lane": "solve",
+    "guide": true,
+    "title": "Latin Square #12",
+    "blurb": "Every row and column gets 1–4 exactly once. Sudoku's gentler cousin.",
+    "time": "5 min",
+    "difficulty": "intermediate",
+    "cost": "free",
+    "action": "Fill the grid, then check it",
+    "puzzle": {
+      "kind": "latin4",
+      "prompt": "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
+      "size": 4,
+      "given": [
+        [
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          4,
+          0,
+          0,
+          3
+        ],
+        [
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          3,
+          1,
+          0,
+          0
+        ]
+      ],
+      "solution": [
         [
           1,
           3,
           4,
           2
+        ],
+        [
+          4,
+          2,
+          1,
+          3
         ],
         [
           2,
@@ -2625,11 +4192,12 @@ export default [
         ],
         [
           3,
-          2,
           1,
+          2,
           4
         ]
-      ]
+      ],
+      "difficulty": "intermediate"
     }
   }
 ];

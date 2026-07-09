@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { markSolved } from "../lib/solveState.js";
 
 /* SolvePuzzle — renders one "Solve This" puzzle inside the /action-lab/:id guide
@@ -84,6 +84,11 @@ function HintToggle({ hint }) {
 // Normalize a free-typed answer for comparison: uppercase, letters/digits only
 // (so spacing and punctuation never matter — "DO A BARREL ROLL" === "doabarrelroll").
 const normalizeAnswer = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+// One underscore per letter of the answer, so the blank in a word-sandwich clue
+// visually matches how long the missing word is (a 3-letter answer shows "___",
+// a 5-letter answer shows "_____"). Used by WordSandwich.
+const BLANKS = (n) => "_".repeat(Math.max(1, n | 0));
 
 // Set the check status and, when the answer is right, record the completion so the
 // Action Lab card shows a ✓ solved badge. Every interactive renderer routes its
@@ -228,57 +233,179 @@ function Cipher({ puzzle, itemId }) {
   );
 }
 
-// Anagram: the scrambled letters are shown big; type the unscrambled word, then
-// check. Same try→check→reveal loop as Cipher (spacing/case ignored). Reveal
-// fills the answer; clear empties the input.
-function Anagram({ puzzle, itemId }) {
-  const [guess, setGuess] = useState("");
-  const [status, setStatus] = useState(null);
-  const [revealed, setRevealed] = useState(false);
+// Word Sprint (kind:"anagram"): a 30-second speed round. Seven scrambled letters
+// are shown; type as many real words (4+ letters) as you can before the clock
+// runs out. The generator pre-computed the full valid-word set (`puzzle.words`),
+// so the check is a cheap membership test — no runtime dictionary. Each unique
+// find scores by length; solving records a completion once the round ends with
+// any finds. A word may be built from the rack's letters (letters can't be reused
+// more than they appear), which the pre-computed set already guarantees.
+const SPRINT_SECONDS = 30;
 
-  const check = () =>
-    settle(setStatus, normalizeAnswer(guess) === normalizeAnswer(puzzle.answer), itemId);
-  const doReveal = () => {
-    setRevealed(true);
-    setStatus(null);
-    setGuess(puzzle.answer);
+function WordSprint({ puzzle, itemId }) {
+  const wordSet = useMemo(
+    () => new Set((puzzle.words || []).map((w) => w.toUpperCase())),
+    [puzzle.words]
+  );
+  const total = puzzle.total ?? wordSet.size;
+
+  const [phase, setPhase] = useState("ready"); // ready | running | done
+  const [left, setLeft] = useState(SPRINT_SECONDS);
+  const [guess, setGuess] = useState("");
+  const [found, setFound] = useState([]); // words the player has landed, newest first
+  const [flash, setFlash] = useState(null); // { kind:"hit"|"dupe"|"miss", word }
+  const foundSet = useMemo(() => new Set(found), [found]);
+  const tickRef = useRef(null);
+  const flashRef = useRef(null);
+
+  // Count down while running; stop at 0.
+  useEffect(() => {
+    if (phase !== "running") return undefined;
+    tickRef.current = window.setInterval(() => {
+      setLeft((t) => {
+        if (t <= 1) {
+          window.clearInterval(tickRef.current);
+          setPhase("done");
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(tickRef.current);
+  }, [phase]);
+
+  // On finishing with at least one find, mark the item solved.
+  useEffect(() => {
+    if (phase === "done" && found.length > 0) markSolved(itemId);
+  }, [phase, found.length, itemId]);
+
+  useEffect(() => () => {
+    window.clearInterval(tickRef.current);
+    window.clearTimeout(flashRef.current);
+  }, []);
+
+  const showFlash = (kind, word) => {
+    setFlash({ kind, word });
+    window.clearTimeout(flashRef.current);
+    flashRef.current = window.setTimeout(() => setFlash(null), 1100);
   };
-  const reset = () => {
-    setRevealed(false);
-    setStatus(null);
+
+  const start = () => {
+    setPhase("running");
+    setLeft(SPRINT_SECONDS);
+    setFound([]);
     setGuess("");
+    setFlash(null);
   };
+
+  const submit = (e) => {
+    e?.preventDefault?.();
+    if (phase !== "running") return;
+    const w = normalizeAnswer(guess);
+    setGuess("");
+    if (w.length < 4) { showFlash("miss", w); return; }
+    if (foundSet.has(w)) { showFlash("dupe", w); return; }
+    if (!wordSet.has(w)) { showFlash("miss", w); return; }
+    setFound((prev) => [w, ...prev]);
+    showFlash("hit", w);
+  };
+
+  const score = found.reduce((s, w) => s + w.length, 0);
+  const timeLow = phase === "running" && left <= 5;
 
   return (
     <div className="arcade-solve">
       {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
-      <p className="arcade-solve-mono arcade-solve-cipher">{puzzle.scramble.split("").join(" ")}</p>
 
-      <input
-        className="arcade-solve-input arcade-solve-cipher-input"
-        type="text"
-        value={guess}
-        readOnly={revealed}
-        maxLength={puzzle.answer.length}
-        onChange={(e) => {
-          setStatus(null);
-          setGuess(e.target.value);
-        }}
-        placeholder="type the word…"
-        aria-label="your unscrambled word"
-        autoComplete="off"
-        autoCapitalize="characters"
-        spellCheck={false}
-      />
+      {/* the rack — big scrambled letters */}
+      <p className="arcade-solve-mono arcade-solve-cipher arcade-sprint-rack">
+        {puzzle.scramble.split("").join(" ")}
+      </p>
 
-      <HintToggle hint={puzzle.hint} />
-      <GridControls
-        onCheck={check}
-        onReveal={doReveal}
-        onClear={reset}
-        revealed={revealed}
-        status={status}
-      />
+      {phase === "ready" && (
+        <>
+          <HintToggle hint={puzzle.hint} />
+          <div className="arcade-solve-controls">
+            <button
+              type="button"
+              className="arcade-solve-btn arcade-solve-check-btn"
+              onClick={start}
+            >
+              start 30s sprint
+            </button>
+          </div>
+        </>
+      )}
+
+      {phase === "running" && (
+        <>
+          <div className="arcade-sprint-hud">
+            <span className={`arcade-sprint-timer${timeLow ? " is-low" : ""}`}>⏱ {left}s</span>
+            <span className="arcade-sprint-count">{found.length} found · {score} pts</span>
+          </div>
+
+          <form onSubmit={submit} className="arcade-sprint-form">
+            <input
+              className="arcade-solve-input arcade-solve-cipher-input"
+              type="text"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              placeholder="type a word, hit enter…"
+              aria-label="your word"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              autoFocus
+            />
+          </form>
+
+          {flash && (
+            <p className={`arcade-solve-status arcade-sprint-flash is-${flash.kind}`}>
+              {flash.kind === "hit" && `✓ ${flash.word} (+${flash.word.length})`}
+              {flash.kind === "dupe" && `already found ${flash.word}`}
+              {flash.kind === "miss" && (flash.word.length < 4 ? "words need 4+ letters" : `${flash.word} isn't in the list`)}
+            </p>
+          )}
+
+          {found.length > 0 && (
+            <div className="arcade-sprint-found">
+              {found.map((w) => (
+                <span key={w} className="arcade-sprint-chip">{w}</span>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {phase === "done" && (
+        <div className="arcade-sprint-result">
+          <p className="arcade-solve-status is-right">
+            ⏱ time! You found <b>{found.length}</b> of {total} words · <b>{score}</b> points.
+          </p>
+          {found.length > 0 && (
+            <div className="arcade-sprint-found">
+              {found.map((w) => (
+                <span key={w} className="arcade-sprint-chip">{w}</span>
+              ))}
+            </div>
+          )}
+          {puzzle.pangrams?.length > 0 && (
+            <p className="arcade-solve-hint">
+              Used all 7 letters: {puzzle.pangrams.join(", ")}
+              {found.some((w) => puzzle.pangrams.includes(w)) ? " — and you got it! 🏆" : ""}
+            </p>
+          )}
+          <div className="arcade-solve-controls">
+            <button
+              type="button"
+              className="arcade-solve-btn arcade-solve-reveal-btn"
+              onClick={start}
+            >
+              play again
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -307,7 +434,7 @@ function WordSandwich({ puzzle, itemId }) {
     <div className="arcade-solve">
       {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
       <p className="arcade-solve-mono arcade-solve-cipher">
-        {puzzle.left}___ &nbsp;+&nbsp; ___{puzzle.right}
+        {puzzle.left}{BLANKS(puzzle.answer.length)} &nbsp;+&nbsp; {BLANKS(puzzle.answer.length)}{puzzle.right}
       </p>
 
       <input
@@ -521,6 +648,9 @@ function Nonogram({ puzzle, itemId }) {
         onClear={reset}
         revealed={revealed}
         status={status}
+        // Name the picture both on a correct solve AND on reveal — so a player
+        // who cracks it themselves still learns what the pixel art depicts.
+        solvedNote={`The picture is ${reveal}!`}
         revealNote={revealed ? `It's ${reveal}!` : null}
       />
     </div>
@@ -615,7 +745,7 @@ function NumberGrid({ puzzle, itemId }) {
 }
 
 // Check / Reveal / Clear row + a right/wrong status line, shared by all grids.
-function GridControls({ onCheck, onReveal, onClear, revealed, status, revealNote }) {
+function GridControls({ onCheck, onReveal, onClear, revealed, status, revealNote, solvedNote }) {
   return (
     <>
       <div className="arcade-solve-controls">
@@ -639,7 +769,9 @@ function GridControls({ onCheck, onReveal, onClear, revealed, status, revealNote
         </button>
       </div>
       {status === "right" && (
-        <p className="arcade-solve-status is-right">✓ that's it — nicely solved!</p>
+        <p className="arcade-solve-status is-right">
+          ✓ that's it — nicely solved!{solvedNote ? ` ${solvedNote}` : ""}
+        </p>
       )}
       {status === "wrong" && (
         <p className="arcade-solve-status is-wrong">not quite — keep going.</p>
@@ -657,7 +789,7 @@ export default function SolvePuzzle({ puzzle, itemId }) {
     case "word_ladder":
       return <WordLadder puzzle={puzzle} itemId={itemId} />;
     case "anagram":
-      return <Anagram puzzle={puzzle} itemId={itemId} />;
+      return <WordSprint puzzle={puzzle} itemId={itemId} />;
     case "middle":
       return <WordSandwich puzzle={puzzle} itemId={itemId} />;
     case "cipher":

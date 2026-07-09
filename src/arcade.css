@@ -1870,6 +1870,34 @@ main > section + section { margin-top: 44px; }
   text-align: center; color: #eef0ff; margin: 0; white-space: pre-wrap;
 }
 
+/* word sprint — timed find-'em-all from a 7-letter rack */
+.arcade-sprint-rack {
+  text-align: center; font-size: 1.5rem; letter-spacing: 0.25em;
+  color: var(--neon-gold); text-shadow: 0 0 12px rgba(255, 210, 63, 0.35);
+}
+.arcade-sprint-hud {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.6rem; margin: 4px 0 2px;
+}
+.arcade-sprint-timer { color: var(--neon-aqua); }
+.arcade-sprint-timer.is-low { color: var(--neon-pink); animation: sprintPulse 0.6s steps(2) infinite; }
+@keyframes sprintPulse { 50% { opacity: 0.4; } }
+.arcade-sprint-count { color: var(--arcade-muted); }
+.arcade-sprint-form { margin: 0; }
+.arcade-sprint-flash { min-height: 1.2em; }
+.arcade-sprint-flash.is-hit { color: var(--neon-casino); }
+.arcade-sprint-flash.is-dupe { color: var(--neon-gold); }
+.arcade-sprint-flash.is-miss { color: var(--neon-pink); }
+.arcade-sprint-found {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.arcade-sprint-chip {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em;
+  padding: 3px 9px; border-radius: 12px; color: var(--neon-lime);
+  background: rgba(120, 255, 120, 0.08); border: 1px solid rgba(120, 255, 120, 0.3);
+}
+.arcade-sprint-result { display: flex; flex-direction: column; gap: 10px; }
+
 /* complete-the-pattern — the shown terms + a trailing "?" for the next one */
 .arcade-solve-pattern {
   display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;

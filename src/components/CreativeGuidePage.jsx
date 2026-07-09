@@ -4,6 +4,7 @@ import { creativeArt, stepArt, plateArt } from "./creativeArt.js";
 import SolvePuzzle from "./SolvePuzzle.jsx";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
+import ShareButton from "./ShareButton.jsx";
 
 /* /creatives/:id — an on-site step-by-step guide (the alternative to linking
    out to a bare Google/YouTube search). Two flavors, both a single vertical
@@ -194,6 +195,14 @@ export default function CreativeGuidePage() {
               <span className="arcade-creative-action-arrow">→</span> {item.action}
             </p>
           )}
+          {/* Deep-link this exact item — the URL is already /action-lab/:id, so a
+              default (current-page) share sends someone straight to this puzzle. */}
+          <ShareButton
+            title={`Ourcade · ${item.title}`}
+            text={`${item.title} — ${item.blurb || "try this on Ourcade"}`}
+            label="Share this"
+            className="arcade-guide-share"
+          />
           <Link to="/action-lab" className="arcade-back-link">
             ← find another mission
           </Link>

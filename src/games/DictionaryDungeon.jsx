@@ -49,6 +49,7 @@ export default function DictionaryDungeon() {
   const [screen, setScreen] = useState("title"); // title | play | over
   const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
+  const rootRef = useRef(null);
   const logRef = useRef(null);
   const revealSig = useRef(null); // last-shown encounter signature (dedupe reveals)
   const fxTimers = useRef([]); // pending setTimeouts (paced log / fx) to clear
@@ -105,14 +106,63 @@ export default function DictionaryDungeon() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
 
+  // Lock page scroll from finger drags, but keep genuinely-scrollable regions
+  // usable. A non-passive touchmove guard on the root swallows the gesture unless
+  // the drag can be legitimately absorbed by:
+  //   (a) an inner overflow:auto/scroll element with room to move (the log), or
+  //   (b) the DOCUMENT itself, once merchant/treasure panels push the content
+  //       past the viewport (so the user can still reach the bottom).
+  // In every other case (short page, at a scroll edge) it preventDefaults, which
+  // is what kills the annoying page rubber-band. Mirrors the 2048 touch lock, but
+  // scoped so overflow content stays reachable.
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return undefined;
+    let startY = 0;
+    const onStart = (e) => { startY = e.touches[0]?.clientY ?? 0; };
+    const scroller = () =>
+      document.scrollingElement || document.documentElement || document.body;
+    const onMove = (e) => {
+      const dy = (e.touches[0]?.clientY ?? 0) - startY; // >0 drag down, <0 drag up
+      if (dy === 0) return;
+      // (a) An inner scroller (the log) with room to move in this direction.
+      let el = e.target;
+      while (el && el !== node) {
+        if (el.nodeType === 1) {
+          const style = window.getComputedStyle(el);
+          if (/(auto|scroll)/.test(style.overflowY) && el.scrollHeight > el.clientHeight) {
+            const atTop = el.scrollTop <= 0;
+            const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+            if (!((dy > 0 && atTop) || (dy < 0 && atBottom))) return; // let it scroll
+          }
+        }
+        el = el.parentNode;
+      }
+      // (b) The document can scroll in this direction (content overflows viewport).
+      const doc = scroller();
+      const docTop = doc.scrollTop <= 0;
+      const docBottom = doc.scrollTop + doc.clientHeight >= doc.scrollHeight - 1;
+      const docCanScroll = doc.scrollHeight > doc.clientHeight;
+      if (docCanScroll && !((dy > 0 && docTop) || (dy < 0 && docBottom))) return;
+      // Nothing can absorb the drag → it would only rubber-band the page. Block it.
+      e.preventDefault();
+    };
+    node.addEventListener("touchstart", onStart, { passive: true });
+    node.addEventListener("touchmove", onMove, { passive: false });
+    return () => {
+      node.removeEventListener("touchstart", onStart);
+      node.removeEventListener("touchmove", onMove);
+    };
+  }, []);
+
   // Clear any pending fx/log timers on unmount.
   useEffect(() => () => fxTimers.current.forEach(window.clearTimeout), []);
 
   // Showcase reveal cards: when the player reaches a NEW level, a NEW enemy, or a
-  // boss shifts to a NEW phase, pop a transient card ("You've encountered a Cave
-  // Bat", its HP + intent) that settles before the fight. Purely presentational —
-  // driven off the current target/level signature. Auto-dismisses (or on tap).
-  const revealTimer = useRef(null);
+  // boss shifts to a NEW phase, pop a card ("You've encountered a Cave Bat", its
+  // HP + intent) before the fight. Purely presentational — driven off the current
+  // target/level signature. The card PERSISTS until the player explicitly closes
+  // it (tapping the backdrop does nothing); this keeps encounter info readable.
   useEffect(() => {
     if (screen !== "play" || !logic || !state) return;
     const lvl = logic.currentLevel(state);
@@ -148,16 +198,8 @@ export default function DictionaryDungeon() {
     }
     if (!next) { setReveal(null); return; }
     setReveal(next);
-    window.clearTimeout(revealTimer.current);
-    const reduce = typeof window !== "undefined" && window.matchMedia
-      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    revealTimer.current = window.setTimeout(() => setReveal(null), reduce ? 500 : 1400);
   }, [screen, logic, state]);
-  useEffect(() => () => window.clearTimeout(revealTimer.current), []);
-  const dismissReveal = useCallback(() => {
-    window.clearTimeout(revealTimer.current);
-    setReveal(null);
-  }, []);
+  const dismissReveal = useCallback(() => setReveal(null), []);
 
   // Flash a toast for a moment.
   const flash = useCallback((msg) => {
@@ -388,7 +430,7 @@ export default function DictionaryDungeon() {
   // ── render ──────────────────────────────────────────────────────────────────
   if (!logic) {
     return (
-      <div className="dd-root">
+      <div className="dd-root" ref={rootRef}>
         <style>{CSS}</style>
         <div className="dd-loading">Opening the lexicon…</div>
       </div>
@@ -396,7 +438,7 @@ export default function DictionaryDungeon() {
   }
 
   return (
-    <div className="dd-root">
+    <div className="dd-root" ref={rootRef}>
       <style>{CSS}</style>
       {screen === "title" && <Title logic={logic} day={day} onStart={startRun} />}
       {screen === "play" && state && (
@@ -708,7 +750,7 @@ function RelicMenu({ logic, relics }) {
     <div className="dd-menu">
       <button className="dd-act" onClick={() => setOpen((o) => !o)}>💠 Relics ({relics.length})</button>
       {open && (
-        <div className="dd-pop">
+        <div className="dd-pop dd-pop-right">
           {relics.length === 0 && <div className="dd-pop-empty">No relics yet.</div>}
           {relics.map((id, i) => {
             const r = relicMeta(logic, id);
@@ -726,12 +768,13 @@ function RelicMenu({ logic, relics }) {
 }
 
 // ── reveal (showcase card for new levels / enemies / boss phases) ─────────────
-// A transient overlay that pops in, holds a beat, then settles so the fight can
-// begin. Tap to dismiss early. Purely presentational.
+// An overlay that pops in and PERSISTS until the player taps Continue. Tapping the
+// backdrop does nothing (so an accidental tap can't skip the encounter info).
+// Purely presentational.
 function Reveal({ reveal, onDismiss }) {
   const isEnemy = reveal.kind === "enemy" || reveal.kind === "phase";
   return (
-    <div className="dd-reveal-overlay" onClick={onDismiss}>
+    <div className="dd-reveal-overlay">
       <div className={`dd-reveal-card dd-reveal-${reveal.kind}`}>
         {reveal.kind === "level" && (
           <>
@@ -753,6 +796,9 @@ function Reveal({ reveal, onDismiss }) {
             {reveal.intent && <div className="dd-reveal-intent">Intent: {reveal.intent}</div>}
           </>
         )}
+        <button className="dd-btn dd-btn-primary dd-reveal-go" onClick={onDismiss}>
+          Continue
+        </button>
       </div>
     </div>
   );
@@ -864,6 +910,11 @@ const CSS = `
     radial-gradient(120% 80% at 50% -10%, rgba(120,90,40,.18), transparent 60%),
     linear-gradient(180deg, #17130f 0%, #0d0b09 100%);
   padding: 16px; display: flex; flex-direction: column; align-items: center;
+  /* Keep finger drags from rubber-banding the page; the touchmove guard (JS)
+     still lets the log and any overflowed content scroll. pan-y allows those
+     inner scrolls; overscroll-behavior stops the scroll chaining to the page. */
+  overscroll-behavior: contain; touch-action: pan-y;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .dd-loading { padding: 60px 0; color: var(--gold); letter-spacing: .1em; font-size: .95rem; opacity: .8; }
 
@@ -888,7 +939,7 @@ const CSS = `
 .dd-help li { margin: 5px 0; }
 
 /* play */
-.dd-play { max-width: 500px; width: 100%; }
+.dd-play { max-width: 500px; width: 100%; overflow-x: hidden; }
 .dd-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .85rem;
   padding: 8px 4px; border-bottom: 1px solid rgba(217,180,94,.2); margin-bottom: 10px; }
 .dd-stat b { color: var(--gold); }
@@ -932,7 +983,7 @@ const CSS = `
 /* showcase reveal cards (new level / enemy / boss phase) */
 .dd-reveal-overlay { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center;
   padding: 24px; background: radial-gradient(120% 90% at 50% 40%, rgba(14,10,7,.7), rgba(6,5,4,.86));
-  animation: ddRevealFade .3s ease-out; cursor: pointer; }
+  animation: ddRevealFade .3s ease-out; }
 .dd-reveal-card { min-width: 220px; max-width: 360px; text-align: center; padding: 22px 22px 20px; border-radius: 16px;
   background: linear-gradient(180deg, rgba(34,27,19,.98), rgba(16,12,9,.98));
   border: 1px solid rgba(217,180,94,.45); box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 40px rgba(0,0,0,.4);
@@ -944,6 +995,7 @@ const CSS = `
 .dd-reveal-emoji { font-size: 3rem; margin: 8px 0 4px; animation: ddRevealPop .5s ease-out both; }
 .dd-reveal-hp { font-size: .9rem; opacity: .85; margin-top: 4px; color: #e8a99c; }
 .dd-reveal-intent { font-size: .85rem; opacity: .75; font-style: italic; margin-top: 6px; }
+.dd-reveal-go { margin-top: 16px; }
 @keyframes ddReveal {
   0% { transform: scale(.7); opacity: 0; }
   60% { transform: scale(1.04); opacity: 1; }
@@ -975,7 +1027,7 @@ const CSS = `
 
 /* word entry + on-screen keyboard */
 .dd-entry { margin-bottom: 10px; }
-.dd-word { min-height: 52px; padding: 11px 14px; border-radius: 10px; font-size: 1.25rem; letter-spacing: .14em;
+.dd-word { min-height: 42px; padding: 8px 14px; border-radius: 10px; font-size: 1.25rem; letter-spacing: .14em;
   text-transform: uppercase; text-align: center; font-family: inherit; color: #f4ecd8; user-select: none;
   background: rgba(0,0,0,.35); border: 1px solid rgba(217,180,94,.4); margin-bottom: 8px;
   display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden; }
@@ -1022,6 +1074,9 @@ const CSS = `
   min-width: 220px; max-width: min(320px, 90vw);
   background: #1a1611; border: 1px solid rgba(217,180,94,.4); border-radius: 10px; padding: 6px;
   box-shadow: 0 10px 30px rgba(0,0,0,.6); max-height: 240px; overflow-y: auto; overflow-x: hidden; }
+/* Relics is the rightmost menu; a left-anchored min-width popup would spill past
+   the viewport's right edge and shift the whole page. Anchor it to the right. */
+.dd-pop-right { left: auto; right: 0; }
 .dd-pop-item { display: block; width: 100%; min-width: 0; text-align: left; padding: 8px; border-radius: 7px;
   cursor: pointer; background: none; border: none; color: #e7ddc9; font-family: inherit; }
 .dd-pop-item.static { cursor: default; }
@@ -1080,6 +1135,6 @@ const CSS = `
   .dd-key { height: 42px; font-size: .9rem; }
   .dd-kb { gap: 5px; }
   .dd-kb-row { gap: 4px; }
-  .dd-word { font-size: 1.1rem; min-height: 46px; }
+  .dd-word { font-size: 1.1rem; min-height: 38px; padding: 6px 12px; }
 }
 `;

@@ -141,12 +141,18 @@ function buildWordLadders(dict4, dict5, want) {
     // Want a satisfying length: 4–6 words total (2–4 changes). Skip trivial/huge.
     if (!sol || sol.length < 4 || sol.length > 6) continue;
     const rungs = sol.map((w, i) => (i === 0 || i === sol.length - 1 ? w : "____"));
+    // Difficulty tracks the number of blanks the player must fill (the hops
+    // between the given first/last rungs): fewer blanks = easier. sol.length is
+    // the whole chain incl. both ends, so blanks = sol.length - 2.
+    const blanks = sol.length - 2;
+    const difficulty = blanks <= 2 ? "beginner" : blanks === 3 ? "intermediate" : "advanced";
     out.push({
       kind: "word_ladder",
       prompt:
         "Change ONE letter at a time. Every step must be a real word. Fill the blanks.",
       rungs,
       answer: sol,
+      difficulty,
       hint,
     });
   }
@@ -154,63 +160,102 @@ function buildWordLadders(dict4, dict5, want) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ANAGRAM — unscramble a real word. The word list does the work twice: it
-// confirms the answer is a real word, and it guarantees the SCRAMBLE we show
-// isn't accidentally a different valid word (or a second valid anagram of the
-// same letters), so there's exactly one intended solution.
+// WORD SPRINT (kind:"anagram") — a 30-second speed round: from 7 scrambled
+// letters, find as MANY real words as you can (any length ≥ 4). This rebrands the
+// old "unscramble one word" anagram into a fast, replayable find-'em-all game.
+//
+// The generator does the heavy lifting once, at build time: for each 7-letter
+// seed word it enumerates every dictionary word (len 4–7) buildable from those
+// letters WITHOUT reusing a letter more times than it appears, and ships that
+// full valid-word set. The browser just checks membership as the player types —
+// no runtime dictionary needed. Difficulty tracks how many words the board holds
+// (a small board is easy to clear, a big one is a harder sprint).
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Sorted-letter signature — two words are anagrams iff their signatures match.
-const signature = (w) => w.toUpperCase().split("").sort().join("");
+// Letter-count bag for a word (e.g. "TREE" → {T:1,R:1,E:2}). A candidate is
+// buildable from a rack iff each of its letters fits within the rack's counts.
+function letterBag(w) {
+  const bag = {};
+  for (const ch of w) bag[ch] = (bag[ch] || 0) + 1;
+  return bag;
+}
+function buildableFrom(word, rackBag) {
+  const need = letterBag(word);
+  for (const ch in need) {
+    if (!rackBag[ch] || rackBag[ch] < need[ch]) return false;
+  }
+  return true;
+}
 
-// A bank of fun, common, on-brand words to scramble (5–7 letters). Curated so
-// the answer always reads as a "real" word a casual player knows; the generator
-// still verifies each is in the list and has a unique anagram before shipping it.
-const ANAGRAM_WORDS = [
-  "ARCADE", "PIXELS", "ROCKET", "PLANET", "DRAGON", "WIZARD", "CASTLE", "KNIGHT",
-  "GOBLIN", "POTION", "SHIELD", "DESERT", "JUNGLE", "ISLAND", "GALAXY", "COMETS",
-  "GARDEN", "PUZZLE", "RIDDLE", "SECRET", "MAGNET", "ROBOTS", "SIGNAL", "BUTTON",
-  "SCREEN", "RECORD", "SPRITE", "TUNNEL", "BRIDGE", "TROPHY", "MEDALS", "WINNER",
-  "MARBLE", "PEBBLE", "TURTLE", "FALCON", "JAGUAR", "PYTHON", "BEACON", "METEOR",
-  "ORBITS", "ANCHOR", "HARBOR", "VOYAGE", "VOLCANO", "THUNDER", "CRYSTAL", "DOLPHIN",
-  "PENGUIN", "COMPASS", "LANTERN", "CIRCUIT",
+// Curated 7-letter seed racks with a rich set of sub-words (all common enough to
+// be a fun sprint). The generator VALIDATES each is a real 7-letter word and only
+// ships racks whose findable-word count lands in a playable band.
+const SPRINT_SEEDS = [
+  "PLANETS", "MONSTER", "CAPTURE", "DIAMOND", "PICTURE", "STRANGE", "COASTER",
+  "MARINES", "PAINTER", "GARDENS", "TEACHER", "DOLPHIN", "LANTERN", "COMPASS",
+  "CIRCUIT", "MACHINE", "PRETZEL", "CRIMSON", "TROUBLE", "STADIUM", "PORTALS",
+  "DUNGEON", "GOBLINS", "WIZARDS", "POTIONS", "CANDLES", "SPARKLE", "THUNDER",
+  "RAINBOW", "PANTHER", "STORMED", "CLEANER", "CREATES", "SILENCE", "MASTERS",
+  "PLASTER", "COUNTER", "RETINAS", "TANGLES", "GRENADE",
 ];
 
-function buildAnagrams(dictByLen, want) {
-  const out = [];
-  for (const word of shuffle(ANAGRAM_WORDS)) {
-    if (out.length >= want) break;
-    const W = word.toUpperCase();
-    const dict = dictByLen[W.length];
-    if (!dict || !dict.has(W)) continue; // must be a real word of its length
+// Difficulty by how many words the rack yields (more words = a harder sprint to
+// meaningfully clear). Tuned against real racks below.
+function sprintDifficulty(count) {
+  if (count <= 22) return "beginner";
+  if (count <= 40) return "intermediate";
+  return "advanced";
+}
 
-    // Single-answer guard: skip if another word shares the same letters (so the
-    // player can't legitimately type a different correct word).
-    let answers = 0;
-    for (const w of dict) {
-      if (signature(w) === signature(W)) {
-        if (++answers > 1) break;
+function buildWordSprints(dictByLen, want) {
+  const out = [];
+  const seen = new Set();
+  for (const seed of shuffle(SPRINT_SEEDS)) {
+    if (out.length >= want) break;
+    const W = seed.toUpperCase();
+    if (W.length !== 7 || seen.has(W)) continue;
+    const d7 = dictByLen[7];
+    if (!d7 || !d7.has(W)) continue; // the rack itself must be a real 7-letter word
+    seen.add(W);
+
+    const rackBag = letterBag(W);
+    // Enumerate every dictionary word of length 4–7 buildable from this rack.
+    const words = [];
+    for (let len = 4; len <= 7; len++) {
+      const dict = dictByLen[len];
+      if (!dict) continue;
+      for (const cand of dict) {
+        if (buildableFrom(cand, rackBag)) words.push(cand);
       }
     }
-    if (answers > 1) continue;
+    // Need a satisfying board that isn't overwhelming.
+    if (words.length < 12 || words.length > 90) continue;
+    words.sort(); // stable, deterministic order in the output
 
-    // A scramble that isn't the word itself and isn't ANOTHER real word.
+    // Present the rack as a scramble (never the seed word itself in order).
     let scramble = null;
     for (let t = 0; t < 40; t++) {
       const s = shuffle(W.split("")).join("");
-      if (s !== W && !dict.has(s)) {
-        scramble = s;
-        break;
-      }
+      if (s !== W) { scramble = s; break; }
     }
-    if (!scramble) continue;
+    if (!scramble) scramble = W;
+
+    // The longest words are the "trophy" finds — surface a couple as a hint.
+    const longest = words.filter((w) => w.length === 7);
 
     out.push({
-      kind: "anagram",
-      prompt: "These letters spell one word. Unscramble them, then check.",
+      kind: "anagram", // keep the id/route stable; renders as the sprint game
+      prompt:
+        "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
       scramble,
-      answer: W,
-      hint: `It's a ${W.length}-letter word starting with “${W[0]}”.`,
+      letters: W,
+      words, // the full valid-word set the browser checks against
+      total: words.length,
+      difficulty: sprintDifficulty(words.length),
+      pangrams: longest, // 7-letter words that use every letter
+      hint: longest.length
+        ? `There's at least one word that uses all 7 letters.`
+        : `Short words add up fast — don't overthink it.`,
     });
   }
   return out;
@@ -639,41 +684,76 @@ function countSolutions(puz, variant, cap = 2) {
   return count;
 }
 
-// Dig holes from a full grid while the puzzle stays uniquely solvable.
-function makePuzzle(variant) {
+// Dig holes from a full grid while the puzzle stays uniquely solvable. `minGivens`
+// stops the dig early so we can aim for a target difficulty — a 4×4 dug to its
+// absolute minimum almost always lands at ~4–5 clues (very hard), so to get
+// easier boards we simply leave more clues in. Digging still stops the moment a
+// removal would break uniqueness.
+function makePuzzle(variant, minGivens = 0) {
   const sol = fullGrid(variant);
   const puz = sol.map((row) => row.slice());
-  // Remove cells in random order; keep a removal only if uniqueness survives.
+  // Remove cells in random order; keep a removal only if uniqueness survives and
+  // we're still above the target clue floor.
   const cells = shuffle(Array.from({ length: 16 }, (_, i) => i));
+  let givens = 16;
   for (const idx of cells) {
+    if (givens <= minGivens) break;
     const r = Math.floor(idx / 4);
     const c = idx % 4;
     const saved = puz[r][c];
     puz[r][c] = 0;
     if (countSolutions(puz, variant, 2) !== 1) puz[r][c] = saved; // revert
+    else givens--;
   }
   return { given: puz, solution: sol };
 }
 
+// Difficulty by how many cells are pre-filled (fewer givens = more deduction =
+// harder). Tuned for the 16-cell 4×4 board: a minimal-uniqueness dig usually
+// leaves 4–8 givens, so the bands split that range.
+function gridDifficulty(givenCount) {
+  if (givenCount >= 8) return "beginner";
+  if (givenCount >= 6) return "intermediate";
+  return "advanced";
+}
+
 function buildGridNumbers(variant, want) {
-  const out = [];
   const seen = new Set();
-  let guard = 0;
-  while (out.length < want && guard++ < want * 40) {
-    const { given, solution } = makePuzzle(variant);
-    const key = given.flat().join("");
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({
-      kind: variant,
-      prompt:
-        variant === "sudoku4"
-          ? "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4."
-          : "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.",
-      size: 4,
-      given,
-      solution,
-    });
+  const prompt =
+    variant === "sudoku4"
+      ? "Fill the grid so every row, every column, AND every 2×2 box contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4."
+      : "Fill the grid so every row and every column contains 1, 2, 3 and 4 exactly once. Tap a blank cell and type 1–4.";
+
+  // Ask each difficulty for its own clue floor so we get real variety instead of
+  // always digging to the (very hard) minimum. beginner leaves the most clues.
+  const TARGETS = { beginner: 9, intermediate: 7, advanced: 5 };
+
+  // Split `want` roughly evenly across the three bands.
+  const bands = ["beginner", "intermediate", "advanced"];
+  const perBand = Math.ceil(want / bands.length);
+
+  const out = [];
+  for (const difficulty of bands) {
+    let made = 0;
+    let guard = 0;
+    while (made < perBand && out.length < want && guard++ < perBand * 60) {
+      const { given, solution } = makePuzzle(variant, TARGETS[difficulty]);
+      const key = given.flat().join("");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      // The dig may not hit the exact floor; classify by the ACTUAL clue count so
+      // the badge is always honest even if a board landed a tier off.
+      const givenCount = given.flat().filter((v) => v !== 0).length;
+      out.push({
+        kind: variant,
+        prompt,
+        size: 4,
+        given,
+        solution,
+        difficulty: gridDifficulty(givenCount),
+      });
+      made++;
+    }
   }
   return out;
 }
@@ -699,10 +779,10 @@ const KIND_META = {
     action: "Climb the ladder, then check it",
   },
   anagram: {
-    label: "Anagram",
-    time: "2 min",
+    label: "Word Sprint",
+    time: "30 sec",
     difficulty: "beginner",
-    action: "Unscramble the word, then check it",
+    action: "Beat the clock — find every word you can",
   },
   middle: {
     label: "Word Sandwich",
@@ -765,7 +845,7 @@ function titleFor(p, n) {
 
 const BLURBS = {
   word_ladder: "Change one letter at a time until you climb from the first word to the last.",
-  anagram: "Every letter of a real word, shuffled. Slide them back into place.",
+  anagram: "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
   middle: "One little word finishes two bigger ones. Find the word that fits both blanks.",
   cipher: "A secret phrase, scrambled by a Caesar shift. Slide the letters back to read it.",
   rebus: "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",
@@ -786,7 +866,10 @@ function toItem(p, n) {
     title: titleFor(p, n),
     blurb: BLURBS[p.kind],
     time: meta.time,
-    difficulty: meta.difficulty,
+    // A puzzle may carry its own computed difficulty (word sprints scale by how
+    // many words the rack holds; grids/ladders by their own metric). Fall back to
+    // the kind's default badge otherwise.
+    difficulty: p.difficulty || meta.difficulty,
     cost: "free",
     action: meta.action,
     puzzle: p,
@@ -813,15 +896,15 @@ const dictByLen = {
 
 const puzzles = [
   ...buildWordLadders(dict4, dict5, 14),
-  ...buildAnagrams(dictByLen, 12),
+  ...buildWordSprints(dictByLen, 12),
   ...buildSandwiches(dictByLen, 10),
   ...buildCiphers(6),
   ...buildRebuses(6),
   ...buildPatterns(8),
   ...buildMysteries(4),
   ...buildNonograms(5),
-  ...buildGridNumbers("sudoku4", 6),
-  ...buildGridNumbers("latin4", 6),
+  ...buildGridNumbers("sudoku4", 12),
+  ...buildGridNumbers("latin4", 12),
 ];
 
 // Stamp a stable per-kind index into each id.
