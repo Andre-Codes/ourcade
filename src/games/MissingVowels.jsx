@@ -56,6 +56,7 @@ export default function MissingVowels() {
   const [streak, setStreak] = useState(() => lsGetJSON(STREAK_KEY, null) || { streak: 0, best: 0 });
   const lastSubmitRef = useRef(-1);
   const streakedRef = useRef(false);
+  const inputRefs = useRef({}); // clue → the row's <input>, for Enter-to-advance
 
   const solvedCount = Object.keys(state.solved).length;
   const total = puzzle.items.length;
@@ -112,7 +113,16 @@ export default function MissingVowels() {
       };
     });
     flash("✓ nice");
-  }, [state.solved, entries, flash, puzzle.items.length]);
+    // Jump focus to the next still-unsolved row so the keyboard flows down the
+    // list (Enter/return on mobile submits, then lands on the next box).
+    const next = puzzle.items.find(
+      (it) => it.clue !== item.clue && !state.solved[it.clue]
+    );
+    if (next) {
+      // Defer past this row's unmount so the target input is mounted & focusable.
+      requestAnimationFrame(() => inputRefs.current[next.clue]?.focus());
+    }
+  }, [state.solved, entries, flash, puzzle.items]);
 
   // Reveal the skeletons and start the clock in the same instant.
   const start = useCallback(() => {
@@ -176,6 +186,7 @@ export default function MissingVowels() {
                     onSubmit={(e) => { e.preventDefault(); tryWord(item); }}
                   >
                     <input
+                      ref={(el) => { inputRefs.current[item.clue] = el; }}
                       className="mvw-input"
                       value={entries[item.clue] || ""}
                       onChange={(e) =>

@@ -30,6 +30,7 @@
     "check:daily": "node scripts/daily-check.js",
     "check:relic": "node scripts/relic-run-check.js",
     "check:spelldown": "node scripts/spelldown-check.js",
+    "check:chain": "node scripts/chain-check.js",
     "check:dungeon": "node scripts/dungeon-check.js",
     "assets:mascots": "node scripts/process-mascots.js",
     "assets:featured": "node scripts/process-featured.js",

@@ -83,26 +83,29 @@ export function scoreOrder(guess, puzzle) {
   const maxInv = (n * (n - 1)) / 2; // fully reversed
   const score = Math.round((1 - inversions / maxInv) * 100);
 
-  // Per-slot marks for the reveal + share grid.
-  const marks = guess.map((w, i) => (w === truth[i] ? "exact" : "off"));
+  // Per-slot closeness marks, by distance from the word's true slot — the SAME
+  // three buckets the share grid uses, so the in-game reveal and the shared
+  // squares always agree: exact (right slot) / near (one off) / far (2+ off).
+  const marks = guess.map((w, i) => {
+    const d = Math.abs(pos.get(w) - i);
+    return d === 0 ? "exact" : d === 1 ? "near" : "far";
+  });
 
   return { exact, inversions, maxInv, score, marks, perfect: exact === n };
 }
 
 // ── share ────────────────────────────────────────────────────────────────────
-// Spoiler-free share line, e.g.
-//   OURCADE Rank It #14  🟩🟩🟨🟩🟥  92 — 4/5 in place
-// 🟩 = exact slot, 🟨 = one away, 🟥 = further off (derived from |guessIdx-trueIdx|).
+// Spoiler-free share line — the "#n" header sits on its own line above the
+// closeness squares, e.g.
+//   OURCADE Rank It #14
+//   🟩🟩🟨🟩🟥  92 — 4/5 in place
+// 🟩 = exact slot, 🟨 = one away, 🟥 = further off. The squares are derived from
+// the SAME per-slot marks the in-game reveal uses (scoreOrder.marks).
+const MARK_SQUARE = { exact: "🟩", near: "🟨", far: "🟥" };
 export function shareLine(dayKey, guess, puzzle) {
   const n = rankitNumber(dayKey);
   const truth = trueOrder(puzzle);
-  const pos = new Map(truth.map((w, i) => [w, i]));
-  const row = guess
-    .map((w, i) => {
-      const d = Math.abs(pos.get(w) - i);
-      return d === 0 ? "🟩" : d === 1 ? "🟨" : "🟥";
-    })
-    .join("");
-  const { score, exact } = scoreOrder(guess, puzzle);
-  return `OURCADE Rank It #${n}  ${row}  ${score} — ${exact}/${truth.length} in place`;
+  const { score, exact, marks } = scoreOrder(guess, puzzle);
+  const row = marks.map((m) => MARK_SQUARE[m]).join("");
+  return `OURCADE Rank It #${n}\n${row}  ${score} — ${exact}/${truth.length} in place`;
 }

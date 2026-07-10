@@ -243,7 +243,7 @@ const CSS = `
 .ldg-rung-n{font-family:'Press Start 2P',monospace;font-size:.62rem;color:#4fdd8a;min-width:16px;text-align:center}
 .ldg-rung-w{font-size:1.1rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 .ldg-entry{display:flex;gap:8px;width:100%;max-width:320px;margin-top:2px}
-.ldg-input{flex:1;height:48px;border:2px solid #1f4331;border-radius:10px;background:#0a1c12;
+.ldg-input{flex:1;min-width:0;height:48px;border:2px solid #1f4331;border-radius:10px;background:#0a1c12;
   color:#e8f5ee;font-size:1.2rem;font-weight:800;letter-spacing:.18em;text-align:center;
   text-transform:uppercase;outline:none;box-sizing:border-box}
 .ldg-input:focus{border-color:#4fdd8a}
