@@ -44,6 +44,7 @@ import {
   FLAVOR,
   MERCHANT_STOCK,
   EVENTS,
+  SWORD_EVENT,
 } from "./pools.js";
 
 // Re-exported so the render-only cabinet can resolve owned relic/scroll ids to
@@ -241,7 +242,11 @@ function assembleRooms(level, levelIdx, dayKey, s) {
       room.enemyMaxHP = e.baseHP;
     }
     if (type === "treasure") {
-      room.relicChoices = s.pickN(RELICS, 3).map((r) => r.id);
+      // The Sword in the Stone is never a free treasure pick — it can only be
+      // drawn in the rare SWORD_EVENT (seeded in buildRun).
+      room.relicChoices = s
+        .pickN(RELICS.filter((r) => r.id !== "sword-in-stone"), 3)
+        .map((r) => r.id);
     }
     if (type === "merchant") {
       // Seeded stock of 4 offers, priced with a mild per-level markup. Always
@@ -276,6 +281,44 @@ function assembleRooms(level, levelIdx, dayKey, s) {
 
 /* Build the whole run for a day key (or a random practice run when dayKey is
    null). Returns the initial game STATE. */
+// Chance (per run) that the rare Sword-in-the-Stone event appears.
+const SWORD_EVENT_CHANCE = 0.08;
+
+/* Mutate `levels` in place to (maybe) seed the Sword-in-the-Stone event. Rolls
+   once off the given seeded stream; on a hit, places SWORD_EVENT on a random
+   level-2+ floor — retargeting an existing event room when possible, else
+   converting a gate/monster/trap room. At most one placement per run. */
+function seedSwordInStone(levels, s) {
+  if (s.rand() >= SWORD_EVENT_CHANCE) return;
+  // Eligible floors: index >= 1 (Level 2 and deeper). Level 1 (the Entry Hall)
+  // is left alone so the opener stays a plain word room.
+  const eligible = levels.map((_, i) => i).filter((i) => i >= 1);
+  if (!eligible.length) return;
+  const li = eligible[s.int(eligible.length)];
+  const rooms = levels[li].rooms;
+  const setSword = (room) => {
+    room.type = "event";
+    room.event = SWORD_EVENT;
+    room.eventResolved = false;
+    // Shed any stale word-room payload so the room reads purely as an event.
+    delete room.enemyId;
+    delete room.enemyHP;
+    delete room.enemyMaxHP;
+  };
+  // Prefer an existing event room on this floor (room-type counts unchanged).
+  const eventRooms = rooms.filter((r) => r.type === "event");
+  if (eventRooms.length) {
+    setSword(eventRooms[s.int(eventRooms.length)]);
+    return;
+  }
+  // Otherwise convert a plain word room (never room 0 — the opener must stay a
+  // word room). Gate/monster/trap are all fine to swap out.
+  const CONVERTIBLE = new Set(["gate", "monster", "trap"]);
+  const swappable = rooms.filter((r) => r.idx > 0 && CONVERTIBLE.has(r.type));
+  if (!swappable.length) return; // nothing safe to convert — skip this run
+  setSword(swappable[s.int(swappable.length)]);
+}
+
 export function buildRun(dayKey) {
   const daily = !!dayKey;
   const baseSeed = daily
@@ -296,6 +339,14 @@ export function buildRun(dayKey) {
       totalRooms: rooms.length + 1, // + boss
     };
   });
+
+  // Rare "sword in the stone" event: roll ONCE per run (~8%) to drop the legendary
+  // Sword in the Stone somewhere on a level-2+ floor. Uses its own salted stream
+  // so this decision never perturbs the room/rule draws above (deterministic per
+  // day). Prefer retargeting an existing event room (keeps per-level room-type
+  // counts identical, so the solvability/structure gate stays happy); only if the
+  // chosen floor has no event room do we convert a plain word room.
+  seedSwordInStone(levels, stream((baseSeed ^ (DUNGEON_SALT << 3) ^ 0x5357) >>> 0));
 
   return {
     v: SAVE_VERSION,
@@ -619,7 +670,8 @@ export function resolveTurn(state, rawWord, seedOverride) {
   if (w === "EXCALIBUR") {
     if (!state.relics.includes("sword-in-stone")) {
       out.reason = "invalid";
-      out.logLines.push("> EXCALIBUR does not stir. The blade will not come to an unworthy hand.");
+      // Don't confirm the word — without the blade in hand, it's just a word.
+      out.logLines.push("> The word hangs in the air and fades. Nothing answers it.");
       return out;
     }
     return resolveExcalibur(state, out, s, flav);

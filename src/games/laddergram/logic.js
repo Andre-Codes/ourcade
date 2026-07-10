@@ -3,21 +3,23 @@
    No React, no DOM: the same module picks the day's ladder, judges a rung, and
    formats the share line for BOTH the cabinet (Laddergram.jsx) and any headless
    check, exactly like spelldown/logic.js. The hop rule + membership come from the
-   shared word-ladder engine (src/lib/wordladder.js) and the shipped common-words
+   shared word-ladder engine (src/lib/wordladder.js) and the shipped wide-words
    dict, so a rung legal here is legal everywhere.
 
    Puzzles are precomputed at build time (scripts/gen-laddergram.js): each is
    { id, start, end, par, solution }. The browser validates the player's OWN rungs
-   against the common-words Set — it never runs BFS at play time (the solution is
+   against the wide-words Set — it never runs BFS at play time (the solution is
    shipped only for the hint + the headless check). */
 
 import { rotateDaily, dayNumberFromKey } from "../../lib/daily.js";
 import { isOneAway } from "../../lib/wordladder.js";
 import PUZZLES from "../../data/generated/laddergram.js";
-import COMMON_WORDS from "../../data/generated/common-words.js";
+import WIDE_WORDS from "../../data/generated/wide-words.js";
 
 // The runtime dictionary: build the Set once (membership check for each rung).
-export const DICT = new Set(COMMON_WORDS);
+// The wider 20k accept-set (scripts/gen-wide-words.js) — matches the pool the
+// generator built the ladders/pars against, so a rung legal here is legal there.
+export const DICT = new Set(WIDE_WORDS);
 
 // A salt unique to this feature. "La" → 0x4c61.
 const LADDER_SALT = 0x4c61;

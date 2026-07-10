@@ -31,16 +31,18 @@ const PER_PUZZLE = 6; // words shown per day
 const VOWELS = /[AEIOU]/g;
 const skeleton = (w) => w.toUpperCase().replace(VOWELS, "");
 
-// Curated common-words set (membership check so authored answers read familiar).
+// Wider common-words set (membership check so authored answers read familiar).
+// Reads the SAME 20k list, 4–8 letters, the runtime validates guesses against
+// (wide-words.js), so a guess accepted at play time is one this generator vetted.
 function loadCommonSet() {
-  const file = path.join(WORDLIST_DIR, "common-10k.txt");
+  const file = path.join(WORDLIST_DIR, "common-20k.txt");
   if (!fs.existsSync(file)) {
-    throw new Error("common-10k.txt not found in assets-src/wordlists.");
+    throw new Error("common-20k.txt not found in assets-src/wordlists.");
   }
   const set = new Set();
   for (const raw of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     const w = raw.trim().toUpperCase();
-    if (/^[A-Z]+$/.test(w)) set.add(w);
+    if (w.length >= 4 && w.length <= 8 && /^[A-Z]+$/.test(w)) set.add(w);
   }
   return set;
 }

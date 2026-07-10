@@ -16,7 +16,8 @@
    then computes a PAR by greedily building a long valid chain UNDER those exact
    constraints, so par is always achievable. Category days ship the category word
    list inline (it's the runtime accept-set); plain days validate against the
-   shipped common-words set in the browser.
+   wider shared common-words set (wide-words.js, the 4–8 slice of common-20k) in
+   the browser — the SAME list par is computed over below.
 
    Run:  npm run gen:chain     (no network, no API key)
    ============================================================ */
@@ -65,9 +66,11 @@ function pickRule(rules) {
 }
 
 // ── word pools ────────────────────────────────────────────────────────────────
+// Read the SAME wider list Chain validates against at runtime (common-20k →
+// wide-words.js), so par is computed over the exact runtime accept-set.
 function loadCommon() {
-  const file = path.join(WORDLIST_DIR, "common-10k.txt");
-  if (!fs.existsSync(file)) throw new Error("common-10k.txt not found in assets-src/wordlists.");
+  const file = path.join(WORDLIST_DIR, "common-20k.txt");
+  if (!fs.existsSync(file)) throw new Error("common-20k.txt not found in assets-src/wordlists.");
   const words = [];
   for (const raw of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     const w = raw.trim().toUpperCase();

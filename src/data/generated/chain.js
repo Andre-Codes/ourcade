@@ -619,124 +619,62 @@ export const categories = {
 export default [
   {
     "id": "chain-001",
-    "seed": "SOLAR",
+    "seed": "MARCH",
     "par": 8,
     "sample": [
-      "SOLAR",
-      "ROLE",
-      "ELEMENTS",
-      "SPOT",
-      "THIN",
-      "NOWHERE",
-      "EQUIPPED",
-      "DATE",
-      "ENTRIES"
+      "MARCH",
+      "HURL",
+      "LIVER",
+      "REACH",
+      "HEART",
+      "THROW",
+      "WRENCH",
+      "HAIR",
+      "RACE"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    },
+    "category": "body"
   },
   {
     "id": "chain-002",
-    "seed": "LANCE",
+    "seed": "LIFT",
     "par": 8,
     "sample": [
-      "LANCE",
-      "ENDORSED",
-      "DEFEND",
-      "DEAN",
-      "NOTED",
-      "DEBIAN",
-      "NOISE",
-      "EXPLAINS",
-      "SYMPHONY"
+      "LIFT",
+      "TOES",
+      "SMILE",
+      "EYEBROW",
+      "WAIST",
+      "TROT",
+      "TONGUE",
+      "ELBOW",
+      "WALK"
     ],
     "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    }
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    },
+    "category": "body"
   },
   {
     "id": "chain-003",
-    "seed": "TOWN",
+    "seed": "STEIN",
     "par": 8,
     "sample": [
-      "TOWN",
-      "NATIONAL",
-      "LAUNCH",
-      "HOMELAND",
-      "DANNY",
-      "YEMEN",
-      "NESTED",
-      "DYING",
-      "GRAIN"
-    ],
-    "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    }
-  },
-  {
-    "id": "chain-004",
-    "seed": "FEWER",
-    "par": 8,
-    "sample": [
-      "FEWER",
-      "ROSS",
-      "SEGMENT",
-      "TUNING",
-      "GUITARS",
-      "SUDDENLY",
-      "YEMEN",
-      "NESTED",
-      "DIABETES"
-    ],
-    "rule": {
-      "id": "consonant_start",
-      "label": "words can't start with a vowel",
-      "hint": "every word must begin with a consonant"
-    }
-  },
-  {
-    "id": "chain-005",
-    "seed": "CRICKETS",
-    "par": 8,
-    "sample": [
-      "CRICKETS",
-      "SPIDERS",
-      "SNAKE",
-      "EAGLE",
-      "EARWIG",
-      "GIBBON",
-      "NEWT",
-      "TIGERS",
-      "SARDINE"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    },
-    "category": "animals"
-  },
-  {
-    "id": "chain-006",
-    "seed": "PHONE",
-    "par": 8,
-    "sample": [
-      "PHONE",
-      "ELECT",
-      "TOOTH",
-      "HONDA",
-      "ALARM",
-      "MUSIC",
-      "CANON",
-      "NEWER",
-      "RIDES"
+      "STEIN",
+      "NAVAL",
+      "LEARN",
+      "NEEDY",
+      "YOUNG",
+      "GARDE",
+      "ELGIN",
+      "NIKON",
+      "NIKKI"
     ],
     "rule": {
       "id": "exactly_5",
@@ -745,101 +683,40 @@ export default [
     }
   },
   {
-    "id": "chain-007",
-    "seed": "BADGER",
+    "id": "chain-004",
+    "seed": "OVERTIME",
     "par": 8,
     "sample": [
-      "BADGER",
-      "REINDEER",
-      "ROOSTER",
-      "RAVEN",
-      "NEWT",
-      "TETRA",
-      "ANTELOPE",
-      "EAGLE",
-      "EAGLES"
+      "OVERTIME",
+      "ENTRE",
+      "ETHANOL",
+      "LASERJET",
+      "THEOLOGY",
+      "YACHTS",
+      "STOKE",
+      "EASTON",
+      "NETS"
     ],
     "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    },
-    "category": "animals"
-  },
-  {
-    "id": "chain-008",
-    "seed": "SODA",
-    "par": 7,
-    "sample": [
-      "SODA",
-      "APRICOT",
-      "THYME",
-      "ESPRESSO",
-      "ONION",
-      "NACHOS",
-      "STEW",
-      "WHISKEY"
-    ],
-    "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-009",
-    "seed": "CORNER",
-    "par": 8,
-    "sample": [
-      "CORNER",
-      "RISING",
-      "GUYS",
-      "STOCK",
-      "KIND",
-      "DONORS",
-      "SENT",
-      "THUMB",
-      "BOUQUET"
-    ],
-    "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
     }
   },
   {
-    "id": "chain-010",
-    "seed": "VINEGAR",
-    "par": 4,
-    "sample": [
-      "VINEGAR",
-      "RAISIN",
-      "NACHOS",
-      "SALMON",
-      "NECTAR"
-    ],
-    "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-011",
-    "seed": "PASSION",
+    "id": "chain-005",
+    "seed": "DECENT",
     "par": 8,
     "sample": [
-      "PASSION",
-      "NOTICES",
-      "STARTER",
-      "REPLICA",
-      "ALMOST",
-      "TRAILER",
-      "RADAR",
-      "RESCUE",
-      "EXTRA"
+      "DECENT",
+      "THREE",
+      "EXPAND",
+      "DIAMOND",
+      "DURANGO",
+      "OPENNESS",
+      "STICK",
+      "KEEPS",
+      "STITCH"
     ],
     "rule": {
       "id": "minlen5",
@@ -848,19 +725,104 @@ export default [
     }
   },
   {
-    "id": "chain-012",
-    "seed": "TERM",
+    "id": "chain-006",
+    "seed": "MARCH",
     "par": 8,
     "sample": [
-      "TERM",
-      "MARIA",
-      "ARRIVED",
-      "DRAFT",
-      "THEATER",
-      "REALITY",
-      "YARDS",
-      "STUART",
-      "THREAT"
+      "MARCH",
+      "HANGER",
+      "RIVERA",
+      "AXIAL",
+      "LAWFUL",
+      "LEGAL",
+      "LARSEN",
+      "NACIONAL",
+      "LABELED"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-007",
+    "seed": "CRICKETS",
+    "par": 8,
+    "sample": [
+      "CRICKETS",
+      "SPIDERS",
+      "SNAIL",
+      "LOBSTER",
+      "ROOSTER",
+      "RABBITS",
+      "SNAKES",
+      "SPARROW",
+      "WALRUS"
+    ],
+    "rule": {
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
+    },
+    "category": "animals"
+  },
+  {
+    "id": "chain-008",
+    "seed": "ANGLICAN",
+    "par": 8,
+    "sample": [
+      "ANGLICAN",
+      "NORMALLY",
+      "YANKEES",
+      "SHEEHAN",
+      "NATURAL",
+      "LINKSYS",
+      "SPENT",
+      "TIBETAN",
+      "NILE"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-009",
+    "seed": "NOAH",
+    "par": 8,
+    "sample": [
+      "NOAH",
+      "HONORARY",
+      "YAMAHA",
+      "ALIVE",
+      "ENSURES",
+      "SICK",
+      "KING",
+      "GRANT",
+      "TIKI"
+    ],
+    "rule": {
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
+    }
+  },
+  {
+    "id": "chain-010",
+    "seed": "SERPENT",
+    "par": 8,
+    "sample": [
+      "SERPENT",
+      "TRUCK",
+      "KAREN",
+      "NEARLY",
+      "YOURSELF",
+      "FERN",
+      "NEAR",
+      "RAPIDLY",
+      "YOUR"
     ],
     "rule": {
       "id": "contains_R",
@@ -869,37 +831,186 @@ export default [
     }
   },
   {
+    "id": "chain-011",
+    "seed": "FOREACH",
+    "par": 8,
+    "sample": [
+      "FOREACH",
+      "HAITI",
+      "IMPAIRED",
+      "DOCTORAL",
+      "LACKS",
+      "SIENA",
+      "ALLIES",
+      "SUBURBAN",
+      "NASH"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-012",
+    "seed": "GRAB",
+    "par": 8,
+    "sample": [
+      "GRAB",
+      "BRAIN",
+      "NOSE",
+      "ELBOW",
+      "WALK",
+      "KICK",
+      "KNUCKLE",
+      "EYELID",
+      "DIVE"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    },
+    "category": "body"
+  },
+  {
     "id": "chain-013",
-    "seed": "RIDGES",
+    "seed": "YEAST",
+    "par": 8,
+    "sample": [
+      "YEAST",
+      "TURNIP",
+      "PASTA",
+      "APRICOT",
+      "TACO",
+      "OATMEAL",
+      "LATTE",
+      "EGGPLANT",
+      "TOMATO"
+    ],
+    "rule": {
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
+    },
+    "category": "food"
+  },
+  {
+    "id": "chain-014",
+    "seed": "LINN",
+    "par": 8,
+    "sample": [
+      "LINN",
+      "NEVIS",
+      "SILENCE",
+      "EVENTUAL",
+      "LOCKING",
+      "GUYANA",
+      "AVOIDING",
+      "GRIND",
+      "DILLON"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-015",
+    "seed": "TURNED",
+    "par": 8,
+    "sample": [
+      "TURNED",
+      "DETAIL",
+      "LOTTERY",
+      "YOUTH",
+      "HEALTHY",
+      "YEAST",
+      "TUNE",
+      "EAST",
+      "TRAGIC"
+    ],
+    "rule": {
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
+    }
+  },
+  {
+    "id": "chain-016",
+    "seed": "ESPRESSO",
     "par": 4,
     "sample": [
-      "RIDGES",
-      "SANDBAR",
-      "RIVERS",
-      "SHORE",
-      "ESTUARY"
+      "ESPRESSO",
+      "OYSTER",
+      "RAISIN",
+      "NACHOS",
+      "SALMON"
+    ],
+    "rule": {
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
+    },
+    "category": "food"
+  },
+  {
+    "id": "chain-017",
+    "seed": "ARBOR",
+    "par": 8,
+    "sample": [
+      "ARBOR",
+      "RICHARDS",
+      "STAIRS",
+      "SCRAP",
+      "PRETEND",
+      "DRAMAS",
+      "SURPLUS",
+      "SPRINT",
+      "TRAINEE"
     ],
     "rule": {
       "id": "contains_R",
       "label": "every word must contain \"R\"",
       "hint": "each word has to include the letter R"
-    },
-    "category": "nature"
+    }
   },
   {
-    "id": "chain-014",
-    "seed": "BLADE",
+    "id": "chain-018",
+    "seed": "HANDSET",
     "par": 8,
     "sample": [
-      "BLADE",
-      "EVIL",
-      "LOGAN",
-      "NYLON",
-      "NORFOLK",
-      "KILLER",
-      "ROLLER",
-      "RULING",
-      "GLASS"
+      "HANDSET",
+      "TRAILING",
+      "GUERNSEY",
+      "YIELDING",
+      "GOLFING",
+      "GROUNDS",
+      "SNAKE",
+      "EDISON",
+      "NEGATIVE"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-019",
+    "seed": "ROUGHLY",
+    "par": 8,
+    "sample": [
+      "ROUGHLY",
+      "YELL",
+      "LANKA",
+      "ALLIANCE",
+      "ETHANOL",
+      "LEDS",
+      "SMILEY",
+      "YIELD",
+      "DYLAN"
     ],
     "rule": {
       "id": "contains_L",
@@ -908,121 +1019,19 @@ export default [
     }
   },
   {
-    "id": "chain-015",
-    "seed": "DRIVE",
-    "par": 8,
-    "sample": [
-      "DRIVE",
-      "ECHO",
-      "OFFICES",
-      "SIMPSON",
-      "NODES",
-      "SECURED",
-      "DUDE",
-      "EATING",
-      "GROSS"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-016",
-    "seed": "CLARITY",
-    "par": 8,
-    "sample": [
-      "CLARITY",
-      "YOUNGER",
-      "RACES",
-      "STRENGTH",
-      "HARBOUR",
-      "RESELLER",
-      "RETURNS",
-      "SPIRITS",
-      "STUART"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    }
-  },
-  {
-    "id": "chain-017",
-    "seed": "WHEAT",
-    "par": 8,
-    "sample": [
-      "WHEAT",
-      "TEACHES",
-      "SLIDE",
-      "EPISODE",
-      "ENROLLED",
-      "DICE",
-      "EVENTS",
-      "STAKE",
-      "EXAMINE"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-018",
-    "seed": "SPRINGER",
-    "par": 8,
-    "sample": [
-      "SPRINGER",
-      "REMEDIES",
-      "STATIONS",
-      "SEMESTER",
-      "REACHING",
-      "GAMBLING",
-      "GENERATE",
-      "EXPLICIT",
-      "TARGETED"
-    ],
-    "rule": {
-      "id": "ascending_len",
-      "label": "each word as long as the last, or longer",
-      "hint": "never get shorter — each word ≥ the previous word's length"
-    }
-  },
-  {
-    "id": "chain-019",
-    "seed": "PARROT",
-    "par": 4,
-    "sample": [
-      "PARROT",
-      "TIGERS",
-      "SPIDERS",
-      "SPARROW",
-      "WALLABY"
-    ],
-    "rule": {
-      "id": "ascending_len",
-      "label": "each word as long as the last, or longer",
-      "hint": "never get shorter — each word ≥ the previous word's length"
-    },
-    "category": "animals"
-  },
-  {
     "id": "chain-020",
-    "seed": "CLIENT",
+    "seed": "GONE",
     "par": 8,
     "sample": [
-      "CLIENT",
-      "TAXI",
-      "ISLAMIC",
-      "CONTESTS",
-      "SMILE",
-      "EXPIRED",
-      "DRAMA",
-      "ALUMNI",
-      "ISAAC"
+      "GONE",
+      "EINE",
+      "ENDORSED",
+      "DECEASED",
+      "DENSE",
+      "ECHOES",
+      "STAYING",
+      "GROWS",
+      "SOAK"
     ],
     "rule": {
       "id": "plain",
@@ -1032,18 +1041,18 @@ export default [
   },
   {
     "id": "chain-021",
-    "seed": "EXPANDED",
+    "seed": "SYRACUSE",
     "par": 8,
     "sample": [
-      "EXPANDED",
-      "DASH",
-      "HOMETOWN",
-      "NTSC",
-      "CLASS",
-      "SENT",
-      "TUNE",
-      "ENDING",
-      "GOLF"
+      "SYRACUSE",
+      "ENTIRETY",
+      "YUGOSLAV",
+      "VGROUP",
+      "PROVIDED",
+      "DICK",
+      "KNOX",
+      "XENICAL",
+      "LOTS"
     ],
     "rule": {
       "id": "unique_end",
@@ -1072,18 +1081,18 @@ export default [
   },
   {
     "id": "chain-023",
-    "seed": "JERRY",
+    "seed": "EARLIEST",
     "par": 8,
     "sample": [
-      "JERRY",
-      "YEARLY",
-      "YOUNGER",
-      "ROUTER",
-      "RAIL",
-      "LIGHTER",
-      "RARE",
-      "EASIER",
-      "REVERSE"
+      "EARLIEST",
+      "THER",
+      "REFUSING",
+      "GRAVE",
+      "EARS",
+      "SURFER",
+      "REED",
+      "DRUMS",
+      "SPRINT"
     ],
     "rule": {
       "id": "contains_R",
@@ -1112,18 +1121,18 @@ export default [
   },
   {
     "id": "chain-025",
-    "seed": "RANKED",
+    "seed": "SCREENED",
     "par": 8,
     "sample": [
-      "RANKED",
-      "DARWIN",
-      "NETWORK",
-      "KINGSTON",
-      "NASCAR",
-      "RELEVANT",
-      "TEENS",
-      "SHOOTING",
-      "GRANNY"
+      "SCREENED",
+      "DENIES",
+      "SHOWN",
+      "NEWBORN",
+      "NASH",
+      "HENCE",
+      "ELEMENTS",
+      "SURGEON",
+      "NACH"
     ],
     "rule": {
       "id": "contains_N",
@@ -1133,18 +1142,18 @@ export default [
   },
   {
     "id": "chain-026",
-    "seed": "OFTEN",
+    "seed": "DANCE",
     "par": 8,
     "sample": [
-      "OFTEN",
-      "NUDIST",
-      "TOOLBOX",
-      "XEROX",
-      "XANAX",
-      "XHTML",
-      "LANDING",
-      "GUEST",
-      "TURNED"
+      "DANCE",
+      "EATON",
+      "NOMINEES",
+      "SKELETAL",
+      "LETRAS",
+      "SWIMSUIT",
+      "TOKENS",
+      "STEPHEN",
+      "NARROW"
     ],
     "rule": {
       "id": "minlen5",
@@ -1176,87 +1185,88 @@ export default [
   },
   {
     "id": "chain-028",
-    "seed": "PLASTIC",
+    "seed": "CVSROOT",
     "par": 8,
     "sample": [
-      "PLASTIC",
-      "CHEST",
-      "TELLS",
-      "SALON",
-      "NETWORKS",
-      "SITTING",
-      "GAYS",
-      "SOULS",
-      "SPECIFY"
+      "CVSROOT",
+      "TYROSINE",
+      "ETERNAL",
+      "LEARNED",
+      "DIRECTX",
+      "XPRESS",
+      "STREAMS",
+      "SHORTCUT",
+      "TERRAIN"
     ],
     "rule": {
-      "id": "contains_S",
-      "label": "every word must contain \"S\"",
-      "hint": "each word has to include the letter S"
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
     }
   },
   {
     "id": "chain-029",
-    "seed": "TEXTBOOK",
+    "seed": "POLK",
     "par": 8,
     "sample": [
-      "TEXTBOOK",
-      "KATE",
-      "ENTRANCE",
-      "ENTITY",
-      "YOUTH",
-      "HEIGHTS",
-      "STUD",
-      "DECENT",
-      "TRAINS"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
-  },
-  {
-    "id": "chain-030",
-    "seed": "LUNCH",
-    "par": 8,
-    "sample": [
-      "LUNCH",
-      "HEALING",
-      "GUIDANCE",
-      "EXISTING",
-      "GENES",
-      "SCENES",
-      "SAINTS",
-      "SCANNING",
-      "GENESIS"
-    ],
-    "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    }
-  },
-  {
-    "id": "chain-031",
-    "seed": "PRINTING",
-    "par": 8,
-    "sample": [
-      "PRINTING",
-      "GASOLINE",
-      "EXTREME",
-      "ENABLED",
-      "DISPLAY",
-      "YEARS",
-      "SPECIES",
-      "SOCIETY",
-      "YALE"
+      "POLK",
+      "KISSES",
+      "SECSG",
+      "GRIP",
+      "POLSKI",
+      "INTAKE",
+      "EDWARDS",
+      "SANDY",
+      "YELLOW"
     ],
     "rule": {
       "id": "plain",
       "label": "just chain — last letter to first",
       "hint": "link the last letter of each word to the first of the next"
     }
+  },
+  {
+    "id": "chain-030",
+    "seed": "PORTAGE",
+    "par": 8,
+    "sample": [
+      "PORTAGE",
+      "ERASE",
+      "EUREKA",
+      "ARCHIVED",
+      "DEAL",
+      "LEONARD",
+      "DANNY",
+      "YAMAHA",
+      "AIRWAYS"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-031",
+    "seed": "LIVER",
+    "par": 8,
+    "sample": [
+      "LIVER",
+      "RACE",
+      "ELBOW",
+      "WALK",
+      "KICK",
+      "KNUCKLE",
+      "EYELID",
+      "DIVE",
+      "EYEBROW"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    },
+    "category": "body"
   },
   {
     "id": "chain-032",
@@ -1282,18 +1292,18 @@ export default [
   },
   {
     "id": "chain-033",
-    "seed": "DRAIN",
+    "seed": "CRACKER",
     "par": 8,
     "sample": [
-      "DRAIN",
-      "NAVIGATE",
-      "EXHAUST",
-      "TAUGHT",
-      "TARIFF",
-      "FRANCIS",
-      "STAMPS",
-      "SAFETY",
-      "YEAST"
+      "CRACKER",
+      "REBECCA",
+      "ARABIAN",
+      "NAMELY",
+      "YATES",
+      "SANG",
+      "GARBAGE",
+      "EXTERNAL",
+      "LEUKEMIA"
     ],
     "rule": {
       "id": "contains_A",
@@ -1303,15 +1313,18 @@ export default [
   },
   {
     "id": "chain-034",
-    "seed": "GLORY",
-    "par": 5,
+    "seed": "REGULAR",
+    "par": 8,
     "sample": [
-      "GLORY",
-      "YIELDS",
-      "STORM",
-      "MONTHS",
-      "SPEEDS",
-      "SUPREME"
+      "REGULAR",
+      "RESIGNED",
+      "DAYTON",
+      "NULL",
+      "LINK",
+      "KNOCK",
+      "KEEP",
+      "PINES",
+      "STRANGE"
     ],
     "rule": {
       "id": "consonant_start",
@@ -1321,103 +1334,74 @@ export default [
   },
   {
     "id": "chain-035",
-    "seed": "THROAT",
-    "par": 8,
+    "seed": "FOMIT",
+    "par": 4,
     "sample": [
-      "THROAT",
-      "TROT",
-      "THROW",
-      "WRENCH",
-      "HURL",
-      "LIVER",
-      "RACE",
-      "EYEBROW",
-      "WRIST"
+      "FOMIT",
+      "TENDERS",
+      "SENIORS",
+      "SUFFERED",
+      "DORA"
     ],
     "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    },
-    "category": "body"
+      "id": "consonant_start",
+      "label": "words can't start with a vowel",
+      "hint": "every word must begin with a consonant"
+    }
   },
   {
     "id": "chain-036",
-    "seed": "TAXI",
+    "seed": "SEATING",
     "par": 8,
     "sample": [
-      "TAXI",
-      "INSTANT",
-      "TEACHES",
-      "SANYO",
-      "OPTIONAL",
-      "LENS",
-      "SERVING",
-      "GRAD",
-      "DELIGHT"
+      "SEATING",
+      "GAUTENG",
+      "GARTNER",
+      "ROADS",
+      "SCHOLAR",
+      "REPAIRS",
+      "SPARROW",
+      "WALTHAM",
+      "MALTA"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
     }
   },
   {
     "id": "chain-037",
-    "seed": "CITIZEN",
-    "par": 8,
+    "seed": "TURN",
+    "par": 4,
     "sample": [
-      "CITIZEN",
-      "NOTED",
-      "DEPOSIT",
-      "TELLS",
-      "STONE",
-      "ESCORTS",
-      "SUMMIT",
-      "TAUGHT",
-      "TOSHIBA"
+      "TURN",
+      "NECK",
+      "KNEEL",
+      "LUNG",
+      "GLANCE"
     ],
     "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    },
+    "category": "body"
   },
   {
     "id": "chain-038",
-    "seed": "TRIGGER",
+    "seed": "MONSTER",
     "par": 8,
     "sample": [
-      "TRIGGER",
-      "RETAILER",
-      "RUNTIME",
-      "EVIDENT",
-      "TERROR",
-      "ROBERT",
-      "TWELVE",
-      "EASTERN",
-      "NORTH"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
-  },
-  {
-    "id": "chain-039",
-    "seed": "PATRICIA",
-    "par": 8,
-    "sample": [
-      "PATRICIA",
-      "ALARM",
-      "MEMORIES",
-      "SCHOLARS",
-      "SENDER",
-      "ROBERTS",
-      "SHOWERS",
-      "STRUCK",
-      "KAREN"
+      "MONSTER",
+      "RENTALS",
+      "STRANDS",
+      "STARTING",
+      "GRATEFUL",
+      "LABOUR",
+      "ROYALS",
+      "SMART",
+      "TRIED"
     ],
     "rule": {
       "id": "contains_R",
@@ -1426,62 +1410,82 @@ export default [
     }
   },
   {
-    "id": "chain-040",
-    "seed": "SLOVENIA",
+    "id": "chain-039",
+    "seed": "CARLISLE",
     "par": 8,
     "sample": [
-      "SLOVENIA",
-      "ADOPTION",
-      "NAIL",
-      "LABOUR",
-      "REWARD",
-      "DOSAGE",
-      "EXAMS",
-      "SEALED",
-      "DRAMATIC"
+      "CARLISLE",
+      "EMOTIONS",
+      "SANTANA",
+      "ABUSES",
+      "STICKS",
+      "SECONDLY",
+      "YOUNGEST",
+      "TOWNSEND",
+      "DEUTSCHE"
     ],
     "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
+    }
+  },
+  {
+    "id": "chain-040",
+    "seed": "SKYLINE",
+    "par": 8,
+    "sample": [
+      "SKYLINE",
+      "EMULE",
+      "EXPORTED",
+      "DEREK",
+      "KAYAK",
+      "KINETIC",
+      "CERTIFY",
+      "YEARS",
+      "SUZANNE"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
     }
   },
   {
     "id": "chain-041",
-    "seed": "PAPRIKA",
+    "seed": "CREATINE",
     "par": 8,
     "sample": [
-      "PAPRIKA",
-      "APRICOT",
-      "TART",
-      "TOAST",
-      "TUNA",
-      "APPLE",
-      "EGGPLANT",
-      "TOMATO",
-      "OKRA"
+      "CREATINE",
+      "EXTRACT",
+      "THRICE",
+      "EARTH",
+      "HARTFORD",
+      "DISPUTE",
+      "EDITOR",
+      "ROMANTIC",
+      "CONFTEST"
     ],
     "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
-    },
-    "category": "food"
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
+    }
   },
   {
     "id": "chain-042",
-    "seed": "IMAGINE",
+    "seed": "MYANMAR",
     "par": 8,
     "sample": [
-      "IMAGINE",
-      "ESTATES",
-      "SAVAGE",
-      "EDWARD",
-      "DIABETES",
-      "SEASONAL",
-      "LEARNERS",
-      "SAFELY",
-      "YARDS"
+      "MYANMAR",
+      "REGAL",
+      "LAMA",
+      "ATTEMPTS",
+      "STRAND",
+      "DEAF",
+      "FAIRE",
+      "ENLARGED",
+      "DONNA"
     ],
     "rule": {
       "id": "contains_A",
@@ -1513,60 +1517,120 @@ export default [
   },
   {
     "id": "chain-044",
-    "seed": "SHERMAN",
+    "seed": "PRESSED",
     "par": 8,
     "sample": [
-      "SHERMAN",
-      "NEEDED",
-      "DONORS",
-      "SEATING",
-      "GENRE",
-      "EXISTING",
-      "GENOME",
-      "ENGAGING",
-      "GENE"
+      "PRESSED",
+      "DIES",
+      "SERVING",
+      "GEORGIA",
+      "ARSENAL",
+      "LATTER",
+      "REGIMEN",
+      "NEWBIES",
+      "SEPARATE"
     ],
     "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
     }
   },
   {
     "id": "chain-045",
-    "seed": "ATTEMPT",
+    "seed": "HURTING",
     "par": 8,
     "sample": [
-      "ATTEMPT",
-      "TOYOTA",
-      "ARTIST",
-      "THINKING",
-      "GRATIS",
-      "STUNNING",
-      "GOING",
-      "GAYS",
-      "SHERMAN"
+      "HURTING",
+      "GRACE",
+      "ERROR",
+      "RUNNER",
+      "REACHING",
+      "GRANNY",
+      "YEAR",
+      "RINGTONE",
+      "EXTRAS"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
     }
   },
   {
     "id": "chain-046",
-    "seed": "POCKET",
+    "seed": "SLOPES",
+    "par": 4,
+    "sample": [
+      "SLOPES",
+      "SUNSET",
+      "TIMBER",
+      "RAVINE",
+      "ESTUARY"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    },
+    "category": "nature"
+  },
+  {
+    "id": "chain-047",
+    "seed": "BRACELET",
     "par": 8,
     "sample": [
-      "POCKET",
-      "TRACKS",
-      "SUITED",
-      "DEATHS",
-      "SELLING",
-      "GARAGE",
-      "ETHICS",
-      "STATED",
-      "DIVING"
+      "BRACELET",
+      "TEENAGE",
+      "EFFICACY",
+      "YEARS",
+      "SMASHING",
+      "GAVIN",
+      "NISSAN",
+      "NOVA",
+      "ANTIQUES"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-048",
+    "seed": "MALAYSIA",
+    "par": 8,
+    "sample": [
+      "MALAYSIA",
+      "ANAL",
+      "LETTERS",
+      "SULPHUR",
+      "REALITY",
+      "YELLOW",
+      "WOLFGANG",
+      "GOOGLE",
+      "EMMANUEL"
+    ],
+    "rule": {
+      "id": "contains_L",
+      "label": "every word must contain \"L\"",
+      "hint": "each word has to include the letter L"
+    }
+  },
+  {
+    "id": "chain-049",
+    "seed": "WEBMAIL",
+    "par": 8,
+    "sample": [
+      "WEBMAIL",
+      "LETTING",
+      "GRAFFITI",
+      "IMPACTS",
+      "STRONG",
+      "GUARDS",
+      "SECUNIA",
+      "ANTENNAS",
+      "SILENTLY"
     ],
     "rule": {
       "id": "minlen6",
@@ -1575,260 +1639,193 @@ export default [
     }
   },
   {
-    "id": "chain-047",
-    "seed": "LUNGE",
-    "par": 8,
-    "sample": [
-      "LUNGE",
-      "ELBOW",
-      "WRENCH",
-      "HURL",
-      "LUNG",
-      "GLANCE",
-      "EYELID",
-      "DANCE",
-      "EYEBROW"
-    ],
-    "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-048",
-    "seed": "REQUEST",
-    "par": 8,
-    "sample": [
-      "REQUEST",
-      "THROWING",
-      "GRADES",
-      "SHOWERS",
-      "STORED",
-      "DEFEAT",
-      "TULSA",
-      "ARABIC",
-      "CHANNELS"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-049",
-    "seed": "MOSCOW",
-    "par": 8,
-    "sample": [
-      "MOSCOW",
-      "WAVES",
-      "SOLOMON",
-      "NODES",
-      "SETUP",
-      "PIRATES",
-      "STONES",
-      "SALLY",
-      "YAMAHA"
-    ],
-    "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
-    }
-  },
-  {
     "id": "chain-050",
-    "seed": "SLITHER",
+    "seed": "WETLAND",
     "par": 8,
     "sample": [
-      "SLITHER",
-      "REACH",
-      "HOLD",
-      "DASH",
-      "HEAVE",
-      "ELBOW",
-      "WAVE",
-      "EYELID",
-      "DIVE"
+      "WETLAND",
+      "DRAWS",
+      "SAINTS",
+      "SARATOGA",
+      "ALPHABET",
+      "TAPPING",
+      "GARRETT",
+      "TUNISIA",
+      "AFGHAN"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    },
-    "category": "body"
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
   },
   {
     "id": "chain-051",
-    "seed": "WIRE",
+    "seed": "IGNORANT",
     "par": 8,
     "sample": [
-      "WIRE",
-      "ENGAGING",
-      "GEOLOGY",
-      "YELLOW",
-      "WEBSTER",
-      "REGIONAL",
-      "LEGS",
-      "SLOVAKIA",
-      "AIRCRAFT"
+      "IGNORANT",
+      "TUNE",
+      "ECONO",
+      "ONTOLOGY",
+      "YEMEN",
+      "NOMINEE",
+      "ENDING",
+      "GENIUS",
+      "SPLENDID"
     ],
     "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
     }
   },
   {
     "id": "chain-052",
-    "seed": "SCAMPER",
+    "seed": "ADVANCE",
     "par": 8,
     "sample": [
-      "SCAMPER",
-      "REACH",
-      "HURL",
-      "LIPS",
-      "SPINE",
-      "ELBOW",
-      "WRIST",
-      "TURN",
-      "NECK"
+      "ADVANCE",
+      "ENTITIES",
+      "SLOAN",
+      "NAVY",
+      "YOUNGEST",
+      "TURNING",
+      "GIVEN",
+      "NOVEMBER",
+      "REACTION"
     ],
     "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
-    },
-    "category": "body"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
   },
   {
     "id": "chain-053",
-    "seed": "CONTAIN",
+    "seed": "TECH",
     "par": 8,
     "sample": [
-      "CONTAIN",
-      "NORMALLY",
-      "YORK",
-      "KISS",
-      "SKIING",
-      "GERMAN",
-      "NEWPORT",
-      "TABLETS",
-      "SWITCH"
+      "TECH",
+      "HOSE",
+      "EXPANDED",
+      "DEFEND",
+      "DISNEY",
+      "YALE",
+      "EDUCATE",
+      "EVIL",
+      "LEUKEMIA"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
     }
   },
   {
     "id": "chain-054",
-    "seed": "CRICKETS",
+    "seed": "MUFFIN",
     "par": 8,
     "sample": [
-      "CRICKETS",
-      "SNAKE",
-      "EARWIG",
-      "GROUPER",
-      "RAVEN",
-      "NEWT",
-      "TETRA",
-      "ANTELOPE",
-      "EAGLES"
+      "MUFFIN",
+      "NOODLE",
+      "EGGPLANT",
+      "TOMATO",
+      "OYSTER",
+      "ROSEMARY",
+      "YOGURT",
+      "TURNIP",
+      "PARSLEY"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
     },
-    "category": "animals"
+    "category": "food"
   },
   {
     "id": "chain-055",
-    "seed": "NOTION",
+    "seed": "BIKE",
     "par": 8,
     "sample": [
-      "NOTION",
-      "NUTS",
-      "SUIT",
-      "TORONTO",
-      "OFFSET",
-      "THOUGHTS",
-      "SITES",
-      "SUBTLE",
-      "ELECTRIC"
+      "BIKE",
+      "EGGS",
+      "STUB",
+      "BINS",
+      "STUD",
+      "DONT",
+      "TILT",
+      "TOLD",
+      "DRUG"
     ],
     "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
+      "id": "exactly_4",
+      "label": "every word exactly 4 letters",
+      "hint": "only 4-letter words count"
     }
   },
   {
     "id": "chain-056",
-    "seed": "FREELY",
+    "seed": "STOOP",
     "par": 8,
     "sample": [
-      "FREELY",
-      "YIELDS",
-      "SCHOLAR",
-      "REPLIED",
-      "DIGITAL",
-      "LIVES",
-      "SMILIES",
-      "SKILL",
-      "LICENSE"
+      "STOOP",
+      "POINT",
+      "TOUCH",
+      "HEAVE",
+      "ELBOW",
+      "WRIST",
+      "THUMB",
+      "BLINK",
+      "KNEEL"
     ],
     "rule": {
-      "id": "contains_L",
-      "label": "every word must contain \"L\"",
-      "hint": "each word has to include the letter L"
-    }
-  },
-  {
-    "id": "chain-057",
-    "seed": "STOMACH",
-    "par": 7,
-    "sample": [
-      "STOMACH",
-      "HOLD",
-      "DIVE",
-      "EYEBROW",
-      "WALK",
-      "KNEEL",
-      "LIFT",
-      "TENDON"
-    ],
-    "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
+      "id": "exactly_5",
+      "label": "every word exactly 5 letters",
+      "hint": "only 5-letter words count"
     },
     "category": "body"
   },
   {
-    "id": "chain-058",
-    "seed": "CLEARING",
+    "id": "chain-057",
+    "seed": "LIBRARY",
     "par": 8,
     "sample": [
-      "CLEARING",
-      "GIRLS",
-      "SILVER",
-      "RULE",
-      "ELEMENT",
-      "TELLS",
-      "SHELTER",
-      "ROLAND",
-      "DELAY"
+      "LIBRARY",
+      "YARD",
+      "DECREASE",
+      "ENERGIES",
+      "SENDER",
+      "ROTH",
+      "HARDY",
+      "YARDS",
+      "SOUVENIR"
     ],
     "rule": {
-      "id": "contains_L",
-      "label": "every word must contain \"L\"",
-      "hint": "each word has to include the letter L"
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
     }
+  },
+  {
+    "id": "chain-058",
+    "seed": "OREGANO",
+    "par": 5,
+    "sample": [
+      "OREGANO",
+      "ORANGE",
+      "ESPRESSO",
+      "OLIVE",
+      "EGGPLANT",
+      "THYME"
+    ],
+    "rule": {
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
+    },
+    "category": "food"
   },
   {
     "id": "chain-059",
@@ -1852,18 +1849,18 @@ export default [
   },
   {
     "id": "chain-060",
-    "seed": "ECLIPSE",
+    "seed": "JABBER",
     "par": 8,
     "sample": [
-      "ECLIPSE",
-      "ENROLLED",
-      "DANCING",
-      "GAYS",
-      "SHELTER",
-      "ROCKY",
-      "YEAST",
-      "TELL",
-      "LATIN"
+      "JABBER",
+      "RESIDE",
+      "ELECTRO",
+      "OGDEN",
+      "NOTCH",
+      "HELSINKI",
+      "IMAGINED",
+      "DISK",
+      "KISS"
     ],
     "rule": {
       "id": "unique_end",
@@ -1873,18 +1870,18 @@ export default [
   },
   {
     "id": "chain-061",
-    "seed": "ASIDE",
+    "seed": "SCANDAL",
     "par": 8,
     "sample": [
-      "ASIDE",
-      "ELEMENT",
-      "TRASH",
-      "HOSTELS",
-      "SHIRT",
-      "TALKS",
-      "SMART",
-      "TRIP",
-      "PLAYS"
+      "SCANDAL",
+      "LOGOS",
+      "SPYING",
+      "GLOWING",
+      "GENETIC",
+      "CLARKE",
+      "EXCITING",
+      "GARDENS",
+      "SURPLUS"
     ],
     "rule": {
       "id": "no_double",
@@ -1894,225 +1891,18 @@ export default [
   },
   {
     "id": "chain-062",
-    "seed": "OFFER",
+    "seed": "PORTRAIT",
     "par": 8,
     "sample": [
-      "OFFER",
-      "ROCKET",
-      "THREAD",
-      "DEFINE",
-      "EVERYDAY",
-      "YUKON",
-      "NECKLACE",
-      "ESSAY",
-      "YEAR"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-063",
-    "seed": "LEAVES",
-    "par": 4,
-    "sample": [
-      "LEAVES",
-      "STREAM",
-      "MOORLAND",
-      "DUNE",
-      "ESTUARY"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    },
-    "category": "nature"
-  },
-  {
-    "id": "chain-064",
-    "seed": "SPEAK",
-    "par": 8,
-    "sample": [
-      "SPEAK",
-      "KNEEL",
-      "LEAP",
-      "PACE",
-      "EYELID",
-      "DIVE",
-      "EYEBROW",
-      "WRENCH",
-      "HEAVE"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-065",
-    "seed": "SOMALIA",
-    "par": 8,
-    "sample": [
-      "SOMALIA",
-      "ADVISED",
-      "DEPTH",
-      "HEALTHY",
-      "YOURSELF",
-      "FLASHERS",
-      "SPOUSE",
-      "EXEMPT",
-      "THIN"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-066",
-    "seed": "MIXTURE",
-    "par": 8,
-    "sample": [
-      "MIXTURE",
-      "EDEN",
-      "NELSON",
-      "NERVOUS",
-      "SOCKET",
-      "TRUSTED",
-      "DIVORCE",
-      "EXCEPT",
-      "THREADED"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-067",
-    "seed": "BURRITO",
-    "par": 6,
-    "sample": [
-      "BURRITO",
-      "OREGANO",
-      "OKRA",
-      "APRICOT",
-      "TROUT",
-      "TURNIP",
-      "PAPRIKA"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-068",
-    "seed": "DONUT",
-    "par": 8,
-    "sample": [
-      "DONUT",
-      "TOMATO",
-      "OMELET",
-      "TUNA",
-      "APRICOT",
-      "TACO",
-      "OYSTER",
-      "ROAST",
-      "TURNIP"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-069",
-    "seed": "JAWBONE",
-    "par": 6,
-    "sample": [
-      "JAWBONE",
-      "EYEBROW",
-      "WAVE",
-      "EYELID",
-      "DANCE",
-      "ELBOW",
-      "WIGGLE"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-070",
-    "seed": "PASTA",
-    "par": 8,
-    "sample": [
-      "PASTA",
-      "ADDED",
-      "DOUBT",
-      "TRANS",
-      "SCORE",
-      "EARLY",
-      "YUKON",
-      "NEEDS",
-      "STRAP"
-    ],
-    "rule": {
-      "id": "exactly_5",
-      "label": "every word exactly 5 letters",
-      "hint": "only 5-letter words count"
-    }
-  },
-  {
-    "id": "chain-071",
-    "seed": "ASSISTED",
-    "par": 8,
-    "sample": [
-      "ASSISTED",
-      "DOCTOR",
-      "REPORTS",
-      "SLOT",
-      "TRIVIA",
-      "ABSTRACT",
-      "TEAR",
-      "RETREAT",
-      "TIMER"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
-  },
-  {
-    "id": "chain-072",
-    "seed": "MILK",
-    "par": 8,
-    "sample": [
-      "MILK",
-      "KEVIN",
-      "NIGHTS",
-      "SECURITY",
-      "YARD",
-      "DETROIT",
-      "TORONTO",
-      "OFFICER",
-      "RELEASE"
+      "PORTRAIT",
+      "TWINS",
+      "SEMESTER",
+      "RAPHAEL",
+      "LATITUDE",
+      "EVOLVING",
+      "GRANNY",
+      "YAMAHA",
+      "ADVANCED"
     ],
     "rule": {
       "id": "unique_end",
@@ -2121,83 +1911,294 @@ export default [
     }
   },
   {
-    "id": "chain-073",
-    "seed": "KATIE",
+    "id": "chain-063",
+    "seed": "FLOOR",
     "par": 8,
     "sample": [
-      "KATIE",
-      "EXPIRES",
-      "SOLDIER",
-      "RELATED",
-      "DURHAM",
-      "MONITORS",
-      "SAVAGE",
-      "ENABLES",
-      "SMILIES"
+      "FLOOR",
+      "REPLAY",
+      "YIELDS",
+      "SNOOKER",
+      "RESULT",
+      "TRANS",
+      "SUPPRESS",
+      "SHADE",
+      "EUROPE"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
     }
   },
   {
-    "id": "chain-074",
-    "seed": "CICHLID",
+    "id": "chain-064",
+    "seed": "VERA",
     "par": 8,
     "sample": [
-      "CICHLID",
-      "DUCK",
-      "KOALA",
-      "ANTELOPE",
-      "EAGLES",
-      "SWAN",
-      "NEWT",
-      "TAPIR",
-      "RAVEN"
+      "VERA",
+      "ADDRESS",
+      "STAPLES",
+      "STEWART",
+      "TULSA",
+      "ARTICLES",
+      "SAFER",
+      "REDHAT",
+      "TACTICAL"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-065",
+    "seed": "SILLY",
+    "par": 8,
+    "sample": [
+      "SILLY",
+      "YEAST",
+      "TEASE",
+      "ESCAPED",
+      "DISSENT",
+      "TWISTED",
+      "DUSK",
+      "KISSING",
+      "GIRLS"
+    ],
+    "rule": {
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
+    }
+  },
+  {
+    "id": "chain-066",
+    "seed": "ABBOTT",
+    "par": 8,
+    "sample": [
+      "ABBOTT",
+      "TWELVE",
+      "ETHICS",
+      "STAYED",
+      "DUSTIN",
+      "NEURONS",
+      "SWELLING",
+      "GLORIOUS",
+      "SPECIMEN"
+    ],
+    "rule": {
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
+    }
+  },
+  {
+    "id": "chain-067",
+    "seed": "ELISA",
+    "par": 8,
+    "sample": [
+      "ELISA",
+      "AWFUL",
+      "LOGON",
+      "NINTH",
+      "HIRED",
+      "DIFFS",
+      "SHOPS",
+      "SHOUT",
+      "TAKEN"
+    ],
+    "rule": {
+      "id": "exactly_5",
+      "label": "every word exactly 5 letters",
+      "hint": "only 5-letter words count"
+    }
+  },
+  {
+    "id": "chain-068",
+    "seed": "SUBUNIT",
+    "par": 8,
+    "sample": [
+      "SUBUNIT",
+      "TORRENT",
+      "TELE",
+      "ENEMIES",
+      "SENSIBLE",
+      "ESPN",
+      "NEPHEW",
+      "WALES",
+      "SPENDING"
     ],
     "rule": {
       "id": "plain",
       "label": "just chain — last letter to first",
       "hint": "link the last letter of each word to the first of the next"
+    }
+  },
+  {
+    "id": "chain-069",
+    "seed": "BULLETIN",
+    "par": 8,
+    "sample": [
+      "BULLETIN",
+      "NOMINAL",
+      "LICKING",
+      "GRENADA",
+      "ALAIN",
+      "NATURAL",
+      "LIPID",
+      "DECADES",
+      "SWEATERS"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    }
+  },
+  {
+    "id": "chain-070",
+    "seed": "LARA",
+    "par": 8,
+    "sample": [
+      "LARA",
+      "ARTERIAL",
+      "LEASE",
+      "EXPLOITS",
+      "SMILING",
+      "GLIBC",
+      "CATALAN",
+      "NEONATAL",
+      "LANDLORD"
+    ],
+    "rule": {
+      "id": "contains_L",
+      "label": "every word must contain \"L\"",
+      "hint": "each word has to include the letter L"
+    }
+  },
+  {
+    "id": "chain-071",
+    "seed": "STOMP",
+    "par": 8,
+    "sample": [
+      "STOMP",
+      "PALM",
+      "MOUTH",
+      "HURL",
+      "LIPS",
+      "SPEAK",
+      "KNEE",
+      "EYEBROW",
+      "WANDER"
+    ],
+    "rule": {
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
     },
-    "category": "animals"
+    "category": "body"
+  },
+  {
+    "id": "chain-072",
+    "seed": "SOOTHING",
+    "par": 8,
+    "sample": [
+      "SOOTHING",
+      "GETAWAYS",
+      "SOFTBALL",
+      "LAUGHING",
+      "GRANTING",
+      "GAMBLING",
+      "GONZALEZ",
+      "ZEPPELIN",
+      "NINTENDO"
+    ],
+    "rule": {
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
+    }
+  },
+  {
+    "id": "chain-073",
+    "seed": "CHESTNUT",
+    "par": 8,
+    "sample": [
+      "CHESTNUT",
+      "TURNIP",
+      "PEANUT",
+      "TUNA",
+      "ALMOND",
+      "DUMPLING",
+      "GINGER",
+      "RAISIN",
+      "NECTAR"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    },
+    "category": "food"
+  },
+  {
+    "id": "chain-074",
+    "seed": "BOISE",
+    "par": 8,
+    "sample": [
+      "BOISE",
+      "EXITS",
+      "SURPRISE",
+      "EAST",
+      "TESTING",
+      "GOODNESS",
+      "SAHARA",
+      "AWARDS",
+      "SUITE"
+    ],
+    "rule": {
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
+    }
   },
   {
     "id": "chain-075",
-    "seed": "WEEKLY",
+    "seed": "ALKALINE",
     "par": 8,
     "sample": [
-      "WEEKLY",
-      "YIELDS",
-      "SPICE",
-      "EXCESS",
-      "SENSE",
-      "EXHIBIT",
-      "TRACE",
-      "EARL",
-      "LABELED"
+      "ALKALINE",
+      "ENHANCED",
+      "DANA",
+      "AGENDA",
+      "ANNOUNCE",
+      "EATON",
+      "NEMO",
+      "OUTLINE",
+      "ENTIRETY"
     ],
     "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
     }
   },
   {
     "id": "chain-076",
-    "seed": "BARE",
+    "seed": "WIPE",
     "par": 8,
     "sample": [
-      "BARE",
-      "EARN",
-      "NODE",
-      "ESPN",
-      "NCAA",
-      "ACID",
-      "DRAG",
-      "GREW",
-      "WALT"
+      "WIPE",
+      "EPIC",
+      "CHAD",
+      "DECO",
+      "ODOR",
+      "ROME",
+      "EATS",
+      "SCAM",
+      "MCSG"
     ],
     "rule": {
       "id": "exactly_4",
@@ -2228,39 +2229,39 @@ export default [
   },
   {
     "id": "chain-078",
-    "seed": "CHARTER",
+    "seed": "CAMERA",
     "par": 8,
     "sample": [
-      "CHARTER",
-      "RUTH",
-      "HAMBURG",
-      "GROUPS",
-      "SOLARIS",
-      "SPARC",
-      "CRYSTAL",
-      "LEADER",
-      "RING"
+      "CAMERA",
+      "AUTONOMY",
+      "YORKER",
+      "RAINBOW",
+      "WYOMING",
+      "GRANTS",
+      "SEASIDE",
+      "ESPN",
+      "NIKON"
     ],
     "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
     }
   },
   {
     "id": "chain-079",
-    "seed": "NEGATIVE",
+    "seed": "DIALOG",
     "par": 8,
     "sample": [
-      "NEGATIVE",
-      "EXTENDS",
-      "STAYING",
-      "GUINEA",
-      "ATTITUDE",
-      "ENTRANCE",
-      "ELECTION",
-      "NEUTRAL",
-      "LUTHER"
+      "DIALOG",
+      "GOVERN",
+      "NOVELL",
+      "LIVECAM",
+      "MELODY",
+      "YORKER",
+      "RIPENCC",
+      "CASCADE",
+      "ENTITLED"
     ],
     "rule": {
       "id": "minlen6",
@@ -2270,236 +2271,196 @@ export default [
   },
   {
     "id": "chain-080",
-    "seed": "SIGNAL",
-    "par": 8,
+    "seed": "FISH",
+    "par": 7,
     "sample": [
-      "SIGNAL",
-      "LISTINGS",
-      "SERIOUS",
-      "STORES",
-      "STATUS",
-      "SOLARIS",
-      "SCHOLARS",
-      "SPEAKING",
-      "GAZETTE"
+      "FISH",
+      "HERON",
+      "NEWT",
+      "TOAD",
+      "DUCK",
+      "KOALA",
+      "APHID",
+      "DOLPHIN"
     ],
     "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
-    }
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
+    },
+    "category": "animals"
   },
   {
     "id": "chain-081",
-    "seed": "CREEKS",
-    "par": 4,
+    "seed": "SOUL",
+    "par": 8,
     "sample": [
-      "CREEKS",
-      "SPRING",
-      "GLACIER",
-      "RIVERS",
-      "SAVANNA"
+      "SOUL",
+      "LORRAINE",
+      "ETERNITY",
+      "YIELDING",
+      "GOODNESS",
+      "SHANGHAI",
+      "INVESTED",
+      "DISCOVER",
+      "REYNOLDS"
     ],
     "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
-    },
-    "category": "nature"
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
+    }
   },
   {
     "id": "chain-082",
-    "seed": "TURN",
+    "seed": "KENO",
     "par": 8,
     "sample": [
-      "TURN",
-      "NERVE",
-      "EYEBROW",
-      "WRIST",
-      "TROT",
-      "TEETER",
-      "ROLL",
-      "LIVER",
-      "RACE"
+      "KENO",
+      "OFTEN",
+      "NCBI",
+      "INNER",
+      "ROOFING",
+      "GENEVA",
+      "AUDIENCE",
+      "ENGINES",
+      "STATEN"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-083",
+    "seed": "STRAND",
+    "par": 8,
+    "sample": [
+      "STRAND",
+      "DEPECHE",
+      "EBONY",
+      "YORK",
+      "KLAUS",
+      "SNAKES",
+      "SPRINGS",
+      "SAILORS",
+      "SPLIT"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    }
+  },
+  {
+    "id": "chain-084",
+    "seed": "DIRECTLY",
+    "par": 8,
+    "sample": [
+      "DIRECTLY",
+      "YARDS",
+      "SENIORS",
+      "SEIZURE",
+      "ESTHER",
+      "RADISSON",
+      "NEAR",
+      "RABBI",
+      "IMPAIRED"
     ],
     "rule": {
       "id": "contains_R",
       "label": "every word must contain \"R\"",
       "hint": "each word has to include the letter R"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-083",
-    "seed": "UNABLE",
-    "par": 8,
-    "sample": [
-      "UNABLE",
-      "EXPAND",
-      "DODGE",
-      "EXISTING",
-      "GROVE",
-      "EXPERTS",
-      "SLAVE",
-      "EBONY",
-      "YAHOO"
-    ],
-    "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
     }
-  },
-  {
-    "id": "chain-084",
-    "seed": "ORANGE",
-    "par": 8,
-    "sample": [
-      "ORANGE",
-      "ESPRESSO",
-      "ONION",
-      "NUTMEG",
-      "GUAVA",
-      "ALMOND",
-      "DUMPLING",
-      "GRAVY",
-      "YOGURT"
-    ],
-    "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
-    },
-    "category": "food"
   },
   {
     "id": "chain-085",
-    "seed": "COLONIAL",
+    "seed": "SARDINE",
     "par": 8,
     "sample": [
-      "COLONIAL",
-      "LATER",
-      "REMEDIES",
-      "SONGS",
-      "SOURCES",
-      "STEVENS",
-      "SOCIAL",
-      "LATTER",
-      "REFERRED"
+      "SARDINE",
+      "EAGLE",
+      "EARWIG",
+      "GAZELLE",
+      "EAGLES",
+      "SEAL",
+      "LAMB",
+      "BEAR",
+      "RABBIT"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    },
+    "category": "animals"
   },
   {
     "id": "chain-086",
-    "seed": "CLOUDY",
+    "seed": "NINA",
     "par": 8,
     "sample": [
-      "CLOUDY",
-      "YAMAHA",
-      "AFRICA",
-      "ALWAYS",
-      "SPIES",
-      "STYLE",
-      "ELEMENTS",
-      "SPIRITS",
-      "SMELL"
+      "NINA",
+      "ARUBA",
+      "ALLEGRA",
+      "APOSTLE",
+      "ENGADGET",
+      "THANK",
+      "KYOCERA",
+      "ATHEIST",
+      "TAVERN"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
     }
   },
   {
     "id": "chain-087",
-    "seed": "LEAVE",
+    "seed": "DOCTORAL",
     "par": 8,
     "sample": [
-      "LEAVE",
-      "ELECTRIC",
-      "CULTURES",
-      "STRONGLY",
-      "YALE",
-      "ENABLES",
-      "SLOVAK",
-      "KYLE",
-      "ENCLOSED"
+      "DOCTORAL",
+      "LAST",
+      "TOKELAU",
+      "USUAL",
+      "LAYER",
+      "REMARKED",
+      "DENTAL",
+      "LARRY",
+      "YATES"
     ],
     "rule": {
-      "id": "contains_L",
-      "label": "every word must contain \"L\"",
-      "hint": "each word has to include the letter L"
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
     }
   },
   {
     "id": "chain-088",
-    "seed": "BURKE",
+    "seed": "MATERIAL",
     "par": 8,
     "sample": [
-      "BURKE",
-      "ELDERLY",
-      "YOURS",
-      "SOMERSET",
-      "TACKLE",
-      "EXTENDED",
-      "DATES",
-      "STRANGER",
-      "RANK"
+      "MATERIAL",
+      "LABS",
+      "SQUADRON",
+      "NOTABLY",
+      "YANG",
+      "GRADES",
+      "SPECTRA",
+      "ALAMEDA",
+      "ALPHA"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
     }
   },
   {
     "id": "chain-089",
-    "seed": "DIAMETER",
-    "par": 8,
-    "sample": [
-      "DIAMETER",
-      "READ",
-      "DAVIDSON",
-      "NEARLY",
-      "YAHOO",
-      "OAKS",
-      "SQUARE",
-      "EXACTLY",
-      "YANG"
-    ],
-    "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
-    }
-  },
-  {
-    "id": "chain-090",
-    "seed": "TABLE",
-    "par": 8,
-    "sample": [
-      "TABLE",
-      "EDWARD",
-      "DRAG",
-      "GRAB",
-      "BAHAMAS",
-      "STATS",
-      "SCANNER",
-      "REALTORS",
-      "SURFACE"
-    ],
-    "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
-    }
-  },
-  {
-    "id": "chain-091",
     "seed": "CURRY",
     "par": 4,
     "sample": [
@@ -2517,7 +2478,7 @@ export default [
     "category": "food"
   },
   {
-    "id": "chain-092",
+    "id": "chain-090",
     "seed": "SPIDERS",
     "par": 5,
     "sample": [
@@ -2536,316 +2497,62 @@ export default [
     "category": "animals"
   },
   {
-    "id": "chain-093",
-    "seed": "BOSNIA",
+    "id": "chain-091",
+    "seed": "LEAP",
     "par": 8,
     "sample": [
-      "BOSNIA",
-      "AGENDA",
-      "ACTUAL",
-      "LAYOUT",
-      "THREADS",
-      "SLIDES",
-      "SITTING",
-      "GUARDS",
-      "SAMPLING"
-    ],
-    "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
-    }
-  },
-  {
-    "id": "chain-094",
-    "seed": "STRIDE",
-    "par": 7,
-    "sample": [
-      "STRIDE",
-      "EYEBROW",
-      "WRIST",
-      "TEETER",
-      "REACH",
-      "HURL",
+      "LEAP",
+      "PULL",
       "LIVER",
-      "RACE"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-095",
-    "seed": "CANDY",
-    "par": 8,
-    "sample": [
-      "CANDY",
-      "YOGURT",
-      "TOMATO",
-      "OYSTER",
-      "ROAST",
-      "THYME",
-      "EGGPLANT",
-      "TROUT",
-      "TOAST"
-    ],
-    "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-096",
-    "seed": "HAZELNUT",
-    "par": 8,
-    "sample": [
-      "HAZELNUT",
-      "TOMATO",
-      "OREGANO",
-      "OATMEAL",
-      "LETTUCE",
-      "EGGPLANT",
-      "TURNIP",
-      "PARSLEY",
-      "YOGURT"
-    ],
-    "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-097",
-    "seed": "DENY",
-    "par": 8,
-    "sample": [
-      "DENY",
-      "YANG",
-      "GENES",
-      "SURGEONS",
-      "STRINGS",
-      "SPANKING",
-      "GLEN",
-      "NEARBY",
-      "YEMEN"
-    ],
-    "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    }
-  },
-  {
-    "id": "chain-098",
-    "seed": "RECIPE",
-    "par": 8,
-    "sample": [
-      "RECIPE",
-      "ENQUIRY",
-      "YOUNG",
-      "GOSPEL",
-      "LIGHTS",
-      "STAFF",
-      "FRED",
-      "DRAMATIC",
-      "CALCIUM"
-    ],
-    "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
-    }
-  },
-  {
-    "id": "chain-099",
-    "seed": "HEAVE",
-    "par": 8,
-    "sample": [
-      "HEAVE",
-      "EYEBROW",
-      "WRENCH",
-      "HEAD",
-      "DIVE",
+      "ROLL",
+      "LIFT",
+      "TEMPLE",
       "ELBOW",
-      "WALK",
-      "KNEEL",
-      "LUNG"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    },
-    "category": "body"
-  },
-  {
-    "id": "chain-100",
-    "seed": "HONOLULU",
-    "par": 8,
-    "sample": [
-      "HONOLULU",
-      "UPCOMING",
-      "GETTING",
-      "GOVERNOR",
-      "RANGERS",
-      "SUDDENLY",
-      "YARN",
-      "NEITHER",
-      "RANDOM"
-    ],
-    "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
-    }
-  },
-  {
-    "id": "chain-101",
-    "seed": "SWIMMING",
-    "par": 8,
-    "sample": [
-      "SWIMMING",
-      "GRAS",
-      "SILICON",
-      "NAILS",
-      "STARTING",
-      "GOLDEN",
-      "NELSON",
-      "NATION",
-      "NURSING"
-    ],
-    "rule": {
-      "id": "consonant_start",
-      "label": "words can't start with a vowel",
-      "hint": "every word must begin with a consonant"
-    }
-  },
-  {
-    "id": "chain-102",
-    "seed": "MODELING",
-    "par": 8,
-    "sample": [
-      "MODELING",
-      "GLAD",
-      "DEFAULT",
-      "TACKLE",
-      "EXCEL",
-      "LIKE",
-      "ENGLISH",
-      "HIGHLY",
-      "YOURSELF"
+      "WOBBLE",
+      "EYELID"
     ],
     "rule": {
       "id": "contains_L",
       "label": "every word must contain \"L\"",
       "hint": "each word has to include the letter L"
-    }
+    },
+    "category": "body"
   },
   {
-    "id": "chain-103",
-    "seed": "LIME",
+    "id": "chain-092",
+    "seed": "BORNE",
     "par": 8,
     "sample": [
-      "LIME",
-      "EXPOSED",
-      "DEMANDS",
-      "SELLS",
-      "SHED",
-      "DAUGHTER",
-      "REACHED",
-      "DELAYED",
-      "DELAYS"
+      "BORNE",
+      "EXACT",
+      "TWAIN",
+      "NICHE",
+      "EARLY",
+      "YOUTH",
+      "HAYES",
+      "SPIES",
+      "SCARF"
     ],
     "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
+      "id": "exactly_5",
+      "label": "every word exactly 5 letters",
+      "hint": "only 5-letter words count"
     }
   },
   {
-    "id": "chain-104",
-    "seed": "NODE",
+    "id": "chain-093",
+    "seed": "ACCEPTED",
     "par": 8,
     "sample": [
-      "NODE",
-      "ENDORSED",
-      "DOCUMENT",
-      "TITTEN",
-      "NEVADA",
-      "ACRES",
-      "SURVIVE",
-      "ERIK",
-      "KENNEDY"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-105",
-    "seed": "LOCATED",
-    "par": 8,
-    "sample": [
-      "LOCATED",
-      "DISPATCH",
-      "HALL",
-      "LENSES",
-      "SERVER",
-      "RANKING",
-      "GARLIC",
-      "COMPARED",
-      "DELUXE"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-106",
-    "seed": "ZERO",
-    "par": 8,
-    "sample": [
-      "ZERO",
-      "OVERHEAD",
-      "DOCTOR",
-      "ROUTERS",
-      "SISTERS",
-      "SECRETS",
-      "STICKERS",
-      "SIERRA",
-      "APART"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    }
-  },
-  {
-    "id": "chain-107",
-    "seed": "PARA",
-    "par": 8,
-    "sample": [
-      "PARA",
-      "ATTRACT",
-      "TATTOO",
-      "OMAN",
-      "NORMAN",
-      "NAMIBIA",
-      "ACTION",
-      "NISSAN",
-      "NAIL"
+      "ACCEPTED",
+      "DIECAST",
+      "TAGGED",
+      "DANCERS",
+      "SKATES",
+      "SPACIOUS",
+      "STRANDS",
+      "SANITY",
+      "YACHT"
     ],
     "rule": {
       "id": "contains_A",
@@ -2854,83 +2561,41 @@ export default [
     }
   },
   {
-    "id": "chain-108",
-    "seed": "DAUGHTER",
+    "id": "chain-094",
+    "seed": "DASH",
     "par": 8,
     "sample": [
-      "DAUGHTER",
-      "REACHES",
-      "SAUCE",
-      "EXISTS",
-      "SPECIFY",
-      "YIELDS",
-      "SERIOUS",
-      "SAVER",
-      "RIDGE"
+      "DASH",
+      "HOLD",
+      "DIVE",
+      "EYELID",
+      "DANCE",
+      "ELBOW",
+      "WAVE",
+      "EYEBROW",
+      "WRIST"
     ],
     "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-109",
-    "seed": "FRIES",
-    "par": 8,
-    "sample": [
-      "FRIES",
-      "SODA",
-      "APRICOT",
-      "TROUT",
-      "TOAST",
-      "THYME",
-      "EGGPLANT",
-      "TART",
-      "TACO"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
     },
-    "category": "food"
+    "category": "body"
   },
   {
-    "id": "chain-110",
-    "seed": "ROLLED",
+    "id": "chain-095",
+    "seed": "BRANDING",
     "par": 8,
     "sample": [
-      "ROLLED",
-      "DARK",
-      "KATRINA",
-      "ARTIST",
-      "THEIR",
-      "ROUTES",
-      "SHEPHERD",
-      "DIRECTLY",
-      "YEAR"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    }
-  },
-  {
-    "id": "chain-111",
-    "seed": "SAILING",
-    "par": 8,
-    "sample": [
-      "SAILING",
-      "GUARDS",
-      "SAFETY",
-      "YOUNGER",
-      "ROBERT",
-      "THERMAL",
-      "LAUNCHES",
-      "STORED",
-      "DENSITY"
+      "BRANDING",
+      "GATHER",
+      "ROTATING",
+      "GARRISON",
+      "NINETY",
+      "YOSEMITE",
+      "EMMANUEL",
+      "LINKSYS",
+      "SYMBOLIC"
     ],
     "rule": {
       "id": "minlen6",
@@ -2939,61 +2604,126 @@ export default [
     }
   },
   {
-    "id": "chain-112",
-    "seed": "CAREY",
+    "id": "chain-096",
+    "seed": "OREGANO",
     "par": 8,
     "sample": [
-      "CAREY",
-      "YIELDS",
-      "SIDE",
-      "EXPECT",
-      "TUCSON",
-      "NIKE",
-      "EXEMPT",
-      "TRANSIT",
-      "TAKEN"
+      "OREGANO",
+      "OMELET",
+      "TOMATO",
+      "OYSTER",
+      "RELISH",
+      "HAZELNUT",
+      "TURNIP",
+      "PASTA",
+      "APRICOT"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    },
+    "category": "food"
+  },
+  {
+    "id": "chain-097",
+    "seed": "SOARING",
+    "par": 8,
+    "sample": [
+      "SOARING",
+      "GUERNSEY",
+      "YIELDED",
+      "DISCUSS",
+      "STREAM",
+      "MILLION",
+      "NAILS",
+      "SANG",
+      "GREECE"
+    ],
+    "rule": {
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
     }
   },
   {
-    "id": "chain-113",
-    "seed": "VOICE",
+    "id": "chain-098",
+    "seed": "INVERSE",
     "par": 8,
     "sample": [
-      "VOICE",
-      "EASIER",
-      "RETURNS",
-      "SLIP",
-      "PEACEFUL",
-      "LEARNED",
-      "DAVE",
-      "ENTERED",
-      "DESERT"
+      "INVERSE",
+      "ELECTRON",
+      "NICE",
+      "EMINEM",
+      "MINDLESS",
+      "STEIN",
+      "NOLAN",
+      "NUTS",
+      "SYNTAX"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
     }
   },
   {
-    "id": "chain-114",
-    "seed": "ANGRY",
+    "id": "chain-099",
+    "seed": "TOILETTE",
     "par": 8,
     "sample": [
-      "ANGRY",
+      "TOILETTE",
+      "EQUITY",
       "YIELDS",
-      "STRIKING",
-      "GRADES",
-      "SAMUEL",
-      "LAYER",
-      "RAISE",
-      "EVANS",
-      "SKILLED"
+      "SURGEONS",
+      "SOMEWHAT",
+      "TRIPLE",
+      "ENGAGED",
+      "DONORS",
+      "SUBARU"
+    ],
+    "rule": {
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
+    }
+  },
+  {
+    "id": "chain-100",
+    "seed": "BADGER",
+    "par": 8,
+    "sample": [
+      "BADGER",
+      "RHINO",
+      "OKAPI",
+      "IMPALA",
+      "ANTELOPE",
+      "EAGLES",
+      "SARDINE",
+      "EAGLE",
+      "EARWIG"
+    ],
+    "rule": {
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
+    },
+    "category": "animals"
+  },
+  {
+    "id": "chain-101",
+    "seed": "CAPTION",
+    "par": 8,
+    "sample": [
+      "CAPTION",
+      "NERVE",
+      "EBOOK",
+      "KANGAROO",
+      "ORDERS",
+      "SPINNING",
+      "GIANTS",
+      "SLAVES",
+      "SLICES"
     ],
     "rule": {
       "id": "minlen5",
@@ -3002,7 +2732,237 @@ export default [
     }
   },
   {
-    "id": "chain-115",
+    "id": "chain-102",
+    "seed": "DEGREE",
+    "par": 8,
+    "sample": [
+      "DEGREE",
+      "EDGAR",
+      "ROSSI",
+      "INSIDER",
+      "REPRINTS",
+      "SERUM",
+      "MARTHA",
+      "ADVISOR",
+      "READERS"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    }
+  },
+  {
+    "id": "chain-103",
+    "seed": "HILL",
+    "par": 5,
+    "sample": [
+      "HILL",
+      "LAGOONS",
+      "SHOAL",
+      "LEAVES",
+      "SLOPES",
+      "SLOPE"
+    ],
+    "rule": {
+      "id": "contains_L",
+      "label": "every word must contain \"L\"",
+      "hint": "each word has to include the letter L"
+    },
+    "category": "nature"
+  },
+  {
+    "id": "chain-104",
+    "seed": "FLAIR",
+    "par": 8,
+    "sample": [
+      "FLAIR",
+      "REDEEM",
+      "MERCER",
+      "ROBBINS",
+      "SOMERSET",
+      "TRIGGERS",
+      "SPURS",
+      "SCARS",
+      "SHOOTER"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    }
+  },
+  {
+    "id": "chain-105",
+    "seed": "CURRY",
+    "par": 8,
+    "sample": [
+      "CURRY",
+      "YEAST",
+      "THYME",
+      "ESPRESSO",
+      "OATMEAL",
+      "LAGER",
+      "ROAST",
+      "TOMATO",
+      "OREGANO"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    },
+    "category": "food"
+  },
+  {
+    "id": "chain-106",
+    "seed": "ISSN",
+    "par": 8,
+    "sample": [
+      "ISSN",
+      "NIKON",
+      "NODE",
+      "ELLEN",
+      "NATURAL",
+      "LISTING",
+      "GENETICS",
+      "STYLING",
+      "GRANDMA"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-107",
+    "seed": "PECK",
+    "par": 8,
+    "sample": [
+      "PECK",
+      "KUALA",
+      "AUDREY",
+      "YOURSELF",
+      "FAIRIES",
+      "SEITE",
+      "ELEMENTS",
+      "SLOWER",
+      "REACH"
+    ],
+    "rule": {
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
+    }
+  },
+  {
+    "id": "chain-108",
+    "seed": "SERPENT",
+    "par": 8,
+    "sample": [
+      "SERPENT",
+      "TOOK",
+      "KERNEL",
+      "LIMP",
+      "PREPAID",
+      "DYNASTY",
+      "YIELDED",
+      "DVDS",
+      "SPELLING"
+    ],
+    "rule": {
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
+    }
+  },
+  {
+    "id": "chain-109",
+    "seed": "WROUGHT",
+    "par": 8,
+    "sample": [
+      "WROUGHT",
+      "TRAY",
+      "YOURS",
+      "SKINCARE",
+      "ERECTION",
+      "NOIR",
+      "ROSEN",
+      "NATURAL",
+      "LATTER"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    }
+  },
+  {
+    "id": "chain-110",
+    "seed": "HONORARY",
+    "par": 8,
+    "sample": [
+      "HONORARY",
+      "YARDS",
+      "SCRIPT",
+      "TRONG",
+      "GENTLE",
+      "ENLARGE",
+      "ENABLES",
+      "SENATE",
+      "ENGAGING"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    }
+  },
+  {
+    "id": "chain-111",
+    "seed": "ARCADE",
+    "par": 8,
+    "sample": [
+      "ARCADE",
+      "ETHICAL",
+      "LIAISON",
+      "NUMBERED",
+      "DEALINGS",
+      "SUSPENSE",
+      "ETERNITY",
+      "YUGOSLAV",
+      "VERISIGN"
+    ],
+    "rule": {
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
+    }
+  },
+  {
+    "id": "chain-112",
+    "seed": "HOSE",
+    "par": 8,
+    "sample": [
+      "HOSE",
+      "EXEC",
+      "COLE",
+      "EASE",
+      "ERIE",
+      "EINE",
+      "ELLA",
+      "ACES",
+      "STUD"
+    ],
+    "rule": {
+      "id": "exactly_4",
+      "label": "every word exactly 4 letters",
+      "hint": "only 4-letter words count"
+    }
+  },
+  {
+    "id": "chain-113",
     "seed": "MACKEREL",
     "par": 6,
     "sample": [
@@ -3022,131 +2982,110 @@ export default [
     "category": "animals"
   },
   {
-    "id": "chain-116",
-    "seed": "SONIC",
+    "id": "chain-114",
+    "seed": "ADDICTED",
     "par": 8,
     "sample": [
-      "SONIC",
-      "CYLINDER",
-      "RUGS",
-      "SOUTH",
-      "HUGO",
-      "OBJECT",
-      "TURNS",
-      "SAPPHIRE",
-      "ERIC"
+      "ADDICTED",
+      "DECORATE",
+      "ENAMEL",
+      "LEFT",
+      "TRISH",
+      "HUNTER",
+      "REFUSE",
+      "ECONO",
+      "ODDS"
     ],
     "rule": {
       "id": "plain",
       "label": "just chain — last letter to first",
       "hint": "link the last letter of each word to the first of the next"
+    }
+  },
+  {
+    "id": "chain-115",
+    "seed": "MOISTURE",
+    "par": 8,
+    "sample": [
+      "MOISTURE",
+      "ENLARGE",
+      "EXPANDED",
+      "DELIVERS",
+      "SMOKE",
+      "EXAMPLES",
+      "SENT",
+      "TAKES",
+      "SHEETS"
+    ],
+    "rule": {
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
+    }
+  },
+  {
+    "id": "chain-116",
+    "seed": "LOGGED",
+    "par": 8,
+    "sample": [
+      "LOGGED",
+      "DEUTSCHE",
+      "EXCLUDES",
+      "SLEEP",
+      "PETS",
+      "SYNTHASE",
+      "ESPANOL",
+      "LITTER",
+      "REVEREND"
+    ],
+    "rule": {
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
     }
   },
   {
     "id": "chain-117",
-    "seed": "BRUNEI",
+    "seed": "MCSE",
     "par": 8,
     "sample": [
-      "BRUNEI",
-      "ICELAND",
-      "DIAMETER",
-      "RACE",
-      "EXPANDED",
-      "DEER",
-      "RIDGE",
-      "ENTIRE",
-      "EMPTY"
+      "MCSE",
+      "ECLIPSE",
+      "EXODUS",
+      "SAHARA",
+      "ATLANTIS",
+      "SWAPPING",
+      "GRADES",
+      "SCISSORS",
+      "SUBMITS"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
     }
   },
   {
     "id": "chain-118",
-    "seed": "WATT",
-    "par": 8,
+    "seed": "BERRY",
+    "par": 5,
     "sample": [
-      "WATT",
-      "TEENS",
-      "STOCKS",
-      "STAYING",
-      "GETS",
-      "STAGE",
-      "EDUCATED",
-      "DECENT",
-      "TONGUE"
+      "BERRY",
+      "YOGURT",
+      "TURNIP",
+      "PRETZEL",
+      "LOBSTER",
+      "ROSEMARY"
     ],
     "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    },
+    "category": "food"
   },
   {
     "id": "chain-119",
-    "seed": "VSNET",
-    "par": 6,
-    "sample": [
-      "VSNET",
-      "THEIR",
-      "RADAR",
-      "REMARK",
-      "KITTY",
-      "YOURS",
-      "SLOVENIA"
-    ],
-    "rule": {
-      "id": "consonant_start",
-      "label": "words can't start with a vowel",
-      "hint": "every word must begin with a consonant"
-    }
-  },
-  {
-    "id": "chain-120",
-    "seed": "TRAUMA",
-    "par": 8,
-    "sample": [
-      "TRAUMA",
-      "ALERT",
-      "THETA",
-      "ATTEMPTS",
-      "STREAMS",
-      "SEATTLE",
-      "ETHERNET",
-      "TOPICS",
-      "START"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    }
-  },
-  {
-    "id": "chain-121",
-    "seed": "DECISION",
-    "par": 8,
-    "sample": [
-      "DECISION",
-      "NAMES",
-      "SILENT",
-      "TONY",
-      "YOURSELF",
-      "FORWARD",
-      "DRINKING",
-      "GENERIC",
-      "CREST"
-    ],
-    "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
-    }
-  },
-  {
-    "id": "chain-122",
     "seed": "SQUEEZE",
     "par": 8,
     "sample": [
@@ -3168,7 +3107,7 @@ export default [
     "category": "body"
   },
   {
-    "id": "chain-123",
+    "id": "chain-120",
     "seed": "RAISIN",
     "par": 8,
     "sample": [
@@ -3190,19 +3129,19 @@ export default [
     "category": "food"
   },
   {
-    "id": "chain-124",
-    "seed": "NOTION",
+    "id": "chain-121",
+    "seed": "RUSTIC",
     "par": 8,
     "sample": [
-      "NOTION",
-      "NEWMAN",
-      "NEEDLE",
-      "ENTERS",
-      "SYDNEY",
-      "YIELDS",
-      "SALARY",
-      "YEARLY",
-      "YELLOW"
+      "RUSTIC",
+      "COWARD",
+      "DUMPED",
+      "DINERS",
+      "SACRED",
+      "DUDLEY",
+      "YANKEE",
+      "EVENLY",
+      "YAMAHA"
     ],
     "rule": {
       "id": "exactly_6",
@@ -3211,19 +3150,19 @@ export default [
     }
   },
   {
-    "id": "chain-125",
-    "seed": "MINIMUM",
+    "id": "chain-122",
+    "seed": "BLONDE",
     "par": 8,
     "sample": [
-      "MINIMUM",
-      "MEETINGS",
-      "SUZUKI",
-      "IGNORED",
-      "DISPUTES",
-      "SUBTLE",
-      "ESCORTS",
-      "SCENES",
-      "SOONEST"
+      "BLONDE",
+      "EDITING",
+      "GAGGED",
+      "DENTON",
+      "NAVAJO",
+      "OVERHAUL",
+      "LAURENCE",
+      "ENZYME",
+      "EDMUND"
     ],
     "rule": {
       "id": "minlen6",
@@ -3232,40 +3171,40 @@ export default [
     }
   },
   {
-    "id": "chain-126",
-    "seed": "CHAPEL",
+    "id": "chain-123",
+    "seed": "THERETO",
     "par": 8,
     "sample": [
-      "CHAPEL",
-      "LISTING",
-      "GAMBLING",
-      "GOLDEN",
-      "NEEDLE",
-      "EARL",
-      "LETS",
-      "STYLUS",
-      "SLOVAK"
+      "THERETO",
+      "OPTERON",
+      "NARROW",
+      "WIDENING",
+      "GOLFING",
+      "GICLEE",
+      "ENGINES",
+      "SAVINGS",
+      "SIDEBAR"
     ],
     "rule": {
-      "id": "contains_L",
-      "label": "every word must contain \"L\"",
-      "hint": "each word has to include the letter L"
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
     }
   },
   {
-    "id": "chain-127",
-    "seed": "ELEPHANT",
+    "id": "chain-124",
+    "seed": "PORTUGAL",
     "par": 8,
     "sample": [
-      "ELEPHANT",
-      "TEAR",
-      "RENTAL",
-      "LIGHT",
-      "THEE",
-      "EASTERN",
-      "NOVELTY",
-      "YOUTH",
-      "HOTTEST"
+      "PORTUGAL",
+      "LAYOUTS",
+      "SECRETS",
+      "STEADILY",
+      "YOSEMITE",
+      "ENTIRE",
+      "EXCITE",
+      "ELECTRON",
+      "NATE"
     ],
     "rule": {
       "id": "contains_T",
@@ -3274,28 +3213,28 @@ export default [
     }
   },
   {
-    "id": "chain-128",
-    "seed": "AMPLAND",
+    "id": "chain-125",
+    "seed": "PICTURE",
     "par": 8,
     "sample": [
-      "AMPLAND",
-      "DOING",
-      "GENESIS",
-      "STRONGLY",
-      "YANG",
-      "GONE",
-      "ELEPHANT",
-      "TRAINING",
-      "GANG"
+      "PICTURE",
+      "ESTONIA",
+      "ATTR",
+      "REPORTER",
+      "RAFTING",
+      "GLITTER",
+      "RETURN",
+      "NUDITY",
+      "YACHT"
     ],
     "rule": {
-      "id": "contains_N",
-      "label": "every word must contain \"N\"",
-      "hint": "each word has to include the letter N"
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
     }
   },
   {
-    "id": "chain-129",
+    "id": "chain-126",
     "seed": "VINEGAR",
     "par": 8,
     "sample": [
@@ -3317,7 +3256,7 @@ export default [
     "category": "food"
   },
   {
-    "id": "chain-130",
+    "id": "chain-127",
     "seed": "CLAMBER",
     "par": 8,
     "sample": [
@@ -3339,19 +3278,19 @@ export default [
     "category": "body"
   },
   {
-    "id": "chain-131",
-    "seed": "GLOSSARY",
+    "id": "chain-128",
+    "seed": "LANDING",
     "par": 8,
     "sample": [
-      "GLOSSARY",
-      "YANG",
-      "GARY",
-      "YEAR",
-      "RETREAT",
-      "TAPE",
-      "ELEGANT",
-      "TRIAL",
-      "LAMP"
+      "LANDING",
+      "GASTRIC",
+      "CHAINS",
+      "START",
+      "TRINA",
+      "ASPECT",
+      "TERESA",
+      "ACHIEVE",
+      "EVAL"
     ],
     "rule": {
       "id": "contains_A",
@@ -3360,19 +3299,19 @@ export default [
     }
   },
   {
-    "id": "chain-132",
-    "seed": "THEORY",
+    "id": "chain-129",
+    "seed": "PURE",
     "par": 8,
     "sample": [
-      "THEORY",
-      "YARD",
-      "DROPS",
-      "STEERING",
-      "GRAPHIC",
-      "CRAPS",
-      "SUPERB",
-      "BANNER",
-      "RETIRED"
+      "PURE",
+      "ERNEST",
+      "TRIVIUM",
+      "MCCARTHY",
+      "YORK",
+      "KANGAROO",
+      "ONBOARD",
+      "DROPPED",
+      "DANCER"
     ],
     "rule": {
       "id": "contains_R",
@@ -3381,121 +3320,19 @@ export default [
     }
   },
   {
-    "id": "chain-133",
-    "seed": "NYLON",
+    "id": "chain-130",
+    "seed": "VIOLENT",
     "par": 8,
     "sample": [
-      "NYLON",
-      "NORTH",
-      "HOUSES",
-      "SANDRA",
-      "ANALYSTS",
-      "STACK",
-      "KIDNEY",
-      "YEAH",
-      "HOSTED"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-134",
-    "seed": "PEARL",
-    "par": 8,
-    "sample": [
-      "PEARL",
-      "LIBRARY",
-      "YOURSELF",
-      "FERRARI",
-      "INTERIOR",
-      "REMAINED",
-      "DRINKING",
-      "GLORY",
-      "YOUR"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    }
-  },
-  {
-    "id": "chain-135",
-    "seed": "PLACE",
-    "par": 8,
-    "sample": [
-      "PLACE",
-      "EMPEROR",
-      "REMAINED",
-      "DATED",
-      "DIRECT",
-      "TRACKED",
-      "DESKTOPS",
-      "SUDDENLY",
-      "YEAST"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-136",
-    "seed": "LIFT",
-    "par": 8,
-    "sample": [
-      "LIFT",
-      "TONER",
-      "RUNS",
-      "STUFFED",
-      "DUMP",
-      "PLUG",
-      "GARCIA",
-      "AIRLINE",
-      "ENDIF"
-    ],
-    "rule": {
-      "id": "unique_end",
-      "label": "no two words may end in the same letter",
-      "hint": "every word has to end in a letter no earlier word ended in"
-    }
-  },
-  {
-    "id": "chain-137",
-    "seed": "SAUCE",
-    "par": 4,
-    "sample": [
-      "SAUCE",
-      "ESPRESSO",
-      "ORANGE",
-      "EGGPLANT",
-      "THYME"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    },
-    "category": "food"
-  },
-  {
-    "id": "chain-138",
-    "seed": "ANNUAL",
-    "par": 8,
-    "sample": [
-      "ANNUAL",
-      "LIGHTS",
-      "SOLELY",
-      "YOUNGER",
-      "REVENGE",
-      "EDITING",
-      "GROUND",
-      "DEFINING",
-      "GREETING"
+      "VIOLENT",
+      "TOWING",
+      "GOLDEN",
+      "NODDED",
+      "DIAGNOSE",
+      "EASIER",
+      "REGGAE",
+      "EXTREME",
+      "EXTENT"
     ],
     "rule": {
       "id": "minlen6",
@@ -3504,118 +3341,82 @@ export default [
     }
   },
   {
-    "id": "chain-139",
-    "seed": "SYRACUSE",
+    "id": "chain-131",
+    "seed": "CHEAT",
     "par": 8,
     "sample": [
-      "SYRACUSE",
-      "EXCUSE",
-      "ENTRANCE",
-      "EMIRATES",
-      "SAMSUNG",
-      "GRAVE",
-      "ENCLOSED",
-      "DESK",
-      "KEEPING"
+      "CHEAT",
+      "TRONG",
+      "GENITAL",
+      "LEISURE",
+      "ENDEAVOR",
+      "RESELLER",
+      "RESPONSE",
+      "EXPLICIT",
+      "THRILLED"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
     }
   },
   {
-    "id": "chain-140",
-    "seed": "HILLS",
-    "par": 4,
-    "sample": [
-      "HILLS",
-      "SWAMP",
-      "PETAL",
-      "LAKES",
-      "SHORE"
-    ],
-    "rule": {
-      "id": "exactly_5",
-      "label": "every word exactly 5 letters",
-      "hint": "only 5-letter words count"
-    },
-    "category": "nature"
-  },
-  {
-    "id": "chain-141",
-    "seed": "ANCIENT",
+    "id": "chain-132",
+    "seed": "HOMELAND",
     "par": 8,
     "sample": [
-      "ANCIENT",
-      "TRAILERS",
-      "SOFTBALL",
-      "LATE",
-      "ENGAGING",
-      "GAMING",
-      "GRAB",
-      "BETA",
-      "AUBURN"
-    ],
-    "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
-    }
-  },
-  {
-    "id": "chain-142",
-    "seed": "JOINED",
-    "par": 8,
-    "sample": [
-      "JOINED",
-      "DRILLING",
-      "GUARD",
-      "DRESSES",
-      "SWITCHES",
-      "SCRIPT",
-      "THEOLOGY",
-      "YEMEN",
-      "NORMAL"
-    ],
-    "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
-    }
-  },
-  {
-    "id": "chain-143",
-    "seed": "SAFFRON",
-    "par": 4,
-    "sample": [
-      "SAFFRON",
-      "NECTAR",
-      "RAISIN",
-      "NUTMEG",
-      "GINGER"
+      "HOMELAND",
+      "DENISE",
+      "EVIDENCE",
+      "ENCARTA",
+      "APPARENT",
+      "TRONG",
+      "GLAZING",
+      "GRANT",
+      "TENERIFE"
     ],
     "rule": {
       "id": "contains_N",
       "label": "every word must contain \"N\"",
       "hint": "each word has to include the letter N"
-    },
-    "category": "food"
+    }
   },
   {
-    "id": "chain-144",
-    "seed": "SCSI",
+    "id": "chain-133",
+    "seed": "AMANDA",
     "par": 8,
     "sample": [
-      "SCSI",
-      "ISTANBUL",
-      "LATVIA",
-      "ANDORRA",
-      "ADDED",
-      "DESTINY",
-      "YEARS",
-      "STATUTE",
-      "ESSAYS"
+      "AMANDA",
+      "ANALYSIS",
+      "SPELLING",
+      "GAUSSIAN",
+      "NAVIGATE",
+      "ENGRAVED",
+      "DISCRETE",
+      "EXCLUDED",
+      "DRIVEWAY"
+    ],
+    "rule": {
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
+    }
+  },
+  {
+    "id": "chain-134",
+    "seed": "HONESTLY",
+    "par": 8,
+    "sample": [
+      "HONESTLY",
+      "YANG",
+      "GERMANY",
+      "YEARLY",
+      "YALE",
+      "ENROLL",
+      "LITER",
+      "RETREATS",
+      "SHAVE"
     ],
     "rule": {
       "id": "plain",
@@ -3624,38 +3425,19 @@ export default [
     }
   },
   {
-    "id": "chain-145",
-    "seed": "RECENTLY",
-    "par": 6,
-    "sample": [
-      "RECENTLY",
-      "YEARS",
-      "SAVING",
-      "GENIUS",
-      "START",
-      "TUMOR",
-      "RESERVE"
-    ],
-    "rule": {
-      "id": "consonant_start",
-      "label": "words can't start with a vowel",
-      "hint": "every word must begin with a consonant"
-    }
-  },
-  {
-    "id": "chain-146",
-    "seed": "SPEAKER",
+    "id": "chain-135",
+    "seed": "SIXTH",
     "par": 8,
     "sample": [
-      "SPEAKER",
-      "RUSH",
-      "HINTS",
-      "SCALES",
-      "SINGH",
-      "HAPPENS",
-      "SAVED",
-      "DEVICES",
-      "SUCCESS"
+      "SIXTH",
+      "HUSKY",
+      "YOSEMITE",
+      "ENSURING",
+      "GAUSSIAN",
+      "NTSC",
+      "CRUST",
+      "TRUSTEE",
+      "EGGS"
     ],
     "rule": {
       "id": "contains_S",
@@ -3664,103 +3446,104 @@ export default [
     }
   },
   {
-    "id": "chain-147",
-    "seed": "MAGNET",
+    "id": "chain-136",
+    "seed": "LEMUR",
     "par": 8,
     "sample": [
-      "MAGNET",
-      "TOTALLY",
-      "YAHOO",
-      "OPERATES",
-      "SAMUEL",
-      "LISA",
-      "ACHIEVE",
-      "EARS",
-      "SAVANNAH"
+      "LEMUR",
+      "RABBITS",
+      "SHARK",
+      "KOALA",
+      "ANTELOPE",
+      "EARWIG",
+      "GAZELLE",
+      "EAGLE",
+      "EAGLES"
     ],
     "rule": {
-      "id": "contains_A",
-      "label": "every word must contain \"A\"",
-      "hint": "each word has to include the letter A"
+      "id": "plain",
+      "label": "just chain — last letter to first",
+      "hint": "link the last letter of each word to the first of the next"
+    },
+    "category": "animals"
+  },
+  {
+    "id": "chain-137",
+    "seed": "SERVICE",
+    "par": 8,
+    "sample": [
+      "SERVICE",
+      "ENQUIRY",
+      "YUGOSLAV",
+      "VOLS",
+      "SUBWAY",
+      "YOSEMITE",
+      "ENHANCED",
+      "DALTON",
+      "NAZIS"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
     }
   },
   {
-    "id": "chain-148",
-    "seed": "SHIPPED",
-    "par": 8,
+    "id": "chain-138",
+    "seed": "BUTTER",
+    "par": 7,
     "sample": [
-      "SHIPPED",
-      "DENSE",
-      "EXISTING",
-      "GOOGLE",
-      "ELLIOTT",
-      "TITTEN",
-      "NORTHERN",
-      "NUKE",
-      "EMIRATES"
-    ],
-    "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
-    }
-  },
-  {
-    "id": "chain-149",
-    "seed": "BOOT",
-    "par": 8,
-    "sample": [
-      "BOOT",
-      "TICKET",
-      "TEXTS",
-      "SEATTLE",
-      "EGYPT",
-      "TIMES",
-      "SORTED",
-      "DUTIES",
-      "SAINTS"
+      "BUTTER",
+      "ROAST",
+      "TURNIP",
+      "PASTA",
+      "APRICOT",
+      "TOMATO",
+      "OATMEAL",
+      "LOBSTER"
     ],
     "rule": {
       "id": "contains_T",
       "label": "every word must contain \"T\"",
       "hint": "each word has to include the letter T"
-    }
+    },
+    "category": "food"
   },
   {
-    "id": "chain-150",
-    "seed": "TRINITY",
+    "id": "chain-139",
+    "seed": "MARBLE",
     "par": 8,
     "sample": [
-      "TRINITY",
-      "YARDS",
-      "STAYS",
-      "SHEEP",
-      "POSTER",
-      "REPORTS",
-      "STUDENTS",
-      "SWEET",
-      "TAPES"
+      "MARBLE",
+      "EQUITY",
+      "YORKER",
+      "RUTH",
+      "HOTSPOTS",
+      "SHRIMP",
+      "PIZZA",
+      "AEROSOL",
+      "LOWERED"
     ],
     "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
     }
   },
   {
-    "id": "chain-151",
-    "seed": "CAMBODIA",
+    "id": "chain-140",
+    "seed": "BROCHURE",
     "par": 8,
     "sample": [
-      "CAMBODIA",
-      "ACQUIRE",
-      "ENTIRE",
-      "EXIST",
-      "THOMAS",
-      "SHOES",
-      "STEVEN",
-      "NOKIA",
-      "ARMENIA"
+      "BROCHURE",
+      "EXAMPLE",
+      "EXPEDIA",
+      "ARMADA",
+      "AUTISM",
+      "MOMENT",
+      "TAILOR",
+      "RAISE",
+      "EITHER"
     ],
     "rule": {
       "id": "plain",
@@ -3769,61 +3552,142 @@ export default [
     }
   },
   {
-    "id": "chain-152",
-    "seed": "PLAY",
+    "id": "chain-141",
+    "seed": "BLANCO",
     "par": 8,
     "sample": [
-      "PLAY",
-      "YEARLY",
-      "YALE",
-      "ENTIRELY",
-      "YOURSELF",
-      "FEELING",
-      "GLOSSARY",
-      "YIELDS",
-      "SALMON"
+      "BLANCO",
+      "OPENBSD",
+      "DURANGO",
+      "OBJECT",
+      "THOR",
+      "ROUND",
+      "DATASET",
+      "TEAR",
+      "ROAMING"
+    ],
+    "rule": {
+      "id": "no_double",
+      "label": "no doubled letters (no LETTER, no BOOK)",
+      "hint": "reject any word with two identical letters in a row"
+    }
+  },
+  {
+    "id": "chain-142",
+    "seed": "LLAMA",
+    "par": 5,
+    "sample": [
+      "LLAMA",
+      "ANTELOPE",
+      "EAGLE",
+      "EAGLES",
+      "SNAIL",
+      "LEMUR"
     ],
     "rule": {
       "id": "contains_L",
       "label": "every word must contain \"L\"",
       "hint": "each word has to include the letter L"
+    },
+    "category": "animals"
+  },
+  {
+    "id": "chain-143",
+    "seed": "MILTON",
+    "par": 8,
+    "sample": [
+      "MILTON",
+      "NEWSWIRE",
+      "ENTIRELY",
+      "YEARBOOK",
+      "KAYAKING",
+      "GRINDING",
+      "GUESSING",
+      "GODSMACK",
+      "KIRIBATI"
+    ],
+    "rule": {
+      "id": "ascending_len",
+      "label": "each word as long as the last, or longer",
+      "hint": "never get shorter — each word ≥ the previous word's length"
     }
   },
   {
-    "id": "chain-153",
-    "seed": "ENTIRELY",
+    "id": "chain-144",
+    "seed": "BROOKS",
     "par": 8,
     "sample": [
-      "ENTIRELY",
-      "YIELD",
-      "DIVIDED",
-      "DISCRETE",
-      "EFFORTS",
-      "SEGMENT",
-      "TUNE",
-      "EXPERTS",
-      "SLOPE"
+      "BROOKS",
+      "STORM",
+      "MOORLAND",
+      "DIRT",
+      "THUNDER",
+      "REEF",
+      "FOREST",
+      "TIMBER",
+      "RAINBOW"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    },
+    "category": "nature"
+  },
+  {
+    "id": "chain-145",
+    "seed": "THICKET",
+    "par": 5,
+    "sample": [
+      "THICKET",
+      "THUNDER",
+      "RIVERS",
+      "STREAM",
+      "MESA",
+      "ASPEN"
     ],
     "rule": {
       "id": "contains_E",
       "label": "every word must contain \"E\"",
       "hint": "each word has to include the letter E"
+    },
+    "category": "nature"
+  },
+  {
+    "id": "chain-146",
+    "seed": "ARTE",
+    "par": 8,
+    "sample": [
+      "ARTE",
+      "EXTRACT",
+      "TENANT",
+      "TREASURE",
+      "EATING",
+      "GASKET",
+      "TRINITY",
+      "YACHT",
+      "TRACTOR"
+    ],
+    "rule": {
+      "id": "contains_T",
+      "label": "every word must contain \"T\"",
+      "hint": "each word has to include the letter T"
     }
   },
   {
-    "id": "chain-154",
-    "seed": "BIDDING",
+    "id": "chain-147",
+    "seed": "FINE",
     "par": 8,
     "sample": [
-      "BIDDING",
-      "GENE",
-      "EXPENSES",
-      "SAINTS",
-      "SOUND",
-      "DOWNTOWN",
-      "NAVIGATE",
-      "EVERYONE",
-      "ENTRIES"
+      "FINE",
+      "EXTEND",
+      "DENSE",
+      "ETHAN",
+      "NONSENSE",
+      "ENLARGED",
+      "DENTON",
+      "NTSC",
+      "CONDUIT"
     ],
     "rule": {
       "id": "contains_N",
@@ -3832,7 +3696,92 @@ export default [
     }
   },
   {
-    "id": "chain-155",
+    "id": "chain-148",
+    "seed": "THIGH",
+    "par": 8,
+    "sample": [
+      "THIGH",
+      "HEART",
+      "TWIST",
+      "TONGUE",
+      "EYEBROW",
+      "WANDER",
+      "REACH",
+      "HEAVE",
+      "EYELID"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    },
+    "category": "body"
+  },
+  {
+    "id": "chain-149",
+    "seed": "BATCH",
+    "par": 8,
+    "sample": [
+      "BATCH",
+      "HOTMAIL",
+      "LANKA",
+      "ANALYTIC",
+      "CARTS",
+      "SILVA",
+      "APPENDIX",
+      "XAVIER",
+      "REALM"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-150",
+    "seed": "DESTINY",
+    "par": 8,
+    "sample": [
+      "DESTINY",
+      "YIELDS",
+      "SCARED",
+      "DIODE",
+      "EPISODE",
+      "EMERALD",
+      "DWELLING",
+      "GREATLY",
+      "YIELDING"
+    ],
+    "rule": {
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
+    }
+  },
+  {
+    "id": "chain-151",
+    "seed": "FLOORING",
+    "par": 8,
+    "sample": [
+      "FLOORING",
+      "GENETIC",
+      "CANYON",
+      "NESTING",
+      "GRAND",
+      "DOZEN",
+      "NEEDLE",
+      "EASTERN",
+      "NINTENDO"
+    ],
+    "rule": {
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
+  },
+  {
+    "id": "chain-152",
     "seed": "FINCH",
     "par": 4,
     "sample": [
@@ -3850,19 +3799,19 @@ export default [
     "category": "animals"
   },
   {
-    "id": "chain-156",
-    "seed": "PLANET",
+    "id": "chain-153",
+    "seed": "GUILTY",
     "par": 8,
     "sample": [
-      "PLANET",
-      "TWINS",
-      "SLIDE",
-      "EVERYDAY",
-      "YOURSELF",
-      "FINANCE",
-      "EDITED",
-      "DISCUSS",
-      "SITEMAP"
+      "GUILTY",
+      "YOSEMITE",
+      "EXPANSYS",
+      "SCARY",
+      "YARDS",
+      "SELECTED",
+      "DICKS",
+      "SEEKING",
+      "GLASGOW"
     ],
     "rule": {
       "id": "minlen5",
@@ -3871,19 +3820,19 @@ export default [
     }
   },
   {
-    "id": "chain-157",
-    "seed": "WIRING",
+    "id": "chain-154",
+    "seed": "JOHAN",
     "par": 8,
     "sample": [
-      "WIRING",
-      "GRANT",
-      "TRANCE",
-      "ECONOMIC",
-      "CONSENT",
-      "THROWING",
-      "GUIDANCE",
-      "ENHANCE",
-      "ENTRY"
+      "JOHAN",
+      "NOISE",
+      "ERNST",
+      "TRANSFER",
+      "ROTATION",
+      "NERD",
+      "DYING",
+      "GENOME",
+      "EVIDENCE"
     ],
     "rule": {
       "id": "contains_N",
@@ -3892,70 +3841,47 @@ export default [
     }
   },
   {
-    "id": "chain-158",
-    "seed": "ANOTHER",
-    "par": 8,
+    "id": "chain-155",
+    "seed": "BOULDER",
+    "par": 5,
     "sample": [
-      "ANOTHER",
-      "RUNNER",
-      "REALITY",
-      "YEARLY",
-      "YELLOW",
-      "WIRE",
-      "EXPERTS",
-      "SECRET",
-      "TICKET"
+      "BOULDER",
+      "RIVERS",
+      "SUNSET",
+      "TIMBER",
+      "RAVINE",
+      "ESTUARY"
     ],
     "rule": {
-      "id": "contains_E",
-      "label": "every word must contain \"E\"",
-      "hint": "each word has to include the letter E"
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
+    },
+    "category": "nature"
+  },
+  {
+    "id": "chain-156",
+    "seed": "RAISED",
+    "par": 8,
+    "sample": [
+      "RAISED",
+      "DEMAND",
+      "DAKOTA",
+      "ASSURE",
+      "ENROLL",
+      "LAKERS",
+      "SENATE",
+      "EUROPE",
+      "ENTIRE"
+    ],
+    "rule": {
+      "id": "exactly_6",
+      "label": "every word exactly 6 letters",
+      "hint": "only 6-letter words count"
     }
   },
   {
-    "id": "chain-159",
-    "seed": "SALAD",
-    "par": 8,
-    "sample": [
-      "SALAD",
-      "DATES",
-      "STORES",
-      "SIMPLE",
-      "ESSAYS",
-      "SOMEBODY",
-      "YIELDS",
-      "SCREEN",
-      "NEEDS"
-    ],
-    "rule": {
-      "id": "contains_S",
-      "label": "every word must contain \"S\"",
-      "hint": "each word has to include the letter S"
-    }
-  },
-  {
-    "id": "chain-160",
-    "seed": "JOHNNY",
-    "par": 8,
-    "sample": [
-      "JOHNNY",
-      "YORK",
-      "KINDS",
-      "STREAMS",
-      "STRAP",
-      "PRICES",
-      "SBJCT",
-      "TRULY",
-      "YEARLY"
-    ],
-    "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
-    }
-  },
-  {
-    "id": "chain-161",
+    "id": "chain-157",
     "seed": "SOUP",
     "par": 8,
     "sample": [
@@ -3977,19 +3903,19 @@ export default [
     "category": "food"
   },
   {
-    "id": "chain-162",
-    "seed": "ANALYZED",
+    "id": "chain-158",
+    "seed": "PLANAR",
     "par": 8,
     "sample": [
-      "ANALYZED",
-      "DOWNTOWN",
-      "NOTIFIED",
-      "DONATION",
-      "NETSCAPE",
-      "EARLIEST",
-      "TEXTILES",
-      "STRONGLY",
-      "YOURSELF"
+      "PLANAR",
+      "RECOVER",
+      "REJECTS",
+      "SHIELDS",
+      "SHUTTER",
+      "RICHTER",
+      "REVOKED",
+      "DISAGREE",
+      "EXPLORED"
     ],
     "rule": {
       "id": "ascending_len",
@@ -3998,125 +3924,103 @@ export default [
     }
   },
   {
-    "id": "chain-163",
-    "seed": "WILLOW",
+    "id": "chain-159",
+    "seed": "SALE",
     "par": 8,
     "sample": [
-      "WILLOW",
-      "WAIVER",
-      "RELIANCE",
-      "ELIGIBLE",
-      "ETHICS",
-      "SURGERY",
-      "YEARLY",
-      "YIELDS",
-      "SEEING"
+      "SALE",
+      "ENOM",
+      "MEANS",
+      "SOMALIA",
+      "ANOMALY",
+      "YEARBOOK",
+      "KERN",
+      "NEONATAL",
+      "LODGED"
     ],
     "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
     }
   },
   {
-    "id": "chain-164",
-    "seed": "MARMOT",
+    "id": "chain-160",
+    "seed": "PENALTY",
     "par": 8,
     "sample": [
-      "MARMOT",
-      "TROUT",
-      "TOAD",
-      "DOLPHIN",
-      "NEWT",
-      "TAPIR",
-      "RODENT",
-      "TETRA",
-      "APHID"
+      "PENALTY",
+      "YEMEN",
+      "NEBRASKA",
+      "ALPS",
+      "SLICED",
+      "DEALTIME",
+      "ESCROW",
+      "WALL",
+      "LAUNCH"
     ],
     "rule": {
-      "id": "no_double",
-      "label": "no doubled letters (no LETTER, no BOOK)",
-      "hint": "reject any word with two identical letters in a row"
-    },
-    "category": "animals"
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
+    }
   },
   {
-    "id": "chain-165",
-    "seed": "CLAM",
-    "par": 6,
+    "id": "chain-161",
+    "seed": "BRANDON",
+    "par": 8,
     "sample": [
-      "CLAM",
-      "MAGPIE",
-      "EAGLE",
-      "EARWIG",
-      "GOAT",
-      "TETRA",
-      "APHID"
+      "BRANDON",
+      "NACIONAL",
+      "LEARNING",
+      "GARMENT",
+      "TRIBUNAL",
+      "LAYOUTS",
+      "SAAB",
+      "BURKINA",
+      "AVAIL"
     ],
     "rule": {
       "id": "contains_A",
       "label": "every word must contain \"A\"",
       "hint": "each word has to include the letter A"
-    },
-    "category": "animals"
-  },
-  {
-    "id": "chain-166",
-    "seed": "SEEING",
-    "par": 8,
-    "sample": [
-      "SEEING",
-      "GLASSES",
-      "SEPARATE",
-      "ENVELOPE",
-      "EPINIONS",
-      "STRAIGHT",
-      "TRAMADOL",
-      "LITERACY",
-      "YOURSELF"
-    ],
-    "rule": {
-      "id": "ascending_len",
-      "label": "each word as long as the last, or longer",
-      "hint": "never get shorter — each word ≥ the previous word's length"
     }
   },
   {
-    "id": "chain-167",
-    "seed": "SANDBAR",
+    "id": "chain-162",
+    "seed": "ATLANTIC",
     "par": 8,
     "sample": [
-      "SANDBAR",
-      "RAPIDS",
-      "SNOW",
-      "WOODS",
-      "STORM",
-      "MARSHES",
-      "STREAM",
-      "MOSS",
-      "SOIL"
+      "ATLANTIC",
+      "CORNERS",
+      "SIND",
+      "DECLINE",
+      "EXPANSYS",
+      "SANDERS",
+      "SERENA",
+      "ANDORRA",
+      "ALIGNED"
     ],
     "rule": {
-      "id": "contains_S",
-      "label": "every word must contain \"S\"",
-      "hint": "each word has to include the letter S"
-    },
-    "category": "nature"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
+    }
   },
   {
-    "id": "chain-168",
-    "seed": "GOOSE",
+    "id": "chain-163",
+    "seed": "GECKO",
     "par": 8,
     "sample": [
-      "GOOSE",
+      "GECKO",
+      "OTTER",
+      "RODENT",
+      "TURTLE",
       "EAGLES",
-      "SPARROW",
-      "WORM",
-      "MULE",
-      "EAGLE",
-      "EARWIG",
-      "GROUPER",
-      "RACCOON"
+      "SHRIMP",
+      "PELICAN",
+      "NEWT",
+      "TROUT"
     ],
     "rule": {
       "id": "plain",
@@ -4126,40 +4030,19 @@ export default [
     "category": "animals"
   },
   {
-    "id": "chain-169",
-    "seed": "ABSOLUTE",
+    "id": "chain-164",
+    "seed": "THROW",
     "par": 8,
     "sample": [
-      "ABSOLUTE",
-      "ENTITLED",
-      "DEPEND",
-      "DRIVER",
-      "RESELLER",
-      "REGION",
-      "NATURAL",
-      "LICENSE",
-      "EXPERT"
-    ],
-    "rule": {
-      "id": "minlen6",
-      "label": "every word at least 6 letters",
-      "hint": "longer words only — 6 letters or more"
-    }
-  },
-  {
-    "id": "chain-170",
-    "seed": "LIVER",
-    "par": 8,
-    "sample": [
-      "LIVER",
-      "REACH",
-      "HAIR",
-      "RACE",
-      "EYEBROW",
+      "THROW",
       "WRIST",
       "TROT",
-      "THROW",
-      "WRENCH"
+      "TEETER",
+      "RACE",
+      "EYEBROW",
+      "WANDER",
+      "REACH",
+      "HURL"
     ],
     "rule": {
       "id": "contains_R",
@@ -4169,38 +4052,183 @@ export default [
     "category": "body"
   },
   {
-    "id": "chain-171",
-    "seed": "ISLANDS",
+    "id": "chain-165",
+    "seed": "LAUGHTER",
+    "par": 8,
+    "sample": [
+      "LAUGHTER",
+      "RUMSFELD",
+      "DIAPER",
+      "REPEAL",
+      "LANGUAGE",
+      "ENSEMBLE",
+      "EXEMPT",
+      "TOWARDS",
+      "SESSIONS"
+    ],
+    "rule": {
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
+    }
+  },
+  {
+    "id": "chain-166",
+    "seed": "BRAVO",
+    "par": 8,
+    "sample": [
+      "BRAVO",
+      "OVERLAY",
+      "YOURS",
+      "SHORTS",
+      "SEWER",
+      "RELATES",
+      "SHRUBS",
+      "STRIPE",
+      "ESCROW"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    }
+  },
+  {
+    "id": "chain-167",
+    "seed": "BALLOON",
+    "par": 8,
+    "sample": [
+      "BALLOON",
+      "NAURU",
+      "UTAH",
+      "HALE",
+      "EARTH",
+      "HANDS",
+      "STRAIGHT",
+      "TREAT",
+      "TRACEY"
+    ],
+    "rule": {
+      "id": "contains_A",
+      "label": "every word must contain \"A\"",
+      "hint": "each word has to include the letter A"
+    }
+  },
+  {
+    "id": "chain-168",
+    "seed": "HAIRED",
+    "par": 8,
+    "sample": [
+      "HAIRED",
+      "DRAWING",
+      "GARTNER",
+      "READILY",
+      "YARD",
+      "DESCRIBE",
+      "ERRORS",
+      "STRUGGLE",
+      "EXPLORE"
+    ],
+    "rule": {
+      "id": "contains_R",
+      "label": "every word must contain \"R\"",
+      "hint": "each word has to include the letter R"
+    }
+  },
+  {
+    "id": "chain-169",
+    "seed": "CONTACT",
+    "par": 8,
+    "sample": [
+      "CONTACT",
+      "THRICE",
+      "EQUIPPED",
+      "DOUBLES",
+      "STEEL",
+      "LAMAR",
+      "RAZOR",
+      "ROTOR",
+      "REVERSAL"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    }
+  },
+  {
+    "id": "chain-170",
+    "seed": "VANILLA",
     "par": 5,
     "sample": [
-      "ISLANDS",
-      "SANDBAR",
-      "RAPIDS",
-      "SAND",
-      "DELTA",
-      "ASPEN"
+      "VANILLA",
+      "APPLE",
+      "EGGPLANT",
+      "TOMATO",
+      "OATMEAL",
+      "LATTE"
     ],
     "rule": {
       "id": "contains_A",
       "label": "every word must contain \"A\"",
       "hint": "each word has to include the letter A"
     },
-    "category": "nature"
+    "category": "food"
+  },
+  {
+    "id": "chain-171",
+    "seed": "FLORIST",
+    "par": 8,
+    "sample": [
+      "FLORIST",
+      "TASTY",
+      "YOURS",
+      "START",
+      "TRANS",
+      "SURVIVAL",
+      "LAMBERT",
+      "TOUCHING",
+      "GERARD"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    }
   },
   {
     "id": "chain-172",
-    "seed": "CLIMB",
+    "seed": "UNLIKELY",
     "par": 8,
     "sample": [
-      "CLIMB",
-      "BRAIN",
-      "NECK",
-      "KNUCKLE",
+      "UNLIKELY",
+      "YIELDING",
+      "GROUNDS",
+      "SPINAL",
+      "LISTENER",
+      "RAPIDS",
+      "STEADY",
+      "YANKEES",
+      "SHAVING"
+    ],
+    "rule": {
+      "id": "minlen6",
+      "label": "every word at least 6 letters",
+      "hint": "longer words only — 6 letters or more"
+    }
+  },
+  {
+    "id": "chain-173",
+    "seed": "WOBBLE",
+    "par": 6,
+    "sample": [
+      "WOBBLE",
       "EYELID",
       "DASH",
-      "HAIR",
-      "ROLL",
-      "LIPS"
+      "HURL",
+      "LUNG",
+      "GRASP",
+      "PALM"
     ],
     "rule": {
       "id": "unique_end",
@@ -4210,83 +4238,81 @@ export default [
     "category": "body"
   },
   {
-    "id": "chain-173",
-    "seed": "BURRITO",
-    "par": 8,
-    "sample": [
-      "BURRITO",
-      "OATMEAL",
-      "LATTE",
-      "EGGPLANT",
-      "TURNIP",
-      "PEANUT",
-      "TOMATO",
-      "OYSTER",
-      "ROAST"
-    ],
-    "rule": {
-      "id": "contains_T",
-      "label": "every word must contain \"T\"",
-      "hint": "each word has to include the letter T"
-    },
-    "category": "food"
-  },
-  {
     "id": "chain-174",
-    "seed": "STORM",
+    "seed": "FOLKLORE",
     "par": 8,
     "sample": [
-      "STORM",
-      "MISTAKES",
-      "SEEKERS",
-      "SPORT",
-      "TARGETS",
-      "SCHOLAR",
-      "ROCKS",
-      "SAYS",
-      "SHERMAN"
+      "FOLKLORE",
+      "EXPENSE",
+      "ESTONIA",
+      "ARCHERY",
+      "YOUNGER",
+      "RECYCLED",
+      "DEMUX",
+      "XENICAL",
+      "LOWERING"
     ],
     "rule": {
-      "id": "contains_S",
-      "label": "every word must contain \"S\"",
-      "hint": "each word has to include the letter S"
+      "id": "contains_E",
+      "label": "every word must contain \"E\"",
+      "hint": "each word has to include the letter E"
     }
   },
   {
     "id": "chain-175",
-    "seed": "SOLUTION",
-    "par": 8,
+    "seed": "HIKING",
+    "par": 7,
     "sample": [
-      "SOLUTION",
-      "NEURAL",
-      "LYCOS",
-      "SAILING",
-      "GOLF",
-      "FABULOUS",
-      "SELECT",
-      "TITLED",
-      "DOUGLAS"
+      "HIKING",
+      "GROW",
+      "WHICH",
+      "HUSH",
+      "HANDEL",
+      "LESSER",
+      "RUMORS",
+      "SOLE"
     ],
     "rule": {
-      "id": "contains_L",
-      "label": "every word must contain \"L\"",
-      "hint": "each word has to include the letter L"
+      "id": "consonant_start",
+      "label": "words can't start with a vowel",
+      "hint": "every word must begin with a consonant"
     }
   },
   {
     "id": "chain-176",
-    "seed": "GRENADA",
+    "seed": "NEITHER",
     "par": 8,
     "sample": [
-      "GRENADA",
-      "AMOUNTS",
-      "SUNNY",
+      "NEITHER",
+      "REVIEW",
+      "WOLVES",
+      "SOCCER",
+      "RITUAL",
+      "LOLITA",
+      "ADVISORY",
+      "YEARLY",
+      "YEARBOOK"
+    ],
+    "rule": {
+      "id": "minlen5",
+      "label": "every word at least 5 letters",
+      "hint": "no short words — 5 letters or longer"
+    }
+  },
+  {
+    "id": "chain-177",
+    "seed": "MARGINAL",
+    "par": 8,
+    "sample": [
+      "MARGINAL",
+      "LIEN",
+      "NOBODY",
       "YOUNGER",
-      "RETURNED",
-      "DUNCAN",
-      "NEARBY",
-      "YUKON",
-      "NIRVANA"
+      "REGENT",
+      "TENDS",
+      "STONE",
+      "ENERGIES",
+      "SAMSON"
     ],
     "rule": {
       "id": "contains_N",
@@ -4295,86 +4321,65 @@ export default [
     }
   },
   {
-    "id": "chain-177",
-    "seed": "BROWNIE",
+    "id": "chain-178",
+    "seed": "LETTUCE",
     "par": 6,
     "sample": [
-      "BROWNIE",
-      "ESPRESSO",
-      "OMELET",
-      "TOMATO",
-      "ORANGE",
+      "LETTUCE",
       "EGGPLANT",
-      "THYME"
+      "TACO",
+      "OKRA",
+      "ALMOND",
+      "DOUGH",
+      "HONEY"
     ],
     "rule": {
-      "id": "minlen5",
-      "label": "every word at least 5 letters",
-      "hint": "no short words — 5 letters or longer"
+      "id": "unique_end",
+      "label": "no two words may end in the same letter",
+      "hint": "every word has to end in a letter no earlier word ended in"
     },
     "category": "food"
   },
   {
-    "id": "chain-178",
-    "seed": "ENTERING",
-    "par": 8,
-    "sample": [
-      "ENTERING",
-      "GRANT",
-      "TERROR",
-      "RECOVER",
-      "RURAL",
-      "LEXMARK",
-      "KATRINA",
-      "ANCHOR",
-      "REASONS"
-    ],
-    "rule": {
-      "id": "contains_R",
-      "label": "every word must contain \"R\"",
-      "hint": "each word has to include the letter R"
-    }
-  },
-  {
     "id": "chain-179",
-    "seed": "IMPORTED",
+    "seed": "APPENDIX",
     "par": 8,
     "sample": [
-      "IMPORTED",
-      "DRYER",
-      "RAISE",
-      "EXPORT",
-      "TOKEN",
-      "NORMAL",
-      "LAKES",
-      "SANTA",
-      "ASSUMING"
+      "APPENDIX",
+      "XENICAL",
+      "LONE",
+      "ENSURES",
+      "SINKING",
+      "GUINEA",
+      "AMEND",
+      "DUNCAN",
+      "NUCLEI"
     ],
     "rule": {
-      "id": "plain",
-      "label": "just chain — last letter to first",
-      "hint": "link the last letter of each word to the first of the next"
+      "id": "contains_N",
+      "label": "every word must contain \"N\"",
+      "hint": "each word has to include the letter N"
     }
   },
   {
     "id": "chain-180",
-    "seed": "CHAIRMAN",
+    "seed": "CASUAL",
     "par": 8,
     "sample": [
-      "CHAIRMAN",
-      "NEIGHBOR",
-      "RELEASED",
-      "DAVIDSON",
-      "NUMEROUS",
-      "SLEEPING",
-      "GRATEFUL",
-      "LISTINGS",
-      "SHOOTING"
+      "CASUAL",
+      "LAKES",
+      "SAPIENS",
+      "SERVE",
+      "ENDLESS",
+      "SUBMIT",
+      "TRANSFER",
+      "RECIPES",
+      "SERVINGS"
     ],
     "rule": {
-      "id": "ascending_len",
-      "label": "each word as long as the last, or longer",
-      "hint": "never get shorter — each word ≥ the previous word's length"
+      "id": "contains_S",
+      "label": "every word must contain \"S\"",
+      "hint": "each word has to include the letter S"
     }
   }
 ];

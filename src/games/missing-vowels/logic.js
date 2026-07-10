@@ -6,15 +6,18 @@
 
    Puzzles are precomputed at build time (scripts/gen-vowels.js): each is
    { id, theme, items: [{ clue, answer }] } where `clue` is the vowel-stripped
-   skeleton. A guess is accepted if it's a common word (shipped common-words dict)
+   skeleton. A guess is accepted if it's a common word (shipped wide-words dict)
    whose own skeleton matches the clue — so the authored answer isn't the ONLY
    solution; any common word with that consonant skeleton counts. */
 
 import { rotateDaily, dayNumberFromKey } from "../../lib/daily.js";
 import PUZZLES from "../../data/generated/vowels.js";
-import COMMON_WORDS from "../../data/generated/common-words.js";
+import WIDE_WORDS from "../../data/generated/wide-words.js";
 
-const DICT = new Set(COMMON_WORDS);
+// The wider 20k accept-set (scripts/gen-wide-words.js) — a guess counts if it's
+// in here and its skeleton matches the clue, so more valid everyday words are
+// accepted (not just the authored answer).
+const DICT = new Set(WIDE_WORDS);
 
 // "Mv" → 0x4d76.
 const VOWELS_SALT = 0x4d76;

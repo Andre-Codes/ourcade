@@ -6,15 +6,19 @@
 
    Puzzles are precomputed at build time (scripts/gen-chain.js): each is
    { id, seed, par, sample }. The rule is last-first: each new word must START with
-   the LAST letter of the previous word, be a common word (shipped common-words
-   dict), and not repeat one already used. `par` is a target chain length. */
+   the LAST letter of the previous word, be a common word (the shipped wide-words
+   dict — the 4–8 slice of common-20k), and not repeat one already used. `par` is
+   a target chain length. */
 
 import { rotateDaily, dayNumberFromKey } from "../../lib/daily.js";
 import PUZZLES, { categories as CATEGORIES } from "../../data/generated/chain.js";
-import COMMON_WORDS from "../../data/generated/common-words.js";
+import WIDE_WORDS from "../../data/generated/wide-words.js";
 import { ruleById } from "./rules.js";
 
-const DICT = new Set(COMMON_WORDS);
+// The wider shared accept-set: the 4–8-letter slice of the 20k frequency list
+// (scripts/gen-wide-words.js), also used by Laddergram / Missing Vowels. Not the
+// narrower common-words dict.
+const DICT = new Set(WIDE_WORDS);
 
 // The category record ({ label, words, set }) for a puzzle, or null on a plain
 // day. The Set is memoized per id so we build each accept-set only once.

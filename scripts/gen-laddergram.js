@@ -47,19 +47,23 @@ function mulberry32(a) {
 const rng = mulberry32(SEED);
 const randInt = (n) => Math.floor(rng() * n);
 
-// ── curated common-words dict, split by length (the runtime dict's source) ────
+// ── wider common-words dict, split by length (the runtime dict's source) ──────
+// Reads the SAME 20k list the runtime validates against (wide-words.js), so the
+// ladders/pars we build here match what the browser will accept.
 function loadCommonByLen() {
-  const file = path.join(WORDLIST_DIR, "common-10k.txt");
+  const file = path.join(WORDLIST_DIR, "common-20k.txt");
   if (!fs.existsSync(file)) {
     throw new Error(
-      "common-10k.txt not found in assets-src/wordlists — fetch " +
-        "google-10000-english-no-swears.txt into that path first."
+      "common-20k.txt not found in assets-src/wordlists — fetch " +
+        "https://raw.githubusercontent.com/first20hours/google-10000-english/master/20k.txt into that path first."
     );
   }
   const byLen = {};
   for (const raw of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     const w = raw.trim().toUpperCase();
-    if (!/^[A-Z]+$/.test(w)) continue;
+    // Match the runtime wide-words slice exactly (4–8 letters, A–Z only) so a
+    // rung the solver uses is always one the browser will accept.
+    if (w.length < 4 || w.length > 8 || !/^[A-Z]+$/.test(w)) continue;
     (byLen[w.length] ||= new Set()).add(w);
   }
   return byLen;
