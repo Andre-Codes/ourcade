@@ -205,7 +205,7 @@ export default function RankIt() {
                 <span className="rki-num">{i + 1}</span>
                 <span className="rki-word">{w}</span>
                 {locked ? (
-                  <span className="rki-mark">{mark === "exact" ? "✓" : "•"}</span>
+                  <span className="rki-mark">{mark === "exact" ? "✓" : mark === "near" ? "~" : "•"}</span>
                 ) : (
                   <span className="rki-handle" aria-hidden="true">
                     <button
@@ -269,13 +269,17 @@ const CSS = `
 .rki-row.is-drag{cursor:grabbing;background:#183049;border-color:#5ac8fa;
   box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:3;position:relative}
 .rki-row.is-exact{background:#12301f;border-color:#34c759}
-.rki-row.is-off{background:#301a1a;border-color:#ff6b6b}
+.rki-row.is-near{background:#302a12;border-color:#e0c341}
+.rki-row.is-far{background:#301a1a;border-color:#ff6b6b}
 .rki-num{font-family:'Press Start 2P',monospace;font-size:.72rem;color:#5ac8fa;min-width:20px;text-align:center}
 .rki-row.is-exact .rki-num{color:#34c759}
-.rki-row.is-off .rki-num{color:#ff8a8a}
+.rki-row.is-near .rki-num{color:#f2d65e}
+.rki-row.is-far .rki-num{color:#ff8a8a}
 .rki-word{flex:1;font-size:1.05rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
 .rki-mark{font-size:1rem;color:#8aa4c8}
 .rki-row.is-exact .rki-mark{color:#34c759}
+.rki-row.is-near .rki-mark{color:#f2d65e}
+.rki-row.is-far .rki-mark{color:#ff8a8a}
 .rki-handle{display:flex;flex-direction:column;gap:2px}
 .rki-chev{width:34px;height:22px;border:0;border-radius:6px;background:#20344a;color:#bcd3ee;
   font-size:.7rem;line-height:1;cursor:pointer;padding:0;touch-action:manipulation}

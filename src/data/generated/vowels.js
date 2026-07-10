@@ -94,6 +94,36 @@ export default [
   },
   {
     "id": "vowels-004",
+    "theme": "Animals",
+    "items": [
+      {
+        "clue": "LN",
+        "answer": "LION"
+      },
+      {
+        "clue": "BR",
+        "answer": "BEAR"
+      },
+      {
+        "clue": "WLF",
+        "answer": "WOLF"
+      },
+      {
+        "clue": "DR",
+        "answer": "DEER"
+      },
+      {
+        "clue": "GT",
+        "answer": "GOAT"
+      },
+      {
+        "clue": "SHP",
+        "answer": "SHEEP"
+      }
+    ]
+  },
+  {
+    "id": "vowels-005",
     "theme": "Weather",
     "items": [
       {
@@ -123,7 +153,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-005",
+    "id": "vowels-006",
+    "theme": "Weather",
+    "items": [
+      {
+        "clue": "RNBW",
+        "answer": "RAINBOW"
+      },
+      {
+        "clue": "SNW",
+        "answer": "SNOW"
+      },
+      {
+        "clue": "WND",
+        "answer": "WIND"
+      },
+      {
+        "clue": "RN",
+        "answer": "RAIN"
+      },
+      {
+        "clue": "CLMT",
+        "answer": "CLIMATE"
+      },
+      {
+        "clue": "SSN",
+        "answer": "SEASON"
+      }
+    ]
+  },
+  {
+    "id": "vowels-007",
     "theme": "Music",
     "items": [
       {
@@ -153,7 +213,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-006",
+    "id": "vowels-008",
+    "theme": "Music",
+    "items": [
+      {
+        "clue": "CNCRT",
+        "answer": "CONCERT"
+      },
+      {
+        "clue": "RCRD",
+        "answer": "RECORD"
+      },
+      {
+        "clue": "STR",
+        "answer": "STEREO"
+      },
+      {
+        "clue": "LYRCS",
+        "answer": "LYRICS"
+      },
+      {
+        "clue": "BND",
+        "answer": "BAND"
+      },
+      {
+        "clue": "SNG",
+        "answer": "SONG"
+      }
+    ]
+  },
+  {
+    "id": "vowels-009",
     "theme": "Sports",
     "items": [
       {
@@ -183,7 +273,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-007",
+    "id": "vowels-010",
+    "theme": "Sports",
+    "items": [
+      {
+        "clue": "RNNR",
+        "answer": "RUNNER"
+      },
+      {
+        "clue": "STDM",
+        "answer": "STADIUM"
+      },
+      {
+        "clue": "JRSY",
+        "answer": "JERSEY"
+      },
+      {
+        "clue": "CCH",
+        "answer": "COACH"
+      },
+      {
+        "clue": "PLYR",
+        "answer": "PLAYER"
+      },
+      {
+        "clue": "GLF",
+        "answer": "GOLF"
+      }
+    ]
+  },
+  {
+    "id": "vowels-011",
     "theme": "Space",
     "items": [
       {
@@ -213,7 +333,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-008",
+    "id": "vowels-012",
+    "theme": "Space",
+    "items": [
+      {
+        "clue": "STRN",
+        "answer": "SATURN"
+      },
+      {
+        "clue": "STR",
+        "answer": "STAR"
+      },
+      {
+        "clue": "MN",
+        "answer": "MOON"
+      },
+      {
+        "clue": "SLR",
+        "answer": "SOLAR"
+      },
+      {
+        "clue": "SPC",
+        "answer": "SPACE"
+      },
+      {
+        "clue": "NVRS",
+        "answer": "UNIVERSE"
+      }
+    ]
+  },
+  {
+    "id": "vowels-013",
     "theme": "School",
     "items": [
       {
@@ -243,7 +393,67 @@ export default [
     ]
   },
   {
-    "id": "vowels-009",
+    "id": "vowels-014",
+    "theme": "School",
+    "items": [
+      {
+        "clue": "HMWRK",
+        "answer": "HOMEWORK"
+      },
+      {
+        "clue": "SCNC",
+        "answer": "SCIENCE"
+      },
+      {
+        "clue": "HSTRY",
+        "answer": "HISTORY"
+      },
+      {
+        "clue": "GRD",
+        "answer": "GRADE"
+      },
+      {
+        "clue": "MRKR",
+        "answer": "MARKER"
+      },
+      {
+        "clue": "CLSS",
+        "answer": "CLASS"
+      }
+    ]
+  },
+  {
+    "id": "vowels-015",
+    "theme": "School",
+    "items": [
+      {
+        "clue": "XM",
+        "answer": "EXAM"
+      },
+      {
+        "clue": "STDY",
+        "answer": "STUDY"
+      },
+      {
+        "clue": "CLLG",
+        "answer": "COLLEGE"
+      },
+      {
+        "clue": "TXTBK",
+        "answer": "TEXTBOOK"
+      },
+      {
+        "clue": "DPLM",
+        "answer": "DIPLOMA"
+      },
+      {
+        "clue": "CMPS",
+        "answer": "CAMPUS"
+      }
+    ]
+  },
+  {
+    "id": "vowels-016",
     "theme": "Travel",
     "items": [
       {
@@ -267,19 +477,15 @@ export default [
         "answer": "CAMERA"
       },
       {
-        "clue": "MPS",
-        "answer": "MAPS"
+        "clue": "JRNY",
+        "answer": "JOURNEY"
       }
     ]
   },
   {
-    "id": "vowels-010",
+    "id": "vowels-017",
     "theme": "Travel",
     "items": [
-      {
-        "clue": "JRNY",
-        "answer": "JOURNEY"
-      },
       {
         "clue": "CRS",
         "answer": "CRUISE"
@@ -299,11 +505,15 @@ export default [
       {
         "clue": "BRDR",
         "answer": "BORDER"
+      },
+      {
+        "clue": "FLGHT",
+        "answer": "FLIGHT"
       }
     ]
   },
   {
-    "id": "vowels-011",
+    "id": "vowels-018",
     "theme": "OldWeb",
     "items": [
       {
@@ -333,21 +543,69 @@ export default [
     ]
   },
   {
-    "id": "vowels-012",
+    "id": "vowels-019",
+    "theme": "OldWeb",
+    "items": [
+      {
+        "clue": "BRWSR",
+        "answer": "BROWSER"
+      },
+      {
+        "clue": "BNNR",
+        "answer": "BANNER"
+      },
+      {
+        "clue": "MNTR",
+        "answer": "MONITOR"
+      },
+      {
+        "clue": "TBLT",
+        "answer": "TABLET"
+      },
+      {
+        "clue": "LPTP",
+        "answer": "LAPTOP"
+      },
+      {
+        "clue": "ML",
+        "answer": "EMAIL"
+      }
+    ]
+  },
+  {
+    "id": "vowels-020",
     "theme": "Nature",
     "items": [
       {
-        "clue": "GRDN",
-        "answer": "GARDEN"
+        "clue": "RVR",
+        "answer": "RIVER"
+      },
+      {
+        "clue": "FRST",
+        "answer": "FOREST"
+      },
+      {
+        "clue": "VLLY",
+        "answer": "VALLEY"
+      },
+      {
+        "clue": "STRM",
+        "answer": "STREAM"
       },
       {
         "clue": "FLWR",
         "answer": "FLOWER"
       },
       {
-        "clue": "FRST",
-        "answer": "FOREST"
-      },
+        "clue": "GRDN",
+        "answer": "GARDEN"
+      }
+    ]
+  },
+  {
+    "id": "vowels-021",
+    "theme": "Nature",
+    "items": [
       {
         "clue": "DSRT",
         "answer": "DESERT"
@@ -357,43 +615,55 @@ export default [
         "answer": "ISLAND"
       },
       {
-        "clue": "BRDG",
-        "answer": "BRIDGE"
+        "clue": "CNYN",
+        "answer": "CANYON"
+      },
+      {
+        "clue": "JNGL",
+        "answer": "JUNGLE"
+      },
+      {
+        "clue": "PRR",
+        "answer": "PRAIRIE"
+      },
+      {
+        "clue": "MNTN",
+        "answer": "MOUNTAIN"
       }
     ]
   },
   {
-    "id": "vowels-013",
+    "id": "vowels-022",
     "theme": "Nature",
     "items": [
       {
-        "clue": "CSTL",
-        "answer": "CASTLE"
+        "clue": "HLL",
+        "answer": "HILL"
       },
       {
-        "clue": "CNDL",
-        "answer": "CANDLE"
+        "clue": "LK",
+        "answer": "LAKE"
       },
       {
-        "clue": "MRRR",
-        "answer": "MIRROR"
+        "clue": "PND",
+        "answer": "POND"
       },
       {
-        "clue": "WNDW",
-        "answer": "WINDOW"
+        "clue": "CLFF",
+        "answer": "CLIFF"
       },
       {
-        "clue": "MRKT",
-        "answer": "MARKET"
+        "clue": "BLDR",
+        "answer": "BOULDER"
       },
       {
-        "clue": "VLLY",
-        "answer": "VALLEY"
+        "clue": "WLDLF",
+        "answer": "WILDLIFE"
       }
     ]
   },
   {
-    "id": "vowels-014",
+    "id": "vowels-023",
     "theme": "Jobs",
     "items": [
       {
@@ -423,7 +693,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-015",
+    "id": "vowels-024",
+    "theme": "Jobs",
+    "items": [
+      {
+        "clue": "BKR",
+        "answer": "BAKER"
+      },
+      {
+        "clue": "PLT",
+        "answer": "PILOT"
+      },
+      {
+        "clue": "DRVR",
+        "answer": "DRIVER"
+      },
+      {
+        "clue": "CHF",
+        "answer": "CHEF"
+      },
+      {
+        "clue": "NGNR",
+        "answer": "ENGINEER"
+      },
+      {
+        "clue": "JDG",
+        "answer": "JUDGE"
+      }
+    ]
+  },
+  {
+    "id": "vowels-025",
     "theme": "Seasons",
     "items": [
       {
@@ -443,47 +743,17 @@ export default [
         "answer": "AUTUMN"
       },
       {
-        "clue": "SLVR",
-        "answer": "SILVER"
-      },
-      {
-        "clue": "GLDN",
-        "answer": "GOLDEN"
-      }
-    ]
-  },
-  {
-    "id": "vowels-016",
-    "theme": "Seasons",
-    "items": [
-      {
-        "clue": "PRPL",
-        "answer": "PURPLE"
-      },
-      {
-        "clue": "RNG",
-        "answer": "ORANGE"
-      },
-      {
-        "clue": "YLLW",
-        "answer": "YELLOW"
-      },
-      {
-        "clue": "SHDW",
-        "answer": "SHADOW"
+        "clue": "HRVST",
+        "answer": "HARVEST"
       },
       {
         "clue": "SNST",
         "answer": "SUNSET"
-      },
-      {
-        "clue": "SNRS",
-        "answer": "SUNRISE"
       }
     ]
   },
   {
-    "id": "vowels-017",
+    "id": "vowels-026",
     "theme": "Food",
     "items": [
       {
@@ -513,7 +783,37 @@ export default [
     ]
   },
   {
-    "id": "vowels-018",
+    "id": "vowels-027",
+    "theme": "Food",
+    "items": [
+      {
+        "clue": "PPPR",
+        "answer": "PEPPER"
+      },
+      {
+        "clue": "DNNR",
+        "answer": "DINNER"
+      },
+      {
+        "clue": "CK",
+        "answer": "COOKIE"
+      },
+      {
+        "clue": "BRD",
+        "answer": "BREAD"
+      },
+      {
+        "clue": "SLD",
+        "answer": "SALAD"
+      },
+      {
+        "clue": "PZZ",
+        "answer": "PIZZA"
+      }
+    ]
+  },
+  {
+    "id": "vowels-028",
     "theme": "Clothes",
     "items": [
       {
@@ -529,46 +829,136 @@ export default [
         "answer": "GLOVES"
       },
       {
-        "clue": "NGN",
-        "answer": "ENGINE"
-      },
-      {
-        "clue": "WHL",
-        "answer": "WHEEL"
-      },
-      {
-        "clue": "RCKT",
-        "answer": "ROCKET"
-      }
-    ]
-  },
-  {
-    "id": "vowels-019",
-    "theme": "Clothes",
-    "items": [
-      {
-        "clue": "PLNT",
-        "answer": "PLANET"
-      },
-      {
-        "clue": "GTR",
-        "answer": "GUITAR"
-      },
-      {
-        "clue": "PCKT",
-        "answer": "POCKET"
-      },
-      {
-        "clue": "BTTN",
-        "answer": "BUTTON"
+        "clue": "WLLT",
+        "answer": "WALLET"
       },
       {
         "clue": "CLLR",
         "answer": "COLLAR"
       },
       {
-        "clue": "RBBN",
-        "answer": "RIBBON"
+        "clue": "BTTN",
+        "answer": "BUTTON"
+      }
+    ]
+  },
+  {
+    "id": "vowels-029",
+    "theme": "Clothes",
+    "items": [
+      {
+        "clue": "PCKT",
+        "answer": "POCKET"
+      },
+      {
+        "clue": "SHRT",
+        "answer": "SHIRT"
+      },
+      {
+        "clue": "PNTS",
+        "answer": "PANTS"
+      },
+      {
+        "clue": "DRSS",
+        "answer": "DRESS"
+      },
+      {
+        "clue": "SCKS",
+        "answer": "SOCKS"
+      },
+      {
+        "clue": "BTS",
+        "answer": "BOOTS"
+      }
+    ]
+  },
+  {
+    "id": "vowels-030",
+    "theme": "Body",
+    "items": [
+      {
+        "clue": "FNGR",
+        "answer": "FINGER"
+      },
+      {
+        "clue": "SHLDR",
+        "answer": "SHOULDER"
+      },
+      {
+        "clue": "WRST",
+        "answer": "WRIST"
+      },
+      {
+        "clue": "THMB",
+        "answer": "THUMB"
+      },
+      {
+        "clue": "THRT",
+        "answer": "THROAT"
+      },
+      {
+        "clue": "STMCH",
+        "answer": "STOMACH"
+      }
+    ]
+  },
+  {
+    "id": "vowels-031",
+    "theme": "Body",
+    "items": [
+      {
+        "clue": "MSCL",
+        "answer": "MUSCLE"
+      },
+      {
+        "clue": "KDNY",
+        "answer": "KIDNEY"
+      },
+      {
+        "clue": "SPN",
+        "answer": "SPINE"
+      },
+      {
+        "clue": "TNG",
+        "answer": "TONGUE"
+      },
+      {
+        "clue": "KN",
+        "answer": "KNEE"
+      },
+      {
+        "clue": "CHST",
+        "answer": "CHEST"
+      }
+    ]
+  },
+  {
+    "id": "vowels-032",
+    "theme": "Colors",
+    "items": [
+      {
+        "clue": "PRPL",
+        "answer": "PURPLE"
+      },
+      {
+        "clue": "RNG",
+        "answer": "ORANGE"
+      },
+      {
+        "clue": "YLLW",
+        "answer": "YELLOW"
+      },
+      {
+        "clue": "SLVR",
+        "answer": "SILVER"
+      },
+      {
+        "clue": "GLDN",
+        "answer": "GOLDEN"
+      },
+      {
+        "clue": "BRWN",
+        "answer": "BROWN"
       }
     ]
   }

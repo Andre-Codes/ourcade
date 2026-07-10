@@ -107,6 +107,19 @@ export default function Spelldown() {
   // Persist per-day progress whenever it changes.
   useEffect(() => { lsSetJSON(STATE_KEY, state); }, [state]);
 
+  // Keep a finger drag that starts on the letter ring from scroll/rubber-banding
+  // the page (a tap that wanders shouldn't pan). Scoped to the RING only — the
+  // rest of the page (found list, footer) must still scroll. Mirrors Game2048's
+  // non-passive touchmove guard, but not the whole-page touch-action:none.
+  const ringRef = useRef(null);
+  useEffect(() => {
+    const node = ringRef.current;
+    if (!node) return undefined;
+    const stop = (e) => e.preventDefault();
+    node.addEventListener("touchmove", stop, { passive: false });
+    return () => node.removeEventListener("touchmove", stop);
+  }, []);
+
   // Keep the leaderboard's "most words" in step with the found count (submit only
   // when it grows; the hook itself no-ops for anon users and worse scores).
   useEffect(() => {
@@ -136,10 +149,15 @@ export default function Spelldown() {
     }
   }, [done]);
 
-  const flash = useCallback((msg) => {
+  // Show a toast. Shake is OPT-IN (shake=true) — it fires only on genuinely
+  // invalid input, not on accepted words, pangrams, or "already found" (all of
+  // which are valid words the player shouldn't be scolded for with a shake).
+  const flash = useCallback((msg, shakeIt = false) => {
     setToast(msg);
-    setShake(true);
-    setTimeout(() => setShake(false), 380);
+    if (shakeIt) {
+      setShake(true);
+      setTimeout(() => setShake(false), 380);
+    }
     setTimeout(() => setToast(null), 1300);
   }, []);
 
@@ -148,7 +166,9 @@ export default function Spelldown() {
     if (!word) return;
     const verdict = judge(word, board, state.found);
     if (verdict !== "ok") {
-      flash(TOAST[verdict] || "nope");
+      // Shake for truly invalid entries; "already found" is a valid word, so it
+      // toasts without a shake.
+      flash(TOAST[verdict] || "nope", verdict !== "already");
       if (verdict !== "already") setEntry("");
       return;
     }
@@ -302,7 +322,11 @@ export default function Spelldown() {
 
         {/* letter ring: center + 6 outer. The toast floats UP over the ring (an
             absolutely-positioned child) so notifications never shove the UI down. */}
-        <div className={`spd-ring${flashPangram ? " is-pangram" : ""}`}>
+        <div
+          ref={ringRef}
+          className={`spd-ring${flashPangram ? " is-pangram" : ""}`}
+          style={{ touchAction: "none" }}
+        >
           {toast && <div className="spd-toast">{toast}</div>}
           <button type="button" className="spd-hex is-center" onClick={() => press(board.center)}>
             {board.center}
@@ -384,7 +408,8 @@ export default function Spelldown() {
 const CSS = `
 .spd-app{min-height:100svh;background:radial-gradient(120% 120% at 50% 0%,#1a1606 0%,#0b0a05 60%);
   color:#fdf6e3;display:flex;flex-direction:column;align-items:center;gap:12px;
-  padding:60px 12px 28px;font-family:'Inter',system-ui,sans-serif;box-sizing:border-box}
+  padding:60px 12px 28px;font-family:'Inter',system-ui,sans-serif;box-sizing:border-box;
+  overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
 .spd-head{text-align:center}
 .spd-title{margin:0;font-family:'Press Start 2P','Black Ops One',monospace;font-size:1.05rem;
   letter-spacing:.04em;color:#ffd45e;text-shadow:0 0 18px rgba(255,212,94,.4)}
@@ -394,7 +419,7 @@ const CSS = `
 .spd-longest b{color:#ffd45e;letter-spacing:.03em}
 
 /* completion end card + celebration */
-.spd-endcard{position:relative;overflow:hidden;width:100%;max-width:420px;margin:2px 0 4px;
+.spd-endcard{position:relative;overflow:hidden;width:100%;max-width:340px;margin:2px 0 4px;
   background:linear-gradient(160deg,#2a2410,#16130a);border:1px solid #c9a227;border-radius:14px;
   padding:18px 16px 16px;text-align:center;box-shadow:0 0 26px rgba(201,162,39,.28)}
 .spd-endcard.is-celebrating{animation:spdEndPop .5s ease-out}
