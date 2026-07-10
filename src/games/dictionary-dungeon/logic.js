@@ -23,7 +23,14 @@ import {
 import { isWord, rarityTier, commonRank } from "./dict.js";
 import { getRule } from "./rules.js";
 import { resolveWordEffect, effectCategoryOf } from "./effects.js";
-import { FIRST_WORD_TITLES, firstWordOmen, sequenceBadge } from "./titles.js";
+import {
+  FIRST_WORD_TITLES,
+  firstWordOmen,
+  sequenceBadge,
+  ALL_TITLES,
+  ALL_OMENS,
+  ALL_BADGES,
+} from "./titles.js";
 import {
   LEVELS,
   ENEMIES,
@@ -43,12 +50,26 @@ import {
 // their display metadata without importing pools.js directly.
 export { RELICS, RELIC_BY_ID, SCROLLS, SCROLL_BY_ID };
 
+// Re-exported so the title screen can show the full titles/omens/badges catalog
+// (with locked "???" entries) WITHOUT statically importing titles.js — which
+// pulls the big dictionary. The cabinet only reads these once `logic` has loaded.
+export { ALL_TITLES, ALL_OMENS, ALL_BADGES };
+
 const DUNGEON_SALT = 0x4444; // "DD" — independent daily rotation order
 const EPOCH_KEY = "2026-06-01"; // anchors the small human "Dungeon #N"
 
 export const START_HEARTS = 5;
 export const START_COINS = 0;
 const RARE_LETTERS = new Set(["J", "Q", "X", "Z"]);
+
+// ── gibberish penalty ─────────────────────────────────────────────────────────
+// "Sticks and stones…" — here, nonsense FEEDS the enemy. A gibberish word (fails
+// the dictionary) played while a live enemy/boss is present heals it +1 HP (never
+// above its max), so spamming junk is actively bad. Capped per room so a fed
+// enemy can never become unkillable (the auto-solver never types gibberish, so
+// the solvability gate is unaffected — the cap is purely to keep real play fair).
+const GIBBERISH_HEAL = 1;
+const GIBBERISH_CAP = 3; // max HP an enemy can regain from gibberish per room
 
 // ── blocking ──────────────────────────────────────────────────────────────────
 // A defense-category word (shield/parry/block/…) raises a BLOCK that negates the
@@ -125,10 +146,11 @@ function assembleRooms(level, levelIdx, dayKey, s) {
   let merchants = 0;
   let events = 0;
   const canExtra = levelIdx >= 1;
-  // Merchant frequency: a deterministic per-level ~42% intent (over the ~5
-  // eligible levels ⇒ ≈2 merchants/run, so coins matter). Placed BEFORE the fill
-  // loop and capped at one, so a level can never exceed a single merchant.
-  if (canExtra && s.rand() < 0.42 && types.length < n) {
+  // Merchant frequency: a deterministic per-level ~70% intent (over the ~5
+  // eligible levels ⇒ most runs see a merchant on most floors, so the coins you
+  // earn per word actually get spent). Placed BEFORE the fill loop and capped at
+  // one, so a level can never exceed a single merchant.
+  if (canExtra && s.rand() < 0.7 && types.length < n) {
     types.push("merchant");
     merchants++;
   }
@@ -145,6 +167,16 @@ function assembleRooms(level, levelIdx, dayKey, s) {
     else types.push("gate");
   }
   const order = s.shuffle(types);
+
+  // The FIRST room of every level (and so the very first room of the whole run)
+  // must be a real WORD room — never a treasure/merchant/event as the opener. A
+  // gate + a monster are always in the pool, so a word room always exists to swap
+  // in. This runs BEFORE rule assignment (which keys off position 0's opener).
+  const WORD_ROOMS = new Set(["gate", "monster", "trap"]);
+  if (!WORD_ROOMS.has(order[0])) {
+    const j = order.findIndex((t) => WORD_ROOMS.has(t));
+    if (j > 0) [order[0], order[j]] = [order[j], order[0]];
+  }
 
   // Assign rules so EARLIER rooms are easier and LATER rooms harder (and later
   // LEVELS skew harder overall). We only REORDER which of this level's already-
@@ -287,6 +319,7 @@ export function buildRun(dayKey) {
     // per-level flags for relic once-per-level effects
     levelFlags: {},
     roomFails: 0, // wrong-word count in the CURRENT room (rule-fail penalty)
+    gibberishFed: 0, // HP the current enemy has regained from gibberish this room
     famished: false, // set while a food-sealing enemy is alive in this room
     blockCooldown: 0, // turns until a defense-word BLOCK can be raised again
     over: false,
@@ -497,6 +530,17 @@ function rarityBonus(tier) {
   return tier === "goblin" ? 4 : tier === "obscure" ? 2 : tier === "familiar" ? 1 : 0;
 }
 
+// Coins earned for an ACCEPTED word: length + rarity, so word quality (not just
+// clearing rooms) drives the run's economy. A short common word is worth a coin
+// or two; a long/rare word pays real money. Not scaled by depth — the merchant
+// prices aren't scaled either, so a good vocabulary is always the way to afford
+// things. (Clears still grant a token bonus in awardClear.)
+function coinsForWord(w, tier) {
+  let c = Math.floor(w.length / 2); // 4→2, 6→3, 8→4, 10→5
+  c += tier === "goblin" ? 4 : tier === "obscure" ? 2 : tier === "familiar" ? 1 : 0;
+  return c;
+}
+
 // Apply owned-relic modifiers to a computed hit. Mutates `parts` (a list of
 // {label, amount}) and returns extra {heal, coins}. `state` used for
 // once-per-level flags.
@@ -584,7 +628,10 @@ export function resolveTurn(state, rawWord, seedOverride) {
   // 1) real word?
   if (!isWord(w)) {
     out.reason = "invalid";
-    out.logLines.push(`> ${w || "(nothing)"} — ${flav("invalid")}`);
+    // Gibberish penalty: if a LIVE enemy/boss is present, it feasts on the
+    // nonsense and gains HP (capped per room). Non-combat rooms just whiff.
+    const fed = feedGibberish(state, target, w, out, flav);
+    if (!fed) out.logLines.push(`> ${w || "(nothing)"} — ${flav("invalid")}`);
     return out;
   }
 
@@ -727,7 +774,9 @@ export function resolveTurn(state, rawWord, seedOverride) {
     state.hearts = Math.min(state.maxHearts, state.hearts + heal);
     out.logLines.push(`> You recover ${heal} heart${heal === 1 ? "" : "s"}. (❤ ${state.hearts})`);
   }
-  const coinGain = (effect?.gold || 0) + relicExtra.coins;
+  // Coins are primarily earned per accepted word (length + rarity), plus any
+  // treasure-word gold and coin-relic bonuses. This is the main coin source.
+  const coinGain = coinsForWord(w, tier) + (effect?.gold || 0) + relicExtra.coins;
   if (coinGain > 0) {
     state.coins += coinGain;
     out.logLines.push(`> +${coinGain} coins. (🪙 ${state.coins})`);
@@ -790,6 +839,9 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
     out.logLines.push(`> ${damage} damage. (${target.name}: ${room.enemyHP}/${room.enemyMaxHP})`);
     if (room.enemyHP <= 0) {
       out.logLines.push(`> ${flav("enemyDown")}`);
+      // Slain-enemy identity for the cabinet's "defeated" card (captured before
+      // advanceRoom moves us to the next target).
+      out.defeated = { name: target.name, emoji: target.emoji, kind: target.kind };
       awardClear(state, out);
       advanceRoom(state, out);
       out.cleared = true;
@@ -812,6 +864,9 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
       } else {
         // boss defeated
         out.logLines.push(`> ${boss.victory}`);
+        // Only a FINAL boss kill sets `defeated` (a phase transition does not) —
+        // the cabinet shows the card for real kills, never mid-boss shifts.
+        out.defeated = { name: target.name, emoji: target.emoji, kind: "boss" };
         awardClear(state, out, /*boss*/ true);
         advanceRoom(state, out);
         out.cleared = true;
@@ -826,6 +881,46 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
     advanceRoom(state, out);
     out.cleared = true;
   }
+}
+
+// Gibberish penalty: a non-word played against a LIVE enemy/boss feeds it +1 HP
+// (clamped to its max), capped at GIBBERISH_CAP per room. Emits a "⚠"-prefixed
+// feast line (the cabinet colorizes it). Returns true if it fed (so the caller
+// skips the generic "not a word" line), false for empty input or no live enemy.
+function feedGibberish(state, target, w, out, flav) {
+  if (!w) return false; // empty input isn't gibberish — just a no-op
+  const live = target && (target.kind === "monster" || target.kind === "trap" || target.kind === "boss");
+  if (!live) return false;
+  const name = target.name;
+  if ((state.gibberishFed || 0) >= GIBBERISH_CAP) {
+    out.logLines.push(`> ⚠ ${flav("gibberishFull").replace(/\{NAME\}/g, name)}`);
+    return true;
+  }
+  // Heal the correct HP pool, clamped to its max.
+  let healed = false;
+  if (target.kind === "boss") {
+    const boss = currentBoss(state);
+    const phaseMax = bossPhaseMaxHP(state, boss, state.bossPhase);
+    const cur = state.bossHP ?? phaseMax;
+    if (cur < phaseMax) {
+      state.bossHP = Math.min(phaseMax, cur + GIBBERISH_HEAL);
+      healed = true;
+    }
+  } else {
+    const room = currentRoom(state);
+    if (room && room.enemyHP < room.enemyMaxHP) {
+      room.enemyHP = Math.min(room.enemyMaxHP, room.enemyHP + GIBBERISH_HEAL);
+      healed = true;
+    }
+  }
+  if (!healed) {
+    // Already at full HP — the feast can't add more, but it's still nonsense.
+    out.logLines.push(`> ⚠ ${flav("gibberishFull").replace(/\{NAME\}/g, name)}`);
+    return true;
+  }
+  state.gibberishFed = (state.gibberishFed || 0) + 1;
+  out.logLines.push(`> ⚠ ${flav("gibberish").replace(/\{NAME\}/g, name)} (${name} +${GIBBERISH_HEAL} HP)`);
+  return true;
 }
 
 // A failed word may be forgiven by a relic (once/level) or a queued scroll.
@@ -907,8 +1002,11 @@ function applyStartingSecrets(state, w, out) {
   }
 }
 
+// Coins now come mostly from played words (coinsForWord). A cleared room grants
+// only a small token bonus so the run total varies with how well you spell, not
+// just how many rooms you clear. Coin relics still add their bonus on top.
 function awardClear(state, out, boss = false) {
-  let coins = boss ? 8 : 3;
+  let coins = boss ? 3 : 1;
   if (state.relics.includes("coin-purse")) coins += 3;
   if (state.relics.includes("lucky-coin")) coins += 5;
   state.coins += coins;
@@ -932,6 +1030,7 @@ function advanceRoom(state, out) {
   const lvl = currentLevel(state);
   state.prevWord = null;
   state.roomFails = 0;
+  state.gibberishFed = 0; // the enemy's gibberish-feast tally resets each room
   // A raised block and its cooldown don't carry between rooms — each fight is
   // fresh (you can raise a block on the first turn of the next enemy).
   delete state.pending.blockNext;
@@ -1341,6 +1440,7 @@ export function hydrateGame(saved) {
   // Backfill fields that may be absent in an older blob.
   if (!Array.isArray(s.used)) s.used = (s.words || []).map((r) => r.word);
   if (typeof s.roomFails !== "number") s.roomFails = 0;
+  if (typeof s.gibberishFed !== "number") s.gibberishFed = 0;
   if (typeof s.famished !== "boolean") s.famished = false;
   if (s.title === undefined) s.title = null;
   if (!Array.isArray(s.badges)) s.badges = [];

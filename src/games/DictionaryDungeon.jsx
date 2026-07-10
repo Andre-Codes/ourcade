@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { todayKey } from "../lib/daily.js";
-import { lsGetJSON, lsSetJSON, lsRemove } from "../lib/store.js";
+import {
+  lsGetJSON,
+  lsSetJSON,
+  lsRemove,
+  getDungeonDiscoveries,
+  recordDungeonDiscovery,
+} from "../lib/store.js";
 import { useArcadeScore } from "../lib/scores.js";
 import { useArcadeBackButton } from "../arcadeChrome.js";
 import { useQuitConfirm } from "../lib/useQuitConfirm.js";
@@ -49,6 +55,7 @@ export default function DictionaryDungeon() {
   const [screen, setScreen] = useState("title"); // title | play | over
   const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
+  const [defeated, setDefeated] = useState(null); // "you slew X" card { name, emoji, kind }
   const rootRef = useRef(null);
   const logRef = useRef(null);
   const revealSig = useRef(null); // last-shown encounter signature (dedupe reveals)
@@ -212,11 +219,24 @@ export default function DictionaryDungeon() {
       setInput("");
       setHitFx(null);
       setReveal(null);
+      setDefeated(null);
       revealSig.current = null; // let the first room re-trigger a level reveal
       setScreen("play");
     },
     [logic, day]
   );
+
+  // Persist any titles/omens/badges the run has earned into the cross-run
+  // collection (idempotent — re-recording a known one is a no-op). Titles record
+  // by their display string; omens/badges by their NAME (split by kind), matching
+  // the ALL_* catalogs. Called after every accepted turn.
+  const persistDiscoveries = useCallback((st) => {
+    if (!st) return;
+    if (st.title?.title) recordDungeonDiscovery("titles", st.title.title);
+    for (const b of st.badges || []) {
+      recordDungeonDiscovery(b.kind === "omen" ? "omens" : "badges", b.name);
+    }
+  }, []);
 
   const onSubmit = useCallback(
     (e) => {
@@ -232,6 +252,14 @@ export default function DictionaryDungeon() {
       const working = structuredClone(state);
       const res = logic.resolveTurn(working, word);
       setInput("");
+      if (res.accepted) persistDiscoveries(working); // collect earned titles/omens/badges
+
+      // A slain enemy/boss (non-terminal) pops a "defeated" card the player taps
+      // to continue. A boss kill that ENDS the run (canDescend/over) goes straight
+      // to the descend/over flow — no card there (avoids stacked overlays). The
+      // card is scheduled AFTER the paced resolution lines land so it reads in
+      // order: hit → "it crumbles" → Defeated card.
+      const showDefeated = res.defeated && !working.canDescend && !working.over;
 
       // A kill or boss-phase change should READ, not flash by. Split the log so
       // the hit + damage lines land immediately (the HP bar drains, the enemy
@@ -258,6 +286,10 @@ export default function DictionaryDungeon() {
           );
         }
         fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
+        // Pop the defeated card once the resolution flavor has had a beat to read.
+        if (showDefeated) {
+          fxTimers.current.push(window.setTimeout(() => setDefeated(res.defeated), 720));
+        }
       } else {
         setState(working);
         setLog((prev) => appendLog(prev, res.logLines));
@@ -265,6 +297,7 @@ export default function DictionaryDungeon() {
           setHitFx("hit");
           fxTimers.current.push(window.setTimeout(() => setHitFx(null), 260));
         }
+        if (showDefeated) setDefeated(res.defeated); // (unpaced kill — rare, be safe)
       }
 
       if (!res.accepted) {
@@ -281,7 +314,7 @@ export default function DictionaryDungeon() {
         fxTimers.current.push(window.setTimeout(() => finishRun(working), paced ? 950 : 650));
       }
     },
-    [logic, state, input, flash]
+    [logic, state, input, flash, persistDiscoveries]
   );
 
   // On-screen keyboard: feed key taps into the same input the form uses. Letters
@@ -453,7 +486,12 @@ export default function DictionaryDungeon() {
           logRef={logRef}
         />
       )}
-      {screen === "play" && state && reveal && !state.canDescend && (
+      {/* The defeated card takes precedence over the next room's reveal, so the
+          beat reads: kill → "X is defeated!" (tap) → "you've encountered a…" (tap). */}
+      {screen === "play" && state && defeated && (
+        <Defeated defeated={defeated} onDismiss={() => setDefeated(null)} />
+      )}
+      {screen === "play" && state && reveal && !defeated && !state.canDescend && (
         <Reveal reveal={reveal} onDismiss={dismissReveal} />
       )}
       {screen === "play" && state && state.canDescend && !state.over && (
@@ -483,6 +521,7 @@ function Title({ logic, day, onStart }) {
       <div className="dd-crest">📖</div>
       <h1 className="dd-name">Dictionary Dungeon</h1>
       <p className="dd-tag">A text roguelike where language is the weapon.</p>
+      <p className="dd-quip">Sticks and stones may break your bones — but down here, it's words that hurt.</p>
       <div className="dd-daily-card">
         <div className="dd-daily-num">Dungeon #{n}</div>
         <div className="dd-daily-sub">Same run for everyone today · resets tomorrow</div>
@@ -498,8 +537,82 @@ function Title({ logic, day, onStart }) {
         <li>Longer, rarer words hit harder. Some words have hidden power.</li>
         <li>A ⚔️ word cuts flesh; 🔥 burns; ✝️ smites the undead. Match your word to the foe.</li>
         <li>A 🛡️ word (SHIELD, PARRY, BLOCK…) turns aside the next blow — then needs a few turns to ready again.</li>
+        <li>Choose your words wisely — each word is spent once per run. A truly great word wasted on a rat is one you won't have for the Lich.</li>
+        <li>⚠ Nonsense feeds the enemy: a gibberish word heals whatever you're fighting. Real words only.</li>
         <li>Lose all ❤ and the run ends. Clear the Lich… then descend deeper.</li>
       </ul>
+      <Collection logic={logic} />
+    </div>
+  );
+}
+
+// ── collection (persistent titles/omens/secrets, with locked "???" entries) ────
+// A moreish gallery on the title screen: everything the player has ever earned
+// across runs, shown next to the ones still locked (rendered as "???" with a
+// vague hint) — so completion is legible without spelling out how to get each.
+// Reads the local store once; the ALL_* catalogs come from the (already-loaded)
+// logic module so this doesn't statically pull the big dictionary.
+function Collection({ logic }) {
+  const [open, setOpen] = useState(false);
+  const groups = useMemo(() => {
+    const found = getDungeonDiscoveries();
+    const mk = (catalog, foundIds) => {
+      const set = new Set(foundIds);
+      // Unique by id, keep catalog order; earned first, then locked.
+      const seen = new Set();
+      const items = [];
+      for (const e of catalog || []) {
+        if (seen.has(e.id)) continue;
+        seen.add(e.id);
+        items.push({ ...e, unlocked: set.has(e.id) });
+      }
+      items.sort((a, b) => (a.unlocked === b.unlocked ? 0 : a.unlocked ? -1 : 1));
+      const count = items.filter((i) => i.unlocked).length;
+      return { items, count, total: items.length };
+    };
+    return {
+      titles: mk(logic.ALL_TITLES, found.titles),
+      omens: mk(logic.ALL_OMENS, found.omens),
+      badges: mk(logic.ALL_BADGES, found.badges),
+    };
+  }, [logic]);
+
+  const totalFound = groups.titles.count + groups.omens.count + groups.badges.count;
+  const totalAll = groups.titles.total + groups.omens.total + groups.badges.total;
+
+  return (
+    <div className="dd-collection">
+      <button className="dd-collection-toggle" onClick={() => setOpen((o) => !o)}>
+        {open ? "▾" : "▸"} Titles &amp; Omens Discovered
+        <span className="dd-collection-tally">{totalFound} / {totalAll}</span>
+      </button>
+      {open && (
+        <div className="dd-collection-body">
+          <CollectionGroup label="Titles" group={groups.titles} />
+          <CollectionGroup label="Omens" group={groups.omens} />
+          <CollectionGroup label="Secrets" group={groups.badges} />
+          <p className="dd-collection-foot">Some are earned by the first word (or words) you speak. Keep experimenting…</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CollectionGroup({ label, group }) {
+  return (
+    <div className="dd-collection-group">
+      <div className="dd-collection-head">
+        {label} <span className="dd-collection-tally">{group.count} / {group.total}</span>
+      </div>
+      <div className="dd-collection-chips">
+        {group.items.map((it) =>
+          it.unlocked ? (
+            <span key={it.id} className="dd-over-relic dd-over-badge" title={it.hint || ""}>✦ {it.name}</span>
+          ) : (
+            <span key={it.id} className="dd-over-relic dd-locked" title={it.hint || "Undiscovered"}>? ? ?</span>
+          )
+        )}
+      </div>
     </div>
   );
 }
@@ -699,6 +812,9 @@ function renderLogLine(line) {
   if (text === LOG_DIVIDER) return <hr className="dd-log-div" />;
   // The whole-line secret/title styling is simplest handled up front.
   if (/^> ✦/.test(text)) return <span className="dd-log-secret">{text}</span>;
+  // Gibberish-feast lines (emitted with a "⚠" prefix): the whole line reads as a
+  // bad-for-you warning (amber), so the "+N HP" going to the enemy stands out.
+  if (/^> ⚠/.test(text)) return <span className="dd-log-gibberish">{text}</span>;
   const out = [];
   let last = 0;
   let m;
@@ -790,6 +906,28 @@ function Reveal({ reveal, onDismiss }) {
             {reveal.intent && <div className="dd-reveal-intent">Intent: {reveal.intent}</div>}
           </>
         )}
+        <button className="dd-btn dd-btn-primary dd-reveal-go" onClick={onDismiss}>
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── defeated (a slain enemy/boss "you won this fight" beat) ────────────────────
+// Pops after a kill and PERSISTS until the player taps Continue (tapping the
+// backdrop does nothing). Reuses the reveal overlay/card shell; a small accent
+// class tints it as a victory. The next room's Reveal is suppressed until this
+// is dismissed (see the overlay stack), so the two cards read in sequence.
+function Defeated({ defeated, onDismiss }) {
+  const isBoss = defeated.kind === "boss";
+  return (
+    <div className="dd-reveal-overlay">
+      <div className="dd-reveal-card dd-reveal-defeated">
+        <div className="dd-reveal-kicker">{isBoss ? "Boss defeated" : "Enemy defeated"}</div>
+        <div className="dd-reveal-emoji dd-defeated-emoji">{defeated.emoji}</div>
+        <div className="dd-reveal-name">{defeated.name}</div>
+        <div className="dd-reveal-tone">{isBoss ? "The floor is yours." : "It falls. The way opens."}</div>
         <button className="dd-btn dd-btn-primary dd-reveal-go" onClick={onDismiss}>
           Continue
         </button>
@@ -919,7 +1057,9 @@ const CSS = `
 .dd-crest { font-size: 2.6rem; }
 .dd-name { font-size: 1.9rem; margin: 4px 0 2px; color: var(--gold); letter-spacing: .04em;
   text-shadow: 0 2px 10px rgba(217,180,94,.25); font-variant: small-caps; }
-.dd-tag { opacity: .78; margin: 0 0 16px; font-style: italic; }
+.dd-tag { opacity: .78; margin: 0 0 6px; font-style: italic; }
+.dd-quip { opacity: .62; margin: 0 0 16px; font-size: .82rem; font-style: italic; line-height: 1.5;
+  color: #d6c9a6; }
 .dd-daily-card { border: 1px solid rgba(217,180,94,.35); border-radius: 12px; padding: 12px;
   background: linear-gradient(180deg, rgba(217,180,94,.08), rgba(0,0,0,.2)); margin-bottom: 16px; }
 .dd-daily-num { font-size: 1.15rem; color: var(--gold); letter-spacing: .06em; }
@@ -933,6 +1073,23 @@ const CSS = `
 .dd-btn-ghost { background: rgba(255,255,255,.04); color: #d8ccae; border-color: rgba(217,180,94,.3); }
 .dd-help { text-align: left; margin: 18px auto 0; padding: 0 0 0 18px; max-width: 400px; opacity: .78; font-size: .86rem; line-height: 1.6; }
 .dd-help li { margin: 5px 0; }
+
+/* persistent titles/omens collection on the title screen */
+.dd-collection { max-width: 440px; margin: 18px auto 0; text-align: left; }
+.dd-collection-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px;
+  border-radius: 10px; cursor: pointer; font-family: inherit; font-size: .9rem; color: var(--gold);
+  background: rgba(217,180,94,.06); border: 1px solid rgba(217,180,94,.3); letter-spacing: .02em; }
+.dd-collection-toggle:hover { background: rgba(217,180,94,.12); }
+.dd-collection-tally { margin-left: auto; font-size: .78rem; opacity: .7; color: #e7ddc9; font-weight: 400;
+  letter-spacing: 0; }
+.dd-collection-body { padding: 10px 4px 2px; }
+.dd-collection-group { margin-bottom: 12px; }
+.dd-collection-head { display: flex; align-items: center; color: #d8ccae; font-size: .84rem;
+  font-variant: small-caps; letter-spacing: .04em; margin-bottom: 6px; }
+.dd-collection-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dd-locked { opacity: .4; color: #9a8f76; letter-spacing: .12em; background: rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.1); cursor: help; }
+.dd-collection-foot { font-size: .76rem; opacity: .6; font-style: italic; margin: 4px 0 0; }
 
 /* play */
 .dd-play { max-width: 500px; width: 100%; overflow-x: hidden; }
@@ -992,6 +1149,12 @@ const CSS = `
 .dd-reveal-hp { font-size: .9rem; opacity: .85; margin-top: 4px; color: #e8a99c; }
 .dd-reveal-intent { font-size: .85rem; opacity: .75; font-style: italic; margin-top: 6px; }
 .dd-reveal-go { margin-top: 16px; }
+/* defeated card — a green-tinted victory variant of the reveal shell */
+.dd-reveal-defeated { border-color: rgba(127,206,127,.5); box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 40px rgba(30,60,30,.35); }
+.dd-reveal-defeated .dd-reveal-kicker { color: #9fce9f; }
+.dd-reveal-defeated .dd-reveal-name { color: #cdeccd; text-shadow: 0 2px 12px rgba(127,206,127,.3); }
+/* the slain foe's emoji reads as "downed": drained + slightly toppled */
+.dd-defeated-emoji { filter: grayscale(.7) brightness(.75); transform: rotate(-8deg); opacity: .85; }
 @keyframes ddReveal {
   0% { transform: scale(.7); opacity: 0; }
   60% { transform: scale(1.04); opacity: 1; }
@@ -1091,6 +1254,7 @@ const CSS = `
 .dd-log-heal { color: #7fce7f; font-weight: 700; }
 .dd-log-coin { color: #ecc25a; font-weight: 700; }
 .dd-log-secret { color: #d9b6e8; font-style: italic; }
+.dd-log-gibberish { color: #e8a54a; font-style: italic; }
 
 .dd-toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 20;
   background: #2a2013; color: var(--parch); padding: 9px 18px; border-radius: 20px;

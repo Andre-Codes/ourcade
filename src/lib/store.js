@@ -235,6 +235,39 @@ export function recordSpelldownLongest(word, day) {
   return { record, isNew: true };
 }
 
+// ---- Dictionary Dungeon: titles/omens/badges discovered across all runs ----
+// Local-only (NOT a syncKey, like relic:history / spelldown:longest): a persistent
+// record of every cosmetic title, omen, and "secret" badge the player has ever
+// earned, so the title screen can show a collection with locked "???" entries.
+// Ids are the DISPLAY names (titles) / omen+badge names, matching the ALL_*
+// catalogs in games/dictionary-dungeon/titles.js. Shape: { titles, omens, badges }
+// (each a string[]). All three getters degrade to empty arrays.
+function emptyDiscoveries() {
+  return { titles: [], omens: [], badges: [] };
+}
+export function getDungeonDiscoveries() {
+  const rec = readJSON("dungeon:discoveries", null);
+  if (!rec || typeof rec !== "object") return emptyDiscoveries();
+  return {
+    titles: Array.isArray(rec.titles) ? rec.titles : [],
+    omens: Array.isArray(rec.omens) ? rec.omens : [],
+    badges: Array.isArray(rec.badges) ? rec.badges : [],
+  };
+}
+// Idempotent union-add of one discovery. `kind` ∈ "titles" | "omens" | "badges".
+// Returns { rec, isNew } — isNew true only the first time this id is recorded (so
+// the caller can celebrate). No-ops (isNew:false) for unknown kinds / empty ids.
+export function recordDungeonDiscovery(kind, id) {
+  if (!id || (kind !== "titles" && kind !== "omens" && kind !== "badges")) {
+    return { rec: getDungeonDiscoveries(), isNew: false };
+  }
+  const rec = getDungeonDiscoveries();
+  if (rec[kind].includes(id)) return { rec, isNew: false };
+  rec[kind] = [...rec[kind], id];
+  lsSetJSON("dungeon:discoveries", rec);
+  return { rec, isNew: true };
+}
+
 // ---- magic 8-ball: per-device sound mute (default: not muted) ----
 export function getEightBallMuted() {
   return read("eightball:muted") === "1";

@@ -556,6 +556,26 @@ export const FLAVOR = {
     "Your snack withers to dust — this thing has sealed your pantry.",
     "The morsel rots in an instant. No nourishment here.",
   ],
+  // Gibberish penalty: a non-word played at a live enemy FEEDS it. {NAME} is the
+  // enemy's name. "Sticks and stones…" but here nonsense is nourishment. The
+  // cabinet colorizes these lines (they're emitted with a "⚠" prefix).
+  gibberish: [
+    "The {NAME} snaps up your nonsense and swells, delighted.",
+    "{NAME} feasts on the gibberish — it looks healthier already.",
+    "Nonsense is nourishment down here; {NAME} grows fat on it.",
+    "You spout gibberish and {NAME} laps it up like broth.",
+    "{NAME} savors the garbled letters. Real words hurt; this heals it.",
+    "That word means nothing — so {NAME} eats it whole and thrives.",
+    "The {NAME} purrs. It adores a delver who feeds it nonsense.",
+  ],
+  // Same feast, but the enemy is already stuffed (cap reached or at full HP): no
+  // more healing, just a jab at the wasted turn.
+  gibberishFull: [
+    "The {NAME} is too gorged on your nonsense to swallow more.",
+    "{NAME} belches — it's had its fill of gibberish for now.",
+    "More nonsense? {NAME} is stuffed. It just wastes your turn.",
+    "The {NAME} waves the garbage away, already full of it.",
+  ],
 };
 
 // ── MERCHANTS ──────────────────────────────────────────────────────────────────

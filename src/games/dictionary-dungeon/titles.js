@@ -132,6 +132,30 @@ function hasDouble(w) {
   return false;
 }
 
+// Structural omens (predicate-based; first match wins, roughly rarest → plainest).
+// Extracted to a shared list so BOTH firstWordOmen and the ALL_OMENS catalog draw
+// from one source (no drift). `hint` is a vague nudge for the locked-collection UI
+// — enough to intrigue, never a solution. `test(w, tier)` gets the UPPERCASE word.
+const STRUCTURAL_OMENS = [
+  { id: "struct:palindrome", name: "Mirror-Touched", text: "The room folds in half and matches itself.",
+    hint: "Open with a word that reads the same backward.", test: (w) => isPalindrome(w) },
+  { id: "struct:novowel", name: "Silent Initiate", text: "The vowels go quiet in your presence.",
+    hint: "Open with a word that has no vowels at all.", test: (w) => countVowels(w) === 0 },
+  { id: "struct:goblin", name: "Goblin-Approved", text: 'A goblin writes "real word??" beside your name.',
+    hint: "Open with a strange, rare word full of odd letters.",
+    test: (w, tier) => (tier === "goblin" || tier === "obscure") && /[XZQJ]/.test(w) && commonRank(w) == null },
+  { id: "struct:long8", name: "Longblade Opening", text: "Your first word arrives carrying its own shadow.",
+    hint: "Open with a long word (8+ letters).", test: (w) => w.length >= 8 },
+  { id: "struct:three", name: "Small Key", text: "A tiny word opens a tiny lock.",
+    hint: "Open with a very short word (exactly 3 letters).", test: (w) => w.length === 3 },
+  { id: "struct:allvowels", name: "Vowel Feast", text: "The Vowel Crypt, somewhere far below, wakes up hungry.",
+    hint: "Open with a word containing every vowel: A, E, I, O, U.", test: (w) => [..."AEIOU"].every((v) => w.includes(v)) },
+  { id: "struct:double", name: "Echo Mark", text: "One letter repeats itself from the rafters.",
+    hint: "Open with a word that has a double letter.", test: (w) => hasDouble(w) },
+  { id: "struct:closedloop", name: "Closed Loop", text: "The dungeon notices your word came back home.",
+    hint: "Open with a word that starts and ends with the same letter.", test: (w) => w[0] === w[w.length - 1] },
+];
+
 // Returns { name, text } for the first matching omen, or null. Exact-word omens
 // win over structural ones. `word` is UPPERCASE and already validated.
 export function firstWordOmen(word) {
@@ -140,18 +164,10 @@ export function firstWordOmen(word) {
     const [name, text] = EXACT_OMENS[w];
     return { name, text };
   }
-  // Structural omens (first match wins, roughly rarest → plainest).
-  if (isPalindrome(w)) return { name: "Mirror-Touched", text: "The room folds in half and matches itself." };
-  if (countVowels(w) === 0) return { name: "Silent Initiate", text: "The vowels go quiet in your presence." };
   const tier = rarityTier(w);
-  if ((tier === "goblin" || tier === "obscure") && /[XZQJ]/.test(w) && commonRank(w) == null) {
-    return { name: "Goblin-Approved", text: 'A goblin writes "real word??" beside your name.' };
+  for (const o of STRUCTURAL_OMENS) {
+    if (o.test(w, tier)) return { name: o.name, text: o.text };
   }
-  if (w.length >= 8) return { name: "Longblade Opening", text: "Your first word arrives carrying its own shadow." };
-  if (w.length === 3) return { name: "Small Key", text: "A tiny word opens a tiny lock." };
-  if ([..."AEIOU"].every((v) => w.includes(v))) return { name: "Vowel Feast", text: "The Vowel Crypt, somewhere far below, wakes up hungry." };
-  if (hasDouble(w)) return { name: "Echo Mark", text: "One letter repeats itself from the rafters." };
-  if (w[0] === w[w.length - 1]) return { name: "Closed Loop", text: "The dungeon notices your word came back home." };
   return null;
 }
 
@@ -191,6 +207,33 @@ const EXACT_SEQUENCES = [
   { seq: ["LOST", "FOUND"], name: "Mapless Miracle", text: "A blank map draws one confident line." },
 ];
 
+// Structural sequence badges, evaluated exactly at the 3rd word. Extracted to a
+// shared list so BOTH sequenceBadge and the ALL_BADGES catalog draw from one
+// source. `test(words, lens, initials)` gets the 3 UPPERCASE words + derived
+// arrays. First match wins (order preserved from the original inline checks).
+const STRUCTURAL_BADGES = [
+  { id: "struct:growing", name: "Growing Incantation", text: "Each word stands taller than the last.",
+    hint: "Play three words, each longer than the one before.",
+    test: (_w, lens) => lens[0] < lens[1] && lens[1] < lens[2] },
+  { id: "struct:shrinking", name: "Shrinking Spell", text: "Your words vanish down a staircase of size.",
+    hint: "Play three words, each shorter than the one before.",
+    test: (_w, lens) => lens[0] > lens[1] && lens[1] > lens[2] },
+  { id: "struct:measured", name: "Measured Pace", text: "The dungeon respects your symmetry.",
+    hint: "Play three words that are all the same length (five letters).",
+    test: (_w, lens) => lens.every((l) => l === 5) },
+  { id: "struct:samestart", name: "Rune Repeater", text: "The same initial scratches itself into the wall three times.",
+    hint: "Play three words that all start with the same letter.",
+    test: (_w, _l, initials) => initials.every((x) => x === initials[0]) },
+  { id: "struct:ordered", name: "Ordered Steps", text: "The alphabet accepts your tribute.",
+    hint: "Play three words whose first letters run in sequence (like B, C, D).",
+    test: (_w, _l, initials) =>
+      initials[1].charCodeAt(0) === initials[0].charCodeAt(0) + 1 &&
+      initials[2].charCodeAt(0) === initials[1].charCodeAt(0) + 1 },
+  { id: "struct:goblin", name: "Goblin Fluency", text: 'The goblins whisper: "one of us."',
+    hint: "Open a run with three strange, rare words in a row.",
+    test: (words) => words.every((w) => rarityTier(w) === "obscure" || rarityTier(w) === "goblin") },
+];
+
 // The uppercase word strings played so far, in order.
 function playedWords(state) {
   return (state.words || []).map((x) => (typeof x === "string" ? x : x.word));
@@ -211,30 +254,50 @@ export function sequenceBadge(state) {
     }
   }
 
-  // Structural sequences evaluated exactly at the 3rd word.
+  // Structural sequences evaluated exactly at the 3rd word (shared list).
   if (n === 3) {
-    const [a, b, c] = words;
     const lens = words.map((w) => w.length);
     const initials = words.map((w) => w[0]);
-    if (lens[0] < lens[1] && lens[1] < lens[2]) {
-      return { id: "struct:growing", name: "Growing Incantation", text: "Each word stands taller than the last." };
-    }
-    if (lens[0] > lens[1] && lens[1] > lens[2]) {
-      return { id: "struct:shrinking", name: "Shrinking Spell", text: "Your words vanish down a staircase of size." };
-    }
-    if (lens.every((l) => l === 5)) {
-      return { id: "struct:measured", name: "Measured Pace", text: "The dungeon respects your symmetry." };
-    }
-    if (initials.every((x) => x === initials[0])) {
-      return { id: "struct:samestart", name: "Rune Repeater", text: "The same initial scratches itself into the wall three times." };
-    }
-    // consecutive letters, e.g. B → C → D
-    if (initials[1].charCodeAt(0) === initials[0].charCodeAt(0) + 1 && initials[2].charCodeAt(0) === initials[1].charCodeAt(0) + 1) {
-      return { id: "struct:ordered", name: "Ordered Steps", text: "The alphabet accepts your tribute." };
-    }
-    if (words.every((w) => rarityTier(w) === "obscure" || rarityTier(w) === "goblin")) {
-      return { id: "struct:goblin", name: "Goblin Fluency", text: 'The goblins whisper: "one of us."' };
+    for (const b of STRUCTURAL_BADGES) {
+      if (b.test(words, lens, initials)) return { id: b.id, name: b.name, text: b.text };
     }
   }
   return null;
 }
+
+// ── catalogs (for the persistent "Discovered" collection on the title screen) ──
+// Every title/omen/badge that CAN be earned, so the cabinet can render locked
+// "???" entries next to the ones the player has found. Each entry is
+// { id, name, hint } — `id` matches what logic.js records (see below), `hint` is
+// a vague nudge (never a solution). These are derived from the same data the
+// award functions use, so the catalog can't drift from what's actually earnable.
+
+// Titles: the DISPLAY string is the id (that's what state.title.title holds and
+// what the store records). Deduped — several first-words map to the same title
+// only rarely, but Object.values may repeat, so we unique them.
+export const ALL_TITLES = [...new Set(Object.values(FIRST_WORD_TITLES))]
+  .sort()
+  .map((name) => ({ id: name, name, hint: "Open a run with a certain evocative first word." }));
+
+// Omens: exact-word omens (id "omen:<name>") + structural omens (their struct id).
+// logic.js records an earned omen by the id it stored on the badge; exact omens
+// are stored as { id: "omen:" + WORD }, but the DISPLAY id we collect on is the
+// omen NAME so the catalog and the store agree regardless of which word triggered
+// it. We therefore key the collection on the omen NAME.
+// (All keyed on the omen NAME — that's the stable id the cabinet records earned
+// entries under, regardless of which word/predicate triggered it.)
+export const ALL_OMENS = [
+  ...Object.values(EXACT_OMENS).map(([name]) => ({
+    id: name, name, hint: "Open a run with a particular telling word.",
+  })),
+  ...STRUCTURAL_OMENS.map((o) => ({ id: o.name, name: o.name, hint: o.hint })),
+];
+
+// Badges ("secrets"): exact word-sequences + structural sequences. Keyed on NAME.
+export const ALL_BADGES = [
+  ...EXACT_SEQUENCES.map((s) => ({
+    id: s.name, name: s.name,
+    hint: `Play a telling sequence of ${s.seq.length} words in a row to open a run.`,
+  })),
+  ...STRUCTURAL_BADGES.map((b) => ({ id: b.name, name: b.name, hint: b.hint })),
+];

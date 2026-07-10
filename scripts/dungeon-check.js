@@ -23,6 +23,7 @@ import { allWords, rarityTier } from "../src/games/dictionary-dungeon/dict.js";
 import { getRule, ruleNeedsContext } from "../src/games/dictionary-dungeon/rules.js";
 import { allEffectWords } from "../src/games/dictionary-dungeon/effects.js";
 import { LEVELS, BOSSES, RELICS, SCROLLS, EVENTS, MERCHANT_STOCK } from "../src/games/dictionary-dungeon/pools.js";
+import { ALL_TITLES, ALL_OMENS, ALL_BADGES } from "../src/games/dictionary-dungeon/titles.js";
 import {
   buildRun,
   currentTarget,
@@ -37,6 +38,11 @@ import {
 } from "../src/games/dictionary-dungeon/logic.js";
 
 const DAYS = 60;
+
+// The room types that pose a WORD challenge (vs treasure/merchant/event). The
+// assembler guarantees the first room of every level is one of these.
+const WORD_ROOMS = new Set(["gate", "monster", "trap"]);
+const GIBBERISH_CAP = 3; // must match logic.js — max HP an enemy regains from gibberish/room
 
 // Difficulty → minimum acceptable valid-answer count (design §17). Boss phases
 // use the boss threshold; treasure/gate use their rule's own difficulty.
@@ -140,6 +146,9 @@ for (const key of keys) {
     check(`${key} ${lvl.id} ≤1 merchant`, countType("merchant") <= 1, `${countType("merchant")}`);
     check(`${key} ${lvl.id} ≤1 event`, countType("event") <= 1, `${countType("event")}`);
     check(`${key} ${lvl.id} ≤1 trap`, countType("trap") <= 1, `${countType("trap")}`);
+    // The FIRST room of every level (so the whole-run opener on Level 1) is always
+    // a word room — never treasure/merchant/event as the opener.
+    check(`${key} ${lvl.id} room 1 is a word room`, WORD_ROOMS.has(lvl.rooms[0]?.type), `${lvl.rooms[0]?.type}`);
     // Merchant/event only appear from Level 2 on.
     if (li === 0) check(`${key} entry-hall has no merchant/event`, !types.includes("merchant") && !types.includes("event"));
     for (const room of lvl.rooms) {
@@ -195,6 +204,22 @@ const dictSet = allWords();
 const badEffect = effectRows.filter((r) => !r.dupe && !dictSet.has(r.word));
 check("all effect words are real ENABLE words", badEffect.length === 0, badEffect.map((r) => `${r.word}(${r.category})`).join(", "));
 console.log(`  ${effectRows.filter((r) => !r.dupe).length} unique effect words, ${badEffect.length} invalid`);
+
+// ── 4b) title/omen/badge catalogs are populated (the title-screen collection) ──
+console.log("\nCollection catalogs:");
+check("ALL_TITLES is non-empty", Array.isArray(ALL_TITLES) && ALL_TITLES.length > 0, `${ALL_TITLES?.length}`);
+check("ALL_OMENS is non-empty", Array.isArray(ALL_OMENS) && ALL_OMENS.length > 0, `${ALL_OMENS?.length}`);
+check("ALL_BADGES is non-empty", Array.isArray(ALL_BADGES) && ALL_BADGES.length > 0, `${ALL_BADGES?.length}`);
+// Every catalog entry has an id + name + hint (so the UI can render + tooltip).
+const catOk = [...ALL_TITLES, ...ALL_OMENS, ...ALL_BADGES].every((e) => e && e.id && e.name && e.hint);
+check("every catalog entry has id/name/hint", catOk);
+console.log(`  ${ALL_TITLES.length} titles, ${ALL_OMENS.length} omens, ${ALL_BADGES.length} secrets`);
+
+// ── 4c) gibberish penalty is capped and clamped ───────────────────────────────
+// Feed a live enemy more gibberish than the cap; assert it gains exactly the cap
+// in HP and never exceeds its max. Confirms nonsense can't make a fight unwinnable.
+console.log("\nGibberish penalty (cap + clamp):");
+check("gibberish feeds an enemy up to the cap, never past max", gibberishCapHolds(keys[0]));
 
 // ── 5) a smoke playthrough: auto-solve the whole daily run ─────────────────────
 // Confirms the engine reaches victory when fed valid answers (no dead ends).
@@ -270,4 +295,45 @@ function autoSolve(key) {
     resolveTurn(state, w);
   }
   return state.won;
+}
+
+// Walk to the first live-enemy room, feed it a pile of gibberish, and assert the
+// per-room cap (+ max clamp) holds. Gibberish never appears in the auto-solver,
+// so the solvability gate is unaffected regardless — this just proves nonsense
+// can't inflate an enemy past a bounded amount. (GIBBERISH_CAP defined up top.)
+function gibberishCapHolds(key) {
+  const state = buildRun(key);
+  state.hearts = 999; // don't die to counters while probing
+  state.maxHearts = 999;
+  let guard = 0;
+  // Advance (auto-solving non-fights) until the current target is a live enemy.
+  while (!state.over && guard++ < 200) {
+    if (isChoiceRoom(state)) { takeRelic(state, currentRoom(state).relicChoices[0]); continue; }
+    if (isMerchantRoom(state)) { leaveMerchant(state); continue; }
+    if (isEventRoom(state)) { resolveEvent(state, 0); continue; }
+    const t = currentTarget(state);
+    if (t && (t.kind === "monster" || t.kind === "trap" || t.kind === "boss") && t.hp > 0) break;
+    // A gate/other word room with no enemy: solve it to move on.
+    const w = findAnswer(state);
+    if (!w) return false;
+    resolveTurn(state, w);
+  }
+  const room = currentRoom(state);
+  if (!room || room.enemyHP == null) {
+    console.log("  (no live enemy room found to probe — skipping)");
+    return true; // not a failure; nothing to test on this seed
+  }
+  // Damage it a little so there's headroom to heal back into (below max).
+  room.enemyHP = Math.max(1, room.enemyMaxHP - (GIBBERISH_CAP + 2));
+  const before = room.enemyHP;
+  const maxHP = room.enemyMaxHP;
+  // Feed more gibberish than the cap; "zzxqk" etc. are not ENABLE words.
+  const junk = ["ZZXQK", "QWXZJ", "VBNMQ", "XKQZW", "JJQQX", "ZXZXZ"];
+  for (const g of junk) resolveTurn(state, g);
+  const gained = room.enemyHP - before;
+  const okGain = gained === GIBBERISH_CAP;
+  const okClamp = room.enemyHP <= maxHP;
+  if (!okGain) console.log(`  gibberish gain was ${gained}, expected ${GIBBERISH_CAP}`);
+  if (!okClamp) console.log(`  gibberish pushed HP ${room.enemyHP} past max ${maxHP}`);
+  return okGain && okClamp;
 }
