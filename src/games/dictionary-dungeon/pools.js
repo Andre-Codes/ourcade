@@ -432,7 +432,10 @@ export const RELICS = [
   { id: "runed-anvil", name: "Runed Anvil", emoji: "🔨", effectTag: "blunt-plus2", description: "Blunt-words deal an extra +2 damage." },
   { id: "second-wind", name: "Second Wind", emoji: "🌬️", effectTag: "level-heal", description: "Heal 1 heart at the start of each level." },
   // Legendary: unlocks the EXCALIBUR power-word (handled specially in logic.js).
-  { id: "sword-in-stone", name: "Sword in the Stone", emoji: "🗿", effectTag: "excalibur", description: "You alone may speak EXCALIBUR — a legendary strike that ignores the room's rule." },
+  // Player-facing text NEVER names the word — drawing the blade is its own rare
+  // "sword in the stone" event (SWORD_EVENT below), and the player must know the
+  // legend to speak its true name.
+  { id: "sword-in-stone", name: "Sword in the Stone", emoji: "🗿", effectTag: "excalibur", description: "You alone may speak the blade's true name — the word a king once drew from the stone — and no rule can stand against it." },
 ];
 
 export const RELIC_BY_ID = Object.fromEntries(RELICS.map((r) => [r.id, r]));
@@ -586,7 +589,7 @@ export const FLAVOR = {
 //   in logic.js. Treasure rooms still give a FREE relic — merchants are the sink.
 export const MERCHANT_STOCK = [
   { id: "buy-minor-heal", kind: "heal", value: 1, basePrice: 4, name: "Minor Draught", emoji: "🩹", description: "Restore 1 heart." },
-  { id: "buy-heal", kind: "heal", value: 2, basePrice: 14, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
+  { id: "buy-heal", kind: "heal", value: 2, basePrice: 22, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
   { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 24, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
   { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
   { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
@@ -603,8 +606,8 @@ export const MERCHANT_STOCK = [
   { id: "buy-relic-reliquary", kind: "relic", grant: "reliquary", basePrice: 20, name: "Reliquary", emoji: "✝️", description: "Holy-words deal +2." },
   { id: "buy-relic-scrabble", kind: "relic", grant: "scrabble-tile", basePrice: 22, name: "Scrabble Tile", emoji: "🔠", description: "J/Q/X/Z words deal +4." },
   { id: "buy-relic-bookmark", kind: "relic", grant: "iron-bookmark", basePrice: 18, name: "Iron Bookmark", emoji: "🔖", description: "First failed word each level costs no heart." },
-  // Legendary — rare, expensive; unlocks the EXCALIBUR power-word.
-  { id: "buy-relic-excalibur", kind: "relic", grant: "sword-in-stone", basePrice: 40, name: "Sword in the Stone", emoji: "🗿", description: "Speak EXCALIBUR: a rule-ignoring legendary strike." },
+  // (The Sword in the Stone is NOT sold — it can only be drawn in the rare
+  //  SWORD_EVENT below.)
 ];
 
 // ── EVENTS ─────────────────────────────────────────────────────────────────────
@@ -698,3 +701,28 @@ export const EVENTS = [
     ],
   },
 ];
+
+// ── SWORD IN THE STONE (rare special event) ────────────────────────────────────
+// NOT part of the EVENTS pool (so the uniform event pick never rolls it). Seeded
+// once per run at a low chance by buildRun (logic.js). Renders through the normal
+// event panel. The text is deliberately Arthurian but NEVER names the word — the
+// player must know the legend to speak the blade's true name in combat.
+export const SWORD_EVENT = {
+  id: "sword-in-stone",
+  bodyText:
+    "The passage opens into a cold, still chamber. A blade of pale metal is buried to the hilt in a cracked stone, humming faintly — as though it has waited a long age for a rightful hand. Legend says only a true king could draw it, and that its name is itself a word of power. The runes along the blade are worn far too faint to read.",
+  choices: [
+    {
+      label: "Grip it and pull (−1 heart)",
+      outcome: { hearts: -1, relic: "sword-in-stone" },
+      resultText:
+        "The stone fights you — a heart's worth of blood is the price (−1 heart) — then, impossibly, the blade slides free. It is yours now. Speak its name, if you know it, and no rule can stand.",
+    },
+    {
+      label: "Leave it in the stone",
+      outcome: {},
+      resultText:
+        "Some blades are not meant for your hand. You leave it humming in the dark and move on.",
+    },
+  ],
+};

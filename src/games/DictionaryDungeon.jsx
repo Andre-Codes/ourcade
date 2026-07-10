@@ -56,6 +56,7 @@ export default function DictionaryDungeon() {
   const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
   const [defeated, setDefeated] = useState(null); // "you slew X" card { name, emoji, kind }
+  const [pendingDefeated, setPendingDefeated] = useState(false); // a paced kill's Defeated card is scheduled but not shown yet — hold the next-room reveal until it lands
   const rootRef = useRef(null);
   const logRef = useRef(null);
   const revealSig = useRef(null); // last-shown encounter signature (dedupe reveals)
@@ -177,6 +178,11 @@ export default function DictionaryDungeon() {
       target?.name || "none",
     ].join("|");
     if (sig === revealSig.current) return; // already shown this encounter
+    // A paced kill advances the room synchronously but pops its Defeated card a
+    // beat later. Don't let the next room's reveal flash into that gap — bail
+    // WITHOUT consuming the signature so that, once the card lands and clears
+    // pendingDefeated, this effect re-runs and shows the reveal in order.
+    if (pendingDefeated) return;
     revealSig.current = sig;
 
     // Decide what (if anything) to showcase. New level entry wins; else a new
@@ -199,7 +205,7 @@ export default function DictionaryDungeon() {
     }
     if (!next) { setReveal(null); return; }
     setReveal(next);
-  }, [screen, logic, state]);
+  }, [screen, logic, state, pendingDefeated]);
   const dismissReveal = useCallback(() => setReveal(null), []);
 
   // Flash a toast for a moment.
@@ -220,6 +226,7 @@ export default function DictionaryDungeon() {
       setHitFx(null);
       setReveal(null);
       setDefeated(null);
+      setPendingDefeated(false);
       revealSig.current = null; // let the first room re-trigger a level reveal
       setScreen("play");
     },
@@ -244,9 +251,12 @@ export default function DictionaryDungeon() {
       if (!logic || !state || state.over) return;
       const word = input.trim();
       if (!word) return;
-      // Clear any pending paced-log / fx timers from a previous fast turn.
+      // Clear any pending paced-log / fx timers from a previous fast turn. Also
+      // release a stuck pending-defeated flag if that turn's card timer was just
+      // cleared before it fired (avoids the reveal being suppressed forever).
       fxTimers.current.forEach(window.clearTimeout);
       fxTimers.current = [];
+      setPendingDefeated(false);
       // resolveTurn mutates a copy; deep-ish clone the parts it touches. The run
       // is plain data, so a structuredClone keeps it simple and correct.
       const working = structuredClone(state);
@@ -287,8 +297,15 @@ export default function DictionaryDungeon() {
         }
         fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
         // Pop the defeated card once the resolution flavor has had a beat to read.
+        // Mark it pending NOW (synchronously) so the reveal effect — which fires
+        // this same render on the already-advanced room — holds the next-room
+        // card until the Defeated card lands, then releases it.
         if (showDefeated) {
-          fxTimers.current.push(window.setTimeout(() => setDefeated(res.defeated), 720));
+          setPendingDefeated(true);
+          fxTimers.current.push(window.setTimeout(() => {
+            setDefeated(res.defeated);
+            setPendingDefeated(false);
+          }, 720));
         }
       } else {
         setState(working);
@@ -491,7 +508,7 @@ export default function DictionaryDungeon() {
       {screen === "play" && state && defeated && (
         <Defeated defeated={defeated} onDismiss={() => setDefeated(null)} />
       )}
-      {screen === "play" && state && reveal && !defeated && !state.canDescend && (
+      {screen === "play" && state && reveal && !defeated && !pendingDefeated && !state.canDescend && (
         <Reveal reveal={reveal} onDismiss={dismissReveal} />
       )}
       {screen === "play" && state && state.canDescend && !state.over && (
@@ -1195,9 +1212,12 @@ const CSS = `
 .dd-kb-row { display: flex; gap: 5px; justify-content: center; }
 .dd-key { flex: 1; min-width: 0; height: 46px; border-radius: 7px; cursor: pointer; font-family: inherit;
   font-size: .98rem; font-weight: 700; color: #ecdfbe; border: 1px solid rgba(217,180,94,.28);
-  background: linear-gradient(180deg, rgba(70,58,40,.7), rgba(40,32,22,.7)); transition: filter .1s, transform .06s; }
+  background: linear-gradient(180deg, rgba(70,58,40,.7), rgba(40,32,22,.7));
+  box-shadow: 0 2px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,236,190,.14);
+  transition: filter .1s, transform .05s, box-shadow .05s; }
 .dd-key:hover { filter: brightness(1.15); }
-.dd-key:active { transform: translateY(1px); filter: brightness(.95); }
+.dd-key:active { transform: translateY(3px) scale(.96); filter: brightness(.88);
+  box-shadow: 0 0 0 rgba(0,0,0,.45), inset 0 2px 5px rgba(0,0,0,.55); }
 .dd-key-wide { flex: 1.5; font-size: .74rem; letter-spacing: .04em; }
 .dd-key-enter { color: #221703; border-color: rgba(255,240,200,.4); background: linear-gradient(180deg, #e5c069, #b8892f); }
 

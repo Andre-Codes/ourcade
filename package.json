@@ -21,6 +21,7 @@
     "gen:rankit": "node scripts/gen-rankit.js",
     "gen:laddergram": "node scripts/gen-laddergram.js",
     "gen:vowels": "node scripts/gen-vowels.js",
+    "gen:wide-words": "node scripts/gen-wide-words.js",
     "gen:chain": "node scripts/gen-chain.js",
     "gen:dungeon-dict": "node scripts/gen-dungeon-dict.js",
     "fetch:onthisday": "node scripts/fetch-onthisday.js",

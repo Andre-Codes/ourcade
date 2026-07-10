@@ -24,6 +24,25 @@ word per line, lowercased. Regenerate with `npm run gen:spelldown`.
 
 ---
 
+## `common-20k.txt` — wider common-words list (shared accept-set)
+
+The daily cabinets where the player TYPES free words — Chain, Laddergram, Missing
+Vowels — use a WIDER accept-set than the 10k list: the 4–8-letter slice of this
+20k frequency list becomes the shared runtime dictionary (`gen:wide-words` →
+`src/data/generated/wide-words.js`) AND the pool those generators author/validate
+puzzles against (so pars/answers stay honest). This catches thousands of everyday
+words the 10k misses (elbow, otter, beige, …) while staying curated by frequency.
+
+The narrower `common-words.js` (10k slice) still exists for the CONTENT-curation
+generators that must keep obscure words OUT of what they generate — Spelldown
+answer lists and Rank It ranks. Don't point those at the 20k list.
+
+Source: https://github.com/first20hours/google-10000-english — the `20k.txt`
+file (same repo/methodology as `common-10k.txt`, extended to 20,000 words). One
+word per line, lowercased. Regenerate with `npm run gen:wide-words`.
+
+---
+
 The original source of "unsorted.txt":
 
 http://www.greenworm.net/notes/2011/05/02/words-friends-wordlist
