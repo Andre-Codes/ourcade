@@ -2,86 +2,82 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-single-serving-sites",
-    "title": "A directory of websites that do exactly one thing",
-    "blurb": "Someone catalogs the internet's proudest one-trick ponies — a whole domain built to serve a single dumb, beautiful purpose. It's the spirit this entire arcade was born from.",
-    "url": "https://singleservingsites.cool/"
+    "id": "gw-internet-roadtrip",
+    "title": "A car the whole internet drives together, one vote at a time",
+    "blurb": "Thousands of strangers steer a single virtual car across America by voting on 'turn left,' 'honk,' or 'change the radio.' Democracy has never been this slow or this beautiful.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "foundNote": "a Maine college radio station's listenership 100x'd when the car rolled through"
   },
   {
-    "id": "gw-absurd-website",
-    "title": "One absurd web experiment, every single month",
-    "blurb": "A lone creator ships one gloriously pointless web thing per month, and the backlog is nearly fifty deep. Bookmark it like a webring you actually keep visiting.",
-    "url": "https://absurd.website",
-    "foundNote": "still shipping"
+    "id": "gw-password-game",
+    "title": "A password game that slowly ruins your life",
+    "blurb": "Make a password. Now it needs a Roman numeral. Now the current moon phase. Now a chess move. It never stops and neither will your rage.",
+    "url": "https://neal.fun/password-game/"
   },
   {
-    "id": "gw-wplace",
-    "title": "A live global map where the whole internet fights over pixels",
-    "blurb": "It's r/place stretched over the entire planet — pixel wars, tiny alliances, and one guy defending his flag at 3am. Refresh and watch strangers slowly build something insane together.",
-    "url": "https://wplace.live",
-    "foundNote": "currently under construction, forever"
+    "id": "gw-nicest-place",
+    "title": "A nonstop stream of strangers hugging you",
+    "blurb": "Real people, filmed opening their arms for a virtual hug, on infinite loop. It's the emotional opposite of a comments section.",
+    "url": "https://thenicestplace.net",
+    "foundNote": "still the antidote"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that turns into the entire modern internet",
-    "blurb": "Neal Agarwal built the anti-relaxation machine: notifications, feeds, and noise piling on until your brain files for a lunch break. Uncomfortably accurate.",
-    "url": "https://neal.fun/stimulation-clicker/"
-  },
-  {
-    "id": "gw-sito-gridcosm",
-    "title": "A collaborative art grid that's been growing since 1997",
-    "blurb": "Grids nested inside grids inside grids, handed off between strangers one panel at a time for over two decades. This thing has outlived most operating systems.",
-    "url": "https://www.sito.org/synergy/",
-    "foundNote": "online since 1997"
-  },
-  {
-    "id": "gw-passweird",
-    "title": "A password generator that's too weird to steal",
-    "blurb": "Instead of xK9#mQ2, it hands you something so cursed and specific no hacker would dare touch it. Genuinely useful, deeply unhinged.",
-    "url": "https://passweird.com"
-  },
-  {
-    "id": "gw-quiet-place",
-    "title": "A website that gently walks you away from the internet",
-    "blurb": "One calm line at a time, it coaxes you to close the tabs and breathe. A rare corner of the web actively rooting for you to leave.",
-    "url": "https://thequietplaceproject.com"
-  },
-  {
-    "id": "gw-neal-fun",
-    "title": "The playground where half the internet's 'whoa' moments live",
-    "blurb": "Neal's ever-growing pile of interactives, timelines and games — the kind of stuff you send a friend at midnight with just the word 'this.' You'll lose an hour, minimum.",
-    "url": "https://neal.fun"
-  },
-  {
-    "id": "gw-koalas",
-    "title": "Click a giant koala into a million tiny koalas",
-    "blurb": "Divide and conquer, but the reward is always more koala. Somewhere between a fractal, a stress toy, and a screensaver you can't stop poking.",
+    "id": "gw-koalas-max",
+    "title": "Circles that split until they become a koala",
+    "blurb": "Drag your cursor and giant circles shatter into smaller ones, over and over, until a picture appears. Weirdly the most relaxing thing on the internet.",
     "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "Find the invisible cow using only a screaming voice",
-    "blurb": "Move your cursor and a voice yells louder the closer you get to a cow you cannot see. It is exactly as stupid and satisfying as it sounds.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume up, sorry"
+    "id": "gw-museum-sounds",
+    "title": "A museum of dead technology noises",
+    "blurb": "The dial-up handshake, the Windows startup chime, the click of a Game Boy — preserved like digital fossils. Our soundboard has cousins, and this is the wing they hang out in.",
+    "url": "https://savethesounds.info",
+    "foundNote": "audio archaeology, no white gloves required"
   },
   {
-    "id": "gw-little-alchemy",
-    "title": "Combine four elements into the entire universe",
-    "blurb": "Start with air, earth, fire and water; end up with, somehow, a Time Machine and a Doctor Who reference. The original before-you-were-crafting-infinite crafting game.",
-    "url": "https://littlealchemy2.com"
+    "id": "gw-strange-website",
+    "title": "A site cataloguing websites that don't exist",
+    "blurb": "Beautifully-written descriptions of imaginary uncanny websites — including one that fell in love with its creator and still waits for them to come back. Read it in a dim room.",
+    "url": "https://strange.website"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug slowly spinning inside a rug, forever",
-    "blurb": "That's the whole website. That's the whole review. Ten out of ten, would rotate again.",
-    "url": "https://puginarug.com"
+    "id": "gw-neal-fun",
+    "title": "One guy's homepage of impossibly polished browser toys",
+    "blurb": "Neal Agarwal keeps quietly dropping single-page experiments that eat your whole afternoon — trolley problems, a scrollable ocean, a car the internet drives. Bookmark the hub.",
+    "url": "https://neal.fun",
+    "foundNote": "the good ending of 'I have an idea for a website'"
   },
   {
-    "id": "gw-lhc",
-    "title": "A live check on whether the Large Hadron Collider ate the planet",
-    "blurb": "It answers one urgent question with a big reassuring 'NOPE.' A monument to early-2000s doomer anxiety that still faithfully reports the good news.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "foundNote": "still online, still nope"
+    "id": "gw-absurd-trolley",
+    "title": "The trolley problem, but the choices get unhinged",
+    "blurb": "Pull the lever or don't — then keep pulling as the philosophy 101 dilemma spirals into pure nonsense. Your moral compass will file a complaint.",
+    "url": "https://neal.fun/absurd-trolley-problems/"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker that adds ONE more screaming distraction each tap",
+    "blurb": "Start with a satisfying click. End with subway surfers, lo-fi beats, a fireplace, and eleven notification pings all at once. A perfect diagnosis of your brain in 2024.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "foundNote": "turn your volume down first, trust us"
+  },
+  {
+    "id": "gw-crossy-road-life",
+    "title": "A game that ages you a full year with every click",
+    "blurb": "Neal's 'Life Stats' and 'The Wheel of Time' side — turns out your whole existence fits inside a browser scroll bar. Bleak but oddly cozy.",
+    "url": "https://neal.fun/life-stats/",
+    "foundNote": "do not read while having a birthday"
+  },
+  {
+    "id": "gw-printing-money",
+    "title": "A page that shows how fast the richest people 'earn' money",
+    "blurb": "Watch dollars pile up in real time and try not to feel anything. It's a scroll-down reality check disguised as a fun little webtoy.",
+    "url": "https://neal.fun/spend/",
+    "foundNote": "you will not spend it all, we tried"
+  },
+  {
+    "id": "gw-size-of-space",
+    "title": "A scroll from an astronaut to the entire observable universe",
+    "blurb": "Start next to a person, keep scrolling, and slowly lose your mind as galaxies dwarf galaxies. Best viewed in 1024x768 with an existential crisis.",
+    "url": "https://neal.fun/size-of-space/"
   }
 ];

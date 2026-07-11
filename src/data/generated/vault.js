@@ -2,6 +2,106 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-size-of-space",
+    "kind": "site",
+    "era": "current",
+    "title": "A scroll from an astronaut to the entire observable universe",
+    "blurb": "Start next to a person, keep scrolling, and slowly lose your mind as galaxies dwarf galaxies. Best viewed in 1024x768 with an existential crisis.",
+    "url": "https://neal.fun/size-of-space/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.943Z"
+  },
+  {
+    "id": "gw-printing-money",
+    "kind": "site",
+    "era": "current",
+    "title": "A page that shows how fast the richest people 'earn' money",
+    "blurb": "Watch dollars pile up in real time and try not to feel anything. It's a scroll-down reality check disguised as a fun little webtoy.",
+    "url": "https://neal.fun/spend/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.869Z"
+  },
+  {
+    "id": "gw-crossy-road-life",
+    "kind": "site",
+    "era": "current",
+    "title": "A game that ages you a full year with every click",
+    "blurb": "Neal's 'Life Stats' and 'The Wheel of Time' side — turns out your whole existence fits inside a browser scroll bar. Bleak but oddly cozy.",
+    "url": "https://neal.fun/life-stats/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.723Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker that adds ONE more screaming distraction each tap",
+    "blurb": "Start with a satisfying click. End with subway surfers, lo-fi beats, a fireplace, and eleven notification pings all at once. A perfect diagnosis of your brain in 2024.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.631Z"
+  },
+  {
+    "id": "gw-absurd-trolley",
+    "kind": "site",
+    "era": "current",
+    "title": "The trolley problem, but the choices get unhinged",
+    "blurb": "Pull the lever or don't — then keep pulling as the philosophy 101 dilemma spirals into pure nonsense. Your moral compass will file a complaint.",
+    "url": "https://neal.fun/absurd-trolley-problems/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.523Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's homepage of impossibly polished browser toys",
+    "blurb": "Neal Agarwal keeps quietly dropping single-page experiments that eat your whole afternoon — trolley problems, a scrollable ocean, a car the internet drives. Bookmark the hub.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.341Z"
+  },
+  {
+    "id": "gw-strange-website",
+    "kind": "site",
+    "era": "current",
+    "title": "A site cataloguing websites that don't exist",
+    "blurb": "Beautifully-written descriptions of imaginary uncanny websites — including one that fell in love with its creator and still waits for them to come back. Read it in a dim room.",
+    "url": "https://strange.website",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:58.237Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A nonstop stream of strangers hugging you",
+    "blurb": "Real people, filmed opening their arms for a virtual hug, on infinite loop. It's the emotional opposite of a comments section.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:57.989Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password game that slowly ruins your life",
+    "blurb": "Make a password. Now it needs a Roman numeral. Now the current moon phase. Now a chess move. It never stops and neither will your rage.",
+    "url": "https://neal.fun/password-game/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:57.876Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A car the whole internet drives together, one vote at a time",
+    "blurb": "Thousands of strangers steer a single virtual car across America by voting on 'turn left,' 'honk,' or 'change the radio.' Democracy has never been this slow or this beautiful.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-11T06:52:57.680Z"
+  },
+  {
     "id": "gw-lhc",
     "kind": "site",
     "era": "current",
@@ -42,16 +142,6 @@ export default [
     "archivedAt": "2026-07-09T07:25:57.046Z"
   },
   {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "The playground where half the internet's 'whoa' moments live",
-    "blurb": "Neal's ever-growing pile of interactives, timelines and games — the kind of stuff you send a friend at midnight with just the word 'this.' You'll lose an hour, minimum.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:56.916Z"
-  },
-  {
     "id": "gw-passweird",
     "kind": "site",
     "era": "current",
@@ -70,16 +160,6 @@ export default [
     "url": "https://www.sito.org/synergy/",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:56.449Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that turns into the entire modern internet",
-    "blurb": "Neal Agarwal built the anti-relaxation machine: notifications, feeds, and noise piling on until your brain files for a lunch break. Uncomfortably accurate.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:56.321Z"
   },
   {
     "id": "gw-wplace",
@@ -150,36 +230,6 @@ export default [
     "url": "https://ncase.me/trust/",
     "source": "weird",
     "archivedAt": "2026-07-07T07:20:43.293Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A website where strangers send you a hug",
-    "blurb": "Just short video clips of people opening their arms to your screen. It's absurdly wholesome, it's from a simpler internet, and yeah, it kind of works.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:42.677Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password field that slowly loses its mind",
-    "blurb": "Include a Roman numeral. Now a chess move. Now today's moon phase. It keeps adding rules until you're negotiating with a website like it's a hostage situation.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:42.484Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A Street View car the whole internet is driving at once",
-    "blurb": "Strangers vote in real time on which way to turn, when to honk, and what local radio to tune. Democracy has never been this slow or this beautiful.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:42.161Z"
   },
   {
     "id": "gw-sad-trombone",
