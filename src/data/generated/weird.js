@@ -3,81 +3,76 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "A car the whole internet drives together, one vote at a time",
-    "blurb": "Thousands of strangers steer a single virtual car across America by voting on 'turn left,' 'honk,' or 'change the radio.' Democracy has never been this slow or this beautiful.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "a Maine college radio station's listenership 100x'd when the car rolled through"
-  },
-  {
-    "id": "gw-password-game",
-    "title": "A password game that slowly ruins your life",
-    "blurb": "Make a password. Now it needs a Roman numeral. Now the current moon phase. Now a chess move. It never stops and neither will your rage.",
-    "url": "https://neal.fun/password-game/"
-  },
-  {
-    "id": "gw-nicest-place",
-    "title": "A nonstop stream of strangers hugging you",
-    "blurb": "Real people, filmed opening their arms for a virtual hug, on infinite loop. It's the emotional opposite of a comments section.",
-    "url": "https://thenicestplace.net",
-    "foundNote": "still the antidote"
-  },
-  {
-    "id": "gw-koalas-max",
-    "title": "Circles that split until they become a koala",
-    "blurb": "Drag your cursor and giant circles shatter into smaller ones, over and over, until a picture appears. Weirdly the most relaxing thing on the internet.",
-    "url": "https://koalastothemax.com"
-  },
-  {
-    "id": "gw-museum-sounds",
-    "title": "A museum of dead technology noises",
-    "blurb": "The dial-up handshake, the Windows startup chime, the click of a Game Boy — preserved like digital fossils. Our soundboard has cousins, and this is the wing they hang out in.",
-    "url": "https://savethesounds.info",
-    "foundNote": "audio archaeology, no white gloves required"
-  },
-  {
-    "id": "gw-strange-website",
-    "title": "A site cataloguing websites that don't exist",
-    "blurb": "Beautifully-written descriptions of imaginary uncanny websites — including one that fell in love with its creator and still waits for them to come back. Read it in a dim room.",
-    "url": "https://strange.website"
-  },
-  {
-    "id": "gw-neal-fun",
-    "title": "One guy's homepage of impossibly polished browser toys",
-    "blurb": "Neal Agarwal keeps quietly dropping single-page experiments that eat your whole afternoon — trolley problems, a scrollable ocean, a car the internet drives. Bookmark the hub.",
-    "url": "https://neal.fun",
-    "foundNote": "the good ending of 'I have an idea for a website'"
-  },
-  {
-    "id": "gw-absurd-trolley",
-    "title": "The trolley problem, but the choices get unhinged",
-    "blurb": "Pull the lever or don't — then keep pulling as the philosophy 101 dilemma spirals into pure nonsense. Your moral compass will file a complaint.",
-    "url": "https://neal.fun/absurd-trolley-problems/"
+    "title": "A multiplayer road trip where a mob of strangers votes on every turn",
+    "blurb": "It's Street View, but thousands of people are white-knuckling the same steering wheel, voting every few seconds on where to go next. Somehow it moves. Somehow it's beautiful.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "foundNote": "like a family road trip if the family was 4,000 strangers"
   },
   {
     "id": "gw-stimulation-clicker",
-    "title": "A clicker that adds ONE more screaming distraction each tap",
-    "blurb": "Start with a satisfying click. End with subway surfers, lo-fi beats, a fireplace, and eleven notification pings all at once. A perfect diagnosis of your brain in 2024.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "foundNote": "turn your volume down first, trust us"
+    "title": "A clicker game that slowly becomes the entire modern internet at once",
+    "blurb": "Starts as a calm little click-the-button game, then piles on autoplay videos, pop-ups, notifications and fake friends until your brain files for divorce. Uncomfortably accurate.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "foundNote": "a documentary disguised as a toy"
   },
   {
-    "id": "gw-crossy-road-life",
-    "title": "A game that ages you a full year with every click",
-    "blurb": "Neal's 'Life Stats' and 'The Wheel of Time' side — turns out your whole existence fits inside a browser scroll bar. Bleak but oddly cozy.",
-    "url": "https://neal.fun/life-stats/",
-    "foundNote": "do not read while having a birthday"
+    "id": "gw-neal-fun",
+    "title": "One guy's home for gloriously polished browser experiments",
+    "blurb": "Neal Agarwal keeps making the exact weird interactive thing you didn't know you needed — deep-sea scrolls, absurd trolley problems, a password game that hates you. New ones keep dropping.",
+    "url": "https://neal.fun"
   },
   {
-    "id": "gw-printing-money",
-    "title": "A page that shows how fast the richest people 'earn' money",
-    "blurb": "Watch dollars pile up in real time and try not to feel anything. It's a scroll-down reality check disguised as a fun little webtoy.",
-    "url": "https://neal.fun/spend/",
-    "foundNote": "you will not spend it all, we tried"
+    "id": "gw-isometric-nyc",
+    "title": "All of New York City rebuilt as one giant isometric pixel map",
+    "blurb": "Zoom around Central Park, the Statue of Liberty and JFK, all rendered in that sweet SimCity 2000 diagonal. Somebody clearly loves this city and also loves suffering.",
+    "url": "https://isometric.nyc",
+    "foundNote": "best viewed with a Snapple"
   },
   {
-    "id": "gw-size-of-space",
-    "title": "A scroll from an astronaut to the entire observable universe",
-    "blurb": "Start next to a person, keep scrolling, and slowly lose your mind as galaxies dwarf galaxies. Best viewed in 1024x768 with an existential crisis.",
-    "url": "https://neal.fun/size-of-space/"
+    "id": "gw-quiet-place",
+    "title": "A three-minute page that just asks you to breathe",
+    "blurb": "No login, no app, no premium tier. One sentence at a time, it walks you through slowing down, then politely sends you back to the chaos. The internet's smallest spa.",
+    "url": "https://thequietplaceproject.com"
+  },
+  {
+    "id": "gw-true-size",
+    "title": "Drag any country across the map to see how badly the map has lied to you",
+    "blurb": "Slide Greenland toward the equator and watch it shrivel like a napped-on gummy bear. Turns out your childhood classroom globe was a filthy liar.",
+    "url": "https://thetruesize.com",
+    "foundNote": "Mercator has some explaining to do"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "title": "A curated vault of one-purpose websites that time forgot",
+    "blurb": "Steve Lambert keeps an archive of the weird single-serving sites the big random button no longer bothers to surface. Deep-cut early-web energy, catalogued with love.",
+    "url": "https://theuselesswebindex.com",
+    "foundNote": "the museum wing of pointless"
+  },
+  {
+    "id": "gw-strange-website",
+    "title": "A haunted collection of websites that have feelings about you",
+    "blurb": "Open each 'door' to meet a lonely, anthropomorphized site — including one that fell in love with its creator and is still, quietly, waiting for them to come back. Dread you can feel in your teeth.",
+    "url": "https://strange.website",
+    "foundNote": "the creepypasta of URLs"
+  },
+  {
+    "id": "gw-koalas",
+    "title": "Tap-to-reveal a hidden koala from one giant fuzzy blob of squares",
+    "blurb": "Start with four huge tiles, keep tapping, and a koala slowly resolves out of the pixel soup. Weirdly hypnotic, extremely 2011, still going strong.",
+    "url": "https://koalastothemax.com"
+  },
+  {
+    "id": "gw-invisible-cow",
+    "title": "A game where you find an invisible cow using only screaming",
+    "blurb": "Move your mouse while the site yells 'COW' louder as you get closer. That's the whole thing. You will absolutely do it three times before you close the tab.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your volume DOWN first, trust us"
+  },
+  {
+    "id": "gw-pixels-fighting",
+    "title": "Two pixels locked in eternal combat for control of your screen",
+    "blurb": "One black, one white, splitting and reclaiming territory forever with no winner. It's the LAN-party grudge match that never resolves, boiled down to two dots.",
+    "url": "https://pixelsfighting.com",
+    "foundNote": "who's winning? nobody. that's the point"
   }
 ];

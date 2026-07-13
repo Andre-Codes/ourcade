@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-pixels-fighting",
+    "kind": "site",
+    "era": "current",
+    "title": "Two pixels locked in eternal combat for control of your screen",
+    "blurb": "One black, one white, splitting and reclaiming territory forever with no winner. It's the LAN-party grudge match that never resolves, boiled down to two dots.",
+    "url": "https://pixelsfighting.com",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:03.819Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "Tap-to-reveal a hidden koala from one giant fuzzy blob of squares",
+    "blurb": "Start with four huge tiles, keep tapping, and a koala slowly resolves out of the pixel soup. Weirdly hypnotic, extremely 2011, still going strong.",
+    "url": "https://koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:03.591Z"
+  },
+  {
+    "id": "gw-strange-website",
+    "kind": "site",
+    "era": "current",
+    "title": "A haunted collection of websites that have feelings about you",
+    "blurb": "Open each 'door' to meet a lonely, anthropomorphized site — including one that fell in love with its creator and is still, quietly, waiting for them to come back. Dread you can feel in your teeth.",
+    "url": "https://strange.website",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:03.448Z"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "kind": "site",
+    "era": "current",
+    "title": "A curated vault of one-purpose websites that time forgot",
+    "blurb": "Steve Lambert keeps an archive of the weird single-serving sites the big random button no longer bothers to surface. Deep-cut early-web energy, catalogued with love.",
+    "url": "https://theuselesswebindex.com",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:03.315Z"
+  },
+  {
+    "id": "gw-true-size",
+    "kind": "site",
+    "era": "current",
+    "title": "Drag any country across the map to see how badly the map has lied to you",
+    "blurb": "Slide Greenland toward the equator and watch it shrivel like a napped-on gummy bear. Turns out your childhood classroom globe was a filthy liar.",
+    "url": "https://thetruesize.com",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:03.196Z"
+  },
+  {
+    "id": "gw-isometric-nyc",
+    "kind": "site",
+    "era": "current",
+    "title": "All of New York City rebuilt as one giant isometric pixel map",
+    "blurb": "Zoom around Central Park, the Statue of Liberty and JFK, all rendered in that sweet SimCity 2000 diagonal. Somebody clearly loves this city and also loves suffering.",
+    "url": "https://isometric.nyc",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:02.911Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's home for gloriously polished browser experiments",
+    "blurb": "Neal Agarwal keeps making the exact weird interactive thing you didn't know you needed — deep-sea scrolls, absurd trolley problems, a password game that hates you. New ones keep dropping.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:02.744Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that slowly becomes the entire modern internet at once",
+    "blurb": "Starts as a calm little click-the-button game, then piles on autoplay videos, pop-ups, notifications and fake friends until your brain files for divorce. Uncomfortably accurate.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:02.577Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A multiplayer road trip where a mob of strangers votes on every turn",
+    "blurb": "It's Street View, but thousands of people are white-knuckling the same steering wheel, voting every few seconds on where to go next. Somehow it moves. Somehow it's beautiful.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-13T07:18:02.377Z"
+  },
+  {
     "id": "gw-size-of-space",
     "kind": "site",
     "era": "current",
@@ -32,16 +122,6 @@ export default [
     "archivedAt": "2026-07-11T06:52:58.723Z"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker that adds ONE more screaming distraction each tap",
-    "blurb": "Start with a satisfying click. End with subway surfers, lo-fi beats, a fireplace, and eleven notification pings all at once. A perfect diagnosis of your brain in 2024.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:58.631Z"
-  },
-  {
     "id": "gw-absurd-trolley",
     "kind": "site",
     "era": "current",
@@ -50,26 +130,6 @@ export default [
     "url": "https://neal.fun/absurd-trolley-problems/",
     "source": "weird",
     "archivedAt": "2026-07-11T06:52:58.523Z"
-  },
-  {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "One guy's homepage of impossibly polished browser toys",
-    "blurb": "Neal Agarwal keeps quietly dropping single-page experiments that eat your whole afternoon — trolley problems, a scrollable ocean, a car the internet drives. Bookmark the hub.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:58.341Z"
-  },
-  {
-    "id": "gw-strange-website",
-    "kind": "site",
-    "era": "current",
-    "title": "A site cataloguing websites that don't exist",
-    "blurb": "Beautifully-written descriptions of imaginary uncanny websites — including one that fell in love with its creator and still waits for them to come back. Read it in a dim room.",
-    "url": "https://strange.website",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:58.237Z"
   },
   {
     "id": "gw-nicest-place",
@@ -90,16 +150,6 @@ export default [
     "url": "https://neal.fun/password-game/",
     "source": "weird",
     "archivedAt": "2026-07-11T06:52:57.876Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A car the whole internet drives together, one vote at a time",
-    "blurb": "Thousands of strangers steer a single virtual car across America by voting on 'turn left,' 'honk,' or 'change the radio.' Democracy has never been this slow or this beautiful.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:57.680Z"
   },
   {
     "id": "gw-lhc",
@@ -130,16 +180,6 @@ export default [
     "url": "https://littlealchemy2.com",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:57.342Z"
-  },
-  {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "Click a giant koala into a million tiny koalas",
-    "blurb": "Divide and conquer, but the reward is always more koala. Somewhere between a fractal, a stress toy, and a screensaver you can't stop poking.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:57.046Z"
   },
   {
     "id": "gw-passweird",
@@ -210,16 +250,6 @@ export default [
     "url": "https://flightradar24.com",
     "source": "weird",
     "archivedAt": "2026-07-07T07:20:43.903Z"
-  },
-  {
-    "id": "gw-true-size",
-    "kind": "site",
-    "era": "current",
-    "title": "Drag any country around a map to expose its real size",
-    "blurb": "Slide Greenland down to the equator and watch it shrink like a Tamagotchi that stopped eating. Every world map you saw in school was lying to you.",
-    "url": "https://thetruesize.com",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:43.795Z"
   },
   {
     "id": "gw-evolution-trust",
@@ -945,16 +975,6 @@ export default [
     "archivedAt": "2026-06-29T07:58:03.808Z"
   },
   {
-    "id": "gw-useless-web-index",
-    "kind": "site",
-    "era": "current",
-    "title": "The deep archive of every weird single-purpose website",
-    "blurb": "A curated vault of the strange little one-trick sites the random button forgot. It's a webring for things that should not exist, and we mean that with love.",
-    "url": "https://theuselesswebindex.com",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:03.593Z"
-  },
-  {
     "id": "gw-one-million-chessboards",
     "kind": "site",
     "era": "current",
@@ -1267,16 +1287,6 @@ export default [
     "url": "https://musiclab.chromeexperiments.com",
     "source": "weird",
     "archivedAt": "2026-06-23T07:25:55.578Z"
-  },
-  {
-    "id": "gw-pixels-fighting",
-    "kind": "site",
-    "era": "current",
-    "title": "Two armies of pixels at war until one color wins",
-    "blurb": "A black side and a white side spread across the screen in a slow, mesmerizing skirmish. No two battles end the same. Place your bets.",
-    "url": "https://pixelsfighting.com",
-    "source": "weird",
-    "archivedAt": "2026-06-23T07:25:55.483Z"
   },
   {
     "id": "gw-make-everything-ok",
