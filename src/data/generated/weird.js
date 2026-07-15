@@ -3,76 +3,74 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "A multiplayer road trip where a mob of strangers votes on every turn",
-    "blurb": "It's Street View, but thousands of people are white-knuckling the same steering wheel, voting every few seconds on where to go next. Somehow it moves. Somehow it's beautiful.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "like a family road trip if the family was 4,000 strangers"
+    "title": "Thousands of strangers driving one car by committee",
+    "blurb": "It's Google Street View, but the steering wheel is a group vote — thousands of people cram in and democratically inch a virtual car down real roads. Somehow it moves. Slowly. Beautifully.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "foundNote": "Twitch-plays-a-road-trip energy"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that slowly becomes the entire modern internet at once",
-    "blurb": "Starts as a calm little click-the-button game, then piles on autoplay videos, pop-ups, notifications and fake friends until your brain files for divorce. Uncomfortably accurate.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "foundNote": "a documentary disguised as a toy"
+    "id": "gw-password-game",
+    "title": "A password form that slowly loses its mind",
+    "blurb": "Make a password. Easy. Now it needs a Roman numeral, a chess move, the current phase of the moon, and a chicken you have to keep alive. You will not finish. Nobody finishes.",
+    "url": "https://neal.fun/password-game/"
   },
   {
-    "id": "gw-neal-fun",
-    "title": "One guy's home for gloriously polished browser experiments",
-    "blurb": "Neal Agarwal keeps making the exact weird interactive thing you didn't know you needed — deep-sea scrolls, absurd trolley problems, a password game that hates you. New ones keep dropping.",
-    "url": "https://neal.fun"
+    "id": "gw-conserve-the-sound",
+    "title": "A museum for the noises old machines used to make",
+    "blurb": "Rotary phones, typewriters, rubber stamps, dying game consoles — an archive of the exact clicks and whirs that furniture used to have. Your ears will time-travel to 1997 instantly.",
+    "url": "https://www.conservethesound.de",
+    "foundNote": "sounds from 1910 onward"
   },
   {
-    "id": "gw-isometric-nyc",
-    "title": "All of New York City rebuilt as one giant isometric pixel map",
-    "blurb": "Zoom around Central Park, the Statue of Liberty and JFK, all rendered in that sweet SimCity 2000 diagonal. Somebody clearly loves this city and also loves suffering.",
-    "url": "https://isometric.nyc",
-    "foundNote": "best viewed with a Snapple"
+    "id": "gw-bouncy-balls",
+    "title": "A screen full of balls that freak out when you're loud",
+    "blurb": "Born as a classroom volume meter — the mic listens to the room and the balls (or emoji, or googly eyes) leap higher the noisier things get. Yell at it. It's cathartic.",
+    "url": "https://bouncyballs.org"
   },
   {
-    "id": "gw-quiet-place",
-    "title": "A three-minute page that just asks you to breathe",
-    "blurb": "No login, no app, no premium tier. One sentence at a time, it walks you through slowing down, then politely sends you back to the chaos. The internet's smallest spa.",
-    "url": "https://thequietplaceproject.com"
-  },
-  {
-    "id": "gw-true-size",
-    "title": "Drag any country across the map to see how badly the map has lied to you",
-    "blurb": "Slide Greenland toward the equator and watch it shrivel like a napped-on gummy bear. Turns out your childhood classroom globe was a filthy liar.",
-    "url": "https://thetruesize.com",
-    "foundNote": "Mercator has some explaining to do"
+    "id": "gw-drift-fm",
+    "title": "An internet radio with zero algorithm and zero opinions",
+    "blurb": "No queue, no recommendations, no 'because you listened to.' Just tracks played back to back like a station run by someone who trusts your taste. Refreshing, honestly.",
+    "url": "https://drift.1mb.dev",
+    "foundNote": "always-on, never skips"
   },
   {
     "id": "gw-useless-web-index",
-    "title": "A curated vault of one-purpose websites that time forgot",
-    "blurb": "Steve Lambert keeps an archive of the weird single-serving sites the big random button no longer bothers to surface. Deep-cut early-web energy, catalogued with love.",
+    "title": "The curated back-catalog of pointless websites",
+    "blurb": "Someone actually archived the weird single-purpose corners of the web so they don't vanish. It's a card catalog for stuff that does exactly one dumb glorious thing.",
     "url": "https://theuselesswebindex.com",
-    "foundNote": "the museum wing of pointless"
+    "foundNote": "maintained by Steve Lambert"
   },
   {
-    "id": "gw-strange-website",
-    "title": "A haunted collection of websites that have feelings about you",
-    "blurb": "Open each 'door' to meet a lonely, anthropomorphized site — including one that fell in love with its creator and is still, quietly, waiting for them to come back. Dread you can feel in your teeth.",
-    "url": "https://strange.website",
-    "foundNote": "the creepypasta of URLs"
-  },
-  {
-    "id": "gw-koalas",
-    "title": "Tap-to-reveal a hidden koala from one giant fuzzy blob of squares",
-    "blurb": "Start with four huge tiles, keep tapping, and a koala slowly resolves out of the pixel soup. Weirdly hypnotic, extremely 2011, still going strong.",
+    "id": "gw-koalas-to-the-max",
+    "title": "Click dots until a hidden picture appears",
+    "blurb": "Every circle you touch splits into four smaller ones, and slowly a secret image surfaces from the pixel soup. You'll tell yourself you'll stop. You won't.",
     "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-invisible-cow",
-    "title": "A game where you find an invisible cow using only screaming",
-    "blurb": "Move your mouse while the site yells 'COW' louder as you get closer. That's the whole thing. You will absolutely do it three times before you close the tab.",
+    "id": "gw-find-invisible-cow",
+    "title": "A game where you hunt a cow you can only hear",
+    "blurb": "Move your mouse around and it MOOs louder as you get closer to an invisible cow. That's the whole thing. It is inexplicably shouting at you and you love it.",
     "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume DOWN first, trust us"
+    "foundNote": "turn your volume up, sorry"
   },
   {
-    "id": "gw-pixels-fighting",
-    "title": "Two pixels locked in eternal combat for control of your screen",
-    "blurb": "One black, one white, splitting and reclaiming territory forever with no winner. It's the LAN-party grudge match that never resolves, boiled down to two dots.",
-    "url": "https://pixelsfighting.com",
-    "foundNote": "who's winning? nobody. that's the point"
+    "id": "gw-mapcrunch",
+    "title": "A teleport button for random corners of Earth",
+    "blurb": "Drops you into a Street View somewhere weird and specific — an empty road in Mongolia, a gas station in New Zealand. Featured spot changes daily, or pick a country and wander.",
+    "url": "https://www.mapcrunch.com"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "title": "A pug you can tuck into a blanket, forever",
+    "blurb": "Click the pug. It gets covered by a rug. Click again. Uncovered. There is no score, no level, no BSOD boss — just a dog and your peace of mind.",
+    "url": "https://puginarug.com"
+  },
+  {
+    "id": "gw-lhc-destroyed-world",
+    "title": "A site that confirms the Large Hadron Collider hasn't ended the world",
+    "blurb": "One giant word — usually 'NO' — updated to reassure you that Switzerland's particle smasher has not yet swallowed reality. Simpler than the news, more honest too.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "foundNote": "reassuring since the 2000s"
   }
 ];

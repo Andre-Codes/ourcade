@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug you can tuck into a blanket, forever",
+    "blurb": "Click the pug. It gets covered by a rug. Click again. Uncovered. There is no score, no level, no BSOD boss — just a dog and your peace of mind.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.699Z"
+  },
+  {
+    "id": "gw-mapcrunch",
+    "kind": "site",
+    "era": "current",
+    "title": "A teleport button for random corners of Earth",
+    "blurb": "Drops you into a Street View somewhere weird and specific — an empty road in Mongolia, a gas station in New Zealand. Featured spot changes daily, or pick a country and wander.",
+    "url": "https://www.mapcrunch.com",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.624Z"
+  },
+  {
+    "id": "gw-find-invisible-cow",
+    "kind": "site",
+    "era": "current",
+    "title": "A game where you hunt a cow you can only hear",
+    "blurb": "Move your mouse around and it MOOs louder as you get closer to an invisible cow. That's the whole thing. It is inexplicably shouting at you and you love it.",
+    "url": "https://findtheinvisiblecow.com",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.511Z"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "kind": "site",
+    "era": "current",
+    "title": "The curated back-catalog of pointless websites",
+    "blurb": "Someone actually archived the weird single-purpose corners of the web so they don't vanish. It's a card catalog for stuff that does exactly one dumb glorious thing.",
+    "url": "https://theuselesswebindex.com",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.317Z"
+  },
+  {
+    "id": "gw-drift-fm",
+    "kind": "site",
+    "era": "current",
+    "title": "An internet radio with zero algorithm and zero opinions",
+    "blurb": "No queue, no recommendations, no 'because you listened to.' Just tracks played back to back like a station run by someone who trusts your taste. Refreshing, honestly.",
+    "url": "https://drift.1mb.dev",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.234Z"
+  },
+  {
+    "id": "gw-bouncy-balls",
+    "kind": "site",
+    "era": "current",
+    "title": "A screen full of balls that freak out when you're loud",
+    "blurb": "Born as a classroom volume meter — the mic listens to the room and the balls (or emoji, or googly eyes) leap higher the noisier things get. Yell at it. It's cathartic.",
+    "url": "https://bouncyballs.org",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:59.101Z"
+  },
+  {
+    "id": "gw-conserve-the-sound",
+    "kind": "site",
+    "era": "current",
+    "title": "A museum for the noises old machines used to make",
+    "blurb": "Rotary phones, typewriters, rubber stamps, dying game consoles — an archive of the exact clicks and whirs that furniture used to have. Your ears will time-travel to 1997 instantly.",
+    "url": "https://www.conservethesound.de",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:58.988Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password form that slowly loses its mind",
+    "blurb": "Make a password. Easy. Now it needs a Roman numeral, a chess move, the current phase of the moon, and a chicken you have to keep alive. You will not finish. Nobody finishes.",
+    "url": "https://neal.fun/password-game/",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:58.894Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers driving one car by committee",
+    "blurb": "It's Google Street View, but the steering wheel is a group vote — thousands of people cram in and democratically inch a virtual car down real roads. Somehow it moves. Slowly. Beautifully.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-15T06:53:58.773Z"
+  },
+  {
     "id": "gw-pixels-fighting",
     "kind": "site",
     "era": "current",
@@ -30,16 +120,6 @@ export default [
     "url": "https://strange.website",
     "source": "weird",
     "archivedAt": "2026-07-13T07:18:03.448Z"
-  },
-  {
-    "id": "gw-useless-web-index",
-    "kind": "site",
-    "era": "current",
-    "title": "A curated vault of one-purpose websites that time forgot",
-    "blurb": "Steve Lambert keeps an archive of the weird single-serving sites the big random button no longer bothers to surface. Deep-cut early-web energy, catalogued with love.",
-    "url": "https://theuselesswebindex.com",
-    "source": "weird",
-    "archivedAt": "2026-07-13T07:18:03.315Z"
   },
   {
     "id": "gw-true-size",
@@ -80,16 +160,6 @@ export default [
     "url": "https://neal.fun/stimulation-clicker",
     "source": "weird",
     "archivedAt": "2026-07-13T07:18:02.577Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A multiplayer road trip where a mob of strangers votes on every turn",
-    "blurb": "It's Street View, but thousands of people are white-knuckling the same steering wheel, voting every few seconds on where to go next. Somehow it moves. Somehow it's beautiful.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-13T07:18:02.377Z"
   },
   {
     "id": "gw-size-of-space",
@@ -142,16 +212,6 @@ export default [
     "archivedAt": "2026-07-11T06:52:57.989Z"
   },
   {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password game that slowly ruins your life",
-    "blurb": "Make a password. Now it needs a Roman numeral. Now the current moon phase. Now a chess move. It never stops and neither will your rage.",
-    "url": "https://neal.fun/password-game/",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:57.876Z"
-  },
-  {
     "id": "gw-lhc",
     "kind": "site",
     "era": "current",
@@ -160,16 +220,6 @@ export default [
     "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:57.647Z"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug slowly spinning inside a rug, forever",
-    "blurb": "That's the whole website. That's the whole review. Ten out of ten, would rotate again.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:57.501Z"
   },
   {
     "id": "gw-little-alchemy",
@@ -935,16 +985,6 @@ export default [
     "archivedAt": "2026-07-01T07:41:30.216Z"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "kind": "site",
-    "era": "current",
-    "title": "Find the invisible cow by how loud a voice screams COW",
-    "blurb": "There's a cow on the screen. It's invisible. Move your mouse and the site bellows COW louder as you close in. That's the whole game and it rules.",
-    "url": "https://findtheinvisiblecow.com",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.439Z"
-  },
-  {
     "id": "gw-museum-endangered-sounds",
     "kind": "site",
     "era": "current",
@@ -1237,16 +1277,6 @@ export default [
     "url": "https://fakeupdate.net",
     "source": "weird",
     "archivedAt": "2026-06-25T07:22:58.078Z"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "kind": "site",
-    "era": "current",
-    "title": "Teleport to a random spot on Earth via street view",
-    "blurb": "MapCrunch drops you somewhere on the planet — a Mongolian highway, a Welsh parking lot — and dares you to figure out where. Geography class but you skipped the textbook.",
-    "url": "https://www.mapcrunch.com",
-    "source": "weird",
-    "archivedAt": "2026-06-25T07:22:57.957Z"
   },
   {
     "id": "gw-pixel-thoughts",
