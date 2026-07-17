@@ -5,11 +5,71 @@ export default [
     "id": "gw-pug-in-a-rug",
     "kind": "site",
     "era": "current",
-    "title": "A pug you can tuck into a blanket, forever",
-    "blurb": "Click the pug. It gets covered by a rug. Click again. Uncovered. There is no score, no level, no BSOD boss — just a dog and your peace of mind.",
+    "title": "A pug. In a rug. That is the site.",
+    "blurb": "You scroll, a pug tucks itself deeper into a rug. That's the transaction. No lore, no levels, no microtransactions — just a very cozy dog and your dwindling free time.",
     "url": "https://puginarug.com",
     "source": "weird",
-    "archivedAt": "2026-07-15T06:53:59.699Z"
+    "archivedAt": "2026-07-17T06:55:57.314Z"
+  },
+  {
+    "id": "gw-conserve-the-sound",
+    "kind": "site",
+    "era": "current",
+    "title": "An online museum of dial telephones, Walkmans, and the 56k modem scream",
+    "blurb": "A German archive lovingly recording sounds that are quietly going extinct — including, yes, the dial-up handshake that still lives rent-free in your skull. Pairs disturbingly well with our Soundboard.",
+    "url": "https://www.conservethesound.de",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:56.771Z"
+  },
+  {
+    "id": "gw-zoomquilt2",
+    "kind": "site",
+    "era": "current",
+    "title": "An infinite painting you fall into forever",
+    "blurb": "A surreal illustration that zooms endlessly inward, hand-painted by a bunch of artists passing the baton. Hit the arrow keys and free-fall through a dream that never hits the bottom. Screensaver energy in the best way.",
+    "url": "https://zoomquilt2.com",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:56.402Z"
+  },
+  {
+    "id": "gw-asteroid-launcher",
+    "kind": "site",
+    "era": "current",
+    "title": "Drop an asteroid on your hometown and get a detailed casualty report",
+    "blurb": "Pick a city, a rock, and an angle, and it uses real impact models to tell you the crater size, fireball radius, and how far the windows shatter. Weirdly educational. Do not aim it at your ex's zip code.",
+    "url": "https://neal.fun/asteroid-launcher",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:56.263Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password field that keeps inventing insane new rules",
+    "blurb": "Make a password. Now add a Roman numeral. Now a chess move. Now the current phase of the moon. It's the login form from your nightmares and you will absolutely lose an hour to it.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:56.052Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that slowly turns into your worst screen-time day",
+    "blurb": "It starts calm, then piles on autoplay videos, notifications, ad pop-ups and needy fake friends until the whole thing is a screaming diorama of the modern internet. It's a joke. It's also a mirror. Uncomfortable.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:55.901Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A cross-country road trip where thousands of strangers vote on every turn",
+    "blurb": "Neal.fun crammed the whole internet into one car and let the crowd steer through Google Street View. It started in Boston, it's been drifting north, and nobody's fully in charge — it's like a family road trip where everyone's a backseat driver.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-17T06:55:55.733Z"
   },
   {
     "id": "gw-mapcrunch",
@@ -60,36 +120,6 @@ export default [
     "url": "https://bouncyballs.org",
     "source": "weird",
     "archivedAt": "2026-07-15T06:53:59.101Z"
-  },
-  {
-    "id": "gw-conserve-the-sound",
-    "kind": "site",
-    "era": "current",
-    "title": "A museum for the noises old machines used to make",
-    "blurb": "Rotary phones, typewriters, rubber stamps, dying game consoles — an archive of the exact clicks and whirs that furniture used to have. Your ears will time-travel to 1997 instantly.",
-    "url": "https://www.conservethesound.de",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:58.988Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password form that slowly loses its mind",
-    "blurb": "Make a password. Easy. Now it needs a Roman numeral, a chess move, the current phase of the moon, and a chicken you have to keep alive. You will not finish. Nobody finishes.",
-    "url": "https://neal.fun/password-game/",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:58.894Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "Thousands of strangers driving one car by committee",
-    "blurb": "It's Google Street View, but the steering wheel is a group vote — thousands of people cram in and democratically inch a virtual car down real roads. Somehow it moves. Slowly. Beautifully.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:58.773Z"
   },
   {
     "id": "gw-pixels-fighting",
@@ -150,16 +180,6 @@ export default [
     "url": "https://neal.fun",
     "source": "weird",
     "archivedAt": "2026-07-13T07:18:02.744Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that slowly becomes the entire modern internet at once",
-    "blurb": "Starts as a calm little click-the-button game, then piles on autoplay videos, pop-ups, notifications and fake friends until your brain files for divorce. Uncomfortably accurate.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "source": "weird",
-    "archivedAt": "2026-07-13T07:18:02.577Z"
   },
   {
     "id": "gw-size-of-space",

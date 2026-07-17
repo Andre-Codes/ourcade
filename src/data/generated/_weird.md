@@ -1,148 +1,149 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-07-15T06:52:45.402Z
+# Generated 2026-07-17T06:54:39.311Z
 # web_search_requests = 5
 
 ## Search queries Claude actually ran
-- weird useless websites roundup 2025
-- quirky single-purpose websites you didn't know you needed
-- neal.fun internet roadtrip collaborative project
-- weird wholesome ongoing internet projects show and tell 2025
-- r/InternetIsBeautiful favorite quirky single-purpose sites window swap radio garden
+- weird useless single-purpose websites 2025 roundup
+- strange delightful websites show and tell 2025
+- wholesome long-running internet projects window swap radio garden
+- r/InternetIsBeautiful quirky project 2025 collaborative
+- unusual ongoing hobbyist web project museum endangered sounds nicest place internet
 
 ## Sources returned ([page_age] title / url)
-- [February 27, 2026] 20 best useless websites to visit when you’re bored | Webflow Blog
-  https://webflow.com/blog/useless-websites
 - [date ?] 20 Best Useless Websites On The Internet In 2025
   https://www.uxie.design/blog/20-best-useless-websites-on-the-internet-in-2025
+- [February 27, 2026] 20 best useless websites to visit when you’re bored | Webflow Blog
+  https://webflow.com/blog/useless-websites
 - [date ?] 30 Random Useless Websites: 2025's Ultimate Time-Killers
   https://www.useless-web.com/
-- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
-  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
-- [June 4, 2025] 32 Useless Websites That Are Fun to Use in 2025 - Stripped
-  https://strippedfilm.com/useless-websites/
 - [May 1, 2025] 8 Useless Websites and What We Can Learn from Them
   https://www.designrush.com/agency/website-design-development/trends/pointless-websites
+- [May 18, 2026] 15 Weirdest Websites On The Internet (2025)
+  https://www.techbloat.com/15-weirdest-websites-on-the-internet-2025.html
+- [3 weeks ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
 - [March 17, 2026] Take Me to a Useless Page: The Best Time-Wasting Websites
   https://wegic.ai/blog/best-time-wasting-websites
-- [date ?] 100+ Useless Websites Directory with Preview (2025) | The Random ...
-  https://therandomweb.com/blog/useless-websites-directory-preview-favorites-2025
-- [May 19, 2025] 50 Weird Websites And Web Apps In 2025
-  https://devtechnosys.com/insights/weird-websites-and-web-apps/
-- [December 14, 2025] 30+ New And Quirky Websites To Cure Boredom In 2025: The Ultimate Time-Killer List
-  https://support.tibcert.org/celebrity-radar-news-hub-014/30-new-and-quirky-websites-to-cure-boredom-in-2025-the-ultimate-time-killer-list-yzlm5.html
-- [May 27, 2015] 27 Quirky Websites You Never Knew You Needed
-  https://www.buzzfeed.com/jessicamisener/websites-you-never-knew-you-needed
-- [July 18, 2024] 25 Weird Websites and Web Apps to Waste Time on When You’re Bored - elpassion.com
-  https://www.elpassion.com/blog/weird-websites-and-web-apps
-- [September 1, 2025] Interesting websites you didn't know existed!
-  https://nothing.community/en/d/688-interesting-websites-you-didnt-know-existed
-- [November 11, 2025] Cool Websites You Didn’t Know You Needed | by Tsumit | Medium
-  https://medium.com/@tsumit849/cool-websites-you-didnt-know-you-needed-26cb47ec7773
-- [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
-  https://middlehost.com/blog/100-weird-websites/
-- [June 1, 2025] Hidden Websites: 50 Cool Sites You’ve Never Heard Of - Web Obscura
-  https://webobscura.com/50-hidden-websites-that-will-blow-your-mind-and-boost-your-productivity/
+- [May 6, 2026] 20 Useless Websites to Waste Your Time | by Web Designer Depot | Medium
+  https://medium.com/@WebdesignerDepot/20-useless-websites-to-waste-your-time-0ccb46bd2fc2
+- [date ?] 105 Totally Useless Websites
+  https://www.totallyuselesswebsites.com/
+- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
+  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
 - [3 weeks ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
   https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
-- [April 19, 2023] 30 Insanely Useful Websites That'll Come in Handy Someday
-  https://www.makeuseof.com/tag/more-useful-websites/
-- [May 14, 2025] Best Random Websites When Bored: 15 Sites Like The Useless Web
-  https://edgeone.ai/blog/details/best-random-websites-when-bored
-- [September 12, 2019] 38 Super Useful And Fun Websites You Never Knew You Needed In Your Life
-  https://www.buzzfeed.com/daves4/useful-fun-websites
-- [date ?] Internet Roadtrip: Vote‑Driven Adventure in Street View
-  https://internet-roadtrip.com/
-- [June 14, 2026] Internet Roadtrip - Wikipedia
-  https://en.wikipedia.org/wiki/Internet_Roadtrip
-- [date ?] Internet Roadtrip
-  https://neal.fun/internet-roadtrip/
-- [July 31, 2025] Join Thousands Of Other People Trying To Drive An Imaginary Car To Canada - Kotaku
-  https://kotaku.com/internet-roadtrip-road-trip-neal-agarwal-fun-1851780768
-- [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
-  https://laughingsquid.com/internet-roadtrip-simulator/
-- [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
-  https://ground.news/article/an-ingenious-roadtrip-simulator-where-players-collectively-vote-on-the-direction-every-ten-seconds
-- [date ?] Internet Roadtrip Unblocked - Play Free Online | Neal.fun
-  https://nealfun-unblocked.com/internet-roadtrip
-- [May 6, 2025] Neal.fun's Internet Roadtrip - Waxy.org
-  https://waxy.org/2025/05/neal-funs-internet-roadtrip/
-- [date ?] Internet Roadtrip: You Steer, the Internet Goes Wild!
-  https://internetroadtrip.net/
-- [date ?] Key Points | Internet Roadtrip
-  https://internet-roadtrip.github.io/
-- [December 30, 2025] 25 of the Most 2025 Moments on the Internet - PAPER Magazine
-  https://www.papermag.com/2025-internet-moments-ranked
-- [2 weeks ago] Top 30 Innovative Internet of Things (IoT) Projects for 2026
-  https://www.theknowledgeacademy.com/blog/internet-of-things-iot-projects/
-- [December 27, 2025] The Most Important Internet Moments Of 2025
-  https://slate.com/podcasts/icymi/2025/12/the-most-important-internet-moments-of-2025
-- [December 19, 2025] The Best of the Internet in 2025 | The Webby Awards
-  https://www.webbyawards.com/the-best-of-the-internet-in-2025/
-- [November 29, 2025] The viral moments that broke the internet in 2025 - Pulse Advertising
-  https://www.pulse-advertising.com/resources/social-media-news/the-viral-moments-that-broke-the-internet-in-2025/
-- [May 11, 2026] 46 Websites To Cure Your Boredom That You Probably Never Heard Of Before | Bored Panda
-  https://www.boredpanda.com/interesting-websites-people-made/?cexp_id=152984&cexp_var=12&_f=homepage_featured
-- [3 weeks ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
-  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
-- [date ?] 10 Great Interactive Websites to Visit | Geeks - Vocal Media
-  https://vocal.media/geeks/10-great-interactive-websites-to-visit
-- [January 5, 2025] 10 Hidden Websites That Can Give You So Much Fun | by Bikash K. | Medium
-  https://bikash-k.medium.com/10-hidden-websites-that-can-give-you-so-much-fun-0dc8e999fb4d
+- [September 14, 2025] 55 weird websites: Explore the strange and unusual sites
+  https://www.hostinger.com/tutorials/weird-websites/
+- [March 17, 2026] Top 15 Weird Websites for Fun and Entertainment in 2025
+  https://wegic.ai/blog/best-weird-websites-for-fun
 - [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
   https://middlehost.com/blog/100-weird-websites/
+- [March 23, 2026] Most Interesting Websites Online Fun and Creative Sites
+  https://orangemonke.com/blogs/most-interesting-websites-on-internet/
+- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
+  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
+- [date ?] Quite A Strange.Website Indeed
+  https://strange.website/
+- [June 27, 2025] 15 Strange Internet Sites That Will Blow Your Mind
+  https://neefox.com/blog/strange-internet-sites
+- [December 23, 2024] Weird Websites: 13 Strange Weird Websites To Visit In 2025 - Onlinedecoded
+  https://www.onlinedecoded.com/strange-weird-websites-to-visit/
 - [May 7, 2025] 10 Websites That Never Let You Get Bored – Explore, Play, and Be Amazed (Guaranteed!) - DEV Community
   https://dev.to/koolkamalkishor/10-websites-that-never-let-you-get-bored-explore-play-and-be-amazed-guaranteed-51ep
-- [April 15, 2025] Top 5 Most Secret Websites You Should Know About | by Ronak Bhatt | Medium
-  https://medium.com/@ronakabhattrz/top-5-most-secret-websites-you-should-know-about-9c58c2eb3044
-- [May 11, 2026] 46 Websites To Cure Your Boredom That You Probably Never Heard Of Before | Bored Panda
-  https://www.boredpanda.com/interesting-websites-people-made/
+- [June 3, 2026] This site made me fall in love with internet radio again | PCWorld
+  https://www.pcworld.com/article/3142871/this-site-made-me-fall-in-love-with-internet-radio-again.html
+- [date ?] 10 Great Interactive Websites to Visit | Geeks - Vocal Media
+  https://vocal.media/geeks/10-great-interactive-websites-to-visit
+- [date ?] online-radio · GitHub Topics · GitHub
+  https://github.com/topics/online-radio
+- [April 28, 2026] Radio Garden makes the internet feel like a shortwave radio again
+  https://webiano.digital/radio-garden-makes-the-internet-feel-like-a-shortwave-radio-again/
+- [2 days ago] Radio Garden - Wikipedia
+  https://en.wikipedia.org/wiki/Radio_Garden
+- [date ?] WindowSwap Radio - YouTube
+  https://www.youtube.com/@WindowSwapOfficial
+- [3 weeks ago] Radio Garden – Explore live radio by rotating the globe
+  https://radio.garden/
+- [November 8, 2022] Announcing a side project in /r/InternetIsBeautiful - Indie Hackers
+  https://www.indiehackers.com/post/announcing-a-side-project-in-r-internetisbeautiful-8f93c05374
+- [July 3, 2025] 50 Weird Websites That Will Leave You Scratching Your Head
+  https://neefox.com/blog/weird-websites
+- [3 weeks ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
+- [May 14, 2025] 40+ Fun & Cool Websites to Cure Boredom in 2025
+  https://edgeone.ai/blog/details/fun-cool-websites-to-cure-boredom
+- [May 29, 2026] r/InternetIsBeautiful - Subreddit Stats & Analysis
+  https://gummysearch.com/r/InternetIsBeautiful/
+- [September 26, 2018] Conserve the Sound, an Online Museum for Old Technology Sounds
+  https://kottke.org/18/09/conserve-the-sound-an-online-museum-for-old-technology-sounds
+- [September 7, 2018] Online Museum Is Preserving 'Endangered' Sounds for Future Generations | Mental Floss
+  https://www.mentalfloss.com/article/556525/online-museum-saving-endangered-noises-conserve-the-sound
+- [January 24, 2016] Take a Virtual Tour of the Museum of Endangered Sounds
+  https://www.mentalfloss.com/article/74182/take-virtual-tour-museum-endangered-sounds
+- [August 31, 2025] The Museum of Endangered Sounds: Preserving Our Vanishing Auditory Heritage for Posterity - Wonderful Museums
+  https://www.wonderfulmuseums.com/museum/museum-of-endangered-sounds/
+- [November 27, 2020] museum of endangered sounds - about curiosity
+  https://www.aboutcuriosity.com/museum-of-endangered-sounds/
+- [March 1, 2013] Visit the Museum of Endangered Sounds, and Experience a Blast from Technology's Past | Open Culture
+  https://www.openculture.com/2013/02/visit_the_museum_of_endangered_sounds.html
+- [February 12, 2019] Where the Sounds of Your Childhood Go to Rest
+  https://melmagazine.com/en-us/story/where-the-sounds-of-your-childhood-go-to-rest
+- [date ?] Museum of Lost Sounds - BigSoundBank
+  https://bigsoundbank.com/museumofsounds/
+- [May 30, 2012] museum of endangered sounds
+  https://www.designboom.com/technology/museum-of-endangered-sounds/
 
 ## Hooks derived from the above
-I'll search for these delightful corners of the internet.
-Let me search for more living/ongoing projects and creator hobbyist things.
-I have plenty of material. Let me do one more search to round out with some more obscure single-purpose/ambient gems.
-- 
-Internet Roadtrip — thousands of players collectively control a virtual car through Google Street View, voting in real time on where to go; a delightful "Twitch plays self-driving car" social experiment by Neal Agarwal
- — https://neal.fun/internet-roadtrip/
-- 
-Infinite Craft — start with earth, air, fire, and water and combine them, with a language model inventing a new element for every combination, so recipes get strange fast
- — https://neal.fun/infinite-craft/
-- 
-The Password Game — write a password against a stack of rules that keeps absurdly growing: add a Roman numeral, a chess move, the current moon phase, a leap year
- — https://neal.fun/password-game/
-- 
-Window Swap — built during 2020 lockdowns, each click opens a user-submitted ten-minute video shot from a real window in someone's home, with contributors from every continent
- — https://window-swap.com
-- 
-Radio Garden — listen to live radio all over the world by navigating and spinning an interactive globe
+I'll search for genuinely weird and delightful corners of the current internet.
+Let me search for more living/ongoing projects and wholesome corners to round out the list.
+I have enough for a rich list. Let me do one more search for a couple of additional living/hobbyist projects to round it out.
+- **The Useless Web** — 
+A portal built by Australian developer Tim Holman that, with a single click, randomly directs you to a variety of bizarre single-purpose pages — a true digital rabbit hole
+ — https://theuselessweb.com
+- **Neal.fun (Internet Roadtrip)** — 
+A multiplayer drive across North America in Google Street View where every few seconds the crowd of viewers votes on the next direction; the car started in Boston and has been heading north
+ — https://neal.fun/internet-roadtrip
+- **Neal.fun (The Deep Sea)** — 
+Scroll from the surface of the ocean down to the Challenger Deep at 10,924 meters, with each species labeled at the depth where it's found, ending in pitch dark
+ — https://neal.fun/deep-sea
+- **Neal.fun (Stimulation Clicker)** — 
+A 2025 game that begins calm and degrades into a parody of the modern internet, with notifications, autoplay videos, ad pop-ups, and a sidebar of fake friends asking for attention
+ — https://neal.fun/stimulation-clicker
+- **Pointer Pointer** — 
+Made by Amsterdam design studio Moniker: hold your cursor still anywhere on the page and it loads a photograph of a real person pointing at that exact location
+ — https://pointerpointer.com
+- **Radio Garden** — 
+Began in 2016 as an exhibition project commissioned by the Netherlands Institute for Sound and Vision, created by Studio Puckey and Moniker
+, letting you 
+explore live radio by rotating the globe
  — https://radio.garden
-- 
-Conserve the Sound — a website archiving recordings of the sounds made by old phones, rubber stamps, pinball machines, cameras, typewriters, fans, and video game consoles from 1910 onwards
+- **WindowSwap** — 
+Look out of someone else's window from anywhere in the world, from snowy rooftops in Sweden to beaches in Thailand — it's soul-soothing
+ — https://window-swap.com
+- **Cat Bounce** — 
+Cats bounce around the browser window and you can drag, toss, and summon more of them; silly, safe, and works on mobile
+ — https://cat-bounce.com
+- **Zoomquilt 2** — 
+An endlessly zooming surrealistic painting created collaboratively by multiple illustrators, navigable with the arrow keys, creating a mesmerizing illusion of infinite depth
+ — https://zoomquilt2.com
+- **Paper Toilet** — 
+A web page featuring a single toilet paper roll on a black screen — scroll, and the rest is weird internet history
+ — https://paper-toilet.com
+- **The Password Game** — 
+You write a password against a stack of rules that keeps growing: add a Roman numeral, add a chess move, add the current moon phase, contain a leap year
+ — https://neal.fun/password-game
+- **Infinite Craft** — 
+Start with the four classical elements and combine them; the page uses a language model to invent a new element for every combination
+ — https://neal.fun/infinite-craft
+- **Asteroid Launcher** — 
+Pick a city, asteroid material, size, and angle, and the page calculates crater diameter, casualty estimate, fireball radius, and shattered-window distance, drawn from peer-reviewed impact models
+ — https://neal.fun/asteroid-launcher
+- **The Museum of Endangered Sounds** — 
+Since 2012 an archive recording and uploading the clicking, whirring, and beeping sounds of outdated devices, more interested in preserving experiences than physical artifacts
+ — https://savethesounds.info
+- **Conserve the Sound** — 
+An online museum for vanishing and endangered sounds — dial telephones, walkmans, typewriters, 56k modems — accompanied by interviews
  — https://www.conservethesound.de
-- 
-Drive and Listen — pick a city and the page plays a driver-perspective dashcam video from that city's streets paired with a local FM station, so you can ride along Tokyo with Japanese pop playing
- — https://driveandlisten.herokuapp.com
-- 
-Live From the Abyss — a 24-hour livestream from the deep ocean floor, mostly dark, occasionally a shrimp or an isopod, and oddly restful
- — https://livefromtheabyss.com
-- 
-Bouncy Balls — started as a classroom volume meter: the microphone listens to the room and bouncing balls (or emoji, or eyes) jump in proportion to the sound
- — https://bouncyballs.org
-- 
-Drift FM — a small always-on ambient internet radio with no algorithm and no queue, playing tracks back to back without skipping or recommending
- — https://drift.1mb.dev
-- 
-The Useless Web Index — a curated archive of weird single-purpose sites maintained by Steve Lambert, going deeper into older entries the front page no longer surfaces
+- **The Useless Web Index** — 
+A curated archive of weird single-purpose sites maintained by Steve Lambert that goes deeper into older entries the front page no longer surfaces
  — https://theuselesswebindex.com
-- 
-Koalas to the Max — reveal a hidden image by clicking dots that split into ever-smaller circles
- — https://koalastothemax.com
-- 
-Zoomquilt — a really neat art project where different artists' works are stitched together to create an endless zoom, morphing from one magical scene to another without ever stopping
- — https://zoomquilt.org
-- 
-Find the Invisible Cow — a weird game where your mouse hunts a cow you can't see but can hear, with the "MOOs" growing louder the closer you get
- — https://findtheinvisiblecow.com
-- 
-MapCrunch — takes you around the globe with Google Maps street views, featuring a different curated interesting or unusual location each day, or pick a country to explore
- — https://www.mapcrunch.com

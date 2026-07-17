@@ -3,74 +3,69 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "Thousands of strangers driving one car by committee",
-    "blurb": "It's Google Street View, but the steering wheel is a group vote — thousands of people cram in and democratically inch a virtual car down real roads. Somehow it moves. Slowly. Beautifully.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "Twitch-plays-a-road-trip energy"
+    "title": "A cross-country road trip where thousands of strangers vote on every turn",
+    "blurb": "Neal.fun crammed the whole internet into one car and let the crowd steer through Google Street View. It started in Boston, it's been drifting north, and nobody's fully in charge — it's like a family road trip where everyone's a backseat driver.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "foundNote": "one car, thousands of hands on the wheel"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker game that slowly turns into your worst screen-time day",
+    "blurb": "It starts calm, then piles on autoplay videos, notifications, ad pop-ups and needy fake friends until the whole thing is a screaming diorama of the modern internet. It's a joke. It's also a mirror. Uncomfortable.",
+    "url": "https://neal.fun/stimulation-clicker"
   },
   {
     "id": "gw-password-game",
-    "title": "A password form that slowly loses its mind",
-    "blurb": "Make a password. Easy. Now it needs a Roman numeral, a chess move, the current phase of the moon, and a chicken you have to keep alive. You will not finish. Nobody finishes.",
-    "url": "https://neal.fun/password-game/"
+    "title": "A password field that keeps inventing insane new rules",
+    "blurb": "Make a password. Now add a Roman numeral. Now a chess move. Now the current phase of the moon. It's the login form from your nightmares and you will absolutely lose an hour to it.",
+    "url": "https://neal.fun/password-game",
+    "foundNote": "your caps-lock will never recover"
+  },
+  {
+    "id": "gw-asteroid-launcher",
+    "title": "Drop an asteroid on your hometown and get a detailed casualty report",
+    "blurb": "Pick a city, a rock, and an angle, and it uses real impact models to tell you the crater size, fireball radius, and how far the windows shatter. Weirdly educational. Do not aim it at your ex's zip code.",
+    "url": "https://neal.fun/asteroid-launcher",
+    "foundNote": "peer-reviewed doom"
+  },
+  {
+    "id": "gw-zoomquilt2",
+    "title": "An infinite painting you fall into forever",
+    "blurb": "A surreal illustration that zooms endlessly inward, hand-painted by a bunch of artists passing the baton. Hit the arrow keys and free-fall through a dream that never hits the bottom. Screensaver energy in the best way.",
+    "url": "https://zoomquilt2.com",
+    "foundNote": "the sequel nobody asked for, everybody needed"
+  },
+  {
+    "id": "gw-save-the-sounds",
+    "title": "A museum recording the beeps and whirrs of dead machines",
+    "blurb": "Since 2012 someone's been archiving the clicks, whirrs and chimes of gear the world left behind — the sounds you didn't know you'd miss until they were gone. Turn up your speakers and get haunted, gently.",
+    "url": "https://savethesounds.info",
+    "foundNote": "preserving vibes since 2012"
   },
   {
     "id": "gw-conserve-the-sound",
-    "title": "A museum for the noises old machines used to make",
-    "blurb": "Rotary phones, typewriters, rubber stamps, dying game consoles — an archive of the exact clicks and whirs that furniture used to have. Your ears will time-travel to 1997 instantly.",
-    "url": "https://www.conservethesound.de",
-    "foundNote": "sounds from 1910 onward"
+    "title": "An online museum of dial telephones, Walkmans, and the 56k modem scream",
+    "blurb": "A German archive lovingly recording sounds that are quietly going extinct — including, yes, the dial-up handshake that still lives rent-free in your skull. Pairs disturbingly well with our Soundboard.",
+    "url": "https://www.conservethesound.de"
   },
   {
-    "id": "gw-bouncy-balls",
-    "title": "A screen full of balls that freak out when you're loud",
-    "blurb": "Born as a classroom volume meter — the mic listens to the room and the balls (or emoji, or googly eyes) leap higher the noisier things get. Yell at it. It's cathartic.",
-    "url": "https://bouncyballs.org"
-  },
-  {
-    "id": "gw-drift-fm",
-    "title": "An internet radio with zero algorithm and zero opinions",
-    "blurb": "No queue, no recommendations, no 'because you listened to.' Just tracks played back to back like a station run by someone who trusts your taste. Refreshing, honestly.",
-    "url": "https://drift.1mb.dev",
-    "foundNote": "always-on, never skips"
-  },
-  {
-    "id": "gw-useless-web-index",
-    "title": "The curated back-catalog of pointless websites",
-    "blurb": "Someone actually archived the weird single-purpose corners of the web so they don't vanish. It's a card catalog for stuff that does exactly one dumb glorious thing.",
-    "url": "https://theuselesswebindex.com",
-    "foundNote": "maintained by Steve Lambert"
+    "id": "gw-find-the-invisible-cow",
+    "title": "A game where a voice screams COW as you hunt an invisible cow",
+    "blurb": "Move your mouse around a blank page while a very intense narrator gets louder the closer you get to the hidden cow. Objectively stupid. Physically impossible to stop playing. Bring headphones or don't — your call.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your volume down first, trust us"
   },
   {
     "id": "gw-koalas-to-the-max",
-    "title": "Click dots until a hidden picture appears",
-    "blurb": "Every circle you touch splits into four smaller ones, and slowly a secret image surfaces from the pixel soup. You'll tell yourself you'll stop. You won't.",
+    "title": "Click a big blob and it splits into smaller and smaller dots into a picture",
+    "blurb": "One giant circle. You poke it, it splits into four, they split into four, and eventually a koala emerges from pure recursion. Calming, hypnotic, and secretly a fractal. Great for low-stim brain-fog days.",
     "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "title": "A game where you hunt a cow you can only hear",
-    "blurb": "Move your mouse around and it MOOs louder as you get closer to an invisible cow. That's the whole thing. It is inexplicably shouting at you and you love it.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume up, sorry"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "title": "A teleport button for random corners of Earth",
-    "blurb": "Drops you into a Street View somewhere weird and specific — an empty road in Mongolia, a gas station in New Zealand. Featured spot changes daily, or pick a country and wander.",
-    "url": "https://www.mapcrunch.com"
-  },
-  {
     "id": "gw-pug-in-a-rug",
-    "title": "A pug you can tuck into a blanket, forever",
-    "blurb": "Click the pug. It gets covered by a rug. Click again. Uncovered. There is no score, no level, no BSOD boss — just a dog and your peace of mind.",
-    "url": "https://puginarug.com"
-  },
-  {
-    "id": "gw-lhc-destroyed-world",
-    "title": "A site that confirms the Large Hadron Collider hasn't ended the world",
-    "blurb": "One giant word — usually 'NO' — updated to reassure you that Switzerland's particle smasher has not yet swallowed reality. Simpler than the news, more honest too.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "foundNote": "reassuring since the 2000s"
+    "title": "A pug. In a rug. That is the site.",
+    "blurb": "You scroll, a pug tucks itself deeper into a rug. That's the transaction. No lore, no levels, no microtransactions — just a very cozy dog and your dwindling free time.",
+    "url": "https://puginarug.com",
+    "foundNote": "peak wholesome, zero notes"
   }
 ];
