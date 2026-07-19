@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-mapcrunch",
+    "kind": "site",
+    "era": "current",
+    "title": "Get teleported to a random spot on Earth",
+    "blurb": "One button drops you into Street View somewhere unexpected — a mountain road, a parking lot, the end of the world. Guess where you are.",
+    "url": "https://www.mapcrunch.com",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.677Z"
+  },
+  {
+    "id": "gw-weavesilk",
+    "kind": "site",
+    "era": "current",
+    "title": "Draw glowing symmetrical art with zero talent required",
+    "blurb": "Drag your mouse and it mirrors your scribbles into gorgeous kaleidoscope silk. Instant fridge-worthy masterpiece, no skill applied.",
+    "url": "http://weavesilk.com",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.584Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "A picture that reveals itself one square at a time",
+    "blurb": "Click to split fuzzy blocks into smaller blocks until a hidden koala snaps into focus. Weirdly satisfying, weirdly hypnotic.",
+    "url": "https://koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.516Z"
+  },
+  {
+    "id": "gw-wplace",
+    "kind": "site",
+    "era": "current",
+    "title": "A worldwide pixel canvas anyone can paint",
+    "blurb": "An r/place-style map of the whole planet where strangers cover the world in tiny pixel art. Come for the murals, stay for the turf wars.",
+    "url": "https://wplace.live",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.428Z"
+  },
+  {
+    "id": "gw-endangered-sounds",
+    "kind": "site",
+    "era": "current",
+    "title": "A museum for sounds tech doesn't make anymore",
+    "blurb": "The dial-up handshake, the Windows chime, the whir of a dying cassette — preserved like digital fossils. Our soundboard's spiritual ancestor.",
+    "url": "https://savethesounds.info",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.344Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A never-ending stream of strangers hugging you",
+    "blurb": "Just real people, arms open, giving you a virtual hug on loop. Deeply sincere, weirdly effective, exactly what a Tuesday needs.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.261Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "The password from your worst nightmare",
+    "blurb": "Type a password, then keep adding a Roman numeral, a chess move, today's moon phase — the rules just keep coming. Nobody has ever won peacefully.",
+    "url": "https://neal.fun/password-game",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.164Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A road trip everyone steers by committee",
+    "blurb": "One shared car, one Street View, and a vote every ten seconds on where to turn. Democracy has never gotten anyone lost so beautifully.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:34.046Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "One million checkboxes the whole internet fights over",
+    "blurb": "Check a box, it's checked for everyone. It quietly became a war between checkers and uncheckers hiding binary messages — the calmest-looking chaos online.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-07-19T06:58:33.924Z"
+  },
+  {
     "id": "gw-pug-in-a-rug",
     "kind": "site",
     "era": "current",
@@ -42,16 +132,6 @@ export default [
     "archivedAt": "2026-07-17T06:55:56.263Z"
   },
   {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password field that keeps inventing insane new rules",
-    "blurb": "Make a password. Now add a Roman numeral. Now a chess move. Now the current phase of the moon. It's the login form from your nightmares and you will absolutely lose an hour to it.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-07-17T06:55:56.052Z"
-  },
-  {
     "id": "gw-stimulation-clicker",
     "kind": "site",
     "era": "current",
@@ -60,26 +140,6 @@ export default [
     "url": "https://neal.fun/stimulation-clicker",
     "source": "weird",
     "archivedAt": "2026-07-17T06:55:55.901Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A cross-country road trip where thousands of strangers vote on every turn",
-    "blurb": "Neal.fun crammed the whole internet into one car and let the crowd steer through Google Street View. It started in Boston, it's been drifting north, and nobody's fully in charge — it's like a family road trip where everyone's a backseat driver.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-17T06:55:55.733Z"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "kind": "site",
-    "era": "current",
-    "title": "A teleport button for random corners of Earth",
-    "blurb": "Drops you into a Street View somewhere weird and specific — an empty road in Mongolia, a gas station in New Zealand. Featured spot changes daily, or pick a country and wander.",
-    "url": "https://www.mapcrunch.com",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:59.624Z"
   },
   {
     "id": "gw-find-invisible-cow",
@@ -130,16 +190,6 @@ export default [
     "url": "https://pixelsfighting.com",
     "source": "weird",
     "archivedAt": "2026-07-13T07:18:03.819Z"
-  },
-  {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "Tap-to-reveal a hidden koala from one giant fuzzy blob of squares",
-    "blurb": "Start with four huge tiles, keep tapping, and a koala slowly resolves out of the pixel soup. Weirdly hypnotic, extremely 2011, still going strong.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-07-13T07:18:03.591Z"
   },
   {
     "id": "gw-strange-website",
@@ -222,16 +272,6 @@ export default [
     "archivedAt": "2026-07-11T06:52:58.523Z"
   },
   {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A nonstop stream of strangers hugging you",
-    "blurb": "Real people, filmed opening their arms for a virtual hug, on infinite loop. It's the emotional opposite of a comments section.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-11T06:52:57.989Z"
-  },
-  {
     "id": "gw-lhc",
     "kind": "site",
     "era": "current",
@@ -270,16 +310,6 @@ export default [
     "url": "https://www.sito.org/synergy/",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:56.449Z"
-  },
-  {
-    "id": "gw-wplace",
-    "kind": "site",
-    "era": "current",
-    "title": "A live global map where the whole internet fights over pixels",
-    "blurb": "It's r/place stretched over the entire planet — pixel wars, tiny alliances, and one guy defending his flag at 3am. Refresh and watch strangers slowly build something insane together.",
-    "url": "https://wplace.live",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:56.117Z"
   },
   {
     "id": "gw-absurd-website",
@@ -1005,26 +1035,6 @@ export default [
     "archivedAt": "2026-07-01T07:41:30.216Z"
   },
   {
-    "id": "gw-museum-endangered-sounds",
-    "kind": "site",
-    "era": "current",
-    "title": "A museum of dial-up modems and other dead tech noises",
-    "blurb": "Dial-up handshakes, old console boots, cassette clunks — audio fossils from the machines we grew up on, preserved before they vanish forever. Basically our soundboard's ancestor.",
-    "url": "https://savethesounds.info",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.327Z"
-  },
-  {
-    "id": "gw-one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One million checkboxes anyone on Earth can toggle",
-    "blurb": "A page of a million shared checkboxes where every click flips it for everyone, everywhere. People started encoding secret binary messages in it, because of course they did.",
-    "url": "https://onemillioncheckboxes.com",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:29.108Z"
-  },
-  {
     "id": "gw-sandspiel-studio",
     "kind": "site",
     "era": "current",
@@ -1457,16 +1467,6 @@ export default [
     "url": "https://floor796.com",
     "source": "weird",
     "archivedAt": "2026-06-17T08:04:01.385Z"
-  },
-  {
-    "id": "gw-weavesilk",
-    "kind": "site",
-    "era": "current",
-    "title": "Drag your mouse and make glowing symmetrical art",
-    "blurb": "Wave your cursor around and it blooms into mirror-image silk patterns you didn't earn. Instant gallery opening, zero talent required.",
-    "url": "http://weavesilk.com",
-    "source": "weird",
-    "archivedAt": "2026-06-17T08:04:01.178Z"
   },
   {
     "id": "gw-typelit",

@@ -2,70 +2,73 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-internet-roadtrip",
-    "title": "A cross-country road trip where thousands of strangers vote on every turn",
-    "blurb": "Neal.fun crammed the whole internet into one car and let the crowd steer through Google Street View. It started in Boston, it's been drifting north, and nobody's fully in charge — it's like a family road trip where everyone's a backseat driver.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "one car, thousands of hands on the wheel"
+    "id": "gw-one-million-checkboxes",
+    "title": "One million checkboxes the whole internet fights over",
+    "blurb": "Check a box, it's checked for everyone. It quietly became a war between checkers and uncheckers hiding binary messages — the calmest-looking chaos online.",
+    "url": "https://onemillioncheckboxes.com",
+    "foundNote": "peak collaborative-nonsense energy"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that slowly turns into your worst screen-time day",
-    "blurb": "It starts calm, then piles on autoplay videos, notifications, ad pop-ups and needy fake friends until the whole thing is a screaming diorama of the modern internet. It's a joke. It's also a mirror. Uncomfortable.",
-    "url": "https://neal.fun/stimulation-clicker"
+    "id": "gw-internet-roadtrip",
+    "title": "A road trip everyone steers by committee",
+    "blurb": "One shared car, one Street View, and a vote every ten seconds on where to turn. Democracy has never gotten anyone lost so beautifully.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "foundNote": "backseat drivers welcome"
   },
   {
     "id": "gw-password-game",
-    "title": "A password field that keeps inventing insane new rules",
-    "blurb": "Make a password. Now add a Roman numeral. Now a chess move. Now the current phase of the moon. It's the login form from your nightmares and you will absolutely lose an hour to it.",
+    "title": "The password from your worst nightmare",
+    "blurb": "Type a password, then keep adding a Roman numeral, a chess move, today's moon phase — the rules just keep coming. Nobody has ever won peacefully.",
     "url": "https://neal.fun/password-game",
-    "foundNote": "your caps-lock will never recover"
+    "foundNote": "your password must contain a leap year"
   },
   {
-    "id": "gw-asteroid-launcher",
-    "title": "Drop an asteroid on your hometown and get a detailed casualty report",
-    "blurb": "Pick a city, a rock, and an angle, and it uses real impact models to tell you the crater size, fireball radius, and how far the windows shatter. Weirdly educational. Do not aim it at your ex's zip code.",
-    "url": "https://neal.fun/asteroid-launcher",
-    "foundNote": "peer-reviewed doom"
+    "id": "gw-nicest-place",
+    "title": "A never-ending stream of strangers hugging you",
+    "blurb": "Just real people, arms open, giving you a virtual hug on loop. Deeply sincere, weirdly effective, exactly what a Tuesday needs.",
+    "url": "https://thenicestplace.net",
+    "foundNote": "the opposite of the comments section"
   },
   {
-    "id": "gw-zoomquilt2",
-    "title": "An infinite painting you fall into forever",
-    "blurb": "A surreal illustration that zooms endlessly inward, hand-painted by a bunch of artists passing the baton. Hit the arrow keys and free-fall through a dream that never hits the bottom. Screensaver energy in the best way.",
-    "url": "https://zoomquilt2.com",
-    "foundNote": "the sequel nobody asked for, everybody needed"
-  },
-  {
-    "id": "gw-save-the-sounds",
-    "title": "A museum recording the beeps and whirrs of dead machines",
-    "blurb": "Since 2012 someone's been archiving the clicks, whirrs and chimes of gear the world left behind — the sounds you didn't know you'd miss until they were gone. Turn up your speakers and get haunted, gently.",
+    "id": "gw-endangered-sounds",
+    "title": "A museum for sounds tech doesn't make anymore",
+    "blurb": "The dial-up handshake, the Windows chime, the whir of a dying cassette — preserved like digital fossils. Our soundboard's spiritual ancestor.",
     "url": "https://savethesounds.info",
-    "foundNote": "preserving vibes since 2012"
+    "foundNote": "if you know the modem noise by heart, welcome home"
   },
   {
-    "id": "gw-conserve-the-sound",
-    "title": "An online museum of dial telephones, Walkmans, and the 56k modem scream",
-    "blurb": "A German archive lovingly recording sounds that are quietly going extinct — including, yes, the dial-up handshake that still lives rent-free in your skull. Pairs disturbingly well with our Soundboard.",
-    "url": "https://www.conservethesound.de"
+    "id": "gw-wplace",
+    "title": "A worldwide pixel canvas anyone can paint",
+    "blurb": "An r/place-style map of the whole planet where strangers cover the world in tiny pixel art. Come for the murals, stay for the turf wars.",
+    "url": "https://wplace.live",
+    "foundNote": "place a pixel, leave a legend"
   },
   {
-    "id": "gw-find-the-invisible-cow",
-    "title": "A game where a voice screams COW as you hunt an invisible cow",
-    "blurb": "Move your mouse around a blank page while a very intense narrator gets louder the closer you get to the hidden cow. Objectively stupid. Physically impossible to stop playing. Bring headphones or don't — your call.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume down first, trust us"
+    "id": "gw-koalas",
+    "title": "A picture that reveals itself one square at a time",
+    "blurb": "Click to split fuzzy blocks into smaller blocks until a hidden koala snaps into focus. Weirdly satisfying, weirdly hypnotic.",
+    "url": "https://koalastothemax.com",
+    "foundNote": "the koala was there the whole time"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "Click a big blob and it splits into smaller and smaller dots into a picture",
-    "blurb": "One giant circle. You poke it, it splits into four, they split into four, and eventually a koala emerges from pure recursion. Calming, hypnotic, and secretly a fractal. Great for low-stim brain-fog days.",
-    "url": "https://koalastothemax.com"
+    "id": "gw-weavesilk",
+    "title": "Draw glowing symmetrical art with zero talent required",
+    "blurb": "Drag your mouse and it mirrors your scribbles into gorgeous kaleidoscope silk. Instant fridge-worthy masterpiece, no skill applied.",
+    "url": "http://weavesilk.com",
+    "foundNote": "screensaver-brain activated"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug. In a rug. That is the site.",
-    "blurb": "You scroll, a pug tucks itself deeper into a rug. That's the transaction. No lore, no levels, no microtransactions — just a very cozy dog and your dwindling free time.",
-    "url": "https://puginarug.com",
-    "foundNote": "peak wholesome, zero notes"
+    "id": "gw-mapcrunch",
+    "title": "Get teleported to a random spot on Earth",
+    "blurb": "One button drops you into Street View somewhere unexpected — a mountain road, a parking lot, the end of the world. Guess where you are.",
+    "url": "https://www.mapcrunch.com",
+    "foundNote": "the original 'where the heck am I' machine"
+  },
+  {
+    "id": "gw-trust",
+    "title": "An interactive game about why we trust each other",
+    "blurb": "A charming little playable comic that teaches game theory through cheating and cooperation. Smarter than it has any right to be, and free.",
+    "url": "https://ncase.me/trust",
+    "foundNote": "by ncase, the kind of thing the old web was made for"
   }
 ];
