@@ -2,6 +2,66 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-omfgdogs",
+    "kind": "site",
+    "era": "current",
+    "title": "Infinitely running dogs set to hypnotic music",
+    "blurb": "A loop of little dogs sprinting forever across your screen while a chiptune-adjacent track loops with them. There's no point and that IS the point.",
+    "url": "https://omfgdogs.com",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:25.693Z"
+  },
+  {
+    "id": "gw-net-art-anthology",
+    "kind": "site",
+    "era": "current",
+    "title": "A museum for the weird art the early web made",
+    "blurb": "Rhizome archived a new piece of net art every week for two years and gave each its own little microsite. It's a lovingly kept graveyard-slash-shrine for the stuff GeoCities almost lost.",
+    "url": "https://anthology.rhizome.org",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:24.938Z"
+  },
+  {
+    "id": "gw-sandboxels",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand physics lab with hundreds of materials",
+    "blurb": "Pour lava on plants, freeze water, breed bacteria, delete the whole thing — Sandboxels is the digital ant farm that ate every study hall of 2005. Now bigger, weirder, and still gloriously pointless.",
+    "url": "https://sandboxels.r74n.com",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:24.837Z"
+  },
+  {
+    "id": "gw-wiki-roulette",
+    "kind": "site",
+    "era": "current",
+    "title": "A button that spits out a random Wikipedia page",
+    "blurb": "One click, one totally unrelated article, one hour gone. It's the bottomless rabbit hole with no algorithm trying to keep you 'engaged' — just pure feral curiosity.",
+    "url": "https://wikiroulette.co",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:24.724Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "A whole home base of polished browser experiments",
+    "blurb": "neal.fun is the good stuff: The Deep Sea, The Password Game, Absurd Trolley Problems, Stimulation Clicker — one guy quietly out-making everyone. It's what the web looked like before everything became a login wall.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:24.579Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers steering one car through Street View",
+    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote on the wheel every ten seconds, so the car crawls forward at the speed of democracy. It's a cross-country road trip with 4,000 backseat drivers and one shared radio.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-21T07:00:24.306Z"
+  },
+  {
     "id": "gw-mapcrunch",
     "kind": "site",
     "era": "current",
@@ -70,16 +130,6 @@ export default [
     "url": "https://neal.fun/password-game",
     "source": "weird",
     "archivedAt": "2026-07-19T06:58:34.164Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A road trip everyone steers by committee",
-    "blurb": "One shared car, one Street View, and a vote every ten seconds on where to turn. Democracy has never gotten anyone lost so beautifully.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.046Z"
   },
   {
     "id": "gw-one-million-checkboxes",
@@ -220,16 +270,6 @@ export default [
     "url": "https://isometric.nyc",
     "source": "weird",
     "archivedAt": "2026-07-13T07:18:02.911Z"
-  },
-  {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "One guy's home for gloriously polished browser experiments",
-    "blurb": "Neal Agarwal keeps making the exact weird interactive thing you didn't know you needed — deep-sea scrolls, absurd trolley problems, a password game that hates you. New ones keep dropping.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-07-13T07:18:02.744Z"
   },
   {
     "id": "gw-size-of-space",
@@ -1013,16 +1053,6 @@ export default [
     "url": "https://crouton.net",
     "source": "weird",
     "archivedAt": "2026-07-01T07:41:30.433Z"
-  },
-  {
-    "id": "gw-omfgdogs",
-    "kind": "site",
-    "era": "current",
-    "title": "An eternal parade of tiny dancing dogs with a loop that won't quit",
-    "blurb": "Dogs. Marching. Forever. Backed by a chiptune loop that will nest in your skull for the rest of the week. This is peak 2004 flash-site brainrot and we love it.",
-    "url": "https://omfgdogs.com",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:30.340Z"
   },
   {
     "id": "gw-long-doge",

@@ -2,73 +2,75 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-one-million-checkboxes",
-    "title": "One million checkboxes the whole internet fights over",
-    "blurb": "Check a box, it's checked for everyone. It quietly became a war between checkers and uncheckers hiding binary messages — the calmest-looking chaos online.",
-    "url": "https://onemillioncheckboxes.com",
-    "foundNote": "peak collaborative-nonsense energy"
-  },
-  {
     "id": "gw-internet-roadtrip",
-    "title": "A road trip everyone steers by committee",
-    "blurb": "One shared car, one Street View, and a vote every ten seconds on where to turn. Democracy has never gotten anyone lost so beautifully.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "backseat drivers welcome"
+    "title": "Thousands of strangers steering one car through Street View",
+    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote on the wheel every ten seconds, so the car crawls forward at the speed of democracy. It's a cross-country road trip with 4,000 backseat drivers and one shared radio.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "foundNote": "honk if you love mob rule"
   },
   {
-    "id": "gw-password-game",
-    "title": "The password from your worst nightmare",
-    "blurb": "Type a password, then keep adding a Roman numeral, a chess move, today's moon phase — the rules just keep coming. Nobody has ever won peacefully.",
-    "url": "https://neal.fun/password-game",
-    "foundNote": "your password must contain a leap year"
+    "id": "gw-neal-fun",
+    "title": "A whole home base of polished browser experiments",
+    "blurb": "neal.fun is the good stuff: The Deep Sea, The Password Game, Absurd Trolley Problems, Stimulation Clicker — one guy quietly out-making everyone. It's what the web looked like before everything became a login wall.",
+    "url": "https://neal.fun"
   },
   {
-    "id": "gw-nicest-place",
-    "title": "A never-ending stream of strangers hugging you",
-    "blurb": "Just real people, arms open, giving you a virtual hug on loop. Deeply sincere, weirdly effective, exactly what a Tuesday needs.",
-    "url": "https://thenicestplace.net",
-    "foundNote": "the opposite of the comments section"
+    "id": "gw-wiki-roulette",
+    "title": "A button that spits out a random Wikipedia page",
+    "blurb": "One click, one totally unrelated article, one hour gone. It's the bottomless rabbit hole with no algorithm trying to keep you 'engaged' — just pure feral curiosity.",
+    "url": "https://wikiroulette.co",
+    "foundNote": "you will learn about a Bulgarian dam"
   },
   {
-    "id": "gw-endangered-sounds",
-    "title": "A museum for sounds tech doesn't make anymore",
-    "blurb": "The dial-up handshake, the Windows chime, the whir of a dying cassette — preserved like digital fossils. Our soundboard's spiritual ancestor.",
-    "url": "https://savethesounds.info",
-    "foundNote": "if you know the modem noise by heart, welcome home"
+    "id": "gw-sandboxels",
+    "title": "A falling-sand physics lab with hundreds of materials",
+    "blurb": "Pour lava on plants, freeze water, breed bacteria, delete the whole thing — Sandboxels is the digital ant farm that ate every study hall of 2005. Now bigger, weirder, and still gloriously pointless.",
+    "url": "https://sandboxels.r74n.com"
   },
   {
-    "id": "gw-wplace",
-    "title": "A worldwide pixel canvas anyone can paint",
-    "blurb": "An r/place-style map of the whole planet where strangers cover the world in tiny pixel art. Come for the murals, stay for the turf wars.",
-    "url": "https://wplace.live",
-    "foundNote": "place a pixel, leave a legend"
+    "id": "gw-net-art-anthology",
+    "title": "A museum for the weird art the early web made",
+    "blurb": "Rhizome archived a new piece of net art every week for two years and gave each its own little microsite. It's a lovingly kept graveyard-slash-shrine for the stuff GeoCities almost lost.",
+    "url": "https://anthology.rhizome.org"
   },
   {
-    "id": "gw-koalas",
-    "title": "A picture that reveals itself one square at a time",
-    "blurb": "Click to split fuzzy blocks into smaller blocks until a hidden koala snaps into focus. Weirdly satisfying, weirdly hypnotic.",
-    "url": "https://koalastothemax.com",
-    "foundNote": "the koala was there the whole time"
+    "id": "gw-thispersondoesnotexist",
+    "title": "Endless faces of people who don't exist",
+    "blurb": "Refresh and a brand-new human who has never lived stares back at you, sometimes with a slightly cursed extra ear. Deeply uncanny, weirdly calming, free of charge.",
+    "url": "https://thispersondoesnotexist.com",
+    "foundNote": "none of them can see you"
   },
   {
-    "id": "gw-weavesilk",
-    "title": "Draw glowing symmetrical art with zero talent required",
-    "blurb": "Drag your mouse and it mirrors your scribbles into gorgeous kaleidoscope silk. Instant fridge-worthy masterpiece, no skill applied.",
-    "url": "http://weavesilk.com",
-    "foundNote": "screensaver-brain activated"
+    "id": "gw-findtheinvisiblecow",
+    "title": "A game that screams 'COW' louder as you get warmer",
+    "blurb": "Move your mouse around a blank page while a very committed voice hollers directions at you until you find the invisible cow. It is exactly as stupid and satisfying as it sounds.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "turn your speakers down first"
   },
   {
-    "id": "gw-mapcrunch",
-    "title": "Get teleported to a random spot on Earth",
-    "blurb": "One button drops you into Street View somewhere unexpected — a mountain road, a parking lot, the end of the world. Guess where you are.",
-    "url": "https://www.mapcrunch.com",
-    "foundNote": "the original 'where the heck am I' machine"
+    "id": "gw-koalastothemax",
+    "title": "Click a giant dot until a hidden picture appears",
+    "blurb": "Every click splits the blobs into four smaller blobs, slowly resolving a secret image out of colored pixels. It's the most relaxing thing you can do while accomplishing absolutely nothing.",
+    "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-trust",
-    "title": "An interactive game about why we trust each other",
-    "blurb": "A charming little playable comic that teaches game theory through cheating and cooperation. Smarter than it has any right to be, and free.",
-    "url": "https://ncase.me/trust",
-    "foundNote": "by ncase, the kind of thing the old web was made for"
+    "id": "gw-puginarug",
+    "title": "A pug hidden in a very busy rug",
+    "blurb": "Find the pug. That's the game. That's the whole website. Peak 'my aunt forwarded this' energy and honestly a good time.",
+    "url": "https://puginarug.com"
+  },
+  {
+    "id": "gw-sadtrombone",
+    "title": "An on-demand womp-womp button",
+    "blurb": "One big button, one perfect descending sad trombone, infinite uses. Keep it open in a tab for every meeting, mistake, and minor tragedy.",
+    "url": "https://sadtrombone.com",
+    "foundNote": "online and disappointing since forever"
+  },
+  {
+    "id": "gw-omfgdogs",
+    "title": "Infinitely running dogs set to hypnotic music",
+    "blurb": "A loop of little dogs sprinting forever across your screen while a chiptune-adjacent track loops with them. There's no point and that IS the point.",
+    "url": "https://omfgdogs.com",
+    "foundNote": "a relic that refuses to die"
   }
 ];

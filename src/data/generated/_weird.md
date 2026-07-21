@@ -1,150 +1,171 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-07-19T06:57:52.909Z
-# web_search_requests = 5
+# Generated 2026-07-21T06:59:05.085Z
+# web_search_requests = 6
 
 ## Search queries Claude actually ran
-- weird single-purpose websites 2025 roundup
-- strange delightful websites to visit right now
-- One Million Checkboxes Internet Roadtrip collaborative weird project
-- quirky personal website projects hacker news show and tell 2025
-- Wplace WindowSwap radio.garden ongoing wholesome web projects 2026
+- weird useless websites roundup 2025 delightful
+- quirky single-purpose websites list fun
+- neal.fun Internet Roadtrip collaborative project
+- weird wonderful websites hacker news show and tell 2026
+- radio.garden window swap ambient websites explore world
+- long-running quirky internet art project ongoing weird web
 
 ## Sources returned ([page_age] title / url)
-- [July 15, 2025] Top 20 Weird Websites to Visit in [year]
-  https://elementor.com/blog/top-weird-websites-to-visit/
-- [4 weeks ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
-  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
-- [May 18, 2026] 15 Weirdest Websites On The Internet (2025)
-  https://www.techbloat.com/15-weirdest-websites-on-the-internet-2025.html
-- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
-  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
-- [date ?] 20 Best Useless Websites On The Internet In 2025
-  https://www.uxie.design/blog/20-best-useless-websites-on-the-internet-in-2025
-- [May 1, 2025] 8 Useless Websites and What We Can Learn from Them
-  https://www.designrush.com/agency/website-design-development/trends/pointless-websites
-- [December 19, 2025] Japan's 'weird' websites - Asian Tech Roundup
-  https://www.computing.co.uk/news/2025/japan-s-weird-websites-asian-tech-roundup
-- [March 17, 2026] Top 15 Weird Websites for Fun and Entertainment in 2025
-  https://wegic.ai/blog/best-weird-websites-for-fun
+- [date ?] 30 Random Useless Websites: 2025's Ultimate Time-Killers
+  https://www.useless-web.com/
 - [February 27, 2026] 20 best useless websites to visit when you’re bored | Webflow Blog
   https://webflow.com/blog/useless-websites
+- [date ?] 20 Best Useless Websites On The Internet In 2025
+  https://www.uxie.design/blog/20-best-useless-websites-on-the-internet-in-2025
+- [March 17, 2026] Take Me to a Useless Page: The Best Time-Wasting Websites
+  https://wegic.ai/blog/best-time-wasting-websites
+- [date ?] The Useless Web: A Curated Guide to Fun, Useless Sites
+  https://www.theuselessweb.online/
+- [June 4, 2025] 32 Useless Websites That Are Fun to Use in 2025 - Stripped
+  https://strippedfilm.com/useless-websites/
+- [May 19, 2025] 50 Weird Websites And Web Apps In 2025
+  https://devtechnosys.com/insights/weird-websites-and-web-apps/
+- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
+  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
+- [May 1, 2025] 8 Useless Websites and What We Can Learn from Them
+  https://www.designrush.com/agency/website-design-development/trends/pointless-websites
+- [1 month ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
+- [February 16, 2013] The Absolutely Nonsensical List Of Interesting Single-Serving Websites
+  https://www.makeuseof.com/tag/the-absolutely-nonsensical-list-of-interesting-single-serving-websites/
 - [September 14, 2025] 55 weird websites: Explore the strange and unusual sites
   https://www.hostinger.com/tutorials/weird-websites/
+- [July 15, 2025] Top 20 Weird Websites to Visit in [year]
+  https://elementor.com/blog/top-weird-websites-to-visit/
 - [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
   https://middlehost.com/blog/100-weird-websites/
 - [January 28, 2026] Top 20 Weird Websites to Visit in 2026 - DiviFlash
   https://diviflash.com/weird-websites/
-- [September 14, 2025] Top 55 weird websites to visit in 2026
-  https://www.hostinger.com/tutorials/weird-websites/
-- [January 27, 2026] 80 Fun Websites To Waste Time on When You're Bored - Parade
-  https://parade.com/1116816/marynliles/fun-websites/
-- [July 15, 2025] Top 20 Weird Websites to Visit in [year]
-  https://elementor.com/blog/top-weird-websites-to-visit/
-- [date ?] Curious and Wondrous Travel Destinations - Atlas Obscura
-  https://www.atlasobscura.com/
-- [January 26, 2026] 19 Weirdest Websites To Visit [2026 Weird Edition]
-  https://www.operationtechnology.com/blog/top-19-weird-websites/
-- [July 16, 2024] Top 14 Weirdest Websites on the Internet: Explore the Strangest and Most Unique Online Destinations | TrevNet Media Corp.
-  https://www.trevnetmedia.com/blog/3332/weirdest-websites-on-the-internet/
-- [June 9, 2023] Top 120+ strange websites on Google in 2026 [updated list]
-  https://replug.io/blog/strange-websites
-- [2 weeks ago] Top 101 Weird Websites to Visit for Fun and Profit [2026]
-  https://createaprowebsite.com/weird-websites-to-visit/
-- [June 25, 2024] One Million Checkboxes · eieio.games
-  https://eieio.games/blog/one-million-checkboxes/
-- [April 5, 2026] One Million Checkboxes - Wikipedia
-  https://en.wikipedia.org/wiki/One_Million_Checkboxes
-- [February 3, 2025] One Million Checkboxes | CoRecursive Podcast
-  https://corecursive.com/one-million-checkboxes-with-nolen-royalty/
-- [May 16, 2025] Internet users steer virtual car across America in roadtrip ...
-  https://www.perplexity.ai/page/internet-users-steer-virtual-c-apEcBDeCSm28h3946GPu1A
-- [January 3, 2026] One Million Checkboxes — Grokipedia
-  https://grokipedia.com/page/one_million_checkboxes
-- [July 6, 2024] bensozia: One Million Check Boxes: The Internet in Nutshell
-  http://benedante.blogspot.com/2024/07/one-million-check-boxed-internet-in.html
-- [date ?] Million Checkboxes - Real-Time Collaborative Grid
-  https://one-million-checkboxes-project.vercel.app/
-- [July 25, 2024] Scaling One Million Checkboxes to 650,000,000 checks · eieio.games
-  https://eieio.games/blog/scaling-one-million-checkboxes/
-- [January 28, 2026] Ask HN: Share your personal website | Hacker News
-  https://news.ycombinator.com/item?id=46618714
-- [December 29, 2025] Ask HN: Those making $500/month on side projects in 2025 – Show and tell | Hacker News
-  https://news.ycombinator.com/item?id=46307973
-- [date ?] Best Show HN Projects and Startup Launches
-  https://bestofshowhn.com/
-- [January 13, 2026] The Most Popular Blogs of Hacker News in 2025 | Hacker News
-  https://news.ycombinator.com/item?id=46478377
-- [January 2, 2026] The most popular blogs of Hacker News in 2025
-  https://simonwillison.net/2026/Jan/2/most-popular-blogs-of-hacker-news/
-- [July 20, 2024] Ask HN: Good Examples of Personal Websites | Hacker News
-  https://news.ycombinator.com/item?id=40989144
-- [date ?] 100 Best Hacker News Startups of the 2025
-  https://bestofshowhn.com/2025
-- [December 29, 2025] Top personal blogs on Hacker News in 2025, by points | Hacker News
-  https://news.ycombinator.com/item?id=46426199
-- [August 7, 2024] Show HN: A Simple Directory Website for Unique Personal Websites and Blogs | Hacker News
-  https://news.ycombinator.com/item?id=41180991
-- [4 days ago] WindowSwap - Wikipedia
+- [January 2, 2026] 50 Fun Websites: Cool Websites to Cure Boredom (2026)
+  https://theninehertz.com/blog/cool-fun-websites
+- [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
+  https://laughingsquid.com/internet-roadtrip-simulator/
+- [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
+  https://ground.news/article/an-ingenious-roadtrip-simulator-where-players-collectively-vote-on-the-direction-every-ten-seconds
+- [date ?] Internet Roadtrip Unblocked - Play Free Online | Neal.fun
+  https://nealfun-unblocked.com/internet-roadtrip
+- [July 31, 2025] Join Thousands Of Other People Trying To Drive An Imaginary Car To Canada - Kotaku
+  https://kotaku.com/internet-roadtrip-road-trip-neal-agarwal-fun-1851780768
+- [date ?] Internet Roadtrip
+  https://en.wikipedia.org/wiki/Internet_Roadtrip
+- [May 6, 2025] Neal.fun's Internet Roadtrip - Waxy.org
+  https://waxy.org/2025/05/neal-funs-internet-roadtrip/
+- [date ?] Key Points | Internet Roadtrip
+  https://internet-roadtrip.github.io/
+- [date ?] Internet Roadtrip: Vote‑Driven Adventure in Street View
+  https://internet-roadtrip.com/
+- [date ?] Internet Roadtrip: You Steer, the Internet Goes Wild!
+  https://internetroadtrip.net/
+- [date ?] Neal Agarwal
+  https://en.wikipedia.org/wiki/Neal_Agarwal
+- [18 hours ago] The Hacker News | #1 Trusted Source for Cybersecurity News
+  https://thehackernews.com/
+- [2 weeks ago] Top 35 Cyber Security News Websites for Information Security Pros in 2026
+  https://news.feedspot.com/cyber_security_news_websites/
+- [January 2, 2026] The Top 10 Cybersecurity & Hacking News Outlets In 2026
+  https://caniphish.com/blog/cybersecurity-news-outlets
+- [date ?] Hacker News Daily
+  https://www.daemonology.net/hn-daily/
+- [date ?] GitHub - cheeaun/awesome-hacker-news: Awesome Hacker News: a collection of awesome Hacker News apps, libraries, resources and shiny things. · GitHub
+  https://github.com/cheeaun/awesome-hacker-news
+- [May 29, 2024] Ask HN: What sites are similar to Hacker News? | Hacker News
+  https://news.ycombinator.com/item?id=40478422
+- [17 hours ago] Show | Hacker News
+  https://news.ycombinator.com/show
+- [December 11, 2021] Ask HN: Where do you find weird and wonderful future tech nowadays? | Hacker News
+  https://news.ycombinator.com/item?id=29509694
+- [6 hours ago] New Show | Hacker News
+  https://news.ycombinator.com/shownew
+- [18 hours ago] Top Links | Hacker News
+  https://news.ycombinator.com/best
+- [April 15, 2025] Top 5 Most Secret Websites You Should Know About | by Ronak Bhatt | Medium
+  https://medium.com/@ronakabhattrz/top-5-most-secret-websites-you-should-know-about-9c58c2eb3044
+- [May 7, 2025] 10 Websites That Never Let You Get Bored – Explore, Play, and Be Amazed (Guaranteed!) - DEV Community
+  https://dev.to/koolkamalkishor/10-websites-that-never-let-you-get-bored-explore-play-and-be-amazed-guaranteed-51ep
+- [January 5, 2025] 10 Hidden Websites That Can Give You So Much Fun | by Bikash K. | Medium
+  https://bikash-k.medium.com/10-hidden-websites-that-can-give-you-so-much-fun-0dc8e999fb4d
+- [February 13, 2021] radio.garden - a slick worldwide radio browser | ResetEra
+  https://www.resetera.com/threads/radio-garden-a-slick-worldwide-radio-browser.376797/
+- [date ?] WindowSwap
   https://en.wikipedia.org/wiki/WindowSwap
-- [April 12, 2026] WindowSwap Is Your Literal Window To The World | Moss and Fog
-  https://mossandfog.com/windowswap-is-your-literal-window-to-the-world/
+- [date ?] WindowSwap Radio - YouTube
+  https://www.youtube.com/@WindowSwapOfficial
+- [November 3, 2025] I discovered the most addictive live radio site online—and it’s completely free
+  https://www.makeuseof.com/discovered-addictive-live-radio-site-online-and-its-free/
+- [1 month ago] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
 - [3 weeks ago] Radio Garden – Explore live radio by rotating the globe
   https://radio.garden/
-- [August 3, 2020] [Must-Visit Website]: WindowSwap - JayDeeMahs.com
-  https://www.jaydeemahs.com/must-visit-website-windowswap/
-- [date ?] Radio Garden · GitHub
-  https://github.com/radio-garden/
-- [June 3, 2026] 30 Weird & Funny Websites That Still Work in 2026 (Tested)
-  https://theguidex.com/weird-website-list/
-- [July 9, 2024] Radio Garden | Hacker News
-  https://news.ycombinator.com/item?id=40887359
-- [August 2, 2025] TIER LIST / WPLACE 🌍 & RADIO GARDEN 📻 - 01/08 - YouTube
-  https://www.youtube.com/watch?v=FUIbQpjMkpg
-- [date ?] WPlace Archive
-  https://wplace.samuelscheit.com/
+- [date ?] Top radio.garden competitors & alternatives
+  https://ahrefs.com/websites/radio.garden/competitors
+- [date ?] Art projects | net-art
+  https://net-art.org/
+- [August 6, 2015] The Data Drive presents the Weird Wide Web of underground digital art - CSMonitor.com
+  https://www.csmonitor.com/Technology/2015/0805/The-Data-Drive-presents-the-Weird-Wide-Web-of-underground-digital-art
+- [May 30, 2012] The Most Wildy Psychedelic Net.Art Rabbit Holes | The Mary Sue
+  https://www.themarysue.com/net-art-bai/
+- [March 24, 2017] Art in the age of ones and zeros: Internet art
+  https://newatlas.com/art-ones-and-zeros-netart/48505/
+- [October 12, 2015] This Art Project Might Trigger Your Internet FOMO
+  https://www.bustle.com/articles/116544-the-network-effect-interactive-art-projects-shows-the-effect-the-internet-has-on-our-anxiety
+- [June 9, 2023] Top 120+ strange websites on Google in 2026 [updated list]
+  https://replug.io/blog/strange-websites
+- [February 12, 2019] We Owe Everything to the Weird Early Web – Eye on Design
+  https://eyeondesign.aiga.org/we-owe-everything-to-the-weird-early-web/
+- [April 17, 2019] These Artist Websites Are Dizzying Works of Art | Artsy
+  https://www.artsy.net/article/artsy-editorial-lost-strange-dizzying-websites-contemporary-artists
+- [February 9, 2024] The craziest art project in internet history
+  https://thehustle.co/04112022-art-project
 
 ## Hooks derived from the above
-I'll search for genuinely weird and delightful corners of the current internet across several angles.
-Let me search for more contemporary living projects and creator show-and-tell threads to round out the list with fresher finds.
-I have a strong set. Let me do one more search to capture a few more living/collaborative and wholesome ongoing projects to round out ~15.
-- The Useless Web — one-button portal that flings you to a random pointless page every click; the gateway drug to weird-web wandering — <https://theuselessweb.com>
-- One Million Checkboxes — 
-a page with one million checkboxes where checking a box checks it for everyone
-; it became a viral battleground of checkers vs. uncheckers and secret binary messages — <https://onemillioncheckboxes.com>
-- Internet Roadtrip — 
-a crowdsourced Street View journey where participants vote every ten seconds and a steering wheel shifts as votes accumulate
-, complete with local internet radio — <https://neal.fun/internet-roadtrip>
-- The Deep Sea — 
-scroll from the ocean surface down to the Challenger Deep at 10,924 meters, with each species labeled at the depth where it's found, ending in pitch dark
- — <https://neal.fun/deep-sea>
-- The Password Game — 
-write a password against a stack of ever-growing rules: add a Roman numeral, a chess move, the current moon phase, a leap year
- — <https://neal.fun/password-game>
-- WindowSwap — 
-a site letting you explore video views through windows from around the world, a simple form of cultural exchange and virtual travel
-; it bills itself as the calmest place online — <https://window-swap.com>
-- Radio Garden — 
-spin a 3D globe and listen to live radio stations around the world, jumping from a talk show in Iceland to music in Brazil in a single click
+I'll search for delightful weird corners of the current internet.
+Let me search for more living projects and niche creator/hobbyist corners.
+Let me search for a couple more distinct categories of delightful projects.
+I have plenty of delightful finds. Here's the list.
+
+- **The Useless Web** — one giant button that flings you to a random pointless single-purpose page; the classic gateway drug to the weird web — <https://theuselessweb.com>
+- **Internet Roadtrip** (Neal Agarwal) — thousands of strangers collectively steer one virtual car through Google Street View, 
+voting on direction and radio music every ten seconds, so the car moves very slowly but gets to an agreed upon location eventually
+ — <https://neal.fun/internet-roadtrip/>
+- **neal.fun** — a whole home base of polished browser experiments; 
+standout entries include The Deep Sea, Absurd Trolley Problems, The Password Game, Internet Roadtrip, and Stimulation Clicker
+ — <https://neal.fun>
+- **Window Swap** — 
+a website allowing users to explore video views through windows from around the world, offering glimpses into everyday life in different areas
+ — <https://window-swap.com>
+- **Radio Garden** — 
+spin a green-dotted globe, click a city, and stream live local radio from that station
  — <https://radio.garden>
-- The Nicest Place on the Internet — 
-a breath of fresh air offering a continuous stream of real people giving you virtual hugs
- — <https://thenicestplace.net>
-- Pointer Pointer — 
-move your mouse across a black surface and the site finds a photo of someone pointing exactly at your pointer
- — <https://pointerpointer.com>
-- Endless Horse — 
-an ASCII horse with never-ending legs, no links or context, tempting you to test just how long the legs are
- — <https://endless.horse>
-- The Quiet Place Project — 
-a site that helps users disconnect from the noise of the internet and focus on mindfulness
-, a refreshing counterpoint to the chaos — <https://thequietplaceproject.com>
-- Museum of Endangered Sounds — 
-a nostalgia machine of audio from obsolete tech—dial-up modems, old consoles, cassette players—turning ordinary noises into digital fossils
- — <https://savethesounds.info>
-- This Is Sand — 
-click and hold to pour digital sand that slowly forms colorful layered landscapes, with no goals, levels, or rules
- — <https://thisissand.com>
-- Bees Bees Bees — 
-a hilariously pointless page showing a looping GIF of Oprah shouting "Bees!" with bees flying around, and that's basically it
- — <https://beesbeesbees.com>
-- Wplace — a collaborative worldwide pixel-art map (an r/place-style living canvas) you can paint on and explore endlessly — <https://wplace.live>
+- **A Soft Murmur** — mixable ambient soundscapes where 
+ten ambient layers stack: rain, thunder, waves, wind, fire, birds, crickets, coffee shop, singing bowl, and a steady hiss layer
+ — <https://asoftmurmur.com>
+- **Drive & Listen** — 
+pick a city and the page plays a driver-perspective dashcam video from that city's streets paired with local radio
+ — <https://driveandlisten.herokuapp.com>
+- **Pointer Pointer** — 
+it finds a photo of a hand pointing at your cursor
+, wherever you park it on screen — <https://pointerpointer.com>
+- **Cat Bounce** — 
+cats jumping up and down; visitors can make them bounce lower or higher, and a "Make it rain" button drops dozens from the sky
+ — <https://cat-bounce.com>
+- **The Zoomquilt** — 
+a single, continuously zooming image that seamlessly transitions from one bizarre and beautiful scene to the next, creating a hypnotic dreamlike effect
+ — <https://zoomquilt.org>
+- **Paper Toilet** — 
+a single toilet paper roll you can roll and unroll endlessly by scrolling up or down
+, by artist Rafaël Rozendaal — <https://papertoilet.com>
+- **The Secret Door** — 
+click a door, get teleported somewhere
+ unexpected on Earth — <https://thesecretdoor.com>
+- **Wiki Roulette** — 
+random Wikipedia pages for curious minds
+, a bottomless rabbit-hole machine — <https://wikiroulette.co>
+- **Sandboxels** (R74n) — a falling-sand physics playground of hundreds of interacting materials, now partnered onto neal.fun — <https://sandboxels.r74n.com>
+- **Net Art Anthology** (Rhizome) — a living archive that, 
+launched in early 2017, preserved a new piece of net art every week for two years, each given its own microsite with images, links, quotes, and an in-depth essay
+ — <https://anthology.rhizome.org>
