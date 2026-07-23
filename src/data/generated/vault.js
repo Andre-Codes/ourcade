@@ -2,14 +2,84 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-little-alchemy",
+    "kind": "site",
+    "era": "current",
+    "title": "Combine four elements until you accidentally invent the internet",
+    "blurb": "Little Alchemy 2 starts you with earth, air, fire and water and lets you smash things together into hundreds of increasingly absurd results — mud, life, spaceships, and eventually, yes, the internet itself. A very slow, very satisfying rabbit hole.",
+    "url": "https://littlealchemy2.com",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:19.753Z"
+  },
+  {
     "id": "gw-omfgdogs",
     "kind": "site",
     "era": "current",
-    "title": "Infinitely running dogs set to hypnotic music",
-    "blurb": "A loop of little dogs sprinting forever across your screen while a chiptune-adjacent track loops with them. There's no point and that IS the point.",
-    "url": "https://omfgdogs.com",
+    "title": "An infinite parade of dogs, running toward nothing",
+    "blurb": "OMFGDOGS is exactly what it says: a looping conga line of pixel dogs jogging across your screen to a cheerful little tune. There is no goal. There is no end. There are only dogs, and that is enough.",
+    "url": "https://www.omfgdogs.com",
     "source": "weird",
-    "archivedAt": "2026-07-21T07:00:25.693Z"
+    "archivedAt": "2026-07-23T06:59:19.573Z"
+  },
+  {
+    "id": "gw-mapcrunch",
+    "kind": "site",
+    "era": "current",
+    "title": "A big green button that teleports you somewhere random on Earth",
+    "blurb": "MapCrunch drops you into a totally random Street View location — a highway in Mongolia, a parking lot in Peru — and asks nothing of you. It's a vacation for people who can't afford one and don't want to leave the chair.",
+    "url": "https://mapcrunch.com",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:19.345Z"
+  },
+  {
+    "id": "gw-sandspiel",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand playground where fire, water and plants fight",
+    "blurb": "Sandspiel is a physics sandbox where you drop sand, water, lava, seeds and dust and watch them react in tiny ecosystems. It's the descendant of every 'falling sand game' you played in the lab instead of doing your worksheet.",
+    "url": "https://sandspiel.club",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:18.936Z"
+  },
+  {
+    "id": "gw-pudding",
+    "kind": "site",
+    "era": "current",
+    "title": "Data journalism that reads like an interactive museum",
+    "blurb": "The Pudding builds gorgeous, scrollable stories about everything from song lyrics to the exact age people stop discovering new music. It's the good kind of internet rabbit hole — you go in for one chart and lose an afternoon.",
+    "url": "https://pudding.cool",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:18.756Z"
+  },
+  {
+    "id": "gw-skull-a-day",
+    "kind": "site",
+    "era": "current",
+    "title": "A guy made a skull every single day, then never stopped",
+    "blurb": "Skull-A-Day started as one artist making a skull out of anything he could find, daily — and grew into a whole archive of fan-made skulls in every material imaginable. Somehow wholesome, somehow spooky, entirely committed.",
+    "url": "https://skulladay.blogspot.com",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:18.477Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that becomes the entire modern internet",
+    "blurb": "Stimulation Clicker starts peaceful, then slowly buries you in notifications, autoplay videos, pop-up ads, and needy fake friends until your brain files for divorce. It's a parody of doomscrolling that is somehow also doomscrolling.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:17.890Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "One car, thousands of backseat drivers, zero destination",
+    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote every 10 seconds on where a Street View car goes next — turn signals, radio station and all. It's a cross-country road trip run entirely by committee, which is exactly as chaotic as it sounds.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-07-23T06:59:17.617Z"
   },
   {
     "id": "gw-net-art-anthology",
@@ -50,26 +120,6 @@ export default [
     "url": "https://neal.fun",
     "source": "weird",
     "archivedAt": "2026-07-21T07:00:24.579Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "Thousands of strangers steering one car through Street View",
-    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote on the wheel every ten seconds, so the car crawls forward at the speed of democracy. It's a cross-country road trip with 4,000 backseat drivers and one shared radio.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-21T07:00:24.306Z"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "kind": "site",
-    "era": "current",
-    "title": "Get teleported to a random spot on Earth",
-    "blurb": "One button drops you into Street View somewhere unexpected — a mountain road, a parking lot, the end of the world. Guess where you are.",
-    "url": "https://www.mapcrunch.com",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.677Z"
   },
   {
     "id": "gw-weavesilk",
@@ -180,16 +230,6 @@ export default [
     "url": "https://neal.fun/asteroid-launcher",
     "source": "weird",
     "archivedAt": "2026-07-17T06:55:56.263Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that slowly turns into your worst screen-time day",
-    "blurb": "It starts calm, then piles on autoplay videos, notifications, ad pop-ups and needy fake friends until the whole thing is a screaming diorama of the modern internet. It's a joke. It's also a mirror. Uncomfortable.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "source": "weird",
-    "archivedAt": "2026-07-17T06:55:55.901Z"
   },
   {
     "id": "gw-find-invisible-cow",
@@ -322,16 +362,6 @@ export default [
     "archivedAt": "2026-07-09T07:25:57.647Z"
   },
   {
-    "id": "gw-little-alchemy",
-    "kind": "site",
-    "era": "current",
-    "title": "Combine four elements into the entire universe",
-    "blurb": "Start with air, earth, fire and water; end up with, somehow, a Time Machine and a Doctor Who reference. The original before-you-were-crafting-infinite crafting game.",
-    "url": "https://littlealchemy2.com",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:57.342Z"
-  },
-  {
     "id": "gw-passweird",
     "kind": "site",
     "era": "current",
@@ -370,16 +400,6 @@ export default [
     "url": "https://singleservingsites.cool/",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:55.803Z"
-  },
-  {
-    "id": "gw-sandspiel",
-    "kind": "site",
-    "era": "current",
-    "title": "A falling-sand toy that quietly became a whole world",
-    "blurb": "Drop sand, water, fire, plants and lava and watch physics do its thing. It's the classic time-waster your school lab banned, now gorgeous.",
-    "url": "https://sandspiel.club",
-    "source": "weird",
-    "archivedAt": "2026-07-07T07:20:44.090Z"
   },
   {
     "id": "gw-flightradar",
@@ -1467,16 +1487,6 @@ export default [
     "url": "http://endless.horse",
     "source": "weird",
     "archivedAt": "2026-06-19T08:04:36.107Z"
-  },
-  {
-    "id": "gw-pudding",
-    "kind": "site",
-    "era": "current",
-    "title": "Visual essays that out-nerd your group chat",
-    "blurb": "Beautiful interactive data stories about everything from one-hit wonders to the height of NBA players. It's like a museum exhibit and a slideshow had a very smart baby.",
-    "url": "https://pudding.cool",
-    "source": "weird",
-    "archivedAt": "2026-06-19T08:04:35.979Z"
   },
   {
     "id": "gw-isit-christmas",
