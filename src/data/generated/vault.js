@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-falling-falling",
+    "kind": "site",
+    "era": "current",
+    "title": "An infinite wall of color falling into forever",
+    "blurb": "Bands of shifting color drop endlessly with a low hum, and it never, ever stops. Somewhere between a screensaver and a mild out-of-body experience.",
+    "url": "https://www.fallingfalling.com",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:55.308Z"
+  },
+  {
+    "id": "gw-nyan-cat",
+    "kind": "site",
+    "era": "current",
+    "title": "The Pop-Tart cat still flying, still tarting",
+    "blurb": "The rainbow-trailing space cat from 2011 is out there looping to that song right now, counting how long you've watched. A living fossil of peak meme internet.",
+    "url": "https://nyan.cat",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:55.083Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "The password rules keep getting worse until you cry",
+    "blurb": "Make a password. Now it must contain a Roman numeral that multiplies to 35, today's moon phase, and a chicken. A comedy of escalating cruelty disguised as a form field.",
+    "url": "https://neal.fun/password-game/",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:54.751Z"
+  },
+  {
+    "id": "gw-absurd-website",
+    "kind": "site",
+    "era": "current",
+    "title": "One dev builds one absurd web toy every month",
+    "blurb": "A running collection of nearly fifty small, gloriously stupid web experiments — one person, one weird idea per month, no notes. Bookmark it and check back.",
+    "url": "https://absurd.website",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:54.603Z"
+  },
+  {
+    "id": "gw-sandspiel",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand sandbox where fire fights plants",
+    "blurb": "Drop sand, water, fire, ice, and seeds into a little 2D world and watch physics get petty. The digital ant farm your school lab computer wished it could run.",
+    "url": "https://sandspiel.club",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:54.044Z"
+  },
+  {
+    "id": "gw-floor796",
+    "kind": "site",
+    "era": "current",
+    "title": "One building floor, drawn by hand, growing forever",
+    "blurb": "An endlessly expanding isometric animation of a single floor — hundreds of tiny scenes, every pixel placed by hand over years. Scroll around and find the little dramas.",
+    "url": "https://floor796.com",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:53.908Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "The whole internet is carpooling in one virtual car",
+    "blurb": "Thousands of strangers vote on every turn, honk, and radio-station change of a single car crawling down real streets. It's a road trip where you're all fighting over the aux and the wheel.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:53.698Z"
+  },
+  {
+    "id": "gw-one-million-chessboards",
+    "kind": "site",
+    "era": "current",
+    "title": "A planet-sized chessboard where strangers move the pieces",
+    "blurb": "The sequel to a million checkboxes: one enormous board, a million games, everybody nudging pawns in real time with no turns and no rules. It should not work. It works.",
+    "url": "https://onemillionchessboards.com",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:53.529Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "One million checkboxes and a war for every single one",
+    "blurb": "A page with a million real checkboxes shared by everyone online — you check one, a stranger unchecks it, and somehow this becomes a full-contact sport. The purest form of internet.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-07-25T06:54:53.313Z"
+  },
+  {
     "id": "gw-little-alchemy",
     "kind": "site",
     "era": "current",
@@ -32,16 +122,6 @@ export default [
     "archivedAt": "2026-07-23T06:59:19.345Z"
   },
   {
-    "id": "gw-sandspiel",
-    "kind": "site",
-    "era": "current",
-    "title": "A falling-sand playground where fire, water and plants fight",
-    "blurb": "Sandspiel is a physics sandbox where you drop sand, water, lava, seeds and dust and watch them react in tiny ecosystems. It's the descendant of every 'falling sand game' you played in the lab instead of doing your worksheet.",
-    "url": "https://sandspiel.club",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:18.936Z"
-  },
-  {
     "id": "gw-pudding",
     "kind": "site",
     "era": "current",
@@ -70,16 +150,6 @@ export default [
     "url": "https://neal.fun/stimulation-clicker",
     "source": "weird",
     "archivedAt": "2026-07-23T06:59:17.890Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "One car, thousands of backseat drivers, zero destination",
-    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote every 10 seconds on where a Street View car goes next — turn signals, radio station and all. It's a cross-country road trip run entirely by committee, which is exactly as chaotic as it sounds.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:17.617Z"
   },
   {
     "id": "gw-net-art-anthology",
@@ -170,26 +240,6 @@ export default [
     "url": "https://thenicestplace.net",
     "source": "weird",
     "archivedAt": "2026-07-19T06:58:34.261Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "The password from your worst nightmare",
-    "blurb": "Type a password, then keep adding a Roman numeral, a chess move, today's moon phase — the rules just keep coming. Nobody has ever won peacefully.",
-    "url": "https://neal.fun/password-game",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.164Z"
-  },
-  {
-    "id": "gw-one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One million checkboxes the whole internet fights over",
-    "blurb": "Check a box, it's checked for everyone. It quietly became a war between checkers and uncheckers hiding binary messages — the calmest-looking chaos online.",
-    "url": "https://onemillioncheckboxes.com",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:33.924Z"
   },
   {
     "id": "gw-pug-in-a-rug",
@@ -380,16 +430,6 @@ export default [
     "url": "https://www.sito.org/synergy/",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:56.449Z"
-  },
-  {
-    "id": "gw-absurd-website",
-    "kind": "site",
-    "era": "current",
-    "title": "One absurd web experiment, every single month",
-    "blurb": "A lone creator ships one gloriously pointless web thing per month, and the backlog is nearly fifty deep. Bookmark it like a webring you actually keep visiting.",
-    "url": "https://absurd.website",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:55.987Z"
   },
   {
     "id": "gw-single-serving-sites",
@@ -1095,16 +1135,6 @@ export default [
     "archivedAt": "2026-06-29T07:58:03.808Z"
   },
   {
-    "id": "gw-one-million-chessboards",
-    "kind": "site",
-    "era": "current",
-    "title": "A million chessboards where moving a piece moves it for everyone",
-    "blurb": "No turns, no rules you'd recognize, just a thousand-by-thousand grid of boards and total cooperative anarchy. Bobby Fischer would have unplugged the modem.",
-    "url": "https://onemillionchessboards.com",
-    "source": "weird",
-    "archivedAt": "2026-06-29T07:58:03.448Z"
-  },
-  {
     "id": "g:game-qwop",
     "kind": "game",
     "era": "nostalgic",
@@ -1409,16 +1439,6 @@ export default [
     "archivedAt": "2026-06-23T07:25:55.398Z"
   },
   {
-    "id": "gw-falling-falling",
-    "kind": "site",
-    "era": "current",
-    "title": "Hypnotic colored stripes that fall forever while a drone hums",
-    "blurb": "Endless descending bands of color and a low ambient buzz, like a screensaver that achieved enlightenment. Stare too long and time stops meaning things.",
-    "url": "https://www.fallingfalling.com",
-    "source": "weird",
-    "archivedAt": "2026-06-23T07:25:54.858Z"
-  },
-  {
     "id": "gw-mynoise",
     "kind": "site",
     "era": "current",
@@ -1497,16 +1517,6 @@ export default [
     "url": "https://isitchristmas.com",
     "source": "weird",
     "archivedAt": "2026-06-17T08:04:01.479Z"
-  },
-  {
-    "id": "gw-floor796",
-    "kind": "site",
-    "era": "current",
-    "title": "A giant animated spaceship floor that never stops growing",
-    "blurb": "One enormous pixel scene crammed with thousands of tiny moving gags and references, hand-drawn frame by frame. Wally would weep.",
-    "url": "https://floor796.com",
-    "source": "weird",
-    "archivedAt": "2026-06-17T08:04:01.385Z"
   },
   {
     "id": "gw-typelit",

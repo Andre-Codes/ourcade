@@ -2,79 +2,85 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
+    "id": "gw-one-million-checkboxes",
+    "title": "One million checkboxes and a war for every single one",
+    "blurb": "A page with a million real checkboxes shared by everyone online — you check one, a stranger unchecks it, and somehow this becomes a full-contact sport. The purest form of internet.",
+    "url": "https://onemillioncheckboxes.com",
+    "foundNote": "peak collaborative chaos"
+  },
+  {
+    "id": "gw-one-million-chessboards",
+    "title": "A planet-sized chessboard where strangers move the pieces",
+    "blurb": "The sequel to a million checkboxes: one enormous board, a million games, everybody nudging pawns in real time with no turns and no rules. It should not work. It works.",
+    "url": "https://onemillionchessboards.com"
+  },
+  {
     "id": "gw-internet-roadtrip",
-    "title": "One car, thousands of backseat drivers, zero destination",
-    "blurb": "Neal Agarwal's Internet Roadtrip lets the whole internet vote every 10 seconds on where a Street View car goes next — turn signals, radio station and all. It's a cross-country road trip run entirely by committee, which is exactly as chaotic as it sounds.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "democracy, but for merging lanes"
+    "title": "The whole internet is carpooling in one virtual car",
+    "blurb": "Thousands of strangers vote on every turn, honk, and radio-station change of a single car crawling down real streets. It's a road trip where you're all fighting over the aux and the wheel.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "foundNote": "democracy has never driven slower"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that becomes the entire modern internet",
-    "blurb": "Stimulation Clicker starts peaceful, then slowly buries you in notifications, autoplay videos, pop-up ads, and needy fake friends until your brain files for divorce. It's a parody of doomscrolling that is somehow also doomscrolling.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "foundNote": "uncomfortably accurate"
-  },
-  {
-    "id": "gw-truesize",
-    "title": "Drag countries around a map to expose Greenland's lies",
-    "blurb": "The True Size Of… lets you grab any country and slide it across the globe, revealing how badly flat maps have been fibbing to you since geography class. Greenland shrinks. Africa is enormous. Everything you knew was a lie.",
-    "url": "https://thetruesize.com",
-    "foundNote": "Mercator has some explaining to do"
-  },
-  {
-    "id": "gw-invisible-cow",
-    "title": "Find an invisible cow by following the screaming",
-    "blurb": "Find the Invisible Cow hides a cow somewhere on the page and yells 'COW' louder as your cursor gets closer. That's the whole game. It works far better than it has any right to.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "volume up, dignity down"
-  },
-  {
-    "id": "gw-skull-a-day",
-    "title": "A guy made a skull every single day, then never stopped",
-    "blurb": "Skull-A-Day started as one artist making a skull out of anything he could find, daily — and grew into a whole archive of fan-made skulls in every material imaginable. Somehow wholesome, somehow spooky, entirely committed.",
-    "url": "https://skulladay.blogspot.com",
-    "foundNote": "dedication, unlocked"
-  },
-  {
-    "id": "gw-pudding",
-    "title": "Data journalism that reads like an interactive museum",
-    "blurb": "The Pudding builds gorgeous, scrollable stories about everything from song lyrics to the exact age people stop discovering new music. It's the good kind of internet rabbit hole — you go in for one chart and lose an afternoon.",
-    "url": "https://pudding.cool"
+    "id": "gw-floor796",
+    "title": "One building floor, drawn by hand, growing forever",
+    "blurb": "An endlessly expanding isometric animation of a single floor — hundreds of tiny scenes, every pixel placed by hand over years. Scroll around and find the little dramas.",
+    "url": "https://floor796.com",
+    "foundNote": "still being added to"
   },
   {
     "id": "gw-sandspiel",
-    "title": "A falling-sand playground where fire, water and plants fight",
-    "blurb": "Sandspiel is a physics sandbox where you drop sand, water, lava, seeds and dust and watch them react in tiny ecosystems. It's the descendant of every 'falling sand game' you played in the lab instead of doing your worksheet.",
+    "title": "A falling-sand sandbox where fire fights plants",
+    "blurb": "Drop sand, water, fire, ice, and seeds into a little 2D world and watch physics get petty. The digital ant farm your school lab computer wished it could run.",
     "url": "https://sandspiel.club",
-    "foundNote": "school-computer-lab energy, certified"
+    "foundNote": "online since 2018"
   },
   {
-    "id": "gw-koalastothemax",
-    "title": "Move your mouse to reveal a mystery koala, one pixel at a time",
-    "blurb": "Koalas to the Max keeps splitting big colored dots into smaller ones as you wave your cursor around, slowly uncovering a hidden picture. It is deeply pointless and I have watched the whole thing resolve more than once.",
+    "id": "gw-koalas-to-the-max",
+    "title": "One giant dot that splits until a koala appears",
+    "blurb": "Wave the mouse and one huge colored blob shatters into four, sixteen, sixty-four smaller ones until a hidden koala fades in. Deeply pointless, weirdly hypnotic.",
     "url": "https://koalastothemax.com",
-    "foundNote": "you already know it's a koala"
+    "foundNote": "it remembers where you left off"
   },
   {
-    "id": "gw-mapcrunch",
-    "title": "A big green button that teleports you somewhere random on Earth",
-    "blurb": "MapCrunch drops you into a totally random Street View location — a highway in Mongolia, a parking lot in Peru — and asks nothing of you. It's a vacation for people who can't afford one and don't want to leave the chair.",
-    "url": "https://mapcrunch.com",
-    "foundNote": "passport not required"
+    "id": "gw-find-the-invisible-cow",
+    "title": "Find the invisible cow by a man screaming 'COW'",
+    "blurb": "Somewhere on the screen is a cow you can't see. Your only guidance is a voice hollering 'COW' louder as you get warmer. This is the internet at its finest.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "headphones recommended, dignity optional"
   },
   {
-    "id": "gw-omfgdogs",
-    "title": "An infinite parade of dogs, running toward nothing",
-    "blurb": "OMFGDOGS is exactly what it says: a looping conga line of pixel dogs jogging across your screen to a cheerful little tune. There is no goal. There is no end. There are only dogs, and that is enough.",
-    "url": "https://www.omfgdogs.com",
-    "foundNote": "the good boys never tire"
+    "id": "gw-absurd-website",
+    "title": "One dev builds one absurd web toy every month",
+    "blurb": "A running collection of nearly fifty small, gloriously stupid web experiments — one person, one weird idea per month, no notes. Bookmark it and check back.",
+    "url": "https://absurd.website",
+    "foundNote": "48 projects and counting"
   },
   {
-    "id": "gw-little-alchemy",
-    "title": "Combine four elements until you accidentally invent the internet",
-    "blurb": "Little Alchemy 2 starts you with earth, air, fire and water and lets you smash things together into hundreds of increasingly absurd results — mud, life, spaceships, and eventually, yes, the internet itself. A very slow, very satisfying rabbit hole.",
-    "url": "https://littlealchemy2.com",
-    "foundNote": "if you liked Infinite Craft, this is the elder"
+    "id": "gw-password-game",
+    "title": "The password rules keep getting worse until you cry",
+    "blurb": "Make a password. Now it must contain a Roman numeral that multiplies to 35, today's moon phase, and a chicken. A comedy of escalating cruelty disguised as a form field.",
+    "url": "https://neal.fun/password-game/",
+    "foundNote": "you will not win"
+  },
+  {
+    "id": "gw-spend",
+    "title": "Spend a billionaire's money before you can blink",
+    "blurb": "You're handed an absurd fortune and a catalog — Big Macs, mansions, an NBA team, a literal Mona Lisa. Spending it all is genuinely hard, which says a lot.",
+    "url": "https://neal.fun/spend/"
+  },
+  {
+    "id": "gw-nyan-cat",
+    "title": "The Pop-Tart cat still flying, still tarting",
+    "blurb": "The rainbow-trailing space cat from 2011 is out there looping to that song right now, counting how long you've watched. A living fossil of peak meme internet.",
+    "url": "https://nyan.cat",
+    "foundNote": "the counter never sleeps"
+  },
+  {
+    "id": "gw-falling-falling",
+    "title": "An infinite wall of color falling into forever",
+    "blurb": "Bands of shifting color drop endlessly with a low hum, and it never, ever stops. Somewhere between a screensaver and a mild out-of-body experience.",
+    "url": "https://www.fallingfalling.com",
+    "foundNote": "turn your volume down first"
   }
 ];
