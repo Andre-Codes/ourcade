@@ -2,6 +2,126 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's endless workshop of browser experiments",
+    "blurb": "Neal Agarwal's whole site is a candy store of polished one-off toys — scroll through the deep sea, age of the universe, spend Bill Gates' money. The rare corner of the web where 'let me just check one thing' costs you an hour.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:49.508Z"
+  },
+  {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game engineered to fry your attention span",
+    "blurb": "It starts as one calm button and ends as a screaming pile of notifications, autoplay videos and dopamine popups. A perfect, horrible mirror of the modern internet — you'll close it feeling seen and slightly unwell.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:49.405Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password field that slowly turns on you",
+    "blurb": "Type a password. Now make it include a Roman numeral, this month's moon phase, and a chess move. The Password Game is what security theater would look like if it were designed by a gremlin.",
+    "url": "https://neal.fun/password-game/",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:49.210Z"
+  },
+  {
+    "id": "gw-hn-simulator",
+    "kind": "site",
+    "era": "current",
+    "title": "Hacker News where every commenter is a robot",
+    "blurb": "Post a link or a rant just like the real thing, except all the replies are instantly hallucinated by AI. Finally, a comment section that argues with you at machine speed and never touches grass.",
+    "url": "https://news.ysimulator.run",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:49.122Z"
+  },
+  {
+    "id": "gw-sito-gridcosm",
+    "kind": "site",
+    "era": "current",
+    "title": "A collaborative art painting nested inside itself forever",
+    "blurb": "Since 1997, artists have been drawing 3x3 grids inside 3x3 grids inside 3x3 grids, zooming inward with no end. It's a webring for people who never wanted the ring to stop.",
+    "url": "https://www.sito.org/synergy/gridcosm/",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:49.023Z"
+  },
+  {
+    "id": "gw-pudding",
+    "kind": "site",
+    "era": "current",
+    "title": "Data journalism that looks like museum art",
+    "blurb": "The Pudding makes interactive stories out of numbers — the geography of pop lyrics, how names age, why your favorite song sounds the way it does. Charts have never been this smug about being pretty.",
+    "url": "https://pudding.cool",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.892Z"
+  },
+  {
+    "id": "gw-internet-map",
+    "kind": "site",
+    "era": "current",
+    "title": "The whole internet rendered as a galaxy of stars",
+    "blurb": "Every website is a glowing dot, sized by traffic, floating in a drifting star-map you can scroll through forever. Find the big suns, then get lost in the dim little corners nobody visits.",
+    "url": "https://internet-map.net",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.796Z"
+  },
+  {
+    "id": "gw-incredibox",
+    "kind": "site",
+    "era": "current",
+    "title": "Dress cartoon guys in hoodies and they beatbox for you",
+    "blurb": "Drag sound icons onto a row of animated dudes and layer beats, melodies and 'boom-tss' until you've accidentally made a banger. Around since 2009 and secretly responsible for a generation of music-class free periods.",
+    "url": "https://incredibox.com",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.697Z"
+  },
+  {
+    "id": "gw-useless-web-index",
+    "kind": "site",
+    "era": "current",
+    "title": "The archive of every pointless site the front page forgot",
+    "blurb": "A curated deep-cut catalog of single-purpose weird sites, maintained by hand for people who've clicked 'take me somewhere useless' one too many times. It's the useless web, but with a card catalog.",
+    "url": "https://theuselesswebindex.com",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.580Z"
+  },
+  {
+    "id": "gw-gifcities",
+    "kind": "site",
+    "era": "current",
+    "title": "A search engine for 1.6 million GeoCities GIFs",
+    "blurb": "Every spinning email envelope, flaming skull and 'Under Construction' hardhat rescued from the GeoCities wreckage, searchable. Type a word, receive a glorious low-res dancing thing.",
+    "url": "https://gifcities.org",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.466Z"
+  },
+  {
+    "id": "gw-sandboxels",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand toy that lets you burn down anything",
+    "blurb": "Drop water, fire, plants, lava and about a hundred other elements into a box and watch physics have opinions. It's the digital descendant of every 'sand game' you played in the library instead of doing homework.",
+    "url": "https://neal.fun/sandboxels/",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.356Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers driving one car by committee",
+    "blurb": "Internet Roadtrip is a single virtual car steered by a live crowd vote — turn left, honk, change the radio, all decided by mob rule. It moves roughly as fast as a Geo Metro with a flat, which is to say gloriously.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-27T07:18:48.208Z"
+  },
+  {
     "id": "gw-falling-falling",
     "kind": "site",
     "era": "current",
@@ -20,16 +140,6 @@ export default [
     "url": "https://nyan.cat",
     "source": "weird",
     "archivedAt": "2026-07-25T06:54:55.083Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "The password rules keep getting worse until you cry",
-    "blurb": "Make a password. Now it must contain a Roman numeral that multiplies to 35, today's moon phase, and a chicken. A comedy of escalating cruelty disguised as a form field.",
-    "url": "https://neal.fun/password-game/",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:54.751Z"
   },
   {
     "id": "gw-absurd-website",
@@ -60,16 +170,6 @@ export default [
     "url": "https://floor796.com",
     "source": "weird",
     "archivedAt": "2026-07-25T06:54:53.908Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "The whole internet is carpooling in one virtual car",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio-station change of a single car crawling down real streets. It's a road trip where you're all fighting over the aux and the wheel.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:53.698Z"
   },
   {
     "id": "gw-one-million-chessboards",
@@ -122,16 +222,6 @@ export default [
     "archivedAt": "2026-07-23T06:59:19.345Z"
   },
   {
-    "id": "gw-pudding",
-    "kind": "site",
-    "era": "current",
-    "title": "Data journalism that reads like an interactive museum",
-    "blurb": "The Pudding builds gorgeous, scrollable stories about everything from song lyrics to the exact age people stop discovering new music. It's the good kind of internet rabbit hole — you go in for one chart and lose an afternoon.",
-    "url": "https://pudding.cool",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:18.756Z"
-  },
-  {
     "id": "gw-skull-a-day",
     "kind": "site",
     "era": "current",
@@ -140,16 +230,6 @@ export default [
     "url": "https://skulladay.blogspot.com",
     "source": "weird",
     "archivedAt": "2026-07-23T06:59:18.477Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that becomes the entire modern internet",
-    "blurb": "Stimulation Clicker starts peaceful, then slowly buries you in notifications, autoplay videos, pop-up ads, and needy fake friends until your brain files for divorce. It's a parody of doomscrolling that is somehow also doomscrolling.",
-    "url": "https://neal.fun/stimulation-clicker",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:17.890Z"
   },
   {
     "id": "gw-net-art-anthology",
@@ -162,16 +242,6 @@ export default [
     "archivedAt": "2026-07-21T07:00:24.938Z"
   },
   {
-    "id": "gw-sandboxels",
-    "kind": "site",
-    "era": "current",
-    "title": "A falling-sand physics lab with hundreds of materials",
-    "blurb": "Pour lava on plants, freeze water, breed bacteria, delete the whole thing — Sandboxels is the digital ant farm that ate every study hall of 2005. Now bigger, weirder, and still gloriously pointless.",
-    "url": "https://sandboxels.r74n.com",
-    "source": "weird",
-    "archivedAt": "2026-07-21T07:00:24.837Z"
-  },
-  {
     "id": "gw-wiki-roulette",
     "kind": "site",
     "era": "current",
@@ -180,16 +250,6 @@ export default [
     "url": "https://wikiroulette.co",
     "source": "weird",
     "archivedAt": "2026-07-21T07:00:24.724Z"
-  },
-  {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "A whole home base of polished browser experiments",
-    "blurb": "neal.fun is the good stuff: The Deep Sea, The Password Game, Absurd Trolley Problems, Stimulation Clicker — one guy quietly out-making everyone. It's what the web looked like before everything became a login wall.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-07-21T07:00:24.579Z"
   },
   {
     "id": "gw-weavesilk",
@@ -290,16 +350,6 @@ export default [
     "url": "https://findtheinvisiblecow.com",
     "source": "weird",
     "archivedAt": "2026-07-15T06:53:59.511Z"
-  },
-  {
-    "id": "gw-useless-web-index",
-    "kind": "site",
-    "era": "current",
-    "title": "The curated back-catalog of pointless websites",
-    "blurb": "Someone actually archived the weird single-purpose corners of the web so they don't vanish. It's a card catalog for stuff that does exactly one dumb glorious thing.",
-    "url": "https://theuselesswebindex.com",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:59.317Z"
   },
   {
     "id": "gw-drift-fm",
@@ -420,16 +470,6 @@ export default [
     "url": "https://passweird.com",
     "source": "weird",
     "archivedAt": "2026-07-09T07:25:56.618Z"
-  },
-  {
-    "id": "gw-sito-gridcosm",
-    "kind": "site",
-    "era": "current",
-    "title": "A collaborative art grid that's been growing since 1997",
-    "blurb": "Grids nested inside grids inside grids, handed off between strangers one panel at a time for over two decades. This thing has outlived most operating systems.",
-    "url": "https://www.sito.org/synergy/",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:56.449Z"
   },
   {
     "id": "gw-single-serving-sites",
@@ -1547,15 +1587,5 @@ export default [
     "url": "http://www.staggeringbeauty.com",
     "source": "weird",
     "archivedAt": "2026-06-17T08:03:59.409Z"
-  },
-  {
-    "id": "gw-incredibox",
-    "kind": "site",
-    "era": "current",
-    "title": "Dress little guys up and make them beatbox",
-    "blurb": "Incredibox lets you drag sounds onto a row of humming animated dudes until they're a full a cappella track. Over 100 million people have wasted glorious hours here since '09. Join them.",
-    "url": "https://incredibox.com",
-    "source": "weird",
-    "archivedAt": "2026-06-15T02:36:28.728Z"
   }
 ];

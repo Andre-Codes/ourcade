@@ -2,85 +2,87 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-one-million-checkboxes",
-    "title": "One million checkboxes and a war for every single one",
-    "blurb": "A page with a million real checkboxes shared by everyone online — you check one, a stranger unchecks it, and somehow this becomes a full-contact sport. The purest form of internet.",
-    "url": "https://onemillioncheckboxes.com",
-    "foundNote": "peak collaborative chaos"
-  },
-  {
-    "id": "gw-one-million-chessboards",
-    "title": "A planet-sized chessboard where strangers move the pieces",
-    "blurb": "The sequel to a million checkboxes: one enormous board, a million games, everybody nudging pawns in real time with no turns and no rules. It should not work. It works.",
-    "url": "https://onemillionchessboards.com"
-  },
-  {
     "id": "gw-internet-roadtrip",
-    "title": "The whole internet is carpooling in one virtual car",
-    "blurb": "Thousands of strangers vote on every turn, honk, and radio-station change of a single car crawling down real streets. It's a road trip where you're all fighting over the aux and the wheel.",
+    "title": "Thousands of strangers driving one car by committee",
+    "blurb": "Internet Roadtrip is a single virtual car steered by a live crowd vote — turn left, honk, change the radio, all decided by mob rule. It moves roughly as fast as a Geo Metro with a flat, which is to say gloriously.",
     "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "democracy has never driven slower"
+    "foundNote": "democracy, but for honking"
   },
   {
-    "id": "gw-floor796",
-    "title": "One building floor, drawn by hand, growing forever",
-    "blurb": "An endlessly expanding isometric animation of a single floor — hundreds of tiny scenes, every pixel placed by hand over years. Scroll around and find the little dramas.",
-    "url": "https://floor796.com",
-    "foundNote": "still being added to"
+    "id": "gw-sandboxels",
+    "title": "A falling-sand toy that lets you burn down anything",
+    "blurb": "Drop water, fire, plants, lava and about a hundred other elements into a box and watch physics have opinions. It's the digital descendant of every 'sand game' you played in the library instead of doing homework.",
+    "url": "https://neal.fun/sandboxels/"
   },
   {
-    "id": "gw-sandspiel",
-    "title": "A falling-sand sandbox where fire fights plants",
-    "blurb": "Drop sand, water, fire, ice, and seeds into a little 2D world and watch physics get petty. The digital ant farm your school lab computer wished it could run.",
-    "url": "https://sandspiel.club",
-    "foundNote": "online since 2018"
+    "id": "gw-gifcities",
+    "title": "A search engine for 1.6 million GeoCities GIFs",
+    "blurb": "Every spinning email envelope, flaming skull and 'Under Construction' hardhat rescued from the GeoCities wreckage, searchable. Type a word, receive a glorious low-res dancing thing.",
+    "url": "https://gifcities.org",
+    "foundNote": "salvaged from the ruins of 2009"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "One giant dot that splits until a koala appears",
-    "blurb": "Wave the mouse and one huge colored blob shatters into four, sixteen, sixty-four smaller ones until a hidden koala fades in. Deeply pointless, weirdly hypnotic.",
-    "url": "https://koalastothemax.com",
-    "foundNote": "it remembers where you left off"
+    "id": "gw-useless-web-index",
+    "title": "The archive of every pointless site the front page forgot",
+    "blurb": "A curated deep-cut catalog of single-purpose weird sites, maintained by hand for people who've clicked 'take me somewhere useless' one too many times. It's the useless web, but with a card catalog.",
+    "url": "https://theuselesswebindex.com"
   },
   {
-    "id": "gw-find-the-invisible-cow",
-    "title": "Find the invisible cow by a man screaming 'COW'",
-    "blurb": "Somewhere on the screen is a cow you can't see. Your only guidance is a voice hollering 'COW' louder as you get warmer. This is the internet at its finest.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "headphones recommended, dignity optional"
+    "id": "gw-incredibox",
+    "title": "Dress cartoon guys in hoodies and they beatbox for you",
+    "blurb": "Drag sound icons onto a row of animated dudes and layer beats, melodies and 'boom-tss' until you've accidentally made a banger. Around since 2009 and secretly responsible for a generation of music-class free periods.",
+    "url": "https://incredibox.com",
+    "foundNote": "a cappella since '09"
   },
   {
-    "id": "gw-absurd-website",
-    "title": "One dev builds one absurd web toy every month",
-    "blurb": "A running collection of nearly fifty small, gloriously stupid web experiments — one person, one weird idea per month, no notes. Bookmark it and check back.",
-    "url": "https://absurd.website",
-    "foundNote": "48 projects and counting"
+    "id": "gw-internet-map",
+    "title": "The whole internet rendered as a galaxy of stars",
+    "blurb": "Every website is a glowing dot, sized by traffic, floating in a drifting star-map you can scroll through forever. Find the big suns, then get lost in the dim little corners nobody visits.",
+    "url": "https://internet-map.net"
+  },
+  {
+    "id": "gw-pudding",
+    "title": "Data journalism that looks like museum art",
+    "blurb": "The Pudding makes interactive stories out of numbers — the geography of pop lyrics, how names age, why your favorite song sounds the way it does. Charts have never been this smug about being pretty.",
+    "url": "https://pudding.cool"
+  },
+  {
+    "id": "gw-sito-gridcosm",
+    "title": "A collaborative art painting nested inside itself forever",
+    "blurb": "Since 1997, artists have been drawing 3x3 grids inside 3x3 grids inside 3x3 grids, zooming inward with no end. It's a webring for people who never wanted the ring to stop.",
+    "url": "https://www.sito.org/synergy/gridcosm/",
+    "foundNote": "online since 1997"
+  },
+  {
+    "id": "gw-hn-simulator",
+    "title": "Hacker News where every commenter is a robot",
+    "blurb": "Post a link or a rant just like the real thing, except all the replies are instantly hallucinated by AI. Finally, a comment section that argues with you at machine speed and never touches grass.",
+    "url": "https://news.ysimulator.run"
   },
   {
     "id": "gw-password-game",
-    "title": "The password rules keep getting worse until you cry",
-    "blurb": "Make a password. Now it must contain a Roman numeral that multiplies to 35, today's moon phase, and a chicken. A comedy of escalating cruelty disguised as a form field.",
+    "title": "A password field that slowly turns on you",
+    "blurb": "Type a password. Now make it include a Roman numeral, this month's moon phase, and a chess move. The Password Game is what security theater would look like if it were designed by a gremlin.",
     "url": "https://neal.fun/password-game/",
-    "foundNote": "you will not win"
+    "foundNote": "your password is now on fire"
   },
   {
-    "id": "gw-spend",
-    "title": "Spend a billionaire's money before you can blink",
-    "blurb": "You're handed an absurd fortune and a catalog — Big Macs, mansions, an NBA team, a literal Mona Lisa. Spending it all is genuinely hard, which says a lot.",
-    "url": "https://neal.fun/spend/"
+    "id": "gw-trolley-problems",
+    "title": "Thirty increasingly cursed trolley dilemmas",
+    "blurb": "The classic 'do you pull the lever' ethics puzzle, escalated into pure chaos, then it tells you how you compare to everyone else who answered. A moral gut-check disguised as a quiz.",
+    "url": "https://neal.fun/absurd-trolley-problems/"
   },
   {
-    "id": "gw-nyan-cat",
-    "title": "The Pop-Tart cat still flying, still tarting",
-    "blurb": "The rainbow-trailing space cat from 2011 is out there looping to that song right now, counting how long you've watched. A living fossil of peak meme internet.",
-    "url": "https://nyan.cat",
-    "foundNote": "the counter never sleeps"
+    "id": "gw-stimulation-clicker",
+    "title": "A clicker game engineered to fry your attention span",
+    "blurb": "It starts as one calm button and ends as a screaming pile of notifications, autoplay videos and dopamine popups. A perfect, horrible mirror of the modern internet — you'll close it feeling seen and slightly unwell.",
+    "url": "https://neal.fun/stimulation-clicker/"
   },
   {
-    "id": "gw-falling-falling",
-    "title": "An infinite wall of color falling into forever",
-    "blurb": "Bands of shifting color drop endlessly with a low hum, and it never, ever stops. Somewhere between a screensaver and a mild out-of-body experience.",
-    "url": "https://www.fallingfalling.com",
-    "foundNote": "turn your volume down first"
+    "id": "gw-neal-fun",
+    "title": "One guy's endless workshop of browser experiments",
+    "blurb": "Neal Agarwal's whole site is a candy store of polished one-off toys — scroll through the deep sea, age of the universe, spend Bill Gates' money. The rare corner of the web where 'let me just check one thing' costs you an hour.",
+    "url": "https://neal.fun",
+    "foundNote": "powered by one relentless dev"
   }
 ];
