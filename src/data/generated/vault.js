@@ -2,14 +2,124 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-is-it-christmas",
+    "kind": "site",
+    "era": "current",
+    "title": "A site that answers one question with total confidence",
+    "blurb": "IsItChristmas.com exists solely to tell you whether it's Christmas, in enormous letters. Most days it just says NO, and there's something grounding about that.",
+    "url": "https://isitchristmas.com",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:23.968Z"
+  },
+  {
+    "id": "gw-crouton",
+    "kind": "site",
+    "era": "current",
+    "title": "A website whose only job is showing you a crouton",
+    "blurb": "Crouton.net loads one photo of a crouton. Refresh for a different crouton. That is the entire experience and honestly it's kind of perfect.",
+    "url": "https://crouton.net",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:23.759Z"
+  },
+  {
+    "id": "gw-lhc",
+    "kind": "site",
+    "era": "current",
+    "title": "A live status check on whether the world has ended yet",
+    "blurb": "Has the Large Hadron Collider Destroyed the World Yet? updates in real time. Spoiler: the answer is still a big reassuring NOPE.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:23.110Z"
+  },
+  {
+    "id": "gw-omfg-dogs",
+    "kind": "site",
+    "era": "current",
+    "title": "A silent parade of dogs jogging forever",
+    "blurb": "OMFGDOGS is just an endless loop of little pixel dogs running to a groove. No goal, no lore, pure early-web nonsense. We respect it enormously.",
+    "url": "https://www.omfgdogs.com",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:23.006Z"
+  },
+  {
+    "id": "gw-does-the-dog-die",
+    "kind": "site",
+    "era": "current",
+    "title": "A database of whether the dog dies in the movie",
+    "blurb": "Does the Dog Die? tells you before you press play whether your evening is about to be emotionally destroyed. Crowd-sourced spoilers, in the good way.",
+    "url": "https://www.doesthedogdie.com",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:22.697Z"
+  },
+  {
+    "id": "gw-dwitter",
+    "kind": "site",
+    "era": "current",
+    "title": "Animations written in exactly 140 characters of code",
+    "blurb": "Dwitter is a demoscene playground where people cram entire looping animations into a single tweet-sized line of JavaScript. Absurd talent, minuscule footprint.",
+    "url": "https://www.dwitter.net",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:22.489Z"
+  },
+  {
+    "id": "gw-pixel-thoughts",
+    "kind": "site",
+    "era": "current",
+    "title": "Type a worry, watch it drift into the void",
+    "blurb": "Pixel Thoughts is a tiny 60-second meditation: put your stress on a little star and let it float away into HTML space. Free therapy, sort of.",
+    "url": "https://pixelthoughts.co",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:22.365Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "An endless stream of strangers hugging you",
+    "blurb": "The Nicest Place on the Internet is exactly that: video after video of people opening their arms for a virtual hug. It's dumb, it works, and we're not crying, you are.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:22.081Z"
+  },
+  {
+    "id": "gw-absurd-website",
+    "kind": "site",
+    "era": "current",
+    "title": "Fake startups that are secretly art",
+    "blurb": "Absurd.website ships a new surreal 'product' every month — projects sitting somewhere between a tech pitch, an art piece, and a fever dream. Best viewed with a raised eyebrow.",
+    "url": "https://absurd.website",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:21.840Z"
+  },
+  {
+    "id": "gw-gridcosm",
+    "kind": "site",
+    "era": "current",
+    "title": "A group drawing that's been going since 1997",
+    "blurb": "Gridcosm is an infinite collaborative picture where anyone can add the next tile, and the result is gloriously chaotic. Older than most of the games we grew up with.",
+    "url": "https://sito.org/synergy/gridcosm/",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:21.702Z"
+  },
+  {
     "id": "gw-neal-fun",
     "kind": "site",
     "era": "current",
-    "title": "One guy's endless workshop of browser experiments",
-    "blurb": "Neal Agarwal's whole site is a candy store of polished one-off toys — scroll through the deep sea, age of the universe, spend Bill Gates' money. The rare corner of the web where 'let me just check one thing' costs you an hour.",
+    "title": "One guy's pile of beautiful, useless browser toys",
+    "blurb": "Neal.fun is a whole arcade of interactive experiments — no downloads, no signup, no paywall, just weird stuff made to be poked. Very much our people.",
     "url": "https://neal.fun",
     "source": "weird",
-    "archivedAt": "2026-07-27T07:18:49.508Z"
+    "archivedAt": "2026-07-29T07:03:21.525Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A car the whole internet is driving at once, by vote",
+    "blurb": "Neal Agarwal's Internet Roadtrip is one virtual car steered by strangers voting on every turn, honk, and radio station. It moves at the speed of democracy, which is to say: barely.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-29T07:03:21.360Z"
   },
   {
     "id": "gw-stimulation-clicker",
@@ -40,16 +150,6 @@ export default [
     "url": "https://news.ysimulator.run",
     "source": "weird",
     "archivedAt": "2026-07-27T07:18:49.122Z"
-  },
-  {
-    "id": "gw-sito-gridcosm",
-    "kind": "site",
-    "era": "current",
-    "title": "A collaborative art painting nested inside itself forever",
-    "blurb": "Since 1997, artists have been drawing 3x3 grids inside 3x3 grids inside 3x3 grids, zooming inward with no end. It's a webring for people who never wanted the ring to stop.",
-    "url": "https://www.sito.org/synergy/gridcosm/",
-    "source": "weird",
-    "archivedAt": "2026-07-27T07:18:49.023Z"
   },
   {
     "id": "gw-pudding",
@@ -112,16 +212,6 @@ export default [
     "archivedAt": "2026-07-27T07:18:48.356Z"
   },
   {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "Thousands of strangers driving one car by committee",
-    "blurb": "Internet Roadtrip is a single virtual car steered by a live crowd vote — turn left, honk, change the radio, all decided by mob rule. It moves roughly as fast as a Geo Metro with a flat, which is to say gloriously.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-27T07:18:48.208Z"
-  },
-  {
     "id": "gw-falling-falling",
     "kind": "site",
     "era": "current",
@@ -140,16 +230,6 @@ export default [
     "url": "https://nyan.cat",
     "source": "weird",
     "archivedAt": "2026-07-25T06:54:55.083Z"
-  },
-  {
-    "id": "gw-absurd-website",
-    "kind": "site",
-    "era": "current",
-    "title": "One dev builds one absurd web toy every month",
-    "blurb": "A running collection of nearly fifty small, gloriously stupid web experiments — one person, one weird idea per month, no notes. Bookmark it and check back.",
-    "url": "https://absurd.website",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:54.603Z"
   },
   {
     "id": "gw-sandspiel",
@@ -200,16 +280,6 @@ export default [
     "url": "https://littlealchemy2.com",
     "source": "weird",
     "archivedAt": "2026-07-23T06:59:19.753Z"
-  },
-  {
-    "id": "gw-omfgdogs",
-    "kind": "site",
-    "era": "current",
-    "title": "An infinite parade of dogs, running toward nothing",
-    "blurb": "OMFGDOGS is exactly what it says: a looping conga line of pixel dogs jogging across your screen to a cheerful little tune. There is no goal. There is no end. There are only dogs, and that is enough.",
-    "url": "https://www.omfgdogs.com",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:19.573Z"
   },
   {
     "id": "gw-mapcrunch",
@@ -290,16 +360,6 @@ export default [
     "url": "https://savethesounds.info",
     "source": "weird",
     "archivedAt": "2026-07-19T06:58:34.344Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A never-ending stream of strangers hugging you",
-    "blurb": "Just real people, arms open, giving you a virtual hug on loop. Deeply sincere, weirdly effective, exactly what a Tuesday needs.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.261Z"
   },
   {
     "id": "gw-pug-in-a-rug",
@@ -450,16 +510,6 @@ export default [
     "url": "https://neal.fun/absurd-trolley-problems/",
     "source": "weird",
     "archivedAt": "2026-07-11T06:52:58.523Z"
-  },
-  {
-    "id": "gw-lhc",
-    "kind": "site",
-    "era": "current",
-    "title": "A live check on whether the Large Hadron Collider ate the planet",
-    "blurb": "It answers one urgent question with a big reassuring 'NOPE.' A monument to early-2000s doomer anxiety that still faithfully reports the good news.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:57.647Z"
   },
   {
     "id": "gw-passweird",
@@ -1145,16 +1195,6 @@ export default [
     "archivedAt": "2026-07-01T10:36:37.671Z"
   },
   {
-    "id": "gw-crouton",
-    "kind": "site",
-    "era": "current",
-    "title": "A website that is just a crouton (click for a new crouton)",
-    "blurb": "It's a crouton. Click it, get a fresh crouton. That's it. Somewhere out there a person maintains this, and honestly, respect.",
-    "url": "https://crouton.net",
-    "source": "weird",
-    "archivedAt": "2026-07-01T07:41:30.433Z"
-  },
-  {
     "id": "gw-long-doge",
     "kind": "site",
     "era": "current",
@@ -1429,16 +1469,6 @@ export default [
     "archivedAt": "2026-06-25T07:22:58.078Z"
   },
   {
-    "id": "gw-pixel-thoughts",
-    "kind": "site",
-    "era": "current",
-    "title": "Put a worry on a star and shrink it to nothing",
-    "blurb": "Pixel Thoughts is a 60-second meditation that floats your anxiety into a tiny dot in space. Cheaper than therapy, less effective, still nice.",
-    "url": "https://pixelthoughts.co",
-    "source": "weird",
-    "archivedAt": "2026-06-25T07:22:57.497Z"
-  },
-  {
     "id": "gw-im-google",
     "kind": "site",
     "era": "current",
@@ -1547,16 +1577,6 @@ export default [
     "url": "http://endless.horse",
     "source": "weird",
     "archivedAt": "2026-06-19T08:04:36.107Z"
-  },
-  {
-    "id": "gw-isit-christmas",
-    "kind": "site",
-    "era": "current",
-    "title": "A site that answers one question: is it Christmas?",
-    "blurb": "It says NO. It will say NO most of the year. The single most committed single-purpose website on the web.",
-    "url": "https://isitchristmas.com",
-    "source": "weird",
-    "archivedAt": "2026-06-17T08:04:01.479Z"
   },
   {
     "id": "gw-typelit",

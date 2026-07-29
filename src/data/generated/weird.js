@@ -3,86 +3,95 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "Thousands of strangers driving one car by committee",
-    "blurb": "Internet Roadtrip is a single virtual car steered by a live crowd vote — turn left, honk, change the radio, all decided by mob rule. It moves roughly as fast as a Geo Metro with a flat, which is to say gloriously.",
+    "title": "A car the whole internet is driving at once, by vote",
+    "blurb": "Neal Agarwal's Internet Roadtrip is one virtual car steered by strangers voting on every turn, honk, and radio station. It moves at the speed of democracy, which is to say: barely.",
     "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "democracy, but for honking"
-  },
-  {
-    "id": "gw-sandboxels",
-    "title": "A falling-sand toy that lets you burn down anything",
-    "blurb": "Drop water, fire, plants, lava and about a hundred other elements into a box and watch physics have opinions. It's the digital descendant of every 'sand game' you played in the library instead of doing homework.",
-    "url": "https://neal.fun/sandboxels/"
-  },
-  {
-    "id": "gw-gifcities",
-    "title": "A search engine for 1.6 million GeoCities GIFs",
-    "blurb": "Every spinning email envelope, flaming skull and 'Under Construction' hardhat rescued from the GeoCities wreckage, searchable. Type a word, receive a glorious low-res dancing thing.",
-    "url": "https://gifcities.org",
-    "foundNote": "salvaged from the ruins of 2009"
-  },
-  {
-    "id": "gw-useless-web-index",
-    "title": "The archive of every pointless site the front page forgot",
-    "blurb": "A curated deep-cut catalog of single-purpose weird sites, maintained by hand for people who've clicked 'take me somewhere useless' one too many times. It's the useless web, but with a card catalog.",
-    "url": "https://theuselesswebindex.com"
-  },
-  {
-    "id": "gw-incredibox",
-    "title": "Dress cartoon guys in hoodies and they beatbox for you",
-    "blurb": "Drag sound icons onto a row of animated dudes and layer beats, melodies and 'boom-tss' until you've accidentally made a banger. Around since 2009 and secretly responsible for a generation of music-class free periods.",
-    "url": "https://incredibox.com",
-    "foundNote": "a cappella since '09"
-  },
-  {
-    "id": "gw-internet-map",
-    "title": "The whole internet rendered as a galaxy of stars",
-    "blurb": "Every website is a glowing dot, sized by traffic, floating in a drifting star-map you can scroll through forever. Find the big suns, then get lost in the dim little corners nobody visits.",
-    "url": "https://internet-map.net"
-  },
-  {
-    "id": "gw-pudding",
-    "title": "Data journalism that looks like museum art",
-    "blurb": "The Pudding makes interactive stories out of numbers — the geography of pop lyrics, how names age, why your favorite song sounds the way it does. Charts have never been this smug about being pretty.",
-    "url": "https://pudding.cool"
-  },
-  {
-    "id": "gw-sito-gridcosm",
-    "title": "A collaborative art painting nested inside itself forever",
-    "blurb": "Since 1997, artists have been drawing 3x3 grids inside 3x3 grids inside 3x3 grids, zooming inward with no end. It's a webring for people who never wanted the ring to stop.",
-    "url": "https://www.sito.org/synergy/gridcosm/",
-    "foundNote": "online since 1997"
-  },
-  {
-    "id": "gw-hn-simulator",
-    "title": "Hacker News where every commenter is a robot",
-    "blurb": "Post a link or a rant just like the real thing, except all the replies are instantly hallucinated by AI. Finally, a comment section that argues with you at machine speed and never touches grass.",
-    "url": "https://news.ysimulator.run"
-  },
-  {
-    "id": "gw-password-game",
-    "title": "A password field that slowly turns on you",
-    "blurb": "Type a password. Now make it include a Roman numeral, this month's moon phase, and a chess move. The Password Game is what security theater would look like if it were designed by a gremlin.",
-    "url": "https://neal.fun/password-game/",
-    "foundNote": "your password is now on fire"
-  },
-  {
-    "id": "gw-trolley-problems",
-    "title": "Thirty increasingly cursed trolley dilemmas",
-    "blurb": "The classic 'do you pull the lever' ethics puzzle, escalated into pure chaos, then it tells you how you compare to everyone else who answered. A moral gut-check disguised as a quiz.",
-    "url": "https://neal.fun/absurd-trolley-problems/"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game engineered to fry your attention span",
-    "blurb": "It starts as one calm button and ends as a screaming pile of notifications, autoplay videos and dopamine popups. A perfect, horrible mirror of the modern internet — you'll close it feeling seen and slightly unwell.",
-    "url": "https://neal.fun/stimulation-clicker/"
+    "foundNote": "cruise control by committee"
   },
   {
     "id": "gw-neal-fun",
-    "title": "One guy's endless workshop of browser experiments",
-    "blurb": "Neal Agarwal's whole site is a candy store of polished one-off toys — scroll through the deep sea, age of the universe, spend Bill Gates' money. The rare corner of the web where 'let me just check one thing' costs you an hour.",
-    "url": "https://neal.fun",
-    "foundNote": "powered by one relentless dev"
+    "title": "One guy's pile of beautiful, useless browser toys",
+    "blurb": "Neal.fun is a whole arcade of interactive experiments — no downloads, no signup, no paywall, just weird stuff made to be poked. Very much our people.",
+    "url": "https://neal.fun"
+  },
+  {
+    "id": "gw-gridcosm",
+    "title": "A group drawing that's been going since 1997",
+    "blurb": "Gridcosm is an infinite collaborative picture where anyone can add the next tile, and the result is gloriously chaotic. Older than most of the games we grew up with.",
+    "url": "https://sito.org/synergy/gridcosm/",
+    "foundNote": "online since 1997"
+  },
+  {
+    "id": "gw-absurd-website",
+    "title": "Fake startups that are secretly art",
+    "blurb": "Absurd.website ships a new surreal 'product' every month — projects sitting somewhere between a tech pitch, an art piece, and a fever dream. Best viewed with a raised eyebrow.",
+    "url": "https://absurd.website",
+    "foundNote": "new absurdity monthly"
+  },
+  {
+    "id": "gw-nicest-place",
+    "title": "An endless stream of strangers hugging you",
+    "blurb": "The Nicest Place on the Internet is exactly that: video after video of people opening their arms for a virtual hug. It's dumb, it works, and we're not crying, you are.",
+    "url": "https://thenicestplace.net"
+  },
+  {
+    "id": "gw-invisible-cow",
+    "title": "A hot-and-cold game where you scream at a hidden cow",
+    "blurb": "Find the Invisible Cow hides a cow on your screen and yells louder as you drift toward it. Move your mouse, listen, repeat, and question your life choices.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "headphones recommended, dignity optional"
+  },
+  {
+    "id": "gw-pixel-thoughts",
+    "title": "Type a worry, watch it drift into the void",
+    "blurb": "Pixel Thoughts is a tiny 60-second meditation: put your stress on a little star and let it float away into HTML space. Free therapy, sort of.",
+    "url": "https://pixelthoughts.co"
+  },
+  {
+    "id": "gw-dwitter",
+    "title": "Animations written in exactly 140 characters of code",
+    "blurb": "Dwitter is a demoscene playground where people cram entire looping animations into a single tweet-sized line of JavaScript. Absurd talent, minuscule footprint.",
+    "url": "https://www.dwitter.net",
+    "foundNote": "140 chars, infinite showoffs"
+  },
+  {
+    "id": "gw-does-the-dog-die",
+    "title": "A database of whether the dog dies in the movie",
+    "blurb": "Does the Dog Die? tells you before you press play whether your evening is about to be emotionally destroyed. Crowd-sourced spoilers, in the good way.",
+    "url": "https://www.doesthedogdie.com",
+    "foundNote": "peace of mind, one pet at a time"
+  },
+  {
+    "id": "gw-koalas-to-the-max",
+    "title": "Click to split dots until a hidden picture appears",
+    "blurb": "Koalas to the Max keeps dividing colored circles every time you touch them, slowly revealing an image underneath. Weirdly hypnotic, weirdly hard to stop.",
+    "url": "https://koalastothemax.com"
+  },
+  {
+    "id": "gw-omfg-dogs",
+    "title": "A silent parade of dogs jogging forever",
+    "blurb": "OMFGDOGS is just an endless loop of little pixel dogs running to a groove. No goal, no lore, pure early-web nonsense. We respect it enormously.",
+    "url": "https://www.omfgdogs.com",
+    "foundNote": "still trotting"
+  },
+  {
+    "id": "gw-lhc",
+    "title": "A live status check on whether the world has ended yet",
+    "blurb": "Has the Large Hadron Collider Destroyed the World Yet? updates in real time. Spoiler: the answer is still a big reassuring NOPE.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "foundNote": "reassuringly still 'NOPE'"
+  },
+  {
+    "id": "gw-crouton",
+    "title": "A website whose only job is showing you a crouton",
+    "blurb": "Crouton.net loads one photo of a crouton. Refresh for a different crouton. That is the entire experience and honestly it's kind of perfect.",
+    "url": "https://crouton.net",
+    "foundNote": "peak single-purpose web"
+  },
+  {
+    "id": "gw-is-it-christmas",
+    "title": "A site that answers one question with total confidence",
+    "blurb": "IsItChristmas.com exists solely to tell you whether it's Christmas, in enormous letters. Most days it just says NO, and there's something grounding about that.",
+    "url": "https://isitchristmas.com"
   }
 ];
