@@ -2,6 +2,116 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-stimulation-clicker",
+    "kind": "site",
+    "era": "current",
+    "title": "A clicker game that piles on every noise the modern internet makes at once",
+    "blurb": "It starts as one button and ends as a screaming wall of subscribe bells, rain sounds and bacon frying. A dead-on parody of your actual attention span in 2003 dial-up form.",
+    "url": "https://neal.fun/stimulation-clicker/",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.802Z"
+  },
+  {
+    "id": "gw-sandspiel",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand playground where fire, water and plants fight it out",
+    "blurb": "Drop sand, light it, flood it, grow a vine through the ashes — a tiny physics world that behaves suspiciously well for something running in your browser. Endless quiet chaos.",
+    "url": "https://sandspiel.club",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.738Z"
+  },
+  {
+    "id": "gw-password-game",
+    "kind": "site",
+    "era": "current",
+    "title": "A password field that keeps adding insane new rules until you break",
+    "blurb": "Sure, add a number. Now include a Roman numeral that sums to 25. Now a chess move. Now feed the chicken. The most stressful text box ever built, and you can't stop.",
+    "url": "https://neal.fun/password-game/",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.467Z"
+  },
+  {
+    "id": "gw-wiki-game",
+    "kind": "site",
+    "era": "current",
+    "title": "Race from one Wikipedia page to another using only the links",
+    "blurb": "If you love our own Web Run, this is the ancestor: get from A to B across the real Wikipedia, clicking blue words like your life depends on it. Warning — you will not do just one.",
+    "url": "https://thewikigame.com",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.390Z"
+  },
+  {
+    "id": "gw-passweird",
+    "kind": "site",
+    "era": "current",
+    "title": "A password generator so gross even hackers won't want your password",
+    "blurb": "It spits out passwords covered in doodles and questionable phrases, on the theory that nobody — criminal or otherwise — wants to steal something that revolting. Genuinely inspired security through disgust.",
+    "url": "https://passweird.com",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.297Z"
+  },
+  {
+    "id": "gw-find-invisible-cow",
+    "kind": "site",
+    "era": "current",
+    "title": "Hunt an invisible cow using only sound",
+    "blurb": "You can't see the cow. You can only hear it get louder as your cursor wanders closer. It is genuinely thrilling and you will feel deeply silly.",
+    "url": "https://findtheinvisiblecow.com",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.220Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A never-ending stream of strangers giving you a hug",
+    "blurb": "Real people, on video, opening their arms to nobody in particular — which is somehow everybody. When the internet gets loud, this is a very quiet room.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.135Z"
+  },
+  {
+    "id": "gw-gridcosm",
+    "kind": "site",
+    "era": "current",
+    "title": "A collaborative art grid that's been zooming inward since 1997",
+    "blurb": "3x3 grids nested inside 3x3 grids inside 3x3 grids, drawn by strangers, tunneling forever. Older than most of the games on this site and still going.",
+    "url": "https://sito.org/synergy/",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:36.039Z"
+  },
+  {
+    "id": "gw-one-million-chessboards",
+    "kind": "site",
+    "era": "current",
+    "title": "A million tiny chessboards on one enormous shared page",
+    "blurb": "The checkbox guy came back with a million chessboards and let the whole internet move pieces at once. It's chaos, it's beautiful, and nobody is winning.",
+    "url": "https://onemillionchessboards.com",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:35.936Z"
+  },
+  {
+    "id": "gw-one-million-checkboxes",
+    "kind": "site",
+    "era": "current",
+    "title": "A million checkboxes strangers keep checking and unchecking",
+    "blurb": "No score, no point, just a million little boxes and thousands of hands fighting over them. Somehow the most compelling thing you'll do with a mouse today.",
+    "url": "https://onemillioncheckboxes.com",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:35.768Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A car thousands of strangers are steering across Street View, together, forever",
+    "blurb": "Every ten seconds the internet votes on which way to turn, and the car lurches accordingly. It started in Boston with no destination — democracy has never parallel-parked worse.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-07-31T07:07:35.611Z"
+  },
+  {
     "id": "gw-is-it-christmas",
     "kind": "site",
     "era": "current",
@@ -72,16 +182,6 @@ export default [
     "archivedAt": "2026-07-29T07:03:22.365Z"
   },
   {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "An endless stream of strangers hugging you",
-    "blurb": "The Nicest Place on the Internet is exactly that: video after video of people opening their arms for a virtual hug. It's dumb, it works, and we're not crying, you are.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:22.081Z"
-  },
-  {
     "id": "gw-absurd-website",
     "kind": "site",
     "era": "current",
@@ -92,16 +192,6 @@ export default [
     "archivedAt": "2026-07-29T07:03:21.840Z"
   },
   {
-    "id": "gw-gridcosm",
-    "kind": "site",
-    "era": "current",
-    "title": "A group drawing that's been going since 1997",
-    "blurb": "Gridcosm is an infinite collaborative picture where anyone can add the next tile, and the result is gloriously chaotic. Older than most of the games we grew up with.",
-    "url": "https://sito.org/synergy/gridcosm/",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:21.702Z"
-  },
-  {
     "id": "gw-neal-fun",
     "kind": "site",
     "era": "current",
@@ -110,36 +200,6 @@ export default [
     "url": "https://neal.fun",
     "source": "weird",
     "archivedAt": "2026-07-29T07:03:21.525Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A car the whole internet is driving at once, by vote",
-    "blurb": "Neal Agarwal's Internet Roadtrip is one virtual car steered by strangers voting on every turn, honk, and radio station. It moves at the speed of democracy, which is to say: barely.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:21.360Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game engineered to fry your attention span",
-    "blurb": "It starts as one calm button and ends as a screaming pile of notifications, autoplay videos and dopamine popups. A perfect, horrible mirror of the modern internet — you'll close it feeling seen and slightly unwell.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "source": "weird",
-    "archivedAt": "2026-07-27T07:18:49.405Z"
-  },
-  {
-    "id": "gw-password-game",
-    "kind": "site",
-    "era": "current",
-    "title": "A password field that slowly turns on you",
-    "blurb": "Type a password. Now make it include a Roman numeral, this month's moon phase, and a chess move. The Password Game is what security theater would look like if it were designed by a gremlin.",
-    "url": "https://neal.fun/password-game/",
-    "source": "weird",
-    "archivedAt": "2026-07-27T07:18:49.210Z"
   },
   {
     "id": "gw-hn-simulator",
@@ -232,16 +292,6 @@ export default [
     "archivedAt": "2026-07-25T06:54:55.083Z"
   },
   {
-    "id": "gw-sandspiel",
-    "kind": "site",
-    "era": "current",
-    "title": "A falling-sand sandbox where fire fights plants",
-    "blurb": "Drop sand, water, fire, ice, and seeds into a little 2D world and watch physics get petty. The digital ant farm your school lab computer wished it could run.",
-    "url": "https://sandspiel.club",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:54.044Z"
-  },
-  {
     "id": "gw-floor796",
     "kind": "site",
     "era": "current",
@@ -250,26 +300,6 @@ export default [
     "url": "https://floor796.com",
     "source": "weird",
     "archivedAt": "2026-07-25T06:54:53.908Z"
-  },
-  {
-    "id": "gw-one-million-chessboards",
-    "kind": "site",
-    "era": "current",
-    "title": "A planet-sized chessboard where strangers move the pieces",
-    "blurb": "The sequel to a million checkboxes: one enormous board, a million games, everybody nudging pawns in real time with no turns and no rules. It should not work. It works.",
-    "url": "https://onemillionchessboards.com",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:53.529Z"
-  },
-  {
-    "id": "gw-one-million-checkboxes",
-    "kind": "site",
-    "era": "current",
-    "title": "One million checkboxes and a war for every single one",
-    "blurb": "A page with a million real checkboxes shared by everyone online — you check one, a stranger unchecks it, and somehow this becomes a full-contact sport. The purest form of internet.",
-    "url": "https://onemillioncheckboxes.com",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:53.313Z"
   },
   {
     "id": "gw-little-alchemy",
@@ -402,16 +432,6 @@ export default [
     "archivedAt": "2026-07-17T06:55:56.263Z"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "kind": "site",
-    "era": "current",
-    "title": "A game where you hunt a cow you can only hear",
-    "blurb": "Move your mouse around and it MOOs louder as you get closer to an invisible cow. That's the whole thing. It is inexplicably shouting at you and you love it.",
-    "url": "https://findtheinvisiblecow.com",
-    "source": "weird",
-    "archivedAt": "2026-07-15T06:53:59.511Z"
-  },
-  {
     "id": "gw-drift-fm",
     "kind": "site",
     "era": "current",
@@ -510,16 +530,6 @@ export default [
     "url": "https://neal.fun/absurd-trolley-problems/",
     "source": "weird",
     "archivedAt": "2026-07-11T06:52:58.523Z"
-  },
-  {
-    "id": "gw-passweird",
-    "kind": "site",
-    "era": "current",
-    "title": "A password generator that's too weird to steal",
-    "blurb": "Instead of xK9#mQ2, it hands you something so cursed and specific no hacker would dare touch it. Genuinely useful, deeply unhinged.",
-    "url": "https://passweird.com",
-    "source": "weird",
-    "archivedAt": "2026-07-09T07:25:56.618Z"
   },
   {
     "id": "gw-single-serving-sites",
