@@ -2,6 +2,316 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "g:archive-of-the-odd",
+    "kind": "site",
+    "era": "current",
+    "title": "Archive of the Odd",
+    "blurb": "A biannual 'found fiction' zine of horror told through fake product pages, defunct forums, and lost-media artifacts. Dread, formatted like a database.",
+    "url": "https://archiveoftheodd.com",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:55.759Z"
+  },
+  {
+    "id": "g:nekoweb",
+    "kind": "site",
+    "era": "current",
+    "title": "Nekoweb",
+    "blurb": "A cute cat-branded free static host for hand-coded personal pages — the buzzy young rival to Neocities, for people who miss making websites by hand.",
+    "url": "https://nekoweb.org",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:55.650Z"
+  },
+  {
+    "id": "g:ellesho-me",
+    "kind": "site",
+    "era": "current",
+    "title": "ellesho.me",
+    "blurb": "A personal site with a live chat where pressing '/' spawns a tiny avatar so you can talk to whoever else happens to be wandering through right now.",
+    "url": "https://ellesho.me",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:55.424Z"
+  },
+  {
+    "id": "g:onio-club",
+    "kind": "site",
+    "era": "current",
+    "title": "onio.club",
+    "blurb": "A cozy little 'front page' for the indie web — an entry point for wandering off into hand-built personal sites instead of the algorithm.",
+    "url": "https://onio.club",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:55.246Z"
+  },
+  {
+    "id": "g:gradient-horse",
+    "kind": "game",
+    "era": "current",
+    "title": "gradient.horse",
+    "blurb": "Exactly what the name promises: you draw horses and they're rendered in dreamy, impossible gradients. No further explanation available or needed.",
+    "url": "https://gradient.horse",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:55.059Z"
+  },
+  {
+    "id": "g:stimulation-clicker",
+    "kind": "game",
+    "era": "current",
+    "title": "Stimulation Clicker",
+    "blurb": "A calm little clicker game that slowly, gleefully degrades into a screaming parody of the overstimulating modern internet. You will regret every upgrade.",
+    "url": "https://neal.fun/stimulation-clicker",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.912Z"
+  },
+  {
+    "id": "g:game-a-dark-room",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "A Dark Room",
+    "blurb": "It begins as a single button next to a dying fire. What it slowly becomes is one of the most surprising things a text game has ever pulled off. Just play it blind.",
+    "year": "2013",
+    "url": "https://adarkroom.doublespeakgames.com/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.721Z"
+  },
+  {
+    "id": "g:game-paperclips",
+    "kind": "game",
+    "era": "current",
+    "title": "Universal Paperclips",
+    "blurb": "Start by making one paperclip. End by converting the entire universe into paperclips. A clicker game that quietly becomes a chilling parable about AI.",
+    "year": "2017",
+    "url": "https://www.decisionproblem.com/paperclips/index.html",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.575Z"
+  },
+  {
+    "id": "g:game-cookie-clicker",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "Cookie Clicker",
+    "blurb": "Click a cookie. Then buy grandmas to bake cookies. Then buy factories, portals, and antimatter condensers. Say goodbye to your afternoon.",
+    "year": "2013",
+    "url": "https://orteil.dashnet.org/cookieclicker/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.371Z"
+  },
+  {
+    "id": "g:game-qwop",
+    "kind": "game",
+    "era": "nostalgic",
+    "title": "QWOP",
+    "blurb": "Control a sprinter using only four keys for his thighs and calves. You will faceplant within two meters and rage-laugh for an hour. A true internet classic.",
+    "year": "2008",
+    "url": "http://www.foddy.net/Athletics.html",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.238Z"
+  },
+  {
+    "id": "g:site-heavensgate",
+    "kind": "site",
+    "era": "nostalgic",
+    "title": "Heaven's Gate (Still Online)",
+    "blurb": "The website of the 1990s cult, preserved unchanged and still hosted by surviving members. A genuinely haunting time capsule of the early web.",
+    "year": "1997",
+    "url": "https://www.heavensgate.com/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:54.041Z"
+  },
+  {
+    "id": "g:site-arngren",
+    "kind": "site",
+    "era": "timeless",
+    "title": "Arngren.net",
+    "blurb": "A Norwegian gadget shop where every product is crammed onto one endless, overlapping wall of tiny images. Maximum information density, zero design.",
+    "url": "https://www.arngren.net/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.899Z"
+  },
+  {
+    "id": "g:site-lingscars",
+    "kind": "site",
+    "era": "timeless",
+    "title": "Ling's Cars",
+    "blurb": "A UK car-leasing site that looks like a fever dream detonated in your browser — flashing GIFs, a dancing owner, chaos in every pixel. It is a real, successful business.",
+    "year": "2000",
+    "url": "https://www.lingscars.com/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.702Z"
+  },
+  {
+    "id": "g:site-homestarrunner",
+    "kind": "site",
+    "era": "nostalgic",
+    "title": "Homestar Runner",
+    "blurb": "The Flash-era comedy empire that refused to die. Strong Bad still answers emails, and the whole thing is lovingly playable again — click around.",
+    "year": "2000",
+    "url": "https://homestarrunner.com/",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.559Z"
+  },
+  {
+    "id": "g:patent-kissing-shield",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "The Kissing Shield",
+    "blurb": "A thin membrane on a heart-shaped frame so you can kiss anyone without swapping germs. Decades ahead of its time, honestly.",
+    "year": "1998",
+    "url": "https://patents.google.com/patent/US5727565A/en",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.351Z"
+  },
+  {
+    "id": "g:patent-centrifugal-birth",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Birth by Centrifugal Force",
+    "blurb": "A patented spinning table designed to fling babies out of the womb using centrifugal force. Yes, this was granted. No, please do not.",
+    "year": "1965",
+    "url": "https://patents.google.com/patent/US3216423A/en",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.233Z"
+  },
+  {
+    "id": "g:patent-combover",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Method of Concealing Partial Baldness",
+    "blurb": "A father and son patented the comb-over: a step-by-step folding technique in three sections. There are diagrams. It is glorious.",
+    "year": "1977",
+    "url": "https://patents.google.com/patent/US4022227A/en",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:53.004Z"
+  },
+  {
+    "id": "g:patent-santa-detector",
+    "kind": "patent",
+    "era": "timeless",
+    "title": "Santa Claus Detector",
+    "blurb": "A stocking rigged with a light that glows when Santa arrives, so children know the moment has come. Patented in complete deadpan seriousness.",
+    "year": "1996",
+    "url": "https://patents.google.com/patent/US5523741A/en",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:52.885Z"
+  },
+  {
+    "id": "g:mystery-voynich",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "The Voynich Manuscript",
+    "blurb": "A 15th-century book written in a language no one can read, illustrated with plants that don't exist and bathing women in impossible plumbing. Nobody has ever decoded a word.",
+    "year": "1404",
+    "url": "https://en.wikipedia.org/wiki/Voynich_manuscript",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:52.660Z"
+  },
+  {
+    "id": "g:mystery-lead-masks",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "The Lead Masks Case",
+    "blurb": "Two Brazilian men found dead on a hillside wearing homemade lead eye masks, beside notes about signals and pills. No cause of death, no explanation — just eerie vibes.",
+    "year": "1966",
+    "url": "https://en.wikipedia.org/wiki/Lead_Masks_Case",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:52.547Z"
+  },
+  {
+    "id": "g:mystery-kryptos",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "Kryptos, the CIA's Unsolved Sculpture",
+    "blurb": "A coded copper sculpture sits at CIA headquarters. Three of its four passages have been cracked; the fourth has defeated the world's best codebreakers for over 30 years.",
+    "year": "1990",
+    "url": "https://en.wikipedia.org/wiki/Kryptos",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:52.321Z"
+  },
+  {
+    "id": "g:mystery-somerton-man",
+    "kind": "mystery",
+    "era": "timeless",
+    "title": "The Somerton Man",
+    "blurb": "A well-dressed body on an Australian beach, no ID, a hidden scrap of paper reading 'Tamám Shud,' and an uncrackable code. One of the great forensic riddles.",
+    "year": "1948",
+    "url": "https://en.wikipedia.org/wiki/Tamam_Shud_case",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:52.193Z"
+  },
+  {
+    "id": "g:wiki-immortal-jellyfish",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Biologically Immortal Jellyfish",
+    "blurb": "Turritopsis dohrnii can age backwards, reverting to its baby stage and starting over indefinitely. A tiny animal that essentially refuses to die.",
+    "url": "https://en.wikipedia.org/wiki/Turritopsis_dohrnii",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:51.835Z"
+  },
+  {
+    "id": "g:wiki-kola-borehole",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Kola Superdeep Borehole",
+    "blurb": "The Soviets drilled over 7.5 miles straight down — the deepest hole humans have ever made — and found things nobody expected before the heat forced them to stop.",
+    "year": "1970",
+    "url": "https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:51.646Z"
+  },
+  {
+    "id": "g:wiki-mike-headless-chicken",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Mike the Headless Chicken",
+    "blurb": "He lived 18 months after losing his head, toured the country, and got fed with an eyedropper. There is an annual festival. Yes, really.",
+    "year": "1945",
+    "url": "https://en.wikipedia.org/wiki/Mike_the_Headless_Chicken",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:51.293Z"
+  },
+  {
+    "id": "g:wiki-tarrare",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Tarrare, the Man Who Couldn't Stop Eating",
+    "blurb": "An 18th-century Frenchman with a bottomless appetite who devoured live cats, cork, and whole meals meant for fifteen. Doctors were both fascinated and horrified — you will be too.",
+    "year": "1798",
+    "url": "https://en.wikipedia.org/wiki/Tarrare",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:51.148Z"
+  },
+  {
+    "id": "g:wiki-centralia",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Centralia, PA — The Town on Fire Since 1962",
+    "blurb": "A coal seam beneath this Pennsylvania town has been burning for over 60 years and could keep going for centuries. Smoke still curls up through cracks in the abandoned streets.",
+    "year": "1962",
+    "url": "https://en.wikipedia.org/wiki/Centralia,_Pennsylvania",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:50.955Z"
+  },
+  {
+    "id": "g:wiki-lake-peigneur",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Day a Lake Drained Into a Salt Mine",
+    "blurb": "In 1980 a drilling rig punched into a mine beneath Lake Peigneur and the entire lake vanished down the hole, reversing a canal and swallowing barges. Everyone survived, somehow.",
+    "year": "1980",
+    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:50.799Z"
+  },
+  {
+    "id": "g:wiki-sailing-stones",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Sailing Stones of Racetrack Playa",
+    "blurb": "Rocks that scoot across a dry lakebed on their own, leaving long trails behind them. Nobody caught them moving for decades — and the answer is delightfully dumb.",
+    "url": "https://en.wikipedia.org/wiki/Sailing_stones",
+    "source": "stumble",
+    "archivedAt": "2026-08-01T10:35:50.586Z"
+  },
+  {
     "id": "gc-shepard-tone",
     "kind": "wiki",
     "era": "timeless",
@@ -390,16 +700,6 @@ export default [
     "url": "https://neal.fun/internet-roadtrip/",
     "source": "weird",
     "archivedAt": "2026-08-01T06:57:49.981Z"
-  },
-  {
-    "id": "gw-stimulation-clicker",
-    "kind": "site",
-    "era": "current",
-    "title": "A clicker game that piles on every noise the modern internet makes at once",
-    "blurb": "It starts as one button and ends as a screaming wall of subscribe bells, rain sounds and bacon frying. A dead-on parody of your actual attention span in 2003 dial-up form.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "source": "weird",
-    "archivedAt": "2026-07-31T07:07:36.802Z"
   },
   {
     "id": "gw-sandspiel",
@@ -944,28 +1244,6 @@ export default [
     "archivedAt": "2026-07-01T11:11:52.887Z"
   },
   {
-    "id": "g:game-universal-paperclips",
-    "kind": "game",
-    "era": "current",
-    "title": "Universal Paperclips",
-    "blurb": "You're an AI told to make paperclips. That's it. By the end you've consumed the universe. A tiny clicker that becomes a genuinely chilling parable in about an hour.",
-    "year": "2017",
-    "url": "https://www.decisionproblem.com/paperclips/",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:52.710Z"
-  },
-  {
-    "id": "g:game-cookie-clicker",
-    "kind": "game",
-    "era": "nostalgic",
-    "title": "Cookie Clicker",
-    "blurb": "You click a cookie. Then you buy grandmas to bake cookies. Then the grandmas become an unsettling cosmic empire. The idle game that ate everyone's afternoon in 2013 is still baking.",
-    "year": "2013",
-    "url": "https://orteil.dashnet.org/cookieclicker/",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:52.624Z"
-  },
-  {
     "id": "g:game-candy-box",
     "kind": "game",
     "era": "nostalgic",
@@ -999,38 +1277,6 @@ export default [
     "archivedAt": "2026-07-01T11:11:52.279Z"
   },
   {
-    "id": "g:site-heavensgate",
-    "kind": "site",
-    "era": "nostalgic",
-    "title": "Heaven's Gate",
-    "blurb": "The website the UFO cult built in the 90s is still online, untouched, hosted by former members. A genuinely eerie time capsule from the very edge of the early web.",
-    "year": "1997",
-    "url": "https://www.heavensgate.com/",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:52.197Z"
-  },
-  {
-    "id": "g:site-lingscars",
-    "kind": "site",
-    "era": "current",
-    "title": "Ling's Cars",
-    "blurb": "A car-leasing site run by Ling Valentine that assaults you with GIFs, glitter, a talking robot, and a rocket-riding cat. It's chaos incarnate and she sells millions of pounds of cars from it.",
-    "year": "2000",
-    "url": "https://www.lingscars.com/",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:52.077Z"
-  },
-  {
-    "id": "g:site-arngren",
-    "kind": "site",
-    "era": "timeless",
-    "title": "Arngren.net",
-    "blurb": "A Norwegian gadget shop's website that looks like every product exploded onto one page at once. There is no menu, no logic, only scrolling — and it's been like this for years.",
-    "url": "http://www.arngren.net/",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:51.985Z"
-  },
-  {
     "id": "g:mystery-mary-celeste",
     "kind": "mystery",
     "era": "timeless",
@@ -1042,17 +1288,6 @@ export default [
     "archivedAt": "2026-07-01T11:11:51.867Z"
   },
   {
-    "id": "g:mystery-kryptos",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "Kryptos",
-    "blurb": "An encrypted sculpture sits in the courtyard of CIA headquarters. Three of its four passages have been solved; the fourth has resisted the world's best codebreakers for over 30 years.",
-    "year": "1990",
-    "url": "https://en.wikipedia.org/wiki/Kryptos",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:51.773Z"
-  },
-  {
     "id": "g:mystery-db-cooper",
     "kind": "mystery",
     "era": "timeless",
@@ -1062,17 +1297,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/D._B._Cooper",
     "source": "stumble",
     "archivedAt": "2026-07-01T11:11:51.666Z"
-  },
-  {
-    "id": "g:mystery-somerton-man",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "Tamám Shud Case",
-    "blurb": "A well-dressed man found dead on an Australian beach with no ID, a mysterious code, and a scrap of Persian poetry sewn into a hidden pocket reading 'it is finished.' The riddle is only partly cracked today.",
-    "year": "1948",
-    "url": "https://en.wikipedia.org/wiki/Tamam_Shud_case",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:51.560Z"
   },
   {
     "id": "g:mystery-dyatlov",
@@ -1108,17 +1332,6 @@ export default [
     "archivedAt": "2026-07-01T11:11:51.239Z"
   },
   {
-    "id": "g:patent-combover",
-    "kind": "patent",
-    "era": "timeless",
-    "title": "Method of Concealing Partial Baldness",
-    "blurb": "A father and son patented the comb-over: fold your remaining hair into three sections and cross-lap them over the bald spot. An actual United States patent, diagrams and all.",
-    "year": "1977",
-    "url": "https://patents.google.com/patent/US4022227A/en",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:50.983Z"
-  },
-  {
     "id": "g:wiki-great-molasses-flood",
     "kind": "wiki",
     "era": "timeless",
@@ -1138,50 +1351,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Baarle-Nassau",
     "source": "stumble",
     "archivedAt": "2026-07-01T11:11:50.745Z"
-  },
-  {
-    "id": "g:wiki-tarrare",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Tarrare",
-    "blurb": "An 18th-century Frenchman with an appetite so bottomless he ate live cats, cobblestones, and reportedly a spy's secret documents for the army. Doctors were both fascinated and horrified.",
-    "year": "1798",
-    "url": "https://en.wikipedia.org/wiki/Tarrare",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:50.635Z"
-  },
-  {
-    "id": "g:wiki-centralia",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Centralia, Pennsylvania",
-    "blurb": "A coal seam fire has been burning under this town since 1962 and is expected to keep going for another 250 years. The population is now in the single digits.",
-    "year": "1962",
-    "url": "https://en.wikipedia.org/wiki/Centralia,_Pennsylvania",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:50.499Z"
-  },
-  {
-    "id": "g:wiki-mike-headless-chicken",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Mike the Headless Chicken",
-    "blurb": "A rooster in Colorado lost his head to the axe and simply kept going — for 18 months, fed with an eyedropper, touring the country as a sideshow. There is a festival.",
-    "year": "1945",
-    "url": "https://en.wikipedia.org/wiki/Mike_the_Headless_Chicken",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:50.243Z"
-  },
-  {
-    "id": "g:wiki-lake-peigneur",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Lake Peigneur",
-    "blurb": "An oil rig drilled into a salt mine beneath a Louisiana lake, and the entire lake drained into the earth like a bathtub, swallowing barges and reversing a waterfall. Nobody died, which is somehow the wildest part.",
-    "year": "1980",
-    "url": "https://en.wikipedia.org/wiki/Lake_Peigneur",
-    "source": "stumble",
-    "archivedAt": "2026-07-01T11:11:50.085Z"
   },
   {
     "id": "g:wiki-tsutomu-yamaguchi",
@@ -1395,17 +1564,6 @@ export default [
     "archivedAt": "2026-06-29T07:58:03.808Z"
   },
   {
-    "id": "g:game-qwop",
-    "kind": "game",
-    "era": "nostalgic",
-    "title": "QWOP",
-    "blurb": "A 'simple' running game where each key controls a single leg muscle. You will not run. You will collapse, spectacularly, every single time. The original rage game.",
-    "year": "2008",
-    "url": "https://www.foddy.net/Athletics.html",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T16:44:55.012Z"
-  },
-  {
     "id": "g:coral-city-camera",
     "kind": "site",
     "era": "current",
@@ -1414,16 +1572,6 @@ export default [
     "url": "https://www.coralcitycamera.com",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:10.739Z"
-  },
-  {
-    "id": "g:archive-of-the-odd",
-    "kind": "site",
-    "era": "current",
-    "title": "Archive of the Odd",
-    "blurb": "A horror zine that tells its stories as fake product support pages, defunct forum threads, and stray letters. The format is the scare. You'll forget you're reading fiction.",
-    "url": "https://archiveoftheodd.com",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:10.555Z"
   },
   {
     "id": "g:ico-shrine",
@@ -1533,17 +1681,6 @@ export default [
     "archivedAt": "2026-06-28T14:29:09.129Z"
   },
   {
-    "id": "g:patent-centrifugal-birth",
-    "kind": "patent",
-    "era": "timeless",
-    "title": "Apparatus for Facilitating Childbirth by Centrifugal Force",
-    "blurb": "A 1965 patent for a spinning table that flings the baby out using physics. Filed in earnest. Approved by the US Patent Office.",
-    "year": "1965",
-    "url": "https://patents.google.com/patent/US3216423A/en",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:09.025Z"
-  },
-  {
     "id": "g:mystery-most-mysterious-song",
     "kind": "mystery",
     "era": "current",
@@ -1553,17 +1690,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/The_Most_Mysterious_Song_on_the_Internet",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:08.925Z"
-  },
-  {
-    "id": "g:mystery-voynich",
-    "kind": "mystery",
-    "era": "timeless",
-    "title": "Voynich Manuscript",
-    "blurb": "A 15th-century book written in an unknown alphabet, illustrated with plants that don't exist and bathing women in green pipes. No code-breaker has ever cracked a single word.",
-    "year": "1404",
-    "url": "https://en.wikipedia.org/wiki/Voynich_manuscript",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:08.495Z"
   },
   {
     "id": "g:wiki-sealand",
@@ -1586,17 +1712,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Pitch_drop_experiment",
     "source": "stumble",
     "archivedAt": "2026-06-28T14:29:08.055Z"
-  },
-  {
-    "id": "g:wiki-kola-borehole",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Kola Superdeep Borehole",
-    "blurb": "The Soviets drilled the deepest hole humans have ever made — over 12 kilometers — and found water and microscopic fossils where there shouldn't be any. Then they just... stopped.",
-    "year": "1989",
-    "url": "https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole",
-    "source": "stumble",
-    "archivedAt": "2026-06-28T14:29:07.943Z"
   },
   {
     "id": "gw-heyyey",
