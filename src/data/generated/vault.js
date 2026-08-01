@@ -2,6 +2,296 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gc-shepard-tone",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Shepard Tone",
+    "blurb": "An audio illusion that seems to climb higher forever without ever getting anywhere — the sonic equivalent of an endless staircase, beloved by film composers.",
+    "url": "https://en.wikipedia.org/wiki/Shepard_tone",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.709Z"
+  },
+  {
+    "id": "gc-boltzmann-brain",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Emperor Norton",
+    "blurb": "A bankrupt San Francisco resident declared himself Emperor of the United States in 1859 — and the city humored him for decades, honoring his own printed currency.",
+    "url": "https://en.wikipedia.org/wiki/Emperor_Norton",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.610Z"
+  },
+  {
+    "id": "gc-four-color-theorem",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Four Color Theorem",
+    "blurb": "Any map, however tangled, needs only four colors so no two neighboring regions match — and it was the first major theorem proven with the help of a computer.",
+    "url": "https://en.wikipedia.org/wiki/Four_color_theorem",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.478Z"
+  },
+  {
+    "id": "gc-halting-problem",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Halting Problem",
+    "blurb": "Alan Turing proved no program can reliably tell whether any other program will eventually finish or loop forever. Some questions are provably off-limits to computers.",
+    "url": "https://en.wikipedia.org/wiki/Halting_problem",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.403Z"
+  },
+  {
+    "id": "gc-double-pendulum",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Double Pendulum",
+    "blurb": "Hang one pendulum off another and the motion becomes chaotic — start it twice from nearly the same spot and the two swings diverge into totally different dances.",
+    "url": "https://en.wikipedia.org/wiki/Double_pendulum",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.287Z"
+  },
+  {
+    "id": "gc-blue-whale-heart",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Blue Whale",
+    "blurb": "The largest animal ever known — bigger than any dinosaur — with a heart the size of a small car and a call loud enough to travel across an ocean basin.",
+    "url": "https://en.wikipedia.org/wiki/Blue_whale",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.171Z"
+  },
+  {
+    "id": "gc-cicada-primes",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Periodical Cicadas",
+    "blurb": "Some cicadas spend 13 or 17 years underground, then emerge all at once — prime-numbered cycles that make it hard for any predator to sync up with the feast.",
+    "url": "https://en.wikipedia.org/wiki/Periodical_cicadas",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:27.082Z"
+  },
+  {
+    "id": "gc-p-adic-doubling",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Doubling of Numbers on a Chessboard",
+    "blurb": "One grain on square one, doubling each square — by square 64 you owe more wheat than the world has ever grown. Exponential growth ruins everyone's day politely.",
+    "url": "https://en.wikipedia.org/wiki/Wheat_and_chessboard_problem",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.944Z"
+  },
+  {
+    "id": "gc-hexagon-saturn",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Saturn's Hexagon",
+    "blurb": "There's a persistent six-sided cloud pattern parked over Saturn's north pole, wide enough to swallow several Earths, holding its shape for decades. A planet drew a hexagon.",
+    "url": "https://en.wikipedia.org/wiki/Saturn%27s_hexagon",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.850Z"
+  },
+  {
+    "id": "gc-brine-pool",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Underwater Brine Pools",
+    "blurb": "At the bottom of the ocean there are lakes — pools of super-salty water so dense they have shorelines and waves, deadly to most creatures that wander in.",
+    "url": "https://en.wikipedia.org/wiki/Brine_pool",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.752Z"
+  },
+  {
+    "id": "gc-tunguska",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Tunguska Event",
+    "blurb": "In 1908 something exploded over remote Siberia and flattened 80 million trees across 2,000 square kilometers — with no crater. Almost certainly an object that never even landed.",
+    "url": "https://en.wikipedia.org/wiki/Tunguska_event",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.641Z"
+  },
+  {
+    "id": "gc-golden-ratio",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Golden Ratio",
+    "blurb": "One number, roughly 1.618, that shows up in geometry, growth patterns, and centuries of art and architecture — the proportion humans keep deciding just looks right.",
+    "url": "https://en.wikipedia.org/wiki/Golden_ratio",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.516Z"
+  },
+  {
+    "id": "gc-benoit-fibonacci",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Fibonacci Sequence",
+    "blurb": "Each number is the sum of the two before it — and the pattern turns up in sunflower spirals, pinecones, and nautilus shells like nature took a math class.",
+    "url": "https://en.wikipedia.org/wiki/Fibonacci_sequence",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.404Z"
+  },
+  {
+    "id": "gc-immortal-jellyfish",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Tabby's Star",
+    "blurb": "A distant star dims in bizarre, irregular chunks nobody fully expected. Theories ran from comet swarms to alien megastructures before dust took the lead.",
+    "url": "https://en.wikipedia.org/wiki/Tabby%27s_Star",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.323Z"
+  },
+  {
+    "id": "gc-methuselah-tree",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Methuselah, the Bristlecone Pine",
+    "blurb": "A gnarled little tree in California has been quietly alive for over 4,800 years — older than the pyramids at Giza, still putting out needles.",
+    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.228Z"
+  },
+  {
+    "id": "gc-library-alexandria",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Nazca Lines",
+    "blurb": "Giant animals and shapes scratched into a Peruvian desert two thousand years ago, only fully legible from the sky — which nobody could reach when they were made.",
+    "url": "https://en.wikipedia.org/wiki/Nazca_Lines",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.098Z"
+  },
+  {
+    "id": "gc-baghdad-battery",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Rosetta Stone",
+    "blurb": "One decree carved in three scripts became the key that cracked Egyptian hieroglyphs — a two-thousand-year-old bureaucratic footnote that reopened a whole language.",
+    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:26.019Z"
+  },
+  {
+    "id": "gc-quipu",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Inca Quipu",
+    "blurb": "The Inca ran an empire without writing — they recorded numbers and records in knotted, colored strings. Some knot-codes we still can't fully read.",
+    "url": "https://en.wikipedia.org/wiki/Quipu",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.912Z"
+  },
+  {
+    "id": "gc-superfluid-helium",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Superfluid Helium",
+    "blurb": "Chill helium enough and it loses all viscosity — it climbs the walls of its container, leaks through microscopic gaps, and generally refuses to obey normal liquid manners.",
+    "url": "https://en.wikipedia.org/wiki/Superfluid_helium-4",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.785Z"
+  },
+  {
+    "id": "gc-brown-noise-baader",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Absolute Zero",
+    "blurb": "There's a coldest possible temperature — around -273.15°C — where atomic motion bottoms out. You can get achingly close but, by the rules, never quite arrive.",
+    "url": "https://en.wikipedia.org/wiki/Absolute_zero",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.691Z"
+  },
+  {
+    "id": "gc-wow-signal",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Wow! Signal",
+    "blurb": "In 1977 a radio telescope caught a strong, oddly specific burst from deep space. An astronomer circled it and wrote 'Wow!' in the margin — and it never repeated.",
+    "url": "https://en.wikipedia.org/wiki/Wow!_signal",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.582Z"
+  },
+  {
+    "id": "gc-radiolab-mantis-shrimp",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Mantis Shrimp",
+    "blurb": "It punches fast enough to boil the water around its claw and has up to sixteen types of color receptor — we get by on three. A tiny reef bruiser out-seeing us all.",
+    "url": "https://en.wikipedia.org/wiki/Mantis_shrimp",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.497Z"
+  },
+  {
+    "id": "gc-brazil-nut-tree",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Pando, the Trembling Giant",
+    "blurb": "A whole Utah aspen forest is secretly one organism — thousands of trunks sharing a single root system, weighing millions of pounds and possibly thousands of years old.",
+    "url": "https://en.wikipedia.org/wiki/Pando_(tree)",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.336Z"
+  },
+  {
+    "id": "gc-pigeonhole",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Pigeonhole Principle",
+    "blurb": "Put more pigeons than holes and one hole gets crowded — obvious, until it proves that at least two people in London have the exact same number of hairs on their head.",
+    "url": "https://en.wikipedia.org/wiki/Pigeonhole_principle",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.245Z"
+  },
+  {
+    "id": "gc-coastline-paradox",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Coastline Paradox",
+    "blurb": "The length of a coastline depends entirely on the length of your ruler — measure finer and it keeps getting longer, toward infinity. Britain has no single true perimeter.",
+    "url": "https://en.wikipedia.org/wiki/Coastline_paradox",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:25.075Z"
+  },
+  {
+    "id": "gc-non-transitive-dice",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Nontransitive Dice",
+    "blurb": "You can build a set of dice where A beats B, B beats C, and C beats A — like rock-paper-scissors wearing a math costume. Let your opponent pick first.",
+    "url": "https://en.wikipedia.org/wiki/Nontransitive_dice",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:24.991Z"
+  },
+  {
+    "id": "gc-brachistochrone",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Brachistochrone Curve",
+    "blurb": "The fastest slide between two points isn't a straight line — it's a specific curve, and a ball rolling down it beats the straight path every time.",
+    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:24.844Z"
+  },
+  {
+    "id": "gc-euler-identity",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "Euler's Identity",
+    "blurb": "e raised to i-pi, plus one, equals zero. Five of math's most important constants shake hands in a single tidy line, and nobody quite gets over it.",
+    "url": "https://en.wikipedia.org/wiki/Euler%27s_identity",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:24.741Z"
+  },
+  {
+    "id": "gc-benfords-friend-collatz",
+    "kind": "wiki",
+    "era": "timeless",
+    "title": "The Collatz Conjecture",
+    "blurb": "Take any number: halve it if even, triple-plus-one if odd, repeat. Every number anyone's ever tried eventually falls to 1 — and nobody can prove it always will.",
+    "url": "https://en.wikipedia.org/wiki/Collatz_conjecture",
+    "source": "curiosities",
+    "archivedAt": "2026-08-01T09:54:24.611Z"
+  },
+  {
     "id": "gw-mapcrunch",
     "kind": "site",
     "era": "current",
@@ -905,16 +1195,6 @@ export default [
     "archivedAt": "2026-07-01T11:11:49.935Z"
   },
   {
-    "id": "gc-rosetta-stone",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Rosetta Stone",
-    "blurb": "One royal decree carved in three scripts, one of them ancient Greek, gave scholars the key to finally reading Egyptian hieroglyphs after they'd been silent for over a thousand years.",
-    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:39.993Z"
-  },
-  {
     "id": "gc-game-of-life",
     "kind": "wiki",
     "era": "timeless",
@@ -975,26 +1255,6 @@ export default [
     "archivedAt": "2026-07-01T10:36:39.551Z"
   },
   {
-    "id": "gc-four-color-theorem",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Four-Color Theorem",
-    "blurb": "Any flat map can be colored with just four colors so no two neighboring regions match. It was the first major theorem proven with the help of a computer, and mathematicians argued about that for years.",
-    "url": "https://en.wikipedia.org/wiki/Four_color_theorem",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:39.467Z"
-  },
-  {
-    "id": "gc-halting-problem",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Unsolvable Program",
-    "blurb": "There can be no program that reliably tells whether any given program will eventually stop or loop forever. Alan Turing proved this in 1936, drawing a hard limit on what computers can ever do.",
-    "url": "https://en.wikipedia.org/wiki/Halting_problem",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:39.382Z"
-  },
-  {
     "id": "gc-aurora",
     "kind": "wiki",
     "era": "timeless",
@@ -1013,36 +1273,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Dead_Sea",
     "source": "curiosities",
     "archivedAt": "2026-07-01T10:36:39.237Z"
-  },
-  {
-    "id": "gc-golden-ratio",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Golden Ratio",
-    "blurb": "A single proportion, roughly 1.618, that appears in geometry, art and growing plants, and connects neatly to the Fibonacci numbers. It's genuinely elegant, even if it gets credited for more than it earns.",
-    "url": "https://en.wikipedia.org/wiki/Golden_ratio",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:39.159Z"
-  },
-  {
-    "id": "gc-fibonacci-sequence",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Nature's Favorite Sequence",
-    "blurb": "Each number is the sum of the two before it, and the pattern quietly shows up in sunflower seeds, pinecones and spiraling shells. Plants seem to have discovered it long before we did.",
-    "url": "https://en.wikipedia.org/wiki/Fibonacci_sequence",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:39.079Z"
-  },
-  {
-    "id": "gc-brachistochrone",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Fastest Slide",
-    "blurb": "The quickest path for a ball rolling between two points isn't a straight line — it's a specific curve. Even stranger, a ball started anywhere on it reaches the bottom in the same amount of time.",
-    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:38.990Z"
   },
   {
     "id": "gc-tsar-bomba",
@@ -1085,16 +1315,6 @@ export default [
     "archivedAt": "2026-07-01T10:36:38.663Z"
   },
   {
-    "id": "gc-nazca-lines",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Nazca Lines",
-    "blurb": "Enormous animals and shapes scratched into a Peruvian desert over 1,500 years ago, some hundreds of feet across and only readable from the air. The people who made them never got that view.",
-    "url": "https://en.wikipedia.org/wiki/Nazca_Lines",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:38.586Z"
-  },
-  {
     "id": "gc-pioneer-plaque",
     "kind": "wiki",
     "era": "timeless",
@@ -1125,26 +1345,6 @@ export default [
     "archivedAt": "2026-07-01T10:36:38.333Z"
   },
   {
-    "id": "gc-methuselah-tree",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Oldest Living Tree",
-    "blurb": "A bristlecone pine in California quietly closing in on 5,000 years old — already ancient when the pyramids were new. Its exact location is kept secret to keep it safe.",
-    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:38.247Z"
-  },
-  {
-    "id": "gc-pando",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Pando, the Trembling Giant",
-    "blurb": "A Utah aspen grove that looks like thousands of trees is actually one organism sharing a single root system, weighing thousands of tons and possibly tens of thousands of years old.",
-    "url": "https://en.wikipedia.org/wiki/Pando_(tree)",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:38.161Z"
-  },
-  {
     "id": "gc-belousov-zhabotinsky",
     "kind": "wiki",
     "era": "timeless",
@@ -1153,16 +1353,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/Belousov%E2%80%93Zhabotinsky_reaction",
     "source": "curiosities",
     "archivedAt": "2026-07-01T10:36:38.081Z"
-  },
-  {
-    "id": "gc-coastline-paradox",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The Coastline Paradox",
-    "blurb": "A coastline has no single true length — measure with a shorter ruler and you catch more wiggles, and the total grows without bound. Britain's coast is genuinely as long as you want it to be.",
-    "url": "https://en.wikipedia.org/wiki/Coastline_paradox",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:38.005Z"
   },
   {
     "id": "gc-mobius-strip",
@@ -1175,16 +1365,6 @@ export default [
     "archivedAt": "2026-07-01T10:36:37.927Z"
   },
   {
-    "id": "gc-euler-identity",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "Euler's Identity",
-    "blurb": "e raised to i times pi, plus one, equals exactly zero — five of math's most important constants shaking hands in a single tidy line. It has been called the most beautiful equation there is.",
-    "url": "https://en.wikipedia.org/wiki/Euler%27s_identity",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:37.840Z"
-  },
-  {
     "id": "gc-kaprekar-6174",
     "kind": "wiki",
     "era": "timeless",
@@ -1193,16 +1373,6 @@ export default [
     "url": "https://en.wikipedia.org/wiki/6174",
     "source": "curiosities",
     "archivedAt": "2026-07-01T10:36:37.759Z"
-  },
-  {
-    "id": "gc-collatz-conjecture",
-    "kind": "wiki",
-    "era": "timeless",
-    "title": "The 3x+1 Problem",
-    "blurb": "Pick any number: if it's even, halve it; if it's odd, triple it and add one. Every number tested so far crashes down to 1, and no one has proven it always will.",
-    "url": "https://en.wikipedia.org/wiki/Collatz_conjecture",
-    "source": "curiosities",
-    "archivedAt": "2026-07-01T10:36:37.671Z"
   },
   {
     "id": "gw-long-doge",

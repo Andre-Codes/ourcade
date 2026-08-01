@@ -2,882 +2,758 @@
 // Daily polls. Shape: { id, question, options:[{id,label}] }
 export default [
   {
-    "id": "gta6-in-2003",
-    "question": "GTA 6, but dropped in 2003?",
+    "id": "gta6-vice-city-return",
+    "question": "GTA VI Vice City hype level?",
     "options": [
       {
-        "id": "burn-to-cd",
-        "label": "💿 Burn to CD"
+        "id": "gta6-day-one",
+        "label": "📀 Day one"
       },
       {
-        "id": "blockbuster-rental",
-        "label": "📼 Rent it"
+        "id": "gta6-wait-patch",
+        "label": "⏳ Wait for patches"
       },
       {
-        "id": "cheat-codes",
-        "label": "🎮 Cheat codes only"
+        "id": "gta6-still-play-sa",
+        "label": "🌴 Still on San Andreas"
       },
       {
-        "id": "still-loading",
-        "label": "⏳ Still loading"
+        "id": "gta6-what-gta",
+        "label": "❓ What's GTA?"
       }
     ]
   },
   {
-    "id": "ff7-rebirth-switch2",
-    "question": "FF7 Rebirth on Switch 2 verdict?",
+    "id": "mario-galaxy-movie-billion",
+    "question": "Super Mario Galaxy Movie: worth it?",
     "options": [
       {
-        "id": "day-one",
-        "label": "⚔️ Day one"
+        "id": "smg-loved-it",
+        "label": "🍄 Loved it"
       },
       {
-        "id": "nostalgia-tears",
-        "label": "😭 Nostalgia tears"
+        "id": "smg-nostalgia-bait",
+        "label": "🎬 Nostalgia bait"
       },
       {
-        "id": "too-many-hours",
-        "label": "⏰ Too many hours"
+        "id": "smg-wait-stream",
+        "label": "📺 Waiting to stream"
       },
       {
-        "id": "never-played",
-        "label": "🤷 Never played"
+        "id": "smg-skip",
+        "label": "🚫 Skip"
       }
     ]
   },
   {
-    "id": "hotd-death-toll",
-    "question": "House of the Dragon's death toll?",
+    "id": "world-cup-2026-vibes",
+    "question": "2026 World Cup: watching how?",
     "options": [
       {
-        "id": "cover-eyes",
-        "label": "🙈 Cover eyes"
+        "id": "wc-every-match",
+        "label": "⚽ Every match"
       },
       {
-        "id": "cheering",
-        "label": "📣 Cheering"
+        "id": "wc-just-finals",
+        "label": "🏆 Just the finals"
       },
       {
-        "id": "team-dragons",
-        "label": "🐉 Team dragons"
+        "id": "wc-highlights-only",
+        "label": "📱 Highlights only"
       },
       {
-        "id": "wiki-race-it",
-        "label": "🖱️ Wiki-race it"
+        "id": "wc-nope",
+        "label": "🙅 Not a fan"
       }
     ]
   },
   {
-    "id": "the-bear-finale",
-    "question": "The Bear ending, how you coping?",
+    "id": "meme-reset-2016",
+    "question": "'2026 is new 2016' — in?",
     "options": [
       {
-        "id": "yes-chef",
-        "label": "🔪 Yes, chef"
+        "id": "reset-mannequin",
+        "label": "🗿 Mannequin challenge"
       },
       {
-        "id": "stress-sweats",
-        "label": "😰 Stress sweats"
+        "id": "reset-bottle-flip",
+        "label": "🍾 Bottle flip"
       },
       {
-        "id": "one-more-season",
-        "label": "🙏 One more?"
+        "id": "reset-cringe",
+        "label": "😬 Hard cringe"
       },
       {
-        "id": "never-watched",
-        "label": "🤷 Never watched"
+        "id": "reset-let-2016-rest",
+        "label": "🪦 Let it rest"
       }
     ]
   },
   {
-    "id": "ted-lasso-s4",
-    "question": "Ted Lasso Season 4 feelings?",
+    "id": "country-roads-usmnt",
+    "question": "'Country Roads' at the match: react?",
     "options": [
       {
-        "id": "believe",
-        "label": "⚽ Believe"
+        "id": "cr-sang-along",
+        "label": "🎤 Sang along"
       },
       {
-        "id": "biscuits-please",
-        "label": "🍪 Biscuits, please"
+        "id": "cr-teared-up",
+        "label": "🥲 Teared up"
       },
       {
-        "id": "cautious",
-        "label": "😬 Cautious"
+        "id": "cr-goosebumps",
+        "label": "😳 Goosebumps"
       },
       {
-        "id": "skip-it",
-        "label": "⏭️ Skip it"
-      }
-    ]
-  },
-  {
-    "id": "supergirl-tomorrow",
-    "question": "Supergirl: Woman of Tomorrow — see it?",
-    "options": [
-      {
-        "id": "opening-night",
-        "label": "🎬 Opening night"
-      },
-      {
-        "id": "wait-streaming",
-        "label": "🛋️ Wait for stream"
-      },
-      {
-        "id": "cape-crazy",
-        "label": "🦸 Cape crazy"
-      },
-      {
-        "id": "hard-pass",
-        "label": "🚫 Hard pass"
-      }
-    ]
-  },
-  {
-    "id": "avatar-liveaction-s2",
-    "question": "Live-action Avatar Season 2 — worth it?",
-    "options": [
-      {
-        "id": "yip-yip",
-        "label": "🦬 Yip yip"
-      },
-      {
-        "id": "cabbages",
-        "label": "🥬 My cabbages"
-      },
-      {
-        "id": "skeptical",
-        "label": "🤨 Skeptical"
-      },
-      {
-        "id": "cartoon-forever",
-        "label": "📺 Cartoon forever"
-      }
-    ]
-  },
-  {
-    "id": "lanterns-hbo",
-    "question": "Lanterns detective show — in or out?",
-    "options": [
-      {
-        "id": "ring-me",
-        "label": "💚 Ring me in"
-      },
-      {
-        "id": "true-detective-vibes",
-        "label": "🔦 Detective vibes"
-      },
-      {
-        "id": "meh",
+        "id": "cr-meh",
         "label": "😐 Meh"
-      },
-      {
-        "id": "comics-only",
-        "label": "📖 Comics only"
       }
     ]
   },
   {
-    "id": "olivia-rodrigo-album",
-    "question": "Olivia Rodrigo's new era — burn a mix?",
+    "id": "harry-styles-disco",
+    "question": "Harry Styles disco album: verdict?",
     "options": [
       {
-        "id": "drop-dead-loop",
-        "label": "🔁 'drop dead' loop"
+        "id": "hs-bop",
+        "label": "🕺 Total bop"
       },
       {
-        "id": "the-cure-repeat",
-        "label": "💊 'the cure' repeat"
+        "id": "hs-mirrorball",
+        "label": "🪩 Mirrorball approved"
       },
       {
-        "id": "cd-r-mixtape",
-        "label": "💿 CD-R mixtape"
+        "id": "hs-overrated",
+        "label": "🙄 Overrated"
       },
       {
-        "id": "not-my-thing",
-        "label": "🙉 Not for me"
+        "id": "hs-havent-heard",
+        "label": "🎧 Haven't heard it"
       }
     ]
   },
   {
-    "id": "ariana-petal",
-    "question": "Ariana Grande's Petal album — hyped?",
+    "id": "bts-arirang-return",
+    "question": "BTS 'Arirang' comeback: how excited?",
     "options": [
       {
-        "id": "tour-tickets",
-        "label": "🎤 Tour tickets"
+        "id": "bts-screaming",
+        "label": "💜 Screaming"
       },
       {
-        "id": "repeat-all-day",
+        "id": "bts-curious",
+        "label": "👀 Curious"
+      },
+      {
+        "id": "bts-not-my-thing",
+        "label": "🎵 Not my thing"
+      }
+    ]
+  },
+  {
+    "id": "jimothy-raccoon-shape",
+    "question": "Jimothy the round raccoon: rate?",
+    "options": [
+      {
+        "id": "jimothy-perfect",
+        "label": "🦝 Perfectly round"
+      },
+      {
+        "id": "jimothy-protect",
+        "label": "🛡️ Must protect"
+      },
+      {
+        "id": "jimothy-who",
+        "label": "❓ Who?"
+      }
+    ]
+  },
+  {
+    "id": "halo-campaign-evolved",
+    "question": "Halo: Campaign Evolved remaster?",
+    "options": [
+      {
+        "id": "halo-finish-fight",
+        "label": "🔫 Finish the fight"
+      },
+      {
+        "id": "halo-nostalgia",
+        "label": "💚 Pure nostalgia"
+      },
+      {
+        "id": "halo-leave-classic",
+        "label": "📀 Leave classics alone"
+      }
+    ]
+  },
+  {
+    "id": "black-flag-resynced",
+    "question": "Assassin's Creed Black Flag remaster?",
+    "options": [
+      {
+        "id": "bf-set-sail",
+        "label": "🏴‍☠️ Set sail"
+      },
+      {
+        "id": "bf-shanties",
+        "label": "🎶 Here for shanties"
+      },
+      {
+        "id": "bf-original-fine",
+        "label": "⚓ Original was fine"
+      }
+    ]
+  },
+  {
+    "id": "project-hail-mary-gosling",
+    "question": "Project Hail Mary with Gosling?",
+    "options": [
+      {
+        "id": "phm-read-book",
+        "label": "📖 Read the book"
+      },
+      {
+        "id": "phm-space-yes",
+        "label": "🚀 Space, yes please"
+      },
+      {
+        "id": "phm-skip",
+        "label": "🛸 Skip"
+      }
+    ]
+  },
+  {
+    "id": "silo-season-three",
+    "question": "Silo Season 3: keeping up?",
+    "options": [
+      {
+        "id": "silo-obsessed",
+        "label": "🌀 Obsessed"
+      },
+      {
+        "id": "silo-behind",
+        "label": "⏳ Way behind"
+      },
+      {
+        "id": "silo-never-started",
+        "label": "🚪 Never started"
+      }
+    ]
+  },
+  {
+    "id": "olivia-rodrigo-new-wave",
+    "question": "Olivia Rodrigo's New Wave era?",
+    "options": [
+      {
+        "id": "or-on-repeat",
         "label": "🔁 On repeat"
       },
       {
-        "id": "ponytail-power",
-        "label": "💁 Ponytail power"
+        "id": "or-solid",
+        "label": "👍 Solid"
       },
       {
-        "id": "pass",
+        "id": "or-prefer-sour",
+        "label": "🍋 Prefer SOUR"
+      }
+    ]
+  },
+  {
+    "id": "enola-holmes-three",
+    "question": "Enola Holmes 3: watching?",
+    "options": [
+      {
+        "id": "eh-tonight",
+        "label": "🔍 Tonight"
+      },
+      {
+        "id": "eh-eventually",
+        "label": "🛋️ Eventually"
+      },
+      {
+        "id": "eh-pass",
         "label": "🚫 Pass"
       }
     ]
   },
   {
-    "id": "tyler-katy-friday",
-    "question": "Stacked New Music Friday — who wins?",
+    "id": "vozinha-viral-keeper",
+    "question": "Vozinha's clean sheet vs Spain?",
     "options": [
       {
-        "id": "tyler-creator",
-        "label": "🎨 Tyler"
+        "id": "voz-legend",
+        "label": "🧤 Instant legend"
       },
       {
-        "id": "katy-perry",
-        "label": "🚀 Katy Perry"
+        "id": "voz-followed",
+        "label": "📈 Followed him"
       },
       {
-        "id": "muse",
-        "label": "🎸 Muse"
-      },
-      {
-        "id": "marshmello",
-        "label": "🍡 Marshmello"
+        "id": "voz-missed-it",
+        "label": "😴 Missed it"
       }
     ]
   },
   {
-    "id": "mj-tiktok-revival",
-    "question": "Michael Jackson moonwalk revival — join?",
+    "id": "dictionary-dungeon-weapon",
+    "question": "Best Dictionary Dungeon strategy?",
     "options": [
       {
-        "id": "smooth-criminal",
-        "label": "🕺 Smooth Criminal"
+        "id": "dd-long-words",
+        "label": "📚 Long words only"
       },
       {
-        "id": "moonwalk-attempt",
-        "label": "🌙 Moonwalk attempt"
+        "id": "dd-spam-short",
+        "label": "⚡ Spam short words"
       },
       {
-        "id": "floppy-hat",
-        "label": "🎩 Floppy hat"
-      },
-      {
-        "id": "just-watch",
-        "label": "👀 Just watch"
+        "id": "dd-panic",
+        "label": "😵 Pure panic"
       }
     ]
   },
   {
-    "id": "coldplay-kisscam",
-    "question": "That Coldplay kiss-cam moment — reaction?",
+    "id": "spelldown-all-seven",
+    "question": "Ever hit the Spelldown jackpot?",
     "options": [
       {
-        "id": "cringe-forever",
-        "label": "😬 Cringe forever"
+        "id": "sd-daily",
+        "label": "🏆 Daily"
       },
       {
-        "id": "caught-in-4k",
-        "label": "📸 Caught in 4K"
+        "id": "sd-sometimes",
+        "label": "🎯 Sometimes"
       },
       {
-        "id": "felt-that",
-        "label": "😅 Felt that"
-      },
-      {
-        "id": "who-cares",
-        "label": "🤷 Who cares"
+        "id": "sd-never",
+        "label": "😭 Never"
       }
     ]
   },
   {
-    "id": "nihilistic-penguin",
-    "question": "The Nihilistic Penguin is your...?",
+    "id": "web-run-clicks",
+    "question": "Web Run: how do you win?",
     "options": [
       {
-        "id": "burnout-mascot",
-        "label": "🐧 Burnout mascot"
+        "id": "wr-instinct",
+        "label": "🧭 Pure instinct"
       },
       {
-        "id": "monday-mood",
-        "label": "😑 Monday mood"
+        "id": "wr-lucky-links",
+        "label": "🍀 Lucky links"
       },
       {
-        "id": "spirit-animal",
-        "label": "✨ Spirit animal"
-      },
-      {
-        "id": "just-a-bird",
-        "label": "🙄 Just a bird"
+        "id": "wr-lost-forever",
+        "label": "🌀 Lost forever"
       }
     ]
   },
   {
-    "id": "kitkat-heist",
-    "question": "The KitKat Heist — the chocolatiest crime?",
+    "id": "modem-defender-loot",
+    "question": "Modem Defender: best loot crate?",
     "options": [
       {
-        "id": "gimme-a-break",
-        "label": "🍫 Gimme a break"
+        "id": "md-multiball",
+        "label": "🔵 Multiball"
       },
       {
-        "id": "mastermind",
-        "label": "🕵️ Mastermind"
+        "id": "md-firewall",
+        "label": "🧱 Firewall"
       },
       {
-        "id": "snack-emergency",
-        "label": "🚨 Snack emergency"
-      },
-      {
-        "id": "unimpressed",
-        "label": "😐 Unimpressed"
+        "id": "md-no-carrier",
+        "label": "📞 NO CARRIER"
       }
     ]
   },
   {
-    "id": "taylor-travis-msg",
-    "question": "Taylor & Travis MSG rumors — believe?",
+    "id": "favorite-arcade-snack",
+    "question": "Ultimate gaming snack?",
     "options": [
       {
-        "id": "total-eras",
-        "label": "💃 Total Eras"
+        "id": "snack-cheeto-fingers",
+        "label": "🧡 Cheeto fingers"
       },
       {
-        "id": "touchdown",
-        "label": "🏈 Touchdown"
-      },
-      {
-        "id": "eyeroll",
-        "label": "🙄 Eyeroll"
-      },
-      {
-        "id": "not-tracking",
-        "label": "🤷 Not tracking"
-      }
-    ]
-  },
-  {
-    "id": "favorite-onsite-game",
-    "question": "Your go-to Ourcade game?",
-    "options": [
-      {
-        "id": "web-run",
-        "label": "🕸️ Web Run"
-      },
-      {
-        "id": "spelldown",
-        "label": "🔤 Spelldown"
-      },
-      {
-        "id": "modem-defender",
-        "label": "📟 Modem Defender"
-      },
-      {
-        "id": "tap-surge",
-        "label": "👆 Tap Surge"
-      }
-    ]
-  },
-  {
-    "id": "dialup-sound",
-    "question": "The dial-up handshake sound is...?",
-    "options": [
-      {
-        "id": "pure-nostalgia",
-        "label": "📞 Pure nostalgia"
-      },
-      {
-        "id": "anxiety",
-        "label": "😰 Anxiety"
-      },
-      {
-        "id": "ringtone-material",
-        "label": "🎶 Ringtone material"
-      },
-      {
-        "id": "never-heard",
-        "label": "🍼 Never heard it"
-      }
-    ]
-  },
-  {
-    "id": "best-snack-gaming",
-    "question": "Peak gaming snack?",
-    "options": [
-      {
-        "id": "pizza-rolls",
+        "id": "snack-pizza-rolls",
         "label": "🍕 Pizza rolls"
       },
       {
-        "id": "dusty-chips",
-        "label": "🧡 Cheese dust chips"
+        "id": "snack-dunkaroos",
+        "label": "🍪 Dunkaroos"
       },
       {
-        "id": "gushers",
-        "label": "🟢 Gushers"
-      },
-      {
-        "id": "warm-soda",
-        "label": "🥤 Warm soda"
+        "id": "snack-mtn-dew",
+        "label": "🥤 Mountain Dew"
       }
     ]
   },
   {
     "id": "controller-vs-keyboard",
-    "question": "Controller or keyboard, ride or die?",
+    "question": "Controller or keyboard?",
     "options": [
       {
-        "id": "gamepad",
-        "label": "🎮 Gamepad"
+        "id": "ctrl-controller",
+        "label": "🎮 Controller"
       },
       {
-        "id": "keyboard-mouse",
-        "label": "⌨️ Keyboard + mouse"
+        "id": "ctrl-keyboard",
+        "label": "⌨️ Keyboard"
       },
       {
-        "id": "touchscreen",
+        "id": "ctrl-touchscreen",
         "label": "📱 Touchscreen"
-      },
-      {
-        "id": "whatever-works",
-        "label": "🤷 Whatever works"
       }
     ]
   },
   {
-    "id": "snake-highscore",
-    "question": "Old-phone Snake, how far?",
+    "id": "snake-nokia-nostalgia",
+    "question": "Snake on a Nokia: memories?",
     "options": [
       {
-        "id": "filled-screen",
-        "label": "🐍 Filled the screen"
+        "id": "snake-legend",
+        "label": "🐍 Peak gaming"
       },
       {
-        "id": "bit-myself",
-        "label": "💀 Bit myself"
+        "id": "snake-class-hero",
+        "label": "📱 Class distraction"
       },
       {
-        "id": "first-turn-death",
-        "label": "😵 First-turn death"
-      },
-      {
-        "id": "still-playing",
-        "label": "⏳ Still playing"
+        "id": "snake-never",
+        "label": "🤷 Never played"
       }
     ]
   },
   {
-    "id": "solitaire-win-anim",
-    "question": "Solitaire's cascading win — feelings?",
+    "id": "tetris-piece-hate",
+    "question": "Which Tetris piece do you dread?",
     "options": [
       {
-        "id": "bouncing-cards",
-        "label": "🃏 Bouncing cards"
+        "id": "tetris-s-piece",
+        "label": "🟩 The S"
       },
       {
-        "id": "work-break-ritual",
-        "label": "☕ Work break ritual"
+        "id": "tetris-z-piece",
+        "label": "🟥 The Z"
       },
       {
-        "id": "chef-kiss",
-        "label": "😌 Chef's kiss"
-      },
-      {
-        "id": "draw-three-only",
-        "label": "3️⃣ Draw three only"
+        "id": "tetris-need-line",
+        "label": "🟦 Waiting for line"
       }
     ]
   },
   {
-    "id": "tetris-block",
-    "question": "Best Tetris piece?",
+    "id": "solitaire-win-animation",
+    "question": "Solitaire win cascade: still magic?",
     "options": [
       {
-        "id": "i-piece",
-        "label": "🟦 The long I"
+        "id": "sol-yes",
+        "label": "🃏 Absolutely"
       },
       {
-        "id": "t-piece",
-        "label": "🟪 T-spin king"
+        "id": "sol-nostalgic",
+        "label": "💾 So nostalgic"
       },
       {
-        "id": "square",
-        "label": "🟨 Cozy square"
-      },
-      {
-        "id": "s-z-menace",
-        "label": "😤 S/Z menace"
+        "id": "sol-never-won",
+        "label": "😅 Never won"
       }
     ]
   },
   {
-    "id": "midnight-refresh",
-    "question": "When a fresh Spelldown drops, you...?",
+    "id": "magic-8-ball-trust",
+    "question": "Trust the Magic 8-Ball?",
     "options": [
       {
-        "id": "instant-play",
-        "label": "⚡ Play instantly"
+        "id": "m8-always",
+        "label": "🎱 Always"
       },
       {
-        "id": "morning-coffee",
-        "label": "☕ Morning coffee"
+        "id": "m8-shake-again",
+        "label": "🔄 Shake till happy"
       },
       {
-        "id": "chase-jackpot",
-        "label": "🎰 Chase the jackpot"
-      },
-      {
-        "id": "forget-daily",
-        "label": "😴 Forget daily"
+        "id": "m8-nah",
+        "label": "🙄 Nah"
       }
     ]
   },
   {
-    "id": "hardest-onsite",
-    "question": "Which Ourcade game breaks you?",
+    "id": "dialup-sound-feels",
+    "question": "The dial-up handshake sound?",
     "options": [
       {
-        "id": "crypt-hollow-king",
-        "label": "👑 Hollow King"
+        "id": "dialup-anthem",
+        "label": "📞 An anthem"
       },
       {
-        "id": "pits-portals",
-        "label": "🕳️ Pits and Portals"
+        "id": "dialup-nightmare",
+        "label": "😱 Nightmare fuel"
       },
       {
-        "id": "mind-flood",
-        "label": "🧠 Mind Flood"
-      },
-      {
-        "id": "video-poker",
-        "label": "🃏 Video Poker"
+        "id": "dialup-what",
+        "label": "❓ Never heard it"
       }
     ]
   },
   {
-    "id": "y2k-aesthetic",
-    "question": "Y2K web aesthetic — bring it back?",
+    "id": "2048-endgame",
+    "question": "How far in 2048?",
     "options": [
       {
-        "id": "blinking-text",
-        "label": "✨ Blinking text"
+        "id": "2048-got-it",
+        "label": "🏅 Hit 2048"
       },
       {
-        "id": "visitor-counter",
-        "label": "🔢 Visitor counter"
+        "id": "2048-stuck-1024",
+        "label": "😤 Stuck at 1024"
       },
       {
-        "id": "under-construction",
-        "label": "🚧 Under construction gif"
-      },
-      {
-        "id": "never-again",
-        "label": "🙅 Never again"
+        "id": "2048-chaos",
+        "label": "🌀 Board chaos"
       }
     ]
   },
   {
-    "id": "magic-8-decisions",
-    "question": "Do you trust the Magic 8-Ball?",
+    "id": "tap-surge-reflexes",
+    "question": "How are your Tap Surge reflexes?",
     "options": [
       {
-        "id": "absolutely",
-        "label": "🎱 It signs, I obey"
+        "id": "ts-lightning",
+        "label": "⚡ Lightning"
       },
       {
-        "id": "shake-again",
-        "label": "🔁 Reply hazy, reshake"
+        "id": "ts-decent",
+        "label": "👌 Decent"
       },
       {
-        "id": "just-fun",
-        "label": "😄 Just for fun"
-      },
-      {
-        "id": "nope",
-        "label": "🚫 Nope"
+        "id": "ts-three-misses",
+        "label": "💀 Three misses fast"
       }
     ]
   },
   {
-    "id": "blackjack-move",
-    "question": "Down to your last chips — hit?",
+    "id": "rank-it-common-words",
+    "question": "Rank It: how confident?",
     "options": [
       {
-        "id": "hit-me",
-        "label": "🃏 Hit me"
+        "id": "ri-nailed",
+        "label": "🎯 Nailed it"
       },
       {
-        "id": "stand-firm",
-        "label": "✋ Stand"
+        "id": "ri-close",
+        "label": "😬 So close"
       },
       {
-        "id": "double-down",
-        "label": "💰 Double down"
-      },
-      {
-        "id": "walk-away",
-        "label": "🚪 Walk away"
+        "id": "ri-way-off",
+        "label": "🙃 Way off"
       }
     ]
   },
   {
-    "id": "popup-nostalgia",
-    "question": "Pop-up ads back then were...?",
+    "id": "blackjack-double-down",
+    "question": "Blackjack: double down on 11?",
     "options": [
       {
-        "id": "punch-monkey",
-        "label": "🐒 Punch the monkey"
+        "id": "bj-always",
+        "label": "💰 Always"
       },
       {
-        "id": "free-ipod",
-        "label": "🎁 Free iPod winner"
+        "id": "bj-depends",
+        "label": "🤔 Depends"
       },
       {
-        "id": "virus-loading",
-        "label": "🦠 Virus loading"
-      },
-      {
-        "id": "close-fast",
-        "label": "❌ Close, close, close"
+        "id": "bj-never-risk",
+        "label": "🛑 Too risky"
       }
     ]
   },
   {
-    "id": "screen-resolution",
-    "question": "Best viewed in...?",
+    "id": "crt-vs-flatscreen",
+    "question": "CRT or flatscreen for retro?",
     "options": [
       {
-        "id": "1024-768",
-        "label": "🖥️ 1024x768"
+        "id": "crt-fat-tv",
+        "label": "📺 Fat CRT"
       },
       {
-        "id": "800-600",
-        "label": "📺 800x600"
+        "id": "crt-flat",
+        "label": "🖥️ Flatscreen"
       },
       {
-        "id": "fullscreen",
-        "label": "⛶ Fullscreen baby"
-      },
-      {
-        "id": "crt-glow",
-        "label": "🌫️ CRT glow"
+        "id": "crt-emulator",
+        "label": "💻 Emulator filter"
       }
     ]
   },
   {
-    "id": "reaction-game-pick",
-    "question": "Fastest fingers game?",
+    "id": "best-word-game-ourcade",
+    "question": "Favorite Ourcade word game?",
     "options": [
       {
-        "id": "color-panic",
-        "label": "🎨 Color Panic"
+        "id": "wg-spelldown",
+        "label": "🔤 Spelldown"
       },
       {
-        "id": "piano-tiles",
-        "label": "🎹 Piano Tiles"
+        "id": "wg-laddergram",
+        "label": "🪜 Laddergram"
       },
       {
-        "id": "splitter",
-        "label": "⚪ Splitter"
+        "id": "wg-chain",
+        "label": "🔗 Chain"
       },
       {
-        "id": "tap-surge-pick",
-        "label": "👆 Tap Surge"
+        "id": "wg-missing-vowels",
+        "label": "🅰️ Missing Vowels"
       }
     ]
   },
   {
-    "id": "memory-match-size",
-    "question": "Memory Match — pick your board?",
+    "id": "streak-anxiety",
+    "question": "Daily streak: how attached?",
     "options": [
       {
-        "id": "easy-4x4",
-        "label": "🟢 Chill 4×4"
+        "id": "streak-obsessed",
+        "label": "🔥 Obsessed"
       },
       {
-        "id": "med-4x5",
-        "label": "🟡 Solid 4×5"
+        "id": "streak-casual",
+        "label": "😌 Casual"
       },
       {
-        "id": "hard-4x6",
-        "label": "🔴 Brutal 4×6"
-      },
-      {
-        "id": "all-of-them",
-        "label": "💪 All of them"
+        "id": "streak-broke-it",
+        "label": "💔 Already broke it"
       }
     ]
   },
   {
-    "id": "lan-party-memory",
-    "question": "LAN party essential?",
+    "id": "pits-portals-strategy",
+    "question": "Pits and Portals: your move?",
     "options": [
       {
-        "id": "ethernet-tangle",
-        "label": "🔌 Ethernet spaghetti"
+        "id": "pp-shove-first",
+        "label": "🕳️ Shove everything"
       },
       {
-        "id": "crt-hauling",
-        "label": "📺 Hauling CRTs"
+        "id": "pp-plan-ahead",
+        "label": "🧠 Plan every step"
       },
       {
-        "id": "mountain-dew",
-        "label": "🥤 Mountain Dew"
-      },
-      {
-        "id": "trash-talk",
-        "label": "🗣️ Trash talk"
+        "id": "pp-yolo",
+        "label": "🎲 YOLO it"
       }
     ]
   },
   {
-    "id": "save-system-hot-take",
-    "question": "Hot take: best save system?",
+    "id": "wheel-of-names-fate",
+    "question": "Wheel of Names: rigged?",
     "options": [
       {
-        "id": "memory-card",
-        "label": "💾 Memory card"
+        "id": "won-fair",
+        "label": "🎡 Totally fair"
       },
       {
-        "id": "password-screen",
-        "label": "🔑 Password screen"
+        "id": "won-suspicious",
+        "label": "🤨 Suspicious"
       },
       {
-        "id": "autosave",
-        "label": "☁️ Autosave"
-      },
-      {
-        "id": "no-saves",
-        "label": "😈 No saves, coward"
+        "id": "won-spin-again",
+        "label": "🔄 Spin again"
       }
     ]
   },
   {
-    "id": "larry-david-sketch",
-    "question": "Larry David's new sketch show — watch?",
+    "id": "color-panic-target",
+    "question": "Color Panic: keeping up?",
     "options": [
       {
-        "id": "prettay-good",
-        "label": "😏 Pretty, pretty good"
+        "id": "cp-easy",
+        "label": "🌈 Easy"
       },
       {
-        "id": "skeptical-larry",
-        "label": "🤨 Skeptical"
+        "id": "cp-sweating",
+        "label": "😰 Sweating"
       },
       {
-        "id": "curb-forever",
-        "label": "🎺 Curb forever"
-      },
-      {
-        "id": "pass-larry",
-        "label": "🚫 Pass"
+        "id": "cp-tapped-wrong",
+        "label": "❌ Tapped wrong"
       }
     ]
   },
   {
-    "id": "soundboard-fav",
-    "question": "Best old-internet noise?",
+    "id": "hot-take-hardest-game",
+    "question": "Hardest Ourcade game?",
     "options": [
       {
-        "id": "win98-startup",
-        "label": "🎵 Win98 startup"
+        "id": "hard-crypt",
+        "label": "🏰 Crypt Crawler"
       },
       {
-        "id": "xp-shutdown",
-        "label": "🔻 XP shutdown"
+        "id": "hard-dungeon",
+        "label": "📖 Dictionary Dungeon"
       },
       {
-        "id": "dialup-handshake",
-        "label": "📞 Dial-up handshake"
+        "id": "hard-pits",
+        "label": "🕳️ Pits & Portals"
       },
       {
-        "id": "aol-mail",
-        "label": "📬 You've got mail"
+        "id": "hard-deadlock",
+        "label": "🃏 Deadlock Poker"
       }
     ]
   },
   {
-    "id": "roguelike-death",
-    "question": "When your roguelike run dies?",
+    "id": "video-poker-royal",
+    "question": "Ever hit a royal flush?",
     "options": [
       {
-        "id": "one-more-run",
-        "label": "🔁 One more run"
+        "id": "vp-yes",
+        "label": "👑 Yes!"
       },
       {
-        "id": "rage-quit",
-        "label": "😤 Rage quit"
+        "id": "vp-close",
+        "label": "😩 So close once"
       },
       {
-        "id": "blame-rng",
-        "label": "🎲 Blame RNG"
-      },
-      {
-        "id": "learn-and-plan",
-        "label": "🧠 Plan better"
+        "id": "vp-never",
+        "label": "🎰 Never"
       }
     ]
   },
   {
-    "id": "wheel-of-names-use",
-    "question": "Wheel of Names picks the...?",
+    "id": "memory-match-difficulty",
+    "question": "Favorite Memory Match board?",
     "options": [
       {
-        "id": "who-pays",
-        "label": "💵 Who pays"
+        "id": "mm-easy",
+        "label": "🟢 4×4 chill"
       },
       {
-        "id": "whose-turn",
-        "label": "🎮 Whose turn"
+        "id": "mm-med",
+        "label": "🟡 4×5"
       },
       {
-        "id": "dinner-choice",
-        "label": "🍜 Dinner choice"
-      },
-      {
-        "id": "loser-chore",
-        "label": "🧹 Loser's chore"
+        "id": "mm-hard",
+        "label": "🔴 4×6 sweaty"
       }
     ]
   },
   {
-    "id": "2048-vibe",
-    "question": "2048 is your...?",
+    "id": "low-stim-vs-reaction",
+    "question": "Chill games or twitchy games?",
     "options": [
       {
-        "id": "calm-zone",
-        "label": "😌 Calm zone"
+        "id": "vibe-lowstim",
+        "label": "🧘 Low-stim vibes"
       },
       {
-        "id": "stuck-at-1024",
-        "label": "😩 Stuck at 1024"
+        "id": "vibe-reaction",
+        "label": "⚡ Twitchy chaos"
       },
       {
-        "id": "one-move-loop",
-        "label": "🔁 One more move"
-      },
-      {
-        "id": "never-2048",
-        "label": "❌ Never hit 2048"
-      }
-    ]
-  },
-  {
-    "id": "dice-roller-loyalty",
-    "question": "Physical dice or Dice & Coin app?",
-    "options": [
-      {
-        "id": "real-dice",
-        "label": "🎲 Real dice"
-      },
-      {
-        "id": "digital-roller",
-        "label": "📱 Digital roller"
-      },
-      {
-        "id": "both",
-        "label": "🤝 Both"
-      },
-      {
-        "id": "coin-flip-only",
-        "label": "🪙 Coin flips only"
+        "id": "vibe-both",
+        "label": "🤹 Both, always"
       }
     ]
   }

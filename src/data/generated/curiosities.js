@@ -2,183 +2,177 @@
 // Timeless Curiosity pool. Shape: { id, title, blurb, url } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gc-collatz-conjecture",
-    "title": "The 3x+1 Problem",
-    "blurb": "Pick any number: if it's even, halve it; if it's odd, triple it and add one. Every number tested so far crashes down to 1, and no one has proven it always will.",
+    "id": "gc-benfords-friend-collatz",
+    "title": "The Collatz Conjecture",
+    "blurb": "Take any number: halve it if even, triple-plus-one if odd, repeat. Every number anyone's ever tried eventually falls to 1 — and nobody can prove it always will.",
     "url": "https://en.wikipedia.org/wiki/Collatz_conjecture"
-  },
-  {
-    "id": "gc-kaprekar-6174",
-    "title": "Kaprekar's Constant",
-    "blurb": "Take any four-digit number with at least two different digits, sort it big-to-small and small-to-big, subtract, and repeat. Within seven steps you always land on 6174 and get stuck there.",
-    "url": "https://en.wikipedia.org/wiki/6174"
   },
   {
     "id": "gc-euler-identity",
     "title": "Euler's Identity",
-    "blurb": "e raised to i times pi, plus one, equals exactly zero — five of math's most important constants shaking hands in a single tidy line. It has been called the most beautiful equation there is.",
+    "blurb": "e raised to i-pi, plus one, equals zero. Five of math's most important constants shake hands in a single tidy line, and nobody quite gets over it.",
     "url": "https://en.wikipedia.org/wiki/Euler%27s_identity"
   },
   {
-    "id": "gc-mobius-strip",
-    "title": "The One-Sided Surface",
-    "blurb": "Give a paper strip a half-twist, tape the ends, and you get a shape with only one side and one edge. Draw a line down the middle and you'll return to start without ever lifting the pen.",
-    "url": "https://en.wikipedia.org/wiki/M%C3%B6bius_strip"
+    "id": "gc-brachistochrone",
+    "title": "The Brachistochrone Curve",
+    "blurb": "The fastest slide between two points isn't a straight line — it's a specific curve, and a ball rolling down it beats the straight path every time.",
+    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve"
+  },
+  {
+    "id": "gc-non-transitive-dice",
+    "title": "Nontransitive Dice",
+    "blurb": "You can build a set of dice where A beats B, B beats C, and C beats A — like rock-paper-scissors wearing a math costume. Let your opponent pick first.",
+    "url": "https://en.wikipedia.org/wiki/Nontransitive_dice"
   },
   {
     "id": "gc-coastline-paradox",
     "title": "The Coastline Paradox",
-    "blurb": "A coastline has no single true length — measure with a shorter ruler and you catch more wiggles, and the total grows without bound. Britain's coast is genuinely as long as you want it to be.",
+    "blurb": "The length of a coastline depends entirely on the length of your ruler — measure finer and it keeps getting longer, toward infinity. Britain has no single true perimeter.",
     "url": "https://en.wikipedia.org/wiki/Coastline_paradox"
   },
   {
-    "id": "gc-belousov-zhabotinsky",
-    "title": "The Clock That Isn't",
-    "blurb": "A chemical mixture that oscillates back and forth between colors, spontaneously forming spirals and pulses. For years no one believed it, because chemistry wasn't supposed to keep time.",
-    "url": "https://en.wikipedia.org/wiki/Belousov%E2%80%93Zhabotinsky_reaction"
+    "id": "gc-pigeonhole",
+    "title": "The Pigeonhole Principle",
+    "blurb": "Put more pigeons than holes and one hole gets crowded — obvious, until it proves that at least two people in London have the exact same number of hairs on their head.",
+    "url": "https://en.wikipedia.org/wiki/Pigeonhole_principle"
   },
   {
-    "id": "gc-pando",
+    "id": "gc-brazil-nut-tree",
     "title": "Pando, the Trembling Giant",
-    "blurb": "A Utah aspen grove that looks like thousands of trees is actually one organism sharing a single root system, weighing thousands of tons and possibly tens of thousands of years old.",
+    "blurb": "A whole Utah aspen forest is secretly one organism — thousands of trunks sharing a single root system, weighing millions of pounds and possibly thousands of years old.",
     "url": "https://en.wikipedia.org/wiki/Pando_(tree)"
   },
   {
-    "id": "gc-methuselah-tree",
-    "title": "The Oldest Living Tree",
-    "blurb": "A bristlecone pine in California quietly closing in on 5,000 years old — already ancient when the pyramids were new. Its exact location is kept secret to keep it safe.",
-    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)"
+    "id": "gc-radiolab-mantis-shrimp",
+    "title": "The Mantis Shrimp",
+    "blurb": "It punches fast enough to boil the water around its claw and has up to sixteen types of color receptor — we get by on three. A tiny reef bruiser out-seeing us all.",
+    "url": "https://en.wikipedia.org/wiki/Mantis_shrimp"
   },
   {
-    "id": "gc-voyager-golden-record",
-    "title": "The Golden Record",
-    "blurb": "Two gold-plated phonograph records bolted to the Voyager probes carry greetings in 55 languages, whale songs and Chuck Berry, now drifting through interstellar space. Playback instructions are etched on the cover.",
-    "url": "https://en.wikipedia.org/wiki/Voyager_Golden_Record"
+    "id": "gc-wow-signal",
+    "title": "The Wow! Signal",
+    "blurb": "In 1977 a radio telescope caught a strong, oddly specific burst from deep space. An astronomer circled it and wrote 'Wow!' in the margin — and it never repeated.",
+    "url": "https://en.wikipedia.org/wiki/Wow!_signal"
   },
   {
-    "id": "gc-arecibo-message",
-    "title": "The Arecibo Message",
-    "blurb": "In 1974 we beamed a picture toward a star cluster 25,000 light-years away — our numbers, our DNA, a little stick figure. The reply, if one comes, won't arrive for about 50,000 years.",
-    "url": "https://en.wikipedia.org/wiki/Arecibo_message"
+    "id": "gc-brown-noise-baader",
+    "title": "Absolute Zero",
+    "blurb": "There's a coldest possible temperature — around -273.15°C — where atomic motion bottoms out. You can get achingly close but, by the rules, never quite arrive.",
+    "url": "https://en.wikipedia.org/wiki/Absolute_zero"
   },
   {
-    "id": "gc-pioneer-plaque",
-    "title": "The Pioneer Plaque",
-    "blurb": "A gold-anodized map to Earth, bolted to two spacecraft, showing a man, a woman, and our address in the galaxy via pulsar directions. A message in a bottle for whoever finds it.",
-    "url": "https://en.wikipedia.org/wiki/Pioneer_plaque"
+    "id": "gc-superfluid-helium",
+    "title": "Superfluid Helium",
+    "blurb": "Chill helium enough and it loses all viscosity — it climbs the walls of its container, leaks through microscopic gaps, and generally refuses to obey normal liquid manners.",
+    "url": "https://en.wikipedia.org/wiki/Superfluid_helium-4"
   },
   {
-    "id": "gc-nazca-lines",
+    "id": "gc-quipu",
+    "title": "The Inca Quipu",
+    "blurb": "The Inca ran an empire without writing — they recorded numbers and records in knotted, colored strings. Some knot-codes we still can't fully read.",
+    "url": "https://en.wikipedia.org/wiki/Quipu"
+  },
+  {
+    "id": "gc-baghdad-battery",
+    "title": "The Rosetta Stone",
+    "blurb": "One decree carved in three scripts became the key that cracked Egyptian hieroglyphs — a two-thousand-year-old bureaucratic footnote that reopened a whole language.",
+    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone"
+  },
+  {
+    "id": "gc-library-alexandria",
     "title": "The Nazca Lines",
-    "blurb": "Enormous animals and shapes scratched into a Peruvian desert over 1,500 years ago, some hundreds of feet across and only readable from the air. The people who made them never got that view.",
+    "blurb": "Giant animals and shapes scratched into a Peruvian desert two thousand years ago, only fully legible from the sky — which nobody could reach when they were made.",
     "url": "https://en.wikipedia.org/wiki/Nazca_Lines"
   },
   {
-    "id": "gc-blood-falls",
-    "title": "Blood Falls",
-    "blurb": "A glacier in Antarctica bleeds a deep rust-red stream, fed by ancient salty water that's been sealed away from air and light for over a million years — and still has microbes living in it.",
-    "url": "https://en.wikipedia.org/wiki/Blood_Falls"
+    "id": "gc-methuselah-tree",
+    "title": "Methuselah, the Bristlecone Pine",
+    "blurb": "A gnarled little tree in California has been quietly alive for over 4,800 years — older than the pyramids at Giza, still putting out needles.",
+    "url": "https://en.wikipedia.org/wiki/Methuselah_(tree)"
   },
   {
-    "id": "gc-lake-nyos",
-    "title": "The Lake That Exhaled",
-    "blurb": "In 1986 a Cameroonian lake belched a vast cloud of stored carbon dioxide that flowed downhill and silently suffocated over 1,700 people. Engineers now vent the gas with pipes to keep it from happening again.",
-    "url": "https://en.wikipedia.org/wiki/Lake_Nyos"
+    "id": "gc-immortal-jellyfish",
+    "title": "Tabby's Star",
+    "blurb": "A distant star dims in bizarre, irregular chunks nobody fully expected. Theories ran from comet swarms to alien megastructures before dust took the lead.",
+    "url": "https://en.wikipedia.org/wiki/Tabby%27s_Star"
   },
   {
-    "id": "gc-bioluminescence",
-    "title": "Living Light",
-    "blurb": "Countless creatures — fireflies, deep-sea fish, glowing plankton — make their own cold light through chemistry, no heat required. Some deep-sea species even wield light as bait or camouflage.",
-    "url": "https://en.wikipedia.org/wiki/Bioluminescence"
-  },
-  {
-    "id": "gc-tsar-bomba",
-    "title": "Tsar Bomba",
-    "blurb": "The most powerful bomb ever detonated, so large its designers deliberately cut its yield in half — and it still produced a mushroom cloud that reached far past the edge of the stratosphere.",
-    "url": "https://en.wikipedia.org/wiki/Tsar_Bomba"
-  },
-  {
-    "id": "gc-brachistochrone",
-    "title": "The Fastest Slide",
-    "blurb": "The quickest path for a ball rolling between two points isn't a straight line — it's a specific curve. Even stranger, a ball started anywhere on it reaches the bottom in the same amount of time.",
-    "url": "https://en.wikipedia.org/wiki/Brachistochrone_curve"
-  },
-  {
-    "id": "gc-fibonacci-sequence",
-    "title": "Nature's Favorite Sequence",
-    "blurb": "Each number is the sum of the two before it, and the pattern quietly shows up in sunflower seeds, pinecones and spiraling shells. Plants seem to have discovered it long before we did.",
+    "id": "gc-benoit-fibonacci",
+    "title": "The Fibonacci Sequence",
+    "blurb": "Each number is the sum of the two before it — and the pattern turns up in sunflower spirals, pinecones, and nautilus shells like nature took a math class.",
     "url": "https://en.wikipedia.org/wiki/Fibonacci_sequence"
   },
   {
     "id": "gc-golden-ratio",
     "title": "The Golden Ratio",
-    "blurb": "A single proportion, roughly 1.618, that appears in geometry, art and growing plants, and connects neatly to the Fibonacci numbers. It's genuinely elegant, even if it gets credited for more than it earns.",
+    "blurb": "One number, roughly 1.618, that shows up in geometry, growth patterns, and centuries of art and architecture — the proportion humans keep deciding just looks right.",
     "url": "https://en.wikipedia.org/wiki/Golden_ratio"
   },
   {
-    "id": "gc-dead-sea",
-    "title": "The Sea You Can't Sink In",
-    "blurb": "So salty that swimmers float like corks and almost nothing lives in it, sitting at the lowest land point on Earth. Its shoreline drops a little lower every year.",
-    "url": "https://en.wikipedia.org/wiki/Dead_Sea"
+    "id": "gc-tunguska",
+    "title": "The Tunguska Event",
+    "blurb": "In 1908 something exploded over remote Siberia and flattened 80 million trees across 2,000 square kilometers — with no crater. Almost certainly an object that never even landed.",
+    "url": "https://en.wikipedia.org/wiki/Tunguska_event"
   },
   {
-    "id": "gc-aurora",
-    "title": "The Northern Lights",
-    "blurb": "Charged particles from the Sun crash into our atmosphere and paint the polar sky in slow curtains of green and red. It's essentially the planet's magnetic field made visible.",
-    "url": "https://en.wikipedia.org/wiki/Aurora"
+    "id": "gc-brine-pool",
+    "title": "Underwater Brine Pools",
+    "blurb": "At the bottom of the ocean there are lakes — pools of super-salty water so dense they have shorelines and waves, deadly to most creatures that wander in.",
+    "url": "https://en.wikipedia.org/wiki/Brine_pool"
+  },
+  {
+    "id": "gc-hexagon-saturn",
+    "title": "Saturn's Hexagon",
+    "blurb": "There's a persistent six-sided cloud pattern parked over Saturn's north pole, wide enough to swallow several Earths, holding its shape for decades. A planet drew a hexagon.",
+    "url": "https://en.wikipedia.org/wiki/Saturn%27s_hexagon"
+  },
+  {
+    "id": "gc-p-adic-doubling",
+    "title": "The Doubling of Numbers on a Chessboard",
+    "blurb": "One grain on square one, doubling each square — by square 64 you owe more wheat than the world has ever grown. Exponential growth ruins everyone's day politely.",
+    "url": "https://en.wikipedia.org/wiki/Wheat_and_chessboard_problem"
+  },
+  {
+    "id": "gc-cicada-primes",
+    "title": "Periodical Cicadas",
+    "blurb": "Some cicadas spend 13 or 17 years underground, then emerge all at once — prime-numbered cycles that make it hard for any predator to sync up with the feast.",
+    "url": "https://en.wikipedia.org/wiki/Periodical_cicadas"
+  },
+  {
+    "id": "gc-blue-whale-heart",
+    "title": "The Blue Whale",
+    "blurb": "The largest animal ever known — bigger than any dinosaur — with a heart the size of a small car and a call loud enough to travel across an ocean basin.",
+    "url": "https://en.wikipedia.org/wiki/Blue_whale"
+  },
+  {
+    "id": "gc-double-pendulum",
+    "title": "The Double Pendulum",
+    "blurb": "Hang one pendulum off another and the motion becomes chaotic — start it twice from nearly the same spot and the two swings diverge into totally different dances.",
+    "url": "https://en.wikipedia.org/wiki/Double_pendulum"
   },
   {
     "id": "gc-halting-problem",
-    "title": "The Unsolvable Program",
-    "blurb": "There can be no program that reliably tells whether any given program will eventually stop or loop forever. Alan Turing proved this in 1936, drawing a hard limit on what computers can ever do.",
+    "title": "The Halting Problem",
+    "blurb": "Alan Turing proved no program can reliably tell whether any other program will eventually finish or loop forever. Some questions are provably off-limits to computers.",
     "url": "https://en.wikipedia.org/wiki/Halting_problem"
   },
   {
     "id": "gc-four-color-theorem",
-    "title": "The Four-Color Theorem",
-    "blurb": "Any flat map can be colored with just four colors so no two neighboring regions match. It was the first major theorem proven with the help of a computer, and mathematicians argued about that for years.",
+    "title": "The Four Color Theorem",
+    "blurb": "Any map, however tangled, needs only four colors so no two neighboring regions match — and it was the first major theorem proven with the help of a computer.",
     "url": "https://en.wikipedia.org/wiki/Four_color_theorem"
   },
   {
-    "id": "gc-gomboc",
-    "title": "The Gömböc",
-    "blurb": "A math-derived shape with exactly one stable and one unstable resting point, so it always rights itself like a weeble — without any added weight inside. Certain tortoise shells turn out to work the same way.",
-    "url": "https://en.wikipedia.org/wiki/G%C3%B6mb%C3%B6c"
+    "id": "gc-boltzmann-brain",
+    "title": "Emperor Norton",
+    "blurb": "A bankrupt San Francisco resident declared himself Emperor of the United States in 1859 — and the city humored him for decades, honoring his own printed currency.",
+    "url": "https://en.wikipedia.org/wiki/Emperor_Norton"
   },
   {
-    "id": "gc-benham-top",
-    "title": "Benham's Top",
-    "blurb": "Spin a disc printed with only black-and-white arcs and your eyes will insist they see bands of color that aren't there. More than a century on, no one fully agrees why.",
-    "url": "https://en.wikipedia.org/wiki/Benham%27s_top"
-  },
-  {
-    "id": "gc-sn-1054",
-    "title": "The Guest Star of 1054",
-    "blurb": "Astronomers in China and elsewhere recorded a new star so bright it was visible in daylight for weeks. Today we see its debris as the Crab Nebula — we literally watched a star explode a thousand years ago.",
-    "url": "https://en.wikipedia.org/wiki/SN_1054"
-  },
-  {
-    "id": "gc-catatumbo-lightning",
-    "title": "The Everlasting Storm",
-    "blurb": "Over a river mouth in Venezuela, lightning flickers almost nightly for much of the year — hundreds of flashes an hour, on some nights. Sailors once used it as a natural lighthouse.",
-    "url": "https://en.wikipedia.org/wiki/Catatumbo_lightning"
-  },
-  {
-    "id": "gc-langtons-ant",
-    "title": "Langton's Ant",
-    "blurb": "A single dumb rule moves a virtual ant across a grid, making chaos for thousands of steps — then, out of nowhere, it starts building a perfectly regular highway forever.",
-    "url": "https://en.wikipedia.org/wiki/Langton%27s_ant"
-  },
-  {
-    "id": "gc-game-of-life",
-    "title": "Conway's Game of Life",
-    "blurb": "Four tiny rules on a grid of cells produce gliders, guns and patterns that endlessly reproduce — complex enough that you can, in principle, build a working computer inside it.",
-    "url": "https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life"
-  },
-  {
-    "id": "gc-rosetta-stone",
-    "title": "The Rosetta Stone",
-    "blurb": "One royal decree carved in three scripts, one of them ancient Greek, gave scholars the key to finally reading Egyptian hieroglyphs after they'd been silent for over a thousand years.",
-    "url": "https://en.wikipedia.org/wiki/Rosetta_Stone"
+    "id": "gc-shepard-tone",
+    "title": "The Shepard Tone",
+    "blurb": "An audio illusion that seems to climb higher forever without ever getting anywhere — the sonic equivalent of an endless staircase, beloved by film composers.",
+    "url": "https://en.wikipedia.org/wiki/Shepard_tone"
   }
 ];

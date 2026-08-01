@@ -2,359 +2,345 @@
 // The Buzz pool. Shape: { id, text, tag, source?, sourceLabel? } — source urls liveness-checked at generation time.
 export default [
   {
-    "id": "bz-gta6-dialup-warning",
-    "text": "Word is GTA 6 is so big it'd have crashed a 56k modem for six years. We priced the download in floppy disks. It's a lot of floppy disks.",
+    "id": "bz-gta-vi-vice-city",
+    "text": "Grand Theft Auto VI finally rolls into Vice City with two heroes — we're just praying it fits on one memory card.",
     "tag": "RUMOR",
     "source": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_VI",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-ff7-rebirth-memory-card",
-    "text": "Final Fantasy VII Rebirth hit Switch 2 and someone in the lab is already asking if you need three memory cards to save it. Cloud, we salute you.",
+    "id": "bz-world-cup-48-lan",
+    "text": "The 48-team World Cup is basically a LAN party with 48 controllers and one very laggy referee.",
     "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Final_Fantasy_VII_Rebirth",
+    "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-hotd-s3-deaths",
-    "text": "House of the Dragon Season 3 reportedly has the biggest body count yet. In 2003 that's a very sad Neopets adoption spike.",
-    "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/House_of_the_Dragon",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-the-bear-final",
-    "text": "The Bear is wrapping up for good. Pour one out — or a perfectly plated small win — like it's the last AIM away message.",
+    "id": "bz-2016-reset-mannequin",
+    "text": "The Mannequin Challenge is back for '2026 is the new 2016.' Next up: freezing mid dial-up handshake.",
     "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/The_Bear_(TV_series)",
+    "source": "https://en.wikipedia.org/wiki/Mannequin_Challenge",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-ted-lasso-s4",
-    "text": "Ted Lasso is back for Season 4, coaching again. If this aired in 2003 the theme song would be a ringtone you paid $2.99 for.",
+    "id": "bz-mario-galaxy-billion",
+    "text": "The Super Mario Galaxy Movie crossed a billion dollars; somewhere a 2003 GameCube is weeping tears of joy.",
+    "tag": "GOSSIP"
+  },
+  {
+    "id": "bz-hail-mary-gosling",
+    "text": "Ryan Gosling saving Earth as a science teacher in Project Hail Mary — like Oregon Trail, minus the dysentery.",
     "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Ted_Lasso",
+    "source": "https://en.wikipedia.org/wiki/Project_Hail_Mary_(film)",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-supergirl-woman",
-    "text": "Supergirl: Woman of Tomorrow is soaring into theaters. Give it the full Tamagotchi rating: five little pixel hearts, no batteries required.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Supergirl:_Woman_of_Tomorrow",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-avatar-live-s2",
-    "text": "Live-action Avatar: The Last Airbender is back for Season 2. Aang bending on a school-lab CRT is the crossover we asked for in 2005.",
-    "tag": "RUMOR",
-    "source": "https://en.wikipedia.org/wiki/Avatar:_The_Last_Airbender_(2024_TV_series)",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-lanterns-hbo",
-    "text": "HBO's Lanterns teams Hal and John in a moody detective mystery. Picture it as a grainy 2002 WB pilot with a dial-up intro.",
+    "id": "bz-bts-arirang-servers",
+    "text": "BTS returned with Arirang and the fan servers melted harder than a Winamp visualizer at full volume.",
     "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/Lanterns_(TV_series)",
+    "source": "https://en.wikipedia.org/wiki/BTS",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-olivia-drop-dead",
-    "text": "Olivia Rodrigo dropped 'drop dead' and 'the cure' for album three. In 2003 these are burned onto a CD-R labeled in Sharpie.",
-    "tag": "SIGHTING",
+    "id": "bz-harry-styles-disco",
+    "text": "Harry Styles' disco-flavored new album is 2026's biggest — basically a burned CD you'd label in Sharpie.",
+    "tag": "HOT TAKE",
+    "source": "https://en.wikipedia.org/wiki/Harry_Styles",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-olivia-new-wave",
+    "text": "Olivia Rodrigo's new record summons the New Wave gods; someone hand her a keytar and a MySpace top 8.",
+    "tag": "GOSSIP",
     "source": "https://en.wikipedia.org/wiki/Olivia_Rodrigo",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-ariana-petal",
-    "text": "Ariana Grande announced album eight, Petal, plus a tour. Filed under: songs you'd set as your MySpace profile track immediately.",
-    "tag": "RUMOR",
-    "source": "https://en.wikipedia.org/wiki/Ariana_Grande",
-    "sourceLabel": "Wikipedia"
+    "id": "bz-jimothy-tamagotchi",
+    "text": "Jimothy the round Seattle raccoon is out here shaped like a Tamagotchi and twice as beloved.",
+    "tag": "SIGHTING"
   },
   {
-    "id": "bz-tyler-katy-friday",
-    "text": "Tyler, The Creator and Katy Perry both dropped on the same Friday. In 2003 that's two very different LimeWire downloads finishing at once.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Tyler,_the_Creator",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-muse-marshmello",
-    "text": "Muse and Marshmello landed on the same New Music Friday. Rip both to your Winamp playlist before the trial expires.",
+    "id": "bz-country-roads-usmnt",
+    "text": "The USMNT clinched and the whole stadium sang 'Take Me Home, Country Roads' — dial-up nostalgia for your tear ducts.",
     "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Muse_(band)",
+    "source": "https://en.wikipedia.org/wiki/Take_Me_Home,_Country_Roads",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-mj-moonwalk-tiktok",
-    "text": "Gen Z is rediscovering 'Smooth Criminal' and the moonwalk. Somewhere a 2003 kid is still trying to lean without wires.",
-    "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/Michael_Jackson",
-    "sourceLabel": "Wikipedia"
+    "id": "bz-vozinha-final-boss",
+    "text": "Cape Verde's keeper Vozinha shut out Spain and gained 30 million followers — from unranked to final boss overnight.",
+    "tag": "GOSSIP"
   },
   {
-    "id": "bz-coldplay-kisscam",
-    "text": "That Coldplay kiss-cam moment is now internet legend. In 2003 it'd be a forwarded email with 40 'FW: FW:' in the subject line.",
+    "id": "bz-silo-season-3-wifi",
+    "text": "Silo returns for season 3 and the underground still has worse Wi-Fi than a 2002 basement.",
     "tag": "RUMOR",
-    "source": "https://en.wikipedia.org/wiki/Coldplay",
+    "source": "https://en.wikipedia.org/wiki/Silo_(TV_series)",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-nihilist-penguin",
-    "text": "The determined burnout penguin waddle is now a whole mascot. That's just every kid trudging to the computer lab at 8am, honestly.",
+    "id": "bz-enola-holmes-3",
+    "text": "Enola Holmes 3 dropped on Netflix; Millie Bobby Brown solving mysteries faster than you cleared Minesweeper on hard.",
+    "tag": "SIGHTING",
+    "source": "https://en.wikipedia.org/wiki/Enola_Holmes_(film)",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-halo-campaign-evolved",
+    "text": "Halo: Campaign Evolved remasters the classic — same nostalgia, now without the jet-engine roar of an original Xbox.",
     "tag": "HOT TAKE"
   },
   {
-    "id": "bz-kitkat-heist",
-    "text": "Someone allegedly made off with 400,000 KitKat bars — dubbed the chocolatiest crime online. In 2003 that's the ultimate vending-machine speedrun.",
-    "tag": "RUMOR"
+    "id": "bz-black-flag-resynced",
+    "text": "Assassin's Creed Black Flag Resynced sails back with a fresh coat of paint; still can't out-sing the sea shanties.",
+    "tag": "RUMOR",
+    "source": "https://en.wikipedia.org/wiki/Assassin%27s_Creed_IV:_Black_Flag",
+    "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-taylor-travis-msg",
-    "text": "Buzz says Taylor Swift and Travis Kelce might do something big at MSG. Our sources are a fan forum with a spinning under-construction gif.",
+    "id": "bz-gta-vi-parallel-park",
+    "text": "GTA VI is set for late 2026 — we've waited so long we accidentally learned to parallel park in real life.",
+    "tag": "HOT TAKE",
+    "source": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_VI",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-world-cup-splitscreen",
+    "text": "Three countries hosting one World Cup is the most ambitious multiplayer campaign since split-screen.",
+    "tag": "HOT TAKE",
+    "source": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-mario-billion-jump",
+    "text": "A billion dollars for a Mario movie proves the real endgame was always jumping on things.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-silo-buffering-secret",
+    "text": "If Silo were made in 2003, the big underground secret would just be buffering.",
+    "tag": "HOT TAKE",
+    "source": "https://en.wikipedia.org/wiki/Silo_(TV_series)",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-hail-mary-screensaver",
+    "text": "Project Hail Mary is streaming and yes, it beats any space screensaver you left running in study hall.",
     "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/Taylor_Swift",
+    "source": "https://en.wikipedia.org/wiki/Project_Hail_Mary_(film)",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-larry-david-250",
-    "text": "Larry David's new HBO sketch series roasts America's 250th. Curb, but make it a shaky camcorder skit tape from 2003.",
+    "id": "bz-jimothy-scale",
+    "text": "Rating Jimothy the raccoon on the Tamagotchi scale: 10/10, would feed digital snacks every 20 minutes.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-country-roads-crossover",
+    "text": "John Denver trending because of soccer is the crossover episode no 2003 mixtape saw coming.",
+    "tag": "GOSSIP",
+    "source": "https://en.wikipedia.org/wiki/Take_Me_Home,_Country_Roads",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-bts-ddr-choreo",
+    "text": "Spotted: an entire timeline learning the Arirang choreography like it's a Dance Dance Revolution mat.",
     "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Larry_David",
+    "source": "https://en.wikipedia.org/wiki/BTS",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-gta6-preorder-line",
-    "text": "GTA 6 pre-orders are live and someone's camping a digital line like it's a midnight mall kiosk in 2003. Bring a Discman.",
+    "id": "bz-harry-disco-checkbox",
+    "text": "Harry Styles going disco means someone finally ticked the 'occasionally' box on the karaoke machine.",
+    "tag": "GOSSIP",
+    "source": "https://en.wikipedia.org/wiki/Harry_Styles",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-olivia-cassette",
+    "text": "Olivia Rodrigo's New Wave era belongs on a cassette you rewind with a pencil.",
+    "tag": "HOT TAKE",
+    "source": "https://en.wikipedia.org/wiki/Olivia_Rodrigo",
+    "sourceLabel": "Wikipedia"
+  },
+  {
+    "id": "bz-vozinha-firewall",
+    "text": "Vozinha stopped Spain cold — the human equivalent of a firewall pop-up that actually works.",
+    "tag": "SIGHTING"
+  },
+  {
+    "id": "bz-gta-jason-lucia",
+    "text": "Jason and Lucia running Vice City together — Bonnie and Clyde if they had respawns.",
     "tag": "SIGHTING",
     "source": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_VI",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-hotd-battles",
-    "text": "They say House of the Dragon's biggest battles yet are coming. Our budget re-enactment is two Modem Defender bosses arguing.",
-    "tag": "RUMOR",
-    "source": "https://en.wikipedia.org/wiki/House_of_the_Dragon",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-ff7-cloud-flip",
-    "text": "Rumor: Cloud from FF7 Rebirth would absolutely have carried a flip phone with the antenna up for reception.",
+    "id": "bz-enola-pre-google",
+    "text": "Enola Holmes solves cases without a search bar; respect the pre-Google detective grind.",
     "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Final_Fantasy_VII_Rebirth",
+    "source": "https://en.wikipedia.org/wiki/Enola_Holmes_(film)",
     "sourceLabel": "Wikipedia"
   },
   {
-    "id": "bz-ariana-tour-mixtape",
-    "text": "Ariana's 10-city tour is on. If you snag tickets, the polite 2003 move is a hand-labeled mixtape to the whole carpool.",
-    "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Ariana_Grande",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-katy-perry-cdr",
-    "text": "New Katy Perry just landed. First order of business: burn it to a CD-R, decorate the case, forget which track is which.",
-    "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/Katy_Perry",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-olivia-away-message",
-    "text": "Every Olivia Rodrigo lyric is one screenshot from becoming a 2003 AIM away message with three parentheses of feelings.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Olivia_Rodrigo",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-avatar-lab-monitor",
-    "text": "Sighting: someone watching live-action Avatar S2 on a beige lab monitor at 800x600, insisting it 'hits different this way.'",
-    "tag": "SIGHTING",
-    "source": "https://en.wikipedia.org/wiki/Avatar:_The_Last_Airbender_(2024_TV_series)",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-bear-recipe-forward",
-    "text": "The Bear's final season has folks emotional. In 2003 you'd forward the finale like a chain letter: 'send to 10 friends or the fryer breaks.'",
-    "tag": "RUMOR",
-    "source": "https://en.wikipedia.org/wiki/The_Bear_(TV_series)",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-ted-lasso-poster",
-    "text": "Ted Lasso S4 has 'be curious' back on the wall. That's just a motivational cat poster in the 2003 guidance counselor's office.",
-    "tag": "GOSSIP",
-    "source": "https://en.wikipedia.org/wiki/Ted_Lasso",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-marshmello-glowstick",
-    "text": "New Marshmello dropped and the school dance committee is already ordering off-brand glowsticks in bulk. Best viewed in a dark gym.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Marshmello",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-muse-ringtone",
-    "text": "That new Muse riff belongs on a monophonic ringtone that beeps through algebra. Volume all the way up, of course.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Muse_(band)",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-lanterns-x-files",
-    "text": "Lanterns is basically 'what if the X-Files had a green flashlight budget.' We mean that as the highest 2003 compliment.",
-    "tag": "HOT TAKE",
-    "source": "https://en.wikipedia.org/wiki/Lanterns_(TV_series)",
-    "sourceLabel": "Wikipedia"
-  },
-  {
-    "id": "bz-reboot-again",
-    "text": "Hearing your favorite childhood cartoon is getting rebooted again. This is the fourth time. It's fine. Everything's fine.",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-vinyl-comeback",
-    "text": "A pop star reportedly pressed the new single to vinyl AND cassette. Next up: the triumphant return of the MiniDisc, we hope.",
+    "id": "bz-bottle-flip-return",
+    "text": "The Bottle Flip Challenge is back thanks to the meme reset; grab a neon soda and pretend it's 2016.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-flip-phone-star",
-    "text": "Sighting: a very famous person spotted with a flip phone 'for the aesthetic.' Sir, that was just called Tuesday in 2003.",
+    "id": "bz-mario-nokia-hum",
+    "text": "Spotted at the theater: grown adults humming the Mario Galaxy theme like it's a Nokia ringtone.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-feud-that-isnt",
-    "text": "Two celebs are 'feuding,' say the tabloids, based entirely on one unliked photo. In 2003 that's a whole Xanga entry.",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-secret-cameo",
-    "text": "Whispers of a surprise cameo in a big sequel. The whole plot leaked to a forum, buried under 90 replies of 'first.'",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-boy-band-reunion",
-    "text": "A beloved boy band may reunite. Choreography's rusty, but the frosted tips are non-negotiable and the stools have returned.",
+    "id": "bz-gritty-cartoon-reboot",
+    "text": "Another beloved cartoon is getting a gritty reboot; the trench-coat budget alone could buy a used Dreamcast.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-actor-relic-run",
-    "text": "Word around the lab: a movie star lost a Web Run bet and had to surf the whole webring in dress shoes. No refunds.",
-    "tag": "GOSSIP"
+    "id": "bz-vinyl-beats-cd",
+    "text": "Word is vinyl sales beat CDs again; the flip phone is next and the fax machine is warming up.",
+    "tag": "RUMOR"
   },
   {
-    "id": "bz-spelldown-jackpot",
-    "text": "Someone hit the Spelldown jackpot with all seven letters before their coffee cooled. Refused to reveal the word. Rude, honestly.",
+    "id": "bz-flip-phone-blanket",
+    "text": "Spotted: a celeb clutching a flip phone like a security blanket. Snake high scores incoming.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-modem-defender-boss",
-    "text": "A local legend claims they beat a Modem Defender BSOD boss one-handed while on hold with tech support. We believe them. We have to.",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-solitaire-marathon",
-    "text": "Overheard: an office allegedly finished a full workday on Solitaire alone. The deck stood, ovation, cards auto-completed in triumph.",
+    "id": "bz-feud-is-duet",
+    "text": "Two pop stars 'feuding' turned out to be planning a duet. Classic misdirect, très 2004.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-snake-highscore",
-    "text": "Sighting: a phone from 2003 dug out of a junk drawer, still holding a Snake high score nobody's dared to beat since.",
+    "id": "bz-cargo-pants-tokens",
+    "text": "Cargo pants are back and honestly the pocket-per-square-inch ratio is peak arcade-token storage.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-boy-band-vhs",
+    "text": "A boy band reunion tour is 'in talks,' which in industry speak means someone found the choreography VHS.",
+    "tag": "RUMOR"
+  },
+  {
+    "id": "bz-emo-bangs-eq",
+    "text": "Spotted: side-swept bangs making a comeback. Emo is rising like a Winamp EQ bar.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-tetris-dreams",
-    "text": "A friend of a friend says they can't stop seeing falling blocks after a Tetris bender. Classic. Rotate responsibly, folks.",
-    "tag": "HOT TAKE"
-  },
-  {
-    "id": "bz-2048-zen",
-    "text": "Hot take: 2048 is the calmest chaos on the internet. No timer, no rush — just you and a tile that refuses to merge. Serenity.",
-    "tag": "HOT TAKE"
-  },
-  {
-    "id": "bz-tap-surge-thumb",
-    "text": "Rumor: a Tap Surge champ retired their thumb like a jersey. Framed it above the CRT. Never taps on Sundays now.",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-pits-portals-shove",
-    "text": "They say a Pits and Portals purist beat a floor by shoving everything into the void and vibing. No healing, all attitude.",
+    "id": "bz-awards-shocker",
+    "text": "An awards 'shocker' that everyone called six weeks ago. Suspense levels: dial-up loading bar.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-crypt-crawler-math",
-    "text": "Sighting: someone doing Crypt of the Hollow King HP math on a graphing calculator smuggled in from 2003. Respect the grind.",
+    "id": "bz-streaming-ads-cable",
+    "text": "Streaming services adding ads is just cable cosplaying as the future. We've seen this rerun.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-90s-game-movie",
+    "text": "A '90s video game is getting a movie; pray they keep the health-bar tension and lose the CGI mascot.",
+    "tag": "RUMOR"
+  },
+  {
+    "id": "bz-disposable-cam-carpet",
+    "text": "Someone brought a disposable camera to a red carpet. Bold. Twenty-seven exposures of pure mystery.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-memory-match-floppy",
-    "text": "Overheard at the water cooler: 'I cleared Memory Match in record moves.' Then flexed a real floppy disk. Iconic behavior.",
+    "id": "bz-reality-casting-drama",
+    "text": "A reality show is casting again; producers seek 'drama,' find only people who miss their flip phones.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-magic8-celeb",
-    "text": "Rumor: a celeb makes every career decision with a Magic 8-Ball. 'Reply hazy, try again' has apparently greenlit two sequels.",
+    "id": "bz-limited-edition-beanie",
+    "text": "Every 'limited edition' collab is just Beanie Baby energy with better marketing.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-sitcom-reboot-groupchat",
+    "text": "Rumor says a legacy sitcom is rebooting with the original cast — the group chat that saved TV.",
     "tag": "RUMOR"
   },
   {
-    "id": "bz-name-o-tron-verdict",
-    "text": "A pop star reportedly fed their stage name to Name-O-Tron 3000. The verdict: 'high mystery, low battery.' They kept the name anyway.",
-    "tag": "GOSSIP"
-  },
-  {
-    "id": "bz-soundboard-nostalgia",
-    "text": "Sighting: a grown adult moved to tears by the dial-up handshake on the Ourcade Soundboard. 'That's the sound of my childhood buffering.'",
+    "id": "bz-popstar-cereal-2am",
+    "text": "A pop star spotted eating cereal at 2am; relatable, iconic, would friend on AIM.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-streaming-password",
-    "text": "The great streaming password crackdown continues. In 2003 we solved this by sharing one Blockbuster card and driving very fast.",
-    "tag": "HOT TAKE"
-  },
-  {
-    "id": "bz-remaster-everything",
-    "text": "Studios are remastering everything now. At this rate they'll remaster the 'you got mail' sound in 4K and we'll still cry.",
-    "tag": "HOT TAKE"
-  },
-  {
-    "id": "bz-diva-rider",
-    "text": "A diva's tour rider allegedly demands only beige M&Ms and a working dial-up tone. We respect the commitment to the bit.",
-    "tag": "RUMOR"
-  },
-  {
-    "id": "bz-mall-tour-return",
-    "text": "Buzz says a mall food-court tour is making a comeback. Signing autographs by the Orange Julius, exactly as nature intended.",
+    "id": "bz-actor-quiet-engaged",
+    "text": "An actor 'quietly' got engaged, which means the internet knew before the caterer.",
     "tag": "GOSSIP"
   },
   {
-    "id": "bz-award-show-gif",
-    "text": "Whole award show reduced to one reaction gif by morning. Somewhere a 2003 forum admin nods slowly, remembering the animated sig.",
+    "id": "bz-cdrom-bonus-feature",
+    "text": "Bring back the enhanced CD-ROM bonus feature. We deserve secret music videos again.",
     "tag": "HOT TAKE"
   },
   {
-    "id": "bz-actor-pixel-role",
-    "text": "Rumor: an A-lister will voice a blocky video game hero. Motion-captured entirely in a room that smells like a 2003 arcade carpet.",
+    "id": "bz-tamagotchi-app",
+    "text": "Whispers of a Tamagotchi-style pet app taking over lunch breaks. Feed it or face the guilt.",
     "tag": "RUMOR"
   },
   {
-    "id": "bz-band-reunion-lan",
-    "text": "Two exes-in-a-band are reportedly cool again. They settled it the mature way: a best-of-three Modem Defender LAN session.",
-    "tag": "GOSSIP"
-  },
-  {
-    "id": "bz-viral-dance-return",
-    "text": "A viral dance is 'reinventing' a move your gym teacher taught in 2003. We were simply ahead of our time. You're welcome.",
-    "tag": "HOT TAKE"
-  },
-  {
-    "id": "bz-celeb-webring",
-    "text": "Sighting: a celebrity spotted 'discovering' webrings and calling them 'so intimate.' Yeah, we know. We built one. It's haunted.",
+    "id": "bz-frosted-tips-mall",
+    "text": "Frosted tips sighted in the wild. The prophecy of the mall food court is fulfilled.",
     "tag": "SIGHTING"
   },
   {
-    "id": "bz-sequel-numbering",
-    "text": "Hot take: sequels have gotten so numbered they should just adopt version numbers. Blockbuster 2.0, now with fewer loading screens.",
+    "id": "bz-cryptic-pixel-tease",
+    "text": "A director 'teased' a sequel with one cryptic pixel. We enhanced it. It was a mailbox.",
+    "tag": "GOSSIP"
+  },
+  {
+    "id": "bz-game-manuals-literature",
+    "text": "Physical game manuals were peak literature and I will not be taking questions.",
     "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-ringtone-musical",
+    "text": "Talk of a jukebox musical using only 2000s ringtones. Somehow we're already sold.",
+    "tag": "RUMOR"
+  },
+  {
+    "id": "bz-band-tee-cant-name",
+    "text": "A celeb wore a band tee for a band they can't name. Ancient tradition, still going strong.",
+    "tag": "SIGHTING"
+  },
+  {
+    "id": "bz-costars-blink-feud",
+    "text": "Two costars 'don't get along' per a fan who read too much into a blink. Investigation ongoing.",
+    "tag": "GOSSIP"
+  },
+  {
+    "id": "bz-practical-fx-mixtape",
+    "text": "The best special effect is still a good practical explosion and a garage-made mixtape.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-mall-arcade-return",
+    "text": "Someone claims the mall arcade is coming back. If true, save us a spot by the racing cabinet.",
+    "tag": "RUMOR"
+  },
+  {
+    "id": "bz-butterfly-clips-claires",
+    "text": "Butterfly clips returning to red carpets. Somewhere a Claire's is being resurrected.",
+    "tag": "SIGHTING"
+  },
+  {
+    "id": "bz-star-learning-guitar",
+    "text": "A star's 'mysterious new project' is just them learning guitar. We support the garage-band arc.",
+    "tag": "GOSSIP"
+  },
+  {
+    "id": "bz-loading-tips-wisdom",
+    "text": "Loading screens with tips were the last honest form of media. Bring back the wisdom.",
+    "tag": "HOT TAKE"
+  },
+  {
+    "id": "bz-dialup-focus-mode",
+    "text": "Buzz says a platform wants to reboot dial-up as an 'ambient focus mode.' We'd subscribe instantly.",
+    "tag": "RUMOR"
   }
 ];
