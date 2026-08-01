@@ -2,6 +2,106 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-mapcrunch",
+    "kind": "site",
+    "era": "current",
+    "title": "A big green button that drops you somewhere random on Earth",
+    "blurb": "Hit it and teleport into a Street View you'll never place. Half geography quiz, half staring at a lonely road in a country you can't name.",
+    "url": "https://mapcrunch.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:51.066Z"
+  },
+  {
+    "id": "gw-hadron-collider",
+    "kind": "site",
+    "era": "current",
+    "title": "A live status check on whether the Large Hadron Collider ate the planet",
+    "blurb": "Spoiler: it just says 'NOPE.' Refresh anytime for reassurance that a black hole has not, in fact, swallowed us all.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.984Z"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug wrapped in a rug, answering the eternal yes-or-no",
+    "blurb": "Ask it anything; the pug simply is. The purest single-serving site on the whole web and we'd defend it in court.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.920Z"
+  },
+  {
+    "id": "gw-is-it-christmas",
+    "kind": "site",
+    "era": "current",
+    "title": "A site that answers one question, forever, with total confidence",
+    "blurb": "It will tell you if it's Christmas. The answer is 'NO' for 364 days a year. Beautiful in its restraint.",
+    "url": "https://isitchristmas.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.849Z"
+  },
+  {
+    "id": "gw-crouton",
+    "kind": "site",
+    "era": "current",
+    "title": "A single photograph of a crouton",
+    "blurb": "That's it. Refresh for a brand new crouton. Someone registered a domain for this and honestly we respect the commitment.",
+    "url": "https://crouton.net",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.738Z"
+  },
+  {
+    "id": "gw-falling-falling",
+    "kind": "site",
+    "era": "current",
+    "title": "Bands of color falling forever, with a hum to match",
+    "blurb": "No goal, no score, just an infinite waterfall of hues you can slow down or speed up. Screensaver energy, load-bearing vibes.",
+    "url": "https://fallingfalling.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.661Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "Click a fuzzy blob until it slowly resolves into a koala",
+    "blurb": "Each click halves the pixels until the little guy comes into focus. Oddly meditative, mildly addictive, extremely 2008.",
+    "url": "https://koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.491Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A website where strangers send you video hugs, no strings attached",
+    "blurb": "Just an endless parade of people opening their arms to you through the screen. Wholesome overload; keep the cynicism in the other tab.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.293Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's home for polished, gloriously pointless browser experiments",
+    "blurb": "Neal Agarwal keeps building the internet toys we didn't know we needed — the Deep Sea, the Password Game, Absurd Trolley Problems. It's the Flash-portal spirit with none of the crashing.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:50.140Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "A Street View car steered by thousands of strangers voting every 10 seconds",
+    "blurb": "It moves at roughly 3 mph across North America because democracy is slow and someone always votes to honk. It's the group project from hell and we cannot stop watching.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-08-01T06:57:49.981Z"
+  },
+  {
     "id": "gw-stimulation-clicker",
     "kind": "site",
     "era": "current",
@@ -62,16 +162,6 @@ export default [
     "archivedAt": "2026-07-31T07:07:36.220Z"
   },
   {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A never-ending stream of strangers giving you a hug",
-    "blurb": "Real people, on video, opening their arms to nobody in particular — which is somehow everybody. When the internet gets loud, this is a very quiet room.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-07-31T07:07:36.135Z"
-  },
-  {
     "id": "gw-gridcosm",
     "kind": "site",
     "era": "current",
@@ -100,46 +190,6 @@ export default [
     "url": "https://onemillioncheckboxes.com",
     "source": "weird",
     "archivedAt": "2026-07-31T07:07:35.768Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A car thousands of strangers are steering across Street View, together, forever",
-    "blurb": "Every ten seconds the internet votes on which way to turn, and the car lurches accordingly. It started in Boston with no destination — democracy has never parallel-parked worse.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-07-31T07:07:35.611Z"
-  },
-  {
-    "id": "gw-is-it-christmas",
-    "kind": "site",
-    "era": "current",
-    "title": "A site that answers one question with total confidence",
-    "blurb": "IsItChristmas.com exists solely to tell you whether it's Christmas, in enormous letters. Most days it just says NO, and there's something grounding about that.",
-    "url": "https://isitchristmas.com",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:23.968Z"
-  },
-  {
-    "id": "gw-crouton",
-    "kind": "site",
-    "era": "current",
-    "title": "A website whose only job is showing you a crouton",
-    "blurb": "Crouton.net loads one photo of a crouton. Refresh for a different crouton. That is the entire experience and honestly it's kind of perfect.",
-    "url": "https://crouton.net",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:23.759Z"
-  },
-  {
-    "id": "gw-lhc",
-    "kind": "site",
-    "era": "current",
-    "title": "A live status check on whether the world has ended yet",
-    "blurb": "Has the Large Hadron Collider Destroyed the World Yet? updates in real time. Spoiler: the answer is still a big reassuring NOPE.",
-    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:23.110Z"
   },
   {
     "id": "gw-omfg-dogs",
@@ -190,16 +240,6 @@ export default [
     "url": "https://absurd.website",
     "source": "weird",
     "archivedAt": "2026-07-29T07:03:21.840Z"
-  },
-  {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "One guy's pile of beautiful, useless browser toys",
-    "blurb": "Neal.fun is a whole arcade of interactive experiments — no downloads, no signup, no paywall, just weird stuff made to be poked. Very much our people.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:21.525Z"
   },
   {
     "id": "gw-hn-simulator",
@@ -272,16 +312,6 @@ export default [
     "archivedAt": "2026-07-27T07:18:48.356Z"
   },
   {
-    "id": "gw-falling-falling",
-    "kind": "site",
-    "era": "current",
-    "title": "An infinite wall of color falling into forever",
-    "blurb": "Bands of shifting color drop endlessly with a low hum, and it never, ever stops. Somewhere between a screensaver and a mild out-of-body experience.",
-    "url": "https://www.fallingfalling.com",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:55.308Z"
-  },
-  {
     "id": "gw-nyan-cat",
     "kind": "site",
     "era": "current",
@@ -310,16 +340,6 @@ export default [
     "url": "https://littlealchemy2.com",
     "source": "weird",
     "archivedAt": "2026-07-23T06:59:19.753Z"
-  },
-  {
-    "id": "gw-mapcrunch",
-    "kind": "site",
-    "era": "current",
-    "title": "A big green button that teleports you somewhere random on Earth",
-    "blurb": "MapCrunch drops you into a totally random Street View location — a highway in Mongolia, a parking lot in Peru — and asks nothing of you. It's a vacation for people who can't afford one and don't want to leave the chair.",
-    "url": "https://mapcrunch.com",
-    "source": "weird",
-    "archivedAt": "2026-07-23T06:59:19.345Z"
   },
   {
     "id": "gw-skull-a-day",
@@ -362,16 +382,6 @@ export default [
     "archivedAt": "2026-07-19T06:58:34.584Z"
   },
   {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "A picture that reveals itself one square at a time",
-    "blurb": "Click to split fuzzy blocks into smaller blocks until a hidden koala snaps into focus. Weirdly satisfying, weirdly hypnotic.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.516Z"
-  },
-  {
     "id": "gw-wplace",
     "kind": "site",
     "era": "current",
@@ -390,16 +400,6 @@ export default [
     "url": "https://savethesounds.info",
     "source": "weird",
     "archivedAt": "2026-07-19T06:58:34.344Z"
-  },
-  {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug. In a rug. That is the site.",
-    "blurb": "You scroll, a pug tucks itself deeper into a rug. That's the transaction. No lore, no levels, no microtransactions — just a very cozy dog and your dwindling free time.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-07-17T06:55:57.314Z"
   },
   {
     "id": "gw-conserve-the-sound",

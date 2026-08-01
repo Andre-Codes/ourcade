@@ -3,86 +3,72 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "A car thousands of strangers are steering across Street View, together, forever",
-    "blurb": "Every ten seconds the internet votes on which way to turn, and the car lurches accordingly. It started in Boston with no destination — democracy has never parallel-parked worse.",
+    "title": "A Street View car steered by thousands of strangers voting every 10 seconds",
+    "blurb": "It moves at roughly 3 mph across North America because democracy is slow and someone always votes to honk. It's the group project from hell and we cannot stop watching.",
     "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "began in Boston, headed nowhere"
+    "foundNote": "currently stuck at an intersection, probably"
   },
   {
-    "id": "gw-one-million-checkboxes",
-    "title": "A million checkboxes strangers keep checking and unchecking",
-    "blurb": "No score, no point, just a million little boxes and thousands of hands fighting over them. Somehow the most compelling thing you'll do with a mouse today.",
-    "url": "https://onemillioncheckboxes.com"
-  },
-  {
-    "id": "gw-one-million-chessboards",
-    "title": "A million tiny chessboards on one enormous shared page",
-    "blurb": "The checkbox guy came back with a million chessboards and let the whole internet move pieces at once. It's chaos, it's beautiful, and nobody is winning.",
-    "url": "https://onemillionchessboards.com",
-    "foundNote": "the checkbox sequel"
-  },
-  {
-    "id": "gw-gridcosm",
-    "title": "A collaborative art grid that's been zooming inward since 1997",
-    "blurb": "3x3 grids nested inside 3x3 grids inside 3x3 grids, drawn by strangers, tunneling forever. Older than most of the games on this site and still going.",
-    "url": "https://sito.org/synergy/",
-    "foundNote": "nesting since 1997"
+    "id": "gw-neal-fun",
+    "title": "One guy's home for polished, gloriously pointless browser experiments",
+    "blurb": "Neal Agarwal keeps building the internet toys we didn't know we needed — the Deep Sea, the Password Game, Absurd Trolley Problems. It's the Flash-portal spirit with none of the crashing.",
+    "url": "https://neal.fun"
   },
   {
     "id": "gw-nicest-place",
-    "title": "A never-ending stream of strangers giving you a hug",
-    "blurb": "Real people, on video, opening their arms to nobody in particular — which is somehow everybody. When the internet gets loud, this is a very quiet room.",
+    "title": "A website where strangers send you video hugs, no strings attached",
+    "blurb": "Just an endless parade of people opening their arms to you through the screen. Wholesome overload; keep the cynicism in the other tab.",
     "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "title": "Hunt an invisible cow using only sound",
-    "blurb": "You can't see the cow. You can only hear it get louder as your cursor wanders closer. It is genuinely thrilling and you will feel deeply silly.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "turn your volume on"
+    "id": "gw-invisible-cow",
+    "title": "Hunt an invisible cow while a voice screams how close you are",
+    "blurb": "You wave your cursor around a blank screen and it shouts 'COW!' louder as you get warmer. Peak turn-of-the-millennium computer-lab chaos.",
+    "url": "https://findtheinvisiblecow.com"
   },
   {
-    "id": "gw-passweird",
-    "title": "A password generator so gross even hackers won't want your password",
-    "blurb": "It spits out passwords covered in doodles and questionable phrases, on the theory that nobody — criminal or otherwise — wants to steal something that revolting. Genuinely inspired security through disgust.",
-    "url": "https://passweird.com"
-  },
-  {
-    "id": "gw-wiki-game",
-    "title": "Race from one Wikipedia page to another using only the links",
-    "blurb": "If you love our own Web Run, this is the ancestor: get from A to B across the real Wikipedia, clicking blue words like your life depends on it. Warning — you will not do just one.",
-    "url": "https://thewikigame.com",
-    "foundNote": "try Web Run for the haunted 2003 version"
-  },
-  {
-    "id": "gw-password-game",
-    "title": "A password field that keeps adding insane new rules until you break",
-    "blurb": "Sure, add a number. Now include a Roman numeral that sums to 25. Now a chess move. Now feed the chicken. The most stressful text box ever built, and you can't stop.",
-    "url": "https://neal.fun/password-game/"
-  },
-  {
-    "id": "gw-spend-bill-gates",
-    "title": "Try to spend a billionaire's money and watch how impossible it is",
-    "blurb": "You get a fortune and a store menu, from Big Macs to entire cruise ships, and you will still fail to make a dent. A humbling little math lesson disguised as a shopping spree.",
-    "url": "https://neal.fun/spend/"
-  },
-  {
-    "id": "gw-koalas-to-the-max",
-    "title": "A single dot that splits into a koala the more you touch it",
-    "blurb": "Move your mouse and the giant dot keeps dividing into smaller and smaller circles until, out of nowhere, a koala. Peak 'why does this exist' energy, in the best way.",
+    "id": "gw-koalas",
+    "title": "Click a fuzzy blob until it slowly resolves into a koala",
+    "blurb": "Each click halves the pixels until the little guy comes into focus. Oddly meditative, mildly addictive, extremely 2008.",
     "url": "https://koalastothemax.com"
   },
   {
-    "id": "gw-sandspiel",
-    "title": "A falling-sand playground where fire, water and plants fight it out",
-    "blurb": "Drop sand, light it, flood it, grow a vine through the ashes — a tiny physics world that behaves suspiciously well for something running in your browser. Endless quiet chaos.",
-    "url": "https://sandspiel.club"
+    "id": "gw-falling-falling",
+    "title": "Bands of color falling forever, with a hum to match",
+    "blurb": "No goal, no score, just an infinite waterfall of hues you can slow down or speed up. Screensaver energy, load-bearing vibes.",
+    "url": "https://fallingfalling.com",
+    "foundNote": "turn your speakers down first"
   },
   {
-    "id": "gw-stimulation-clicker",
-    "title": "A clicker game that piles on every noise the modern internet makes at once",
-    "blurb": "It starts as one button and ends as a screaming wall of subscribe bells, rain sounds and bacon frying. A dead-on parody of your actual attention span in 2003 dial-up form.",
-    "url": "https://neal.fun/stimulation-clicker/",
-    "foundNote": "headphones users beware"
+    "id": "gw-crouton",
+    "title": "A single photograph of a crouton",
+    "blurb": "That's it. Refresh for a brand new crouton. Someone registered a domain for this and honestly we respect the commitment.",
+    "url": "https://crouton.net"
+  },
+  {
+    "id": "gw-is-it-christmas",
+    "title": "A site that answers one question, forever, with total confidence",
+    "blurb": "It will tell you if it's Christmas. The answer is 'NO' for 364 days a year. Beautiful in its restraint.",
+    "url": "https://isitchristmas.com",
+    "foundNote": "online and honest since forever"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "title": "A pug wrapped in a rug, answering the eternal yes-or-no",
+    "blurb": "Ask it anything; the pug simply is. The purest single-serving site on the whole web and we'd defend it in court.",
+    "url": "https://puginarug.com"
+  },
+  {
+    "id": "gw-hadron-collider",
+    "title": "A live status check on whether the Large Hadron Collider ate the planet",
+    "blurb": "Spoiler: it just says 'NOPE.' Refresh anytime for reassurance that a black hole has not, in fact, swallowed us all.",
+    "url": "https://hasthelargehadroncolliderdestroyedtheworldyet.com",
+    "foundNote": "still nope"
+  },
+  {
+    "id": "gw-mapcrunch",
+    "title": "A big green button that drops you somewhere random on Earth",
+    "blurb": "Hit it and teleport into a Street View you'll never place. Half geography quiz, half staring at a lonely road in a country you can't name.",
+    "url": "https://mapcrunch.com"
   }
 ];

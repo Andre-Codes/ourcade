@@ -7,6 +7,6 @@ export default {
     "weird": 80,
     "curiosities": 30
   },
-  "newest": "2026-07-31T07:07:36.802Z",
-  "builtAt": "2026-07-31T07:07:37.672Z"
+  "newest": "2026-08-01T06:57:51.066Z",
+  "builtAt": "2026-08-01T06:57:51.890Z"
 };
