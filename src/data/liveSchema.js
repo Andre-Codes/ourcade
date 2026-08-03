@@ -1,5 +1,5 @@
-﻿/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   LIVE SCHEMA â€” one field table per content family.
+/* ─────────────────────────────────────────────────────────────────────────
+   LIVE SCHEMA — one field table per content family.
 
    Drives BOTH the admin console's form renderer and its validation, so the
    seven editors at #/admin are one generic component instead of seven
@@ -8,8 +8,8 @@
    valid kind/era), so anything the console accepts also survives check:daily
    once scripts/snapshot-live.js bakes it into the repo.
 
-   Node-pure â€” no React, no Firebase. See src/data/live.js for the overlay.
-   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+   Node-pure — no React, no Firebase. See src/data/live.js for the overlay.
+   ───────────────────────────────────────────────────────────────────────── */
 
 // Kept in sync with the KINDS/ERAS sets in scripts/daily-check.js. "flash" is
 // deliberately absent: those artifacts are generated from the archive.org pool
@@ -17,7 +17,7 @@
 export const LIVE_KINDS = ["site", "wiki", "patent", "game", "video", "image", "mystery"];
 export const LIVE_ERAS = ["nostalgic", "current", "timeless"];
 
-const URL_FIELD = { key: "url", label: "url", type: "url", required: true, placeholder: "https://â€¦" };
+const URL_FIELD = { key: "url", label: "url", type: "url", required: true, placeholder: "https://…" };
 const TITLE_FIELD = { key: "title", label: "title", required: true, max: 90 };
 const BLURB_FIELD = {
   key: "blurb",
@@ -25,22 +25,22 @@ const BLURB_FIELD = {
   type: "textarea",
   required: true,
   max: 320,
-  hint: "1â€“2 sentences: why is this worth a click?",
+  hint: "1–2 sentences: why is this worth a click?",
 };
 
 export const LIVE_FORMS = {
   stumble: {
-    emoji: "ðŸŽ²",
+    emoji: "🎲",
     tab: "STUMBLE",
     noun: "artifact", plural: "artifacts",
-    blurb: "The ðŸŽ² pool. `era` drives the invisible 40/40/20 draw and is never shown to visitors.",
+    blurb: "The 🎲 pool. `era` drives the invisible 40/40/20 draw and is never shown to visitors.",
     fields: [
       TITLE_FIELD,
       BLURB_FIELD,
       URL_FIELD,
       { key: "kind", label: "kind", type: "select", options: LIVE_KINDS, required: true, default: "site" },
       { key: "era", label: "era", type: "select", options: LIVE_ERAS, required: true, default: "current" },
-      { key: "year", label: "year", placeholder: "1996 â€” optional" },
+      { key: "year", label: "year", placeholder: "1996 — optional" },
       { key: "credit", label: "credit", placeholder: "optional" },
     ],
     // Matches the "site:spacejam-1996" convention in MANUAL_ARTIFACTS.
@@ -48,24 +48,24 @@ export const LIVE_FORMS = {
   },
 
   weird: {
-    emoji: "ðŸ”",
+    emoji: "🔍",
     tab: "WEIRD",
     noun: "weird thing", plural: "weird things",
-    blurb: "The ðŸ” card, daytime. Rotates every ~3h through the day.",
+    blurb: "The 🔍 card, daytime. Rotates every ~3h through the day.",
     fields: [
       TITLE_FIELD,
       BLURB_FIELD,
       URL_FIELD,
-      { key: "foundNote", label: "found note", placeholder: "updates every few minutes â€” optional" },
+      { key: "foundNote", label: "found note", placeholder: "updates every few minutes — optional" },
     ],
     makeId: (v) => `weird-${slugify(v.title)}`,
   },
 
   weirdNight: {
-    emoji: "ðŸŒ™",
+    emoji: "🌙",
     tab: "NIGHT",
     noun: "late-night weird thing", plural: "night finds",
-    blurb: "The ðŸŒ™ pool â€” only shown after dark, and never touched by the scheduler. Keep these good.",
+    blurb: "The 🌙 pool — only shown after dark, and never touched by the scheduler. Keep these good.",
     fields: [
       TITLE_FIELD,
       BLURB_FIELD,
@@ -76,42 +76,42 @@ export const LIVE_FORMS = {
   },
 
   curiosities: {
-    emoji: "ðŸŒŒ",
+    emoji: "🌌",
     tab: "CURIOS",
     noun: "curiosity", plural: "curiosities",
-    blurb: "The ðŸŒŒ card â€” fascinating regardless of decade. One per day.",
+    blurb: "The 🌌 card — fascinating regardless of decade. One per day.",
     fields: [TITLE_FIELD, BLURB_FIELD, { ...URL_FIELD, required: false }],
     makeId: (v) => `cur-${slugify(v.title)}`,
   },
 
   featured: {
-    emoji: "â˜…",
+    emoji: "★",
     tab: "FEATURED",
     noun: "featured game", plural: "featured games",
-    blurb: "The â˜… FEATURED GAME hero â€” a real, external game. Cycles one per week.",
+    blurb: "The ★ FEATURED GAME hero — a real, external game. Cycles one per week.",
     fields: [
       TITLE_FIELD,
       BLURB_FIELD,
       URL_FIELD,
-      { key: "tagline", label: "tagline", placeholder: "roguelike Â· science-fantasy â€” optional" },
-      { key: "year", label: "year", placeholder: "2024 or TBA â€” optional" },
+      { key: "tagline", label: "tagline", placeholder: "roguelike · science-fantasy — optional" },
+      { key: "year", label: "year", placeholder: "2024 or TBA — optional" },
       {
         key: "imageUrl",
         label: "image url",
         type: "url",
-        placeholder: "https://â€¦ â€” optional",
-        hint: "Full URL to cover art. Repo entries use the optimized `image` basename instead; a live entry can't run assets:featured, so it links art directly. Blank falls back to the ðŸŽ® placeholder.",
+        placeholder: "https://… — optional",
+        hint: "Full URL to cover art. Repo entries use the optimized `image` basename instead; a live entry can't run assets:featured, so it links art directly. Blank falls back to the 🎮 placeholder.",
       },
-      { key: "accent", label: "accent", type: "color", placeholder: "#6B4BB8 â€” optional" },
+      { key: "accent", label: "accent", type: "color", placeholder: "#6B4BB8 — optional" },
     ],
     makeId: (v) => slugify(v.title),
   },
 
   news: {
-    emoji: "ðŸ“°",
+    emoji: "📰",
     tab: "NEWS",
     noun: "news line", plural: "news lines",
-    blurb: "SITE NEWS on the homepage. For a dated announcement use ðŸ—“ï¸ SCHEDULE instead â€” it pins.",
+    blurb: "SITE NEWS on the homepage. For a dated announcement use 🗓️ SCHEDULE instead — it pins.",
     fields: [
       {
         key: "text",
@@ -126,7 +126,7 @@ export const LIVE_FORMS = {
   },
 
   schedule: {
-    emoji: "ðŸ—“ï¸",
+    emoji: "🗓️",
     tab: "SCHEDULE",
     noun: "scheduled entry", plural: "scheduled entries",
     blurb:
@@ -142,8 +142,8 @@ export const LIVE_FORMS = {
       },
       { key: "mode", label: "mode", type: "select", options: ["pin", "pool"], required: true, default: "pin" },
       { key: "from", label: "from", type: "date", required: true, placeholder: "YYYY-MM-DD" },
-      { key: "until", label: "until", type: "date", placeholder: "YYYY-MM-DD â€” optional" },
-      { key: "days", label: "or days", type: "number", placeholder: "7 â€” optional" },
+      { key: "until", label: "until", type: "date", placeholder: "YYYY-MM-DD — optional" },
+      { key: "days", label: "or days", type: "number", placeholder: "7 — optional" },
 
       // Content fields switch on the chosen slot (mirrors toItem() in manual/schedule.js).
       { key: "text", label: "news line", type: "textarea", required: true, max: 200, when: (v) => v.type === "news" },
@@ -157,10 +157,10 @@ export const LIVE_FORMS = {
   },
 };
 
-// Title â†’ id slug, matching the kebab-case ids already in manual/content.js.
+// Title → id slug, matching the kebab-case ids already in manual/content.js.
 export function slugify(s) {
   // NFKD splits accented letters into base + combining mark, and the
-  // non-alphanumeric sweep below eats the mark â€” so "cafÃ©" lands on "cafe"
+  // non-alphanumeric sweep below eats the mark — so "café" lands on "cafe"
   // rather than losing the letter entirely.
   return String(s || "")
     .toLowerCase()
@@ -185,7 +185,7 @@ function isUrl(s) {
   }
 }
 
-/* Validate one item. Returns { <fieldKey>: "message" } â€” empty means good.
+/* Validate one item. Returns { <fieldKey>: "message" } — empty means good.
    `takenIds` is every id already in the pool (baked + live); pass the item's
    own id as `selfId` when editing so it doesn't collide with itself. */
 export function validateItem(type, values, takenIds = [], selfId = null) {
@@ -205,7 +205,7 @@ export function validateItem(type, values, takenIds = [], selfId = null) {
     else if (f.type === "select" && !f.options.includes(v)) errors[f.key] = "pick one of the options";
     else if (f.type === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(v)) errors[f.key] = "use YYYY-MM-DD";
     else if (f.type === "number" && !(Number(v) > 0)) errors[f.key] = "must be a positive number";
-    else if (f.max && String(v).length > f.max) errors[f.key] = `${String(v).length}/${f.max} â€” too long`;
+    else if (f.max && String(v).length > f.max) errors[f.key] = `${String(v).length}/${f.max} — too long`;
   }
 
   // A schedule entry may end with `until` OR `days`, never both (isWithinWindow
@@ -217,13 +217,13 @@ export function validateItem(type, values, takenIds = [], selfId = null) {
   const id = (values.id || "").trim() || LIVE_FORMS[type]?.makeId?.(values) || "";
   if (!id) errors.title = errors.title || "can't derive an id from this";
   else if (id !== selfId && takenIds.includes(id)) {
-    errors.title = "an item with this id already exists â€” tweak the title";
+    errors.title = "an item with this id already exists — tweak the title";
   }
 
   return errors;
 }
 
-// Form values â†’ the object stored in the overlay: trimmed, blanks dropped
+// Form values → the object stored in the overlay: trimmed, blanks dropped
 // (so an optional field left empty never ships as ""), id derived if absent.
 export function buildItem(type, values, selfId = null) {
   const out = {};
