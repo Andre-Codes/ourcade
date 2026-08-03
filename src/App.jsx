@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./components/Home.jsx";
 import GamePage from "./components/GamePage.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import useLive from "./lib/useLive.js";
 
 const QuizPage = lazy(() => import("./components/QuizPage.jsx"));
 const FlashPage = lazy(() => import("./components/FlashPage.jsx"));
@@ -18,6 +19,7 @@ const AccountPage = lazy(() => import("./components/AccountPage.jsx"));
 const ScoresPage = lazy(() => import("./components/ScoresPage.jsx"));
 const ProfilePage = lazy(() => import("./components/ProfilePage.jsx"));
 const PhonePage = lazy(() => import("./components/PhonePage.jsx"));
+const AdminPage = lazy(() => import("./components/AdminPage.jsx"));
 
 function Loading() {
   return <div className="arcade-loading">Loading…</div>;
@@ -27,6 +29,10 @@ export default function App() {
   // resetKey lets the boundary auto-recover when the user navigates to a new
   // route, so a single crashed page never traps the rest of the site.
   const { pathname } = useLocation();
+  // Fetches the admin content overlay once on boot and re-renders when it
+  // lands, so #/admin edits show up site-wide without a reload. Failure is a
+  // no-op — the pools fall back to the baked seed. See src/data/live.js.
+  useLive();
   return (
     <ErrorBoundary resetKey={pathname}>
       <Suspense fallback={<Loading />}>
@@ -48,6 +54,7 @@ export default function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/me" element={<AccountPage />} />
           <Route path="/phone" element={<PhonePage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/scores/:gameId" element={<ScoresPage />} />
           <Route path="/u/:username" element={<ProfilePage />} />
           <Route path="*" element={<Home />} />

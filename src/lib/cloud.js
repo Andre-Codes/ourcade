@@ -466,3 +466,34 @@ export async function deletePing(pingId) {
   if (!id || !pingId) return;
   await deleteDoc(doc(db, "messages", id, "pings", pingId)).catch(() => {});
 }
+
+/* ─── M3: the live content overlay (the #/admin dev console) ─────────────────
+   ONE doc — live/content — holding { <type>: { adds, patches, hides } } for
+   each family in src/data/live.js. Public-read (every visitor merges it over
+   the baked pools on boot); writes are gated to the admin uids by the
+   isAdmin() helper in firestore.rules. One doc means one read per page load
+   and no fan-out as content grows. */
+
+const LIVE_DOC = () => doc(db, "live", "content");
+
+// The whole overlay, or null if it hasn't been created yet / the read failed.
+// Never throws: a visitor who can't reach Firestore just keeps the baked seed.
+export async function readLiveContent() {
+  try {
+    const snap = await getDoc(LIVE_DOC());
+    return snap.exists() ? snap.data() : null;
+  } catch {
+    return null;
+  }
+}
+
+// Replace ONE family's layer. Merge-writes so the other six are untouched —
+// which also means two tabs editing different families can't clobber each
+// other. Throws on permission-denied so the console can surface it.
+export async function writeLiveContent(type, layer) {
+  await setDoc(
+    LIVE_DOC(),
+    { [type]: layer, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}

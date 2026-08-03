@@ -5,6 +5,7 @@ import { pickDaily, pickDailyN } from "../lib/daily.js";
 import generated from "./generated/flavor.js";
 import { MANUAL_NEWS, MANUAL_TIPS } from "./manual/content.js";
 import { activeSchedule } from "./manual/schedule.js";
+import { applyLiveNews } from "./live.js";
 
 const FALLBACK = {
   tips: [
@@ -45,6 +46,10 @@ const news = [
     : FALLBACK.news),
 ];
 
+// The news pool BEFORE the admin overlay — the #/admin console lists this to
+// show which lines are baked into the repo vs. added from the console.
+export const NEWS_BASE = news;
+
 export function getTodaysTip(key) {
   return pickDaily(tips, key, 303);
 }
@@ -57,8 +62,10 @@ export function getTodaysNews(key, n = 3) {
   // scheduled this is exactly the old behavior: n generated items.)
   const { pinned, pool } = activeSchedule("news", key);
   // Ask for enough candidates that, after removing any that collide with pinned,
-  // we can still fill n generated slots.
-  const rotated = pickDailyN([...news, ...pool], key, n + pinned.length, 404);
+  // we can still fill n generated slots. applyLiveNews layers in admin-authored
+  // lines (and drops hidden ones) — news items are plain strings, so it's a
+  // string-keyed variant of the usual applyLive.
+  const rotated = pickDailyN([...applyLiveNews(news), ...pool], key, n + pinned.length, 404);
   const seen = new Set(pinned);
   const filled = rotated.filter((item) => !seen.has(item)).slice(0, n);
   return [...pinned, ...filled];

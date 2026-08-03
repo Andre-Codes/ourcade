@@ -6,15 +6,16 @@ The whole "fresh every day" feel rests on one idea: a given **local calendar day
 
 ---
 
-## The three layers of content
+## The layers of content
 
-Every card on the homepage is assembled from up to three stacked sources. Think of them as a sandwich — they all flow into one pool, and the daily rotation picks from the combined result.
+Every card on the homepage is assembled from up to four stacked sources. Think of them as a sandwich — they all flow into one pool, and the daily rotation picks from the combined result.
 
 | Layer | File(s) | Who edits it | Touched by `npm run generate`? |
 |---|---|---|---|
 | ✋ **Manual** (hand-curated) | [src/data/manual/](../src/data/manual/) — `content.js` + the standalone `movies.js` / `featured.js` / `onthisday.js` | **You, by hand** | ❌ Never |
 | 🤖 **Generated** (AI-authored) | [src/data/generated/*.js](../src/data/generated/) | Claude, via scripts/CI | ✅ Overwritten each run |
 | 🗓️ **Scheduled** (date-windowed) | [src/data/manual/schedule.js](../src/data/manual/schedule.js) | **You, by hand** | ❌ Never |
+| 🛠️ **Live** (the dev console) | Firestore `live/content`, baked to [src/data/generated/live.js](../src/data/generated/live.js) | **You, from [#/admin](#️-the-live-layer-admin)** | ❌ Never |
 | 🛟 *Fallback* | inline in each consumer | (safety net only) | ❌ Never |
 
 > **Golden rule:** the AI generators **only ever rewrite `src/data/generated/*`**. Your hand-edited files under `src/data/manual/` (including `schedule.js`) are sacred — they survive every regeneration. The fallback is a tiny built-in list so a card never renders empty if a generated batch is missing.
@@ -153,6 +154,45 @@ Each entry in the `SCHEDULE` array:
 
 ---
 
+## 🛠️ The live layer ([#/admin](../src/components/AdminPage.jsx))
+
+Everything above ships in the bundle, so editing it means commit → push → wait for `deploy.yml`. The **dev console** is the escape hatch: a phone-sized editor at `#/admin` whose changes are live in seconds.
+
+**How it flows:**
+
+```
+   phone ──write──►  Firestore live/content        (admin-only, rules-gated)
+                          │
+   visitor ─read──◄───────┘                        (1 doc read on boot, public)
+                          │
+                   src/data/live.js                (merges adds / patches / hides)
+                          │
+   nightly Action ──►  src/data/generated/live.js  (baked seed, committed)
+```
+
+Firestore is the authority; the baked seed exists so content renders on **first paint** (and still renders if Firestore is unreachable), and so phone edits land in git history like any other content commit. Adds dedupe by id, so nothing ever appears twice.
+
+**Three operations per family** — this is what lets the console edit content that's baked into the repo:
+
+| Op | What it does |
+|---|---|
+| `adds` | New items authored in the console. Appended to the pool, so they join the normal rotation. |
+| `patches` | `{ "<existing id>": { url: "…" } }` shallow-merged over a baked item — **how you fix a dead link** in `manual/content.js` without touching the file. |
+| `hides` | Ids dropped from the pool. Also the tombstone for a deleted add, so it can't come back from the baked seed. |
+
+**Editable families:** 🎲 stumble · 🔍 weird · 🌙 weird-night · 🌌 curiosities · ★ featured · 📰 news · 🗓️ schedule. Games, quizzes, and the Water Cooler set are deliberately out of scope — games carry `lazy()` closures that can't be expressed as data.
+
+**Where the pieces live:**
+
+- [src/data/live.js](../src/data/live.js) — the merge. Node-pure, so `check:daily` still runs; under Node the overlay is just the baked seed.
+- [src/data/liveSchema.js](../src/data/liveSchema.js) — the field tables. **Add a field here and it appears in the console**, validated, automatically.
+- [src/lib/admin.js](../src/lib/admin.js) — the uid allowlist. Only hides the UI; the real gate is `isAdmin()` in [firestore.rules](../firestore.rules), which must be pasted into the Firebase console by hand (there's no `firebase.json` in this repo).
+- `npm run snapshot:live` → the nightly [snapshot-live.yml](../.github/workflows/snapshot-live.yml) Action (04:00 UTC).
+
+> **Note on rotations:** adding an item lengthens the pool, which reshuffles what `rotateDaily` surfaces — exactly as a hand edit to `manual/content.js` would. Salts are untouched.
+
+---
+
 ## 🤖 How generated content gets refreshed
 
 AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is **never** imported by the app — no API key ever reaches the browser. Generators call Claude (`claude-opus-4-8`, structured JSON output) and write into `src/data/generated/*`. Topical items use a forced, verified real-time web search to name genuinely current things.
@@ -236,9 +276,11 @@ A destination page (top nav, next to the Water Cooler) to **wander the whole bac
 
 ## TL;DR cheat sheet
 
+- **Not at a computer?** → open [#/admin](../src/components/AdminPage.jsx) on your phone. Adds, link fixes, the Featured Game, and date-windowed pins all go live in seconds, no rebuild.
 - **Want to add an evergreen item to the rotation?** → edit `src/data/manual/content.js` (survives regeneration, joins the daily mix).
 - **Want to announce something for a date range?** → add a `pin` entry to `src/data/manual/schedule.js`.
 - **Want to nudge a specific item into rotation for a while?** → add a `pool` entry to `src/data/manual/schedule.js`.
+- **Found a dead link in a baked pool?** → the console's EDIT on a `repo` row writes an override; the file stays put until you get around to fixing it properly.
 - **Want fresher AI content now?** → run the relevant workflow via `workflow_dispatch`, or `npm run generate*` locally.
 - **Never hand-edit `src/data/generated/*`** — the next AI run will overwrite it.
 - **The 🌙 Late-Night Weird pool is hand-curated and off-limits to the generators and the scheduler** — keep it special.

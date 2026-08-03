@@ -13,6 +13,7 @@ import { rotateIntraday, rotateDaily, dayPart } from "../lib/daily.js";
 import generated from "./generated/weird.js";
 import { MANUAL_WEIRD, MANUAL_WEIRD_NIGHT } from "./manual/content.js";
 import { activeSchedule } from "./manual/schedule.js";
+import { applyLive } from "./live.js";
 
 // Minimal safety net if both pools are ever emptied.
 const FALLBACK = [
@@ -51,12 +52,16 @@ export const WEIRD_BLOCKS_PER_DAY = 8;
 export function getCurrentWeirdThing(key, part = dayPart(), block) {
   // The 🌙 late-night secret pool is sacred — dev-scheduled weird things only
   // affect the daytime parts.
+  // The admin overlay is merged HERE, not into the exported consts, so the pool
+  // reflects live edits the moment they hydrate (and stays the committed pool
+  // under Node, where the overlay is always empty — see live.js).
   if (part?.id === "night") {
-    const pool = WEIRD_NIGHT.length ? WEIRD_NIGHT : FALLBACK;
-    return rotateDaily(pool, key, NIGHT_SALT);
+    const night = applyLive(WEIRD_NIGHT, "weirdNight");
+    return rotateDaily(night.length ? night : FALLBACK, key, NIGHT_SALT);
   }
   const { pinned, pool: extra } = activeSchedule("weird", key);
   if (pinned.length) return rotateIntraday(pinned, key, WEIRD_BLOCKS_PER_DAY, SALT, block);
-  const base = WEIRD.length ? WEIRD : FALLBACK;
+  const live = applyLive(WEIRD, "weird");
+  const base = live.length ? live : FALLBACK;
   return rotateIntraday([...base, ...extra], key, WEIRD_BLOCKS_PER_DAY, SALT, block);
 }

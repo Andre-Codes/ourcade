@@ -1,0 +1,80 @@
+name: Snapshot Live Content
+
+# Bakes the #/admin dev console's overlay (Firestore live/content) into
+# src/data/generated/live.js and commits it.
+#
+# The console writes straight to Firestore and every visitor merges that doc
+# over the baked pools on boot (src/data/live.js), so content added from a
+# phone is ALREADY live before this runs — this job is not the delivery path.
+# What it buys:
+#   • first-paint rendering (no waiting on the Firestore read, and the content
+#     still shows if Firestore is unreachable)
+#   • git history for edits made from a phone, same as any content commit
+#   • check:daily coverage — staticArtifacts() includes the overlay, so
+#     admin-authored Stumble finds get audited like committed ones
+#
+# No API cost: this is one Firestore document read. Soft-fails without
+# clobbering if the secret is missing or the doc doesn't exist yet.
+#
+# NOTE on "I edited but the deploy didn't change anything": that's expected
+# and fine. If the overlay hasn't changed since last night there's nothing to
+# commit, and the site was already serving your edit from Firestore anyway.
+on:
+  schedule:
+    # 04:00 UTC nightly — after the day's edits, before US-morning traffic.
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write # needed for `gh workflow run deploy.yml` (trigger Pages deploy)
+
+concurrency:
+  group: snapshot-live
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bake live/content → src/data/generated/live.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: npm run snapshot:live
+
+      # The overlay is now part of the committed content, so the usual content
+      # gate applies to it: ids unique, artifacts well-formed, rotations hold.
+      - name: Verify content still checks out
+        run: npm run check:daily
+
+      - name: Commit the snapshot (only if changed)
+        id: commit
+        run: |
+          git config user.name "ourcade-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data/generated/live.js
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No console edits since the last snapshot — nothing to commit."
+          else
+            git commit -m "chore: snapshot live content overlay from the dev console"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Commits pushed with the default GITHUB_TOKEN do NOT trigger other
+      # workflows, so deploy.yml won't auto-run — kick it off explicitly.
+      - name: Trigger Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml

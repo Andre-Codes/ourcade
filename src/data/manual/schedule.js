@@ -26,6 +26,7 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 import { isWithinWindow } from "../../lib/daily.js";
+import { applyLive } from "../live.js";
 
 export const SCHEDULE = [
   // { type: "news", mode: "pin", from: "2026-06-20", days: 7,
@@ -49,6 +50,16 @@ export const SCHEDULE = [
   //   title: "A website that's just spooky ambience", blurb: "Pure October energy, all month.", url: "https://example.com", foundNote: "haunting since forever" },
 ];
 
+/* Every entry carries an explicit id before anything else touches it, so the
+   #/admin console can hide or override a hand-written entry by id (ids used to
+   be derived from array position, which shifts the moment one is hidden).
+   The derived value matches the old `sched-<type>-<index>` shape exactly, so
+   nothing that already relied on those ids moves. */
+export const SCHEDULE_BASE = SCHEDULE.map((e, i) => ({
+  ...e,
+  id: e.id || `sched-${e.type}-${i}`,
+}));
+
 // Normalize a schedule entry to the item shape its slot's pool expects.
 function toItem(e, i) {
   const id = e.id || `sched-${e.type}-${i}`;
@@ -65,7 +76,14 @@ function toItem(e, i) {
 export function activeSchedule(type, key) {
   const pinned = [];
   const pool = [];
-  SCHEDULE.forEach((e, i) => {
+  // Hand-written entries, plus anything scheduled from the #/admin console —
+  // and minus anything hidden there. Going through applyLive (rather than just
+  // appending the adds) is what lets the console hide or override an entry
+  // written here. Both kinds then take the same window test and the same
+  // toItem() normalization, so a phone-scheduled pin behaves exactly like one
+  // committed here — and this single seam covers news, curiosities AND weird.
+  const entries = applyLive(SCHEDULE_BASE, "schedule");
+  entries.forEach((e, i) => {
     if (e.type !== type || !isWithinWindow(key, e)) return;
     const item = toItem(e, i);
     if (item == null) return;

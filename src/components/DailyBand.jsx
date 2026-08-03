@@ -12,6 +12,7 @@ import { creativeArt } from "./creativeArt.js";
 import { getCurrentWeirdThing } from "../data/weird.js";
 import { MOVIES } from "../data/manual/movies.js";
 import { FEATURED } from "../data/manual/featured.js";
+import { applyLive } from "../data/live.js";
 import { NEXT_GAME_VOTE, nextGameRealTally } from "../data/nextGame.js";
 import {
   getPollVote,
@@ -394,14 +395,18 @@ function MascotTip({ dayKey: key, streak }) {
 // the card simply lists everything currently in that file (no rotation).
 // ── Featured Game (a real, external game worth a look) ────────────────────
 function FeaturedGame({ dayKey: key }) {
-  if (!FEATURED.length) return null;
+  const pool = applyLive(FEATURED, "featured");
+  if (!pool.length) return null;
   // Cycle one featured game per week, no repeats until the whole pool is
   // exhausted. salt=2 keeps this independent of Game of the Day (0) so the two
   // hero cards don't move in lockstep. A single-entry pool simply never changes.
-  const game = rotateEvery(FEATURED, key, 7, 2);
+  const game = rotateEvery(pool, key, 7, 2);
+  // Repo entries carry an `image` basename optimized by `npm run assets:featured`.
+  // Entries added from the #/admin console can't run that build step, so they
+  // link art directly via `imageUrl`. Neither present → the 🎮 placeholder.
   const art = game.image
     ? FEATURED_IMAGES[`../assets/featured/${game.image}.webp`]
-    : null;
+    : game.imageUrl || null;
   const meta = [game.tagline, game.year].filter(Boolean).join(" · ");
   return (
     <a

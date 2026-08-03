@@ -26,6 +26,7 @@
     "gen:dungeon-dict": "node scripts/gen-dungeon-dict.js",
     "fetch:onthisday": "node scripts/fetch-onthisday.js",
     "snapshot:archive": "node scripts/snapshot-archive.js",
+    "snapshot:live": "node scripts/snapshot-live.js",
     "quarter:text": "node scripts/quarter-text.js",
     "research": "node scripts/research-topics.js",
     "check:daily": "node scripts/daily-check.js",

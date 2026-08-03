@@ -2474,3 +2474,124 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
   font-size: 0.84rem; color: #c4d0e6;
 }
 .arcade-submit-check input { width: 16px; height: 16px; accent-color: var(--neon-aqua); cursor: pointer; }
+
+/* ====================================================================== */
+/*  DEV CONSOLE (#/admin)                                                  */
+/*  Built phone-first — this page is meant to be used one-handed on a      */
+/*  bookmarked tab, so everything is single-column with ≥44px tap targets. */
+/* ====================================================================== */
+.arcade-admin { max-width: 720px; margin: 0 auto; padding: 64px 14px 64px; }
+.arcade-admin-head { margin-bottom: 14px; }
+.arcade-admin-title {
+  font-family: 'Black Ops One', cursive; font-size: 1.6rem; color: #fff; margin: 8px 0 4px;
+}
+.arcade-admin-blurb {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; line-height: 1.5;
+  color: var(--arcade-muted); margin: 0 0 12px;
+}
+
+/* Seven tabs never fit one row on a phone — wrap instead of squeezing. */
+.arcade-admin-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.arcade-admin-tab {
+  flex: 1 1 auto; min-height: 44px; min-width: 88px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.5rem; letter-spacing: 0.03em;
+  color: #8a8fb5; background: #0e101a; border: 2px solid #2a2f4a; border-radius: 8px;
+  padding: 10px 8px; cursor: pointer; transition: color .14s, background .14s, border-color .14s;
+}
+.arcade-admin-tab.is-active { color: #0a0a12; background: var(--neon-gold); border-color: #04050b; }
+
+.arcade-admin-btn {
+  min-height: 44px; padding: 10px 14px; cursor: pointer; border-radius: 8px;
+  font-family: 'Press Start 2P', monospace; font-size: 0.52rem; letter-spacing: 0.04em;
+  color: #eef0ff; background: rgba(255,255,255,.06); border: 2px solid #2a2f4a;
+}
+.arcade-admin-btn:disabled { opacity: .45; cursor: default; }
+.arcade-admin-btn.is-go { color: #0a0a12; background: var(--neon-lime); border-color: #04050b; }
+.arcade-admin-btn.is-bad { color: var(--neon-pink); border-color: var(--neon-pink); }
+.arcade-admin-add { width: 100%; margin-bottom: 14px; }
+
+.arcade-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.arcade-admin-row {
+  background: #0b0d16; border: 2px solid #2a2f4a; border-radius: 10px; padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.arcade-admin-row.is-hidden { opacity: .45; }
+.arcade-admin-rowtop { display: flex; flex-wrap: wrap; gap: 6px; }
+.arcade-admin-chip {
+  font-family: 'Press Start 2P', monospace; font-size: 0.42rem; letter-spacing: 0.05em;
+  padding: 4px 6px; border-radius: 5px; border: 1px solid currentColor;
+}
+.arcade-admin-chip.is-live { color: var(--neon-lime); }
+.arcade-admin-chip.is-baked { color: var(--arcade-muted); }
+.arcade-admin-chip.is-patched { color: var(--neon-gold); }
+.arcade-admin-chip.is-off { color: var(--neon-pink); }
+.arcade-admin-rowtext {
+  margin: 0; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;
+  line-height: 1.45; color: var(--arcade-text);
+}
+/* URLs are the one thing here that can't wrap on their own. */
+.arcade-admin-rowurl {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--neon-aqua);
+  overflow-wrap: anywhere;
+}
+.arcade-admin-rowbar { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.arcade-admin-form { display: flex; flex-direction: column; gap: 12px; }
+.arcade-admin-form .arcade-field-input.is-bad { border-color: var(--neon-pink); }
+.arcade-admin-form textarea.arcade-field-input { resize: vertical; line-height: 1.5; }
+.arcade-admin-formbar { display: flex; gap: 8px; }
+.arcade-admin-formbar .arcade-admin-btn { flex: 1; }
+.arcade-admin-err { font-family: 'Share Tech Mono', monospace; font-size: 0.76rem; color: var(--neon-pink); }
+.arcade-admin-hint { font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; line-height: 1.4; color: var(--arcade-muted); }
+.arcade-admin-note {
+  margin: 0; padding: 10px 12px; border-radius: 8px; background: #04050b; border: 2px solid #2a2f4a;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; line-height: 1.5; color: #cbb8f0;
+}
+.arcade-admin-note code, .arcade-admin-foot code { color: var(--neon-aqua); overflow-wrap: anywhere; }
+.arcade-admin-color { display: flex; align-items: center; gap: 8px; }
+.arcade-admin-color .arcade-field-input { flex: 1; min-width: 0; }
+.arcade-admin-swatch { width: 34px; height: 34px; flex: none; border-radius: 7px; border: 2px solid #2a2f4a; }
+.arcade-admin-foot {
+  margin: 16px 0 0; font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
+  line-height: 1.5; color: var(--arcade-muted);
+}
+
+/* ❓ HELP tab — a reference sheet, so it reads as prose rather than chrome. */
+.arcade-admin-help {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; line-height: 1.6; color: #c4d0e6;
+}
+.arcade-admin-help h2 {
+  font-family: 'Press Start 2P', monospace; font-size: 0.62rem; letter-spacing: 0.05em;
+  color: var(--neon-gold); margin: 22px 0 8px; line-height: 1.6;
+}
+.arcade-admin-help h2:first-child { margin-top: 4px; }
+.arcade-admin-help p { margin: 0 0 10px; }
+.arcade-admin-help ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.arcade-admin-help li { padding-left: 2px; }
+.arcade-admin-help b { color: var(--arcade-text); }
+.arcade-admin-help code {
+  color: var(--neon-aqua); background: #04050b; border-radius: 4px;
+  padding: 1px 4px; overflow-wrap: anywhere;
+}
+.arcade-admin-help .arcade-admin-chip { display: inline-block; vertical-align: middle; }
+
+/* The action table is the one thing here that can't reflow — let it scroll
+   inside its own box instead of pushing the page sideways on a phone. */
+.arcade-admin-tablewrap { overflow-x: auto; margin: 0 0 4px; }
+.arcade-admin-help table { border-collapse: collapse; min-width: 460px; width: 100%; }
+.arcade-admin-help th, .arcade-admin-help td {
+  border: 1px solid #2a2f4a; padding: 8px 10px; text-align: left; vertical-align: top;
+  font-size: 0.82rem; line-height: 1.5;
+}
+.arcade-admin-help thead th {
+  font-family: 'Press Start 2P', monospace; font-size: 0.46rem; letter-spacing: 0.05em;
+  color: var(--neon-aqua); background: #0b0d16;
+}
+.arcade-admin-help tbody th {
+  font-family: 'Press Start 2P', monospace; font-size: 0.46rem; letter-spacing: 0.04em;
+  color: var(--arcade-text); background: #0b0d16; white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-admin-tab { transition: none; }
+}

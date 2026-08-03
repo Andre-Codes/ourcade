@@ -16,6 +16,12 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
 
+    // The dev console's allowlist. Keep in sync with ADMIN_UIDS in
+    // src/lib/admin.js — that copy only hides the UI; THIS is the real gate.
+    function isAdmin() {
+      return signedIn() && request.auth.uid in ['it3XWpWHtTd65es3NJSRTLl5DZg1'];
+    }
+
     // users/{uid} — profile (username, email, createdAt) + synced `state` map.
     // Private to its owner (keeps email out of public reach).
     match /users/{uid} {
@@ -167,6 +173,21 @@ service cloud.firestore {
         && request.resource.data.kind == 'ping';
       allow update: if false;
       allow delete: if isOwner(owner);
+    }
+
+    // ── M3: the live content overlay (the #/admin dev console) ───────────────
+
+    // live/content — { <type>: { adds, patches, hides } } layered over the
+    // baked content pools at runtime (see src/data/live.js), so the phone
+    // console can add a Stumble find or fix a dead link without a rebuild.
+    // WORLD-READABLE by design: every visitor merges this on boot, including
+    // signed-out ones, so it can't be gated on auth. Writes are admin-only.
+    // Shape isn't validated here — the console validates against
+    // src/data/liveSchema.js, and the reader in live.js normalizes anything
+    // malformed rather than trusting it.
+    match /live/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Default deny — future collections (archive) get explicit rules when those

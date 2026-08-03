@@ -20,6 +20,7 @@ import { loadPool } from "./animations.js";
 import { loadVault } from "./vault.js";
 import generated from "./generated/stumble.js";
 import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual/content.js";
+import { applyLive } from "./live.js";
 import {
   getStumbleSeen,
   recordStumbleSeen,
@@ -31,6 +32,10 @@ const STATIC = [
   ...MANUAL_ARTIFACTS,
   ...(Array.isArray(generated) && generated.length ? generated : []),
 ];
+
+// The curated pool BEFORE the admin overlay — the #/admin console lists this to
+// show which artifacts are baked into the repo vs. added from the console.
+export const STUMBLE_BASE = STATIC;
 
 // Konami-locked extras — stranger picks that only join the draw once the code
 // has been entered (see Home.jsx). Flagged so the page can show the 🩻 chip.
@@ -95,11 +100,14 @@ function loadVaultArtifacts() {
 // weights still dominate, but every roll CAN reach into the whole archive. Deep
 // Cuts (Konami-unlocked) are a separate small bucket on top of that.
 function buildBuckets(flashArtifacts, vaultArtifacts) {
+  // buildBuckets runs on every draw, so merging the admin overlay here means a
+  // find added from the phone joins the dice on the very next click.
+  const pool = applyLive(STATIC, "stumble");
   return [
     { weight: 0.2, items: flashArtifacts },
-    { weight: 0.2, items: STATIC.filter((a) => a.era === "nostalgic") },
-    { weight: 0.4, items: STATIC.filter((a) => a.era === "current") },
-    { weight: 0.2, items: STATIC.filter((a) => a.era === "timeless") },
+    { weight: 0.2, items: pool.filter((a) => a.era === "nostalgic") },
+    { weight: 0.4, items: pool.filter((a) => a.era === "current") },
+    { weight: 0.2, items: pool.filter((a) => a.era === "timeless") },
     { weight: 0.15, items: vaultArtifacts }, // 🗄️ Deep Stumble — the deep tail
     ...(getDeepCutsUnlocked() ? [{ weight: 0.12, items: DEEP_CUTS }] : []),
   ].filter((b) => b.items.length > 0);
@@ -147,7 +155,9 @@ export async function drawArtifact(excludeId) {
 // friend it was sent to.
 export async function findArtifact(id) {
   if (!id) return null;
-  const hit = STATIC.find((a) => a.id === id) || DEEP_CUTS.find((a) => a.id === id);
+  const hit =
+    applyLive(STATIC, "stumble").find((a) => a.id === id) ||
+    DEEP_CUTS.find((a) => a.id === id);
   if (hit) return hit;
   if (id.startsWith("flash:")) {
     const raw = id.slice("flash:".length);
@@ -162,6 +172,8 @@ export async function findArtifact(id) {
 
 // For scripts/daily-check.js: audit the static pools (deep cuts included)
 // without touching the lazy flash chunk (fetch-flash.js validates that one).
+// The overlay is included so that once snapshot-live.js bakes admin-authored
+// finds into the repo, check:daily holds them to the same shape rules.
 export function staticArtifacts() {
-  return [...STATIC, ...DEEP_CUTS];
+  return [...applyLive(STATIC, "stumble"), ...DEEP_CUTS];
 }

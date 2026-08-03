@@ -7,6 +7,7 @@ import { rotateDaily } from "../lib/daily.js";
 import generated from "./generated/curiosities.js";
 import { MANUAL_CURIOSITIES } from "./manual/content.js";
 import { activeSchedule } from "./manual/schedule.js";
+import { applyLive } from "./live.js";
 
 // Minimal safety net if MANUAL_CURIOSITIES is ever emptied.
 const FALLBACK = [
@@ -32,6 +33,8 @@ const SALT = 606; // independent of games(0)/polls(101)/quizzes+facts(202)/tips(
 export function getTodaysCuriosity(key) {
   const { pinned, pool: extra } = activeSchedule("curiosity", key);
   if (pinned.length) return rotateDaily(pinned, key, SALT);
-  const base = CURIOSITIES.length ? CURIOSITIES : FALLBACK;
+  // Admin overlay merged at pick time (see live.js) — empty under Node.
+  const live = applyLive(CURIOSITIES, "curiosities");
+  const base = live.length ? live : FALLBACK;
   return rotateDaily([...base, ...extra], key, SALT);
 }
