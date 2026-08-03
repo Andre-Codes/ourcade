@@ -2510,6 +2510,12 @@ a.arcade-board-name:hover { color: var(--neon-aqua); text-decoration: underline;
 .arcade-admin-btn.is-bad { color: var(--neon-pink); border-color: var(--neon-pink); }
 .arcade-admin-add { width: 100%; margin-bottom: 14px; }
 
+.arcade-admin-search { display: flex; gap: 8px; margin-bottom: 12px; }
+.arcade-admin-search .arcade-field-input { flex: 1; min-width: 0; min-height: 44px; }
+/* Safari draws its own clear affordance on type=search; ours is the CLEAR button. */
+.arcade-admin-search input[type="search"]::-webkit-search-decoration,
+.arcade-admin-search input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+
 .arcade-admin-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .arcade-admin-row {
   background: #0b0d16; border: 2px solid #2a2f4a; border-radius: 10px; padding: 12px;

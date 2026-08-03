@@ -235,6 +235,13 @@ function HelpGuide() {
           <code>days</code>, never both. Blank both = runs forever.</li>
       </ul>
 
+      <h2>Searching</h2>
+      <p>
+        The box above each list matches <b>any</b> field — title, blurb, url, id, kind, era. Words
+        are AND-ed, so <code>rain live</code> narrows twice. The status words work as filters
+        too: <code>hidden</code>, <code>override</code>, <code>live</code>, <code>repo</code>.
+      </p>
+
       <h2>Worth knowing</h2>
       <ul>
         <li>Adding items lengthens a pool, which reshuffles what the rotation surfaces today.
@@ -262,6 +269,7 @@ export default function AdminPage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState(null); // { id } | { add: true }
   const [confirm, setConfirm] = useState(null);
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     if (!ready || !admin) return;
@@ -299,6 +307,26 @@ export default function AdminPage() {
   }, [type, layer]);
 
   const takenIds = useMemo(() => rows.map((r) => r.item.id), [rows]);
+
+  /* Search. Every string value on the item is searchable (title, blurb, url,
+     id, kind, era, the news text…), plus the row's own status words — so
+     "hidden", "override", "live" and "repo" work as filters without needing a
+     separate control. Terms are AND-ed, so "rain live" narrows twice. */
+  const visibleRows = useMemo(() => {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return rows;
+    return rows.filter((r) => {
+      const hay = [
+        ...Object.values(r.item).filter((v) => typeof v === "string"),
+        r.origin === "live" ? "live" : "repo",
+        r.patched ? "override" : "",
+        r.hidden ? "hidden" : "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return terms.every((t) => hay.includes(t));
+    });
+  }, [rows, q]);
 
   // The row being edited, if any — declared here because the save handlers below
   // branch on where it came from (repo vs. console).
@@ -468,6 +496,7 @@ export default function AdminPage() {
               setEditing(null);
               setError("");
               setNotice("");
+              setQ("");
             }}
           >
             {t === HELP ? "❓ HELP" : `${LIVE_FORMS[t].emoji} ${LIVE_FORMS[t].tab}`}
@@ -503,8 +532,24 @@ export default function AdminPage() {
             + ADD {form.noun.toUpperCase()}
           </button>
 
+          <div className="arcade-admin-search">
+            <input
+              className="arcade-field-input"
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={`search ${rows.length} ${form.plural}…`}
+              aria-label={`Search ${form.tab}`}
+            />
+            {q ? (
+              <button type="button" className="arcade-admin-btn" onClick={() => setQ("")}>
+                CLEAR
+              </button>
+            ) : null}
+          </div>
+
           <ul className="arcade-admin-list">
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <li key={row.item.id} className={`arcade-admin-row${row.hidden ? " is-hidden" : ""}`}>
                 <div className="arcade-admin-rowtop">
                   <span className={`arcade-admin-chip is-${row.origin}`}>
@@ -537,8 +582,15 @@ export default function AdminPage() {
             ))}
           </ul>
 
+          {q && !visibleRows.length ? (
+            <p className="arcade-admin-foot">
+              Nothing matches “{q}”. Try fewer words, or a url fragment.
+            </p>
+          ) : null}
+
           <p className="arcade-admin-foot">
-            {rows.length} in the pool · preview a date with <code>#/?day={todayKey()}</code> ·{" "}
+            {q ? `${visibleRows.length} of ${rows.length} shown` : `${rows.length} in the pool`} ·
+            preview a date with <code>#/?day={todayKey()}</code> ·{" "}
             <button type="button" className="arcade-account-link" onClick={() => setType(HELP)}>
               what do these buttons do?
             </button>
