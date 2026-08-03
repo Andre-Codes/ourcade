@@ -2,6 +2,96 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-omfg-dogs",
+    "kind": "site",
+    "era": "current",
+    "title": "Spinning dogs. A loop. Forever.",
+    "blurb": "Cartoon dogs spinning to a chiptune loop that will burrow into your skull and stay for a week. This has been online basically unchanged since the Flash era.",
+    "url": "https://www.omfgdogs.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:56.021Z"
+  },
+  {
+    "id": "gw-thats-the-finger",
+    "kind": "site",
+    "era": "current",
+    "title": "A website that just gives you the finger",
+    "blurb": "You point the cursor at the hand, the hand points back at you. Rude, minimal, and honestly kind of soothing in its commitment.",
+    "url": "https://thatsthefinger.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.943Z"
+  },
+  {
+    "id": "gw-nyan-cat",
+    "kind": "site",
+    "era": "current",
+    "title": "The Pop-Tart cat that flew across every 2011 monitor",
+    "blurb": "Rainbow trail, chiptune loop, infinite space. Nyan Cat is still up and still nyaning, a perfect time capsule of when memes were just a cat and a song.",
+    "url": "https://www.nyan.cat",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.867Z"
+  },
+  {
+    "id": "gw-pug-in-a-rug",
+    "kind": "site",
+    "era": "current",
+    "title": "A pug, in a rug, that will not be denied",
+    "blurb": "You try to cover the pug with a blanket. The pug insists on being seen. A gentle, wordless struggle you can play forever.",
+    "url": "https://puginarug.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.707Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's lab of absurdly polished browser experiments",
+    "blurb": "Neal Agarwal keeps quietly dropping perfect little internet toys — password games, scale-of-the-universe scrollers, clicker fever dreams. New ones show up every few months.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.539Z"
+  },
+  {
+    "id": "gw-is-it-christmas",
+    "kind": "site",
+    "era": "current",
+    "title": "A website that answers one question: is it Christmas?",
+    "blurb": "Loads a giant YES or NO. That's the whole site, and it has been unwaveringly devoted to this mission for years. We respect the focus.",
+    "url": "https://isitchristmas.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.447Z"
+  },
+  {
+    "id": "gw-find-invisible-cow",
+    "kind": "site",
+    "era": "current",
+    "title": "A game where you find a cow by how loud it screams",
+    "blurb": "There's an invisible cow somewhere on the page. A voice yells 'COW' louder as your cursor gets closer. That's it. That's the internet.",
+    "url": "https://findtheinvisiblecow.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.343Z"
+  },
+  {
+    "id": "gw-marginalia-search",
+    "kind": "site",
+    "era": "current",
+    "title": "A search engine that only finds the weird handmade web",
+    "blurb": "A tiny indie search engine that skips the SEO sludge and surfaces the grass-fed, free-range HTML your grandma used to write. No cookie banners, no ads, just the old internet.",
+    "url": "https://marginalia-search.com",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.226Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers driving one Street View car by committee",
+    "blurb": "Everybody votes every 10 seconds on where the car turns, and somehow it goes places. It even tunes real local radio as you crawl down some highway together — the world's slowest, friendliest road trip.",
+    "url": "https://neal.fun/internet-roadtrip/",
+    "source": "weird",
+    "archivedAt": "2026-08-03T07:18:55.073Z"
+  },
+  {
     "id": "g:archive-of-the-odd",
     "kind": "site",
     "era": "current",
@@ -622,26 +712,6 @@ export default [
     "archivedAt": "2026-08-01T06:57:50.984Z"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "kind": "site",
-    "era": "current",
-    "title": "A pug wrapped in a rug, answering the eternal yes-or-no",
-    "blurb": "Ask it anything; the pug simply is. The purest single-serving site on the whole web and we'd defend it in court.",
-    "url": "https://puginarug.com",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.920Z"
-  },
-  {
-    "id": "gw-is-it-christmas",
-    "kind": "site",
-    "era": "current",
-    "title": "A site that answers one question, forever, with total confidence",
-    "blurb": "It will tell you if it's Christmas. The answer is 'NO' for 364 days a year. Beautiful in its restraint.",
-    "url": "https://isitchristmas.com",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.849Z"
-  },
-  {
     "id": "gw-crouton",
     "kind": "site",
     "era": "current",
@@ -680,26 +750,6 @@ export default [
     "url": "https://thenicestplace.net",
     "source": "weird",
     "archivedAt": "2026-08-01T06:57:50.293Z"
-  },
-  {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "One guy's home for polished, gloriously pointless browser experiments",
-    "blurb": "Neal Agarwal keeps building the internet toys we didn't know we needed — the Deep Sea, the Password Game, Absurd Trolley Problems. It's the Flash-portal spirit with none of the crashing.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.140Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "A Street View car steered by thousands of strangers voting every 10 seconds",
-    "blurb": "It moves at roughly 3 mph across North America because democracy is slow and someone always votes to honk. It's the group project from hell and we cannot stop watching.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:49.981Z"
   },
   {
     "id": "gw-sandspiel",
@@ -742,16 +792,6 @@ export default [
     "archivedAt": "2026-07-31T07:07:36.297Z"
   },
   {
-    "id": "gw-find-invisible-cow",
-    "kind": "site",
-    "era": "current",
-    "title": "Hunt an invisible cow using only sound",
-    "blurb": "You can't see the cow. You can only hear it get louder as your cursor wanders closer. It is genuinely thrilling and you will feel deeply silly.",
-    "url": "https://findtheinvisiblecow.com",
-    "source": "weird",
-    "archivedAt": "2026-07-31T07:07:36.220Z"
-  },
-  {
     "id": "gw-gridcosm",
     "kind": "site",
     "era": "current",
@@ -780,16 +820,6 @@ export default [
     "url": "https://onemillioncheckboxes.com",
     "source": "weird",
     "archivedAt": "2026-07-31T07:07:35.768Z"
-  },
-  {
-    "id": "gw-omfg-dogs",
-    "kind": "site",
-    "era": "current",
-    "title": "A silent parade of dogs jogging forever",
-    "blurb": "OMFGDOGS is just an endless loop of little pixel dogs running to a groove. No goal, no lore, pure early-web nonsense. We respect it enormously.",
-    "url": "https://www.omfgdogs.com",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:23.006Z"
   },
   {
     "id": "gw-does-the-dog-die",
@@ -900,16 +930,6 @@ export default [
     "url": "https://neal.fun/sandboxels/",
     "source": "weird",
     "archivedAt": "2026-07-27T07:18:48.356Z"
-  },
-  {
-    "id": "gw-nyan-cat",
-    "kind": "site",
-    "era": "current",
-    "title": "The Pop-Tart cat still flying, still tarting",
-    "blurb": "The rainbow-trailing space cat from 2011 is out there looping to that song right now, counting how long you've watched. A living fossil of peak meme internet.",
-    "url": "https://nyan.cat",
-    "source": "weird",
-    "archivedAt": "2026-07-25T06:54:55.083Z"
   },
   {
     "id": "gw-floor796",

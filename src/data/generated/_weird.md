@@ -1,48 +1,47 @@
 # OURCADE — live topical research (real-time web search)
-# Generated 2026-08-01T06:56:35.816Z
-# web_search_requests = 6
+# Generated 2026-08-03T07:17:48.009Z
+# web_search_requests = 7
 
 ## Search queries Claude actually ran
-- weird useless websites roundup 2025
-- quirky single-purpose websites you must see
+- weird useless websites 2025 roundup delightful
+- quirky single-purpose websites you should visit
 - neal.fun Internet Roadtrip collaborative project
-- weird wholesome ongoing internet projects show and tell hobbyist
-- radio garden listen live radio around the world
-- windows93 hyperlink to nowhere quirky art website
+- weird wholesome hobbyist web projects show and tell 2026
+- WindowSwap radio.garden Zoomquilt ambient web projects
+- Pointer Pointer Cat Bounce Paper Toilet single serving sites
+- The Wikipedia Speedrun Marginalia search engine indie web delightful
 
 ## Sources returned ([page_age] title / url)
-- [December 14, 2025] 30+ New And Quirky Websites To Cure Boredom In 2025: The Ultimate Time-Killer List
-  https://support.tibcert.org/celebrity-radar-news-hub-014/30-new-and-quirky-websites-to-cure-boredom-in-2025-the-ultimate-time-killer-list-yzlm5.html
+- [March 17, 2026] Take Me to a Useless Page: The Best Time-Wasting Websites
+  https://wegic.ai/blog/best-time-wasting-websites
 - [date ?] 20 Best Useless Websites On The Internet In 2025
   https://www.uxie.design/blog/20-best-useless-websites-on-the-internet-in-2025
-- [September 14, 2025] 55 weird websites: Explore the strange and unusual sites
-  https://www.hostinger.com/tutorials/weird-websites/
-- [June 4, 2025] 32 Useless Websites That Are Fun to Use in 2025 - Stripped
-  https://strippedfilm.com/useless-websites/
-- [date ?] 100+ Useless Websites Directory with Preview (2025) | The Random ...
-  https://therandomweb.com/blog/useless-websites-directory-preview-favorites-2025
-- [May 1, 2025] 8 Useless Websites and What We Can Learn from Them
-  https://www.designrush.com/agency/website-design-development/trends/pointless-websites
-- [date ?] 30 Random Useless Websites: 2025's Ultimate Time-Killers
-  https://www.useless-web.com/
 - [February 27, 2026] 20 best useless websites to visit when you’re bored | Webflow Blog
   https://webflow.com/blog/useless-websites
+- [June 4, 2025] 32 Useless Websites That Are Fun to Use in 2025 - Stripped
+  https://strippedfilm.com/useless-websites/
+- [date ?] 30 Random Useless Websites: 2025's Ultimate Time-Killers
+  https://www.useless-web.com/
+- [May 14, 2025] 40+ Fun & Cool Websites to Cure Boredom in 2025
+  https://edgeone.ai/blog/details/fun-cool-websites-to-cure-boredom
+- [date ?] The Useless Web: A Curated Guide to Fun, Useless Sites
+  https://www.theuselessweb.online/
 - [date ?] The Useless Pages
   https://en.wikipedia.org/wiki/The_Useless_Pages
-- [February 16, 2013] The Absolutely Nonsensical List Of Interesting Single-Serving Websites
-  https://www.makeuseof.com/tag/the-absolutely-nonsensical-list-of-interesting-single-serving-websites/
 - [June 24, 2026] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
   https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
-- [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
-  https://middlehost.com/blog/100-weird-websites/
+- [July 15, 2025] Top 20 Weird Websites to Visit in [year]
+  https://elementor.com/blog/top-weird-websites-to-visit/
 - [January 28, 2026] Top 20 Weird Websites to Visit in 2026 - DiviFlash
   https://diviflash.com/weird-websites/
-- [September 14, 2025] 55 weird websites: Explore the strange and unusual sites
+- [January 25, 2026] Weirdest Websites: Discover The Top 50 Weird Websites To Visit
+  https://www.10comwebdevelopment.com/post/weirdest-websites-discover-the-top-50-weird-websites
+- [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
+  https://middlehost.com/blog/100-weird-websites/
+- [September 14, 2025] Top 55 weird websites to visit in 2026
   https://www.hostinger.com/tutorials/weird-websites/
-- [January 29, 2021] Single-serving sites are sometimes strange, but always fun!
-  https://hover.blog/10-epic-single-serving-sites-to-pass-the-time/
-- [date ?] Single-serving site
-  https://en.wikipedia.org/wiki/Single-serving_site
+- [July 3, 2025] 50 Weird Websites That Will Leave You Scratching Your Head
+  https://neefox.com/blog/weird-websites
 - [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
   https://laughingsquid.com/internet-roadtrip-simulator/
 - [May 19, 2025] An Ingenious Roadtrip Simulator Where Players Collectively Vote on the Direction Every Ten Seconds
@@ -57,117 +56,120 @@
   https://internet-roadtrip.github.io/
 - [date ?] Internet Roadtrip: Vote‑Driven Adventure in Street View
   https://internet-roadtrip.com/
-- [date ?] Internet Roadtrip: A Crowd-Controlled Nostalgia Trip Through the Web | Internet Roadtrip
-  https://internetroadtrip.com/t/internet-roadtrip-a-crowd-controlled-nostalgia-trip-through-the-web
 - [date ?] Internet Roadtrip: You Steer, the Internet Goes Wild!
   https://internetroadtrip.net/
+- [August 31, 2025] The Internet Roadtrip Pathfinder
+  https://matdoes.dev/internet-roadtrip-pathfinder
 - [date ?] Neal Agarwal
   https://en.wikipedia.org/wiki/Neal_Agarwal
+- [1 month ago] 30 Weird, Funny & Crazy Websites (2026): Tested & Still Working — TheGuideX
+  https://theguidex.com/resources/weird-websites
+- [January 2, 2026] Best Hobby Websites of 2026 | 11 Inspiring Examples 🚀
+  https://mycodelesswebsite.com/hobby-website/
+- [date ?] Coolest Projects | The Technology Showcase For Young People 2026
+  https://online.coolestprojects.org/
+- [January 24, 2026] Coolest Projects 2026: Entries Open for Education Day | Elektor Magazine
+  https://www.elektormagazine.com/news/coolest-projects-2026-entries
+- [April 25, 2026] 5 CRAZY Project ideas to build in 2026 - YouTube
+  https://www.youtube.com/watch?v=WLAUJeeOTB4
+- [date ?] Webcurios 12/06/26 – webcurios
+  https://webcurios.co.uk/webcurios-12-06-26/
+- [December 27, 2025] 50 Projects for 2026! Set your goal to reach your goal! - Craftalongs - the Lettuce Craft Forums
+  https://forum.lettucecraft.com/t/50-projects-for-2026-set-your-goal-to-reach-your-goal/37182
+- [date ?] 2026 in stand-up comedy
+  https://en.wikipedia.org/wiki/2026_in_stand-up_comedy
+- [date ?] Totally Weird and Funny
+  https://en.wikipedia.org/wiki/Totally_Weird_and_Funny
 - [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
   https://middlehost.com/blog/100-weird-websites/
-- [March 19, 2026] 30 Weirdest Websites You Won’t Believe Exist
-  https://uselessweb.org/30-weirdest-websites-you-wont-believe-exist/
-- [November 24, 2025] 50 Weird Hobbies People Enjoy In Their Spare Time | Bored Panda
-  https://www.boredpanda.com/weird-hobbies/
-- [November 12, 2025] 50 Times People Showed Off Their Awesome Craft Projects Online And Made Everyone Jealous
-  https://www.boredpanda.com/interesting-creative-people-pics/
-- [date ?] Show and tell (disambiguation)
-  https://en.wikipedia.org/wiki/Show_and_tell_(disambiguation)
-- [3 weeks ago] 54 Times 3D Printing Fans Took Their Hobby To A Whole New Level And Wowed The Internet | Bored Panda
-  https://www.boredpanda.com/interesting-3d-printing-pics/
-- [date ?] WeirdlyWeirdStudios » Shared Projects (41)
-  https://scratch.mit.edu/users/WeirdlyWeirdStudios/projects
-- [date ?] Discuss Scratch
-  https://scratch.mit.edu/discuss/post/4277244
-- [date ?] mystery files
-  https://tvmaze.com/shows/68835/mystery-files
-- [March 30, 2026] Radio Garden lets you explore local radio from around the world at home - Boing Boing
-  https://boingboing.net/2026/03/30/radio-garden-lets-you-explore-local-radio-from-around-the-world-at-home.html
-- [date ?] Radio Garden - Apps on Google Play
-  https://play.google.com/store/apps/details?id=com.jonathanpuckey.radiogarden&hl=en_US
-- [February 21, 2026] Tune In Anywhere: How Radio Garden Lets You Listen Live to Skies Across the Globe - Saint Augustines University
-  https://explore.st-aug.edu/exp/tune-in-anywhere-how-radio-garden-lets-you-listen-live-to-skies-across-the-globe
-- [June 27, 2026] Radio Garden Live App - App Store
-  https://apps.apple.com/us/app/radio-garden-live/id1339670993
-- [date ?] Moniker – Radio Garden
-  https://studiomoniker.com/projects/radio-garden
-- [February 23, 2022] Radio Garden: Listen to Worldwide Radio - Lounge - VCV Community
-  https://community.vcvrack.com/t/radio-garden-listen-to-worldwide-radio/16690
-- [June 27, 2026] Radio Garden – Explore live radio by rotating the globe
-  https://radio.garden/
-- [July 25, 2025] Radio Garden – spin the globe and listen to live radio from around the world
-  https://cogimator.net/en/sites/www-radio-garden/
-- [date ?] Explore live radio by rotating the globe – Radio Garden
-  https://radio.garden/search
-- [date ?] ahrefs.com
-  https://ahrefs.com/websites/radio.garden
-- [November 26, 2025] TCB Review: Windows '93
-  https://www.thechangingbooth.com/post/tcb-review-windows-93
-- [date ?] Windows93 — free parody operating system | Powerful Websites
-  https://powerfulwebsites.io/site/windows93.net
-- [October 24, 2025] Framer Blog: 15 classic 90s websites + modern sites keeping the aesthetic alive
-  https://www.framer.com/blog/90s-websites/
-- [date ?] Windows 93 | HOVERSTAT.ES
-  https://www.hoverstat.es/features/windows-93/
-- [November 17, 2015] Windows93 is the operating system that internet culture really wants - Kill Screen - Previously
-  https://www.killscreen.com/windows93-operating-system-internet-culture-really-wants/
-- [1 week ago] Windows 93 - Wikipedia
-  https://en.wikipedia.org/wiki/Windows_93
-- [July 10, 2018] Try Windows 93: The Hilarious OS That Never Was - Fast Company
-  https://www.fastcompany.com/3037721/try-windows-93-the-hilarious-os-that-never-was
-- [date ?] Hyperlink
-  https://en.wikipedia.org/wiki/Hyperlink
-- [May 6, 2026] 'Windows 93' on the Web is Weird
-  https://thenextweb.com/news/windows-93-web-weird
+- [June 4, 2026] Websites Like Neal.fun That Feel Surprisingly Addictive
+  https://curiouxify.com/websites-like-neal-fun/
+- [June 3, 2026] 30 Weird & Funny Websites That Still Work in 2026 (Tested)
+  https://theguidex.com/weird-website-list/
+- [April 27, 2026] Window Swap Website: Explore Views Around the World
+  https://curiouxify.com/window-swap-website/
+- [date ?] WindowSwap Radio - YouTube
+  https://www.youtube.com/@WindowSwapOfficial
+- [December 25, 2025] WindowSwap - WebCurate
+  https://webcurate.co/windowswap
+- [June 20, 2026] GitHub - deroverda/recommended-radio-streams: Internet radio stations I actually listen to - underground electronic, freeform, jazz, ambient, and weird stuff. Direct stream URLs and the apps to play them. · GitHub
+  https://github.com/deroverda/recommended-radio-streams
+- [date ?] WindowSwap
+  https://en.wikipedia.org/wiki/WindowSwap
+- [date ?] Hypelist
+  https://app.hypelist.com/public/hypelist/13b0a95b-4451-40bc-ba02-1f2bce249606
+- [date ?] Radio Garden
+  https://en.wikipedia.org/wiki/Radio_Garden
+- [January 28, 2026] 100 Weird Websites: Strange, Funny, and Surprisingly Addictive - Middlehost, Inc
+  https://middlehost.com/blog/100-weird-websites/
+- [July 15, 2025] Top 20 Weird Websites to Visit in [year]
+  https://elementor.com/blog/top-weird-websites-to-visit/
+- [June 24, 2026] 50 Weird Websites to Visit When You Are Bored | GreenGeeks
+  https://www.greengeeks.com/blog/weird-websites-to-visit-when-you-are-bored/
+- [November 7, 2022] 100+ Ridiculously Weird Websites. But Not All of Them Are Pointless
+  https://blog.magezon.com/weird-pointless-website-dm/
+- [1 month ago] 30 Weird, Funny & Crazy Websites (2026): Tested & Still Working — TheGuideX
+  https://theguidex.com/resources/weird-websites
+- [September 8, 2025] The Five Most Useless Websites on the Internet: A Journey into Digital Absurdity
+  https://hogfishstudios.com/the-five-most-useless-websites-on-the-internet-a-journey-into-digital-absurdity/
+- [February 27, 2026] 20 best useless websites to visit when you’re bored | Webflow Blog
+  https://webflow.com/blog/useless-websites
+- [date ?] Single-serving site
+  https://en.wikipedia.org/wiki/Single-serving_site
+- [date ?] Marginalia (search engine)
+  https://en.wikipedia.org/wiki/Marginalia_(search_engine)
+- [August 30, 2024] marginalia - IndieWeb
+  https://indieweb.org/marginalia
+- [date ?] Marginalia Search
+  https://marginalia-search.com/
+- [date ?] Marginalia Search
+  https://old-search.marginalia.nu/
+- [date ?] GitHub - MarginaliaSearch/MarginaliaSearch: Internet search engine for text-oriented websites. Indexing the small, old and weird web. · GitHub
+  https://github.com/MarginaliaSearch/MarginaliaSearch
+- [date ?] Marginalia Search | marginalia.nu
+  https://www.marginalia.nu/marginalia-search/
+- [January 24, 2024] How To Search The Internet | Brain Baking
+  https://brainbaking.com/post/2024/01/how-to-search-the-internet/
 
 ## Hooks derived from the above
-I'll search for weird and delightful corners of the current internet across several angles.
-Good material. Let me search for more living projects and creator/hobbyist oddities.
-I have strong material. Let me do a couple more targeted searches for unusual living/creator projects to round out the list with variety.
-I have plenty of great, varied material. Here's the list.
-
-- Internet Roadtrip — a crowd-controlled Street View car where thousands of strangers vote every 10 seconds on where to drive and which local radio station to play; 
-players collectively navigate a virtual car by voting on direction, honking, or changing the radio, moving at about 3 mph across North America
- — https://neal.fun/internet-roadtrip/
-- neal.fun — Neal Agarwal's home for polished, delightfully weird browser experiments; 
-standout entries include The Deep Sea, Absurd Trolley Problems, The Password Game, Internet Roadtrip, and Stimulation Clicker
- — https://neal.fun
-- Radio Garden — spin a 3D globe and tune into live local radio anywhere on Earth; 
-it lets you select any city on the planet and listen live to any of its broadcast radio stations, often hundreds per city
- — https://radio.garden
-- Windows 93 — a surreal browser "operating system" parodying Windows 9x; 
-a surreal alternate-timeline desktop packed with weird apps, mini-games, and Easter eggs — an art project and rabbit hole more than a tool
- — https://www.windows93.net
-- The Useless Web — the classic gateway button that flings you to a random pointless site; 
-a curated roundup of the web's most pointless sites, featuring a giant button that takes you to some of the most absurd pages online
- — https://theuselessweb.com
-- Pointer Pointer — move your cursor and it finds a real photo of someone pointing right at it; 
-move your cursor anywhere on the screen, and this site finds a photo of someone pointing directly at it
- — https://pointerpointer.com
-- Cat Bounce — a chaotic playground of falling, flipping kittens; 
-grab any kitten and throw it around, or hit the Make It Rain button to shower the screen with even more jumping cats
- — https://cat-bounce.com
-- Zoomquilt — an infinite, hypnotic zoom through a chain of surreal paintings; 
-infinite zoom into a surreal painting chain
- — https://zoomquilt.org
-- This Is Sand — pour endless streams of digital sand into calming colored dunes; 
-pour digital sand, oddly calming
- — https://thisissand.com
-- Weave Silk — draw glowing, symmetrical generative art that feels like magic; 
-draw symmetry art that feels like magic
- — https://weavesilk.com
-- Radiooooo — a musical time machine where you pick a country and decade to hear its music; 
-choose a country on the map and a decade on the dial, and it plays music from that moment
- — https://radiooooo.com
-- The Nicest Place on the Internet — strangers send you video hugs for pure wholesome comfort; 
-instant wholesome overload
- — https://thenicestplace.net
-- Staggering Beauty — wiggle your mouse and unleash a wildly reactive, squiggling creature; 
-wiggle your mouse and see what happens
- — https://staggeringbeauty.com
-- Find The Invisible Cow — hunt an unseen cow across the screen guided only by a shouting voice; 
-listen, hunt, repeat
- — https://findtheinvisiblecow.com
-- Paper Toilet — a single toilet paper roll on a black screen that you can unspool forever; 
-perhaps the most useless website, Paper Toilet is a web page featuring a single toilet paper roll on a black screen
- — https://paper-toilet.com
+I'll search for delightful weird corners of the current internet.
+Let me search for more specific ongoing projects and creator/hobbyist finds.
+Let me search for a few more specific ambient/living projects to round out the list.
+I have plenty of great finds. Let me do one more search for a couple of unique living/creator projects to round out the list.
+- The Useless Web — one button that flings you to a random hand-picked pointless page, the classic door into the weird web — <https://theuselessweb.com>
+- Internet Roadtrip — thousands of strangers collectively drive a Street View car by voting every 10 seconds, even tuning real local radio stations along the way — <https://neal.fun/internet-roadtrip/>
+- neal.fun — Neal Agarwal's home for polished browser experiments like The Password Game, Stimulation Clicker, and I'm Not a Robot, with new ones every few months — <https://neal.fun>
+- WindowSwap — 
+real people record the view from their window and submit it; you look through someone's window in Mumbai, Helsinki, São Paulo, or a random village in New Zealand
+ — <https://window-swap.com>
+- Radio Garden — 
+spin a virtual globe and instantly tune into live broadcasts from almost anywhere in the world
+ — <https://radio.garden>
+- Zoomquilt — 
+a painting that zooms into itself forever
+, seamlessly stitched from 15 artists and online since 2004 — <https://zoomquilt.org>
+- Pointer Pointer — 
+hold the cursor still anywhere on the page and the site loads a photograph of a real person pointing at that exact location
+ — <https://pointerpointer.com>
+- Marginalia Search — 
+a small independent DIY search engine for surprising but content-rich websites that never ask you to accept cookies; the goal is to bring you the sort of grass fed, free range HTML your grandma used to write
+ — <https://marginalia-search.com>
+- Cat Bounce — 
+an endless stream of cartoon cats you can click, drag, and bounce off the walls, plus a "make it rain" button that unleashes a torrent of feline friends
+ — <https://cat-bounce.com>
+- Paper Toilet — 
+simulates the forbidden pleasure of unrolling an entire roll of toilet paper with your cursor, a surprisingly satisfying and strangely calming experience
+ — <https://papertoilet.com>
+- Endless Horse — 
+a horse with an infinite number of legs; scroll down and the legs just keep going and going and going
+ — <https://endless.horse>
+- A Soft Murmur — a free in-browser ambient soundboard for mixing rain, thunder, café chatter, and more with no account needed — <https://asoftmurmur.com>
+- Find the Invisible Cow — 
+a game of auditory hot-and-cold where a voice shouts "cow" louder as your cursor nears the hidden bovine
+ — <https://findtheinvisiblecow.com>
+- Is It Christmas? — 
+a single-purpose site whose only job is to tell you Yes or No about whether it's Christmas, the epitome of unwavering dedication to one mission
+ — <https://isitchristmas.com>
+- Staggering Beauty — 
+a wiggly black worm that reacts to your mouse; move vigorously and it goes wild with flashing lights and loud music
+ — <https://www.staggeringbeauty.com>
