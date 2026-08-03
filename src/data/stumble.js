@@ -17,7 +17,7 @@
       own seen-list and keeps going. */
 
 import { loadPool } from "./animations.js";
-import { loadVault } from "./vault.js";
+import { loadVaultRaw } from "./vault.js";
 import generated from "./generated/stumble.js";
 import { MANUAL_ARTIFACTS, MANUAL_DEEP_CUTS } from "./manual/content.js";
 import { applyLive } from "./live.js";
@@ -79,10 +79,13 @@ function hostKey(url) {
     return String(url || "").toLowerCase();
   }
 }
+// Caches the dedupe over the RAW corpus; the admin overlay is applied after,
+// per draw (buildBuckets), so a hidden or corrected find takes effect at once
+// instead of being frozen into this promise on the first stumble.
 let vaultArtifactsPromise = null;
 function loadVaultArtifacts() {
   if (!vaultArtifactsPromise) {
-    vaultArtifactsPromise = loadVault()
+    vaultArtifactsPromise = loadVaultRaw()
       .then((items) => {
         const knownIds = new Set(STATIC.map((a) => a.id));
         const knownHosts = new Set(STATIC.filter((a) => a.url).map((a) => hostKey(a.url)));
@@ -108,7 +111,7 @@ function buildBuckets(flashArtifacts, vaultArtifacts) {
     { weight: 0.2, items: pool.filter((a) => a.era === "nostalgic") },
     { weight: 0.4, items: pool.filter((a) => a.era === "current") },
     { weight: 0.2, items: pool.filter((a) => a.era === "timeless") },
-    { weight: 0.15, items: vaultArtifacts }, // 🗄️ Deep Stumble — the deep tail
+    { weight: 0.15, items: applyLive(vaultArtifacts, "vault") }, // 🗄️ Deep Stumble — the deep tail
     ...(getDeepCutsUnlocked() ? [{ weight: 0.12, items: DEEP_CUTS }] : []),
   ].filter((b) => b.items.length > 0);
 }
@@ -165,8 +168,9 @@ export async function findArtifact(id) {
     const anim = pool.find((a) => a.id === raw);
     if (anim) return flashToArtifact(anim);
   }
-  // Deep Stumble: a shared link to a vault-only find still opens for the friend.
-  const fromVault = (await loadVaultArtifacts()).find((a) => a.id === id);
+  // Deep Stumble: a shared link to a vault-only find still opens for the friend
+  // — with any admin correction applied, and hidden finds resolving to nothing.
+  const fromVault = applyLive(await loadVaultArtifacts(), "vault").find((a) => a.id === id);
   return fromVault || null;
 }
 

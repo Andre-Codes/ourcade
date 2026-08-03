@@ -22,6 +22,7 @@ import { readLiveContent, writeLiveContent } from "../lib/cloud.js";
 import { LIVE_TYPES, setLive } from "../data/live.js";
 import { LIVE_FORMS, visibleFields, validateItem, buildItem } from "../data/liveSchema.js";
 import { STUMBLE_BASE } from "../data/stumble.js";
+import { loadVaultRaw } from "../data/vault.js";
 import { WEIRD, WEIRD_NIGHT } from "../data/weird.js";
 import { CURIOSITIES } from "../data/curiosities.js";
 import { NEWS_BASE } from "../data/flavor.js";
@@ -34,6 +35,8 @@ import ConfirmDialog from "./ConfirmDialog.jsx";
 
 // The committed pool behind each family, pre-overlay. News is a list of plain
 // strings; everything else is { id, … } objects.
+// `vault` is absent on purpose — it's an 82 KB lazy chunk, so it's fetched by
+// the component only when that tab is opened (see vaultBase below).
 const BASE = {
   stumble: () => STUMBLE_BASE,
   weird: () => WEIRD,
@@ -223,6 +226,10 @@ function HelpGuide() {
       <ul>
         <li><b>🎲 Stumble</b> — <code>era</code> drives the invisible 40/40/20 draw and is never
           shown. Flash artifacts aren't listed: they're generated from the archive.org pool.</li>
+        <li><b>🗄️ Vault</b> — the archived corpus behind <code>/vault</code>, the gem of the day,
+          and Stumble's low-weight “deep tail”. It's the oldest material on the site, so it's
+          where dead links collect — fix or hide them here. <b>No ADD button:</b> new finds go in
+          🎲 Stumble, since anything added here would be wiped by the next archive snapshot.</li>
         <li><b>🔍 Weird / 🌙 Night</b> — Weird rotates every ~3h through the day. Night only
           appears after 22:00 and is never touched by the scheduler. Keep those good.</li>
         <li><b>★ Featured</b> — one entry per <i>week</i>. Repo entries use optimized art; entries
@@ -270,6 +277,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState(null); // { id } | { add: true }
   const [confirm, setConfirm] = useState(null);
   const [q, setQ] = useState("");
+  const [vaultBase, setVaultBase] = useState(null); // lazy — only when 🗄️ is opened
 
   useEffect(() => {
     if (!ready || !admin) return;
@@ -282,14 +290,27 @@ export default function AdminPage() {
     };
   }, [ready, admin]);
 
+  // Pull the Vault chunk the first time its tab is opened, never before.
+  useEffect(() => {
+    if (type !== "vault" || vaultBase) return;
+    let alive = true;
+    loadVaultRaw().then((items) => alive && setVaultBase(items));
+    return () => {
+      alive = false;
+    };
+  }, [type, vaultBase]);
+
   const layer = layerOf(overlay, type);
+
+  // The committed pool behind the current tab, pre-overlay.
+  const baseItems = type === "vault" ? vaultBase : BASE[type] ? BASE[type]() : null;
 
   // Baked rows first (matching the pool order the site rotates through), then
   // console-added ones. A live add with a baked id shadows it, same as applyLive.
   const rows = useMemo(() => {
-    if (!BASE[type]) return []; // the ❓ HELP tab has no pool
+    if (!baseItems) return []; // ❓ HELP has no pool; 🗄️ VAULT is still fetching
     const addIds = new Set(layer.adds.map((a) => a.id));
-    const baked = BASE[type]()
+    const baked = baseItems
       .filter((it) => !addIds.has(it.id))
       .map((it) => ({
         item: layer.patches[it.id] ? { ...it, ...layer.patches[it.id] } : it,
@@ -304,7 +325,7 @@ export default function AdminPage() {
       hidden: layer.hides.includes(it.id),
     }));
     return [...baked, ...live];
-  }, [type, layer]);
+  }, [baseItems, layer]);
 
   const takenIds = useMemo(() => rows.map((r) => r.item.id), [rows]);
 
@@ -374,7 +395,7 @@ export default function AdminPage() {
      (or a regenerated blurb) would never show through. Fields the form
      cleared are blanked explicitly, since a shallow merge can't unset a key. */
   const onSavePatch = (item) => {
-    const base = BASE[type]().find((b) => b.id === item.id) || {};
+    const base = (baseItems || []).find((b) => b.id === item.id) || {};
     const patch = {};
     for (const [k, v] of Object.entries(item)) {
       if (k !== "id" && v !== base[k]) patch[k] = v;
@@ -526,11 +547,17 @@ export default function AdminPage() {
           onCancel={() => setEditing(null)}
           onSave={onSave}
         />
+      ) : !baseItems ? (
+        <p className="arcade-loading">loading the vault…</p>
       ) : (
         <>
-          <button className="arcade-admin-btn is-go arcade-admin-add" onClick={() => setEditing({ add: true })}>
-            + ADD {form.noun.toUpperCase()}
-          </button>
+          {/* The Vault is a snapshot of the archive — correcting and pruning it
+              is the point; adding here would be wiped by snapshot:archive. */}
+          {form.noAdd ? null : (
+            <button className="arcade-admin-btn is-go arcade-admin-add" onClick={() => setEditing({ add: true })}>
+              + ADD {form.noun.toUpperCase()}
+            </button>
+          )}
 
           <div className="arcade-admin-search">
             <input

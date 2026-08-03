@@ -69,7 +69,10 @@ export default function VaultPage() {
 
   const visible = filtered.slice(0, shown);
   const more = filtered.length - visible.length;
-  const total = VAULT_INDEX.total || pool?.length || 0;
+  // The eager index gives an instant count before the lazy corpus arrives; once
+  // it has, prefer its length — that's the one the admin overlay has filtered,
+  // so a hidden find doesn't leave the headline stat one too high.
+  const total = pool ? pool.length : VAULT_INDEX.total || 0;
 
   return (
     <div className="arcade-stage">

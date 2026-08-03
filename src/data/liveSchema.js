@@ -47,6 +47,31 @@ export const LIVE_FORMS = {
     makeId: (v) => `${v.kind || "site"}:${slugify(v.title)}`,
   },
 
+  /* The archived corpus (generated/vault.js, snapshotted from Firestore
+     archive/*). It feeds /vault, the gem of the day, and Stumble's low-weight
+     Deep Stumble bucket. This is the OLDEST material on the site and therefore
+     where link rot collects, so it's here to be corrected and pruned — not
+     added to. New finds belong in 🎲 STUMBLE; anything added here would be
+     wiped by the next `npm run snapshot:archive`. */
+  vault: {
+    emoji: "🗄️",
+    tab: "VAULT",
+    noun: "archived find",
+    plural: "archived finds",
+    noAdd: true,
+    blurb:
+      "The deep tail — every find ever archived. Fix or hide rotted entries here; add new ones under 🎲 STUMBLE.",
+    fields: [
+      TITLE_FIELD,
+      BLURB_FIELD,
+      URL_FIELD,
+      { key: "kind", label: "kind", type: "select", options: LIVE_KINDS, required: true, default: "site" },
+      { key: "era", label: "era", type: "select", options: LIVE_ERAS, required: true, default: "timeless" },
+      { key: "year", label: "year", placeholder: "1996 — optional" },
+    ],
+    makeId: (v) => `${v.kind || "site"}:${slugify(v.title)}`,
+  },
+
   weird: {
     emoji: "🔍",
     tab: "WEIRD",

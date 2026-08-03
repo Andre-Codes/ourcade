@@ -33,6 +33,7 @@ import seed from "./generated/live.js";
 // Every family the console can edit. Order drives the admin tab strip.
 export const LIVE_TYPES = [
   "stumble",
+  "vault",
   "weird",
   "weirdNight",
   "curiosities",
