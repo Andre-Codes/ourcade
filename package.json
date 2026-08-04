@@ -24,6 +24,7 @@
     "gen:wide-words": "node scripts/gen-wide-words.js",
     "gen:chain": "node scripts/gen-chain.js",
     "gen:dungeon-dict": "node scripts/gen-dungeon-dict.js",
+    "gen:dungeon-effect-words": "node scripts/gen-dungeon-effect-words.js",
     "fetch:onthisday": "node scripts/fetch-onthisday.js",
     "snapshot:archive": "node scripts/snapshot-archive.js",
     "snapshot:live": "node scripts/snapshot-live.js",

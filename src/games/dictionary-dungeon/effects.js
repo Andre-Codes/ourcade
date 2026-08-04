@@ -23,6 +23,8 @@
    Flavor is chosen deterministically from `seed` so the daily run reads the same
    for everyone on a given turn. */
 
+import { BULK_WORD_LISTS } from "../../data/generated/dungeon-effect-words.js";
+
 // ── categories ───────────────────────────────────────────────────────────────
 // Each category: base bonus + which enemy kind-tags it is strong/weak against +
 // flavor text buckets (generic / strong / resisted).
@@ -291,7 +293,7 @@ const WORD_LISTS = {
     "broadsword", "claymore", "falchion", "kris", "bolo", "edge", "point",
     "assegai", "kukri", "yatagan", "sabres", "rapiers", "cutlasses",
     "blades", "swords", "knives", "spears", "arrows", "daggers", "axes", "lances",
-    "hatchet", "tomahawk", "cutlass", "billhook", "partisan",
+    "hatchet", "tomahawk", "billhook", "partisan",
   ],
   blunt: [
     "hammer", "mace", "club", "cudgel", "mallet", "maul", "bat", "staff", "rod",
@@ -299,7 +301,7 @@ const WORD_LISTS = {
     "brick", "stone", "rock", "boulder", "anvil", "fist", "knuckle", "pestle",
     "cobble", "cobblestone", "slab", "bricks", "stones", "rocks", "bash",
     "quarterstaff", "truncheon", "blackjack", "cosh", "knobkerrie",
-    "boulders", "mauls", "maces", "cudgels", "bricks",
+    "boulders", "mauls", "maces", "cudgels",
   ],
   piercing: [
     "needle", "pin", "awl", "nail", "spike", "thorn", "quill", "fang", "tusk",
@@ -348,8 +350,9 @@ const WORD_LISTS = {
     "gauntlet", "breastplate", "cover", "bunker", "barricade", "defend",
     "cuirass", "greaves", "pauldron", "vambrace", "brigandine", "hauberk",
     "palisade", "portcullis", "battlement", "redoubt",
-    // Active defensive verbs — these are the words that trigger a BLOCK (logic.js
-    // reads the "defense" category + the category's `block` stat).
+    // Active defensive verbs — these are the words that trigger a BLOCK. logic.js
+    // matches on the "defense" category and reads this category's `block` stat as
+    // the number of hearts the raised guard absorbs (see blockStrengthFor).
     "parry", "parries", "block", "blocks", "deflect", "deflects", "dodge",
     "dodges", "brace", "braces", "fend", "repel", "repels", "defends", "wards",
   ],
@@ -463,6 +466,27 @@ const WORD_LISTS = {
   ],
 };
 
+/* The effective lists = hand-curated above + the generated bulk lists from
+   scripts/gen-dungeon-effect-words.js (animals/birds → beastly, food & drink →
+   food, trees → nature; every generated word already filtered against the
+   game's own dictionary, so all of them are playable).
+
+   Curated ALWAYS comes first in each category, and the lookup below is
+   first-assignment-wins, so a hand-placed word keeps the category we chose for
+   it. Duplicates within a category are dropped here; cross-category collisions
+   still resolve by category source order (e.g. ALMOND stays food, not nature).
+   Uppercased once at build time so lookups don't re-case on every call. */
+const WORD_LISTS_MERGED = (() => {
+  const out = {};
+  const cats = new Set([...Object.keys(WORD_LISTS), ...Object.keys(BULK_WORD_LISTS)]);
+  for (const cat of cats) {
+    const hand = (WORD_LISTS[cat] || []).map((w) => w.toUpperCase());
+    const bulk = BULK_WORD_LISTS[cat] || [];
+    out[cat] = [...new Set([...hand, ...bulk])];
+  }
+  return out;
+})();
+
 // Build the flat lookup map ONCE. Later categories don't override earlier ones:
 // a word listed in two buckets keeps its FIRST assignment (source order above),
 // which is intentional (e.g. "thorn" → piercing before nature).
@@ -470,10 +494,9 @@ let _lookup = null;
 function lookup() {
   if (!_lookup) {
     _lookup = new Map();
-    for (const [cat, words] of Object.entries(WORD_LISTS)) {
+    for (const [cat, words] of Object.entries(WORD_LISTS_MERGED)) {
       for (const w of words) {
-        const key = w.toUpperCase();
-        if (!_lookup.has(key)) _lookup.set(key, cat);
+        if (!_lookup.has(w)) _lookup.set(w, cat);
       }
     }
   }
@@ -485,11 +508,10 @@ function lookup() {
 export function allEffectWords() {
   const rows = [];
   const seen = new Set();
-  for (const [cat, words] of Object.entries(WORD_LISTS)) {
+  for (const [cat, words] of Object.entries(WORD_LISTS_MERGED)) {
     for (const w of words) {
-      const key = w.toUpperCase();
-      rows.push({ word: key, category: cat, dupe: seen.has(key) });
-      seen.add(key);
+      rows.push({ word: w, category: cat, dupe: seen.has(w) });
+      seen.add(w);
     }
   }
   return rows;
@@ -541,7 +563,11 @@ export function resolveWordEffect(word, enemy = {}, seed = 0) {
   if (weakTo.has(cat)) weaknessBonus += 2;
   if (strong) weaknessBonus += 1;
 
-  if (resistTo.has(cat) || catWeak) {
+  // PIERCE is the exception to resistance: a piercing word (needle, spike, awl —
+  // and the `tool` category's picks and chisels) punches straight through armor
+  // and hide, so the usual dampening never applies to it.
+  const piercing = status === "pierce";
+  if ((resistTo.has(cat) || catWeak) && !piercing) {
     resisted = true;
     // Dampen: drop the category damage bonus and any status/heal payload.
     damageBonus = Math.max(0, Math.floor(damageBonus / 2));

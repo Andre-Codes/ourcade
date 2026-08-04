@@ -20,7 +20,7 @@
 
 import { dayKey } from "../src/lib/daily.js";
 import { allWords, rarityTier } from "../src/games/dictionary-dungeon/dict.js";
-import { getRule, ruleNeedsContext } from "../src/games/dictionary-dungeon/rules.js";
+import { getRule, ruleNeedsContext, ruleNeedsEnemy } from "../src/games/dictionary-dungeon/rules.js";
 import { allEffectWords } from "../src/games/dictionary-dungeon/effects.js";
 import { LEVELS, BOSSES, RELICS, SCROLLS, EVENTS, MERCHANT_STOCK } from "../src/games/dictionary-dungeon/pools.js";
 import { ALL_TITLES, ALL_OMENS, ALL_BADGES } from "../src/games/dictionary-dungeon/titles.js";
@@ -135,6 +135,7 @@ for (const key of keys) {
 
   // Walk every step, confirm each rule is solvable and structure is sane.
   let earlyCommonOk = true;
+  const shopFloors = []; // level indices carrying a merchant, in order
   a.levels.forEach((lvl, li) => {
     // structure: each level has ≥1 gate, ≥1 monster, ≥1 treasure; and no more
     // than 1 merchant / 1 event / 1 trap (assembler caps).
@@ -151,6 +152,7 @@ for (const key of keys) {
     check(`${key} ${lvl.id} room 1 is a word room`, WORD_ROOMS.has(lvl.rooms[0]?.type), `${lvl.rooms[0]?.type}`);
     // Merchant/event only appear from Level 2 on.
     if (li === 0) check(`${key} entry-hall has no merchant/event`, !types.includes("merchant") && !types.includes("event"));
+    if (types.includes("merchant")) shopFloors.push(li);
     for (const room of lvl.rooms) {
       if (room.type === "merchant") {
         check(`${key} ${lvl.id} merchant has offers`, Array.isArray(room.offers) && room.offers.length >= 2);
@@ -170,12 +172,34 @@ for (const key of keys) {
       const rule = getRule(room.ruleSpec);
       const need = THRESHOLDS[rule.difficulty] ?? THRESHOLDS.medium;
       check(`${key} ${lvl.id} room rule "${room.ruleSpec}"`, count >= need, `${count} < ${need}`);
+      // An enemy-context rule ("share 3+ letters with the enemy's name") needs an
+      // enemy to read. In a GATE room there isn't one, so ctx.enemyName is "" and
+      // the rule can never be satisfied — players were getting stuck on exactly
+      // this. Only monster/trap rooms may carry one.
+      if (room.type === "gate") {
+        check(
+          `${key} ${lvl.id} gate rule needs no enemy ("${room.ruleSpec}")`,
+          !ruleNeedsEnemy(room.ruleSpec)
+        );
+      }
       // early-level common-word path: levels 0-1 rooms should be answerable by a
       // top-10k word (not obscure-only). We approximate: the rule isn't a
       // strictly-obscure gate in the first two levels.
       if (li <= 1 && (room.ruleSpec === "tier:obscure" || room.ruleSpec === "tier:goblin")) earlyCommonOk = false;
     }
   });
+
+  /* Merchants are no longer a per-level coin flip — they land on a fixed 2-or-3
+     floor cadence so the player can plan around their coin. Assert the shape:
+     at least one shop per run, the first never in the Entry Hall, and every gap
+     between consecutive shops is 2 or 3 floors. */
+  check(`${key} run has at least one merchant`, shopFloors.length >= 1, `${shopFloors.length}`);
+  check(`${key} first merchant is past the entry hall`, shopFloors[0] >= 1, `level ${shopFloors[0]}`);
+  for (let i = 1; i < shopFloors.length; i++) {
+    const gap = shopFloors[i] - shopFloors[i - 1];
+    check(`${key} merchant gap is 2–3 floors`, gap === 2 || gap === 3, `gap ${gap} (floors ${shopFloors.join(",")})`);
+  }
+
   if (earlyCommonOk) commonPathDays++;
 }
 

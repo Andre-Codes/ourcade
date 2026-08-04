@@ -388,3 +388,17 @@ export function ruleNeedsContext(spec) {
   if (s.includes("&")) return s.split("&").some((p) => ruleNeedsContext(p));
   return /^tier:/.test(s) || s === "longer" || s === "freshletters" || s === "enemyletter";
 }
+
+/* Whether a spec can only be satisfied when there's an ENEMY in the room — i.e.
+   it reads ctx.enemyName. A gate/treasure/merchant/event room has no enemy, so
+   ctx.enemyName is "" and such a rule is unsatisfiable; the room assembler uses
+   this to keep those specs out of non-combat rooms.
+
+   Deliberately narrower than ruleNeedsContext: `tier:`, `longer` and
+   `freshletters` also need context, but their context (word rarity, the previous
+   word) exists in every room, so they're perfectly fine on a gate. */
+export function ruleNeedsEnemy(spec) {
+  const s = String(spec).trim();
+  if (s.includes("&")) return s.split("&").some((p) => ruleNeedsEnemy(p));
+  return s === "enemyletter";
+}

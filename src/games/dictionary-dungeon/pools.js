@@ -646,7 +646,19 @@ export const EVENTS = [
     id: "gambling-skull",
     bodyText: "A grinning skull rattles two dice. 'Double or nothing on your luck,' it clacks.",
     choices: [
-      { label: "Bet 10 coins", requires: { coins: 10 }, outcome: { coins: 10 }, resultText: "The dice land in your favor — the pot doubles back to you. (+10 coins)" },
+      // A real 50/50 — `gamble` is the LOSING branch and logic.js flips a seeded
+      // coin for it. (This used to pay +10 with no stake deducted and no way to
+      // lose, so it was free money any time you held 10 coins.)
+      {
+        label: "Bet 10 coins",
+        requires: { coins: 10 },
+        outcome: { coins: 10 },
+        resultText: "The dice land in your favor — the pot doubles back to you. (+10 coins)",
+        gamble: {
+          outcome: { coins: -10 },
+          resultText: "The dice come up wrong. The skull rakes in your stake, delighted. (−10 coins)",
+        },
+      },
       { label: "Bet a heart", outcome: { hearts: -1, coins: 15 }, resultText: "You wager blood (−1 heart) and the skull pays out in gold. (+15 coins)" },
       { label: "Walk away", outcome: {}, resultText: "The skull sighs. 'Cowardice. Very sensible.'" },
     ],

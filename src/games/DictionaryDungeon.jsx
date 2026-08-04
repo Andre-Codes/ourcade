@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { todayKey } from "../lib/daily.js";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { todayKey, seededShuffle } from "../lib/daily.js";
 import {
   lsGetJSON,
   lsSetJSON,
@@ -27,15 +27,22 @@ import ShareButton from "../components/ShareButton.jsx";
    persists under ourcade:dictionary-dungeon:save so a mid-run reload resumes. */
 
 const GAME_ID = "dictionary-dungeon";
-const SAVE_KEY = "dictionary-dungeon:save"; // { ...serializeGame(state), mode }
+const SAVE_KEY = "dictionary-dungeon:save"; // { ...serializeGame(state) }
+/* Matches MAX_LEN in scripts/gen-dungeon-dict.js — the dictionary is banded to
+   12 letters. The input used to allow 16, so typing a real 13+ letter word failed
+   isWord(), counted as gibberish, and HEALED the enemy: the game punished you for
+   the best word you had. Capping here means you simply can't type one. */
+const MAX_WORD_LEN = 12;
 const LOG_DIVIDER = "---"; // sentinel line → renders as a stage divider (see renderLogLine)
-const LOG_CAP = 80;
 
 // Append a batch of log lines as a distinct "stage": prefix a divider (unless the
-// log is empty) so each turn/scroll/event reads as its own block, then cap length.
+// log is empty) so each turn/scroll/event reads as its own block.
+// The log is NEVER truncated — a run's full history stays scrollable to the very
+// first line. (Each line renders through a memoized <LogLine>, so keeping
+// hundreds of them around doesn't re-tokenize on every keystroke.)
 function appendLog(prev, lines) {
   const batch = prev.length ? [LOG_DIVIDER, ...lines] : [...lines];
-  return [...prev, ...batch].slice(-LOG_CAP);
+  return [...prev, ...batch];
 }
 
 // The logic module is loaded lazily (it pulls the big dictionary payload). We
@@ -57,6 +64,7 @@ export default function DictionaryDungeon() {
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
   const [defeated, setDefeated] = useState(null); // "you slew X" card { name, emoji, kind }
   const [pendingDefeated, setPendingDefeated] = useState(false); // a paced kill's Defeated card is scheduled but not shown yet — hold the next-room reveal until it lands
+  const [warned, setWarned] = useState(true); // false = show the WARNING card before anything else this run
   const rootRef = useRef(null);
   const logRef = useRef(null);
   const revealSig = useRef(null); // last-shown encounter signature (dedupe reveals)
@@ -89,10 +97,11 @@ export default function DictionaryDungeon() {
     const saved = lsGetJSON(SAVE_KEY, null);
     const hydrated = saved && logic.hydrateGame(saved);
     if (hydrated) {
-      // Only auto-resume a DAILY run that matches today; a stale daily is dropped.
-      if (hydrated.mode === "practice" || hydrated.dayKey === day) {
+      // Only auto-resume a run that matches today; a stale one is dropped.
+      if (hydrated.dayKey === day) {
         setState(hydrated);
         setScreen("play");
+        setWarned(true); // resuming mid-run: you've already been warned
       } else {
         lsRemove(SAVE_KEY);
       }
@@ -183,6 +192,10 @@ export default function DictionaryDungeon() {
     // WITHOUT consuming the signature so that, once the card lands and clears
     // pendingDefeated, this effect re-runs and shows the reveal in order.
     if (pendingDefeated) return;
+    // Same idea for the WARNING card: it's the first thing a run shows, so don't
+    // consume the signature until it's been dismissed — the Entry Hall reveal
+    // then lands immediately after it.
+    if (!warned) return;
     revealSig.current = sig;
 
     // Decide what (if anything) to showcase. New level entry wins; else a new
@@ -205,7 +218,7 @@ export default function DictionaryDungeon() {
     }
     if (!next) { setReveal(null); return; }
     setReveal(next);
-  }, [screen, logic, state, pendingDefeated]);
+  }, [screen, logic, state, pendingDefeated, warned]);
   const dismissReveal = useCallback(() => setReveal(null), []);
 
   // Flash a toast for a moment.
@@ -215,23 +228,21 @@ export default function DictionaryDungeon() {
     flash._t = window.setTimeout(() => setToast(null), 1800);
   }, []);
 
-  const startRun = useCallback(
-    (mode) => {
-      if (!logic) return;
-      const s = logic.buildRun(mode === "daily" ? day : null);
-      setState(s);
-      const lvl = logic.currentLevel(s);
-      setLog([`> ${lvl?.rooms?.[0]?.intro || "You descend into the dungeon."}`]);
-      setInput("");
-      setHitFx(null);
-      setReveal(null);
-      setDefeated(null);
-      setPendingDefeated(false);
-      revealSig.current = null; // let the first room re-trigger a level reveal
-      setScreen("play");
-    },
-    [logic, day]
-  );
+  const startRun = useCallback(() => {
+    if (!logic) return;
+    const s = logic.buildRun(day);
+    setState(s);
+    const lvl = logic.currentLevel(s);
+    setLog([`> ${lvl?.rooms?.[0]?.intro || "You descend into the dungeon."}`]);
+    setInput("");
+    setHitFx(null);
+    setReveal(null);
+    setDefeated(null);
+    setPendingDefeated(false);
+    setWarned(false); // a fresh run opens on the WARNING card
+    revealSig.current = null; // let the first room re-trigger a level reveal
+    setScreen("play");
+  }, [logic, day]);
 
   // Persist any titles/omens/badges the run has earned into the cross-run
   // collection (idempotent — re-recording a known one is a no-op). Titles record
@@ -292,7 +303,7 @@ export default function DictionaryDungeon() {
           // The resolution lines belong to the SAME stage as the hit — append
           // them without a fresh divider (plain concat, still capped).
           fxTimers.current.push(
-            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines].slice(-LOG_CAP)), 560)
+            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines]), 560)
           );
         }
         fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
@@ -335,13 +346,13 @@ export default function DictionaryDungeon() {
   );
 
   // On-screen keyboard: feed key taps into the same input the form uses. Letters
-  // append (cap 16), ⌫ pops, ENTER submits. A physical-keyboard bridge (below)
-  // routes real keystrokes here too, so desktop typing still works.
+  // append (cap MAX_WORD_LEN), ⌫ pops, ENTER submits. A physical-keyboard bridge
+  // (below) routes real keystrokes here too, so desktop typing still works.
   const onKey = useCallback(
     (k) => {
       if (k === "enter") { onSubmit(); return; }
       if (k === "back") { setInput((v) => v.slice(0, -1)); return; }
-      if (/^[a-z]$/i.test(k)) setInput((v) => (v.length >= 16 ? v : v + k.toUpperCase()));
+      if (/^[a-z]$/i.test(k)) setInput((v) => (v.length >= MAX_WORD_LEN ? v : v + k.toUpperCase()));
     },
     [onSubmit]
   );
@@ -364,9 +375,7 @@ export default function DictionaryDungeon() {
   const finishRun = useCallback(
     (finalState) => {
       setScreen("over");
-      if (finalState.mode === "daily") {
-        submit(logic.runScore(finalState));
-      }
+      submit(logic.runScore(finalState));
     },
     [logic, submit]
   );
@@ -503,12 +512,16 @@ export default function DictionaryDungeon() {
           logRef={logRef}
         />
       )}
+      {/* The WARNING card is the first thing a fresh run shows — it sits ahead of
+          the Entry Hall reveal in the overlay stack, so the order reads:
+          WARNING (tap) → "You descend into the Entry Hall" (tap) → first enemy. */}
+      {screen === "play" && state && !warned && <Warning onDismiss={() => setWarned(true)} />}
       {/* The defeated card takes precedence over the next room's reveal, so the
           beat reads: kill → "X is defeated!" (tap) → "you've encountered a…" (tap). */}
-      {screen === "play" && state && defeated && (
+      {screen === "play" && state && warned && defeated && (
         <Defeated defeated={defeated} onDismiss={() => setDefeated(null)} />
       )}
-      {screen === "play" && state && reveal && !defeated && !pendingDefeated && !state.canDescend && (
+      {screen === "play" && state && warned && reveal && !defeated && !pendingDefeated && !state.canDescend && (
         <Reveal reveal={reveal} onDismiss={dismissReveal} />
       )}
       {screen === "play" && state && state.canDescend && !state.over && (
@@ -538,27 +551,42 @@ function Title({ logic, day, onStart }) {
       <div className="dd-crest">📖</div>
       <h1 className="dd-name">Dictionary Dungeon</h1>
       <p className="dd-tag">A text roguelike where language is the weapon.</p>
-      <p className="dd-quip">Sticks and stones may break your bones — but down here, it's words that hurt.</p>
       <div className="dd-daily-card">
         <div className="dd-daily-num">Dungeon #{n}</div>
         <div className="dd-daily-sub">Same run for everyone today · resets tomorrow</div>
       </div>
-      <button className="dd-btn dd-btn-primary" onClick={() => onStart("daily")}>
+      <button className="dd-btn dd-btn-primary" onClick={onStart}>
         Enter Today's Dungeon
       </button>
-      <button className="dd-btn dd-btn-ghost" onClick={() => onStart("practice")}>
-        Practice (random, no score)
-      </button>
-      <ul className="dd-help">
-        <li>Type any real word that satisfies the room's rule.</li>
-        <li>Longer, rarer words hit harder. Some words have hidden power.</li>
-        <li>A ⚔️ word cuts flesh; 🔥 burns; ✝️ smites the undead. Match your word to the foe.</li>
-        <li>A 🛡️ word (SHIELD, PARRY, BLOCK…) turns aside the next blow — then needs a few turns to ready again.</li>
-        <li>Choose your words wisely — each word is spent once per run. A truly great word wasted on a rat is one you won't have for the Lich.</li>
-        <li>⚠ Nonsense feeds the enemy: a gibberish word heals whatever you're fighting. Real words only.</li>
-        <li>Lose all ❤ and the run ends. Clear the Lich… then descend deeper.</li>
-      </ul>
+      <Help />
       <Collection logic={logic} />
+    </div>
+  );
+}
+
+// ── help (collapsed by default) ───────────────────────────────────────────────
+// The rules used to sit open on the title screen and pushed everything else —
+// the daily number, the collection — below the fold. Same disclosure pattern as
+// Collection below, so the two read as a pair.
+function Help() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="dd-collection">
+      <button className="dd-collection-toggle" onClick={() => setOpen((o) => !o)}>
+        {open ? "▾" : "▸"} Help
+      </button>
+      {open && (
+        <ul className="dd-help">
+          <li>Type any real word that satisfies the room's rule.</li>
+          <li>Longer, rarer words hit harder. Some words have hidden power.</li>
+          <li>A ⚔️ word cuts flesh; 🔥 burns; ✝️ smites the undead. Match your word to the foe.</li>
+          <li>🔥 sets a foe alight and ☠️ poisons it — both keep working on later turns. 🔮 magic, ❄️ ice and 🌿 nature words stagger it out of its next attack.</li>
+          <li>A 🛡️ word (SHIELD, PARRY, BLOCK…) turns aside the next blow — then needs a few turns to ready again.</li>
+          <li>Choose your words wisely — each word is spent once per run. A truly great word wasted on a rat is one you won't have for the Lich.</li>
+          <li>⚠ Nonsense feeds the enemy: a gibberish word heals whatever you're fighting. Real words only.</li>
+          <li>Lose all ❤ and the run ends. Clear the Lich… then descend deeper.</li>
+        </ul>
+      )}
     </div>
   );
 }
@@ -573,9 +601,15 @@ function Collection({ logic }) {
   const [open, setOpen] = useState(false);
   const groups = useMemo(() => {
     const found = getDungeonDiscoveries();
-    const mk = (catalog, foundIds) => {
+    /* Every entry gets a PERMANENT slot in the grid, scattered rather than
+       alphabetical. The order is a seededShuffle on a constant per-group seed,
+       so a given title always sits in the same place — discoveries light up
+       where they already were instead of jumping to the front. (This used to
+       sort unlocked-first, which reshuffled the whole board every time you found
+       something and made the collection impossible to learn by shape.) */
+    const mk = (catalog, foundIds, seed) => {
       const set = new Set(foundIds);
-      // Unique by id, keep catalog order; earned first, then locked.
+      // Unique by id, keep catalog order for a stable shuffle input.
       const seen = new Set();
       const items = [];
       for (const e of catalog || []) {
@@ -583,14 +617,14 @@ function Collection({ logic }) {
         seen.add(e.id);
         items.push({ ...e, unlocked: set.has(e.id) });
       }
-      items.sort((a, b) => (a.unlocked === b.unlocked ? 0 : a.unlocked ? -1 : 1));
-      const count = items.filter((i) => i.unlocked).length;
-      return { items, count, total: items.length };
+      const scattered = seededShuffle(items, seed);
+      const count = scattered.filter((i) => i.unlocked).length;
+      return { items: scattered, count, total: scattered.length };
     };
     return {
-      titles: mk(logic.ALL_TITLES, found.titles),
-      omens: mk(logic.ALL_OMENS, found.omens),
-      badges: mk(logic.ALL_BADGES, found.badges),
+      titles: mk(logic.ALL_TITLES, found.titles, 0x7117_1e5),
+      omens: mk(logic.ALL_OMENS, found.omens, 0x0e_5c_11),
+      badges: mk(logic.ALL_BADGES, found.badges, 0xbad_5ec),
     };
   }, [logic]);
 
@@ -689,6 +723,7 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
                 <div className="dd-hpbar"><div className="dd-hpbar-fill" style={{ width: `${hpPct}%` }} /></div>
               </>
             )}
+            <StatusChips status={state.status} target={target} />
             {target.intent && <div className="dd-intent">Intent: {target.intent}</div>}
           </div>
         )}
@@ -698,6 +733,11 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
           <div className="dd-event-body">{room.event.bodyText}</div>
         ) : merchant ? (
           <div className="dd-scene">A hooded merchant spreads their wares. Spend your coin.</div>
+        ) : choice ? (
+          /* A treasure room asks for no word, so showing a word rule there made
+             no sense. Empty plate, sized like the rule box, waiting on the
+             treasure-room art. */
+          <div className="dd-rule dd-rule-empty" aria-hidden="true" />
         ) : (
           <div className="dd-rule">{rule.displayText}</div>
         )}
@@ -769,7 +809,7 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
           "cast the word" CTA), next to the Scrolls / Relics menus. */}
       {!special && (
         <div className="dd-actions">
-          <button type="button" className="dd-act dd-act-enter" onClick={() => onKey("enter")}>ENTER</button>
+          <button type="button" className="dd-act dd-act-enter" onClick={() => onKey("enter")}>SPEAK</button>
           <ScrollMenu logic={logic} scrolls={state.scrolls} onUse={onUseScroll} />
           <RelicMenu logic={logic} relics={state.relics} />
         </div>
@@ -778,11 +818,37 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
       {/* result log */}
       <div className="dd-log" ref={logRef}>
         {log.map((line, i) => (
-          <div key={i} className="dd-logline">{renderLogLine(line)}</div>
+          <LogLine key={i} line={line} />
         ))}
       </div>
 
       {toast && <div className="dd-toast">{toast}</div>}
+    </div>
+  );
+}
+
+// ── status chips ──────────────────────────────────────────────────────────────
+// What's currently stuck to the enemy: burning, poisoned, cursed, staggered,
+// drenched, or laid bare by a light word. Without these the statuses are
+// invisible and the player can't tell the fire word did anything.
+function StatusChips({ status, target }) {
+  if (!status) return null;
+  const chips = [];
+  if (status.burn > 0) chips.push({ k: "burn", t: `🔥 ${status.burn}`, hint: "Burning" });
+  if (status.poison > 0) chips.push({ k: "poison", t: `☠️ ${status.poison}`, hint: "Poisoned" });
+  if (status.skip) chips.push({ k: "skip", t: "💫", hint: "Can't strike back next turn" });
+  if (status.curse) chips.push({ k: "curse", t: "💀", hint: "Cursed — takes extra damage" });
+  if (status.soak > 0) chips.push({ k: "soak", t: `💧 ${status.soak}`, hint: "Drenched — hits softer" });
+  if (status.reveal) {
+    const weak = (target?.weaknessTags || []).join(", ");
+    chips.push({ k: "reveal", t: `👁 ${weak || "revealed"}`, hint: "Weaknesses revealed" });
+  }
+  if (!chips.length) return null;
+  return (
+    <div className="dd-statuses">
+      {chips.map((c) => (
+        <span key={c.k} className={`dd-status-chip dd-status-${c.k}`} title={c.hint}>{c.t}</span>
+      ))}
     </div>
   );
 }
@@ -847,6 +913,13 @@ function renderLogLine(line) {
   if (last < text.length) out.push(text.slice(last));
   return out;
 }
+
+/* One log line, memoized on its text. The log is never truncated, so a long run
+   holds hundreds of lines — and every one of them runs the regex tokenizer
+   above. Without memo, each keystroke re-tokenized the entire history. */
+const LogLine = memo(function LogLine({ line }) {
+  return <div className="dd-logline">{renderLogLine(line)}</div>;
+});
 
 function ScrollMenu({ logic, scrolls, onUse }) {
   const [open, setOpen] = useState(false);
@@ -931,6 +1004,27 @@ function Reveal({ reveal, onDismiss }) {
   );
 }
 
+// ── warning (the run's opening beat) ──────────────────────────────────────────
+// The premise of the whole game, stated once, as the first thing you see when
+// you go down. It used to be a line of small print on the title screen where
+// nobody read it. Reuses the reveal overlay shell.
+function Warning({ onDismiss }) {
+  return (
+    <div className="dd-reveal-overlay">
+      <div className="dd-reveal-card dd-reveal-warning">
+        <div className="dd-reveal-emoji">⚠️</div>
+        <div className="dd-reveal-name">WARNING</div>
+        <div className="dd-reveal-tone">
+          Sticks and stones may break your bones — but down here, it's words that hurt.
+        </div>
+        <button className="dd-btn dd-btn-primary dd-reveal-go" onClick={onDismiss}>
+          Descend
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── defeated (a slain enemy/boss "you won this fight" beat) ────────────────────
 // Pops after a kill and PERSISTS until the player taps Continue (tapping the
 // backdrop does nothing). Reuses the reveal overlay/card shell; a small accent
@@ -1005,9 +1099,28 @@ function Over({ logic, state, onAgain }) {
         <Stat label="Hearts left" value={`❤ ${recap.hearts}`} />
         <Stat label="Coins" value={`🪙 ${recap.coins}`} />
         <Stat label="Words played" value={recap.words} />
-        <Stat label="Best word" value={recap.best || "—"} />
+        <Stat label="Longest word" value={recap.longestWord ? `${recap.longestWord} (${recap.longestLen})` : "—"} />
         <Stat label="Rarest word" value={recap.rarest || "—"} />
+        <Stat label="Biggest hit" value={recap.bestHit ? `${recap.bestHit} dmg` : "—"} />
+        <Stat label="Damage dealt" value={recap.dmgDealt} />
+        <Stat label="Damage taken" value={`❤ ${recap.dmgTaken}`} />
+        <Stat
+          label="Favourite lane"
+          value={
+            recap.favoriteCategory
+              ? `${recap.favoriteCategoryEmoji} ${recap.favoriteCategory} ×${recap.favoriteCategoryCount}`
+              : "—"
+          }
+        />
+        <Stat label="Goblin words" value={recap.goblinWords} />
+        <Stat label="Obscure words" value={recap.obscureWords} />
       </div>
+      {recap.story && (
+        <div className="dd-over-story">
+          <div className="dd-over-story-head">The tale of your run</div>
+          <p className="dd-over-story-body">{recap.story}</p>
+        </div>
+      )}
       {recap.badges?.length > 0 && (
         <div className="dd-over-relics">
           {recap.badges.map((b, i) => (
@@ -1074,9 +1187,7 @@ const CSS = `
 .dd-crest { font-size: 2.6rem; }
 .dd-name { font-size: 1.9rem; margin: 4px 0 2px; color: var(--gold); letter-spacing: .04em;
   text-shadow: 0 2px 10px rgba(217,180,94,.25); font-variant: small-caps; }
-.dd-tag { opacity: .78; margin: 0 0 6px; font-style: italic; }
-.dd-quip { opacity: .62; margin: 0 0 16px; font-size: .82rem; font-style: italic; line-height: 1.5;
-  color: #d6c9a6; }
+.dd-tag { opacity: .78; margin: 0 0 16px; font-style: italic; }
 .dd-daily-card { border: 1px solid rgba(217,180,94,.35); border-radius: 12px; padding: 12px;
   background: linear-gradient(180deg, rgba(217,180,94,.08), rgba(0,0,0,.2)); margin-bottom: 16px; }
 .dd-daily-num { font-size: 1.15rem; color: var(--gold); letter-spacing: .06em; }
@@ -1136,6 +1247,16 @@ const CSS = `
 .dd-hpbar { height: 9px; background: rgba(255,255,255,.09); border-radius: 5px; overflow: hidden; }
 .dd-hpbar-fill { height: 100%; background: linear-gradient(90deg, #c0392b, #e05a4a); transition: width .35s; }
 .dd-intent { font-size: .8rem; opacity: .7; margin-top: 6px; font-style: italic; }
+/* what's currently stuck to the enemy: burning / poisoned / cursed / … */
+.dd-statuses { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.dd-status-chip { font-size: .72rem; padding: 2px 7px; border-radius: 10px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); }
+.dd-status-burn { color: #ffb27a; border-color: rgba(255,140,60,.45); background: rgba(255,120,40,.12); }
+.dd-status-poison { color: #b6e39a; border-color: rgba(140,200,100,.45); background: rgba(120,190,80,.12); }
+.dd-status-skip { color: #ffe08a; border-color: rgba(255,210,110,.45); background: rgba(255,200,80,.12); }
+.dd-status-curse { color: #d7b0e8; border-color: rgba(190,130,220,.45); background: rgba(170,110,210,.14); }
+.dd-status-soak { color: #9fd3f0; border-color: rgba(110,180,230,.45); background: rgba(90,160,220,.12); }
+.dd-status-reveal { color: #f0e7c0; border-color: rgba(230,215,150,.4); background: rgba(230,210,140,.1); }
 /* hit / kill feedback on the enemy card */
 .dd-enemy-hit { animation: ddHit .26s ease-out; }
 .dd-enemy-slain { animation: ddSlain .6s ease-out; }
@@ -1170,6 +1291,11 @@ const CSS = `
 .dd-reveal-defeated { border-color: rgba(127,206,127,.5); box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 40px rgba(30,60,30,.35); }
 .dd-reveal-defeated .dd-reveal-kicker { color: #9fce9f; }
 .dd-reveal-defeated .dd-reveal-name { color: #cdeccd; text-shadow: 0 2px 12px rgba(127,206,127,.3); }
+/* the run's opening WARNING beat — amber, ominous, read once */
+.dd-reveal-warning { border-color: rgba(232,178,90,.5); box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 40px rgba(70,50,20,.35); }
+.dd-reveal-warning .dd-reveal-name { color: #f0c777; letter-spacing: .18em;
+  text-shadow: 0 2px 14px rgba(232,178,90,.35); }
+.dd-reveal-warning .dd-reveal-tone { color: #e6dcc6; font-size: 1rem; line-height: 1.5; max-width: 30ch; margin: 0 auto; }
 /* the slain foe's emoji reads as "downed": drained + slightly toppled */
 .dd-defeated-emoji { filter: grayscale(.7) brightness(.75); transform: rotate(-8deg); opacity: .85; }
 @keyframes ddReveal {
@@ -1200,6 +1326,9 @@ const CSS = `
   color: #2a2013; border-radius: 8px;
   background: linear-gradient(180deg, #ece0c4, #d8c9a4); border: 1px solid #b8a67e;
   box-shadow: 0 3px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4); font-weight: 600; }
+/* Treasure rooms need no word, so the rule plate sits empty — reserved at the
+   same height for the treasure-room art. */
+.dd-rule-empty { min-height: 46px; opacity: .55; }
 
 /* word entry + on-screen keyboard */
 .dd-entry { margin-bottom: 10px; }
@@ -1310,6 +1439,12 @@ const CSS = `
   border: 1px solid rgba(217,180,94,.3); }
 .dd-over-badge { background: rgba(217,182,232,.1); border-color: rgba(217,182,232,.35); color: #e6d3f0; }
 .dd-over-actions { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+/* the seeded prose recap built from the words actually played */
+.dd-over-story { margin: 14px 0; padding: 13px 15px; border-radius: 10px; text-align: left;
+  background: rgba(217,180,94,.07); border: 1px solid rgba(217,180,94,.25); }
+.dd-over-story-head { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+  opacity: .65; margin-bottom: 7px; }
+.dd-over-story-body { margin: 0; font-size: .92rem; line-height: 1.55; font-style: italic; color: #e8dcc0; }
 
 @media (max-width: 380px) {
   .dd-key { height: 42px; font-size: .9rem; }
