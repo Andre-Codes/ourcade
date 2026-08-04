@@ -44,7 +44,7 @@ content generator. Each file has a header comment explaining its format.
 | Add a poll, quiz, fact, news, tip, weird thing | [`src/data/manual/content.js`](src/data/manual/content.js) |
 | Pin content to a specific date / window      | [`src/data/manual/schedule.js`](src/data/manual/schedule.js) |
 | Change the "Stay for the credits?" movies    | [`src/data/manual/movies.js`](src/data/manual/movies.js) |
-| Change the spotlighted real-world game        | [`src/data/manual/featured.js`](src/data/manual/featured.js) |
+| Change the PING games (real games we recommend) | [`src/data/manual/featured.js`](src/data/manual/featured.js) |
 | Change the "what genre next?" vote options    | [`src/data/nextGame.js`](src/data/nextGame.js) |
 | Change the time-of-day greetings              | [`src/data/dayparts.js`](src/data/dayparts.js) |
 | Teach Byte Badger (the phone NPC) new things  | [`src/data/generated/badger.js`](src/data/generated/badger.js) ⚠️ |
@@ -62,10 +62,13 @@ content generator. Each file has a header comment explaining its format.
   like `"tap-surge": "HOT",`. Valid stickers: `NEW`, `HOT`, `STAR`, `TOP`,
   `FREE`. This overrides whatever was set in `games.js`. (To invent a new
   sticker color, the file's comment tells you the one CSS line to add.)
-- **Spotlight a different game.** Move an entry to the **top** of the array in
-  `src/data/manual/featured.js` (newest-first is the convention). For new art,
-  drop it in `assets-src/featured/<slug>.(png|jpg)` and run
-  `npm run assets:featured`.
+- **Add a PING game** (the ★ PING hero — "Play It Now, Gamer", a real game by
+  another developer). Add an entry to `src/data/manual/featured.js`. **Array
+  order does nothing:** the card shows one entry per week, picked by a
+  date-seeded rotation that rolls over on Thursdays, so a new entry takes
+  whichever slot the shuffle gives it (and adding one reshuffles the rest). For
+  new art, drop it in `assets-src/featured/<slug>.(png|jpg)` and run
+  `npm run assets:featured`. Preview a future week with `?day=YYYY-MM-DD`.
 - **Add a game.** Add an entry to `src/data/games.js` (it's the only file you
   touch for the catalog). React game → `.jsx` in `src/games/`,
   `type: "react"`. Standalone HTML → file in `public/games/`, `type: "iframe"`.

@@ -160,7 +160,7 @@ function buildWordLadders(dict4, dict5, want) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// WORD SPRINT (kind:"anagram") — a 30-second speed round: from 7 scrambled
+// WORD SPRINT (kind:"anagram") — a 60-second speed round: from 7 scrambled
 // letters, find as MANY real words as you can (any length ≥ 4). This rebrands the
 // old "unscramble one word" anagram into a fast, replayable find-'em-all game.
 //
@@ -246,7 +246,7 @@ function buildWordSprints(dictByLen, want) {
     out.push({
       kind: "anagram", // keep the id/route stable; renders as the sprint game
       prompt:
-        "You have 30 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
+        "You have 60 seconds. Make as many real words (4+ letters) as you can from these 7 letters. Any valid word counts!",
       scramble,
       letters: W,
       words, // the full valid-word set the browser checks against
@@ -780,7 +780,7 @@ const KIND_META = {
   },
   anagram: {
     label: "Word Sprint",
-    time: "30 sec",
+    time: "60 sec",
     difficulty: "beginner",
     action: "Beat the clock — find every word you can",
   },
@@ -845,7 +845,7 @@ function titleFor(p, n) {
 
 const BLURBS = {
   word_ladder: "Change one letter at a time until you climb from the first word to the last.",
-  anagram: "Seven letters, thirty seconds. Find as many words as you can before time runs out.",
+  anagram: "Seven letters, sixty seconds. Find as many words as you can before time runs out.",
   middle: "One little word finishes two bigger ones. Find the word that fits both blanks.",
   cipher: "A secret phrase, scrambled by a Caesar shift. Slide the letters back to read it.",
   rebus: "A little picture-puzzle hiding a word or phrase. Old puzzle-book energy.",

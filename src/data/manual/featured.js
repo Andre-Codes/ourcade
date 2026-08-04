@@ -1,17 +1,23 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   FEATURED — real-world games worth a look  ·  edit this file by hand
+   PING — "Play It Now, Gamer"  ·  edit this file by hand
 
-   The homepage "FEATURED GAME" card spotlights a real game — past, current,
-   or future — especially the lesser-known, fascinating ones (Caves of Qud,
-   Outer Wilds, an upcoming release you're excited about). This is distinct
-   from the Ourcade Game of the Day, which surfaces a *playable* Ourcade game.
+   The homepage "★ PING ★" card recommends a real game by ANOTHER developer —
+   past, current, or future — especially the lesser-known, fascinating ones
+   (Caves of Qud, Outer Wilds, an upcoming release you're excited about). That
+   "someone else made this and we vouch for it" framing is the point of the
+   name. Distinct from the Ourcade Game of the Day, which surfaces a *playable*
+   Ourcade game. (The export is still `FEATURED` and the console's live layer
+   still keys off `featured` — renaming those would orphan existing overrides.)
 
    The card cycles ONE entry per week, no repeats until the whole pool is
    exhausted (rotateEvery(FEATURED, key, 7, 2) in DailyBand.jsx's FeaturedGame).
    On-screen order is deterministic but shuffled, so array order here is NOT the
-   on-screen order — add new entries anywhere. With a single entry the card just
-   shows that one game until you add more. Weeks roll on a local-calendar
-   boundary shared across all devices (Wordle-style), same as Game of the Day.
+   on-screen order — add new entries anywhere. A new entry is NOT guaranteed to
+   show up right away: it owns one week-slot out of N, and the week rolls over on
+   a Thursday. Preview any future week with `?day=YYYY-MM-DD`. With a single
+   entry the card just shows that one game until you add more. Weeks roll on a
+   local-calendar boundary shared across all devices (Wordle-style), same as
+   Game of the Day.
 
    Each entry:
      id       — unique slug (kebab-case), e.g. "caves-of-qud". Also the React key.

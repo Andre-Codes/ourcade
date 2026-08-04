@@ -49,6 +49,9 @@ export const TIME_BUCKET_LABEL = {
 export function timeBucketOf(item) {
   const t = String(item?.time || "").toLowerCase();
   if (/week|weekend|day|days/.test(t)) return "weekend";
+  // Anything measured in seconds (the timed word sprints) is obviously quick —
+  // without this "60 sec" matches nothing below and lands in the "hour" bucket.
+  if (/\bsec(?:ond)?s?\b/.test(t)) return "quick";
   const mins = t.match(/(\d+)\s*(?:min|minute)/);
   if (mins) return Number(mins[1]) <= 20 ? "quick" : "hour";
   // Plain hour mentions ("~1 hour", "1-3 hours"): 2+ hours leans weekend-ish.

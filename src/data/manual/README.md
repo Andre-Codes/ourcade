@@ -9,8 +9,8 @@ place to add or tweak content without it getting clobbered.
 | `content.js`  | Polls, quizzes, facts, news, tips, curiosities, weird things, stumble artifacts. Manual entries join the daily rotation alongside the generated pools. |
 | `creatives.js`| The `/creatives` page — small "make this" missions (3D-print files, how-to-draw sheets) with a next action, time, difficulty, and cost. Hand-curated; this is the sole source for now. |
 | `schedule.js` | Pin/pool a specific News / Curiosity / Weird item to a date window.           |
-| `movies.js`   | Movies currently in theaters + their post-credits verdict (the homepage "STAY FOR THE CREDITS?" card). |
-| `featured.js` | Real-world games to spotlight in the homepage "FEATURED GAME" card (shows the first entry, newest-first). Drop art in `assets-src/featured/<slug>.(png\|jpg)` and run `npm run assets:featured` to make the optimized `src/assets/featured/<slug>.webp`. |
+| `movies.js`   | Movies currently in theaters + their post-credits verdict (the homepage "STAY FOR THE CREDITS?" card). Every entry shows, in array order. Also editable live from the 🎬 CREDITS tab at `#/admin`. |
+| `featured.js` | Real games by other developers, recommended in the homepage "★ PING ★" card (Play It Now, Gamer). **One per week, picked by a date-seeded rotation that rolls over on Thursdays — array order is irrelevant.** Drop art in `assets-src/featured/<slug>.(png\|jpg)` and run `npm run assets:featured` to make the optimized `src/assets/featured/<slug>.webp`. |
 | `stickers.js` | The corner flair on game cards — `NEW!`, `HOT!`, `★`, etc. Maps a game id to a sticker. This is the sole source — only listed games get one. |
 
 Each file has a header comment documenting its entry shape. After editing,

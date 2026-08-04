@@ -122,8 +122,8 @@ export default function CreativesPage() {
   const [lane, setLane] = useState("all");
   const [bucket, setBucket] = useState("all");
   const [shown, setShown] = useState(PAGE);
-  // A fresh random seed per visit — so the "All" view is shuffled differently
-  // each time you land on the page, but stays put while you search / filter /
+  // A fresh random seed per visit — so the grid is shuffled differently each
+  // time you land on the page, but stays put while you search / filter /
   // load more within this visit (re-mounts reshuffle; re-renders don't).
   const [shuffleSeed] = useState(() => (Math.random() * 0xffffffff) >>> 0);
 
@@ -142,10 +142,10 @@ export default function CreativesPage() {
 
   const filtered = useMemo(() => {
     const matches = searchCreatives(CREATIVES_POOL, query, lane, bucket);
-    // In the "All" view (no lane selected), randomize the order so the page
-    // feels like a fresh grab-bag each visit. Picking a single lane keeps the
-    // pool's natural order so that lane reads coherently.
-    return lane === "all" ? seededShuffle(matches, shuffleSeed) : matches;
+    // Always a grab-bag, in every view. The generated lanes emit grouped by kind,
+    // so raw pool order reads as "14 word ladders, then 12 sprints, then…" —
+    // a shuffle is what makes one category feel like a pile worth digging in.
+    return seededShuffle(matches, shuffleSeed);
   }, [query, lane, bucket, shuffleSeed]);
 
   // Reset the reveal window whenever the result set changes.
@@ -164,7 +164,7 @@ export default function CreativesPage() {
           <div className="arcade-vault-masthead">
             <div className="arcade-masthead-text">
               <h1 className="arcade-vault-title">🧪 ACTION LAB</h1>
-              <span className="arcade-vault-standing">things to make & solve today</span>
+              <span className="arcade-vault-standing">things to make & solve right now</span>
             </div>
           </div>
           <div className="arcade-vault-stat">

@@ -109,11 +109,13 @@ export const LIVE_FORMS = {
     makeId: (v) => `cur-${slugify(v.title)}`,
   },
 
+  // Key stays `featured` — it's what live/content already stores. Only the
+  // labels are the PING rebrand.
   featured: {
     emoji: "★",
-    tab: "FEATURED",
-    noun: "featured game", plural: "featured games",
-    blurb: "The ★ FEATURED GAME hero — a real, external game. Cycles one per week.",
+    tab: "PING",
+    noun: "PING game", plural: "PING games",
+    blurb: "The ★ PING hero (Play It Now, Gamer) — a real, external game by another developer. Cycles one per week.",
     fields: [
       TITLE_FIELD,
       BLURB_FIELD,
@@ -128,6 +130,35 @@ export const LIVE_FORMS = {
         hint: "Full URL to cover art. Repo entries use the optimized `image` basename instead; a live entry can't run assets:featured, so it links art directly. Blank falls back to the 🎮 placeholder.",
       },
       { key: "accent", label: "accent", type: "color", placeholder: "#6B4BB8 — optional" },
+    ],
+    makeId: (v) => slugify(v.title),
+  },
+
+  movies: {
+    emoji: "🎬",
+    tab: "CREDITS",
+    noun: "movie", plural: "movies",
+    blurb:
+      "The 🎬 STAY FOR THE CREDITS? card. No rotation — every entry shows. Delete one when the film leaves theaters.",
+    fields: [
+      TITLE_FIELD,
+      {
+        key: "stinger",
+        label: "stinger",
+        type: "select",
+        options: ["yes", "no"],
+        required: true,
+        default: "no",
+        hint: "yes → ✅ STAY · no → 🚫 nothing extra",
+      },
+      {
+        key: "credits",
+        label: "detail",
+        type: "textarea",
+        max: 240,
+        placeholder: "Yes — mid-credits scene ~2 min in, then another ~3 min later.",
+        hint: "Optional. Shown under the title — write it however you like.",
+      },
     ],
     makeId: (v) => slugify(v.title),
   },

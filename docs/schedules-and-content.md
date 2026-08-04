@@ -180,7 +180,7 @@ Firestore is the authority; the baked seed exists so content renders on **first 
 | `patches` | `{ "<existing id>": { url: "…" } }` shallow-merged over a baked item — **how you fix a dead link** in `manual/content.js` without touching the file. |
 | `hides` | Ids dropped from the pool. Also the tombstone for a deleted add, so it can't come back from the baked seed. |
 
-**Editable families:** 🎲 stumble · 🔍 weird · 🌙 weird-night · 🌌 curiosities · ★ featured · 📰 news · 🗓️ schedule. Games, quizzes, and the Water Cooler set are deliberately out of scope — games carry `lazy()` closures that can't be expressed as data.
+**Editable families:** 🎲 stumble · 🗄️ vault · 🔍 weird · 🌙 weird-night · 🌌 curiosities · ★ ping · 🎬 credits · 📰 news · 🗓️ schedule. Games, quizzes, and the Water Cooler set are deliberately out of scope — games carry `lazy()` closures that can't be expressed as data.
 
 **Where the pieces live:**
 
@@ -276,7 +276,7 @@ A destination page (top nav, next to the Water Cooler) to **wander the whole bac
 
 ## TL;DR cheat sheet
 
-- **Not at a computer?** → open [#/admin](../src/components/AdminPage.jsx) on your phone. Adds, link fixes, the Featured Game, and date-windowed pins all go live in seconds, no rebuild.
+- **Not at a computer?** → open [#/admin](../src/components/AdminPage.jsx) on your phone. Adds, link fixes, the PING game, the "stay for the credits?" movies, and date-windowed pins all go live in seconds, no rebuild.
 - **Want to add an evergreen item to the rotation?** → edit `src/data/manual/content.js` (survives regeneration, joins the daily mix).
 - **Want to announce something for a date range?** → add a `pin` entry to `src/data/manual/schedule.js`.
 - **Want to nudge a specific item into rotation for a while?** → add a `pool` entry to `src/data/manual/schedule.js`.

@@ -116,7 +116,10 @@ export default function CreativeGuidePage() {
         <header className="arcade-guide-head">
           <span className="arcade-stumble-kind">{laneLabel}</span>
           <h1 className="arcade-guide-title">{item.title}</h1>
-          {item.blurb && <p className="arcade-guide-blurb">{item.blurb}</p>}
+          {/* A puzzle's rules are puzzle.prompt, rendered just below by SolvePuzzle
+              — showing the blurb here too says the same thing twice. The blurb
+              still carries the Action Lab card, the home hero and the share text. */}
+          {item.blurb && !solve && <p className="arcade-guide-blurb">{item.blurb}</p>}
 
           <div className="arcade-creative-badges arcade-guide-meta">
             {item.time && <span className="arcade-creative-badge">⏱ {item.time}</span>}

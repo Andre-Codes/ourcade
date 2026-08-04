@@ -390,10 +390,10 @@ function MascotTip({ dayKey: key, streak }) {
   );
 }
 
-// ── Now in theaters — the one thing the multiplex won't tell you: is it ───
-// worth sitting through the credits? Hand-curated in data/manual/movies.js;
-// the card simply lists everything currently in that file (no rotation).
-// ── Featured Game (a real, external game worth a look) ────────────────────
+// ── PING · "Play It Now, Gamer" ───────────────────────────────────────────
+// A real, external game by another developer that we're vouching for. The
+// acronym line under the kicker is the whole point of the rebrand: it says out
+// loud that this is someone else's game and we're recommending it.
 function FeaturedGame({ dayKey: key }) {
   const pool = applyLive(FEATURED, "featured");
   if (!pool.length) return null;
@@ -417,7 +417,11 @@ function FeaturedGame({ dayKey: key }) {
       style={game.accent ? { "--accent": game.accent } : undefined}
     >
       <div className="arcade-hero-glow" />
-      <span className="arcade-hero-kicker">★ FEATURED GAME ★</span>
+      <span className="arcade-hero-kicker">★ PING ★</span>
+      <p className="arcade-ping-note">
+        <b>P</b>lay <b>I</b>t <b>N</b>ow, <b>G</b>amer — games by other developers
+        that we actually recommend.
+      </p>
       <div className="arcade-hero-body">
         <div className="arcade-hero-screen">
           {art ? (
@@ -444,12 +448,14 @@ function FeaturedGame({ dayKey: key }) {
 
 // ── Now in theaters ───────────────────────────────────────────────────────
 function NowInTheaters() {
-  if (!MOVIES.length) return null;
+  // No rotation — the card lists everything currently in the pool, in order.
+  const movies = applyLive(MOVIES, "movies");
+  if (!movies.length) return null;
   return (
     <div className="arcade-widget arcade-credits">
       <span className="arcade-widget-kicker">🎬 STAY FOR THE CREDITS?</span>
       <ul className="arcade-credits-list">
-        {MOVIES.map((m) => {
+        {movies.map((m) => {
           const stay = m.stinger === "yes";
           return (
             <li key={m.id} className="arcade-credits-row">

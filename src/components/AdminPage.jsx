@@ -2,7 +2,7 @@
    #/admin — the dev console.
 
    A phone-sized editor for the dynamic content families: add a Stumble find,
-   fix a dead link, swap the Featured Game, pin a news line to a date window.
+   fix a dead link, swap the PING game, pin a news line to a date window.
    Writes land in Firestore live/content and show up site-wide within seconds,
    with no rebuild (see src/data/live.js for the merge, and scripts/snapshot-live.js
    for the nightly bake back into the repo).
@@ -27,6 +27,7 @@ import { WEIRD, WEIRD_NIGHT } from "../data/weird.js";
 import { CURIOSITIES } from "../data/curiosities.js";
 import { NEWS_BASE } from "../data/flavor.js";
 import { FEATURED } from "../data/manual/featured.js";
+import { MOVIES } from "../data/manual/movies.js";
 import { SCHEDULE_BASE } from "../data/manual/schedule.js";
 import { todayKey } from "../lib/daily.js";
 import BackBar from "./BackBar.jsx";
@@ -43,6 +44,7 @@ const BASE = {
   weirdNight: () => WEIRD_NIGHT,
   curiosities: () => CURIOSITIES,
   featured: () => FEATURED,
+  movies: () => MOVIES,
   // A baked news line is a bare string — its own text is the only id it has.
   news: () => NEWS_BASE.map((text) => ({ id: text, text })),
   schedule: () => SCHEDULE_BASE,
@@ -63,6 +65,7 @@ function layerOf(overlay, type) {
 // One-line summary for a list row.
 function rowText(type, item) {
   if (type === "news") return item.text;
+  if (type === "movies") return `${item.stinger === "yes" ? "✅" : "🚫"} ${item.title}`;
   if (type === "schedule") {
     const when = item.until ? `→ ${item.until}` : item.days ? `for ${item.days}d` : "open-ended";
     return `${item.mode?.toUpperCase()} ${item.type} · ${item.from} ${when} — ${item.title || item.text || ""}`;
@@ -232,8 +235,13 @@ function HelpGuide() {
           🎲 Stumble, since anything added here would be wiped by the next archive snapshot.</li>
         <li><b>🔍 Weird / 🌙 Night</b> — Weird rotates every ~3h through the day. Night only
           appears after 22:00 and is never touched by the scheduler. Keep those good.</li>
-        <li><b>★ Featured</b> — one entry per <i>week</i>. Repo entries use optimized art; entries
-          added here need a full <code>image url</code> since they can't run the asset build.</li>
+        <li><b>★ PING</b> — one entry per <i>week</i>, and the week rolls over on a{" "}
+          <b>Thursday</b>, not seven days from when you added it. The pick is date-seeded, so a
+          new game takes whichever slot the shuffle gives it — it may show today, or wait a few
+          weeks. Repo entries use optimized art; entries added here need a full{" "}
+          <code>image url</code> since they can't run the asset build.</li>
+        <li><b>🎬 Credits</b> — no rotation: every entry shows on the homepage, in list order.
+          Delete one the week its film leaves theaters, or the card just grows.</li>
         <li><b>📰 News</b> — the odd one out. Baked lines are bare strings with no id, so EDIT
           <i> hides the original and adds your version</i>. Same result, and the original comes
           back if you RESTORE it.</li>

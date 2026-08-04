@@ -8,6 +8,10 @@
    homepage "STAY FOR THE CREDITS?" card lists every entry here (newest first
    is up to you — order in the array is the order shown).
 
+   Also editable from the phone: the 🎬 CREDITS tab at #/admin adds/hides/patches
+   this pool live (src/data/live.js), and scripts/snapshot-live.js bakes those
+   edits back into the repo overnight.
+
    Each entry:
      id      — unique slug (kebab-case), e.g. "some-movie-2026"
      title   — display title

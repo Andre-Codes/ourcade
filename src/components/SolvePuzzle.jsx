@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { markSolved } from "../lib/solveState.js";
+import { RUNES } from "../lib/runes.js";
 
 /* SolvePuzzle — renders one "Solve This" puzzle inside the /action-lab/:id guide
    page (CreativeGuidePage branches here when an item carries a `puzzle`). Most
@@ -233,14 +234,29 @@ function Cipher({ puzzle, itemId }) {
   );
 }
 
-// Word Sprint (kind:"anagram"): a 30-second speed round. Seven scrambled letters
+// Word Sprint (kind:"anagram"): a 60-second speed round. Seven scrambled letters
 // are shown; type as many real words (4+ letters) as you can before the clock
 // runs out. The generator pre-computed the full valid-word set (`puzzle.words`),
 // so the check is a cheap membership test — no runtime dictionary. Each unique
 // find scores by length; solving records a completion once the round ends with
 // any finds. A word may be built from the rack's letters (letters can't be reused
 // more than they appear), which the pre-computed set already guarantees.
-const SPRINT_SECONDS = 30;
+//
+// The rack is RUNES until the clock starts — otherwise you could sit and solve
+// the whole board before pressing start, and the timer would mean nothing.
+const SPRINT_SECONDS = 60;
+
+// One rune tile: the letter's glyph drawn as strokes on the 12×20 grid RUNES uses.
+function Rune({ letter }) {
+  const strokes = RUNES[letter] || RUNES.I;
+  return (
+    <svg className="arcade-sprint-rune" viewBox="0 0 12 20" aria-hidden="true">
+      {strokes.map((pts, i) => (
+        <polyline key={i} points={pts.map(([x, y]) => `${x},${y}`).join(" ")} />
+      ))}
+    </svg>
+  );
+}
 
 function WordSprint({ puzzle, itemId }) {
   const wordSet = useMemo(
@@ -312,14 +328,30 @@ function WordSprint({ puzzle, itemId }) {
 
   const score = found.reduce((s, w) => s + w.length, 0);
   const timeLow = phase === "running" && left <= 5;
+  // Only the pangrams the player actually landed — see the result block below.
+  const gotPangrams = (puzzle.pangrams || []).filter((p) => foundSet.has(p));
+  const rackSize = (puzzle.letters || puzzle.scramble || "").length;
 
   return (
     <div className="arcade-solve">
       {puzzle.prompt && <p className="arcade-solve-prompt">{puzzle.prompt}</p>}
 
-      {/* the rack — big scrambled letters */}
-      <p className="arcade-solve-mono arcade-solve-cipher arcade-sprint-rack">
-        {puzzle.scramble.split("").join(" ")}
+      {/* the rack — runes while you're still on the start screen, flipping to the
+          real letters (left to right) the moment the clock starts. */}
+      <p
+        className="arcade-solve-mono arcade-solve-cipher arcade-sprint-rack"
+        role="img"
+        aria-label={phase === "ready" ? "hidden letters" : puzzle.scramble.split("").join(" ")}
+      >
+        {puzzle.scramble.split("").map((ch, i) => (
+          <span
+            key={i}
+            className={`arcade-sprint-tile${phase === "ready" ? " is-rune" : " is-letter"}`}
+            style={phase === "ready" ? undefined : { animationDelay: `${i * 60}ms` }}
+          >
+            {phase === "ready" ? <Rune letter={ch} /> : ch}
+          </span>
+        ))}
       </p>
 
       {phase === "ready" && (
@@ -331,7 +363,7 @@ function WordSprint({ puzzle, itemId }) {
               className="arcade-solve-btn arcade-solve-check-btn"
               onClick={start}
             >
-              start 30s sprint
+              start {SPRINT_SECONDS}s sprint
             </button>
           </div>
         </>
@@ -389,12 +421,17 @@ function WordSprint({ puzzle, itemId }) {
               ))}
             </div>
           )}
-          {puzzle.pangrams?.length > 0 && (
-            <p className="arcade-solve-hint">
-              Used all 7 letters: {puzzle.pangrams.join(", ")}
-              {found.some((w) => puzzle.pangrams.includes(w)) ? " — and you got it! 🏆" : ""}
+          {/* Never name a pangram the player didn't land — "play again" replays
+              this exact rack, so spoiling it here would burn the round. */}
+          {gotPangrams.length > 0 ? (
+            <p className="arcade-solve-status is-right">
+              🏆 You used all {rackSize} letters: {gotPangrams.join(", ")}
             </p>
-          )}
+          ) : puzzle.pangrams?.length > 0 ? (
+            <p className="arcade-solve-hint">
+              There was a word using all {rackSize} letters — you didn't find it. Play again?
+            </p>
+          ) : null}
           <div className="arcade-solve-controls">
             <button
               type="button"

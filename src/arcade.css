@@ -1059,8 +1059,14 @@ main > section + section { margin-top: 44px; }
 }
 .arcade-hero:hover .arcade-hero-play { filter: brightness(1.1); }
 
-/* ---- featured game (real, external game) — hero variant with art ---- */
+/* ---- PING (a real, external game by another dev) — hero variant with art ---- */
 .arcade-featured { --accent: #6ad6ff; margin-top: 18px; } /* default; per-game accent overrides inline */
+/* the acronym line under the ★ PING ★ kicker */
+.arcade-ping-note {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; line-height: 1.5;
+  letter-spacing: 0.03em; color: var(--arcade-muted); margin: 2px 0 10px;
+}
+.arcade-ping-note b { color: var(--neon-gold); }
 .arcade-featured .arcade-hero-screen {
   width: 168px; height: 118px; padding: 0; overflow: hidden;
 }
@@ -1870,10 +1876,31 @@ main > section + section { margin-top: 44px; }
   text-align: center; color: #eef0ff; margin: 0; white-space: pre-wrap;
 }
 
-/* word sprint — timed find-'em-all from a 7-letter rack */
+/* word sprint — timed find-'em-all from a 7-letter rack.
+   The rack is per-letter tiles (runes before the clock starts, then the real
+   letters), so spacing is a flex gap — letter-spacing does nothing between
+   elements. */
 .arcade-sprint-rack {
-  text-align: center; font-size: 1.5rem; letter-spacing: 0.25em;
-  color: var(--neon-gold); text-shadow: 0 0 12px rgba(255, 210, 63, 0.35);
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.3em;
+  font-size: 1.5rem; color: var(--neon-gold);
+  text-shadow: 0 0 12px rgba(255, 210, 63, 0.35);
+}
+.arcade-sprint-tile {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 1em;
+}
+.arcade-sprint-tile.is-rune { color: var(--neon-aqua); opacity: 0.85; }
+.arcade-sprint-rune {
+  width: 0.9em; height: 1.5em; fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+}
+/* the flip: staggered left-to-right by an inline animation-delay */
+.arcade-sprint-tile.is-letter { animation: runeFlip 320ms ease-out backwards; }
+@keyframes runeFlip {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to { transform: rotateX(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-sprint-tile.is-letter { animation: none; }
 }
 .arcade-sprint-hud {
   display: flex; justify-content: space-between; align-items: center; gap: 10px;

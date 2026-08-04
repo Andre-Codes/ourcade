@@ -38,6 +38,7 @@ export const LIVE_TYPES = [
   "weirdNight",
   "curiosities",
   "featured",
+  "movies",
   "news",
   "schedule",
 ];
