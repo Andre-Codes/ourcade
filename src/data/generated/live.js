@@ -2,4 +2,100 @@
 // Baked copy of the live overlay (Firestore live/content), so admin edits render
 // on first paint instead of waiting on the network — and so they land in git.
 // Shape: { <type>: { adds: [], patches: {}, hides: [] } }. See src/data/live.js.
-export default {};
+export default {
+  "vault": {
+    "patches": {
+      "gw-im-google": {
+        "archivedAt": "",
+        "source": "",
+        "url": "https://imgoogle.dinakelberman.com/"
+      }
+    },
+    "hides": [
+      "g:the-quiet-place-project"
+    ]
+  },
+  "weird": {
+    "adds": [
+      {
+        "title": "The Chaos by Gerard Nolst Trenité",
+        "blurb": "A cheerful ambush made of English spelling. Hundreds of words that look like they should rhyme…and absolutely refuse. Read it aloud and watch the language slowly remove its mask. The dictionary is load-bearing",
+        "url": "https://ncf.idallen.com/english.html",
+        "id": "weird-the-chaos-by-gerard-nolst-trenite"
+      }
+    ]
+  },
+  "featured": {
+    "adds": [
+      {
+        "accent": "#255427",
+        "blurb": "A colony simulator about tiny bearded disasters. It looks like a spreadsheet and plays like an ancient cursed machine designed to generate stories no sane developer would dare script.",
+        "url": "http://www.bay12games.com",
+        "tagline": "roguelike • simulation",
+        "id": "dwarf-fortress",
+        "year": "2006",
+        "imageUrl": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/975370/34e18f5695fffd64458b78110930abc5258ccd14/header.jpg?t=1779740424",
+        "title": "Dwarf Fortress"
+      },
+      {
+        "title": "Disco Elysium",
+        "blurb": "Your greatest weapon isn’t a sword—it’s your mind. Investigate a murder, argue with your own inner thoughts, and shape the kind of cop you’ll become through deep dialogue and meaningful choices.",
+        "url": "https://discoelysium.com/",
+        "tagline": "Detective RPG • Narrative • Choices Matter",
+        "year": "2019",
+        "imageUrl": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/632470/816ea59d6d8ac525f79a07c3a7afa94eddb3437c/header.jpg?t=1780913406",
+        "accent": "#f55e27",
+        "id": "disco-elysium"
+      }
+    ]
+  },
+  "movies": {
+    "adds": [
+      {
+        "title": "The Odyssey",
+        "stinger": "no",
+        "credits": "Nothing to see. Go home. You’ve been here for 3 hours.",
+        "id": "the-odyssey"
+      },
+      {
+        "title": "Spider-Man: Brand New Day",
+        "stinger": "yes",
+        "credits": "Short extra scene after the very end of the credits",
+        "id": "spider-man-brand-new-day"
+      },
+      {
+        "title": "Motor City",
+        "stinger": "no",
+        "credits": "Nothing. You’re free to go rest your ears.",
+        "id": "motor-city"
+      }
+    ],
+    "hides": [
+      "scary-movie-2026",
+      "the-death-of-robinhood-2026",
+      "the-furious-2026"
+    ]
+  },
+  "schedule": {
+    "adds": [
+      {
+        "days": 7,
+        "mode": "pin",
+        "from": "2026-08-03",
+        "text": "NEW: See The Odyssey or Odd, I see?",
+        "type": "news",
+        "id": "sched-news-rumor-see-the-odyssey-or-odd-i-s"
+      },
+      {
+        "type": "news",
+        "mode": "pin",
+        "from": "2026-08-04",
+        "text": "Commercial internet. What’s that? Commercial internet. NOT QUITE YET.",
+        "id": "sched-news-commercial-internet-what-s-that-"
+      }
+    ],
+    "hides": [
+      "sched-news-psa-commercial-internet-what-s-t"
+    ]
+  }
+};
