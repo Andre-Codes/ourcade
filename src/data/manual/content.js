@@ -383,57 +383,73 @@ export const MANUAL_DEEP_CUTS = [
 // (the ranking IS the content), one set per day. Shape:
 //   { id, title, unit:"song"|"movie"|"show", blurb?,
 //     entries: [{ rank:1..5, title, by?, note?, trend:"up"|"down"|"same"|"new" }] }
-// Always EXACTLY 5 entries, ranks 1..5. `trend` drives the ↑↓– arrow; `note` is
-// the dry one-liner under each pick. These go stale — refresh the topical ones
-// monthly (npm run generate) and keep a few evergreen sets here so the page is
-// never empty between runs.
+// Always EXACTLY 5 entries, ranks 1..5. `era` is "now" | "retro"; `trend` drives
+// the ▲▼— glyph (flavor, not real chart movement); `note` is the dry one-liner
+// under each pick.
+//
+// FALLBACK TIER ONLY (see src/data/countdowns.js): while the generated pool is
+// healthy these never surface. They exist so a failed generation run degrades to
+// something rather than nothing — which is exactly why they're all era:"retro"
+// and name REAL era-defining work. A hand-written chart can't stay current, but
+// it can stay true, and "the one from the show everyone's watching" was a chart
+// of blank rows. Topical charts come from npm run generate:watercooler.
 export const MANUAL_COUNTDOWNS = [
   {
     id: "ctd-songs-stuck",
-    title: "TOP 5 SONGS STUCK IN EVERYONE'S HEAD",
+    title: "TOP 5 SONGS THAT OWNED THE BURNED CD",
     unit: "song",
-    blurb: "as decided by the entire internet, no take-backs",
+    era: "retro",
+    blurb: "track one through five of every mix that ever got handed to someone",
     entries: [
-      { rank: 1, title: "the one from the show everyone's watching", by: "you know the one", note: "you're humming it right now. that's the request line working.", trend: "up" },
-      { rank: 2, title: "the throwback that won't die", by: "an artist from 2003", note: "a TikTok unearthed it and now it's everywhere again. the cycle is complete.", trend: "new" },
-      { rank: 3, title: "the summer single", by: "the pop star of the moment", note: "engineered in a lab to be unskippable. it worked.", trend: "down" },
-      { rank: 4, title: "the sad one you secretly love", by: "the sensitive one", note: "for staring out the bus window like it's a music video.", trend: "same" },
-      { rank: 5, title: "the novelty track", by: "an account, not a band", note: "it shouldn't chart. it's charting. respect the chaos.", trend: "up" },
+      { rank: 1, title: "In the End", by: "Linkin Park", note: "the nu-metal on-ramp. you know every word and you're not sorry.", trend: "same" },
+      { rank: 2, title: "Hey Ya!", by: "OutKast", note: "still the only song that can end a wedding standoff.", trend: "up" },
+      { rank: 3, title: "Mr. Brightside", by: "The Killers", note: "legally it is no longer a song, it is a group activity.", trend: "up" },
+      { rank: 4, title: "Crazy in Love", by: "Beyoncé ft. Jay-Z", note: "that horn intro reorganized several nervous systems.", trend: "same" },
+      { rank: 5, title: "Since U Been Gone", by: "Kelly Clarkson", note: "engineered in a lab to be unskippable. it worked.", trend: "down" },
     ],
   },
   {
     id: "ctd-rewatch-comfort",
-    title: "TOP 5 SHOWS THE INTERNET WON'T SHUT UP ABOUT",
+    title: "TOP 5 SHOWS WORTH THE DIAL-UP RECAP",
     unit: "show",
-    blurb: "the group chat has opinions",
+    era: "retro",
+    blurb: "the ones the message boards stayed up all night for",
     entries: [
-      { rank: 1, title: "the prestige drama with the twist", note: "do NOT read the replies until you've finished. they have no mercy.", trend: "same" },
-      { rank: 2, title: "the comfort sitcom on its 9th rewatch", note: "you've seen every episode. you'll watch it again tonight. that's the deal.", trend: "up" },
-      { rank: 3, title: "the reality show that's actually art", note: "trash, but the kind you'd defend in a college essay.", trend: "up" },
-      { rank: 4, title: "the animated one for 'kids'", note: "the adults are crying harder than the kids. it's fine. everyone's fine.", trend: "new" },
-      { rank: 5, title: "the show that got cancelled too soon", note: "RIP. the fandom is still lighting candles in the tag.", trend: "down" },
+      { rank: 1, title: "The Sopranos", by: "HBO", note: "do NOT read the boards until you've finished. they have no mercy.", trend: "same" },
+      { rank: 2, title: "Friends", by: "NBC", note: "you've seen every episode. you'll put it on again. that's the deal.", trend: "up" },
+      { rank: 3, title: "Total Request Live", by: "MTV", note: "appointment television, back when the appointment was 3:30pm.", trend: "same" },
+      { rank: 4, title: "Avatar: The Last Airbender", by: "Nickelodeon", note: "the adults are crying harder than the kids. it's fine. everyone's fine.", trend: "up" },
+      { rank: 5, title: "Arrested Development", by: "Fox", note: "cancelled too soon. the fandom is still lighting candles in the tag.", trend: "down" },
     ],
   },
   {
     id: "ctd-box-office",
-    title: "TOP 5 AT THE BOX OFFICE-OF-THE-MIND",
+    title: "TOP 5 THAT RULED THE MULTIPLEX",
     unit: "movie",
-    blurb: "what the whole multiplex is arguing about",
+    era: "retro",
+    blurb: "back when the ticket stub went in your wallet and stayed there",
     entries: [
-      { rank: 1, title: "the blockbuster sequel nobody asked for but everyone saw", note: "it made a billion dollars. you saw it twice. let's not pretend.", trend: "same" },
-      { rank: 2, title: "the original idea that snuck through", note: "an actual new story. in this economy. cherish it.", trend: "new" },
-      { rank: 3, title: "the indie that became a meme", note: "you haven't seen it but you can quote it. that's modern cinema.", trend: "up" },
-      { rank: 4, title: "the legacy reboot", note: "same title, new cast, your childhood used as a hostage. you went anyway.", trend: "down" },
-      { rank: 5, title: "the one that's better than it had any right to be", note: "the trailer was a disaster. the movie is a 9. the internet is shocked.", trend: "up" },
+      { rank: 1, title: "The Lord of the Rings: The Return of the King", by: "New Line Cinema", note: "eleven Oscars and roughly nine endings. worth every one.", trend: "same" },
+      { rank: 2, title: "The Matrix", by: "Warner Bros.", note: "an actual new idea, in a multiplex. cherish it.", trend: "up" },
+      { rank: 3, title: "Shrek", by: "DreamWorks", note: "you haven't rewatched it but you can quote it. that's cinema.", trend: "up" },
+      { rank: 4, title: "Spider-Man", by: "Sony", note: "the upside-down kiss single-handedly funded a decade of sequels.", trend: "down" },
+      { rank: 5, title: "Pirates of the Caribbean: The Curse of the Black Pearl", by: "Disney", note: "a theme-park ride had no business being this good.", trend: "new" },
     ],
   },
 ];
 
-// THE BUZZ — short water-cooler/tabloid blurbs, dry 2000s e-zine humor. Shown a
-// few per day (rotateDailyN). Shape: { id, text (<=160 chars), tag } where tag is
-// one of GOSSIP | RUMOR | SIGHTING | HOT TAKE (drives the small chip). No URL —
-// these are flavor, not links. Inherently topical; keep them understandable a few
-// weeks later and refresh the time-sensitive ones via npm run generate.
+// THE BUZZ — short water-cooler blurbs, dry 2000s e-zine humor. Shape:
+// { id, text (<=160 chars), tag } where tag is one of GOSSIP | RUMOR | SIGHTING |
+// HOT TAKE (drives the small chip). No URL — these are flavor, not links.
+//
+// FALLBACK TIER ONLY (see src/data/buzz.js): while the generated pool is healthy
+// these never surface. They're evergreen archetypes — "a celebrity was
+// photographed holding an iced coffee" — which read fine alone but turn the card
+// into a horoscope when they're most of what you see, and that's what The Buzz
+// had become. The real dispatches come from npm run generate:watercooler, where
+// every line must name a real subject and cite a real outlet
+// (scripts/lib/buzz-quality.js). Don't add to this list to "top up" the card —
+// topping it up with archetypes is the bug.
 export const MANUAL_BUZZ = [
   { id: "bz-reboot", text: "Another beloved 2000s franchise is getting rebooted. The original cast is 'in talks,' which is Hollywood for 'we asked, they're thinking about the check.'", tag: "RUMOR" },
   { id: "bz-feud", text: "Two pop stars are 'not feuding,' according to a statement that nobody asked them for, which is how you know they are absolutely feuding.", tag: "GOSSIP" },

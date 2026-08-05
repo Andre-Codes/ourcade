@@ -90,8 +90,10 @@ A **separate page** (linked from the top nav), not part of the homepage band —
 
 ### 📻 The Countdown
 - **File:** [src/data/countdowns.js](../src/data/countdowns.js) · **Cadence:** daily (`rotateDaily`, salt 909)
-- **Pools:** `MANUAL_COUNTDOWNS` (✋) → `generated/countdowns.js` (🤖) → fallback (🛟)
+- **Pools — two tiers:** `generated/countdowns.js` (🤖) is what rotates (`COUNTDOWN_POOL`); `MANUAL_COUNTDOWNS` (✋) is a **fallback that only surfaces if the generated tier drops below 8 charts** → inline fallback (🛟). `COUNTDOWNS` is the whole corpus, for tooling — **don't size a rotation off it.**
 - A whole **TRL/Billboard-style top-5 chart is the unit of rotation** (the ranking *is* the content), so finished chart *sets* rotate day-to-day rather than being assembled from loose entries. Each entry's `trend` field (`up`/`down`/`same`/`new`) drives the ▲▼—★ arrow — it's **flavor set by the content, not computed** from real chart movement.
+- **Every entry names a real `title` AND a real `by`.** Placeholder rows ("the one from the show everyone's watching") are dropped at generation time and gated by `check:daily`; the joke belongs in `note`.
+- `era` is `"now"` (genuinely current) or `"retro"` (deliberate throwback). Generation targets ≥75% `now` and **trims** surplus retro charts rather than failing; `check:daily` holds the shipped pool to ≥60% `now`. The page's standfirst switches on it.
 
 ### 📅 On This Day
 - **File:** [src/data/onthisday.js](../src/data/onthisday.js) · **Cadence:** **date-keyed** (an MM-DD lookup, *not* rotation; salt 1010 only disambiguates multiple years on the same date)
@@ -100,9 +102,14 @@ A **separate page** (linked from the top nav), not part of the homepage band —
 - ⚠️ This is the **one content type that deliberately uses hard calendar dates** (the date *is* the content) and **AI generation is intentionally DISABLED** (`GENERATE_ONTHISDAY` off): "#1 song / box office on an exact date" is a checkable fact LLMs get plausibly-but-subtly wrong, so — like Game Facts — the hand-verified set is the source of truth.
 
 ### 💬 The Buzz
-- **File:** [src/data/buzz.js](../src/data/buzz.js) · **Cadence:** **3 per day** (`rotateDailyN`, salt 1111)
-- **Pools:** `MANUAL_BUZZ` (✋) → `generated/buzz.js` (🤖) → fallback (🛟)
-- Short tabloid/water-cooler blurbs in dry 2000s-e-zine voice; each has a `tag` chip (`GOSSIP` / `RUMOR` / `SIGHTING` / `HOT TAKE`).
+- **File:** [src/data/buzz.js](../src/data/buzz.js) · **Cadence:** **6 per day** (`rotateDailyN`, salt 1111 — `BUZZ_N` in [WaterCoolerPage.jsx](../src/components/WaterCoolerPage.jsx))
+- **Pools — two tiers:** `generated/buzz.js` (🤖) is what rotates (`BUZZ_POOL`); `MANUAL_BUZZ` (✋) is a **fallback that only surfaces if the generated tier drops below 24 dispatches** → inline fallback (🛟). `BUZZ` is the whole corpus, for tooling — **don't size a rotation off it.**
+- Short dispatches in dry 2000s-e-zine voice; each has a `tag` chip (`GOSSIP` / `RUMOR` / `SIGHTING` / `HOT TAKE`) and a "read more ↗" link.
+- **The specificity contract** — [scripts/lib/buzz-quality.js](../scripts/lib/buzz-quality.js), enforced by the generator at write time and re-asserted by `check:daily`:
+  - Every generated dispatch declares a `subject` (the real named thing) that must appear **verbatim in its `text`**, and a `sourceId` that a JSON-schema `enum` constrains to that run's live web-search results — so the model can't invent a URL and can't hand-wave a subject. Resolved to `source` + `sourceLabel` (a real outlet) by the generator; `filed` stamps the research date, which the page renders as one section-level dateline.
+  - *Specific about WHAT, vague about WHEN.* Content rotates for weeks after it's written, so naming the thing is required and dating it ("this week", "just dropped", any weekday/month) is rejected.
+  - Every quality rejection at generation time is a **silent drop**, never a `req()` — `req()` aborts the run and writes nothing, so one bad line would discard a paid batch. The floor is a single aggregate count (≥30).
+  - Why the archetypes were demoted: 51 of the old 72-item pool named nothing real, so a typical 6-item edition was 4–5 horoscopes. They're kept as the never-empty net, not as filler. **Adding archetypes to "top up" the card is the bug, not the fix.**
 
 ### 🔥 Hot or Not
 - **File:** [src/data/hotornot.js](../src/data/hotornot.js) · **Cadence:** **5 per day** (`rotateDailyN`, salt 1212)

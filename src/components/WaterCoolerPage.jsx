@@ -29,6 +29,18 @@ const TREND = {
   new: { glyph: "★", cls: "is-new", label: "new" },
 };
 
+// "Aug 1" for a YYYY-MM-DD key. Parsed as UTC so it echoes the key exactly,
+// same convention as prettyDate() in src/lib/daily.js.
+function shortDate(key) {
+  const [y, m, d] = String(key).split("-").map(Number);
+  if (!y || !m || !d) return "";
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 // A section header: the neon kicker plus a one-line standfirst that orients the
 // reader (what this is, why it's here). The informational layer over the wink.
 function SectionHead({ kicker, standfirst, children }) {
@@ -51,7 +63,11 @@ function Countdown({ dayKey: key }) {
     <div className="arcade-widget arcade-countdown">
       <SectionHead
         kicker="📻 THE COUNTDOWN"
-        standfirst="the five things the whole internet moved on — ranked, with the week's drift"
+        standfirst={
+          chart.era === "retro"
+            ? "a throwback chart — five things that owned the era, ranked"
+            : "the five things the whole internet moved on — ranked, with the week's drift"
+        }
       >
         <ShareButton
           className="arcade-countdown-share"
@@ -90,11 +106,17 @@ function Countdown({ dayKey: key }) {
 function TheBuzz({ dayKey: key }) {
   const items = getTodaysBuzz(key, BUZZ_N);
   if (!items.length) return null;
+  // One dateline for the section, not one per row: every dispatch in an edition
+  // shares the research run that produced it, so six identical "filed Aug 1"
+  // lines would read as a rendering bug. Newest wins; absent on the fallback tier.
+  const filed = items.map((b) => b.filed).filter(Boolean).sort().pop();
   return (
     <div className="arcade-widget arcade-buzz">
       <SectionHead
         kicker="💬 THE BUZZ"
-        standfirst="today's dispatches — rumor, gossip, and hot takes, sourced from nobody reputable"
+        standfirst={`today's dispatches — real things, real links, arcade-brain commentary${
+          filed ? ` · filed ${shortDate(filed)}` : ""
+        }`}
       />
       <ul className="arcade-buzz-list">
         {items.map((b) => (
@@ -243,7 +265,8 @@ export default function WaterCoolerPage() {
           <p className="arcade-watercooler-lede">
             In this edition: the countdown
             {headline?.title ? ` led by “${headline.title}”` : ""}, {BUZZ_N} dispatches
-            from the rumor mill, today's almanac, and the verdicts you put on the record.
+            on what the internet is actually talking about, today's almanac, and the
+            verdicts you put on the record.
           </p>
         </header>
 

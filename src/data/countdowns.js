@@ -1,8 +1,13 @@
 /* The Countdown — the 💧 Water Cooler's TRL/Billboard top-5. A whole chart SET
    is the unit of rotation (the ranking IS the content), so we rotate finished
-   sets day-to-day rather than assembling a chart from loose entries. Hand-curated
-   sets lead the pool; the generated supplement layers in when it lands. Pure JS —
-   importable by the UI and by scripts/daily-check.js. */
+   sets day-to-day rather than assembling a chart from loose entries. Pure JS —
+   importable by the UI and by scripts/daily-check.js.
+
+   TWO TIERS, same as src/data/buzz.js: generated charts name real titles AND
+   real artists (and carry era: "now" | "retro"), so they're what rotates.
+   MANUAL_COUNTDOWNS is the safety net only — a chart whose rows are "the one
+   from the show everyone's watching" is a chart of blank rows, fine as a
+   never-empty guarantee, not fine as a third of the rotation. */
 
 import { rotateDaily } from "../lib/daily.js";
 import generated from "./generated/countdowns.js";
@@ -25,15 +30,23 @@ const FALLBACK = [
   },
 ];
 
-export const COUNTDOWNS = [
-  ...MANUAL_COUNTDOWNS,
-  ...(Array.isArray(generated) && generated.length ? generated : []),
-];
+export const COUNTDOWNS_GENERATED = Array.isArray(generated) ? generated : [];
+export const COUNTDOWNS_MANUAL = MANUAL_COUNTDOWNS;
+
+// Every tier — for tooling and validators. NOT what the page rotates.
+export const COUNTDOWNS = [...COUNTDOWNS_GENERATED, ...COUNTDOWNS_MANUAL];
+
+// Roughly a week and a half of charts before the placeholders would be needed.
+const MIN_GENERATED = 8;
+
+export const COUNTDOWN_POOL =
+  COUNTDOWNS_GENERATED.length >= MIN_GENERATED ? COUNTDOWNS_GENERATED
+  : COUNTDOWNS.length ? COUNTDOWNS
+  : FALLBACK;
 
 const SALT = 909; // independent of all other pools (see src/lib/daily.js)
 
-// Today's countdown — cycles the whole pool of chart sets with no early repeats.
+// Today's countdown — cycles the pool of chart sets with no early repeats.
 export function getTodaysCountdown(key) {
-  const base = COUNTDOWNS.length ? COUNTDOWNS : FALLBACK;
-  return rotateDaily(base, key, SALT);
+  return rotateDaily(COUNTDOWN_POOL, key, SALT);
 }

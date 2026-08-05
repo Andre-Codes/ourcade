@@ -16,12 +16,13 @@ import { CURIOSITIES, getTodaysCuriosity } from "../src/data/curiosities.js";
 import { WEIRD, WEIRD_NIGHT, getCurrentWeirdThing, WEIRD_BLOCKS_PER_DAY } from "../src/data/weird.js";
 import { getDayPartGreeting } from "../src/data/dayparts.js";
 import { staticArtifacts } from "../src/data/stumble.js";
-import { COUNTDOWNS, getTodaysCountdown } from "../src/data/countdowns.js";
-import { BUZZ, getTodaysBuzz } from "../src/data/buzz.js";
+import { COUNTDOWNS, COUNTDOWNS_GENERATED, COUNTDOWN_POOL, getTodaysCountdown } from "../src/data/countdowns.js";
+import { BUZZ, BUZZ_GENERATED, BUZZ_POOL, getTodaysBuzz } from "../src/data/buzz.js";
 import { HOT_OR_NOT, getTodaysHotOrNot } from "../src/data/hotornot.js";
 import { ON_THIS_DAY_ALL, getOnThisDay } from "../src/data/onthisday.js";
 import { CREATIVES_POOL, timeBucketOf, TIME_BUCKETS, getCreativeOfTheDay, getCreative, isGuide } from "../src/data/creatives.js";
 import { urlKey } from "./lib/validate-urls.js";
+import { isDispatch, VAGUE_CHART_RE } from "./lib/buzz-quality.js";
 
 // A day-part object for a given local hour (date is arbitrary — only the hour
 // determines the part). Lets us drive the time-of-day logic headlessly.
@@ -80,6 +81,18 @@ let failures = 0;
 function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? " — " + detail : ""}`);
   if (!ok) failures++;
+}
+
+/* Reported but NOT a failure. For the one case a content gate can't tell apart
+   on its own: a pool that predates a contract (a migration that hasn't run yet)
+   looks identical to a pool that has drifted, but only the second is a bug.
+
+   This matters because FOUR workflows run check:daily before their commit step —
+   generate-content, fetch-stumble, refresh-weird and snapshot-live. Failing on
+   un-migrated data would freeze the nightly live snapshot and the weird refresh
+   over a pool they never touch. */
+function note(name, detail = "") {
+  console.log(`NOTE  ${name}${detail ? " — " + detail : ""}`);
 }
 
 // Determinism: the same date must always resolve to the same pick.
@@ -206,8 +219,10 @@ check(
 
 // Countdown: deterministic, cycles its pool of chart sets with no early repeats,
 // and every set is a well-formed top-5 (ranks 1..5, valid trend).
+// NOTE: the rotation walks COUNTDOWN_POOL (the generated tier while it's healthy),
+// NOT the full COUNTDOWNS corpus — sizing the walk off the wrong one fails.
 check("countdown deterministic", getTodaysCountdown(k0).id === getTodaysCountdown(k0).id);
-noRepeats("countdown", (k) => getTodaysCountdown(k).id, COUNTDOWNS.length);
+noRepeats("countdown", (k) => getTodaysCountdown(k).id, COUNTDOWN_POOL.length);
 {
   const TRENDS = new Set(["up", "down", "same", "new"]);
   const bad = COUNTDOWNS.filter((c) => {
@@ -219,17 +234,68 @@ noRepeats("countdown", (k) => getTodaysCountdown(k).id, COUNTDOWNS.length);
   });
   check("countdown sets well-formed (5 entries, ranks 1..5, valid trend)", bad.length === 0,
     bad.length ? `bad: ${bad.map((c) => c.id || "?").join(", ")}` : `${COUNTDOWNS.length} sets`);
+
+  // The ranking IS the content, so a placeholder row is a blank row. Only the
+  // rotating pool is held to this — MANUAL_COUNTDOWNS is the never-empty net.
+  const mush = COUNTDOWN_POOL.filter((c) =>
+    c.entries.some((e) => VAGUE_CHART_RE.test(e.title) || VAGUE_CHART_RE.test(e.by || ""))
+  );
+  check("countdown rows name real things (no placeholders)", mush.length === 0,
+    mush.length ? `mush: ${mush.map((c) => c.id).join(", ")}` : `${COUNTDOWN_POOL.length} sets`);
+
+  // Most days should surface a current chart; retro ones are garnish, not the diet.
+  const nowN = COUNTDOWN_POOL.filter((c) => c.era === "now").length;
+  if (!COUNTDOWN_POOL.some((c) => c.era)) {
+    note("countdown era mix pending", `no chart carries \`era\` yet — run npm run generate:watercooler`);
+  } else {
+    check("countdown pool is mostly current (>=60% era:now)", nowN / COUNTDOWN_POOL.length >= 0.6,
+      `${nowN}/${COUNTDOWN_POOL.length} now`);
+  }
 }
 
-// Buzz: deterministic, returns N distinct blurbs, cycles the pool with no early repeats.
+// Buzz: deterministic, returns N distinct dispatches, cycles the pool with no
+// early repeats. Same pool-vs-corpus trap as the countdown above.
 check("buzz deterministic", getTodaysBuzz(k0, 3).map((b) => b.id).join() === getTodaysBuzz(k0, 3).map((b) => b.id).join());
-check("buzz returns 3 distinct ids", new Set(getTodaysBuzz(k0, 3).map((b) => b.id)).size === Math.min(3, BUZZ.length));
-noRepeats("buzz", (k) => getTodaysBuzz(k, 1)[0].id, BUZZ.length);
+check("buzz returns 3 distinct ids", new Set(getTodaysBuzz(k0, 3).map((b) => b.id)).size === Math.min(3, BUZZ_POOL.length));
+noRepeats("buzz", (k) => getTodaysBuzz(k, 1)[0].id, BUZZ_POOL.length);
 {
   // Any buzz item that carries a "read more" source must have a valid http(s) url.
   const badSrc = BUZZ.filter((b) => b.source && !/^https?:\/\//i.test(b.source));
   check("buzz sources are valid urls", badSrc.length === 0,
     badSrc.length ? `bad: ${badSrc.map((b) => b.id).join(", ")}` : `${BUZZ.filter((b) => b.source).length} sourced`);
+}
+{
+  /* The Water Cooler is the arcade's daily briefing, so The Buzz has to read as
+     news: every generated dispatch names a real subject (verbatim in its text)
+     and carries a live source. scripts/lib/buzz-quality.js is the same contract
+     the generator enforces at write time, so a freshly-written pool passes by
+     construction and this only fires on a real regression.
+
+     MANUAL_BUZZ is exempt — it's the fallback tier and never surfaces while the
+     generated tier is healthy (see src/data/buzz.js).
+
+     THRESHOLD IS DELIBERATELY LOOSE. .github/workflows/generate-content.yml runs
+     this check AFTER generation and BEFORE the commit step, so a red here
+     discards the whole month's polls, quizzes, tips, news and hot-or-not too.
+     Don't tighten it casually. */
+  const MIN_SPECIFIC = 0.8;
+  const good = BUZZ_GENERATED.filter(isDispatch);
+  const worst = BUZZ_GENERATED.filter((b) => !isDispatch(b)).slice(0, 3).map((b) => b.id);
+  if (!BUZZ_GENERATED.some((b) => b.subject)) {
+    // Pre-contract pool: nothing declares a `subject`, so the ratio would read 0%
+    // and say nothing about drift. See note() above for why this can't fail.
+    note("buzz specificity gate pending",
+      `no dispatch carries \`subject\` yet — run npm run generate:watercooler`);
+  } else {
+    check(`buzz dispatches name a real subject + source (>=${MIN_SPECIFIC * 100}%)`,
+      good.length / BUZZ_GENERATED.length >= MIN_SPECIFIC,
+      `${good.length}/${BUZZ_GENERATED.length}` + (worst.length ? ` — e.g. ${worst.join(", ")}` : ""));
+  }
+
+  const onGenerated = BUZZ_POOL === BUZZ_GENERATED;
+  check("buzz rotation is on the generated tier", onGenerated,
+    onGenerated ? `${BUZZ_GENERATED.length} dispatches`
+      : "FALLBACK TIER — run npm run generate:watercooler");
 }
 
 // Hot or Not: deterministic, 5 distinct subjects per day, each normalized to the

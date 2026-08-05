@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
 import { checkUrls, urlKey } from "./lib/validate-urls.js";
+import { hasNamedSubject, isVagueBuzz, DATED_RE, VAGUE_CHART_RE } from "./lib/buzz-quality.js";
 import { archiveAll } from "./lib/firebase-admin.js";
 import crypto from "node:crypto";
 
@@ -42,7 +43,10 @@ function archivePool(type, items) {
 const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").split("=")[1] || null;
 
 // How big a batch to ask for. One run = a month-plus of date-seeded daily rotation.
-const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30, countdowns: 16, buzz: 60, hotornot: 50, onthisday: 40 };
+// Countdowns/buzz are asked for with headroom: the Water Cooler's specificity
+// gate DROPS anything vague, dated or unsourced, so the ask has to exceed the
+// target pool size (see generateWatercooler).
+const COUNT = { polls: 40, quizzes: 14, tips: 90, news: 50, facts: 60, weird: 14, curiosities: 30, countdowns: 20, buzz: 72, hotornot: 50, onthisday: 40 };
 
 // Facts are hand-curated (see MANUAL_FACTS in src/data/manual/content.js); the home runs
 // on those only. Set true to also (re)generate the supplemental generated/facts.js.
@@ -98,6 +102,87 @@ const client = new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 // block so every structured call can riff on the same current hooks.
 let TOPICAL = "";
 
+// The run's citable link set — [{ n, url, title, host, page_age }] — and the date
+// the research fired. runResearch() has ALWAYS returned the real source URLs it
+// saw; we used to throw them away and keep only the prose hooks, which is why
+// every sourced Buzz dispatch ended up pointing at a Wikipedia article the model
+// recalled from memory. Now the model picks an "S-number" out of this list and we
+// map it back to the real url, so a "read more" link goes to actual coverage.
+let SOURCES = [];
+let FILED = "";
+
+// The search returns whatever the open web hands back, including SEO chum. These
+// are real hosts from a live run — linking readers there costs more credibility
+// than a Wikipedia link ever did.
+const SOURCE_DENY = [
+  /(^|\.)accio\.com$/i,
+  /(^|\.)barchart\.com$/i,
+  /financialcontent\.com$/i,
+  /(^|\.)meme\.com$/i,
+  /rednotememe\.com$/i,
+  /trends\.usa\.one$/i,
+  /plataformamedia\.com$/i,
+  /(^|\.)sportskeeda\.com$/i,
+];
+const SOURCE_CAP = 24; // ~500 tokens in the cached prefix; plenty to cite from
+
+// page_age comes back as "3 days ago" / "June 24, 2026" / null. Rough days-old so
+// the citable set can be ranked newest-first; unparseable sorts last.
+function ageDays(s) {
+  const m = /^(\d+)\s+(day|week|month|year)s?\s+ago$/i.exec(String(s || "").trim());
+  if (m) return Number(m[1]) * { day: 1, week: 7, month: 30, year: 365 }[m[2].toLowerCase()];
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? Math.max(0, (Date.now() - t) / 86400000) : 9999;
+}
+
+function curateSources(results) {
+  const seen = new Set();
+  const keep = [];
+  for (const r of results || []) {
+    if (!/^https?:\/\//i.test(r.url || "")) continue;
+    let host;
+    try {
+      host = new URL(r.url).host.replace(/^www\./, "");
+    } catch {
+      continue;
+    }
+    if (SOURCE_DENY.some((re) => re.test(host)) || seen.has(r.url)) continue;
+    seen.add(r.url);
+    keep.push({ url: r.url, title: String(r.title || "").trim(), host, page_age: r.page_age || "" });
+  }
+  keep.sort((a, b) => ageDays(a.page_age) - ageDays(b.page_age));
+  return keep.slice(0, SOURCE_CAP).map((s, i) => ({ n: i + 1, ...s }));
+}
+
+// "read more ↗" reads better as an outlet than as a domain. Known names first,
+// title-cased bare domain otherwise.
+const OUTLET = {
+  "netflix.com": "Netflix Tudum",
+  "billboard.com": "Billboard",
+  "rollingstone.com": "Rolling Stone",
+  "gamespot.com": "GameSpot",
+  "thewrap.com": "TheWrap",
+  "foxsports.com": "FOX Sports",
+  "variety.com": "Variety",
+  "npr.org": "NPR",
+  "en.wikipedia.org": "Wikipedia",
+  "officialcharts.com": "Official Charts",
+  "editorial.rottentomatoes.com": "Rotten Tomatoes",
+  "metacritic.com": "Metacritic",
+  "timeout.com": "Time Out",
+  "videogameschronicle.com": "VGC",
+  "tvguide.com": "TV Guide",
+  "boston.com": "Boston.com",
+  "roughtrade.com": "Rough Trade",
+  "stereofox.com": "Stereofox",
+  "analyticsinsight.net": "Analytics Insight",
+};
+function outletLabel(host) {
+  if (OUTLET[host]) return OUTLET[host];
+  const bare = host.replace(/^(editorial|newsroom|blog|www)\./, "").split(".")[0];
+  return bare.charAt(0).toUpperCase() + bare.slice(1);
+}
+
 // Pull current hooks via a forced, live web search (see scripts/lib/research.js).
 // We VERIFY a search actually fired (web_search_requests) — otherwise the model
 // may have answered from stale training data, so we fall back to evergreen only.
@@ -115,7 +200,12 @@ async function researchTopics() {
       console.warn("  research: model did NOT actually search (0 requests) — evergreen only.");
       return "";
     }
-    console.log(`  research: ${r.requestCount} live search(es), ${r.results.length} sources → src/data/generated/_research.md`);
+    SOURCES = curateSources(r.results);
+    FILED = new Date().toISOString().slice(0, 10);
+    console.log(
+      `  research: ${r.requestCount} live search(es), ${r.results.length} sources ` +
+        `(${SOURCES.length} citable) → src/data/generated/_research.md`
+    );
     return r.hooks;
   } catch (e) {
     console.warn(`  research: web search unavailable (${e.message}); evergreen content only.`);
@@ -133,6 +223,20 @@ function systemBlocks() {
       text:
         "TOPICAL HOOKS (current — riff on SOME content with an early-2000s / nostalgic twist; keep it understandable weeks later and never mean):\n" +
         TOPICAL,
+    });
+  }
+  // Deliberately NO urls here. The model returns an S-number, which a schema
+  // `enum` constrains, and we map it back to the real link ourselves — so
+  // inventing or mistyping a url is impossible at the decoding level rather
+  // than something we hope a prompt instruction prevents.
+  if (SOURCES.length) {
+    blocks.push({
+      type: "text",
+      text:
+        "VERIFIED SOURCES — the ONLY citable links this run. Each came back from a live web " +
+        "search minutes ago, so every one is real and reachable. When a schema asks for a " +
+        "sourceId, return one of these S-numbers EXACTLY. You are never to write a url yourself.\n" +
+        SOURCES.map((s) => `S${s.n} | ${s.host} | ${s.page_age || "undated"} | ${s.title}`).join("\n"),
     });
   }
   blocks[blocks.length - 1].cache_control = { type: "ephemeral" };
@@ -350,6 +454,7 @@ const countdownsSchema = {
           id: { type: "string" },
           title: { type: "string" }, // TRL-style header, e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"
           unit: { type: "string", enum: ["song", "movie", "show"] },
+          era: { type: "string", enum: ["now", "retro"] }, // "now" = genuinely current; "retro" = deliberate throwback
           blurb: { type: "string" }, // optional dek; "" if none
           entries: {
             type: "array",
@@ -367,14 +472,20 @@ const countdownsSchema = {
             },
           },
         },
-        required: ["id", "title", "unit", "blurb", "entries"],
+        required: ["id", "title", "unit", "era", "blurb", "entries"],
       },
     },
   },
   required: ["countdowns"],
 };
 
-const buzzSchema = {
+// A FACTORY, not a const: `sourceId` is enum-constrained to THIS run's verified
+// S-numbers, which is what makes an invented url structurally impossible. The
+// real `source`/`sourceLabel` are filled in by the generator from the S-number,
+// so they're deliberately absent here — the model never handles a url at all.
+// `subject` is the specificity contract: the model names the real thing it wrote
+// about, and we verify that name actually appears in `text` (buzz-quality.js).
+const buzzSchema = (sourceIds) => ({
   type: "object",
   additionalProperties: false,
   properties: {
@@ -385,17 +496,17 @@ const buzzSchema = {
         additionalProperties: false,
         properties: {
           id: { type: "string" },
+          subject: { type: "string" }, // the real named thing, verbatim as it appears in `text`
           text: { type: "string" }, // one tabloid-style line, <= ~160 chars
           tag: { type: "string", enum: ["GOSSIP", "RUMOR", "SIGHTING", "HOT TAKE"] },
-          source: { type: "string" }, // "read more" url for topical blurbs; "" if none
-          sourceLabel: { type: "string" }, // short outlet/host label; "" if none
+          sourceId: { type: "string", enum: sourceIds }, // an S-number from VERIFIED SOURCES
         },
-        required: ["id", "text", "tag", "source", "sourceLabel"],
+        required: ["id", "subject", "text", "tag", "sourceId"],
       },
     },
   },
   required: ["buzz"],
-};
+});
 
 const hotornotSchema = {
   type: "object",
@@ -698,37 +809,72 @@ ACCURACY IS THE WHOLE POINT — these are presented as true. Use ONLY widely doc
 // ---- The Water Cooler (/watercooler) — pop-culture pools ----
 // Countdowns + Buzz + Hot-or-Not in one pass (they share the same topical
 // research). These are the site's most time-sensitive pools, so the cron runs
-// `--only=watercooler` to refresh just them cheaply. They carry NO urls, so
-// there's no liveness gate — just structural validation, then write + archive.
+// `--only=watercooler` to refresh just them cheaply.
+//
+// THE BUZZ IS HELD TO A SPECIFICITY CONTRACT (scripts/lib/buzz-quality.js): every
+// dispatch must name a real thing and cite one of this run's VERIFIED SOURCES.
+// The page is the arcade's daily briefing, and a pool of "a celebrity was spotted
+// holding an iced coffee" archetypes made it read like a horoscope.
+//
+// Every quality rejection here is a SILENT DROP, never a req() — req() aborts the
+// whole run and writes nothing, so one hedgy line out of 72 would discard a paid
+// batch. The floor is a single aggregate count at the end. Buzz sources ARE
+// liveness-checked, and a dead one now drops the item (it can't stand alone
+// without its link any more).
 async function generateWatercooler() {
   console.log("Generating the Water Cooler pools (countdowns + buzz + hot-or-not)…");
   // --only=watercooler skips main()'s research, so pull hooks here too.
   if (!TOPICAL) TOPICAL = await researchTopics();
   const topical = !!TOPICAL;
+  // Nothing citable → no honest way to write a sourced dispatch. Skip the buzz
+  // call entirely (saving it) and let the loader's fallback tier carry the card.
+  const citable = SOURCES.length >= 8;
 
   // — The Countdown —
   const countdownsData = await generate(
     "countdowns",
     countdownsSchema,
-    `Generate ${COUNT.countdowns} TRL/Billboard-style top-5 countdowns for the 📻 THE COUNTDOWN card on OURCADE's "Water Cooler" pop-culture page. Each is a complete, ordered chart — the ranking is the content. Fields: a kebab-case id starting with "ctd-", a punchy ALL-CAPS title (e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"), unit ("song" | "movie" | "show"), an optional one-line blurb ("" if none), and EXACTLY 5 entries. Each entry: rank 1-5 (each rank used once), title (the real thing by name), by (artist/studio — "" if n/a), note (a dry one-line quip in the site's 2000s-e-zine voice — "" if none), and trend ("up" | "down" | "same" | "new").
+    `Generate ${COUNT.countdowns} TRL/Billboard-style top-5 countdowns for the 📻 THE COUNTDOWN card on OURCADE's "Water Cooler" pop-culture page. Each is a complete, ordered chart — the ranking is the content. Fields: a kebab-case id starting with "ctd-", a punchy ALL-CAPS title (e.g. "TOP 5 SONGS STUCK IN EVERYONE'S HEAD"), unit ("song" | "movie" | "show"), era ("now" | "retro"), an optional one-line blurb ("" if none), and EXACTLY 5 entries. Each entry: rank 1-5 (each rank used once), title (the real thing by name), by (the real artist/studio/network), note (a dry one-line quip in the site's 2000s-e-zine voice — "" if none), and trend ("up" | "down" | "same" | "new").
+
+EVERY ENTRY NAMES A REAL THING. Both "title" AND "by" must be the actual work and the actual artist/studio/network — this holds for current and throwback charts alike. Placeholders are forbidden: no "the one everyone's watching", no "you know the one", no "the pop star of the moment", no "an artist from 2003". A chart of unnamed rows is a chart of blank rows. The joke lives in "note" and nowhere else.
+
+SPECIFIC ABOUT WHAT, VAGUE ABOUT WHEN: no "this week", no chart dates, no "debuts Friday" — these rotate for weeks after they're written. "trend" is flavor for the ▲▼ glyph, not a claim about real chart movement.
 ${topical
-      ? `Make MOST countdowns TOPICAL and REAL: the "title" and "by" fields MUST be the actual current song/movie/show and its real artist/studio from the TOPICAL HOOKS — name real things, NOT vague placeholders like "the one everyone's watching". Put ALL the dry early-2000s wink in the "note" only. Keep them understandable a few weeks from now; non-defamatory and good-natured. Include 2-3 evergreen 2000s-nostalgia charts (also naming real era-defining titles) for texture.`
-      : `No current hooks this run — lean on evergreen 2000s-nostalgia and arcade-culture countdowns, naming REAL era-defining songs/movies/shows by title/artist (not vague placeholders). Keep it good-natured and non-defamatory.`}
+      ? `era: use "now" for a chart of what is genuinely current — this is the DEFAULT and at least ${Math.ceil(COUNT.countdowns * 0.75)} of the ${COUNT.countdowns} charts must be "now", built from the TOPICAL HOOKS and the VERIFIED SOURCES headlines. Use "retro" only for a deliberate 2000s-nostalgia chart; those still name real era-defining titles and artists (e.g. "In the End" — Linkin Park, Total Request Live — MTV). Keep everything non-defamatory and good-natured.`
+      : `No current hooks this run — these will all be era:"retro" 2000s-nostalgia and arcade-culture countdowns, still naming REAL era-defining songs/movies/shows by title AND artist. Keep it good-natured and non-defamatory.`}
 Unique ids. No duplicate chart concepts.`
   );
 
   // — The Buzz —
-  const buzzData = await generate(
-    "buzz",
-    buzzSchema,
-    `Generate ${COUNT.buzz} short water-cooler/tabloid blurbs for the 💬 THE BUZZ card on OURCADE's "Water Cooler" page. Each: a kebab-case id starting with "bz-", text (one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory; do NOT prefix the text with the tag — the UI shows the tag separately, so "text" must NOT begin with "RUMOR:"/"GOSSIP:"/etc.), tag ("GOSSIP" | "RUMOR" | "SIGHTING" | "HOT TAKE"), and a source pair for "read more".
+  // Skipped entirely when the research turned up nothing citable: an unsourced
+  // pool is exactly the failure mode this rewrite exists to kill, and the loader
+  // already falls back to MANUAL_BUZZ on a thin generated tier.
+  let buzzData = null;
+  if (!citable) {
+    console.warn(`  buzz: only ${SOURCES.length} citable sources — skipping (previous pool keeps serving)`);
+  } else {
+    buzzData = await generate(
+      "buzz",
+      buzzSchema(SOURCES.map((s) => `S${s.n}`)),
+      `Generate ${COUNT.buzz} short water-cooler dispatches for the 💬 THE BUZZ card on OURCADE's "Water Cooler" page — the arcade's daily briefing. Each: a kebab-case id starting with "bz-", a subject, text, a tag ("GOSSIP" | "RUMOR" | "SIGHTING" | "HOT TAKE"), and a sourceId.
 
-SOURCES: for any blurb that names a REAL current thing (a real show/song/movie/game/trend), set "source" to a durable, canonical URL for that thing — the official site, its Wikipedia article, or a major outlet's landing page — and "sourceLabel" to a short label (e.g. "Wikipedia", "Variety", the site's name). The url must be one you are confident points at the named thing; when you are NOT confident, set both "source" and "sourceLabel" to "". For evergreen archetype blurbs (no specific real subject), set both to "". Do NOT invent or guess URLs — a missing source is fine; a wrong one is not.
-${topical
-      ? `Make about half TOPICAL: riff on REAL current entertainment from the TOPICAL HOOKS (name the actual show/song/movie/trend) WITH a source, then add the early-2000s framing. The rest can be evergreen celebrity/pop-culture archetypes (reboots, feuds-that-aren't, vinyl/flip-phone revivals) with empty sources. Keep every line understandable weeks later and non-defamatory — no real allegations about real people.`
-      : `No current hooks this run — write evergreen pop-culture archetype blurbs (reboots, "not feuding" statements, nostalgia revivals, streaming-becomes-cable) with empty sources. Good-natured, non-defamatory.`}
-Unique ids. No duplicates.`
-  );
+EVERY DISPATCH IS ABOUT A REAL, NAMED THING. This is the whole point of the card — a reader should finish a line knowing something they didn't know.
+
+"subject": the real thing the dispatch is about, written EXACTLY as it appears in "text" — a title, person, team, game, album, film, show, or named meme ("Grand Theft Auto VI", "Olivia Rodrigo", "Jimothy the Raccoon", "Silo"). NOT a category and NOT a trend ("flip phones", "a pop star", "streaming services", "vinyl") — a category is not a story.
+
+"text": one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory. It MUST contain "subject" verbatim. Do NOT prefix it with the tag; the UI renders the tag separately, so it must not begin with "RUMOR:"/"GOSSIP:"/etc.
+
+BANNED CONSTRUCTIONS — these are precisely what makes a dispatch worthless: "a celebrity…", "a pop star…", "two pop stars…", "an actor…", "a director…", "another beloved franchise…", "a boy band…", "a huge act…", "a washed-up 2000s heartthrob…", "your streaming service…", "someone claims…". If you cannot name the thing, do not write the dispatch — write a different one about something you can name.
+
+SPECIFIC ABOUT WHAT, VAGUE ABOUT WHEN. These rotate for weeks after they're written, so name the thing but never date it. BANNED: "this week", "tonight", "yesterday", "opening weekend", "just dropped", "just announced", "out now", any weekday or month name, any calendar date. "Grand Theft Auto VI is set in Vice City with two protagonists" ages fine. "GTA VI drops this Friday" does not.
+
+"sourceId": the S-number of the VERIFIED SOURCES entry that actually covers your subject. If nothing in that list covers a subject, pick a different subject — every dispatch needs a real source behind its "read more" link. Never write a url; the S-number is the only thing you return.
+
+The early-2000s wink belongs in the JOKE, never in the subject: the subject is real and current, the punchline is dial-up / Tamagotchi / LAN party / burned CD.
+
+Unique ids. No duplicate subjects — spread them across the whole source list rather than writing six dispatches about one headline.`
+    );
+  }
 
   // — Hot or Not —
   const hotornotData = await generate(
@@ -741,11 +887,12 @@ ${topical
 Unique ids. No duplicate subjects.`
   );
 
-  // — normalize + structural validation (no urls → no liveness gate) —
+  // — normalize + structural validation —
   const countdowns = (countdownsData.countdowns || []).map((c) => ({
     id: String(c.id || "").trim(),
     title: String(c.title || "").trim(),
     unit: String(c.unit || "").trim(),
+    era: String(c.era || "").trim(),
     ...(String(c.blurb || "").trim() ? { blurb: String(c.blurb).trim() } : {}),
     entries: (c.entries || [])
       .map((e) => ({
@@ -757,15 +904,20 @@ Unique ids. No duplicate subjects.`
       }))
       .sort((a, b) => a.rank - b.rank),
   }));
-  const buzz = (buzzData.buzz || []).map((b) => {
-    const source = String(b.source || "").trim();
-    const sourceLabel = String(b.sourceLabel || "").trim();
+  // The model returned an S-number, not a url — resolve it against this run's
+  // verified set. An unresolvable id yields no source, and the filter below
+  // drops the item. `filed` stamps the research date so the page can date the
+  // edition (see TheBuzz in src/components/WaterCoolerPage.jsx).
+  const SRC_BY_N = new Map(SOURCES.map((s) => [`S${s.n}`, s]));
+  const buzz = (buzzData?.buzz || []).map((b) => {
+    const src = SRC_BY_N.get(String(b.sourceId || "").trim().toUpperCase()) || null;
     return {
       id: String(b.id || "").trim(),
+      subject: String(b.subject || "").trim(),
       text: String(b.text || "").trim(),
       tag: String(b.tag || "").trim(),
-      // a source only counts if it's a real http(s) url; carry its label alongside
-      ...(/^https?:\/\//i.test(source) ? { source, ...(sourceLabel ? { sourceLabel } : {}) } : {}),
+      ...(src ? { source: src.url, sourceLabel: outletLabel(src.host) } : {}),
+      ...(FILED ? { filed: FILED } : {}),
     };
   });
   const hotornot = (hotornotData.subjects || []).map((s) => ({
@@ -777,48 +929,87 @@ Unique ids. No duplicate subjects.`
   // Countdowns: malformed → recorded error; duplicate id (incl. vs manual) →
   // silently dropped (the model reusing a hand-curated id is expected overlap,
   // not a failure). Must be exactly 5 entries, ranks 1..5, valid trends.
+  // Quality drops are ALSO silent: a chart of unnamed rows is a blank chart, but
+  // it's not worth discarding a paid batch over.
   const TRENDS = new Set(["up", "down", "same", "new"]);
   const cSeen = new Set(MANUAL_COUNTDOWNS.map((c) => c.id));
+  const cDrop = { dupe: 0, era: 0, vague: 0, bylines: 0 };
   const cValid = countdowns.filter((c, i) => {
     const ranks = c.entries.map((e) => e.rank).sort((a, b) => a - b);
     const wellFormed = c.id && c.title && c.entries.length === 5 &&
       ranks.every((r, j) => r === j + 1) &&
       c.entries.every((e) => e.title && TRENDS.has(e.trend));
     if (!wellFormed) { req(false, `countdown[${i}] (${c.id || "?"}): needs id, title, 5 entries (ranks 1..5), valid trends`); return false; }
-    if (cSeen.has(c.id)) return false; // silent dedupe
+    if (cSeen.has(c.id)) { cDrop.dupe++; return false; } // silent dedupe
+    if (c.era !== "now" && c.era !== "retro") { cDrop.era++; return false; }
+    // Placeholder rows are the disease this fixes ("the one from the show
+    // everyone's watching" / by: "you know the one"). Checked on entries, not on
+    // the chart title — an ALL-CAPS TRL header is allowed to be playful.
+    if (c.entries.some((e) => VAGUE_CHART_RE.test(e.title) || VAGUE_CHART_RE.test(e.by || ""))) { cDrop.vague++; return false; }
+    // The ranking IS the content, so most rows need an attributed artist/studio.
+    if (c.entries.filter((e) => e.by).length < 4) { cDrop.bylines++; return false; }
     cSeen.add(c.id);
     return true;
   });
-  req(cValid.length >= 8, `countdowns: only ${cValid.length} valid (need >=8) — keeping the previous pool`);
+  // Enforce the current/throwback mix by TRIMMING, not by failing: a
+  // nostalgia-heavy batch shouldn't take over the rotation, but it also
+  // shouldn't cost a paid run. Retro charts are good content — just a garnish.
+  const nowCharts = cValid.filter((c) => c.era === "now");
+  const retroCharts = cValid.filter((c) => c.era === "retro");
+  const cFinal = nowCharts.length >= 8
+    ? [...nowCharts, ...retroCharts.slice(0, Math.max(1, Math.round(nowCharts.length * 0.33)))]
+    : cValid;
+  console.log(
+    `  countdowns: ${cFinal.length}/${countdowns.length} kept (${nowCharts.length} now, ` +
+      `${cFinal.length - nowCharts.length} retro; dropped — dupe ${cDrop.dupe}, bad-era ${cDrop.era}, ` +
+      `placeholder rows ${cDrop.vague}, missing bylines ${cDrop.bylines})`
+  );
+  req(cFinal.length >= 8, `countdowns: only ${cFinal.length} valid (need >=8) — keeping the previous pool`);
 
-  // Buzz: malformed → error; duplicate id → silently dropped.
+  // Buzz: malformed → recorded error. EVERY quality rejection is a SILENT DROP —
+  // req() would abort the run and write nothing, so a single hedgy line out of 72
+  // would discard the whole paid batch. The floor is the aggregate count below.
   const TAGS = new Set(["GOSSIP", "RUMOR", "SIGHTING", "HOT TAKE"]);
   const bSeen = new Set(MANUAL_BUZZ.map((b) => b.id));
-  const bValid = buzz.filter((b, i) => {
+  const perSource = new Map();
+  const bDrop = { dupe: 0, subject: 0, dated: 0, vague: 0, source: 0, overcited: 0 };
+  const bKept = buzz.filter((b, i) => {
     const wellFormed = b.id && b.text && TAGS.has(b.tag) && b.text.length <= 180;
     if (!wellFormed) { req(false, `buzz[${i}] (${b.id || "?"}): needs id, text (<=180), valid tag`); return false; }
-    if (bSeen.has(b.id)) return false; // silent dedupe
+    if (bSeen.has(b.id)) { bDrop.dupe++; return false; }
+    if (!hasNamedSubject(b)) { bDrop.subject++; return false; } // no real subject, or subject absent from text
+    if (DATED_RE.test(b.text)) { bDrop.dated++; return false; } // would rot mid-rotation
+    if (isVagueBuzz(b.text)) { bDrop.vague++; return false; } // hedge net (second belt)
+    if (!b.source) { bDrop.source++; return false; } // unresolvable sourceId
+    // One listicle shouldn't become half the pool.
+    const n = (perSource.get(b.source) || 0) + 1;
+    if (n > 3) { bDrop.overcited++; return false; }
+    perSource.set(b.source, n);
     bSeen.add(b.id);
     return true;
   });
-  req(bValid.length >= 20, `buzz: only ${bValid.length} valid (need >=20) — keeping the previous pool`);
+  if (buzz.length) {
+    console.log(
+      `  buzz: ${bKept.length}/${buzz.length} kept (dropped — dupe ${bDrop.dupe}, ` +
+        `no-subject ${bDrop.subject}, dated ${bDrop.dated}, vague ${bDrop.vague}, ` +
+        `no-source ${bDrop.source}, over-cited ${bDrop.overcited})`
+    );
+  }
 
-  // Buzz sources: liveness-check the "read more" urls. UNLIKE weird/curiosities
-  // (where a dead url drops the whole item), here the blurb stands alone — so a
-  // dead source is just STRIPPED, keeping the dispatch. Reuses checkUrls.
-  const buzzUrls = bValid.map((b) => b.source).filter(Boolean);
-  if (buzzUrls.length) {
-    const live = await checkUrls(buzzUrls);
-    let stripped = 0;
-    for (const b of bValid) {
-      if (b.source && !live.get(b.source)?.alive) {
-        console.warn(`  buzz: strip dead source on ${b.id} (${b.source})`);
-        delete b.source;
-        delete b.sourceLabel;
-        stripped++;
-      }
-    }
-    console.log(`  buzz: ${buzzUrls.length - stripped}/${buzzUrls.length} sources alive`);
+  // Buzz sources: liveness-check the "read more" urls. A dispatch no longer
+  // stands alone without its link (that's the whole contract), so unlike the old
+  // behaviour a dead source DROPS the item rather than being stripped from it.
+  // Must run before the floor below, so the floor counts what actually ships.
+  let bValid = bKept;
+  if (bKept.length) {
+    const live = await checkUrls([...new Set(bKept.map((b) => b.source))]);
+    bValid = bKept.filter((b) => live.get(b.source)?.alive);
+    console.log(`  buzz: ${bValid.length}/${bKept.length} survive the source liveness check`);
+  }
+  // Only enforced when we actually asked for buzz — a skipped call keeps the
+  // previous pool, which is a valid outcome, not a failure.
+  if (citable) {
+    req(bValid.length >= 30, `buzz: only ${bValid.length} specific+sourced (need >=30) — keeping the previous pool`);
   }
 
   // Hot-or-Not: malformed → error; duplicate id → silently dropped. Must use the
@@ -840,11 +1031,15 @@ Unique ids. No duplicate subjects.`
     return;
   }
 
-  writeModule("countdowns.js", cValid, "The Countdown pool. Shape: { id, title, unit, blurb?, entries:[{rank,title,by?,note?,trend}] }");
-  writeModule("buzz.js", bValid, "The Buzz pool. Shape: { id, text, tag, source?, sourceLabel? } — source urls liveness-checked at generation time.");
+  writeModule("countdowns.js", cFinal, "The Countdown pool. Shape: { id, title, unit, era, blurb?, entries:[{rank,title,by?,note?,trend}] } — era is \"now\" | \"retro\"; every entry names a real title AND artist/studio.");
+  await archivePool("countdowns", cFinal);
+  // A skipped or failed buzz run leaves generated/buzz.js untouched, so the
+  // previous pool keeps serving rather than the card going blank.
+  if (citable) {
+    writeModule("buzz.js", bValid, "The Buzz pool. Shape: { id, subject, text, tag, source, sourceLabel, filed } — every dispatch names a real subject (verbatim in text) and cites a source from that run's live web search, liveness-checked at generation time. See scripts/lib/buzz-quality.js.");
+    await archivePool("buzz", bValid);
+  }
   writeModule("hotornot.js", hValid, "Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].");
-  await archivePool("countdowns", cValid);
-  await archivePool("buzz", bValid);
   await archivePool("hotornot", hValid);
   console.log("\n✓ done");
 }
