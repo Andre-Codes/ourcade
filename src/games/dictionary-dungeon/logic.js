@@ -45,6 +45,7 @@ import {
   SCROLL_BY_ID,
   FLAVOR,
   MERCHANT_STOCK,
+  SCROLL_DROPS,
   EVENTS,
   SWORD_EVENT,
 } from "./pools.js";
@@ -108,17 +109,23 @@ function blockStrengthFor(state) {
    effect never applies a status at all (effects.js nulls it out).
 
      burn   (fire)      BURN_DAMAGE per turn for BURN_TURNS
-     poison (poison)    POISON_DAMAGE per turn for POISON_TURNS, stacking
+     poison (poison)    POISON_DAMAGE × stacks per turn, stacks to POISON_MAX_STACKS
      stun   (magic)     ─┐
-     freeze (ice)        ├ the enemy loses its next counterattack
+     freeze (ice)        ├ the enemy loses the counterattack it was about to throw
      root   (nature)    ─┘
      curse  (dark)      the enemy takes CURSE_BONUS extra from every later hit
      pierce (piercing,  this hit ignores the target's resistance
              tool)
      soak   (water)     the enemy's counterattacks lose a heart for SOAK_TURNS
-     reveal (light)     the cabinet shows the enemy's weaknesses for the fight  */
+     reveal (light)     the cabinet shows the enemy's weaknesses for the fight
+
+   Burn and venom tick AFTER the player's blow, as their own beat (see
+   runLingering / the phase machinery below) — folded into the same damage
+   number they were invisible, and a fire word read as if it had done nothing. */
 const BURN_DAMAGE = 2;
-const BURN_TURNS = 2;
+// Three turns, not two: the tick is its own animated beat now, and two ticks of
+// 2 went by too fast to register as "this enemy is on fire".
+const BURN_TURNS = 3;
 const POISON_DAMAGE = 1;
 const POISON_TURNS = 3;
 const POISON_MAX_STACKS = 3;
@@ -135,9 +142,12 @@ const SKIP_LINES = {
   freeze: "{NAME} is locked in frost — the blow never lands.",
   root: "Roots hold {NAME} fast. It strains, and does not reach you.",
 };
+// …and the cabinet pops the matching mark over the enemy for that beat. A skip
+// used to be a bare log line, so a frozen turn read as if nothing had happened.
+const SKIP_ICONS = { stun: "💫", freeze: "❄️", root: "🌿" };
 
 function freshStatus() {
-  return { burn: 0, poison: 0, skip: false, skipKind: null, curse: false, soak: 0, reveal: false };
+  return { burn: 0, poison: 0, poisonStacks: 0, skip: false, skipKind: null, curse: false, soak: 0, reveal: false };
 }
 
 // The live status block for the current fight, created lazily so an old save (or
@@ -164,11 +174,17 @@ function applyStatus(state, statusTag, target, out) {
       out.logLines.push(`> 🔥 ${name} catches light — it will burn for ${BURN_TURNS} turns.`);
       break;
     case "poison":
-      if (st.poison >= POISON_TURNS * POISON_MAX_STACKS) {
+      // Venom stacks for real: each poison word deepens the dose (more damage
+      // per tick) as well as extending it. It used to only extend the duration
+      // while the tick stayed a flat 1, so a second poison word did nothing you
+      // could feel.
+      if ((st.poisonStacks || 0) >= POISON_MAX_STACKS) {
         out.logLines.push(`> ☠️ ${name} is already as poisoned as a thing can be.`);
       } else {
+        st.poisonStacks = Math.min(POISON_MAX_STACKS, (st.poisonStacks || 0) + 1);
         st.poison = Math.min(POISON_TURNS * POISON_MAX_STACKS, st.poison + POISON_TURNS);
-        out.logLines.push(`> ☠️ Venom takes hold in ${name}. (${st.poison} turns)`);
+        const dose = POISON_DAMAGE * st.poisonStacks;
+        out.logLines.push(`> ☠️ Venom takes hold in ${name}. (${dose}/turn for ${st.poison} turns)`);
       }
       break;
     case "stun":
@@ -199,10 +215,18 @@ function applyStatus(state, statusTag, target, out) {
   }
 }
 
-/* Tick burn/poison on the current target BEFORE the player's blow resolves, so a
-   damage-over-time tick can land the killing hit (and when it does, the room
-   clears with no counterattack — same as any other kill). Returns the damage
-   dealt so the run's damage tally stays honest. */
+/* Tick burn/poison on the current target, spending one turn of each. The FIRST
+   tick lands on the turn the status is applied, so "it will burn for 3 turns"
+   means three ticks starting now.
+
+   That's deliberate. Gating the first tick until the following turn reads more
+   logical, but it makes the whole mechanic hypothetical: monsters have 8–13 HP
+   and a decent word does 7–14, so a fight is two words. Simulated over 150 runs
+   an enemy lit on turn 1 essentially NEVER survived turn 2's word — burn landed
+   0% of the damage dealt. Igniting immediately guarantees a fire word does
+   something the moment you play it, and the remaining turns are gravy.
+
+   Returns the damage dealt, so the run's tally stays honest. */
 function tickStatusDamage(state, target, out) {
   if (!target || !state.status) return 0;
   const st = state.status;
@@ -213,11 +237,86 @@ function tickStatusDamage(state, target, out) {
     out.logLines.push(`> 🔥 ${target.name} burns for ${BURN_DAMAGE}.${st.burn ? "" : " The flames gutter out."}`);
   }
   if (st.poison > 0) {
-    total += POISON_DAMAGE;
+    const dose = POISON_DAMAGE * Math.max(1, st.poisonStacks || 1);
+    total += dose;
     st.poison -= 1;
-    out.logLines.push(`> ☠️ Venom eats at ${target.name} for ${POISON_DAMAGE}.${st.poison ? "" : " The last of it burns away."}`);
+    if (st.poison <= 0) st.poisonStacks = 0;
+    out.logLines.push(`> ☠️ Venom eats at ${target.name} for ${dose}.${st.poison ? "" : " The last of it burns away."}`);
   }
   return total;
+}
+
+/* ── turn phases ───────────────────────────────────────────────────────────────
+   A turn used to resolve as one undifferentiated instant: the word's damage, any
+   lingering burn/venom and the enemy's counter all landed together, summed into
+   a single number, with log lines emitted in whatever order the code happened to
+   run them. The HP bar drained once. A fire word looked like it did nothing.
+
+   Now every beat of a turn is MARKED. `out.logLines` is still the flat
+   concatenation — the check script, the save log and the log renderer read it
+   exactly as before — `mark()` only records where each beat began, and
+   `sealPhases()` slices the lines back apart at the end. The cabinet replays
+   `out.phases` on a timer so the hit, the burn tick, a frozen enemy's missed
+   swing and the counterattack each get their own moment on screen.
+
+   `meta` carries the POST-beat snapshot (hp / hearts / icons), captured as the
+   beat resolves — state has moved on by the time we seal. */
+function mark(out, kind, meta = {}) {
+  (out._marks || (out._marks = [])).push({ kind, from: out.logLines.length, meta });
+}
+
+// Attach a snapshot to the beat currently being written.
+function markMeta(out, meta) {
+  const marks = out._marks;
+  if (marks && marks.length) Object.assign(marks[marks.length - 1].meta, meta);
+}
+
+function sealPhases(out) {
+  const marks = out && out._marks;
+  if (out) delete out._marks;
+  if (!marks || !marks.length) return out;
+  const phases = [];
+  // Anything said before the first mark (a whiffed word, a scroll's message) is
+  // its own opening beat rather than being dropped on the floor.
+  if (marks[0].from > 0) phases.push({ kind: "text", lines: out.logLines.slice(0, marks[0].from) });
+  marks.forEach((m, i) => {
+    const to = i + 1 < marks.length ? marks[i + 1].from : out.logLines.length;
+    const lines = out.logLines.slice(m.from, to);
+    // A beat with nothing to say and nothing to show isn't a beat.
+    if (lines.length || m.meta.icons?.length) phases.push({ kind: m.kind, ...m.meta, lines });
+  });
+  if (phases.length) out.phases = phases;
+  return out;
+}
+
+/* The lingering beat: burn and venom already on the enemy resolve AFTER the
+   player's blow, as their own step with their own damage application, so the HP
+   bar drains twice and the cabinet can pop a 🔥 over the enemy between them.
+   Returns true if the lingering damage finished the target — the room has
+   already cleared and nothing further in the turn should run. */
+function runLingering(state, target, out, flav) {
+  if (!target) return false;
+  const live = target.kind === "monster" || target.kind === "trap" || target.kind === "boss";
+  if (!live) return false;
+  const st = statusOf(state);
+  const icons = [];
+  if (st.burn > 0) icons.push("🔥");
+  if (st.poison > 0) icons.push("☠️");
+  if (!icons.length) return false;
+  mark(out, "dot", { icons });
+  const dot = tickStatusDamage(state, target, out);
+  if (!dot) return false;
+  out.lingeringDamage = (out.lingeringDamage || 0) + dot;
+  // deferCounter: a lingering tick never provokes the counter itself — the
+  // caller runs it once, after all the beats have landed.
+  return !applyDamageAndProgress(state, target, dot, out, flav, { deferCounter: true, quiet: true });
+}
+
+/* Same beat, on a turn the player wasted (gibberish, or a word that broke the
+   room's rule). A whiff still doesn't provoke a counterattack — it never did. */
+function lingerOnWhiff(state, target, out, flav) {
+  if (!target || !state.status) return;
+  runLingering(state, target, out, flav);
 }
 
 // Hidden word Easter eggs. These aren't real ENABLE words, so they never pass
@@ -263,25 +362,84 @@ function stream(seed) {
     // same-length draws returned identical picks.)
     pickN: (arr, n) => seededShuffle(arr, (Math.floor(rand() * 0xffffffff) ^ arr.length) >>> 0).slice(0, n),
     shuffle: (arr) => seededShuffle(arr, seed >>> 0),
+    // Weighted draw. `weightOf` defaults to the item's own `weight` (1 if it has
+    // none), so a catalog can express "common / uncommon / rare" as data.
+    pickWeighted: (arr, weightOf = (x) => x.weight ?? 1) => {
+      const total = arr.reduce((a, x) => a + Math.max(0, weightOf(x)), 0);
+      if (total <= 0) return arr[0];
+      let r = rand() * total;
+      for (const x of arr) {
+        r -= Math.max(0, weightOf(x));
+        if (r < 0) return x;
+      }
+      return arr[arr.length - 1];
+    },
   };
 }
 
-/* Which FLOORS carry a merchant. Merchants used to be a per-level ~70% coin
-   flip, so a run could hand you three shops or none and you couldn't plan around
-   your coin. Now they land on a fixed cadence: start after the Entry Hall, then
-   step 2 or 3 floors at a time (seeded, so it's the same for everyone today but
-   varies day to day). Gives 2–3 shops in a 6-floor run at predictable spacing —
-   e.g. floors 2,4,6 · 3,5 · 2,5. Treasure rooms stay randomly placed.
-   Returns a Set of level indices. */
-function merchantFloors(levelCount, s) {
+/* Which FLOORS carry a merchant: every other floor from 2, i.e. 2 · 4 · 6.
+
+   This has been walked back twice. It was a per-level ~70% coin flip (a run
+   could hand you three shops or none), then a seeded 2-or-3 floor cadence —
+   which read well on paper but meant ~16% of days stopped at floors 2 and 4 and
+   gave you nothing for the back half of the run. With coins earned per WORD, a
+   player who spells well banks 250+ over six floors and then has nowhere to
+   spend it; the shop drying up after floor 4 was the single loudest complaint.
+
+   Fixed and predictable now: three shops, evenly spaced, and one always sits on
+   the final floor so there's a pre-boss restock. Treasure rooms stay randomly
+   placed. Returns a Set of level indices. */
+function merchantFloors(levelCount) {
   const floors = new Set();
   // 1-based floor numbers; floor 1 (Entry Hall) never has a merchant.
-  let floor = 2 + s.int(2); // first shop on floor 2 or 3
-  while (floor <= levelCount) {
-    floors.add(floor - 1); // → level index
-    floor += 2 + s.int(2); // then every 2–3 floors
-  }
+  for (let floor = 2; floor <= levelCount; floor += 2) floors.add(floor - 1);
   return floors;
+}
+
+const MERCHANT_OFFERS = 4;
+/* Depth tax on shop prices. It was 0.15/floor — a 1.75× ceiling at the bottom of
+   the run — which was really compensating for how few shops a run had. With a
+   shop every other floor the sink is three times as deep, so the tax comes down
+   to a mild 0.08/floor (1.40× on the last floor). */
+const MERCHANT_MARKUP_PER_FLOOR = 0.08;
+
+/* Roll a merchant's stock: MERCHANT_OFFERS offers, priced for this depth.
+
+   Slots: one guaranteed SCROLL, one guaranteed RELIC, then weighted picks from
+   the whole eligible catalog, at most one heal per shop.
+
+   The guaranteed slot used to be a HEAL, which put a potion in literally every
+   shop while scrolls — filling only the two random slots — averaged half an
+   offer. Swapping which kind is guaranteed is the whole fix: a scroll is always
+   there to buy, and heals become something you're glad to find (~55% of shops)
+   rather than something you step over. `weight`/`minFloor` in MERCHANT_STOCK do
+   the rest: the Greater Draught is rare AND floor-4-or-later. */
+function rollMerchantStock(levelIdx, s) {
+  const floor = levelIdx + 1;
+  const eligible = MERCHANT_STOCK.filter((m) => (m.minFloor ?? 0) <= floor);
+  const chosen = [];
+  const taken = new Set();
+  const draw = (pool) => {
+    const hasHeal = chosen.some((c) => c.kind === "heal");
+    // One heal per shop, tops — two potions in a four-slot shop is a wasted shop.
+    const avail = pool.filter((m) => !taken.has(m.id) && !(hasHeal && m.kind === "heal"));
+    if (!avail.length) return false;
+    const m = s.pickWeighted(avail);
+    taken.add(m.id);
+    chosen.push(m);
+    return true;
+  };
+  draw(eligible.filter((m) => m.kind === "scroll"));
+  draw(eligible.filter((m) => m.kind === "relic"));
+  while (chosen.length < MERCHANT_OFFERS && draw(eligible)) { /* fill the rest */ }
+
+  const markup = 1 + levelIdx * MERCHANT_MARKUP_PER_FLOOR;
+  // Shuffled so the guaranteed scroll isn't always sitting in the first slot.
+  return s.shuffle(chosen).map((m) => ({
+    ...m,
+    price: Math.max(1, Math.round(m.basePrice * markup)),
+    sold: false,
+  }));
 }
 
 // Non-boss room types the assembler places. Every level gets at least one
@@ -422,27 +580,7 @@ function assembleRooms(level, levelIdx, dayKey, s, wantMerchant = false) {
         .map((r) => r.id);
     }
     if (type === "merchant") {
-      // Seeded stock of 4 offers, priced with a mild per-level markup. Always
-      // include ONE healing potion (reliable survival triage) AND ONE relic
-      // (relics are now a paid purchase alongside the free treasure room); the
-      // remaining slots fill from the rest of the catalog.
-      const markup = 1 + levelIdx * 0.15;
-      const HEAL_IDS = new Set(["buy-minor-heal", "buy-heal", "buy-greater-heal"]);
-      const heals = MERCHANT_STOCK.filter((m) => HEAL_IDS.has(m.id));
-      const relicStock = MERCHANT_STOCK.filter((m) => m.kind === "relic");
-      const chosen = [];
-      chosen.push(s.pick(heals));
-      if (relicStock.length) chosen.push(s.pick(relicStock));
-      const chosenIds = new Set(chosen.map((m) => m.id));
-      const rest = s.pickN(
-        MERCHANT_STOCK.filter((m) => !chosenIds.has(m.id)),
-        Math.max(0, 4 - chosen.length)
-      );
-      room.offers = s.shuffle([...chosen, ...rest]).slice(0, 4).map((m) => ({
-        ...m,
-        price: Math.max(1, Math.round(m.basePrice * markup)),
-        sold: false,
-      }));
+      room.offers = rollMerchantStock(levelIdx, s);
     }
     if (type === "event") {
       room.event = s.pick(EVENTS);
@@ -485,10 +623,15 @@ function seedSwordInStone(levels, s) {
     setSword(eventRooms[s.int(eventRooms.length)]);
     return;
   }
-  // Otherwise convert a plain word room (never room 0 — the opener must stay a
-  // word room). Gate/monster/trap are all fine to swap out.
+  /* Otherwise convert a plain word room (never room 0 — the opener must stay a
+     word room). Gate/monster/trap are all fine to swap out, BUT the level's
+     structure guarantee (≥1 gate, ≥1 monster, ≥1 treasure) has to survive it:
+     converting a floor's ONLY gate left days like 2026-01-16 with a gateless
+     Vowel Crypt. A trap is always spare — the assembler never guarantees one. */
   const CONVERTIBLE = new Set(["gate", "monster", "trap"]);
-  const swappable = rooms.filter((r) => r.idx > 0 && CONVERTIBLE.has(r.type));
+  const counts = rooms.reduce((m, r) => ((m[r.type] = (m[r.type] || 0) + 1), m), {});
+  const spare = (type) => type === "trap" || counts[type] > 1;
+  const swappable = rooms.filter((r) => r.idx > 0 && CONVERTIBLE.has(r.type) && spare(r.type));
   if (!swappable.length) return; // nothing safe to convert — skip this run
   setSword(swappable[s.int(swappable.length)]);
 }
@@ -500,9 +643,9 @@ export function buildRun(dayKey) {
     : (Math.floor(Math.random() * 0xffffffff) >>> 0);
   const s = stream(baseSeed);
 
-  // Decide the shop cadence for the WHOLE run up front, off its own salted
-  // stream so it never perturbs the per-level room draws below.
-  const shopFloors = merchantFloors(LEVELS.length, stream((baseSeed ^ 0x5348_0000) >>> 0));
+  // Shop cadence for the WHOLE run, decided up front (no longer seeded — see
+  // merchantFloors).
+  const shopFloors = merchantFloors(LEVELS.length);
 
   const levels = LEVELS.map((level, li) => {
     const ls = stream((baseSeed ^ daySeed(`${level.id}|${li}`)) >>> 0);
@@ -615,7 +758,10 @@ export function descend(state) {
   const dmgBand = 1 + Math.floor(cycle / 2) * 0.5; // damage steps up every 2 floors
 
   const ls = stream((state.seed ^ daySeed(`endless|${cycle}`)) >>> 0);
-  const rooms = assembleRooms(template, LEVELS.length + cycle - 1, state.dayKey, ls);
+  // Endless floors used to omit `wantMerchant` entirely, so past the Lich there
+  // was no shop ever again and coin became pure score filler. Same every-other-
+  // floor cadence as the main run.
+  const rooms = assembleRooms(template, LEVELS.length + cycle - 1, state.dayKey, ls, cycle % 2 === 1);
   // Bake scaled enemy HP into the rooms (damage is scaled at read-time by band).
   for (const room of rooms) {
     if (room.enemyHP != null) {
@@ -766,9 +912,9 @@ function rarityBonus(tier) {
 
 // Coins earned for an ACCEPTED word: length + rarity, so word quality (not just
 // clearing rooms) drives the run's economy. A short common word is worth a coin
-// or two; a long/rare word pays real money. Not scaled by depth — the merchant
-// prices aren't scaled either, so a good vocabulary is always the way to afford
-// things. (Clears still grant a token bonus in awardClear.)
+// or two; a long/rare word pays real money. Income is flat with depth while shop
+// prices carry a mild markup (MERCHANT_MARKUP_PER_FLOOR), so a good vocabulary
+// stays the way to afford things. (Clears grant a token bonus in awardClear.)
 function coinsForWord(w, tier) {
   let c = Math.floor(w.length / 2); // 4→2, 6→3, 8→4, 10→5
   c += tier === "goblin" ? 4 : tier === "obscure" ? 2 : tier === "familiar" ? 1 : 0;
@@ -826,8 +972,16 @@ function countVowelsIn(w) {
    and MUTATES `state` (hearts/coins/hp/progression/log). Pure w.r.t. inputs
    except the intended state mutation — the cabinet calls this then re-renders.
 
-   reason (when !accepted): "invalid" | "rulefail". */
+   reason (when !accepted): "invalid" | "rulefail".
+
+   `out.phases` (see the phase machinery above) breaks the same turn into the
+   beats the cabinet animates. Every early return routes through sealPhases via
+   this wrapper, so no exit path can forget it. */
 export function resolveTurn(state, rawWord, seedOverride) {
+  return sealPhases(resolveTurnInner(state, rawWord, seedOverride));
+}
+
+function resolveTurnInner(state, rawWord, seedOverride) {
   syncRoomEntry(state); // keep the food-seal flag correct (first turn / resume)
   const w = (rawWord || "").toUpperCase().replace(/[^A-Z]/g, "");
   const target = currentTarget(state);
@@ -867,6 +1021,10 @@ export function resolveTurn(state, rawWord, seedOverride) {
     // nonsense and gains HP (capped per room). Non-combat rooms just whiff.
     const fed = feedGibberish(state, target, w, out, flav);
     if (!fed) out.logLines.push(`> ${w || "(nothing)"} — ${flav("invalid")}`);
+    // A wasted turn is still a TURN: whatever is already burning keeps burning.
+    // Skipping the tick here is what made "it will burn for 3 turns" a lie — the
+    // effect quietly paused every time you fumbled a word.
+    else lingerOnWhiff(state, target, out, flav);
     return out;
   }
 
@@ -909,6 +1067,8 @@ export function resolveTurn(state, rawWord, seedOverride) {
         checkDeath(state, out, `a wrong word in the ${currentLevel(state).name}`);
       }
     }
+    // A missed rule burned a turn too — the fire on the enemy doesn't wait.
+    if (!state.over) lingerOnWhiff(state, target, out, flav);
     return out;
   }
   if (ruleBypassed) delete state.pending.clearRule;
@@ -966,18 +1126,10 @@ export function resolveTurn(state, rawWord, seedOverride) {
     if (effect.weaknessBonus) parts.push({ label: "weakness", amount: effect.weaknessBonus });
   }
 
-  // Statuses already on the enemy resolve BEFORE this blow: an existing curse
-  // deepens it, and burn/venom tick first so a lingering effect can land the kill
-  // (in which case the room clears with no counterattack, like any other kill).
-  if (inCombat) {
-    const st = statusOf(state);
-    if (st.curse) parts.push({ label: "curse", amount: CURSE_BONUS });
-    const dot = tickStatusDamage(state, target, out);
-    if (dot) parts.push({ label: "lingering", amount: dot });
-    // Then this word's own status lands — including a stun/freeze/root, which
-    // costs the enemy the counterattack it would have thrown this turn.
-    applyStatus(state, effect?.status, target, out);
-  }
+  // A curse already on the enemy deepens THIS blow — it's an amplifier, not a
+  // tick, so it rides along inside the word's own damage. Burn and venom do NOT:
+  // they resolve after the blow, as their own beat (see below).
+  if (inCombat && statusOf(state).curse) parts.push({ label: "curse", amount: CURSE_BONUS });
 
   // relics
   const relicExtra = applyRelics(state, w, tier, effectCat, parts, ctx);
@@ -993,6 +1145,7 @@ export function resolveTurn(state, rawWord, seedOverride) {
 
   // 4) narrate the hit — attribute to the player's earned title if they have one
   // ("Tower Giant plays APPLES"), else the plain "You played APPLES".
+  mark(out, "hit");
   const actor = state.title?.title;
   const actorLine = actor ? `${actor} plays ${w}` : `You played ${w}`;
   out.logLines.push(`> ${actorLine}.${tier === "goblin" ? " (a goblin word!)" : tier === "obscure" ? " (obscure)" : ""}`);
@@ -1021,6 +1174,7 @@ export function resolveTurn(state, rawWord, seedOverride) {
   const heal = effectHeal + relicExtra.heal;
   if (heal > 0) {
     state.hearts = Math.min(state.maxHearts, state.hearts + heal);
+    markMeta(out, { hearts: state.hearts }); // so the cabinet's heart count moves on this beat
     out.logLines.push(`> You recover ${heal} heart${heal === 1 ? "" : "s"}. (❤ ${state.hearts})`);
   }
   // Coins are primarily earned per accepted word (length + rarity), plus any
@@ -1031,8 +1185,22 @@ export function resolveTurn(state, rawWord, seedOverride) {
     out.logLines.push(`> +${coinGain} coins. (🪙 ${state.coins})`);
   }
 
-  // 5) apply damage to the target and progress
-  applyDamageAndProgress(state, target, damage, out, flav);
+  /* 5) resolve the turn as ordered BEATS, not one instant:
+
+       hit        the word's own damage
+       (status)   whatever this word set alight / poisoned / froze — narrated
+                  after the damage line, where it reads, instead of before it
+       lingering  burn + venom on the enemy, their own damage step (including
+                  the one this word just lit — see tickStatusDamage)
+       counter    the enemy's swing, if it's still standing and not frozen
+
+     Each step can end the fight; a lingering tick landing the kill clears the
+     room with no counterattack, exactly like any other kill. */
+  const alive = applyDamageAndProgress(state, target, damage, out, flav, { deferCounter: true });
+  if (alive && inCombat) {
+    applyStatus(state, effect?.status, target, out);
+    if (!runLingering(state, target, out, flav)) enemyCounter(state, target, out);
+  }
 
   return out;
 }
@@ -1068,20 +1236,40 @@ function resolveExcalibur(state, out, s, flav) {
   }
 
   const actor = state.title?.title;
+  mark(out, "hit");
   out.logLines.push(`> ${actor ? `${actor} draws` : "You draw"} EXCALIBUR from the stone — the dungeon holds its breath.`);
   out.logLines.push(effect?.resisted
     ? "> The legendary blade bites, though this foe is oddly unbothered."
     : "> A blaze of old light: the sword falls like a verdict.");
 
   out.damage = damage;
-  applyDamageAndProgress(state, target, damage, out, flav);
+  // Same beat sequence as a normal turn — the blade used to skip the status
+  // system entirely, so a burning enemy stopped burning the turn you drew it.
+  const alive = applyDamageAndProgress(state, target, damage, out, flav, { deferCounter: true });
+  if (alive && !runLingering(state, target, out, flav)) enemyCounter(state, target, out);
   return out;
 }
 
 // Apply a computed hit to the current target (enemy / boss / gate) and advance.
 // Shared by the normal accepted-word path and the EXCALIBUR power-word so both
 // resolve kills, boss phases, and counterattacks identically. Mutates state/out.
-function applyDamageAndProgress(state, target, damage, out, flav) {
+/* Apply `damage` to the current target and progress the run. Returns TRUE if the
+   target is still standing and the turn has more beats to play, FALSE if the
+   blow ended the room / drained a boss phase / opened a gate.
+
+   `opts.deferCounter` suppresses the counterattack so the caller can sequence a
+   multi-beat turn itself (hit → lingering → counter); without it the counter
+   fires inline, as it always did. `opts.quiet` drops the "N damage." line for a
+   step that already narrated its own damage (a burn tick says "burns for 2" —
+   restating it as "2 damage." reads like the enemy was hit twice). The HP
+   snapshot still lands in the phase meta either way, so the bar tracks it. */
+function applyDamageAndProgress(state, target, damage, out, flav, opts = {}) {
+  const counter = () => {
+    if (!opts.deferCounter) enemyCounter(state, target, out);
+  };
+  const say = (line) => {
+    if (!opts.quiet) out.logLines.push(line);
+  };
   if (target && (target.kind === "monster" || target.kind === "trap" || target.kind === "boss")) {
     state.dmgDealt = (state.dmgDealt || 0) + damage;
     state.bestHit = Math.max(state.bestHit || 0, damage);
@@ -1089,25 +1277,32 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
   if (target && (target.kind === "monster" || target.kind === "trap")) {
     const room = currentRoom(state);
     room.enemyHP = Math.max(0, room.enemyHP - damage);
-    out.logLines.push(`> ${damage} damage. (${target.name}: ${room.enemyHP}/${room.enemyMaxHP})`);
+    say(`> ${damage} damage. (${target.name}: ${room.enemyHP}/${room.enemyMaxHP})`);
+    markMeta(out, { damage, hp: room.enemyHP, maxHP: room.enemyMaxHP });
     if (room.enemyHP <= 0) {
+      mark(out, "clear", { hp: 0, maxHP: room.enemyMaxHP });
       out.logLines.push(`> ${flav("enemyDown")}`);
       // Slain-enemy identity for the cabinet's "defeated" card (captured before
       // advanceRoom moves us to the next target).
       out.defeated = { name: target.name, emoji: target.emoji, kind: target.kind };
       awardClear(state, out);
+      maybeDropScroll(state, out); // before advanceRoom — it seeds off this room
       advanceRoom(state, out);
       out.cleared = true;
-    } else {
-      enemyCounter(state, target, out);
+      return false;
     }
-  } else if (target && target.kind === "boss") {
+    counter();
+    return true;
+  }
+  if (target && target.kind === "boss") {
     const boss = currentBoss(state);
     const phaseMax = bossPhaseMaxHP(state, boss, state.bossPhase);
     state.bossHP = Math.max(0, (state.bossHP ?? phaseMax) - damage);
-    out.logLines.push(`> ${damage} damage. (${boss.name} phase ${state.bossPhase + 1}/${boss.phases.length}: ${state.bossHP}/${phaseMax})`);
+    say(`> ${damage} damage. (${boss.name} phase ${state.bossPhase + 1}/${boss.phases.length}: ${state.bossHP}/${phaseMax})`);
+    markMeta(out, { damage, hp: state.bossHP, maxHP: phaseMax });
     if (state.bossHP <= 0) {
       if (state.bossPhase + 1 < boss.phases.length) {
+        mark(out, "clear", { hp: 0, maxHP: phaseMax });
         state.bossPhase += 1;
         state.bossHP = bossPhaseMaxHP(state, boss, state.bossPhase);
         state.prevWord = null;
@@ -1120,6 +1315,7 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
         // never hits back — the boss is busy becoming the next thing.
       } else {
         // boss defeated
+        mark(out, "clear", { hp: 0, maxHP: phaseMax });
         out.logLines.push(`> ${boss.victory}`);
         // Only a FINAL boss kill sets `defeated` (a phase transition does not) —
         // the cabinet shows the card for real kills, never mid-boss shifts.
@@ -1128,16 +1324,18 @@ function applyDamageAndProgress(state, target, damage, out, flav) {
         advanceRoom(state, out);
         out.cleared = true;
       }
-    } else {
-      enemyCounter(state, target, out);
+      return false;
     }
-  } else {
-    // gate / treasure — no enemy; the valid word simply opens it.
-    out.logLines.push(`> ${flav("roomClear")}`);
-    awardClear(state, out);
-    advanceRoom(state, out);
-    out.cleared = true;
+    counter();
+    return true;
   }
+  // gate / treasure — no enemy; the valid word simply opens it.
+  mark(out, "clear");
+  out.logLines.push(`> ${flav("roomClear")}`);
+  awardClear(state, out);
+  advanceRoom(state, out);
+  out.cleared = true;
+  return false;
 }
 
 // Gibberish penalty: a non-word played against a LIVE enemy/boss feeds it +1 HP
@@ -1217,21 +1415,27 @@ function isVowelRule(spec) {
 }
 
 function enemyCounter(state, target, out) {
-  // A queued Smoke Bomb skips one incoming counterattack.
-  if (state.pending.skipCounter) {
-    delete state.pending.skipCounter;
-    out.logLines.push(`> Smoke swallows ${target.name}'s counter — no damage.`);
-    return;
-  }
-  // A stun / freeze / root status costs the enemy its counterattack outright.
+  /* A stun / freeze / root costs the enemy its counterattack outright — checked
+     BEFORE the Smoke Bomb, which used to be spent silently on a counter that was
+     already being skipped. Its own beat, so the cabinet can pop a ❄️ over the
+     enemy rather than letting a frozen turn read as "nothing happened". */
   const st = statusOf(state);
   if (st.skip) {
     const why = st.skipKind || "stun";
     st.skip = false;
     st.skipKind = null;
+    mark(out, "skip", { icons: [SKIP_ICONS[why] || SKIP_ICONS.stun] });
     out.logLines.push(`> ${SKIP_LINES[why] || SKIP_LINES.stun}`.replace(/\{NAME\}/g, target.name));
     return;
   }
+  // A queued Smoke Bomb skips one incoming counterattack.
+  if (state.pending.skipCounter) {
+    delete state.pending.skipCounter;
+    mark(out, "skip", { icons: ["💨"] });
+    out.logLines.push(`> Smoke swallows ${target.name}'s counter — no damage.`);
+    return;
+  }
+  mark(out, "counter");
   let baseDmg = target.damage || 1;
   // SOAK: a drenched enemy swings heavy and slow — one less heart per blow, for
   // as long as it stays wet. Spends a turn of the soak whenever it actually swings.
@@ -1246,11 +1450,13 @@ function enemyCounter(state, target, out) {
     const absorbed = blockStrengthFor(state);
     const reduced = Math.max(0, baseDmg - absorbed);
     if (reduced <= 0) {
+      markMeta(out, { icons: ["🛡"] });
       out.logLines.push(`> You turn aside ${target.name}'s blow — no damage.`);
       return;
     }
     state.hearts -= reduced;
     state.dmgTaken = (state.dmgTaken || 0) + reduced;
+    markMeta(out, { icons: ["🛡"], hearts: state.hearts });
     out.logLines.push(`> You partly block ${target.name}'s blow — only ${reduced} heart${reduced === 1 ? "" : "s"} lost. (❤ ${state.hearts})`);
     checkDeath(state, out, deathBy(target.name));
     return;
@@ -1262,6 +1468,7 @@ function enemyCounter(state, target, out) {
   }
   state.hearts -= dmg;
   state.dmgTaken = (state.dmgTaken || 0) + dmg;
+  markMeta(out, { hearts: state.hearts });
   out.logLines.push(`> ${target.name} strikes for ${dmg} heart${dmg === 1 ? "" : "s"}. (❤ ${state.hearts})`);
   checkDeath(state, out, deathBy(target.name));
 }
@@ -1310,7 +1517,28 @@ function awardClear(state, out, boss = false) {
   if (state.relics.includes("coin-purse")) coins += 3;
   if (state.relics.includes("lucky-coin")) coins += 5;
   state.coins += coins;
-  out.effects.coins = coins;
+  if (out.effects) out.effects.coins = coins;
+}
+
+// How often a slain monster leaves a scroll behind.
+const SCROLL_DROP_CHANCE = 0.22;
+
+/* A slain monster may be carrying a scroll. Scrolls were shop-only and filled
+   only the two random offer slots, so a whole run averaged about ONE — and four
+   of the ten in SCROLLS could be obtained from nowhere at all. Seeded off the
+   run + room, so a resumed save re-rolls the same drop. Reported inside the
+   clear beat (the cabinet pops a 📜 over the body). Bosses don't drop; clearing
+   a boss hands you the floor, which is reward enough.
+
+   Call this BEFORE advanceRoom — the roomIdx it seeds off is the dead enemy's. */
+function maybeDropScroll(state, out) {
+  const s = stream(daySeed(`${state.seed}|drop|${state.levelIdx}|${state.roomIdx}`));
+  if (s.rand() >= SCROLL_DROP_CHANCE) return;
+  const sc = SCROLLS.find((x) => x.id === s.pickWeighted(SCROLL_DROPS).id);
+  if (!sc) return;
+  (state.scrolls || (state.scrolls = [])).push(sc.id);
+  markMeta(out, { icons: ["📜"] });
+  out.logLines.push(`> 📜 It was carrying a ${sc.name} — ${sc.description}`);
 }
 
 function checkDeath(state, out, cause) {
@@ -1384,6 +1612,9 @@ export function useScroll(state, scrollId) {
   if (i < 0) return { ok: false, message: "You don't have that scroll." };
   const sc = SCROLLS.find((x) => x.id === scrollId);
   state.scrolls.splice(i, 1);
+  // Anything the scroll's effect narrates on its own (a Banish kill's clear
+  // lines and its scroll drop) rides back out alongside the message.
+  const out = { logLines: [] };
   let message = "";
   switch (sc.effectTag) {
     case "heal-2":
@@ -1429,26 +1660,26 @@ export function useScroll(state, scrollId) {
       break;
     case "banish": {
       // Deal a flat 8 to the current enemy/boss (no word played).
-      const dealt = dealDirectDamage(state, 8);
+      const dealt = dealDirectDamage(state, 8, out);
       message = dealt ? "Banish Scroll: 8 damage torn out of the enemy." : "Nothing here to banish.";
       break;
     }
     default:
       message = sc.description;
   }
-  return { ok: true, message };
+  return { ok: true, message, logLines: out.logLines };
 }
 
 // Flat damage to the current enemy/boss (used by the Banish scroll). Advances
 // the room if it kills. Returns true if there was a target to hit.
-function dealDirectDamage(state, amount) {
+function dealDirectDamage(state, amount, out = { logLines: [] }) {
   const target = currentTarget(state);
-  const out = { logLines: [] };
   if (target && (target.kind === "monster" || target.kind === "trap")) {
     const room = currentRoom(state);
     room.enemyHP = Math.max(0, room.enemyHP - amount);
     if (room.enemyHP <= 0) {
       awardClear(state, out);
+      maybeDropScroll(state, out);
       advanceRoom(state, out);
     }
     return true;
@@ -1542,16 +1773,30 @@ export function isEventRoom(state) {
 }
 
 // ── merchant ──────────────────────────────────────────────────────────────────
-/* Buy offer #i in the current merchant room. Deducts coins (with Merchant's
-   Token discount), grants the item, marks the offer sold. The room is NOT
-   advanced by a purchase — the player leaves via leaveMerchant(). */
+/* What an offer actually costs THIS player — the shelf price less the Merchant's
+   Token discount. Exported because the cabinet has to agree with buyItem: it
+   used to render and affordability-check the undiscounted `offer.price`, so a
+   token holder saw full prices and had the buy button disabled on items the
+   merchant would happily have sold them. */
+export function priceFor(state, offer) {
+  if (!offer) return 0;
+  const discount = state?.relics?.includes("merchants-token") ? 0.75 : 1;
+  return Math.max(1, Math.round(offer.price * discount));
+}
+
+/* Buy offer #i in the current merchant room. Deducts coins, grants the item,
+   marks the offer sold. The room is NOT advanced by a purchase — the player
+   leaves via leaveMerchant(). */
 export function buyItem(state, offerIdx) {
   const room = currentRoom(state);
   if (!room || room.type !== "merchant") return { ok: false, message: "No merchant here." };
   const offer = room.offers?.[offerIdx];
   if (!offer || offer.sold) return { ok: false, message: "That's not for sale." };
-  const discount = state.relics.includes("merchants-token") ? 0.75 : 1;
-  const price = Math.max(1, Math.round(offer.price * discount));
+  // A potion bought at full hearts used to take the coins and heal nothing.
+  if (offer.kind === "heal" && state.hearts >= state.maxHearts) {
+    return { ok: false, message: "You're already whole." };
+  }
+  const price = priceFor(state, offer);
   if (state.coins < price) return { ok: false, message: `Not enough coins (need ${price}).` };
   state.coins -= price;
   offer.sold = true;
@@ -1578,6 +1823,35 @@ export function buyItem(state, offerIdx) {
       message = `Bought ${offer.name}.`;
   }
   return { ok: true, message, coins: state.coins };
+}
+
+/* Restock: pay to reroll everything still on the shelf.
+
+   The last coin sink. Even with three shops a good speller finishes the run with
+   coin to spare, and leftover coin converts to a flat 5 points each — no
+   decision in it. Rerolling turns that surplus back into agency: chase the relic
+   you want, or dig for the Greater Draught before the boss. The fee doubles each
+   time so it can't be ground down to nothing. Sold items stay sold. */
+const RESTOCK_BASE_FEE = 12;
+export function restockPrice(state) {
+  const room = currentRoom(state);
+  if (!room || room.type !== "merchant") return 0;
+  return RESTOCK_BASE_FEE * Math.pow(2, room.restocks || 0);
+}
+
+export function restockMerchant(state) {
+  const room = currentRoom(state);
+  if (!room || room.type !== "merchant") return { ok: false, message: "No merchant here." };
+  const fee = restockPrice(state);
+  if (state.coins < fee) return { ok: false, message: `Not enough coins (need ${fee}).` };
+  state.coins -= fee;
+  room.restocks = (room.restocks || 0) + 1;
+  // A fresh seeded roll per restock, so the second reroll isn't the first again.
+  // Replaces the WHOLE shelf, sold slots included — a player who cleared the shop
+  // out is exactly the one who wants more stock.
+  const s = stream(daySeed(`${state.seed}|restock|${state.levelIdx}|${state.roomIdx}|${room.restocks}`));
+  room.offers = rollMerchantStock(state.levelIdx, s);
+  return { ok: true, message: `The merchant digs out fresh stock. (−🪙 ${fee})`, coins: state.coins };
 }
 
 /* Leave the merchant room and advance. */
@@ -1893,6 +2167,9 @@ export function hydrateGame(saved) {
   if (typeof s.descentCycle !== "number") s.descentCycle = 0;
   if (!s.pending || typeof s.pending !== "object") s.pending = {};
   if (!s.status || typeof s.status !== "object") s.status = freshStatus();
+  // Poison gained a per-dose stack count; a v5 save mid-fight only has the turn
+  // counter, so treat an existing venom as a single dose.
+  if (typeof s.status.poisonStacks !== "number") s.status.poisonStacks = s.status.poison > 0 ? 1 : 0;
   if (typeof s.dmgDealt !== "number") s.dmgDealt = 0;
   if (typeof s.dmgTaken !== "number") s.dmgTaken = 0;
   if (typeof s.bestHit !== "number") s.bestHit = 0;

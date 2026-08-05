@@ -22,7 +22,7 @@ import { dayKey } from "../src/lib/daily.js";
 import { allWords, rarityTier } from "../src/games/dictionary-dungeon/dict.js";
 import { getRule, ruleNeedsContext, ruleNeedsEnemy } from "../src/games/dictionary-dungeon/rules.js";
 import { allEffectWords } from "../src/games/dictionary-dungeon/effects.js";
-import { LEVELS, BOSSES, RELICS, SCROLLS, EVENTS, MERCHANT_STOCK } from "../src/games/dictionary-dungeon/pools.js";
+import { LEVELS, BOSSES, RELICS, SCROLLS, EVENTS, MERCHANT_STOCK, SCROLL_DROPS } from "../src/games/dictionary-dungeon/pools.js";
 import { ALL_TITLES, ALL_OMENS, ALL_BADGES } from "../src/games/dictionary-dungeon/titles.js";
 import {
   buildRun,
@@ -37,7 +37,11 @@ import {
   resolveEvent,
 } from "../src/games/dictionary-dungeon/logic.js";
 
-const DAYS = 60;
+/* Days of daily assembly to exercise. This was 60, which was too narrow to catch
+   rare seeded placements: the Sword-in-the-Stone event fires on ~8% of runs and
+   could convert a floor's ONLY gate room, breaking the structure guarantee on
+   ~2.6% of days — invisible in a 60-day window most of the time. */
+const DAYS = 180;
 
 // The room types that pose a WORD challenge (vs treasure/merchant/event). The
 // assembler guarantees the first room of every level is one of these.
@@ -48,6 +52,12 @@ const GIBBERISH_CAP = 3; // must match logic.js — max HP an enemy regains from
 // use the boss threshold; treasure/gate use their rule's own difficulty.
 const THRESHOLDS = { easy: 500, medium: 150, hard: 40 };
 const BOSS_THRESHOLD = 20;
+
+// Merchant cadence: every other floor from 2 (see merchantFloors in logic.js),
+// as level indices. For the shipped 6 levels that's floors 2 · 4 · 6.
+const EXPECTED_SHOP_FLOORS = LEVELS.map((_, i) => i)
+  .filter((i) => i % 2 === 1)
+  .join(",");
 
 // Count real words satisfying a rule spec. For rarity/memory rules that depend
 // on run state we approximate: rarity rules are counted with the correct tier
@@ -189,16 +199,14 @@ for (const key of keys) {
     }
   });
 
-  /* Merchants are no longer a per-level coin flip — they land on a fixed 2-or-3
-     floor cadence so the player can plan around their coin. Assert the shape:
-     at least one shop per run, the first never in the Entry Hall, and every gap
-     between consecutive shops is 2 or 3 floors. */
-  check(`${key} run has at least one merchant`, shopFloors.length >= 1, `${shopFloors.length}`);
+  /* Merchants land on every other floor: 2 · 4 · 6, the same for every day.
+     The previous seeded 2-or-3 cadence passed a "gap is 2 or 3" check while
+     still leaving ~16% of days with their last shop on floor 4 and nothing for
+     the back half of the run — so assert the exact floors AND that one sits on
+     the final floor, which is the property that actually failed. */
+  check(`${key} merchants on every other floor`, shopFloors.join(",") === EXPECTED_SHOP_FLOORS, `[${shopFloors.join(",")}] != [${EXPECTED_SHOP_FLOORS}]`);
   check(`${key} first merchant is past the entry hall`, shopFloors[0] >= 1, `level ${shopFloors[0]}`);
-  for (let i = 1; i < shopFloors.length; i++) {
-    const gap = shopFloors[i] - shopFloors[i - 1];
-    check(`${key} merchant gap is 2–3 floors`, gap === 2 || gap === 3, `gap ${gap} (floors ${shopFloors.join(",")})`);
-  }
+  check(`${key} a merchant sits on the final floor`, shopFloors.includes(LEVELS.length - 1), `floors ${shopFloors.join(",")}`);
 
   if (earlyCommonOk) commonPathDays++;
 }
@@ -218,6 +226,21 @@ for (const ev of EVENTS) {
 for (const m of MERCHANT_STOCK) {
   if (m.kind === "relic") check(`merchant "${m.id}" relic "${m.grant}" exists`, relicIds.has(m.grant));
   if (m.kind === "scroll") check(`merchant "${m.id}" scroll "${m.grant}" exists`, scrollIds.has(m.grant));
+  check(`merchant "${m.id}" has a positive weight`, typeof m.weight === "number" && m.weight > 0, `${m.weight}`);
+}
+for (const d of SCROLL_DROPS) check(`drop "${d.id}" is a real scroll`, scrollIds.has(d.id));
+
+/* …and the OTHER direction, which nothing checked: is every authored scroll
+   reachable by any means at all? Four of them (Vowel Pardon, Reroll Scroll,
+   Smoke Bomb, Coin Scroll) shipped in no shop, no event and no drop table, so
+   their useScroll handlers were unreachable code for the life of the game. */
+const obtainable = new Set([
+  ...MERCHANT_STOCK.filter((m) => m.kind === "scroll").map((m) => m.grant),
+  ...SCROLL_DROPS.map((d) => d.id),
+  ...EVENTS.flatMap((ev) => ev.choices.map((c) => c.outcome?.scroll).filter(Boolean)),
+]);
+for (const sc of SCROLLS) {
+  check(`scroll "${sc.id}" is obtainable somewhere`, obtainable.has(sc.id), "in no shop, event or drop table");
 }
 check("early levels keep a common-word path every day", commonPathDays === keys.length, `${commonPathDays}/${keys.length}`);
 

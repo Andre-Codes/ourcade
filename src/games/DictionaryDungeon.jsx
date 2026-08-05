@@ -45,6 +45,15 @@ function appendLog(prev, lines) {
   return [...prev, ...batch];
 }
 
+/* How long each beat of a turn holds the screen before the next one starts, and
+   which enemy-card animation it plays. A hit reads fast; a lingering burn tick
+   and a frozen enemy's missed swing need a real pause or they don't register as
+   separate events at all — which is exactly how burn used to read when it was
+   summed into the same damage number as the word. Keys match the `kind` values
+   resolveTurn emits in `out.phases`. */
+const PHASE_MS = { text: 300, hit: 440, dot: 620, skip: 620, counter: 520, clear: 640 };
+const PHASE_FX = { hit: "hit", dot: "dot", skip: "whiff", clear: "slain" };
+
 // The logic module is loaded lazily (it pulls the big dictionary payload). We
 // cache the promise so re-mounts don't re-import.
 let _logicPromise = null;
@@ -60,7 +69,9 @@ export default function DictionaryDungeon() {
   const [input, setInput] = useState("");
   const [toast, setToast] = useState(null);
   const [screen, setScreen] = useState("title"); // title | play | over
-  const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "slain"
+  const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "dot" | "slain" | "whiff"
+  const [fxIcon, setFxIcon] = useState(null); // emoji popped over the enemy for the current beat ("🔥")
+  const [fxView, setFxView] = useState(null); // enemy-card display override while a turn animates: { target, status, hp, maxHP, hearts }
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
   const [defeated, setDefeated] = useState(null); // "you slew X" card { name, emoji, kind }
   const [pendingDefeated, setPendingDefeated] = useState(false); // a paced kill's Defeated card is scheduled but not shown yet — hold the next-room reveal until it lands
@@ -256,6 +267,68 @@ export default function DictionaryDungeon() {
     }
   }, []);
 
+  /* Stop any animation mid-flight and snap the display back to the real state.
+     Called before every new turn (and on unmount) so a fast typist can never
+     leave the bars showing a stale intermediate frame. */
+  const cancelFx = useCallback(() => {
+    fxTimers.current.forEach(window.clearTimeout);
+    fxTimers.current = [];
+    setFxView(null);
+    setFxIcon(null);
+    setHitFx(null);
+  }, []);
+
+  useEffect(() => cancelFx, [cancelFx]);
+
+  /* Walk a turn's beats on a timer. Each beat appends its lines, steps the
+     displayed bars to its own post-beat snapshot, pops its emoji and plays its
+     enemy-card animation. The FIRST beat opens a new stage in the log; the rest
+     extend it, so one turn stays one block.
+
+     `view` is the pre-turn enemy, held for the whole animation and released once
+     the closing beat has played — state has already advanced past a slain enemy,
+     so without the hold the death beat plays over the NEXT room's card. */
+  const playPhases = useCallback((phases, view, defeatedCard) => {
+    const shown = { ...view };
+    let at = 0;
+    phases.forEach((p, i) => {
+      const first = i === 0;
+      const run = () => {
+        if (p.lines.length) {
+          setLog((prev) => (first ? appendLog(prev, p.lines) : [...prev, ...p.lines]));
+        }
+        if (p.hp != null) shown.hp = p.hp;
+        if (p.maxHP != null) shown.maxHP = p.maxHP;
+        if (p.hearts != null) shown.hearts = p.hearts;
+        setFxView({ ...shown });
+        setFxIcon(p.icons?.[0] || null);
+        setHitFx(PHASE_FX[p.kind] || null);
+      };
+      if (at === 0) run();
+      else fxTimers.current.push(window.setTimeout(run, at));
+      at += PHASE_MS[p.kind] ?? PHASE_MS.hit;
+    });
+    /* The hold runs through the LAST beat too — releasing it on that beat would
+       swap the card to the next room mid-death-animation, which is the exact
+       thing the hold exists to prevent. */
+    fxTimers.current.push(window.setTimeout(() => {
+      setHitFx(null);
+      setFxIcon(null);
+      setFxView(null);
+    }, at));
+    /* Pop the Defeated card once the beats have read. Flag it pending NOW
+       (synchronously) so the reveal effect — which fires this same render on the
+       already-advanced room — holds the next-room card until this one lands. */
+    if (defeatedCard) {
+      setPendingDefeated(true);
+      fxTimers.current.push(window.setTimeout(() => {
+        setDefeated(defeatedCard);
+        setPendingDefeated(false);
+      }, at + 120));
+    }
+    return at;
+  }, []);
+
   const onSubmit = useCallback(
     (e) => {
       e?.preventDefault?.();
@@ -265,8 +338,7 @@ export default function DictionaryDungeon() {
       // Clear any pending paced-log / fx timers from a previous fast turn. Also
       // release a stuck pending-defeated flag if that turn's card timer was just
       // cleared before it fired (avoids the reveal being suppressed forever).
-      fxTimers.current.forEach(window.clearTimeout);
-      fxTimers.current = [];
+      cancelFx();
       setPendingDefeated(false);
       // resolveTurn mutates a copy; deep-ish clone the parts it touches. The run
       // is plain data, so a structuredClone keeps it simple and correct.
@@ -282,50 +354,29 @@ export default function DictionaryDungeon() {
       // order: hit → "it crumbles" → Defeated card.
       const showDefeated = res.defeated && !working.canDescend && !working.over;
 
-      // A kill or boss-phase change should READ, not flash by. Split the log so
-      // the hit + damage lines land immediately (the HP bar drains, the enemy
-      // card pulses), then the "it crumbles" / "shifts" resolution lines follow
-      // a beat later. `resolveTurn` always emits the resolution flavor AFTER the
-      // "N damage." line, so we split on the last damage line.
-      const paced = res.accepted && (res.cleared || res.bossPhaseChanged);
-      if (paced) {
-        const lines = res.logLines;
-        let cut = -1;
-        for (let i = lines.length - 1; i >= 0; i--) {
-          if (/\d+ damage\./.test(lines[i])) { cut = i; break; }
-        }
-        const hitLines = cut >= 0 ? lines.slice(0, cut + 1) : lines;
-        const afterLines = cut >= 0 ? lines.slice(cut + 1) : [];
-        setState(working);
-        setLog((prev) => appendLog(prev, hitLines));
-        setHitFx(res.cleared ? "slain" : "hit");
-        if (afterLines.length) {
-          // The resolution lines belong to the SAME stage as the hit — append
-          // them without a fresh divider (plain concat, still capped).
-          fxTimers.current.push(
-            window.setTimeout(() => setLog((prev) => [...prev, ...afterLines]), 560)
-          );
-        }
-        fxTimers.current.push(window.setTimeout(() => setHitFx(null), 620));
-        // Pop the defeated card once the resolution flavor has had a beat to read.
-        // Mark it pending NOW (synchronously) so the reveal effect — which fires
-        // this same render on the already-advanced room — holds the next-room
-        // card until the Defeated card lands, then releases it.
-        if (showDefeated) {
-          setPendingDefeated(true);
-          fxTimers.current.push(window.setTimeout(() => {
-            setDefeated(res.defeated);
-            setPendingDefeated(false);
-          }, 720));
-        }
+      /* A turn is a sequence of BEATS, not one instant. `resolveTurn` hands back
+         `res.phases` — the word's hit, a lingering burn/venom tick, a frozen
+         enemy's missed swing, the counterattack, the kill — each with its own
+         lines and its own post-beat HP/heart snapshot. Play them on a timer so
+         the bar drains twice for a burning enemy and the 🔥 gets a moment of
+         its own, instead of everything collapsing into a single number.
+
+         State is committed immediately and stays authoritative; only the DISPLAY
+         follows the queue (fxView), so an interrupted animation just snaps to
+         truth (see cancelFx) rather than desyncing. */
+      // Captured from the PRE-turn state, before setState advances past a kill.
+      const preTarget = logic.currentTarget(state);
+      const preStatus = state.status;
+      setState(working);
+      let runway = 0;
+      if (res.phases?.length) {
+        const view = preTarget
+          ? { target: preTarget, status: preStatus, hp: preTarget.hp, maxHP: preTarget.maxHP, hearts: state.hearts }
+          : {};
+        runway = playPhases(res.phases, view, showDefeated ? res.defeated : null);
       } else {
-        setState(working);
         setLog((prev) => appendLog(prev, res.logLines));
-        if (res.accepted && res.damage > 0) {
-          setHitFx("hit");
-          fxTimers.current.push(window.setTimeout(() => setHitFx(null), 260));
-        }
-        if (showDefeated) setDefeated(res.defeated); // (unpaced kill — rare, be safe)
+        if (showDefeated) setDefeated(res.defeated);
       }
 
       if (!res.accepted) {
@@ -338,11 +389,12 @@ export default function DictionaryDungeon() {
         );
       }
       if (working.over) {
-        // Let the paced resolution lines land before the over-screen swap.
-        fxTimers.current.push(window.setTimeout(() => finishRun(working), paced ? 950 : 650));
+        // Let the turn's beats land before the over-screen swap.
+        fxTimers.current.push(window.setTimeout(() => finishRun(working), runway + 400));
       }
     },
-    [logic, state, input, flash, persistDiscoveries]
+    // (finishRun is defined below and intentionally not a dep — see its useCallback.)
+    [logic, state, input, flash, persistDiscoveries, cancelFx, playPhases]
   );
 
   // On-screen keyboard: feed key taps into the same input the form uses. Letters
@@ -387,7 +439,9 @@ export default function DictionaryDungeon() {
       const r = logic.useScroll(working, scrollId);
       if (r.ok) {
         setState(working);
-        setLog((prev) => appendLog(prev, [`> ${r.message}`]));
+        // r.logLines carries anything the effect narrated itself — a Banish kill's
+        // clear lines and whatever the corpse was carrying.
+        setLog((prev) => appendLog(prev, [`> ${r.message}`, ...(r.logLines || [])]));
       } else {
         flash(r.message);
       }
@@ -422,6 +476,18 @@ export default function DictionaryDungeon() {
     },
     [logic, state, flash]
   );
+
+  const onRestock = useCallback(() => {
+    if (!logic || !state) return;
+    const working = structuredClone(state);
+    const r = logic.restockMerchant(working);
+    if (r.ok) {
+      setState(working);
+      setLog((prev) => appendLog(prev, [`> ${r.message}`]));
+    } else {
+      flash(r.message);
+    }
+  }, [logic, state, flash]);
 
   const onLeaveMerchant = useCallback(() => {
     if (!logic || !state) return;
@@ -504,11 +570,14 @@ export default function DictionaryDungeon() {
           onUseScroll={onUseScroll}
           onTakeRelic={onTakeRelic}
           onBuy={onBuy}
+          onRestock={onRestock}
           onLeaveMerchant={onLeaveMerchant}
           onEvent={onEvent}
           onQuit={goTitle}
           toast={toast}
           hitFx={hitFx}
+          fxIcon={fxIcon}
+          fxView={fxView}
           logRef={logRef}
         />
       )}
@@ -669,9 +738,8 @@ function CollectionGroup({ label, group }) {
 }
 
 // ── play ──────────────────────────────────────────────────────────────────────
-function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onLeaveMerchant, onEvent, onQuit, toast, hitFx, logRef }) {
+function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onRestock, onLeaveMerchant, onEvent, onQuit, toast, hitFx, fxIcon, fxView, logRef }) {
   const lvl = logic.currentLevel(state);
-  const target = logic.currentTarget(state);
   const rule = logic.activeRule(state);
   const prog = logic.runProgress(state);
   const choice = logic.isChoiceRoom(state);
@@ -679,8 +747,19 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
   const event = logic.isEventRoom(state);
   const special = choice || merchant || event; // non-word rooms
   const room = logic.currentRoom(state);
+
+  /* While a turn animates, the enemy card follows the phase player rather than
+     live state: `state` has already advanced past a slain enemy, so without the
+     hold the death beat (and any lingering tick that landed the kill) would play
+     over the NEXT room's card. Everything else on screen follows state as usual;
+     the Defeated overlay lands right after the last beat and covers the swap. */
+  const target = fxView?.target || logic.currentTarget(state);
+  const status = fxView?.status || state.status;
+  const hearts = fxView?.hearts ?? state.hearts;
+  const hp = fxView?.hp ?? target?.hp;
+  const maxHP = fxView?.maxHP ?? target?.maxHP;
   const boss = target?.kind === "boss";
-  const hpPct = target && target.hp != null ? Math.max(0, (target.hp / target.maxHP) * 100) : 0;
+  const hpPct = hp != null && maxHP ? Math.max(0, (hp / maxHP) * 100) : 0;
 
   const accent = lvl?.accent || "#d9b45e";
 
@@ -688,7 +767,7 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
     <div className="dd-play" style={{ "--accent": accent }}>
       {/* status bar */}
       <div className="dd-status">
-        <span className="dd-stat">❤ <b>{state.hearts}</b>/{state.maxHearts}</span>
+        <span className="dd-stat">❤ <b>{hearts}</b>/{state.maxHearts}</span>
         <span className="dd-stat">🪙 <b>{state.coins}</b></span>
         <span className="dd-stat">Floor <b>{logic.floorLabel(state)}</b></span>
         <div className="dd-meter"><div className="dd-meter-fill" style={{ width: `${prog.pct * 100}%` }} /></div>
@@ -712,18 +791,21 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
 
         {target?.name && (
           <div className={`dd-enemy${hitFx ? ` dd-enemy-${hitFx}` : ""}`}>
+            {/* The beat's mark — 🔥 for a burn tick, ❄️ for a frozen swing, 📜 for
+                a dropped scroll — pops over the card for the length of that beat. */}
+            {fxIcon && <span key={fxIcon + hitFx} className="dd-fx-pop" aria-hidden="true">{fxIcon}</span>}
             <div className="dd-enemy-row">
               <span className="dd-enemy-emoji">{target.emoji}</span>
               <span className="dd-enemy-name">{target.name}</span>
               {boss && <span className="dd-phase">phase {target.phase + 1}/{target.phaseCount}</span>}
             </div>
-            {target.hp != null && (
+            {hp != null && (
               <>
-                <div className="dd-hp-label">HP {target.hp} / {target.maxHP}</div>
+                <div className="dd-hp-label">HP {hp} / {maxHP}</div>
                 <div className="dd-hpbar"><div className="dd-hpbar-fill" style={{ width: `${hpPct}%` }} /></div>
               </>
             )}
-            <StatusChips status={state.status} target={target} />
+            <StatusChips status={status} target={target} />
             {target.intent && <div className="dd-intent">Intent: {target.intent}</div>}
           </div>
         )}
@@ -765,7 +847,13 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
           <div className="dd-treasure-head">🛒 Merchant · 🪙 {state.coins}</div>
           <div className="dd-relic-choices">
             {room.offers.map((o, i) => {
-              const afford = state.coins >= o.price && !o.sold;
+              /* Ask logic for the price rather than reading o.price: the
+                 Merchant's Token discount lives in there, and rendering the
+                 shelf price meant a token holder saw full prices AND had the
+                 buy button disabled on things buyItem would have sold them. */
+              const price = logic.priceFor(state, o);
+              const full = state.hearts >= state.maxHearts && o.kind === "heal";
+              const afford = state.coins >= price && !o.sold && !full;
               return (
                 <button
                   key={o.id + i}
@@ -774,13 +862,25 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
                   onClick={() => onBuy(i)}
                 >
                   <div className="dd-relic-emoji">{o.emoji}</div>
-                  <div className="dd-relic-name">{o.name} <span className="dd-price">{o.sold ? "SOLD" : `🪙 ${o.price}`}</span></div>
-                  <div className="dd-relic-desc">{o.description}</div>
+                  <div className="dd-relic-name">
+                    {o.name} <span className="dd-price">{o.sold ? "SOLD" : `🪙 ${price}`}</span>
+                  </div>
+                  <div className="dd-relic-desc">{full && !o.sold ? "You're already whole." : o.description}</div>
                 </button>
               );
             })}
           </div>
-          <button className="dd-btn dd-btn-ghost dd-leave" onClick={onLeaveMerchant}>Leave shop</button>
+          <div className="dd-shop-actions">
+            {/* The coin sink of last resort: turn a surplus back into choices. */}
+            <button
+              className="dd-btn dd-btn-ghost"
+              disabled={state.coins < logic.restockPrice(state) || room.offers.every((o) => o.sold)}
+              onClick={onRestock}
+            >
+              Restock 🪙 {logic.restockPrice(state)}
+            </button>
+            <button className="dd-btn dd-btn-ghost" onClick={onLeaveMerchant}>Leave shop</button>
+          </div>
         </div>
       ) : event ? (
         <div className="dd-treasure">
@@ -834,9 +934,17 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
 function StatusChips({ status, target }) {
   if (!status) return null;
   const chips = [];
-  if (status.burn > 0) chips.push({ k: "burn", t: `🔥 ${status.burn}`, hint: "Burning" });
-  if (status.poison > 0) chips.push({ k: "poison", t: `☠️ ${status.poison}`, hint: "Poisoned" });
-  if (status.skip) chips.push({ k: "skip", t: "💫", hint: "Can't strike back next turn" });
+  if (status.burn > 0) chips.push({ k: "burn", t: `🔥 ${status.burn}`, hint: `Burning — ${status.burn} more turns` });
+  if (status.poison > 0) {
+    const dose = Math.max(1, status.poisonStacks || 1);
+    chips.push({
+      k: "poison",
+      t: dose > 1 ? `☠️ ${status.poison}×${dose}` : `☠️ ${status.poison}`,
+      hint: `Poisoned — ${dose}/turn for ${status.poison} more turns`,
+    });
+  }
+  // (No chip for stun/freeze/root: they're spent on the counterattack of the very
+  //  turn they land, so a chip could never render. That beat gets its own ❄️ pop.)
   if (status.curse) chips.push({ k: "curse", t: "💀", hint: "Cursed — takes extra damage" });
   if (status.soak > 0) chips.push({ k: "soak", t: `💧 ${status.soak}`, hint: "Drenched — hits softer" });
   if (status.reveal) {
@@ -1253,22 +1361,54 @@ const CSS = `
   border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); }
 .dd-status-burn { color: #ffb27a; border-color: rgba(255,140,60,.45); background: rgba(255,120,40,.12); }
 .dd-status-poison { color: #b6e39a; border-color: rgba(140,200,100,.45); background: rgba(120,190,80,.12); }
-.dd-status-skip { color: #ffe08a; border-color: rgba(255,210,110,.45); background: rgba(255,200,80,.12); }
 .dd-status-curse { color: #d7b0e8; border-color: rgba(190,130,220,.45); background: rgba(170,110,210,.14); }
 .dd-status-soak { color: #9fd3f0; border-color: rgba(110,180,230,.45); background: rgba(90,160,220,.12); }
 .dd-status-reveal { color: #f0e7c0; border-color: rgba(230,215,150,.4); background: rgba(230,210,140,.1); }
-/* hit / kill feedback on the enemy card */
+
+/* ── per-beat feedback on the enemy card ────────────────────────────────────
+   One animation per beat of a turn (see PHASE_MS / PHASE_FX): the word's hit
+   snaps, a lingering burn/venom tick smoulders (slower, warmer, unmistakably
+   NOT another sword blow), a frozen enemy's missed swing stalls, a kill fades. */
+.dd-enemy { position: relative; }
 .dd-enemy-hit { animation: ddHit .26s ease-out; }
+.dd-enemy-dot { animation: ddDot .5s ease-in-out; }
+.dd-enemy-whiff { animation: ddWhiff .5s ease-out; }
 .dd-enemy-slain { animation: ddSlain .6s ease-out; }
 @keyframes ddHit {
   0% { transform: translateX(0); }
   25% { transform: translateX(-4px); } 55% { transform: translateX(5px); }
   80% { transform: translateX(-2px); } 100% { transform: translateX(0); }
 }
+@keyframes ddDot {
+  0% { transform: translateY(0); filter: none; }
+  35% { transform: translateY(-2px); filter: brightness(1.25) saturate(1.3); }
+  70% { transform: translateY(1px); filter: brightness(1.1); }
+  100% { transform: translateY(0); filter: none; }
+}
+@keyframes ddWhiff {
+  0% { transform: translateX(0); filter: none; }
+  40% { transform: translateX(-3px); filter: brightness(1.3) saturate(.6); }
+  100% { transform: translateX(0); filter: none; }
+}
 @keyframes ddSlain {
   0% { transform: scale(1); filter: none; opacity: 1; }
   30% { transform: scale(1.03); filter: brightness(1.8) saturate(0); }
   100% { transform: scale(.96); filter: grayscale(1) brightness(.6); opacity: .55; }
+}
+/* The beat's mark, drifting up off the enemy card. This is the "a fire emoji
+   pops in" tell that a lingering effect just did something on its own. */
+.dd-fx-pop { position: absolute; right: 10px; top: -4px; font-size: 1.6rem; pointer-events: none;
+  z-index: 2; text-shadow: 0 2px 10px rgba(0,0,0,.7);
+  animation: ddPop .62s cubic-bezier(.2,1.3,.5,1) both; }
+@keyframes ddPop {
+  0% { transform: translateY(6px) scale(.5); opacity: 0; }
+  30% { transform: translateY(-4px) scale(1.25); opacity: 1; }
+  70% { transform: translateY(-12px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(-24px) scale(.95); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-enemy-hit, .dd-enemy-dot, .dd-enemy-whiff, .dd-enemy-slain, .dd-fx-pop { animation-duration: .01ms; }
+  .dd-fx-pop { opacity: 1; }
 }
 
 /* showcase reveal cards (new level / enemy / boss phase) */
@@ -1362,7 +1502,9 @@ const CSS = `
 .dd-relic-card:disabled { opacity: .45; cursor: default; }
 .dd-shop-card { display: flex; flex-direction: column; }
 .dd-price { float: right; font-size: .82rem; color: #e7ddc9; font-weight: 400; }
-.dd-leave { margin-top: 4px; }
+/* Restock + Leave sit side by side under the shelf. */
+.dd-shop-actions { display: flex; gap: 8px; margin-top: 4px; }
+.dd-shop-actions .dd-btn { flex: 1; }
 .dd-event-body { margin-top: 12px; padding: 12px 14px; font-style: italic; line-height: 1.6;
   color: #e7ddc9; border-left: 3px solid var(--accent, var(--gold)); background: rgba(255,255,255,.03);
   border-radius: 0 8px 8px 0; }

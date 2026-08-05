@@ -582,32 +582,72 @@ export const FLAVOR = {
 };
 
 // ── MERCHANTS ──────────────────────────────────────────────────────────────────
-// A merchant room draws a small seeded stock (2–4 offers) from this catalog and
-// prices each. buyItem (logic.js) deducts coins. `kind` decides what's granted:
-//   "scroll"/"relic" (grants the id), "heal" (restores value hearts),
-//   "maxheart" (raises max + current hearts). basePrice scales mildly by level
-//   in logic.js. Treasure rooms still give a FREE relic — merchants are the sink.
+/* A merchant room draws a seeded stock of 4 offers from this catalog and prices
+   each. buyItem (logic.js) deducts coins. `kind` decides what's granted:
+     "scroll"/"relic" (grants the id), "heal" (restores value hearts),
+     "maxheart" (raises max + current hearts).
+   basePrice scales mildly by depth in logic.js. Treasure rooms still give a FREE
+   relic — merchants are the sink.
+
+   `weight`   relative odds of filling one of the two open slots. Every shop
+              guarantees one SCROLL and one RELIC; the other two are weighted
+              picks from the whole catalog, capped at one heal per shop. Shops
+              used to guarantee a HEAL instead, so a potion was in every single
+              one and scrolls averaged half an offer per shop.
+   `minFloor` 1-based floor before which the item is never stocked. Keeps the
+              big-ticket consumables out of the early game.
+
+   Heal pricing is deliberately MONOTONIC in coins-per-heart (6.0 → 5.0 → 4.5),
+   so buying in bulk is a discount. It used to invert — the Healing Draught cost
+   11 coins/heart against the Greater Draught's 6, making the mid-tier potion
+   strictly worse than the one that healed twice as much for 2 more coins. */
 export const MERCHANT_STOCK = [
-  { id: "buy-minor-heal", kind: "heal", value: 1, basePrice: 4, name: "Minor Draught", emoji: "🩹", description: "Restore 1 heart." },
-  { id: "buy-heal", kind: "heal", value: 2, basePrice: 22, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
-  { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 24, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
-  { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
-  { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
-  { id: "buy-bomb", kind: "scroll", grant: "word-bomb", basePrice: 12, name: "Word Bomb", emoji: "💣", description: "Next word deals +6." },
-  { id: "buy-greater-bomb", kind: "scroll", grant: "greater-bomb", basePrice: 20, name: "Greater Word Bomb", emoji: "🧨", description: "Next word deals +12." },
-  { id: "buy-banish", kind: "scroll", grant: "banish-scroll", basePrice: 18, name: "Banish Scroll", emoji: "🌀", description: "Deal 8 damage instantly." },
-  { id: "buy-relic-quill", kind: "relic", grant: "rusty-quill", basePrice: 20, name: "Rusty Quill", emoji: "🪶", description: "+2 damage for 6+ letter words." },
-  { id: "buy-relic-whetstone", kind: "relic", grant: "whetstone", basePrice: 20, name: "Whetstone", emoji: "⚔️", description: "Weapon-words deal +2." },
-  { id: "buy-relic-purse", kind: "relic", grant: "coin-purse", basePrice: 24, name: "Bottomless Purse", emoji: "👛", description: "+3 coins per room cleared." },
-  { id: "buy-relic-stomach", kind: "relic", grant: "iron-stomach", basePrice: 18, name: "Iron Stomach", emoji: "🍖", description: "Food heals +1 extra." },
-  { id: "buy-relic-thesaurus", kind: "relic", grant: "thesaurus-shard", basePrice: 20, name: "Thesaurus Shard", emoji: "💠", description: "+1 damage for every 5+ letter word." },
-  { id: "buy-relic-secondwind", kind: "relic", grant: "second-wind", basePrice: 22, name: "Second Wind", emoji: "🌬️", description: "Heal 1 heart each new level." },
-  { id: "buy-relic-tinderbox", kind: "relic", grant: "tinderbox", basePrice: 20, name: "Tinderbox", emoji: "🔥", description: "Fire-words deal +2." },
-  { id: "buy-relic-reliquary", kind: "relic", grant: "reliquary", basePrice: 20, name: "Reliquary", emoji: "✝️", description: "Holy-words deal +2." },
-  { id: "buy-relic-scrabble", kind: "relic", grant: "scrabble-tile", basePrice: 22, name: "Scrabble Tile", emoji: "🔠", description: "J/Q/X/Z words deal +4." },
-  { id: "buy-relic-bookmark", kind: "relic", grant: "iron-bookmark", basePrice: 18, name: "Iron Bookmark", emoji: "🔖", description: "First failed word each level costs no heart." },
+  // heals — at most one per shop (see assembleRooms)
+  { id: "buy-minor-heal", kind: "heal", value: 1, basePrice: 6, weight: 17, name: "Minor Draught", emoji: "🩹", description: "Restore 1 heart." },
+  { id: "buy-heal", kind: "heal", value: 2, basePrice: 10, weight: 11, name: "Healing Draught", emoji: "🧪", description: "Restore 2 hearts." },
+  { id: "buy-greater-heal", kind: "heal", value: 4, basePrice: 18, weight: 3, minFloor: 4, name: "Greater Draught", emoji: "⚗️", description: "Restore 4 hearts." },
+  { id: "buy-maxheart", kind: "maxheart", value: 1, basePrice: 22, weight: 4, minFloor: 3, name: "Heart Locket", emoji: "❤️", description: "Raise max hearts by 1 (and heal 1)." },
+  // scrolls — one guaranteed slot per shop
+  { id: "buy-clean", kind: "scroll", grant: "clean-slate", basePrice: 10, weight: 8, name: "Clean Slate", emoji: "🧼", description: "Lift a room's rule for one word." },
+  { id: "buy-bomb", kind: "scroll", grant: "word-bomb", basePrice: 12, weight: 8, name: "Word Bomb", emoji: "💣", description: "Next word deals +6." },
+  { id: "buy-pardon", kind: "scroll", grant: "vowel-pardon", basePrice: 8, weight: 7, name: "Vowel Pardon", emoji: "🕊️", description: "Your next failed word costs no heart." },
+  { id: "buy-reroll", kind: "scroll", grant: "reroll-room", basePrice: 10, weight: 6, name: "Reroll Scroll", emoji: "🎲", description: "Swap a room's rule for another." },
+  { id: "buy-smoke", kind: "scroll", grant: "smoke-bomb", basePrice: 12, weight: 6, name: "Smoke Bomb", emoji: "💨", description: "Skip the enemy's next counter." },
+  { id: "buy-banish", kind: "scroll", grant: "banish-scroll", basePrice: 18, weight: 4, minFloor: 3, name: "Banish Scroll", emoji: "🌀", description: "Deal 8 damage instantly." },
+  { id: "buy-greater-bomb", kind: "scroll", grant: "greater-bomb", basePrice: 20, weight: 3, minFloor: 4, name: "Greater Word Bomb", emoji: "🧨", description: "Next word deals +12." },
+  // relics — one guaranteed slot per shop
+  { id: "buy-relic-quill", kind: "relic", grant: "rusty-quill", basePrice: 20, weight: 4, name: "Rusty Quill", emoji: "🪶", description: "+2 damage for 6+ letter words." },
+  { id: "buy-relic-whetstone", kind: "relic", grant: "whetstone", basePrice: 20, weight: 4, name: "Whetstone", emoji: "⚔️", description: "Weapon-words deal +2." },
+  { id: "buy-relic-purse", kind: "relic", grant: "coin-purse", basePrice: 24, weight: 4, name: "Bottomless Purse", emoji: "👛", description: "+3 coins per room cleared." },
+  { id: "buy-relic-stomach", kind: "relic", grant: "iron-stomach", basePrice: 18, weight: 4, name: "Iron Stomach", emoji: "🍖", description: "Food heals +1 extra." },
+  { id: "buy-relic-thesaurus", kind: "relic", grant: "thesaurus-shard", basePrice: 20, weight: 4, name: "Thesaurus Shard", emoji: "💠", description: "+1 damage for every 5+ letter word." },
+  { id: "buy-relic-secondwind", kind: "relic", grant: "second-wind", basePrice: 22, weight: 4, name: "Second Wind", emoji: "🌬️", description: "Heal 1 heart each new level." },
+  { id: "buy-relic-tinderbox", kind: "relic", grant: "tinderbox", basePrice: 20, weight: 4, name: "Tinderbox", emoji: "🔥", description: "Fire-words deal +2." },
+  { id: "buy-relic-reliquary", kind: "relic", grant: "reliquary", basePrice: 20, weight: 4, name: "Reliquary", emoji: "✝️", description: "Holy-words deal +2." },
+  { id: "buy-relic-scrabble", kind: "relic", grant: "scrabble-tile", basePrice: 22, weight: 4, name: "Scrabble Tile", emoji: "🔠", description: "J/Q/X/Z words deal +4." },
+  { id: "buy-relic-bookmark", kind: "relic", grant: "iron-bookmark", basePrice: 18, weight: 4, name: "Iron Bookmark", emoji: "🔖", description: "First failed word each level costs no heart." },
   // (The Sword in the Stone is NOT sold — it can only be drawn in the rare
-  //  SWORD_EVENT below.)
+  //  SWORD_EVENT below. The Coin Scroll isn't sold either: paying coins for
+  //  coins is just a discount on nothing. It only ever turns up as a drop.)
+];
+
+/* What a slain monster might be carrying. Scrolls used to be shop-only and only
+   ever filled one of two random slots, so a whole run averaged about ONE — and
+   four of the ten scrolls in SCROLLS were reachable from nowhere at all. A
+   modest drop chance per kill (see SCROLL_DROP_CHANCE in logic.js) turns them
+   into a real part of the run, and gives the storable draughts — the only way to
+   BANK a heal for a boss — somewhere to come from. */
+export const SCROLL_DROPS = [
+  { id: "clean-slate", weight: 8 },
+  { id: "word-bomb", weight: 8 },
+  { id: "vowel-pardon", weight: 7 },
+  { id: "coin-scroll", weight: 7 },
+  { id: "smoke-bomb", weight: 6 },
+  { id: "reroll-room", weight: 6 },
+  { id: "healing-draught", weight: 5 },
+  { id: "banish-scroll", weight: 3 },
+  { id: "greater-draught", weight: 2 },
+  { id: "greater-bomb", weight: 2 },
 ];
 
 // ── EVENTS ─────────────────────────────────────────────────────────────────────
