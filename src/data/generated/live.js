@@ -79,18 +79,18 @@ export default {
   "schedule": {
     "adds": [
       {
-        "days": 7,
         "mode": "pin",
-        "from": "2026-08-03",
+        "id": "sched-news-rumor-see-the-odyssey-or-odd-i-s",
         "text": "NEW: See The Odyssey or Odd, I see?",
-        "type": "news",
-        "id": "sched-news-rumor-see-the-odyssey-or-odd-i-s"
+        "from": "2026-08-03",
+        "days": 7,
+        "type": "news"
       },
       {
         "type": "news",
         "mode": "pin",
         "from": "2026-08-04",
-        "text": "Commercial internet. What’s that? Commercial internet. NOT QUITE YET.",
+        "text": "PSA: Commercial internet. What’s that? Commercial internet. NOT QUITE YET.",
         "id": "sched-news-commercial-internet-what-s-that-"
       }
     ],
