@@ -3,76 +3,84 @@
 export default [
   {
     "id": "gw-internet-roadtrip",
-    "title": "Thousands of strangers driving one Street View car by committee",
-    "blurb": "Everybody votes every 10 seconds on where the car turns, and somehow it goes places. It even tunes real local radio as you crawl down some highway together — the world's slowest, friendliest road trip.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "foundNote": "democracy, but it's a minivan"
-  },
-  {
-    "id": "gw-marginalia-search",
-    "title": "A search engine that only finds the weird handmade web",
-    "blurb": "A tiny indie search engine that skips the SEO sludge and surfaces the grass-fed, free-range HTML your grandma used to write. No cookie banners, no ads, just the old internet.",
-    "url": "https://marginalia-search.com"
-  },
-  {
-    "id": "gw-find-invisible-cow",
-    "title": "A game where you find a cow by how loud it screams",
-    "blurb": "There's an invisible cow somewhere on the page. A voice yells 'COW' louder as your cursor gets closer. That's it. That's the internet.",
-    "url": "https://findtheinvisiblecow.com",
-    "foundNote": "headphones recommended, dignity not"
-  },
-  {
-    "id": "gw-is-it-christmas",
-    "title": "A website that answers one question: is it Christmas?",
-    "blurb": "Loads a giant YES or NO. That's the whole site, and it has been unwaveringly devoted to this mission for years. We respect the focus.",
-    "url": "https://isitchristmas.com",
-    "foundNote": "single-purpose since forever"
+    "title": "Thousands of strangers steering one car by vote",
+    "blurb": "A shared Google Street View road trip where the whole internet votes on which way to turn, whether to honk, and what station's on the radio. It's a school-bus field trip driven entirely by democracy and vibes.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "foundNote": "honk to vote"
   },
   {
     "id": "gw-neal-fun",
-    "title": "One guy's lab of absurdly polished browser experiments",
-    "blurb": "Neal Agarwal keeps quietly dropping perfect little internet toys — password games, scale-of-the-universe scrollers, clicker fever dreams. New ones show up every few months.",
-    "url": "https://neal.fun",
-    "foundNote": "the good kind of rabbit hole"
+    "title": "One guy's endless closet of browser toys",
+    "blurb": "Neal Agarwal keeps quietly shipping the internet's best little experiments — Infinite Craft, The Password Game, the whole cabinet. It's the modern-day version of finding a Flash portal that never ran out of games.",
+    "url": "https://neal.fun"
   },
   {
-    "id": "gw-koalas-to-the-max",
-    "title": "Move your mouse and koalas slowly appear from pixel fog",
-    "blurb": "A big blurry square splits into smaller and smaller squares as you wander over it, until a hidden koala reveals itself. Weirdly meditative, ends adorable.",
-    "url": "https://koalastothemax.com"
+    "id": "gw-sandboxels",
+    "title": "A falling-sand physics lab with hundreds of elements",
+    "blurb": "Pour sand, set it on fire, wire up electricity, grow a little ecosystem, then flood the whole thing with lava. It's every 2005 sand game you loved, except it grew up and got a chemistry degree.",
+    "url": "https://sandboxels.r74n.com"
   },
   {
-    "id": "gw-pug-in-a-rug",
-    "title": "A pug, in a rug, that will not be denied",
-    "blurb": "You try to cover the pug with a blanket. The pug insists on being seen. A gentle, wordless struggle you can play forever.",
-    "url": "https://puginarug.com"
+    "id": "gw-nicest-place",
+    "title": "A wall of strangers giving you a virtual hug",
+    "blurb": "Short video clips of real people opening their arms right at your screen, no strings attached. Absolutely the emotional opposite of a comments section, and we're okay with that.",
+    "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-longdoge",
-    "title": "The longest possible doge, and you have to scroll all of it",
-    "blurb": "Such length. Very scroll. It's the doge meme stretched into a genuine endurance event — see if you can reach the bottom without giving up. Wow.",
-    "url": "https://longdogechallenge.com",
-    "foundNote": "a 2013 meme, aged into performance art"
+    "id": "gw-endless-horse",
+    "title": "A horse with infinitely long legs",
+    "blurb": "Scroll down. The legs continue. Keep scrolling. They still continue. It's a single joke stretched across the entire vertical concept of the internet, and honestly it earns it.",
+    "url": "http://endless.horse",
+    "foundNote": "just keep scrolling"
   },
   {
-    "id": "gw-nyan-cat",
-    "title": "The Pop-Tart cat that flew across every 2011 monitor",
-    "blurb": "Rainbow trail, chiptune loop, infinite space. Nyan Cat is still up and still nyaning, a perfect time capsule of when memes were just a cat and a song.",
-    "url": "https://www.nyan.cat",
-    "foundNote": "turn it up, then turn it off, then back on"
+    "id": "gw-pixel-thoughts",
+    "title": "A 60-second timer that shrinks your worries to a speck",
+    "blurb": "Type in whatever's rattling around your skull, then watch it float off into space and get tiny. Guided meditation with the file size of a GeoCities page.",
+    "url": "https://pixelthoughts.co"
   },
   {
-    "id": "gw-thats-the-finger",
-    "title": "A website that just gives you the finger",
-    "blurb": "You point the cursor at the hand, the hand points back at you. Rude, minimal, and honestly kind of soothing in its commitment.",
-    "url": "https://thatsthefinger.com",
-    "foundNote": "PG-13, technically"
+    "id": "gw-sonicviz",
+    "title": "A flock of thousands of birds that plays its own music",
+    "blurb": "Procedural birds swoop around and their movement writes the soundtrack in real time. It's a screensaver, an instrument, and a nap machine all at once.",
+    "url": "https://sonicviz.com",
+    "foundNote": "needs the good speakers"
   },
   {
-    "id": "gw-omfg-dogs",
-    "title": "Spinning dogs. A loop. Forever.",
-    "blurb": "Cartoon dogs spinning to a chiptune loop that will burrow into your skull and stay for a week. This has been online basically unchanged since the Flash era.",
-    "url": "https://www.omfgdogs.com",
-    "foundNote": "survived the Flash apocalypse"
+    "id": "gw-zen-zone",
+    "title": "Relaxing visuals that follow your mouse",
+    "blurb": "Drag your cursor around and let the calm shapes chase it. The digital equivalent of running your hand through a zen garden you didn't have to rake.",
+    "url": "https://thezen.zone"
+  },
+  {
+    "id": "gw-koalas",
+    "title": "Click a giant circle until it becomes a koala",
+    "blurb": "One big dot splits into four, then sixteen, then a full pixel koala emerges from the chaos. Weirdly hypnotic, dangerously easy to keep clicking through your lunch break.",
+    "url": "https://www.koalastothemax.com"
+  },
+  {
+    "id": "gw-weave-silk",
+    "title": "Draw glowing symmetrical silk with your cursor",
+    "blurb": "Every squiggle mirrors itself into shimmering fractal art you couldn't make ugly if you tried. This was the fidget spinner of the browser tab.",
+    "url": "http://weavesilk.com"
+  },
+  {
+    "id": "gw-falling-falling",
+    "title": "An endless waterfall of color that never lands",
+    "blurb": "Bands of shifting color pour down forever with a low ambient hum. Stare too long and you'll forget you opened seventeen other tabs.",
+    "url": "http://www.fallingfalling.com",
+    "foundNote": "sound on"
+  },
+  {
+    "id": "gw-purrli",
+    "title": "A cat purr generator you can tune to your mood",
+    "blurb": "Adjust the size of the imaginary cat, add a rumble, dial in the warmth. All the comfort of a lap cat with none of the 3 a.m. zoomies.",
+    "url": "https://purrli.com"
+  },
+  {
+    "id": "gw-thisissand",
+    "title": "Pour colored sand into a jar, one grain at a time",
+    "blurb": "Tap to drop streams of colored sand into pretty layered dunes, then just… keep going. It's a mesmerizing little art toy that's been quietly calming people for years.",
+    "url": "https://thisissand.com"
   }
 ];

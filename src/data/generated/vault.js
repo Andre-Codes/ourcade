@@ -2,6 +2,126 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-purrli",
+    "kind": "site",
+    "era": "current",
+    "title": "A cat purr generator you can tune to your mood",
+    "blurb": "Adjust the size of the imaginary cat, add a rumble, dial in the warmth. All the comfort of a lap cat with none of the 3 a.m. zoomies.",
+    "url": "https://purrli.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:47.349Z"
+  },
+  {
+    "id": "gw-falling-falling",
+    "kind": "site",
+    "era": "current",
+    "title": "An endless waterfall of color that never lands",
+    "blurb": "Bands of shifting color pour down forever with a low ambient hum. Stare too long and you'll forget you opened seventeen other tabs.",
+    "url": "http://www.fallingfalling.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:47.271Z"
+  },
+  {
+    "id": "gw-weave-silk",
+    "kind": "site",
+    "era": "current",
+    "title": "Draw glowing symmetrical silk with your cursor",
+    "blurb": "Every squiggle mirrors itself into shimmering fractal art you couldn't make ugly if you tried. This was the fidget spinner of the browser tab.",
+    "url": "http://weavesilk.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:47.175Z"
+  },
+  {
+    "id": "gw-koalas",
+    "kind": "site",
+    "era": "current",
+    "title": "Click a giant circle until it becomes a koala",
+    "blurb": "One big dot splits into four, then sixteen, then a full pixel koala emerges from the chaos. Weirdly hypnotic, dangerously easy to keep clicking through your lunch break.",
+    "url": "https://www.koalastothemax.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:47.076Z"
+  },
+  {
+    "id": "gw-zen-zone",
+    "kind": "site",
+    "era": "current",
+    "title": "Relaxing visuals that follow your mouse",
+    "blurb": "Drag your cursor around and let the calm shapes chase it. The digital equivalent of running your hand through a zen garden you didn't have to rake.",
+    "url": "https://thezen.zone",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.987Z"
+  },
+  {
+    "id": "gw-sonicviz",
+    "kind": "site",
+    "era": "current",
+    "title": "A flock of thousands of birds that plays its own music",
+    "blurb": "Procedural birds swoop around and their movement writes the soundtrack in real time. It's a screensaver, an instrument, and a nap machine all at once.",
+    "url": "https://sonicviz.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.865Z"
+  },
+  {
+    "id": "gw-pixel-thoughts",
+    "kind": "site",
+    "era": "current",
+    "title": "A 60-second timer that shrinks your worries to a speck",
+    "blurb": "Type in whatever's rattling around your skull, then watch it float off into space and get tiny. Guided meditation with the file size of a GeoCities page.",
+    "url": "https://pixelthoughts.co",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.762Z"
+  },
+  {
+    "id": "gw-endless-horse",
+    "kind": "site",
+    "era": "current",
+    "title": "A horse with infinitely long legs",
+    "blurb": "Scroll down. The legs continue. Keep scrolling. They still continue. It's a single joke stretched across the entire vertical concept of the internet, and honestly it earns it.",
+    "url": "http://endless.horse",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.658Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A wall of strangers giving you a virtual hug",
+    "blurb": "Short video clips of real people opening their arms right at your screen, no strings attached. Absolutely the emotional opposite of a comments section, and we're okay with that.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.566Z"
+  },
+  {
+    "id": "gw-sandboxels",
+    "kind": "site",
+    "era": "current",
+    "title": "A falling-sand physics lab with hundreds of elements",
+    "blurb": "Pour sand, set it on fire, wire up electricity, grow a little ecosystem, then flood the whole thing with lava. It's every 2005 sand game you loved, except it grew up and got a chemistry degree.",
+    "url": "https://sandboxels.r74n.com",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.440Z"
+  },
+  {
+    "id": "gw-neal-fun",
+    "kind": "site",
+    "era": "current",
+    "title": "One guy's endless closet of browser toys",
+    "blurb": "Neal Agarwal keeps quietly shipping the internet's best little experiments — Infinite Craft, The Password Game, the whole cabinet. It's the modern-day version of finding a Flash portal that never ran out of games.",
+    "url": "https://neal.fun",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.343Z"
+  },
+  {
+    "id": "gw-internet-roadtrip",
+    "kind": "site",
+    "era": "current",
+    "title": "Thousands of strangers steering one car by vote",
+    "blurb": "A shared Google Street View road trip where the whole internet votes on which way to turn, whether to honk, and what station's on the radio. It's a school-bus field trip driven entirely by democracy and vibes.",
+    "url": "https://neal.fun/internet-roadtrip",
+    "source": "weird",
+    "archivedAt": "2026-08-05T07:01:46.180Z"
+  },
+  {
     "id": "gw-omfg-dogs",
     "kind": "site",
     "era": "current",
@@ -42,16 +162,6 @@ export default [
     "archivedAt": "2026-08-03T07:18:55.707Z"
   },
   {
-    "id": "gw-neal-fun",
-    "kind": "site",
-    "era": "current",
-    "title": "One guy's lab of absurdly polished browser experiments",
-    "blurb": "Neal Agarwal keeps quietly dropping perfect little internet toys — password games, scale-of-the-universe scrollers, clicker fever dreams. New ones show up every few months.",
-    "url": "https://neal.fun",
-    "source": "weird",
-    "archivedAt": "2026-08-03T07:18:55.539Z"
-  },
-  {
     "id": "gw-is-it-christmas",
     "kind": "site",
     "era": "current",
@@ -80,16 +190,6 @@ export default [
     "url": "https://marginalia-search.com",
     "source": "weird",
     "archivedAt": "2026-08-03T07:18:55.226Z"
-  },
-  {
-    "id": "gw-internet-roadtrip",
-    "kind": "site",
-    "era": "current",
-    "title": "Thousands of strangers driving one Street View car by committee",
-    "blurb": "Everybody votes every 10 seconds on where the car turns, and somehow it goes places. It even tunes real local radio as you crawl down some highway together — the world's slowest, friendliest road trip.",
-    "url": "https://neal.fun/internet-roadtrip/",
-    "source": "weird",
-    "archivedAt": "2026-08-03T07:18:55.073Z"
   },
   {
     "id": "g:archive-of-the-odd",
@@ -722,36 +822,6 @@ export default [
     "archivedAt": "2026-08-01T06:57:50.738Z"
   },
   {
-    "id": "gw-falling-falling",
-    "kind": "site",
-    "era": "current",
-    "title": "Bands of color falling forever, with a hum to match",
-    "blurb": "No goal, no score, just an infinite waterfall of hues you can slow down or speed up. Screensaver energy, load-bearing vibes.",
-    "url": "https://fallingfalling.com",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.661Z"
-  },
-  {
-    "id": "gw-koalas",
-    "kind": "site",
-    "era": "current",
-    "title": "Click a fuzzy blob until it slowly resolves into a koala",
-    "blurb": "Each click halves the pixels until the little guy comes into focus. Oddly meditative, mildly addictive, extremely 2008.",
-    "url": "https://koalastothemax.com",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.491Z"
-  },
-  {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A website where strangers send you video hugs, no strings attached",
-    "blurb": "Just an endless parade of people opening their arms to you through the screen. Wholesome overload; keep the cynicism in the other tab.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-08-01T06:57:50.293Z"
-  },
-  {
     "id": "gw-sandspiel",
     "kind": "site",
     "era": "current",
@@ -842,16 +912,6 @@ export default [
     "archivedAt": "2026-07-29T07:03:22.489Z"
   },
   {
-    "id": "gw-pixel-thoughts",
-    "kind": "site",
-    "era": "current",
-    "title": "Type a worry, watch it drift into the void",
-    "blurb": "Pixel Thoughts is a tiny 60-second meditation: put your stress on a little star and let it float away into HTML space. Free therapy, sort of.",
-    "url": "https://pixelthoughts.co",
-    "source": "weird",
-    "archivedAt": "2026-07-29T07:03:22.365Z"
-  },
-  {
     "id": "gw-absurd-website",
     "kind": "site",
     "era": "current",
@@ -922,16 +982,6 @@ export default [
     "archivedAt": "2026-07-27T07:18:48.466Z"
   },
   {
-    "id": "gw-sandboxels",
-    "kind": "site",
-    "era": "current",
-    "title": "A falling-sand toy that lets you burn down anything",
-    "blurb": "Drop water, fire, plants, lava and about a hundred other elements into a box and watch physics have opinions. It's the digital descendant of every 'sand game' you played in the library instead of doing homework.",
-    "url": "https://neal.fun/sandboxels/",
-    "source": "weird",
-    "archivedAt": "2026-07-27T07:18:48.356Z"
-  },
-  {
     "id": "gw-floor796",
     "kind": "site",
     "era": "current",
@@ -980,16 +1030,6 @@ export default [
     "url": "https://wikiroulette.co",
     "source": "weird",
     "archivedAt": "2026-07-21T07:00:24.724Z"
-  },
-  {
-    "id": "gw-weavesilk",
-    "kind": "site",
-    "era": "current",
-    "title": "Draw glowing symmetrical art with zero talent required",
-    "blurb": "Drag your mouse and it mirrors your scribbles into gorgeous kaleidoscope silk. Instant fridge-worthy masterpiece, no skill applied.",
-    "url": "http://weavesilk.com",
-    "source": "weird",
-    "archivedAt": "2026-07-19T06:58:34.584Z"
   },
   {
     "id": "gw-wplace",
@@ -1882,16 +1922,6 @@ export default [
     "url": "https://www.geopixels.net",
     "source": "weird",
     "archivedAt": "2026-06-19T08:04:36.319Z"
-  },
-  {
-    "id": "gw-endless-horse",
-    "kind": "site",
-    "era": "current",
-    "title": "An ASCII horse with legs that go on forever",
-    "blurb": "No menu, no point, no end. Just a little horse and four legs that keep scrolling into infinity. We respect the commitment.",
-    "url": "http://endless.horse",
-    "source": "weird",
-    "archivedAt": "2026-06-19T08:04:36.107Z"
   },
   {
     "id": "gw-typelit",
