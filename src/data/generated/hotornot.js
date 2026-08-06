@@ -2,74 +2,19 @@
 // Hot-or-Not subjects. Shape: { id, subject, emoji } — loader hard-codes [HOT, NOT].
 export default [
   {
-    "id": "hon-gta-vi-vice-city",
-    "subject": "GTA VI's Vice City return",
-    "emoji": "🌴"
-  },
-  {
-    "id": "hon-fifa-world-cup-2026",
-    "subject": "2026 FIFA World Cup",
-    "emoji": "⚽"
-  },
-  {
-    "id": "hon-48-team-world-cup",
-    "subject": "The 48-team World Cup",
-    "emoji": "🏟️"
-  },
-  {
-    "id": "hon-2026-new-2016",
-    "subject": "\"2026 is the new 2016\"",
-    "emoji": "🔄"
+    "id": "hon-2016-nostalgia-wave",
+    "subject": "2016 Nostalgia Wave",
+    "emoji": "📼"
   },
   {
     "id": "hon-mannequin-challenge-revival",
-    "subject": "Reviving the Mannequin Challenge",
+    "subject": "Mannequin Challenge Revival",
     "emoji": "🧍"
   },
   {
     "id": "hon-bottle-flip-comeback",
-    "subject": "Bottle Flip Challenge comeback",
-    "emoji": "🍼"
-  },
-  {
-    "id": "hon-super-mario-galaxy-movie",
-    "subject": "The Super Mario Galaxy Movie",
-    "emoji": "🌌"
-  },
-  {
-    "id": "hon-black-flag-resynced",
-    "subject": "Assassin's Creed Black Flag Resynced",
-    "emoji": "🏴‍☠️"
-  },
-  {
-    "id": "hon-halo-campaign-evolved",
-    "subject": "Halo: Campaign Evolved",
-    "emoji": "🪖"
-  },
-  {
-    "id": "hon-project-hail-mary",
-    "subject": "Project Hail Mary movie",
-    "emoji": "🚀"
-  },
-  {
-    "id": "hon-gosling-science-teacher",
-    "subject": "Ryan Gosling, science teacher",
-    "emoji": "🧪"
-  },
-  {
-    "id": "hon-bts-arirang",
-    "subject": "BTS's album \"Arirang\"",
-    "emoji": "🎤"
-  },
-  {
-    "id": "hon-harry-styles-disco",
-    "subject": "Harry Styles going disco",
-    "emoji": "🪩"
-  },
-  {
-    "id": "hon-olivia-rodrigo-new-wave",
-    "subject": "Olivia Rodrigo's new album",
-    "emoji": "💿"
+    "subject": "Bottle Flip Comeback",
+    "emoji": "🍶"
   },
   {
     "id": "hon-jimothy-raccoon",
@@ -77,168 +22,223 @@ export default [
     "emoji": "🦝"
   },
   {
-    "id": "hon-country-roads-usmnt",
-    "subject": "\"Country Roads\" at the World Cup",
-    "emoji": "🎶"
+    "id": "hon-kwebbelkop-laugh",
+    "subject": "Kwebbelkop Laugh Sound",
+    "emoji": "😂"
   },
   {
-    "id": "hon-vozinha-keeper",
-    "subject": "Vozinha, Cape Verde's keeper",
-    "emoji": "🧤"
+    "id": "hon-gta-vi-countdown",
+    "subject": "GTA VI Countdown",
+    "emoji": "🚗"
   },
   {
-    "id": "hon-silo-season-3",
-    "subject": "Silo Season 3",
-    "emoji": "🌀"
+    "id": "hon-bieberchella-moment",
+    "subject": "Bieberchella Laptop Moment",
+    "emoji": "💻"
   },
   {
-    "id": "hon-enola-holmes-3",
-    "subject": "Enola Holmes 3",
-    "emoji": "🔍"
+    "id": "hon-koolaid-pineapple",
+    "subject": "Kool-Aid Pineapple Trend",
+    "emoji": "🍍"
   },
   {
-    "id": "hon-gta-dual-protagonists",
-    "subject": "GTA's dual protagonists",
-    "emoji": "👥"
+    "id": "hon-scientology-speedrun",
+    "subject": "Scientology Speedrun Trend",
+    "emoji": "🏃"
   },
   {
-    "id": "hon-remaster-everything",
-    "subject": "Remastering every classic game",
-    "emoji": "✨"
+    "id": "hon-ted-lasso-return",
+    "subject": "Ted Lasso Season 4",
+    "emoji": "⚽"
   },
   {
-    "id": "hon-pirate-games",
-    "subject": "Pirate games making a comeback",
-    "emoji": "⚓"
+    "id": "hon-lanterns-hbo",
+    "subject": "Lanterns on HBO Max",
+    "emoji": "🟢"
   },
   {
-    "id": "hon-most-hyped-game-earth",
-    "subject": "Endless GTA VI hype",
-    "emoji": "📢"
+    "id": "hon-michael-biopic",
+    "subject": "Michael MJ Biopic Streaming",
+    "emoji": "🕺"
+  },
+  {
+    "id": "hon-stranger-things-85",
+    "subject": "Stranger Things: Tales From '85",
+    "emoji": "📺"
+  },
+  {
+    "id": "hon-olivia-rodrigo-threepeat",
+    "subject": "Olivia Rodrigo's Third No. 1",
+    "emoji": "🎤"
+  },
+  {
+    "id": "hon-drake-triple-takeover",
+    "subject": "Drake's Triple Chart Takeover",
+    "emoji": "💿"
+  },
+  {
+    "id": "hon-ella-langley-reign",
+    "subject": "Ella Langley's Country Reign",
+    "emoji": "🤠"
+  },
+  {
+    "id": "hon-resident-evil-requiem",
+    "subject": "Resident Evil Requiem Hype",
+    "emoji": "🧟"
+  },
+  {
+    "id": "hon-little-house-reboot",
+    "subject": "Little House Reboot",
+    "emoji": "🌾"
+  },
+  {
+    "id": "hon-2026-is-2016",
+    "subject": "2026 Is the New 2016",
+    "emoji": "🔁"
+  },
+  {
+    "id": "hon-vice-city-throwback",
+    "subject": "Vice City Arcade Throwback",
+    "emoji": "🌴"
+  },
+  {
+    "id": "hon-accuracy-reenactments",
+    "subject": "Accuracy Reenactment Videos",
+    "emoji": "🎬"
+  },
+  {
+    "id": "hon-apple-tv-comedy-comeback",
+    "subject": "Apple TV Comedy Comeback",
+    "emoji": "📱"
+  },
+  {
+    "id": "hon-green-lantern-reboot",
+    "subject": "Green Lantern Reboot",
+    "emoji": "💚"
+  },
+  {
+    "id": "hon-raccoon-ball-fame",
+    "subject": "Raccoon-Ball Internet Fame",
+    "emoji": "🐾"
+  },
+  {
+    "id": "hon-y2k-revival-wave",
+    "subject": "Y2K Revival Wave",
+    "emoji": "💾"
   },
   {
     "id": "hon-flip-phones",
-    "subject": "Flip phones",
+    "subject": "Flip Phones",
     "emoji": "📱"
   },
   {
     "id": "hon-trucker-hats",
-    "subject": "Trucker hats",
+    "subject": "Trucker Hats",
     "emoji": "🧢"
   },
   {
     "id": "hon-physical-media",
-    "subject": "Physical media (DVDs)",
-    "emoji": "📀"
+    "subject": "Physical Media (DVDs)",
+    "emoji": "💿"
   },
   {
-    "id": "hon-dial-up-sound",
-    "subject": "The dial-up handshake sound",
-    "emoji": "☎️"
+    "id": "hon-dialup-sound",
+    "subject": "Dial-Up Modem Sound",
+    "emoji": "🌐"
   },
   {
-    "id": "hon-tamagotchi",
-    "subject": "Tamagotchi pets",
-    "emoji": "🐣"
-  },
-  {
-    "id": "hon-cargo-shorts",
-    "subject": "Cargo shorts",
-    "emoji": "🩳"
-  },
-  {
-    "id": "hon-jnco-jeans",
-    "subject": "JNCO wide-leg jeans",
-    "emoji": "👖"
-  },
-  {
-    "id": "hon-von-dutch-caps",
-    "subject": "Von Dutch caps",
-    "emoji": "🧢"
-  },
-  {
-    "id": "hon-butterfly-clips",
-    "subject": "Butterfly hair clips",
-    "emoji": "🦋"
-  },
-  {
-    "id": "hon-gel-bracelets",
-    "subject": "Jelly gel bracelets",
-    "emoji": "⭕"
-  },
-  {
-    "id": "hon-chunky-highlights",
-    "subject": "Chunky hair highlights",
-    "emoji": "💇‍♀️"
-  },
-  {
-    "id": "hon-myspace-top-8",
-    "subject": "The MySpace Top 8",
-    "emoji": "🖥️"
-  },
-  {
-    "id": "hon-aim-away-messages",
-    "subject": "AIM away messages",
+    "id": "hon-aim-away-message",
+    "subject": "AIM Away Messages",
     "emoji": "💬"
   },
   {
-    "id": "hon-lan-parties",
-    "subject": "LAN parties",
-    "emoji": "🖧"
+    "id": "hon-gel-pens",
+    "subject": "Gel Pens",
+    "emoji": "✏️"
   },
   {
-    "id": "hon-blockbuster-nights",
-    "subject": "Blockbuster Friday nights",
-    "emoji": "🎬"
+    "id": "hon-side-swept-bangs",
+    "subject": "Side-Swept Scene Bangs",
+    "emoji": "✂️"
   },
   {
-    "id": "hon-burning-mix-cds",
-    "subject": "Burning mix CDs",
-    "emoji": "💽"
+    "id": "hon-von-dutch-hats",
+    "subject": "Von Dutch Hats",
+    "emoji": "🧢"
   },
   {
-    "id": "hon-motorola-razr",
-    "subject": "The Motorola Razr",
-    "emoji": "📲"
+    "id": "hon-silly-bandz",
+    "subject": "Silly Bandz",
+    "emoji": "🌈"
   },
   {
-    "id": "hon-ipod-click-wheel",
-    "subject": "The iPod click wheel",
-    "emoji": "🎧"
+    "id": "hon-tamagotchi-pets",
+    "subject": "Tamagotchi Pets",
+    "emoji": "🐣"
   },
   {
-    "id": "hon-livestrong-bracelets",
-    "subject": "Livestrong bracelets",
+    "id": "hon-butterfly-clips",
+    "subject": "Butterfly Clips",
+    "emoji": "🦋"
+  },
+  {
+    "id": "hon-neon-windbreakers",
+    "subject": "Neon Windbreakers",
+    "emoji": "⚡"
+  },
+  {
+    "id": "hon-chunky-highlights",
+    "subject": "Chunky Highlights",
     "emoji": "💛"
   },
   {
-    "id": "hon-crocs",
-    "subject": "Crocs",
-    "emoji": "🐊"
+    "id": "hon-rat-tail-haircut",
+    "subject": "Rat-Tail Haircuts",
+    "emoji": "🐀"
   },
   {
-    "id": "hon-popcorn-shirts",
-    "subject": "Stretchy popcorn shirts",
-    "emoji": "👕"
+    "id": "hon-zune-vs-ipod",
+    "subject": "Zune vs iPod",
+    "emoji": "🎵"
   },
   {
-    "id": "hon-studded-belts",
-    "subject": "Studded belts",
-    "emoji": "🔩"
+    "id": "hon-cd-mixtapes",
+    "subject": "CD Mixtapes",
+    "emoji": "📀"
   },
   {
-    "id": "hon-screensavers",
-    "subject": "Bouncing DVD screensavers",
-    "emoji": "📺"
+    "id": "hon-chain-wallets",
+    "subject": "Chain Wallets",
+    "emoji": "⛓️"
   },
   {
-    "id": "hon-mall-food-courts",
-    "subject": "Mall food courts",
-    "emoji": "🍕"
+    "id": "hon-popped-collars",
+    "subject": "Popped Collars",
+    "emoji": "👔"
   },
   {
-    "id": "hon-ringtone-stores",
-    "subject": "Paying for ringtones",
-    "emoji": "🔔"
+    "id": "hon-livestrong-bracelets",
+    "subject": "Livestrong Bracelets",
+    "emoji": "💛"
+  },
+  {
+    "id": "hon-juicy-couture-tracksuit",
+    "subject": "Juicy Couture Tracksuits",
+    "emoji": "👚"
+  },
+  {
+    "id": "hon-myspace-top-8",
+    "subject": "MySpace Top 8",
+    "emoji": "🌟"
+  },
+  {
+    "id": "hon-fat-laces-skate-shoes",
+    "subject": "Fat Laces on Skate Shoes",
+    "emoji": "👟"
+  },
+  {
+    "id": "hon-inflatable-furniture",
+    "subject": "Inflatable Furniture",
+    "emoji": "🛋️"
   }
 ];

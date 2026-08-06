@@ -1,9 +1,19 @@
 # Anthropic API calls — what runs, and when
 
 A map of every place Ourcade spends Anthropic (Claude) tokens, so the cost is easy
-to estimate. **All calls use `claude-opus-4-8`.** Nothing in the running site (the
-browser app) ever calls the API — these are all **build-time dev/CI scripts** that
-write static data into `src/data/generated/`, which then ships as plain JSON.
+to estimate. Nothing in the running site (the browser app) ever calls the API —
+these are all **build-time dev/CI scripts** that write static data into
+`src/data/generated/`, which then ships as plain JSON.
+
+**Model:** `generate-content.js` and the shared research helper run on
+**`claude-sonnet-5`** — one constant, `GEN_MODEL` in
+[scripts/lib/research.js](scripts/lib/research.js). These are short creative-writing
+and search-and-summarize calls against a strict schema, not deep reasoning; Sonnet 5
+supports everything they use (adaptive thinking, effort, structured JSON output) at
+roughly 40% of Opus's output price. The Buzz specificity gate is the quality check —
+if a run's drop tally spikes or it can't clear the `>=30` floor, move back up a tier.
+The separate `generate-badger.js`, `fetch-stumble.js`, and `fetch-flash.js`
+pipelines still pin `claude-opus-4-8`.
 
 If a script isn't listed here, it makes **no** API calls (e.g. the On This Day
 fetcher — see the bottom).

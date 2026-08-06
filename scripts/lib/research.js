@@ -22,6 +22,19 @@ export function loadEnv(root) {
   }
 }
 
+/* The model the content generators run on — one source of truth, imported by
+   scripts/generate-content.js so the research call and the structured calls
+   can't drift apart.
+
+   Sonnet 5, not Opus: these are short creative-writing and search-and-summarize
+   calls against a strict schema, not deep reasoning. It supports everything the
+   generators use (adaptive thinking, the full effort ladder, structured JSON
+   output) and shares Opus 4.8's tokenizer, so token budgets carry over
+   unchanged. The Buzz specificity gate in scripts/lib/buzz-quality.js is the
+   check on whether that holds: watch the drop tally and the >=30 floor on a
+   run, and move back up a tier if the model can't clear them. */
+export const GEN_MODEL = "claude-sonnet-5";
+
 const RESEARCH_PROMPT = `You MUST use the web_search tool — your training data is stale, so do NOT answer from memory. Run several searches for what is genuinely popular and being talked about RIGHT NOW: new/upcoming movies & TV, music (albums, songs, artists), video games, viral internet memes and moments, and notable pop-culture news. Prefer things from the last few weeks or months.
 
 Then return ONLY a plain bulleted list of ~15 hooks we can riff on for a nostalgic arcade site. Each bullet MUST name the actual thing and add a short gloss, like:
@@ -36,7 +49,7 @@ No preamble, no closing remarks — just the bullets.`;
 // thing / stumble harvesters) pass their own.
 export async function runResearch(client, prompt = RESEARCH_PROMPT) {
   const res = await client.messages.create({
-    model: "claude-opus-4-8",
+    model: GEN_MODEL,
     max_tokens: 4000,
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }],
     messages: [{ role: "user", content: prompt }],

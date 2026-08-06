@@ -21,13 +21,31 @@ const FALLBACK = [
   { id: "bz-fallback-3", text: "Your streaming service raised its price and added ads. It is slowly, confidently reinventing cable. Welcome home.", tag: "HOT TAKE" },
 ];
 
-// Some generated/older entries prefix the text with their own tag ("RUMOR: …"),
-// which would double up next to the tag chip in the UI. Strip a single leading
-// TAG: so the chip is the only place the tag shows. Defensive — harmless on
-// already-clean items.
-const TAG_PREFIX = /^\s*(GOSSIP|RUMOR|SIGHTING|HOT TAKE)\s*:\s*/i;
+/* The tag already renders as a chip immediately left of the text, so a line that
+   announces its own tag reads as a stutter: "RUMOR · Rumor says Severance…".
+   Two forms show up — a literal "RUMOR:" prefix, and the conversational
+   equivalent ("Rumor is…", "Word is…", "Buzz says…"). Strip both so the chip is
+   the only place the tag appears. The generator prompt also forbids them; this
+   is the net for older entries and anything that slips through. */
+const TAG_PREFIX = /^\s*(?:GOSSIP|RUMOR|SIGHTING|HOT TAKE)\s*:\s*/i;
+const TAG_LEADIN =
+  /^\s*(?:rumou?r(?:\s+(?:is|has\s+it|says|mill\s+says))?|word\s+(?:is|on\s+the\s+street\s+is)|buzz\s+(?:is|says)|gossip\s+(?:is|says)|the\s+buzz\s+is|sighting)\s*[:,]?\s+/i;
+
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
 function clean(b) {
-  const text = String(b.text || "").replace(TAG_PREFIX, "").trim();
+  let text = String(b.text || "").replace(TAG_PREFIX, "").trim();
+
+  /* Only drop the lead-in if the dispatch still names its subject afterwards.
+     Guards the case where the lead-in IS the subject — the film "Rumor Has It",
+     say — since stripping it there would break the subject-in-text contract
+     that scripts/lib/buzz-quality.js asserts. */
+  const stripped = cap(text.replace(TAG_LEADIN, "").trim());
+  if (stripped && stripped !== text) {
+    const subj = String(b.subject || "").toLowerCase();
+    if (!subj || stripped.toLowerCase().includes(subj)) text = stripped;
+  }
+
   return text === b.text ? b : { ...b, text };
 }
 

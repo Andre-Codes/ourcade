@@ -202,7 +202,7 @@ Firestore is the authority; the baked seed exists so content renders on **first 
 
 ## 🤖 How generated content gets refreshed
 
-AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is **never** imported by the app — no API key ever reaches the browser. Generators call Claude (`claude-opus-4-8`, structured JSON output) and write into `src/data/generated/*`. Topical items use a forced, verified real-time web search to name genuinely current things.
+AI content is **build-time only.** `@anthropic-ai/sdk` is a devDependency and is **never** imported by the app — no API key ever reaches the browser. Generators call Claude (`claude-sonnet-5` — `GEN_MODEL` in [scripts/lib/research.js](../scripts/lib/research.js), structured JSON output) and write into `src/data/generated/*`. Topical items use a forced, verified real-time web search to name genuinely current things.
 
 ### Two scheduled workflows
 

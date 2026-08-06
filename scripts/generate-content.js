@@ -17,7 +17,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
-import { loadEnv, runResearch, buildProofMarkdown } from "./lib/research.js";
+import { loadEnv, runResearch, buildProofMarkdown, GEN_MODEL } from "./lib/research.js";
 import { checkUrls, urlKey } from "./lib/validate-urls.js";
 import { hasNamedSubject, isVagueBuzz, DATED_RE, VAGUE_CHART_RE } from "./lib/buzz-quality.js";
 import { archiveAll } from "./lib/firebase-admin.js";
@@ -111,10 +111,28 @@ let TOPICAL = "";
 let SOURCES = [];
 let FILED = "";
 
-// The search returns whatever the open web hands back, including SEO chum. These
-// are real hosts from a live run — linking readers there costs more credibility
-// than a Wikipedia link ever did.
+// The search returns whatever the open web hands back. Two categories get cut,
+// both observed in real runs — linking readers to either costs more credibility
+// than the Wikipedia links this replaced.
+//
+// Deliberately NOT denied: small or lightweight-but-real publications (niche
+// trade sites, local stations, culture blogs). They're thin, not junk, and
+// over-denying shrinks the citable set until topical dispatches lose their
+// source and get dropped by the gate. Only add a host here if it's a platform
+// or a marketing blog, not merely because it's small.
 const SOURCE_DENY = [
+  // 1. Social / UGC platforms. A "read more ↗" should open coverage, not a
+  //    video or a feed — the reader already knows what TikTok is.
+  /(^|\.)tiktok\.com$/i,
+  /(^|\.)youtube\.com$/i,
+  /(^|\.)youtu\.be$/i,
+  /(^|\.)instagram\.com$/i,
+  /(^|\.)facebook\.com$/i,
+  /(^|\.)threads\.(net|com)$/i,
+  /(^|\.)reddit\.com$/i,
+  /(^|\.)(x|twitter)\.com$/i,
+  /(^|\.)pinterest\.com$/i,
+  // 2. SEO / marketing-SaaS blogs that publish trend listicles for traffic.
   /(^|\.)accio\.com$/i,
   /(^|\.)barchart\.com$/i,
   /financialcontent\.com$/i,
@@ -123,6 +141,7 @@ const SOURCE_DENY = [
   /trends\.usa\.one$/i,
   /plataformamedia\.com$/i,
   /(^|\.)sportskeeda\.com$/i,
+  /(^|\.)napoleoncat\.com$/i,
 ];
 const SOURCE_CAP = 24; // ~500 tokens in the cached prefix; plenty to cite from
 
@@ -154,16 +173,20 @@ function curateSources(results) {
   return keep.slice(0, SOURCE_CAP).map((s, i) => ({ n: i + 1, ...s }));
 }
 
-// "read more ↗" reads better as an outlet than as a domain. Known names first,
-// title-cased bare domain otherwise.
+// "read more ↗" reads better as an outlet than as a domain — where we actually
+// know the outlet's name. Anything not in this map falls back to the bare host.
 const OUTLET = {
   "netflix.com": "Netflix Tudum",
   "billboard.com": "Billboard",
   "rollingstone.com": "Rolling Stone",
   "gamespot.com": "GameSpot",
+  "gamesradar.com": "GamesRadar",
   "thewrap.com": "TheWrap",
   "foxsports.com": "FOX Sports",
+  "fox13seattle.com": "FOX 13 Seattle",
+  "komonews.com": "KOMO News",
   "variety.com": "Variety",
+  "hollywoodreporter.com": "The Hollywood Reporter",
   "npr.org": "NPR",
   "en.wikipedia.org": "Wikipedia",
   "officialcharts.com": "Official Charts",
@@ -176,11 +199,40 @@ const OUTLET = {
   "roughtrade.com": "Rough Trade",
   "stereofox.com": "Stereofox",
   "analyticsinsight.net": "Analytics Insight",
+  "buzzfeed.com": "BuzzFeed",
+  "purewow.com": "PureWow",
+  "brobible.com": "BroBible",
+  "movieinsider.com": "MovieInsider",
+  "whats-on-netflix.com": "What's on Netflix",
+  "ultimateclassicrock.com": "Ultimate Classic Rock",
+  "ign.com": "IGN",
+  "polygon.com": "Polygon",
+  "eurogamer.net": "Eurogamer",
+  "pitchfork.com": "Pitchfork",
+  "deadline.com": "Deadline",
+  "ew.com": "Entertainment Weekly",
+  "avclub.com": "The A.V. Club",
+  "vulture.com": "Vulture",
+  "theverge.com": "The Verge",
+  "espn.com": "ESPN",
+  "bbc.com": "BBC",
+  "bbc.co.uk": "BBC",
+  "apnews.com": "AP News",
+  "reuters.com": "Reuters",
+  "complex.com": "Complex",
+  "pcgamer.com": "PC Gamer",
+  "dexerto.com": "Dexerto",
+  "knowyourmeme.com": "Know Your Meme",
+  "goldderby.com": "Gold Derby",
+  "rateyourmusic.com": "Rate Your Music",
 };
+
+// The bare host, NOT a title-cased guess. Naive capitalization invents outlet
+// names that don't exist — "fox13seattle.com" became "Fox13seattle", which reads
+// like a typo and misnames a real newsroom. A domain is never wrong, and readers
+// recognize domains fine.
 function outletLabel(host) {
-  if (OUTLET[host]) return OUTLET[host];
-  const bare = host.replace(/^(editorial|newsroom|blog|www)\./, "").split(".")[0];
-  return bare.charAt(0).toUpperCase() + bare.slice(1);
+  return OUTLET[host] || host.replace(/^(editorial|newsroom|blog|www)\./, "");
 }
 
 // Pull current hooks via a forced, live web search (see scripts/lib/research.js).
@@ -245,7 +297,7 @@ function systemBlocks() {
 
 async function generate(label, schema, userPrompt) {
   const stream = client.messages.stream({
-    model: "claude-opus-4-8",
+    model: GEN_MODEL,
     max_tokens: 48000, // richer quizzes (6-7 blended questions) need more room
     thinking: { type: "adaptive" },
     output_config: {
@@ -862,7 +914,7 @@ EVERY DISPATCH IS ABOUT A REAL, NAMED THING. This is the whole point of the card
 
 "subject": the real thing the dispatch is about, written EXACTLY as it appears in "text" — a title, person, team, game, album, film, show, or named meme ("Grand Theft Auto VI", "Olivia Rodrigo", "Jimothy the Raccoon", "Silo"). NOT a category and NOT a trend ("flip phones", "a pop star", "streaming services", "vinyl") — a category is not a story.
 
-"text": one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory. It MUST contain "subject" verbatim. Do NOT prefix it with the tag; the UI renders the tag separately, so it must not begin with "RUMOR:"/"GOSSIP:"/etc.
+"text": one punchy line, <= 160 chars, dry 2000s-e-zine humor — gossipy but warm, never mean or defamatory. It MUST contain "subject" verbatim. Do NOT announce the tag — the UI renders it as a chip right next to the line, so opening with it reads as a stutter ("RUMOR · Rumor says…"). That means no "RUMOR:"/"GOSSIP:" prefix AND no conversational equivalent: no "Rumor is…", "Rumor says…", "Word is…", "Buzz says…", "Sighting:…". Open on the subject instead.
 
 BANNED CONSTRUCTIONS — these are precisely what makes a dispatch worthless: "a celebrity…", "a pop star…", "two pop stars…", "an actor…", "a director…", "another beloved franchise…", "a boy band…", "a huge act…", "a washed-up 2000s heartthrob…", "your streaming service…", "someone claims…". If you cannot name the thing, do not write the dispatch — write a different one about something you can name.
 
