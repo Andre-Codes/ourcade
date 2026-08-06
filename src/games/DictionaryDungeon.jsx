@@ -50,9 +50,19 @@ function appendLog(prev, lines) {
    and a frozen enemy's missed swing need a real pause or they don't register as
    separate events at all — which is exactly how burn used to read when it was
    summed into the same damage number as the word. Keys match the `kind` values
-   resolveTurn emits in `out.phases`. */
-const PHASE_MS = { text: 300, hit: 440, dot: 620, skip: 620, counter: 520, clear: 640 };
-const PHASE_FX = { hit: "hit", dot: "dot", skip: "whiff", clear: "slain" };
+   resolveTurn emits in `out.phases`.
+
+   The EMOJI beats — 🔥 burning, ❄️ frozen, 📜 a scroll off the corpse — were the
+   ones that read as a flicker: 620 ms of hold against a 620 ms pop animation
+   meant the mark was still fading in as the next beat took the screen. They now
+   get roughly a second each, and the pop is timed off the beat (see fxIcon.ms)
+   so the two can't fall out of step again. The routine hit/counter beats are only
+   nudged — every turn pays that cost, so it has to stay brisk. */
+const PHASE_MS = { text: 340, hit: 480, dot: 1000, skip: 950, counter: 560, clear: 780, loot: 1000 };
+// `loot` reuses "slain": the class doesn't change between the clear and loot
+// beats, so the kill animation isn't restarted and (with its `both` fill) the
+// corpse stays drained while the 📜 rises off it.
+const PHASE_FX = { hit: "hit", dot: "dot", skip: "whiff", clear: "slain", loot: "slain" };
 
 // The logic module is loaded lazily (it pulls the big dictionary payload). We
 // cache the promise so re-mounts don't re-import.
@@ -70,7 +80,7 @@ export default function DictionaryDungeon() {
   const [toast, setToast] = useState(null);
   const [screen, setScreen] = useState("title"); // title | play | over
   const [hitFx, setHitFx] = useState(null); // transient enemy-card fx: "hit" | "dot" | "slain" | "whiff"
-  const [fxIcon, setFxIcon] = useState(null); // emoji popped over the enemy for the current beat ("🔥")
+  const [fxIcon, setFxIcon] = useState(null); // emoji popped over the enemy for the current beat: { char, ms }
   const [fxView, setFxView] = useState(null); // enemy-card display override while a turn animates: { target, status, hp, maxHP, hearts }
   const [reveal, setReveal] = useState(null); // transient showcase card { kind, ... }
   const [defeated, setDefeated] = useState(null); // "you slew X" card { name, emoji, kind }
@@ -209,17 +219,24 @@ export default function DictionaryDungeon() {
     if (!warned) return;
     revealSig.current = sig;
 
-    // Decide what (if anything) to showcase. New level entry wins; else a new
-    // enemy or a new boss phase. Non-combat rooms (gate/treasure/merchant/event)
-    // still get a level-entry card on the first room but no enemy card otherwise.
+    /* Decide what (if anything) to showcase. New level entry wins; else a new
+       enemy. Non-combat rooms (gate/treasure/merchant/event) still get a
+       level-entry card on the first room but no enemy card otherwise.
+
+       A boss gets ONE card, when you first walk into its room. The later PHASE
+       SHIFTS get none: a four-phase boss meant four modal interruptions inside a
+       single fight, each stopping the run dead to tell you something the screen
+       was already about to show. A shift is narrated in the log, the phase badge
+       steps, and the rule plate pulses (see useRuleFlash) — which is the part
+       that actually changes how you play. */
     let next = null;
     if (isFirstRoom) {
       next = { kind: "level", name: lvl?.name, tone: lvl?.tone };
     } else if (target?.kind === "boss") {
+      if (target.phase > 0) { setReveal(null); return; }
       next = {
-        kind: "phase", name: target.name, emoji: target.emoji,
+        kind: "enemy", name: target.name, emoji: target.emoji,
         hp: target.hp, maxHP: target.maxHP, intent: target.intent,
-        phase: target.phase + 1, phaseCount: target.phaseCount,
       };
     } else if (target && (target.kind === "monster" || target.kind === "trap")) {
       next = {
@@ -293,6 +310,7 @@ export default function DictionaryDungeon() {
     let at = 0;
     phases.forEach((p, i) => {
       const first = i === 0;
+      const hold = PHASE_MS[p.kind] ?? PHASE_MS.hit;
       const run = () => {
         if (p.lines.length) {
           setLog((prev) => (first ? appendLog(prev, p.lines) : [...prev, ...p.lines]));
@@ -301,12 +319,14 @@ export default function DictionaryDungeon() {
         if (p.maxHP != null) shown.maxHP = p.maxHP;
         if (p.hearts != null) shown.hearts = p.hearts;
         setFxView({ ...shown });
-        setFxIcon(p.icons?.[0] || null);
+        // The mark rises for as long as its beat holds the screen, so a 🔥 tick
+        // and a 📜 drop are legible instead of a flicker under the next beat.
+        setFxIcon(p.icons?.[0] ? { char: p.icons[0], ms: hold } : null);
         setHitFx(PHASE_FX[p.kind] || null);
       };
       if (at === 0) run();
       else fxTimers.current.push(window.setTimeout(run, at));
-      at += PHASE_MS[p.kind] ?? PHASE_MS.hit;
+      at += hold;
     });
     /* The hold runs through the LAST beat too — releasing it on that beat would
        swap the card to the next room mid-death-animation, which is the exact
@@ -737,10 +757,25 @@ function CollectionGroup({ label, group }) {
   );
 }
 
+/* The rule plate is the one thing on screen a boss's phase shift actually
+   changes, and a shift no longer stops the run with a modal to say so. Return a
+   remount key that changes whenever the rule text does, so the plate replays its
+   pulse — a keyed remount rather than a toggled class, because a class has to be
+   cleared on a timer and a fast second shift would land while it was still set.
+   The first rule of a run doesn't pulse (there's nothing to have changed from). */
+function useRuleFlash(ruleText) {
+  const [key, setKey] = useState(0);
+  const prev = useRef(null);
+  useEffect(() => {
+    if (prev.current !== null && prev.current !== ruleText) setKey((k) => k + 1);
+    prev.current = ruleText;
+  }, [ruleText]);
+  return key;
+}
+
 // ── play ──────────────────────────────────────────────────────────────────────
 function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy, onRestock, onLeaveMerchant, onEvent, onQuit, toast, hitFx, fxIcon, fxView, logRef }) {
   const lvl = logic.currentLevel(state);
-  const rule = logic.activeRule(state);
   const prog = logic.runProgress(state);
   const choice = logic.isChoiceRoom(state);
   const merchant = logic.isMerchantRoom(state);
@@ -754,6 +789,12 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
      over the NEXT room's card. Everything else on screen follows state as usual;
      the Defeated overlay lands right after the last beat and covers the swap. */
   const target = fxView?.target || logic.currentTarget(state);
+  /* The rule plate rides the SAME hold. It used to read live state, so a boss
+     phase shift swapped the rule the instant you hit SPEAK — a second before the
+     log said the boss had shifted at all. Held, the rule changes (and pulses)
+     exactly as the shift beat lands. */
+  const rule = logic.activeRule(state, target);
+  const ruleFlash = useRuleFlash(rule.displayText);
   const status = fxView?.status || state.status;
   const hearts = fxView?.hearts ?? state.hearts;
   const hp = fxView?.hp ?? target?.hp;
@@ -793,7 +834,16 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
           <div className={`dd-enemy${hitFx ? ` dd-enemy-${hitFx}` : ""}`}>
             {/* The beat's mark — 🔥 for a burn tick, ❄️ for a frozen swing, 📜 for
                 a dropped scroll — pops over the card for the length of that beat. */}
-            {fxIcon && <span key={fxIcon + hitFx} className="dd-fx-pop" aria-hidden="true">{fxIcon}</span>}
+            {fxIcon && (
+              <span
+                key={fxIcon.char + hitFx}
+                className="dd-fx-pop"
+                style={{ animationDuration: `${fxIcon.ms}ms` }}
+                aria-hidden="true"
+              >
+                {fxIcon.char}
+              </span>
+            )}
             <div className="dd-enemy-row">
               <span className="dd-enemy-emoji">{target.emoji}</span>
               <span className="dd-enemy-name">{target.name}</span>
@@ -821,7 +871,11 @@ function Play({ logic, state, log, input, onKey, onUseScroll, onTakeRelic, onBuy
              treasure-room art. */
           <div className="dd-rule dd-rule-empty" aria-hidden="true" />
         ) : (
-          <div className="dd-rule">{rule.displayText}</div>
+          /* Keyed on ruleFlash so a changed rule remounts and replays the pulse
+             (0 on the run's first rule = no animation — see useRuleFlash). */
+          <div key={ruleFlash} className={`dd-rule${ruleFlash ? " dd-rule-changed" : ""}`}>
+            {rule.displayText}
+          </div>
         )}
       </div>
 
@@ -1080,7 +1134,6 @@ function RelicMenu({ logic, relics }) {
 // backdrop does nothing (so an accidental tap can't skip the encounter info).
 // Purely presentational.
 function Reveal({ reveal, onDismiss }) {
-  const isEnemy = reveal.kind === "enemy" || reveal.kind === "phase";
   return (
     <div className="dd-reveal-overlay">
       <div className={`dd-reveal-card dd-reveal-${reveal.kind}`}>
@@ -1091,15 +1144,15 @@ function Reveal({ reveal, onDismiss }) {
             {reveal.tone && <div className="dd-reveal-tone">A place of {reveal.tone}.</div>}
           </>
         )}
-        {isEnemy && (
+        {reveal.kind === "enemy" && (
           <>
+            {/* Bosses come through here too, and their names already carry the
+                article ("The Unabridged Lich") — don't stack a second one. */}
             <div className="dd-reveal-kicker">
-              {reveal.kind === "phase"
-                ? `${reveal.name} shifts — Phase ${reveal.phase}/${reveal.phaseCount}`
-                : `You've encountered a`}
+              You've encountered{/^the\b/i.test(reveal.name || "") ? "" : " a"}
             </div>
             <div className="dd-reveal-emoji">{reveal.emoji}</div>
-            {reveal.kind === "enemy" && <div className="dd-reveal-name">{reveal.name}</div>}
+            <div className="dd-reveal-name">{reveal.name}</div>
             {reveal.hp != null && <div className="dd-reveal-hp">HP {reveal.hp} / {reveal.maxHP}</div>}
             {reveal.intent && <div className="dd-reveal-intent">Intent: {reveal.intent}</div>}
           </>
@@ -1371,9 +1424,11 @@ const CSS = `
    NOT another sword blow), a frozen enemy's missed swing stalls, a kill fades. */
 .dd-enemy { position: relative; }
 .dd-enemy-hit { animation: ddHit .26s ease-out; }
-.dd-enemy-dot { animation: ddDot .5s ease-in-out; }
+.dd-enemy-dot { animation: ddDot .8s ease-in-out; }
 .dd-enemy-whiff { animation: ddWhiff .5s ease-out; }
-.dd-enemy-slain { animation: ddSlain .6s ease-out; }
+/* The "both" fill matters: a scroll drop adds a beat AFTER the kill, and without
+   a held final frame the corpse sprang back to full colour underneath the 📜. */
+.dd-enemy-slain { animation: ddSlain .6s ease-out both; }
 @keyframes ddHit {
   0% { transform: translateX(0); }
   25% { transform: translateX(-4px); } 55% { transform: translateX(5px); }
@@ -1396,19 +1451,26 @@ const CSS = `
   100% { transform: scale(.96); filter: grayscale(1) brightness(.6); opacity: .55; }
 }
 /* The beat's mark, drifting up off the enemy card. This is the "a fire emoji
-   pops in" tell that a lingering effect just did something on its own. */
-.dd-fx-pop { position: absolute; right: 10px; top: -4px; font-size: 1.6rem; pointer-events: none;
+   pops in" tell that a lingering effect just did something on its own.
+
+   The duration is set INLINE from the beat's own hold (see playPhases) — the
+   fixed .62s used to outlive short beats and get cut off by long ones. The
+   keyframes are proportional, so the mark spends the middle ~60% of whatever
+   window it's given at full opacity and only then drifts off. */
+.dd-fx-pop { position: absolute; right: 10px; top: -4px; font-size: 1.9rem; pointer-events: none;
   z-index: 2; text-shadow: 0 2px 10px rgba(0,0,0,.7);
   animation: ddPop .62s cubic-bezier(.2,1.3,.5,1) both; }
 @keyframes ddPop {
   0% { transform: translateY(6px) scale(.5); opacity: 0; }
-  30% { transform: translateY(-4px) scale(1.25); opacity: 1; }
-  70% { transform: translateY(-12px) scale(1.05); opacity: 1; }
-  100% { transform: translateY(-24px) scale(.95); opacity: 0; }
+  16% { transform: translateY(-5px) scale(1.3); opacity: 1; }
+  80% { transform: translateY(-13px) scale(1.08); opacity: 1; }
+  100% { transform: translateY(-26px) scale(.95); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dd-enemy-hit, .dd-enemy-dot, .dd-enemy-whiff, .dd-enemy-slain, .dd-fx-pop { animation-duration: .01ms; }
-  .dd-fx-pop { opacity: 1; }
+  .dd-enemy-hit, .dd-enemy-dot, .dd-enemy-whiff, .dd-enemy-slain { animation-duration: .01ms; }
+  /* !important: playPhases sets the pop's duration inline, which would otherwise
+     out-specify this. */
+  .dd-fx-pop { animation-duration: .01ms !important; opacity: 1; }
 }
 
 /* showcase reveal cards (new level / enemy / boss phase) */
@@ -1469,6 +1531,26 @@ const CSS = `
 /* Treasure rooms need no word, so the rule plate sits empty — reserved at the
    same height for the treasure-room art. */
 .dd-rule-empty { min-height: 46px; opacity: .55; }
+/* A changed rule announces itself HERE instead of in a modal (see useRuleFlash):
+   the plate flares gold and swells for a beat. This carries the boss phase
+   shifts that used to interrupt the fight with a card, so it has to be loud
+   enough to catch the eye mid-fight without stealing the turn. */
+.dd-rule-changed { animation: ddRulePulse 1.1s ease-out both; }
+@keyframes ddRulePulse {
+  0%   { transform: scale(1); box-shadow: 0 3px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4); }
+  14%  { transform: scale(1.045);
+         box-shadow: 0 0 0 3px rgba(232,178,90,.75), 0 6px 26px rgba(232,178,90,.45), inset 0 1px 0 rgba(255,255,255,.6);
+         filter: brightness(1.18); }
+  46%  { transform: scale(1.01);
+         box-shadow: 0 0 0 2px rgba(232,178,90,.45), 0 4px 18px rgba(232,178,90,.28), inset 0 1px 0 rgba(255,255,255,.5); }
+  70%  { transform: scale(1.025);
+         box-shadow: 0 0 0 3px rgba(232,178,90,.6), 0 5px 22px rgba(232,178,90,.36), inset 0 1px 0 rgba(255,255,255,.55);
+         filter: brightness(1.1); }
+  100% { transform: scale(1); box-shadow: 0 3px 12px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-rule-changed { animation-duration: .01ms; }
+}
 
 /* word entry + on-screen keyboard */
 .dd-entry { margin-bottom: 10px; }

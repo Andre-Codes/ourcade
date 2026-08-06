@@ -122,10 +122,10 @@ function blockStrengthFor(state) {
    Burn and venom tick AFTER the player's blow, as their own beat (see
    runLingering / the phase machinery below) — folded into the same damage
    number they were invisible, and a fire word read as if it had done nothing. */
-const BURN_DAMAGE = 2;
+const BURN_DAMAGE = 4;
 // Three turns, not two: the tick is its own animated beat now, and two ticks of
 // 2 went by too fast to register as "this enemy is on fire".
-const BURN_TURNS = 3;
+const BURN_TURNS = 2;
 const POISON_DAMAGE = 1;
 const POISON_TURNS = 3;
 const POISON_MAX_STACKS = 3;
@@ -397,11 +397,16 @@ function merchantFloors(levelCount) {
 }
 
 const MERCHANT_OFFERS = 4;
-/* Depth tax on shop prices. It was 0.15/floor — a 1.75× ceiling at the bottom of
-   the run — which was really compensating for how few shops a run had. With a
-   shop every other floor the sink is three times as deep, so the tax comes down
-   to a mild 0.08/floor (1.40× on the last floor). */
-const MERCHANT_MARKUP_PER_FLOOR = 0.08;
+/* Depth tax on shop prices, charged PER SHOP rather than per floor: the first
+   merchant you meet sells at face value, the second at 1.25×, the third at
+   1.50×, and so on without a ceiling (endless keeps stepping).
+
+   Per-floor markup (0.08/floor) was the same idea expressed indirectly, and it
+   read as noise — the floor-4 shop was 1.24× and the floor-6 shop 1.40× for
+   reasons no player could see. Tying it to the shop's ORDINAL makes the curve
+   legible ("everything is dearer down here") and steeper where it matters, so
+   the coin a good speller banks late in a run has somewhere to go. */
+const MERCHANT_MARKUP_PER_SHOP = 0.25;
 
 /* Roll a merchant's stock: MERCHANT_OFFERS offers, priced for this depth.
 
@@ -413,8 +418,11 @@ const MERCHANT_MARKUP_PER_FLOOR = 0.08;
    offer. Swapping which kind is guaranteed is the whole fix: a scroll is always
    there to buy, and heals become something you're glad to find (~55% of shops)
    rather than something you step over. `weight`/`minFloor` in MERCHANT_STOCK do
-   the rest: the Greater Draught is rare AND floor-4-or-later. */
-function rollMerchantStock(levelIdx, s) {
+   the rest: the Greater Draught is rare AND floor-4-or-later.
+
+   `shopIndex` is this merchant's 0-based ordinal across the whole run — it, not
+   the floor, sets the markup (see MERCHANT_MARKUP_PER_SHOP). */
+function rollMerchantStock(levelIdx, s, shopIndex = 0) {
   const floor = levelIdx + 1;
   const eligible = MERCHANT_STOCK.filter((m) => (m.minFloor ?? 0) <= floor);
   const chosen = [];
@@ -433,7 +441,7 @@ function rollMerchantStock(levelIdx, s) {
   draw(eligible.filter((m) => m.kind === "relic"));
   while (chosen.length < MERCHANT_OFFERS && draw(eligible)) { /* fill the rest */ }
 
-  const markup = 1 + levelIdx * MERCHANT_MARKUP_PER_FLOOR;
+  const markup = 1 + Math.max(0, shopIndex) * MERCHANT_MARKUP_PER_SHOP;
   // Shuffled so the guaranteed scroll isn't always sitting in the first slot.
   return s.shuffle(chosen).map((m) => ({
     ...m,
@@ -448,7 +456,9 @@ function rollMerchantStock(levelIdx, s) {
 // pacing stays clean; whether this floor carries a merchant is decided ACROSS
 // levels by merchantFloors() and passed in as `wantMerchant`. `dayKey` (or a
 // seed) rotates the FIRST room's rule so the opening differs day to day.
-function assembleRooms(level, levelIdx, dayKey, s, wantMerchant = false) {
+// `shopIndex` is the 0-based ordinal of the shop this floor would carry — the
+// price markup is per-shop, not per-floor (see rollMerchantStock).
+function assembleRooms(level, levelIdx, dayKey, s, wantMerchant = false, shopIndex = 0) {
   const n = level.roomCount;
   const types = [];
   // Guaranteed beats.
@@ -580,7 +590,10 @@ function assembleRooms(level, levelIdx, dayKey, s, wantMerchant = false) {
         .map((r) => r.id);
     }
     if (type === "merchant") {
-      room.offers = rollMerchantStock(levelIdx, s);
+      // Kept on the room so a restock (and a resumed save) re-rolls at the same
+      // markup this shop opened at.
+      room.shopIndex = shopIndex;
+      room.offers = rollMerchantStock(levelIdx, s, shopIndex);
     }
     if (type === "event") {
       room.event = s.pick(EVENTS);
@@ -646,10 +659,13 @@ export function buildRun(dayKey) {
   // Shop cadence for the WHOLE run, decided up front (no longer seeded — see
   // merchantFloors).
   const shopFloors = merchantFloors(LEVELS.length);
+  // Shop ordinal per floor: the 1st merchant sells at face value, each later one
+  // dearer (MERCHANT_MARKUP_PER_SHOP).
+  const shopOrder = [...shopFloors].sort((a, b) => a - b);
 
   const levels = LEVELS.map((level, li) => {
     const ls = stream((baseSeed ^ daySeed(`${level.id}|${li}`)) >>> 0);
-    const rooms = assembleRooms(level, li, dayKey, ls, shopFloors.has(li));
+    const rooms = assembleRooms(level, li, dayKey, ls, shopFloors.has(li), shopOrder.indexOf(li));
     return {
       id: level.id,
       name: level.name,
@@ -743,6 +759,17 @@ function endlessLevelTemplate(cycle) {
   };
 }
 
+// How many merchants the run has already laid out — the ordinal the NEXT one
+// gets. Counted off the assembled levels (not a running tally) so a resumed save
+// prices its endless shops correctly too.
+function shopsPlaced(state) {
+  let n = 0;
+  for (const lvl of state.levels || []) {
+    for (const room of lvl.rooms || []) if (room.type === "merchant") n++;
+  }
+  return n;
+}
+
 /* Descend one endless floor: append a scaled level and drop the player into it.
    Called by the cabinet when the player chooses "Descend Deeper". Mutates state. */
 export function descend(state) {
@@ -760,8 +787,11 @@ export function descend(state) {
   const ls = stream((state.seed ^ daySeed(`endless|${cycle}`)) >>> 0);
   // Endless floors used to omit `wantMerchant` entirely, so past the Lich there
   // was no shop ever again and coin became pure score filler. Same every-other-
-  // floor cadence as the main run.
-  const rooms = assembleRooms(template, LEVELS.length + cycle - 1, state.dayKey, ls, cycle % 2 === 1);
+  // floor cadence as the main run — and the markup keeps climbing, so the shop
+  // ordinal counts every merchant already placed rather than restarting at 1.
+  const rooms = assembleRooms(
+    template, LEVELS.length + cycle - 1, state.dayKey, ls, cycle % 2 === 1, shopsPlaced(state)
+  );
   // Bake scaled enemy HP into the rooms (damage is scaled at read-time by band).
   for (const room of rooms) {
     if (room.enemyHP != null) {
@@ -887,8 +917,13 @@ export function currentTarget(state) {
   };
 }
 
-export function activeRule(state) {
-  const t = currentTarget(state);
+/* The rule the player must satisfy right now. `target` may be passed to read the
+   rule off a target OTHER than the live one — the cabinet holds the pre-turn
+   target for the length of a turn's animation, and the rule plate has to follow
+   the same hold or it flips to the next room's (or the next boss phase's) rule
+   before the beats that explain the change have played. */
+export function activeRule(state, target) {
+  const t = target === undefined ? currentTarget(state) : target;
   return t ? getRule(t.ruleSpec) : getRule("any");
 }
 
@@ -1526,9 +1561,13 @@ const SCROLL_DROP_CHANCE = 0.22;
 /* A slain monster may be carrying a scroll. Scrolls were shop-only and filled
    only the two random offer slots, so a whole run averaged about ONE — and four
    of the ten in SCROLLS could be obtained from nowhere at all. Seeded off the
-   run + room, so a resumed save re-rolls the same drop. Reported inside the
-   clear beat (the cabinet pops a 📜 over the body). Bosses don't drop; clearing
-   a boss hands you the floor, which is reward enough.
+   run + room, so a resumed save re-rolls the same drop. Bosses don't drop;
+   clearing a boss hands you the floor, which is reward enough.
+
+   The drop is its OWN beat. It used to markMeta the 📜 onto the CLEAR beat,
+   which meant the kill animation and the loot pop shared one 640 ms window: the
+   scroll icon flashed through the death fade and was gone before you could read
+   what you'd picked up. Its own beat means the body drops, THEN the scroll rises.
 
    Call this BEFORE advanceRoom — the roomIdx it seeds off is the dead enemy's. */
 function maybeDropScroll(state, out) {
@@ -1537,7 +1576,7 @@ function maybeDropScroll(state, out) {
   const sc = SCROLLS.find((x) => x.id === s.pickWeighted(SCROLL_DROPS).id);
   if (!sc) return;
   (state.scrolls || (state.scrolls = [])).push(sc.id);
-  markMeta(out, { icons: ["📜"] });
+  mark(out, "loot", { icons: ["📜"] });
   out.logLines.push(`> 📜 It was carrying a ${sc.name} — ${sc.description}`);
 }
 
@@ -1850,7 +1889,7 @@ export function restockMerchant(state) {
   // Replaces the WHOLE shelf, sold slots included — a player who cleared the shop
   // out is exactly the one who wants more stock.
   const s = stream(daySeed(`${state.seed}|restock|${state.levelIdx}|${state.roomIdx}|${room.restocks}`));
-  room.offers = rollMerchantStock(state.levelIdx, s);
+  room.offers = rollMerchantStock(state.levelIdx, s, room.shopIndex || 0);
   return { ok: true, message: `The merchant digs out fresh stock. (−🪙 ${fee})`, coins: state.coins };
 }
 
