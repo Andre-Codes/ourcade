@@ -48,6 +48,7 @@ export const STICKERS = {
   "video-poker": "NEW",
   "blackjack": "NEW",
   "chip-panic": "NEW",
+  "homepage-builder": "NEW",
 };
 
 // Sticker key → the text drawn in the starburst. Add a row here (and a CSS

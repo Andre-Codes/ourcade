@@ -1,18 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { loadVault, VAULT_INDEX, searchVault } from "../data/vault.js";
+import { useClaimed } from "../lib/AuthProvider.jsx";
 import ArtifactCard, { KIND_LABEL } from "./ArtifactCard.jsx";
 import BackBar from "./BackBar.jsx";
 import NedryGag from "./NedryGag.jsx";
 import vaultIcon from "../assets/page-icons/vault.webp";
+import badgerOfficer from "../assets/badger-officer.webp";
 
 /* /vault — THE VAULT. The whole back catalogue of the arcade's timeless internet
    finds (stumble + weird + curiosities, ever). The daily site only ever shows you
    "today"; this is the depth — a wanderable library, not a feed. Finite, no
    algorithm: search + a kind filter + load-more, newest-first by default. The
    corpus is a build-time snapshot of the Firestore archive (see vault.js /
-   scripts/snapshot-archive.js), lazy-loaded as its own chunk. */
+   scripts/snapshot-archive.js), lazy-loaded as its own chunk.
+
+   MEMBERS GET THE KEY. Everyone sees the door and the newest FREE_PAGE finds —
+   the depth (search, kind filters, sort, everything past the free slice) wants a
+   claimed account. This is a PRODUCT gate, not access control: generated/vault.js
+   ships as a public static chunk, so it buys a reason to claim an account and
+   nothing more. Deliberately still open to everyone: Deep Stumble (stumble.js)
+   and getVaultGemOfTheDay() — the daily taste that makes the door worth opening. */
 
 const PAGE = 24; // how many cards to reveal per "load more"
+const FREE_PAGE = 24; // how much of the vault an unclaimed visitor gets to browse
 
 // Short chip labels (the long KIND_LABEL is the on-card flavor). Order is the
 // display order; only kinds actually present get a chip.
@@ -29,6 +40,7 @@ const KIND_CHIP = {
 const KIND_ORDER = Object.keys(KIND_CHIP);
 
 export default function VaultPage() {
+  const { claimed, ready } = useClaimed();
   const [pool, setPool] = useState(null); // null = loading
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("all");
@@ -67,7 +79,10 @@ export default function VaultPage() {
     setShown(PAGE);
   }, [query, kind, oldestFirst]);
 
-  const visible = filtered.slice(0, shown);
+  // Unclaimed visitors get the newest FREE_PAGE and no reveal button. The
+  // controls aren't rendered for them either, so query/kind/sort sit at their
+  // defaults and `filtered` is simply the whole corpus, newest first.
+  const visible = filtered.slice(0, claimed ? shown : FREE_PAGE);
   const more = filtered.length - visible.length;
   // The eager index gives an instant count before the lazy corpus arrives; once
   // it has, prefer its length — that's the one the admin overlay has filtered,
@@ -97,46 +112,55 @@ export default function VaultPage() {
           </p>
         </header>
 
-        <div className="arcade-vault-controls">
-          <input
-            className="arcade-search-input arcade-vault-search"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="search the vault…"
-            aria-label="search the vault"
-          />
-          <div className="arcade-chips arcade-vault-chips">
-            <button
-              type="button"
-              className={`arcade-chip${kind === "all" ? " is-active" : ""}`}
-              onClick={() => setKind("all")}
-            >
-              all
-            </button>
-            {kinds.map((k) => (
+        {claimed ? (
+          <div className="arcade-vault-controls">
+            <input
+              className="arcade-search-input arcade-vault-search"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="search the vault…"
+              aria-label="search the vault"
+            />
+            <div className="arcade-chips arcade-vault-chips">
               <button
-                key={k}
                 type="button"
-                className={`arcade-chip${kind === k ? " is-active" : ""}`}
-                onClick={() => setKind(k)}
-                title={KIND_LABEL[k]}
+                className={`arcade-chip${kind === "all" ? " is-active" : ""}`}
+                onClick={() => setKind("all")}
               >
-                {KIND_CHIP[k]}
+                all
               </button>
-            ))}
-            <button
-              type="button"
-              className="arcade-chip arcade-vault-sort"
-              onClick={() => setOldestFirst((v) => !v)}
-              title="toggle order"
-            >
-              {oldestFirst ? "⏶ oldest" : "⏷ newest"}
-            </button>
+              {kinds.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  className={`arcade-chip${kind === k ? " is-active" : ""}`}
+                  onClick={() => setKind(k)}
+                  title={KIND_LABEL[k]}
+                >
+                  {KIND_CHIP[k]}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="arcade-chip arcade-vault-sort"
+                onClick={() => setOldestFirst((v) => !v)}
+                title="toggle order"
+              >
+                {oldestFirst ? "⏶ oldest" : "⏷ newest"}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="arcade-vault-locked-strip">
+            🔒 search, filters &amp; the full depth — members only
+          </p>
+        )}
 
-        {pool === null ? (
+        {/* `ready` guards the gate, not just the data: isAnonymous defaults to
+            true until auth settles, so rendering off `claimed` alone would flash
+            the locked state at members on every reload. */}
+        {pool === null || !ready ? (
           <p className="arcade-vault-loading">cracking the vault…</p>
         ) : visible.length ? (
           <>
@@ -145,20 +169,38 @@ export default function VaultPage() {
                 <ArtifactCard key={a.id} artifact={a} />
               ))}
             </div>
-            {more > 0 && (
-              <div className="arcade-vault-more">
-                <button
-                  type="button"
-                  className="arcade-stumble"
-                  onClick={() => setShown((n) => n + PAGE)}
-                >
-                  load {Math.min(more, PAGE)} more ▾
-                </button>
-                <span className="arcade-vault-count">
-                  showing {visible.length} of {filtered.length}
-                </span>
-              </div>
-            )}
+            {more > 0 &&
+              (claimed ? (
+                <div className="arcade-vault-more">
+                  <button
+                    type="button"
+                    className="arcade-stumble"
+                    onClick={() => setShown((n) => n + PAGE)}
+                  >
+                    load {Math.min(more, PAGE)} more ▾
+                  </button>
+                  <span className="arcade-vault-count">
+                    showing {visible.length} of {filtered.length}
+                  </span>
+                </div>
+              ) : (
+                <section className="arcade-card-panel arcade-submit-gate arcade-vault-gate">
+                  <img
+                    className="arcade-submit-officer"
+                    src={badgerOfficer}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <p className="arcade-account-blurb">
+                    <strong>{more.toLocaleString()} more finds</strong> are behind the
+                    vault door — plus search and filters. Claim an account and the
+                    key's yours.
+                  </p>
+                  <Link to="/me" className="arcade-stumble arcade-submit-cta">
+                    Claim / Log in →
+                  </Link>
+                </section>
+              ))}
           </>
         ) : (
           <NedryGag message="Nothing in the vault matches that. Try a different word or clear the filter." />

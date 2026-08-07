@@ -2,6 +2,16 @@
    when available, and falls back to copying the link on desktop browsers that
    don't have it. Returns a status string so callers can show feedback. */
 
+/* Absolute, HashRouter-safe deep link. hashUrl("/flash?play=abc") →
+   "https://ourcade.example/#/flash?play=abc". Strips any existing hash so the
+   link is stable no matter which page the user hit Share from — pass this to
+   ShareButton's `url` whenever the thing being shared has its own identity, or
+   share() falls back to window.location.href and loses it. */
+export function hashUrl(path) {
+  if (typeof window === "undefined") return undefined;
+  return `${window.location.href.split("#")[0]}#${path}`;
+}
+
 export async function share({ title, text, url } = {}) {
   const link = url || (typeof window !== "undefined" ? window.location.href : "");
   const data = { title, text, url: link };

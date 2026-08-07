@@ -18,6 +18,17 @@ import { DEFAULT_AVATAR, DEFAULT_THEME } from "../data/profilePresets.js";
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
+/* The membership test every gated surface shares: a visitor who has actually
+   claimed the account, not just the silent anonymous sign-in.
+
+   Always gate on `ready` too. `isAnonymous` defaults to TRUE until the first
+   onAuthStateChanged settles, so a gate that renders off `claimed` alone flashes
+   its locked state at signed-in members on every reload. */
+export function useClaimed() {
+  const { isAnonymous, username, ready } = useAuth() || {};
+  return { claimed: !isAnonymous && !!username, ready: !!ready };
+}
+
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 // Once-per-session guard so the lazy number backfill (loadProfile) fires at

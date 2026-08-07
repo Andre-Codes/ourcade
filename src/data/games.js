@@ -520,6 +520,20 @@ export const GAMES = [
     type: "react",
     component: lazy(() => import("../tools/Soundboard.jsx")),
   },
+  {
+    id: "homepage-builder",
+    original: true,
+    title: "Homepage Builder '97",
+    blurb: "Build your own GeoCities page — tiled wallpaper, WordArt name, a scrolling marquee, a hit counter, and an UNDER CONSTRUCTION sign. Then save it as a card.",
+    emoji: "🚧",
+    accent: "#e8ff47",
+    tags: ["party", "novelty", "creative"],
+    rating: 5,
+    plays: 0,
+    category: "tool",
+    type: "react",
+    component: lazy(() => import("../tools/HomepageBuilder.jsx")),
+  },
 ];
 
 export const getGame = (id) => GAMES.find((g) => g.id === id);

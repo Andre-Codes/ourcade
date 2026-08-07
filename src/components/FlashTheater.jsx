@@ -8,13 +8,23 @@ import {
 } from "../data/animations.js";
 import ShareButton from "./ShareButton.jsx";
 import Top8HeartButton from "./Top8HeartButton.jsx";
+import { hashUrl } from "../lib/share.js";
 
 // Shared by the daily band (compact) and the /flash page (full). Renders today's
 // featured animation as an archive.org embed; STUMBLE swaps in a random one from
 // the whole pool IN PLACE (no navigation). key={anim.id} forces a clean iframe
 // remount so the new SWF actually reloads on swap. The full pool loads lazily on
 // the first stumble (randomAnimation is async), so there's a brief busy state.
-export default function FlashTheater({ dayKey, compact = false, browseTo, initialAnim }) {
+//
+// onAnimChange (optional) lets an owner mirror the current short into the URL —
+// /flash passes it, the compact homepage widget deliberately doesn't.
+export default function FlashTheater({
+  dayKey,
+  compact = false,
+  browseTo,
+  initialAnim,
+  onAnimChange,
+}) {
   const [anim, setAnim] = useState(
     () => initialAnim || getTodaysAnimation(dayKey) || FEATURED[0]
   );
@@ -28,9 +38,17 @@ export default function FlashTheater({ dayKey, compact = false, browseTo, initia
     setBusy(true);
     setFailed(false);
     const next = await randomAnimation(anim.id);
-    if (next) setAnim(next);
+    if (next) {
+      setAnim(next);
+      onAnimChange?.(next);
+    }
     setBusy(false);
   };
+
+  // Share the short ON SCREEN, not the page we happen to be standing on. Without
+  // an explicit url, share() falls back to window.location.href — which is "#/"
+  // on the homepage and "#/flash" (a random short) on the channel.
+  const shareUrl = hashUrl(`/flash?play=${encodeURIComponent(anim.id)}`);
 
   return (
     <div className={`arcade-flash${compact ? " is-compact" : ""}`}>
@@ -85,6 +103,7 @@ export default function FlashTheater({ dayKey, compact = false, browseTo, initia
           label="Share"
           title="Ourcade — Flash Theater"
           text={`"${anim.title}"${anim.creator ? ` by ${anim.creator}` : ""} on Ourcade Flash Theater`}
+          url={shareUrl}
         />
         <Top8HeartButton
           type="flash"

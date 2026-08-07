@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../lib/AuthProvider.jsx";
+import { useAuth, useClaimed } from "../lib/AuthProvider.jsx";
 import { useFormspree } from "../lib/useFormspree.js";
 import badgerOfficer from "../assets/badger-officer.webp";
 
@@ -20,8 +20,8 @@ import badgerOfficer from "../assets/badger-officer.webp";
 const FORMSPREE_GAME_ID = "xgojvwav";
 
 export default function GameSubmitCard() {
-  const { isAnonymous, username, uid } = useAuth() || {};
-  const claimed = !isAnonymous && !!username;
+  const { uid } = useAuth() || {};
+  const { claimed } = useClaimed();
   const { status, error, onSubmit, reset } = useFormspree(FORMSPREE_GAME_ID);
   const [scored, setScored] = useState(false);
 

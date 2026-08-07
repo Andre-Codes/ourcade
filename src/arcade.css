@@ -1620,6 +1620,15 @@ main > section + section { margin-top: 44px; }
   font-family: 'Share Tech Mono', monospace; font-size: 0.74rem; color: var(--arcade-muted);
   text-align: center; letter-spacing: 0.03em; margin: 6px 0 0;
 }
+/* members-get-the-key gate: the locked controls strip, and the vault door that
+   replaces "load more". The door reuses .arcade-submit-gate wholesale — this
+   only sizes it to the grid. */
+.arcade-vault-locked-strip {
+  font-family: 'Press Start 2P', monospace; font-size: 0.52rem; letter-spacing: 0.05em;
+  color: var(--arcade-muted); text-align: center; line-height: 1.7;
+  padding: 12px 10px; border: 2px dashed #3a3050; border-radius: 8px; background: #0b0d16;
+}
+.arcade-vault-gate { max-width: 460px; margin: 4px auto 0; }
 @media (max-width: 760px) {
   .arcade-vault-title { font-size: 1.4rem; }
 }

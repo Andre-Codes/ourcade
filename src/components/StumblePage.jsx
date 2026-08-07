@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { drawArtifact, findArtifact } from "../data/stumble.js";
 import { renderStumbleCard } from "../lib/stumbleCard.js";
-import { shareImage } from "../lib/share.js";
+import { hashUrl, shareImage } from "../lib/share.js";
 import ShareButton from "./ShareButton.jsx";
 import BackBar from "./BackBar.jsx";
 import ArtifactCard from "./ArtifactCard.jsx";
@@ -13,8 +13,8 @@ import ArtifactCard from "./ArtifactCard.jsx";
 
 // Stable share deep-link regardless of how the page was reached (HashRouter).
 function shareUrlFor(artifact) {
-  if (typeof window === "undefined" || !artifact) return undefined;
-  return `${window.location.href.split("#")[0]}#/stumble?a=${encodeURIComponent(artifact.id)}`;
+  if (!artifact) return undefined;
+  return hashUrl(`/stumble?a=${encodeURIComponent(artifact.id)}`);
 }
 
 // Renders the artifact as a 1080×1080 PNG and hands it to the OS share sheet
