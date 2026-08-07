@@ -2,6 +2,76 @@
 // The Vault — every timeless internet find ever archived (stumble + weird + curiosities), normalized to the Stumble artifact shape. Lazy-imported (can be large).
 export default [
   {
+    "id": "gw-yourabbit",
+    "kind": "site",
+    "era": "current",
+    "title": "A site whose only job is finding you a new YouTube rabbit hole every day",
+    "blurb": "You had one job: don't fall down a YouTube hole today. This site has one job too, and it is actively working against you.",
+    "url": "https://yourabbit.com",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.991Z"
+  },
+  {
+    "id": "gw-morningprint",
+    "kind": "site",
+    "era": "current",
+    "title": "A receipt printer that wakes up before its owner to print daily mood art",
+    "blurb": "A Raspberry Pi rig that spits out one-of-a-kind ASCII art every morning based on the weather and the news. It has a better sleep schedule than any of us.",
+    "url": "https://github.com/matt-w-horn/morningprint",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.913Z"
+  },
+  {
+    "id": "gw-wiki-game",
+    "kind": "site",
+    "era": "current",
+    "title": "Speedrunning Wikipedia from one random page to another",
+    "blurb": "Click your way from 'Cheese' to 'Genghis Khan' using nothing but blue links and desperation. Suspiciously similar to a game we have here.",
+    "url": "https://www.thewikigame.com",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.743Z"
+  },
+  {
+    "id": "gw-nicest-place",
+    "kind": "site",
+    "era": "current",
+    "title": "A website whose entire personality is telling you you're doing great",
+    "blurb": "No ads, no drama, just relentless, sincere encouragement from strangers. It's suspicious how good this feels.",
+    "url": "https://thenicestplace.net",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.546Z"
+  },
+  {
+    "id": "gw-zombie-passions",
+    "kind": "site",
+    "era": "current",
+    "title": "A dating site exclusively for zombie enthusiasts",
+    "blurb": "Somewhere out there, love is blooming between people who really, really like the undead. We respect the niche.",
+    "url": "https://www.zombiepassions.com",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.464Z"
+  },
+  {
+    "id": "gw-cat-bounce",
+    "kind": "site",
+    "era": "current",
+    "title": "A screen full of cats you can fling around like beanbags",
+    "blurb": "Cats fall, flip, and bounce off each other while you grab and throw them for reasons science cannot explain. Hit 'Make It Rain' and regret nothing.",
+    "url": "https://catbounce.com",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.346Z"
+  },
+  {
+    "id": "gw-is-it-christmas",
+    "kind": "site",
+    "era": "current",
+    "title": "The internet's most brutally honest calendar app",
+    "blurb": "You visit, you ask, it tells you: no. It is right 364 days out of 365 and somehow that's the whole appeal.",
+    "url": "https://isitchristmas.com",
+    "source": "weird",
+    "archivedAt": "2026-08-07T06:30:55.213Z"
+  },
+  {
     "id": "gw-purrli",
     "kind": "site",
     "era": "current",
@@ -82,16 +152,6 @@ export default [
     "archivedAt": "2026-08-05T07:01:46.658Z"
   },
   {
-    "id": "gw-nicest-place",
-    "kind": "site",
-    "era": "current",
-    "title": "A wall of strangers giving you a virtual hug",
-    "blurb": "Short video clips of real people opening their arms right at your screen, no strings attached. Absolutely the emotional opposite of a comments section, and we're okay with that.",
-    "url": "https://thenicestplace.net",
-    "source": "weird",
-    "archivedAt": "2026-08-05T07:01:46.566Z"
-  },
-  {
     "id": "gw-sandboxels",
     "kind": "site",
     "era": "current",
@@ -160,16 +220,6 @@ export default [
     "url": "https://puginarug.com",
     "source": "weird",
     "archivedAt": "2026-08-03T07:18:55.707Z"
-  },
-  {
-    "id": "gw-is-it-christmas",
-    "kind": "site",
-    "era": "current",
-    "title": "A website that answers one question: is it Christmas?",
-    "blurb": "Loads a giant YES or NO. That's the whole site, and it has been unwaveringly devoted to this mission for years. We respect the focus.",
-    "url": "https://isitchristmas.com",
-    "source": "weird",
-    "archivedAt": "2026-08-03T07:18:55.447Z"
   },
   {
     "id": "gw-find-invisible-cow",
@@ -840,16 +890,6 @@ export default [
     "url": "https://neal.fun/password-game/",
     "source": "weird",
     "archivedAt": "2026-07-31T07:07:36.467Z"
-  },
-  {
-    "id": "gw-wiki-game",
-    "kind": "site",
-    "era": "current",
-    "title": "Race from one Wikipedia page to another using only the links",
-    "blurb": "If you love our own Web Run, this is the ancestor: get from A to B across the real Wikipedia, clicking blue words like your life depends on it. Warning — you will not do just one.",
-    "url": "https://thewikigame.com",
-    "source": "weird",
-    "archivedAt": "2026-07-31T07:07:36.390Z"
   },
   {
     "id": "gw-passweird",

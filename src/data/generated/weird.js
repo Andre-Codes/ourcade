@@ -2,85 +2,69 @@
 // Today's Weird Thing pool. Shape: { id, title, blurb, url, foundNote? } — urls liveness-checked at generation time.
 export default [
   {
-    "id": "gw-internet-roadtrip",
-    "title": "Thousands of strangers steering one car by vote",
-    "blurb": "A shared Google Street View road trip where the whole internet votes on which way to turn, whether to honk, and what station's on the radio. It's a school-bus field trip driven entirely by democracy and vibes.",
-    "url": "https://neal.fun/internet-roadtrip",
-    "foundNote": "honk to vote"
+    "id": "gw-is-it-christmas",
+    "title": "The internet's most brutally honest calendar app",
+    "blurb": "You visit, you ask, it tells you: no. It is right 364 days out of 365 and somehow that's the whole appeal.",
+    "url": "https://isitchristmas.com",
+    "foundNote": "batting .997 on disappointment"
   },
   {
-    "id": "gw-neal-fun",
-    "title": "One guy's endless closet of browser toys",
-    "blurb": "Neal Agarwal keeps quietly shipping the internet's best little experiments — Infinite Craft, The Password Game, the whole cabinet. It's the modern-day version of finding a Flash portal that never ran out of games.",
-    "url": "https://neal.fun"
+    "id": "gw-cat-bounce",
+    "title": "A screen full of cats you can fling around like beanbags",
+    "blurb": "Cats fall, flip, and bounce off each other while you grab and throw them for reasons science cannot explain. Hit 'Make It Rain' and regret nothing.",
+    "url": "https://catbounce.com",
+    "foundNote": "resize the window, the vibe changes too"
   },
   {
-    "id": "gw-sandboxels",
-    "title": "A falling-sand physics lab with hundreds of elements",
-    "blurb": "Pour sand, set it on fire, wire up electricity, grow a little ecosystem, then flood the whole thing with lava. It's every 2005 sand game you loved, except it grew up and got a chemistry degree.",
-    "url": "https://sandboxels.r74n.com"
+    "id": "gw-zombie-passions",
+    "title": "A dating site exclusively for zombie enthusiasts",
+    "blurb": "Somewhere out there, love is blooming between people who really, really like the undead. We respect the niche.",
+    "url": "https://www.zombiepassions.com",
+    "foundNote": "swipe right, brains optional"
   },
   {
     "id": "gw-nicest-place",
-    "title": "A wall of strangers giving you a virtual hug",
-    "blurb": "Short video clips of real people opening their arms right at your screen, no strings attached. Absolutely the emotional opposite of a comments section, and we're okay with that.",
+    "title": "A website whose entire personality is telling you you're doing great",
+    "blurb": "No ads, no drama, just relentless, sincere encouragement from strangers. It's suspicious how good this feels.",
     "url": "https://thenicestplace.net"
   },
   {
-    "id": "gw-endless-horse",
-    "title": "A horse with infinitely long legs",
-    "blurb": "Scroll down. The legs continue. Keep scrolling. They still continue. It's a single joke stretched across the entire vertical concept of the internet, and honestly it earns it.",
-    "url": "http://endless.horse",
-    "foundNote": "just keep scrolling"
+    "id": "gw-invisible-cow",
+    "title": "A game where you hunt a cow you literally cannot see",
+    "blurb": "Just audio, headphones, and a moo somewhere in the dark. It's Marco Polo but you're the only one who can lose.",
+    "url": "https://findtheinvisiblecow.com",
+    "foundNote": "moo triangulation, basically"
   },
   {
-    "id": "gw-pixel-thoughts",
-    "title": "A 60-second timer that shrinks your worries to a speck",
-    "blurb": "Type in whatever's rattling around your skull, then watch it float off into space and get tiny. Guided meditation with the file size of a GeoCities page.",
-    "url": "https://pixelthoughts.co"
+    "id": "gw-wiki-game",
+    "title": "Speedrunning Wikipedia from one random page to another",
+    "blurb": "Click your way from 'Cheese' to 'Genghis Khan' using nothing but blue links and desperation. Suspiciously similar to a game we have here.",
+    "url": "https://www.thewikigame.com",
+    "foundNote": "Web Run's non-haunted cousin"
   },
   {
-    "id": "gw-sonicviz",
-    "title": "A flock of thousands of birds that plays its own music",
-    "blurb": "Procedural birds swoop around and their movement writes the soundtrack in real time. It's a screensaver, an instrument, and a nap machine all at once.",
-    "url": "https://sonicviz.com",
-    "foundNote": "needs the good speakers"
+    "id": "gw-infinite-craft",
+    "title": "Combine 'Water' and 'Fire' enough times and you somehow get Obama's Pizza Planet",
+    "blurb": "An endless AI crafting sandbox where two elements make a third, increasingly unhinged one. We lost four hours to this and don't regret it.",
+    "url": "https://neal.fun/infinite-craft"
   },
   {
-    "id": "gw-zen-zone",
-    "title": "Relaxing visuals that follow your mouse",
-    "blurb": "Drag your cursor around and let the calm shapes chase it. The digital equivalent of running your hand through a zen garden you didn't have to rake.",
-    "url": "https://thezen.zone"
+    "id": "gw-morningprint",
+    "title": "A receipt printer that wakes up before its owner to print daily mood art",
+    "blurb": "A Raspberry Pi rig that spits out one-of-a-kind ASCII art every morning based on the weather and the news. It has a better sleep schedule than any of us.",
+    "url": "https://github.com/matt-w-horn/morningprint",
+    "foundNote": "runs on a Pi, judges your day silently"
   },
   {
-    "id": "gw-koalas",
-    "title": "Click a giant circle until it becomes a koala",
-    "blurb": "One big dot splits into four, then sixteen, then a full pixel koala emerges from the chaos. Weirdly hypnotic, dangerously easy to keep clicking through your lunch break.",
-    "url": "https://www.koalastothemax.com"
+    "id": "gw-yourabbit",
+    "title": "A site whose only job is finding you a new YouTube rabbit hole every day",
+    "blurb": "You had one job: don't fall down a YouTube hole today. This site has one job too, and it is actively working against you.",
+    "url": "https://yourabbit.com"
   },
   {
-    "id": "gw-weave-silk",
-    "title": "Draw glowing symmetrical silk with your cursor",
-    "blurb": "Every squiggle mirrors itself into shimmering fractal art you couldn't make ugly if you tried. This was the fidget spinner of the browser tab.",
-    "url": "http://weavesilk.com"
-  },
-  {
-    "id": "gw-falling-falling",
-    "title": "An endless waterfall of color that never lands",
-    "blurb": "Bands of shifting color pour down forever with a low ambient hum. Stare too long and you'll forget you opened seventeen other tabs.",
-    "url": "http://www.fallingfalling.com",
-    "foundNote": "sound on"
-  },
-  {
-    "id": "gw-purrli",
-    "title": "A cat purr generator you can tune to your mood",
-    "blurb": "Adjust the size of the imaginary cat, add a rumble, dial in the warmth. All the comfort of a lap cat with none of the 3 a.m. zoomies.",
-    "url": "https://purrli.com"
-  },
-  {
-    "id": "gw-thisissand",
-    "title": "Pour colored sand into a jar, one grain at a time",
-    "blurb": "Tap to drop streams of colored sand into pretty layered dunes, then just… keep going. It's a mesmerizing little art toy that's been quietly calming people for years.",
-    "url": "https://thisissand.com"
+    "id": "gw-this-person",
+    "title": "A face that has never existed, regenerated every time you refresh",
+    "blurb": "An AI grows a brand-new human face out of nothing, every single load. Nobody's home, but somebody's always smiling.",
+    "url": "https://thispersondoesnotexist.com"
   }
 ];
