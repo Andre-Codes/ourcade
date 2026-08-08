@@ -3,6 +3,19 @@
 // on first paint instead of waiting on the network — and so they land in git.
 // Shape: { <type>: { adds: [], patches: {}, hides: [] } }. See src/data/live.js.
 export default {
+  "stumble": {
+    "adds": [
+      {
+        "title": "Not Pr0n",
+        "blurb": "If Sherlock Holmes was given a mouse and a keyboard, this is where he’d live. Legendary web-based riddle turns every page of its website into a puzzle.",
+        "url": "https://notpron.com",
+        "kind": "site",
+        "era": "nostalgic",
+        "year": "2004",
+        "id": "site:not-pr0n"
+      }
+    ]
+  },
   "vault": {
     "patches": {
       "gw-im-google": {
